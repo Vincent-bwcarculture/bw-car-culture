@@ -1,0 +1,73 @@
+/* src/components/shared/ComingSoonModal.css */
+.coming-soon-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+}
+
+.coming-soon-modal {
+  background: #1a1a1a;
+  border-radius: 12px;
+  border: 1px solid #ff3300;
+  padding: 2rem;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 0 20px rgba(255, 51, 0, 0.4);
+}
+
+.close-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: #c9c9c9;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.coming-soon-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.coming-soon-modal h2 {
+  color: #ff3300;
+  margin: 0 0 1rem 0;
+}
+
+.coming-soon-modal p {
+  margin: 0 0 1rem 0;
+  color: #c9c9c9;
+}
+
+.coming-soon-message {
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.got-it-button {
+  background: #ff3300;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 2rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.2s ease;
+}
+
+.got-it-button:hover {
+  background: #cc2900;
+}

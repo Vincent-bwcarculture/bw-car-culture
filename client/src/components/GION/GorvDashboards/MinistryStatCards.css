@@ -1,0 +1,102 @@
+.ministry-stat-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  
+  .stat-card {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 24px;
+  }
+  
+  .reviews-icon {
+    background-color: rgba(74, 74, 138, 0.1);
+    color: #4a4a8a;
+  }
+  
+  .rating-icon {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+  }
+  
+  .compliance-icon {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+  }
+  
+  .issues-icon {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+  }
+  
+  .stat-content {
+    flex: 1;
+  }
+  
+  .stat-content h3 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  
+  .stat-trend {
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .stat-trend.positive {
+    color: #4caf50;
+  }
+  
+  .stat-trend.negative {
+    color: #f44336;
+  }
+  
+  .trend-arrow {
+    font-size: 16px;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 1200px) {
+    .ministry-stat-cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .ministry-stat-cards {
+      grid-template-columns: 1fr;
+    }
+  }

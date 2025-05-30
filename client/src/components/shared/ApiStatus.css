@@ -1,0 +1,38 @@
+/* src/components/shared/ApiStatus.css */
+.api-status {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+    z-index: 1000;
+  }
+  
+  .status-indicator {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .status-indicator.active {
+    background: #4CAF50;
+    color: white;
+  }
+  
+  .status-indicator.inactive {
+    background: #f44336;
+    color: white;
+  }
+  
+  @media (max-width: 768px) {
+    .api-status {
+      bottom: 10px;
+      right: 10px;
+      flex-direction: column;
+      gap: 5px;
+    }
+  }

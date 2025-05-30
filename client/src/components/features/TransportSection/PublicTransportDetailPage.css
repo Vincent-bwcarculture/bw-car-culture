@@ -1,0 +1,1426 @@
+/* src/components/features/TransportSection/PublicTransportDetailPage.css */
+.transport-detail-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+  
+  .transport-back-button {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.4rem 0.8rem;
+    margin-bottom: 1.25rem;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .transport-back-button:hover {
+    color: #ff3300;
+  }
+  
+  .transport-content {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 1rem;
+  }
+  
+  .transport-main-content {
+    border: 1px solid #2c2c2c;
+    background: rgba(20, 20, 20, 0.95);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  /* Gallery Section */
+  .transport-gallery {
+    padding: 0rem;
+    margin-bottom: 0rem;
+  }
+  
+  .transport-main-image-container {
+    position: relative;
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  .transport-main-image-container:hover .transport-gallery-nav {
+    opacity: 1;
+  }
+  
+  .transport-main-image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+  }
+  
+  .transport-main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  
+  .transport-main-image:hover img {
+    transform: scale(1.02);
+  }
+  
+  .transport-gallery-actions {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    z-index: 11;
+  }
+  
+  .transport-gallery-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  .transport-action-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+  }
+  
+  .transport-action-button:hover {
+    background: rgba(255, 51, 0, 0.9);
+    border-color: #ff3300;
+    transform: scale(1.1);
+  }
+  
+  .transport-action-button.saved {
+    background: #ff3300;
+    border-color: #ff3300;
+  }
+  
+  .transport-gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 38px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: white;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 2;
+    opacity: 0;
+  }
+  
+  .transport-gallery-nav:hover {
+    background: #ff3300;
+    border-color: #ff3300;
+    transform: translateY(-50%) scale(1.1);
+  }
+  
+  .transport-gallery-nav.prev {
+    left: 1.5rem;
+  }
+  
+  .transport-gallery-nav.next {
+    right: 1.5rem;
+  }
+  
+  .transport-image-counter {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 2;
+  }
+  
+  .transport-thumbnail-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.15rem;
+    margin-top: 0.5rem;
+    padding: 0 0.5rem 0.5rem;
+  }
+  
+  .transport-thumbnail {
+    position: relative;
+    aspect-ratio: 16/9;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  .transport-thumbnail::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  .transport-thumbnail:hover::after {
+    background: rgba(0, 0, 0, 0.1);
+  }
+  
+  .transport-thumbnail.active::after {
+    background: rgba(0, 0, 0, 0);
+  }
+  
+  .transport-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  .transport-thumbnail:hover img {
+    transform: scale(1.05);
+  }
+  
+  .transport-thumbnail.active {
+    border-color: #ff3300;
+  }
+  
+  /* Route Information */
+  .transport-info {
+    padding: 1.5rem;
+  }
+  
+  .transport-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+  }
+  
+  .transport-title {
+    font-size: 1.75rem;
+    color: #ffffff;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .transport-destination-arrow {
+    color: #ff3300;
+    margin: 0 0.5rem;
+  }
+  
+  .transport-badges-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .transport-type-badge, 
+  .transport-service-badge, 
+  .transport-status-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  .transport-type-badge {
+    background-color: rgba(54, 162, 235, 0.1);
+    color: #36a2eb;
+    border: 1px solid rgba(54, 162, 235, 0.3);
+  }
+  
+  .transport-type-badge.bus {
+    background-color: rgba(54, 162, 235, 0.1);
+    color: #36a2eb;
+    border: 1px solid rgba(54, 162, 235, 0.3);
+  }
+  
+  .transport-type-badge.taxi {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+  }
+  
+  .transport-type-badge.shuttle {
+    background-color: rgba(153, 102, 255, 0.1);
+    color: #9966ff;
+    border: 1px solid rgba(153, 102, 255, 0.3);
+  }
+  
+  .transport-type-badge.train {
+    background-color: rgba(255, 99, 132, 0.1);
+    color: #ff6384;
+    border: 1px solid rgba(255, 99, 132, 0.3);
+  }
+  
+  .transport-service-badge.express {
+    background-color: rgba(46, 213, 115, 0.1);
+    color: #2ed573;
+    border: 1px solid rgba(46, 213, 115, 0.3);
+  }
+  
+  .transport-service-badge.premium {
+    background-color: rgba(153, 102, 255, 0.1);
+    color: #9966ff;
+    border: 1px solid rgba(153, 102, 255, 0.3);
+  }
+  
+  .transport-service-badge.regular {
+    background-color: rgba(54, 162, 235, 0.1);
+    color: #36a2eb;
+    border: 1px solid rgba(54, 162, 235, 0.3);
+  }
+  
+  .transport-status-badge.on-time {
+    background-color: rgba(46, 213, 115, 0.1);
+    color: #2ed573;
+    border: 1px solid rgba(46, 213, 115, 0.3);
+  }
+  
+  .transport-status-badge.delayed {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+  }
+  
+  .transport-status-badge.cancelled {
+    background-color: rgba(255, 99, 132, 0.1);
+    color: #ff6384;
+    border: 1px solid rgba(255, 99, 132, 0.3);
+  }
+  
+  .transport-price-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.3rem;
+  }
+  
+  .transport-price {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #0051ff;
+  }
+  
+  .transport-frequency-badge {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    background-color: rgba(46, 213, 115, 0.1);
+    color: #2ed573;
+    border: 1px solid rgba(46, 213, 115, 0.3);
+  }
+  
+  /* Schedule Grid */
+  .transport-schedule-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .transport-schedule-column {
+    flex: 1;
+    min-width: 170px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .transport-schedule-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    padding: 0.5rem;
+  }
+  
+  .transport-schedule-label {
+    color: #888;
+    font-size: 0.8rem;
+  }
+  
+  .transport-schedule-value {
+    color: #ffffff;
+    font-size: 0.9rem;
+  }
+  
+  .transport-schedule-value.transport-status.on-time {
+    color: #2ed573;
+  }
+  
+  .transport-schedule-value.transport-status.delayed {
+    color: #ffc107;
+  }
+  
+  .transport-schedule-value.transport-status.cancelled {
+    color: #ff6384;
+  }
+  
+  /* Operating Days */
+  .transport-days-section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .transport-days-section h3 {
+    font-size: 1.1rem;
+    color: #ffffff;
+    margin-bottom: 0.75rem;
+  }
+  
+  .transport-days-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .transport-day-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  .transport-day-item.active {
+    background-color: rgba(46, 213, 115, 0.1);
+    color: #2ed573;
+    border: 1px solid rgba(46, 213, 115, 0.3);
+  }
+  
+  .transport-day-item.inactive {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #666;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Features Tabs */
+  .transport-features-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #2c2c2c;
+    padding-bottom: 0.5rem;
+  }
+  
+  .transport-tab-button {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid #2c2c2c;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .transport-tab-button:hover {
+    background: rgba(255, 51, 0, 0.1);
+    border-color: #ff3300;
+  }
+  
+  .transport-tab-button.active {
+    background: rgba(255, 51, 0, 0.2);
+    border-color: #ff3300;
+    color: #ff3300;
+  }
+  
+  /* Description and Features Sections */
+  .transport-description-section, 
+  .transport-features-section,
+  .transport-boarding-section,
+  .transport-luggage-section,
+  .transport-reviews-section,
+  .transport-stops-section,
+  .transport-amenities-section,
+  .transport-services-section {
+    margin-top: 1.5rem;
+  }
+  
+  .transport-description-section h2, 
+  .transport-features-section h2,
+  .transport-boarding-section h2, 
+  .transport-luggage-section h2,
+  .transport-reviews-section h2 {
+    font-size: 1.3rem;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #ff3300;
+    padding-bottom: 0.35rem;
+  }
+  
+  .transport-stops-section h3,
+  .transport-amenities-section h3,
+  .transport-services-section h3,
+  .transport-boarding-points h3,
+  .transport-prohibited-section h3 {
+    font-size: 1.1rem;
+    color: #ffffff;
+    margin: 1.25rem 0 0.75rem 0;
+  }
+  
+  .transport-description-content {
+    line-height: 1.6;
+    color: #c9c9c9;
+    white-space: pre-line;
+  }
+  
+  /* Stops Section */
+  .transport-stops-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    position: relative;
+  }
+  
+  .transport-stops-list::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(
+      to bottom,
+      #36a2eb 0%,
+      #ff3300 100%
+    );
+  }
+  
+  .transport-stop-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    margin-left: 1.5rem;
+  }
+  
+  .transport-stop-point {
+    width: 14px;
+    height: 14px;
+    background: #36a2eb;
+    border-radius: 50%;
+    position: absolute;
+    left: -1.5rem;
+    border: 2px solid rgba(20, 20, 20, 0.95);
+  }
+  
+  .transport-stop-name {
+    font-size: 0.9rem;
+    color: #ffffff;
+    line-height: 2;
+  }
+  
+  /* Amenities Section */
+  .transport-amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.75rem;
+  }
+  
+  .transport-amenity-item {
+    color: #ffffff;
+    padding: 0.6rem 0.8rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Services Section */
+  .transport-services-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 0.75rem;
+  }
+  
+  .transport-service-item {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #2c2c2c;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    transition: all 0.3s ease;
+  }
+  
+  .transport-service-item:hover {
+    border-color: rgba(255, 51, 0, 0.3);
+    background: rgba(255, 51, 0, 0.05);
+  }
+  
+  .transport-service-info {
+    flex: 1;
+  }
+  
+  .transport-service-name {
+    font-size: 1rem;
+    color: #ffffff;
+    margin: 0 0 0.3rem 0;
+  }
+  
+  .transport-service-description {
+    font-size: 0.9rem;
+    color: #c9c9c9;
+    margin: 0;
+  }
+  
+  .transport-service-price {
+    font-size: 0.9rem;
+    color: #0051ff;
+    font-weight: 500;
+    margin-left: 1rem;
+  }
+  
+  /* Boarding Points Section */
+  .transport-boarding-points {
+    margin-bottom: 1.5rem;
+  }
+  
+  .transport-points-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  
+  .transport-point-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #2c2c2c;
+    transition: all 0.3s ease;
+  }
+  
+  .transport-point-item:hover {
+    border-color: rgba(255, 51, 0, 0.3);
+    background: rgba(255, 51, 0, 0.05);
+  }
+  
+  .transport-point-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1rem;
+  }
+  
+  .transport-point-icon.origin {
+    background-color: rgba(54, 162, 235, 0.2);
+    color: #36a2eb;
+    border: 2px solid rgba(54, 162, 235, 0.3);
+  }
+  
+  .transport-point-icon.destination {
+    background-color: rgba(255, 51, 0, 0.2);
+    color: #ff3300;
+    border: 2px solid rgba(255, 51, 0, 0.3);
+  }
+  
+  .transport-point-details {
+    flex: 1;
+  }
+  
+  .transport-point-name {
+    color: #ffffff;
+    font-size: 0.95rem;
+    margin: 0 0 0.3rem 0;
+  }
+  
+  .transport-point-address {
+    color: #c9c9c9;
+    font-size: 0.85rem;
+    margin: 0;
+  }
+  
+  .transport-map-placeholder {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px dashed #2c2c2c;
+    margin-top: 1.5rem;
+  }
+  
+  .transport-map-placeholder p {
+    color: #888;
+    margin: 0.5rem 0;
+  }
+  
+  /* Luggage Policy Section */
+  .transport-luggage-details {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #2c2c2c;
+    margin-bottom: 1.5rem;
+  }
+  
+  .transport-luggage-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .transport-luggage-row:last-child {
+    border-bottom: none;
+  }
+  
+  .transport-luggage-label {
+    color: #c9c9c9;
+    font-size: 0.9rem;
+  }
+  
+  .transport-luggage-value {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .transport-prohibited-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0.5rem 0;
+  }
+  
+  .transport-prohibited-item {
+    position: relative;
+    padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+    color: #e0e0e0;
+    line-height: 1.5;
+  }
+  
+  .transport-prohibited-item:before {
+    content: '⚠️';
+    position: absolute;
+    left: 0;
+    font-size: 0.9rem;
+  }
+  
+  /* Reviews Section */
+  .transport-reviews-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .transport-review {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #2c2c2c;
+  }
+  
+  .transport-review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .transport-review-user {
+    font-weight: 500;
+    color: #ffffff;
+  }
+  
+  .transport-review-rating {
+    color: #ffd700;
+    letter-spacing: 2px;
+  }
+  
+  .transport-review-date {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 0.5rem;
+  }
+  
+  .transport-review-comment {
+    color: #e0e0e0;
+    line-height: 1.5;
+  }
+  
+  .transport-no-reviews {
+    color: #888;
+    font-style: italic;
+  }
+  
+  /* Provider Sidebar */
+  .transport-sidebar {
+    position: relative;
+    top: 0;
+    height: fit-content;
+  }
+  
+  .transport-provider-section {
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid #2c2c2c;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .transport-provider-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid #2c2c2c;
+  }
+  
+  .transport-provider-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #ffffff;
+  }
+  
+  .transport-provider-card {
+    padding: 1rem;
+  }
+  
+  .transport-provider-header-compact {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 0.5px solid #2c2c2c;
+  }
+  
+  .transport-provider-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 51, 0, 0.5);
+  }
+  
+  .transport-provider-details {
+    flex: 1;
+  }
+  
+  .transport-provider-name {
+    color: #ffffff;
+    font-size: 1.1rem;
+    margin: 0 0 0.3rem 0;
+  }
+  
+  .transport-provider-frequency {
+    color: #888;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+  
+  .transport-provider-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    margin: 1rem 0;
+    text-align: center;
+  }
+  
+  .transport-stat-value {
+    font-size: 1.2rem;
+    color: #ffffff;
+    margin-bottom: 0.2rem;
+  }
+  
+  .transport-stat-label {
+    font-size: 0.8rem;
+    color: #888;
+  }
+  
+  .transport-provider-contact-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .transport-contact-grid-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 0.5rem;
+    border-radius: 4px;
+  }
+  
+  .transport-contact-icon {
+    font-size: 1rem;
+  }
+  
+  .transport-contact-info {
+    font-size: 0.85rem;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .transport-website-link {
+    color: #ff3300;
+    text-decoration: none;
+  }
+  
+  .transport-website-link:hover {
+    text-decoration: underline;
+  }
+  
+  .transport-contact-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .transport-contact-button {
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  
+  .transport-contact-button.transport-whatsapp {
+    background: #25D366;
+    color: white;
+    grid-column: span 2;
+  }
+  
+  .transport-contact-button.transport-whatsapp:hover {
+    background: #1ea952;
+  }
+  
+  .transport-contact-button.transport-call {
+    background: #ff3300;
+    color: white;
+  }
+  
+  .transport-contact-button.transport-call:hover {
+    background: #cc2900;
+  }
+  
+  .transport-contact-button.transport-email {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+  
+  .transport-contact-button.transport-email:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Fare Information Card */
+  .transport-fare-card {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #2c2c2c;
+    margin-top: 1.5rem;
+  }
+  
+  .transport-fare-title {
+    font-size: 1.1rem;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid #2c2c2c;
+  }
+  
+  .transport-fare-details {
+    margin-bottom: 1rem;
+  }
+  
+  .transport-fare-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .transport-fare-row:last-child {
+    border-bottom: none;
+  }
+  
+  .transport-fare-label {
+    color: #c9c9c9;
+    font-size: 0.9rem;
+  }
+  
+  .transport-fare-value {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .transport-fare-row.transport-fare-promo .transport-fare-value {
+    color: #2ed573;
+  }
+  
+  .transport-fare-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0.5rem 0;
+  }
+  
+  .transport-fare-extra {
+    padding: 0.5rem 0;
+  }
+  
+  .transport-fare-extra-label {
+    display: block;
+    color: #c9c9c9;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .transport-fare-extra-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .transport-fare-extra-list li {
+    position: relative;
+    padding: 0.25rem 0 0.25rem 1.2rem;
+    color: #e0e0e0;
+    font-size: 0.85rem;
+  }
+  
+  .transport-fare-extra-list li:before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #ff3300;
+  }
+  
+  .transport-book-button {
+    background: #ff3300;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    text-align: center;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+  
+  .transport-book-button:hover {
+    background: #cc2900;
+  }
+  
+  /* Loading State */
+  .transport-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .transport-loader {
+    width: 48px;
+    height: 48px;
+    border: 3px solid #ff3300;
+    border-radius: 50%;
+    display: inline-block;
+    position: relative;
+    box-sizing: border-box;
+    animation: transport-rotation 1s linear infinite;
+  }
+  
+  .transport-loader::after {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-bottom-color: #ff3300;
+  }
+  
+  @keyframes transport-rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Error Container */
+  .transport-error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .transport-error-container h2 {
+    font-size: 1.5rem;
+    color: #ff3300;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Related Sections */
+  .transport-related-section {
+    grid-column: 1 / -1;
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid #2c2c2c;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  .transport-related-title {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(255, 51, 0, 0.3);
+    color: #ffffff;
+    position: relative;
+  }
+  
+  .transport-related-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 80px;
+    height: 2px;
+    background: #ff3300;
+  }
+  
+  /* Carousel Styling */
+  .transport-carousel-container {
+    position: relative;
+    width: 100%;
+    margin: 1.5rem 0;
+    overflow: hidden;
+  }
+  
+  .transport-carousel-viewport {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .transport-carousel-track {
+    display: flex;
+    transition: transform 0.5s ease;
+    width: max-content;
+  }
+  
+  .transport-carousel-slide {
+    flex: 0 0 100%;
+    padding: 0 0.5rem;
+    box-sizing: border-box;
+  }
+  
+  .transport-carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    transition: all 0.3s ease;
+    color: white;
+  }
+  
+  .transport-carousel-nav:hover {
+    background: #ff3300;
+    border-color: #ff3300;
+  }
+  
+  .transport-carousel-nav.prev {
+    left: 10px;
+  }
+  
+  .transport-carousel-nav.next {
+    right: 10px;
+  }
+  
+  .transport-carousel-nav:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .transport-carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 1rem;
+  }
+  
+  .transport-carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .transport-carousel-dot.active {
+    background: #ff3300;
+    transform: scale(1.2);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .transport-content {
+      grid-template-columns: 1fr 300px;
+    }
+  
+    .transport-detail-container {
+      padding: 1rem;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .transport-content {
+      grid-template-columns: 1fr;
+    }
+    
+    .transport-sidebar {
+      margin-top: 1.5rem;
+    }
+  
+    .transport-schedule-grid {
+      flex-direction: column;
+    }
+    
+    .transport-schedule-column {
+      min-width: 100%;
+    }
+  
+    .transport-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  
+    .transport-price-container {
+      align-items: flex-start;
+    }
+  
+    .transport-amenities-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .transport-contact-buttons {
+      grid-template-columns: 1fr;
+    }
+    
+    .transport-contact-button.transport-whatsapp {
+      grid-column: span 1;
+    }
+    
+    .transport-services-list,
+    .transport-points-list {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .transport-detail-container {
+      padding: 0.75rem;
+    }
+  
+    .transport-content {
+      gap: 0.75rem;
+    }
+  
+    .transport-title {
+      font-size: 1.5rem;
+    }
+  
+    .transport-price {
+      font-size: 1.4rem;
+    }
+  
+    .transport-gallery-nav {
+      width: 36px;
+      height: 36px;
+      font-size: 1rem;
+      opacity: 1;
+    }
+  
+    .transport-action-button {
+      width: 36px;
+      height: 36px;
+      font-size: 1rem;
+    }
+  
+    .transport-thumbnail-strip {
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    }
+  
+    .transport-features-tabs {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding-bottom: 0.5rem;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    .transport-features-tabs::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .transport-tab-button {
+      flex: 0 0 auto;
+    }
+    
+    .transport-amenities-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .transport-days-container {
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .transport-detail-container {
+      padding: 0.5rem;
+    }
+  
+    .transport-main-content, .transport-sidebar, .transport-related-section {
+      border-radius: 8px;
+    }
+  
+    .transport-info {
+      padding: 1rem;
+    }
+  
+    .transport-title {
+      font-size: 1.3rem;
+    }
+    
+    .transport-gallery-nav {
+      width: 32px;
+      height: 32px;
+    }
+  
+    .transport-image-counter {
+      bottom: 1rem;
+      right: 1rem;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+  
+    .transport-provider-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  
+    .transport-contact-buttons {
+      gap: 0.5rem;
+    }
+    
+    .transport-contact-button {
+      padding: 0.75rem;
+    }
+    
+    .transport-related-section {
+      padding: 1rem;
+    }
+    
+    .transport-related-title {
+      font-size: 1.2rem;
+    }
+  }
+  
+  /* Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    .transport-carousel-track,
+    .transport-main-image img,
+    .transport-thumbnail img {
+      transition: none;
+    }
+  }
+  
+  /* Touch Device Support */
+  @media (hover: none) {
+    .transport-gallery-nav,
+    .transport-action-button {
+      opacity: 1;
+    }
+  }

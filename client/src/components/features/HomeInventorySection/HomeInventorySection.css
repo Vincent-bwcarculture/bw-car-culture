@@ -1,0 +1,263 @@
+/* src/components/features/HomeInventorySection/HomeInventorySection.css */
+.home-inventory-section {
+    padding: 3rem 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), rgba(20, 20, 20, 0.9));
+    position: relative;
+  }
+  
+  .home-inventory-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 51, 0, 0.3), transparent);
+  }
+  
+  .home-inventory-section::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 51, 0, 0.3), transparent);
+  }
+  
+  .inventory-section-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  
+  .inventory-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .section-title-group {
+    flex: 1;
+  }
+  
+  .section-title {
+    font-size: 2.2rem;
+    color: #ffffff;
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+    position: relative;
+  }
+  
+  .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 80px;
+    height: 3px;
+    background: #ff3300;
+  }
+  
+  .section-subtitle {
+    font-size: 1.1rem;
+    color: #c9c9c9;
+    margin-top: 1rem;
+  }
+  
+  .view-all-button {
+    padding: 0.8rem 1.5rem;
+    background-color: rgba(255, 51, 0, 0.2);
+    color: #ff3300;
+    border: 1px solid rgba(255, 51, 0, 0.3);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .view-all-button:hover {
+    background-color: rgba(255, 51, 0, 0.3);
+  }
+  
+  .inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .inventory-grid-item {
+    height: 100%;
+  }
+  
+  .inventory-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+  }
+  
+  .inventory-loader {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 51, 0, 0.3);
+    border-radius: 50%;
+    border-top: 3px solid #ff3300;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .inventory-error {
+    text-align: center;
+    padding: 3rem 0;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .inventory-error p {
+    color: #ff6b81;
+    margin-bottom: 1.5rem;
+  }
+  
+  .retry-button {
+    padding: 0.75rem 1.5rem;
+    background-color: rgba(255, 51, 0, 0.2);
+    color: #ff3300;
+    border: 1px solid rgba(255, 51, 0, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .retry-button:hover {
+    background-color: rgba(255, 51, 0, 0.3);
+  }
+  
+  .inventory-empty {
+    text-align: center;
+    padding: 3rem 0;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .inventory-empty p {
+    color: #c9c9c9;
+    margin-bottom: 1.5rem;
+  }
+  
+  .browse-link {
+    padding: 0.75rem 1.5rem;
+    background-color: #ff3300;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+  }
+  
+  .browse-link:hover {
+    background-color: #cc2900;
+  }
+  
+  .inventory-section-footer {
+    display: none;
+  }
+  
+  .mobile-view-all {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 0;
+    background-color: #ff3300;
+    color: white;
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+  }
+  
+  .mobile-view-all:hover {
+    background-color: #cc2900;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 992px) {
+    .inventory-grid {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+    
+    .section-title {
+      font-size: 2rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .home-inventory-section {
+      padding: 2.5rem 0;
+    }
+    
+    .inventory-section-container {
+      padding: 0 1rem;
+    }
+    
+    .inventory-section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .view-all-button {
+      display: none;
+    }
+    
+    .section-title {
+      font-size: 1.8rem;
+    }
+    
+    .section-subtitle {
+      font-size: 1rem;
+    }
+    
+    .inventory-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .inventory-section-footer {
+      display: block;
+      margin-top: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .home-inventory-section {
+      padding: 2rem 0;
+    }
+    
+    .inventory-section-container {
+      padding: 0 0.75rem;
+    }
+    
+    .section-title {
+      font-size: 1.6rem;
+    }
+    
+    .inventory-grid {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 0.75rem;
+    }
+  }

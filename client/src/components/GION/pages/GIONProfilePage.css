@@ -1,0 +1,1644 @@
+.gion-profile-page {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #181820;
+    color: #ffffff;
+    min-height: 100%;
+    width: 100%;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  /* Header */
+  .gion-page-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    position: relative;
+    z-index: 5;
+  }
+  
+  .gion-back-button {
+    background: none;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .gion-page-title {
+    flex: 1;
+    margin: 0;
+    font-size: 1.3rem;
+    text-align: center;
+    font-weight: 600;
+  }
+  
+  .gion-settings-button {
+    background: none;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+  
+  /* User Card */
+  .gion-profile-user-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    margin: 1rem 1rem 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .gion-profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+  }
+  
+  .gion-profile-user-info {
+    flex: 1;
+  }
+  
+  .gion-profile-name {
+    margin: 0 0 0.35rem;
+    font-size: 1.1rem;
+    color: white;
+  }
+  
+  .gion-profile-tier {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Badges Section */
+  .profile-badges-section {
+    margin: 0 1rem 1.5rem;
+  }
+  
+  .badges-container {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .badges-container::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .profile-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+    padding: 0.75rem 0.5rem;
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  .badge-icon {
+    font-size: 1.75rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .badge-name {
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+  
+  /* Points Card */
+  .gion-profile-points-card {
+    background: linear-gradient(135deg, rgba(95, 95, 196, 0.25) 0%, rgba(95, 95, 196, 0.15) 100%);
+    margin: 0 1rem 1.5rem;
+    border-radius: 14px;
+    padding: 1.25rem;
+    border: 1px solid rgba(95, 95, 196, 0.2);
+  }
+  
+  .gion-points-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .gion-tier-progress {
+    margin-top: 0.5rem;
+  }
+  
+  .gion-tier-progress-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+  }
+  
+  .gion-tier-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+  }
+  
+  .gion-tier-progress-info {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: right;
+  }
+  
+  /* Profile Stats */
+  .gion-profile-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    padding: 0 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .gion-stat-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 0.75rem;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .gion-stat-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 0.25rem;
+  }
+  
+  .gion-stat-label {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  /* Profile Tabs */
+  .profile-tabs {
+    display: flex;
+    margin: 0 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 0.35rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .profile-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.75rem 0.5rem;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 10px;
+  }
+  
+  .profile-tab.active {
+    background: rgba(95, 95, 196, 0.2);
+    color: white;
+  }
+  
+  .profile-tab:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .profile-tab span {
+    font-size: 0.75rem;
+  }
+  
+  /* Tab Content */
+  .profile-tab-content {
+    padding: 0 1rem;
+  }
+  
+  .tab-section-title {
+    font-size: 1.1rem;
+    margin: 0 0 1rem;
+    color: white;
+    position: relative;
+  }
+  
+  .tab-section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(90deg, #5f5fc4, transparent);
+  }
+  
+  /* Activity Tab Content */
+  .gion-recent-reviews {
+    margin-bottom: 1.5rem;
+  }
+  
+  .gion-review-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .service-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .service-icon {
+    font-size: 1.2rem;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .service-details {
+    flex: 1;
+  }
+  
+  .gion-review-service {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: white;
+    margin-bottom: 0.15rem;
+  }
+  
+  .service-id {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .gion-review-date {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .gion-review-rating {
+    margin: 0.75rem 0;
+    color: #ffd700;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .gion-review-points {
+    margin-left: auto;
+    color: #4caf50;
+    font-size: 0.8rem;
+  }
+  
+  .gion-review-comment {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+  
+  .review-features {
+    display: flex;
+    gap: 0.75rem;
+  }
+  
+  .review-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+  }
+  
+  .review-feature.safety {
+    background: rgba(231, 76, 60, 0.1);
+    color: rgba(231, 76, 60, 0.9);
+  }
+  
+  /* Transport Types Grid */
+  .transport-types-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .transport-type-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 0.75rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0.6;
+    position: relative;
+  }
+  
+  .transport-type-item.active {
+    background: rgba(255, 255, 255, 0.08);
+    opacity: 1;
+    border-color: rgba(95, 95, 196, 0.3);
+  }
+  
+  .transport-icon {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .transport-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .type-check {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    color: #4caf50;
+  }
+  
+  /* Areas Covered */
+  .areas-covered-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .area-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.5rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  /* Impact Tab */
+  .impact-intro {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .impact-headline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  
+  .impact-headline h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: white;
+  }
+  
+  .impact-score {
+    background: linear-gradient(135deg, #5f5fc4 0%, #4a4a8a 100%);
+    color: white;
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  
+  .impact-description {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.4;
+  }
+  
+  .impact-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .impact-metric {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .metric-icon {
+    color: #5f5fc4;
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Impact Timeline */
+  .impact-timeline-title {
+    font-size: 1.1rem;
+    margin: 0 0 1rem;
+    color: white;
+  }
+  
+  .impact-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .impact-event {
+    display: flex;
+    gap: 1rem;
+    padding-left: 1rem;
+    position: relative;
+  }
+  
+  .impact-event::before {
+    content: '';
+    position: absolute;
+    top: 30px;
+    bottom: -40px;
+    left: 16px;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  .impact-event:last-child::before {
+    display: none;
+  }
+  
+  .event-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  
+  .event-details {
+    flex: 1;
+    padding-bottom: 1.5rem;
+  }
+  
+  .event-description {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.4;
+  }
+  
+  .event-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  /* Achievements Tab */
+  .achievement-item {
+    display: flex;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+  }
+  
+  .achievement-item.earned {
+    background: rgba(255, 255, 255, 0.08);
+    opacity: 1;
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+  
+  .achievement-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .achievement-icon {
+    font-size: 2rem;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .achievement-details {
+    flex: 1;
+  }
+  
+  .achievement-title {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    color: white;
+  }
+  
+  .achievement-description {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .achievement-earned {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: #4caf50;
+  }
+  
+  .achievement-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #5f5fc4, #4a4a8a);
+    border-radius: 3px;
+  }
+  
+  .progress-text {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+  }
+  
+  /* Settings Tab */
+  .gion-profile-menu {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 1.5rem;
+  }
+  
+  .gion-menu-item {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .gion-menu-item:last-child {
+    border-bottom: none;
+  }
+  
+  .gion-menu-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  
+  .gion-menu-item span {
+    flex: 1;
+  }
+  
+  .gion-menu-chevron {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .gion-menu-item.logout {
+    color: #e74c3c;
+  }
+  
+  .app-info-section {
+    text-align: center;
+    padding: 2rem 0;
+  }
+  
+  .app-version {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 1rem;
+  }
+  
+  .ministry-partnership {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1.5rem;
+  }
+  
+  .legal-links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+  
+  .legal-link {
+    color: #5f5fc4;
+    font-size: 0.85rem;
+    text-decoration: none;
+  }
+  
+  .legal-link:hover {
+    text-decoration: underline;
+  }
+  
+  /* Access Tab Styles - NEW */
+  .access-tab-content {
+    padding-bottom: 2rem;
+  }
+  
+  .access-description {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+  }
+  
+  .access-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .access-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    gap: 1rem;
+    transition: all 0.2s ease;
+  }
+  
+  .access-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+  }
+  
+  .access-card-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(95, 95, 196, 0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5f5fc4;
+    flex-shrink: 0;
+  }
+  
+  .access-card-content {
+    flex: 1;
+  }
+  
+  .access-card-content h4 {
+    margin: 0 0 0.5rem;
+    color: white;
+    font-size: 1.1rem;
+  }
+  
+  .access-card-content p {
+    margin: 0 0 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  .request-access-btn {
+    background: #5f5fc4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .request-access-btn:hover {
+    background: #4a4a8a;
+  }
+  
+  .access-requests-section {
+    margin-top: 2rem;
+  }
+  
+  .access-request-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  .request-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  
+  .request-name {
+    font-weight: 500;
+    color: white;
+    font-size: 1.05rem;
+  }
+  
+  .request-status {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+  
+  .status-pending {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+  }
+  
+  .status-approved {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+  }
+  
+  .status-rejected {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+  
+  .request-details {
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .review-notes {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .review-notes h5 {
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .review-notes p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  .resubmit-btn {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.6rem;
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1px solid #dc3545;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+  }
+  
+  .resubmit-btn:hover {
+    background: rgba(220, 53, 69, 0.2);
+  }
+  
+  /* NEW STYLES FOR ENHANCED FEATURES */
+  
+  /* Dark Mode */
+  .gion-page.dark-mode {
+    background-color: #121218;
+    color: #ffffff;
+  }
+  
+  .gion-page.dark-mode .gion-profile-user-card,
+  .gion-page.dark-mode .gion-stat-item,
+  .gion-page.dark-mode .profile-tab,
+  .gion-page.dark-mode .gion-review-card,
+  .gion-page.dark-mode .gion-menu-item,
+  .gion-page.dark-mode .transport-type-item,
+  .gion-page.dark-mode .achievement-item,
+  .gion-page.dark-mode .impact-intro,
+  .gion-page.dark-mode .impact-metric,
+  .gion-page.dark-mode .access-card,
+  .gion-page.dark-mode .access-request-item {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Profile Edit Form */
+  .profile-edit-form {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .profile-edit-form h3 {
+    margin: 0 0 1.5rem;
+    font-size: 1.1rem;
+    color: white;
+  }
+  
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 0.8rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.95rem;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: #5f5fc4;
+    outline: none;
+  }
+  
+  .form-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .cancel-button,
+  .save-button {
+    flex: 1;
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .cancel-button {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .save-button {
+    background: #5f5fc4;
+    color: white;
+    border: none;
+  }
+  
+  .cancel-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  .save-button:hover {
+    background: #4a4a8a;
+  }
+  
+  /* Toggle Switch */
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 24px;
+  }
+  
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: .4s;
+    border-radius: 24px;
+  }
+  
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .toggle-slider {
+    background-color: #5f5fc4;
+  }
+  
+  input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+  }
+  
+  /* Small Toggle Switch for Menu Items */
+  .toggle-switch-small {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 18px;
+  }
+  
+  .toggle-switch-small input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .toggle-slider-small {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: .4s;
+    border-radius: 18px;
+  }
+  
+  .toggle-slider-small:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .toggle-slider-small {
+    background-color: #5f5fc4;
+  }
+  
+  input:checked + .toggle-slider-small:before {
+    transform: translateX(18px);
+  }
+  
+  /* Notification Settings */
+  .notification-settings {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .notification-settings h3 {
+    margin: 0 0 1.5rem;
+    font-size: 1.1rem;
+    color: white;
+  }
+  
+  .notification-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .notification-option:last-child {
+    border-bottom: none;
+  }
+  
+  .notification-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .save-notification-settings {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0.8rem;
+    background: #5f5fc4;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .save-notification-settings:hover {
+    background: #4a4a8a;
+  }
+  
+  /* View All Reviews Button */
+  .view-all-reviews-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.8rem;
+    margin-top: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .view-all-reviews-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  
+  /* No Reviews State */
+  .gion-no-reviews {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .gion-no-reviews-icon {
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.4);
+  }
+  
+  .gion-start-reviewing-btn {
+    margin-top: 1rem;
+    padding: 0.8rem 1.5rem;
+    background: #5f5fc4;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .gion-start-reviewing-btn:hover {
+    background: #4a4a8a;
+  }
+  
+  /* Ministry Badge */
+  .ministry-impact-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+  }
+  
+  .ministry-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(95, 95, 196, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+  }
+  
+  .ministry-impact-text {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+  
+  /* Civic Rewards */
+  .civic-rewards-section {
+    margin-top: 2rem;
+  }
+  
+  .rewards-description {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+  }
+  
+  .rewards-tiers {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .reward-tier {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1rem;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+  }
+  
+  .reward-tier.unlocked {
+    opacity: 1;
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  
+  .tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    width: fit-content;
+  }
+  
+  .tier-badge.silver {
+    background: rgba(192, 192, 192, 0.1);
+    color: #c0c0c0;
+  }
+  
+  .tier-badge.gold {
+    background: rgba(255, 215, 0, 0.1);
+    color: #ffd700;
+  }
+  
+  .tier-badge.platinum {
+    background: rgba(229, 228, 226, 0.1);
+    color: #e5e4e2;
+  }
+  
+  .tier-points {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .tier-rewards ul {
+    margin: 0;
+    padding-left: 1.5rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .tier-rewards li {
+    margin-bottom: 0.25rem;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .gion-profile-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .transport-types-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .impact-metrics {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    
+    .request-details {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .access-card {
+      flex-direction: column;
+    }
+    
+    .access-card-icon {
+      margin-bottom: 0.5rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .gion-profile-user-card {
+      flex-direction: column;
+      text-align: center;
+      padding: 1.5rem 1rem;
+    }
+    
+    .gion-profile-avatar {
+      margin: 0 auto 1rem;
+    }
+    
+    .gion-profile-tier {
+      justify-content: center;
+    }
+    
+    .achievement-item {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .achievement-icon {
+      margin: 0 auto 0.75rem;
+    }
+    
+    .impact-event {
+      gap: 0.75rem;
+    }
+    
+    .form-buttons {
+      flex-direction: column;
+    }
+    
+    .reward-tier,
+    .notification-option {
+      padding: 0.75rem;
+    }
+  }
+
+ /* Services Tab Styles */
+.services-tab-content {
+  padding-bottom: 2rem;
+}
+
+.user-services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.service-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.service-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.service-info h4 {
+  margin: 0 0 0.5rem;
+  color: white;
+  font-size: 1.1rem;
+}
+
+.service-info p {
+  margin: 0 0 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.service-statuses {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.service-status, .service-verification {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.status-active {
+  color: #4caf50;
+}
+
+.status-pending {
+  color: #ffc107;
+}
+
+.status-suspended {
+  color: #f44336;
+}
+
+.status-verified {
+  color: #2196f3;
+}
+
+.service-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.view-service-button,
+.dashboard-button {
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  border: none;
+}
+
+.view-service-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.dashboard-button {
+  background: #ff3300;
+  color: white;
+  font-weight: 500;
+}
+
+.view-service-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dashboard-button:hover {
+  opacity: 0.9;
+}
+
+.register-service-section {
+  margin-top: 2rem;
+  text-align: center;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.add-service-button,
+.request-provider-button {
+  margin-top: 1rem;
+  padding: 0.8rem 1.5rem;
+  background: #5f5fc4;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.add-service-button:hover,
+.request-provider-button:hover {
+  background: #4a4a8a;
+}
+
+.no-services-message {
+  text-align: center;
+  padding: 2rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.loading-indicator {
+  text-align: center;
+  padding: 2rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.loading-indicator .spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 1rem;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border-top-color: #ff3300;
+  animation: spin 1s linear infinite;
+}
+
+.error-message {
+  text-align: center;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 8px;
+  color: #f44336;
+}
+
+.retry-button {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgba(244, 67, 54, 0.2);
+  color: white;
+  border: 1px solid rgba(244, 67, 54, 0.5);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.retry-button:hover {
+  background: rgba(244, 67, 54, 0.3);
+}
+
+/* Dashboard Access Styles */
+.dashboard-access-section {
+  margin-bottom: 2rem;
+}
+
+.dashboard-access-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 51, 0, 0.15);
+  color: #ff3300;
+}
+
+.dashboard-info {
+  flex: 1;
+}
+
+.dashboard-info h4 {
+  margin: 0 0 0.5rem;
+  color: white;
+  font-size: 1.1rem;
+}
+
+.dashboard-info p {
+  margin: 0 0 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dashboard-note {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+}
+
+.access-dashboard-button {
+  padding: 0.6rem 1.25rem;
+  background: #ff3300;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-top: 0.75rem;
+}
+
+.access-dashboard-button:hover {
+  background: #cc2900;
+}
+
+/* User Role Badges */
+.user-role-badges {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.role-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.role-badge.provider {
+  background: rgba(33, 150, 243, 0.2);
+  color: #2196f3;
+}
+
+.role-badge.ministry {
+  background: rgba(156, 39, 176, 0.2);
+  color: #9c27b0;
+}
+
+.role-badge.admin {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .service-card {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .service-actions {
+    flex-direction: row;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .service-statuses {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

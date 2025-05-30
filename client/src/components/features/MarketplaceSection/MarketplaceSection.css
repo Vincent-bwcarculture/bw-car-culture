@@ -1,0 +1,187 @@
+/* src/components/features/MarketplaceSection/MarketplaceSection.css */
+
+.marketplace-section {
+  padding: 20px;
+  margin-bottom: 30px;
+  background: rgba(15, 15, 15, 0.95);
+  border-radius: 10px;
+  border: 1px solid #2c2c2c;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.marketplace-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 51, 0, 0.3);
+}
+
+.marketplace-header h2 {
+  font-size: 24px;
+  color: #ffffff;
+  font-weight: 600;
+  margin: 0;
+}
+
+.view-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.view-all {
+  padding: 8px 15px;
+  background: rgba(255, 51, 0, 0.1);
+  color: #ff3300;
+  border: 1px solid rgba(255, 51, 0, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+}
+
+.view-all:hover {
+  background: rgba(255, 51, 0, 0.2);
+  border-color: #ff3300;
+}
+
+.listings-scroll {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 5px;
+  padding-bottom: 10px;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.listings-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.vehicle-card-wrapper {
+  flex: 0 0 330px;
+  scroll-snap-align: start;
+  height: 100%;
+}
+
+.scroll-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.scroll-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid #2c2c2c;
+  color: white;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.scroll-button:hover {
+  background: rgba(255, 51, 0, 0.8);
+  border-color: #ff3300;
+}
+
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: #888;
+  font-size: 16px;
+}
+
+.no-listings {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #888;
+  text-align: center;
+  font-size: 16px;
+}
+
+.retry-button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: #ff3300;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-size: 14px;
+}
+
+.retry-button:hover {
+  background: #e62e00;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .marketplace-section {
+    padding: 15px;
+  }
+
+  .vehicle-card-wrapper {
+    flex: 0 0 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .marketplace-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .marketplace-header h2 {
+    font-size: 20px;
+  }
+
+  .view-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .vehicle-card-wrapper {
+    flex: 0 0 270px;
+  }
+}
+
+@media (max-width: 480px) {
+  .marketplace-section {
+    padding: 10px;
+  }
+
+  .marketplace-header h2 {
+    font-size: 18px;
+  }
+
+  .vehicle-card-wrapper {
+    flex: 0 0 260px;
+  }
+  
+  .scroll-button {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+}

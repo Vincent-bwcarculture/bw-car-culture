@@ -1,0 +1,455 @@
+/* src/components/admin/TrailerListingManager/TrailerListingForm.css */
+
+.trailer-form-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    z-index: 1000;
+    overflow-y: auto;
+    padding: 2rem;
+  }
+  
+  .trailer-form-container {
+    background-color: white;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .trailer-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 10;
+  }
+  
+  .trailer-form-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+  }
+  
+  .close-button:hover {
+    color: #ff3300;
+  }
+  
+  .trailer-form {
+    padding: 1rem 1.5rem 2rem;
+  }
+  
+  .form-error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+    font-size: 0.95rem;
+  }
+  
+  .trailer-form-tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 70px;
+    background-color: white;
+    z-index: 5;
+  }
+  
+  .tab-button {
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .tab-button:hover {
+    color: #333;
+  }
+  
+  .tab-button.active {
+    color: #ff3300;
+    border-bottom-color: #ff3300;
+  }
+  
+  .form-tab-content {
+    padding-top: 1.5rem;
+  }
+  
+  .form-tab-content h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    color: #444;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #444;
+  }
+  
+  .form-group input[type="text"],
+  .form-group input[type="number"],
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.95rem;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #ff3300;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 1.5rem;
+  }
+  
+  .form-row .form-group {
+    flex: 1;
+  }
+  
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .features-container {
+    margin-bottom: 1.5rem;
+  }
+  
+  .feature-input-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .feature-input-row input {
+    flex: 1;
+    padding: 0.7rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.95rem;
+  }
+  
+  .remove-feature-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+  }
+  
+  .add-feature-btn {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.7rem 1rem;
+    margin-top: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .image-upload-container {
+    margin-bottom: 1.5rem;
+    border: 2px dashed #ddd;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .upload-image-btn {
+    display: inline-block;
+    background-color: #f2f2f2;
+    border: 1px solid #ddd;
+    padding: 0.7rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .upload-image-btn:hover {
+    background-color: #e6e6e6;
+  }
+  
+  .upload-note {
+    margin-top: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+  }
+  
+  .image-previews {
+    margin-top: 1.5rem;
+  }
+  
+  .image-previews h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    color: #444;
+  }
+  
+  .image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .image-preview-container {
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+  }
+  
+  .image-preview-container.primary {
+    border-color: #ff3300;
+    box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.2);
+  }
+  
+  .image-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .image-preview-actions {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .primary-toggle,
+  .remove-image {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .primary-toggle:hover,
+  .remove-image:hover {
+    transform: scale(1.2);
+  }
+  
+  .primary-toggle.is-primary {
+    color: #ffd700;
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #ddd;
+  }
+  
+  .cancel-button,
+  .save-button {
+    padding: 0.7rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .cancel-button {
+    background-color: #f2f2f2;
+    border: 1px solid #ddd;
+    color: #444;
+  }
+  
+  .cancel-button:hover {
+    background-color: #e6e6e6;
+  }
+  
+  .save-button {
+    background-color: #ff3300;
+    border: none;
+    color: white;
+  }
+  
+  .save-button:hover {
+    background-color: #e62e00;
+  }
+  
+  .save-button:disabled {
+    background-color: #ffcccc;
+    cursor: not-allowed;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .trailer-form-overlay {
+      padding: 1rem;
+    }
+    
+    .form-row {
+      flex-direction: column;
+      gap: 0;
+    }
+    
+    .trailer-form-tabs {
+      flex-wrap: wrap;
+    }
+    
+    .tab-button {
+      padding: 0.7rem 1rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .trailer-form-overlay {
+      padding: 0;
+    }
+    
+    .trailer-form-container {
+      border-radius: 0;
+      max-height: 100vh;
+    }
+    
+    .image-grid {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+  }
+  
+  /* Dark mode styles */
+  @media (prefers-color-scheme: dark) {
+    .trailer-form-container {
+      background-color: #222;
+    }
+    
+    .trailer-form-header {
+      background-color: #222;
+      border-bottom-color: #444;
+    }
+    
+    .trailer-form-header h2 {
+      color: #f2f2f2;
+    }
+    
+    .close-button {
+      color: #ccc;
+    }
+    
+    .trailer-form-tabs {
+      background-color: #222;
+      border-bottom-color: #444;
+    }
+    
+    .tab-button {
+      color: #ccc;
+    }
+    
+    .tab-button:hover {
+      color: #fff;
+    }
+    
+    .form-tab-content h3 {
+      color: #f2f2f2;
+      border-bottom-color: #444;
+    }
+    
+    .form-group label {
+      color: #ccc;
+    }
+    
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group textarea {
+      background-color: #333;
+      border-color: #444;
+      color: #f2f2f2;
+    }
+    
+    .image-upload-container {
+      border-color: #444;
+    }
+    
+    .upload-image-btn {
+      background-color: #333;
+      border-color: #444;
+      color: #f2f2f2;
+    }
+    
+    .upload-image-btn:hover {
+      background-color: #444;
+    }
+    
+    .image-preview-container {
+      border-color: #444;
+    }
+    
+    .form-actions {
+      border-top-color: #444;
+    }
+    
+    .cancel-button {
+      background-color: #333;
+      border-color: #444;
+      color: #f2f2f2;
+    }
+    
+    .cancel-button:hover {
+      background-color: #444;
+    }
+  }

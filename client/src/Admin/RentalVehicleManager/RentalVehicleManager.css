@@ -1,0 +1,315 @@
+/* src/components/admin/RentalVehicleManager/RentalVehicleManager.css */
+
+.rental-vehicle-manager {
+    padding: 1.5rem;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .section-header h1 {
+    font-size: 1.8rem;
+    color: #333;
+    margin: 0;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .add-rental-btn {
+    background-color: #ff3300;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .add-rental-btn:hover {
+    background-color: #cc2900;
+  }
+  
+  .add-rental-btn.small {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+  }
+  
+  .provider-selection {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+  }
+  
+  .provider-selection label {
+    font-weight: 500;
+    color: #555;
+  }
+  
+  .provider-select {
+    flex: 1;
+    max-width: 400px;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-color: white;
+    padding-right: 1.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .provider-select:focus {
+    outline: none;
+    border-color: #ff3300;
+  }
+  
+  .filter-section {
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .filter-group {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .search-group {
+    display: flex;
+    flex: 2;
+    min-width: 300px;
+  }
+  
+  .search-input {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+    font-size: 0.875rem;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: #ff3300;
+  }
+  
+  .search-btn {
+    background-color: #ff3300;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .search-btn:hover {
+    background-color: #cc2900;
+  }
+  
+  .filter-select {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-color: white;
+    padding-right: 1.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .filter-select:focus {
+    outline: none;
+    border-color: #ff3300;
+  }
+  
+  .rentals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .retry-button {
+    background-color: #721c24;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.375rem 0.75rem;
+    cursor: pointer;
+  }
+  
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .spinner {
+    border: 4px solid rgba(255, 51, 0, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid #ff3300;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .no-rentals {
+    text-align: center;
+    padding: 3rem 0;
+    color: #777;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+  
+  .page-button {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .page-button:hover:not([disabled]) {
+    background-color: #f5f5f5;
+    border-color: #ccc;
+  }
+  
+  .page-button.active {
+    background-color: #ff3300;
+    color: white;
+    border-color: #ff3300;
+  }
+  
+  .page-button.prev,
+  .page-button.next {
+    padding: 0.5rem 1rem;
+  }
+  
+  .page-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .rentals-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .filter-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .filter-group,
+    .search-group {
+      min-width: 100%;
+    }
+    
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }
+  
+  /* Dark mode styles */
+  @media (prefers-color-scheme: dark) {
+    .rental-vehicle-manager {
+      background-color: #1a1a1a;
+      color: #f5f5f5;
+    }
+    
+    .section-header h1 {
+      color: #f5f5f5;
+    }
+    
+    .filter-section {
+      background-color: #2a2a2a;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    .search-input,
+    .filter-select,
+    .provider-select {
+      background-color: #333;
+      border-color: #444;
+      color: #f5f5f5;
+    }
+    
+    .filter-select,
+    .provider-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f5f5f5' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    }
+    
+    .page-button {
+      background-color: #2a2a2a;
+      border-color: #444;
+      color: #f5f5f5;
+    }
+    
+    .page-button:hover:not([disabled]) {
+      background-color: #333;
+    }
+    
+    .no-rentals {
+      color: #aaa;
+    }
+  }

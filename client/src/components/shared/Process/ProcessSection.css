@@ -1,0 +1,280 @@
+/* Enhanced ProcessSection.css - Carousel version */
+.process-section {
+  padding: 1.5rem;
+  margin: 1.5rem auto;
+  max-width: 1200px;
+  background: rgba(20, 20, 20, 0.95);
+  border-radius: 12px;
+  border: 1px solid #2c2c2c;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.process-section.light {
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+}
+
+.process-title {
+  font-size: 1.8rem;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-bottom: 0.8rem;
+}
+
+.process-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: #ff3300;
+  border-radius: 2px;
+}
+
+/* Carousel container with relative positioning for the buttons */
+.process-carousel-container {
+  position: relative;
+  margin: 0 auto;
+  max-width: 100%;
+  padding: 0 1.5rem;
+}
+
+/* Carousel layout */
+.process-steps-carousel {
+  display: flex;
+  gap: 1.2rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 1.5rem 0.5rem;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.process-steps-carousel::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Process step cards - now smaller for the carousel */
+.process-step {
+  flex: 0 0 280px;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  border: 1px solid #2c2c2c;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  scroll-snap-align: start;
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.process-step:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(255, 51, 0, 0.2);
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.step-icon {
+  font-size: 1.5rem;
+}
+
+.step-number {
+  width: 28px;
+  height: 28px;
+  background: #ff3300;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.step-title {
+  color: #ffffff;
+  font-size: 1.1rem;
+  margin: 0;
+  flex: 1;
+}
+
+.step-details {
+  color: #c9c9c9;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.detail-text {
+  margin: 0.6rem 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #d6d6d6;
+}
+
+/* Navigation buttons */
+.process-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: white;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.process-nav-button:hover {
+  background: #ff3300;
+  border-color: #ff3300;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 15px rgba(255, 51, 0, 0.3);
+}
+
+.prev-button {
+  left: 0;
+}
+
+.next-button {
+  right: 0;
+}
+
+/* Mobile indicator dots */
+.process-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.process-indicator-dot {
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.process-indicator-dot.active {
+  background: #ff3300;
+  transform: scale(1.2);
+}
+
+.process-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid #2c2c2c;
+}
+
+.process-note {
+  color: #ffffff;
+  font-size: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.process-note strong {
+  color: #ff3300;
+}
+
+/* Light Theme Overrides */
+.process-section.light .process-title,
+.process-section.light .step-title {
+  color: #333;
+}
+
+.process-section.light .step-details,
+.process-section.light .process-note {
+  color: #555;
+}
+
+.process-section.light .process-step {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ddd;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .process-section {
+    padding: 1.2rem;
+    margin: 1rem;
+  }
+  
+  .process-title {
+    font-size: 1.5rem;
+  }
+  
+  .process-step {
+    flex: 0 0 240px;
+    padding: 1.2rem;
+    height: 260px;
+  }
+  
+  .step-title {
+    font-size: 1rem;
+  }
+  
+  .detail-text {
+    font-size: 0.8rem;
+  }
+  
+  .process-note {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .process-title {
+    font-size: 1.3rem;
+  }
+  
+  .process-step {
+    flex: 0 0 220px;
+    padding: 1rem;
+    height: 240px;
+  }
+  
+  .step-title {
+    font-size: 0.9rem;
+  }
+  
+  .process-nav-button {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+}
+
+/* Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+  .process-step:hover {
+    transform: none;
+  }
+  
+  .process-steps-carousel {
+    scroll-behavior: auto;
+  }
+}

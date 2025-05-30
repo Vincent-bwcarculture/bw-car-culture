@@ -1,0 +1,277 @@
+.gion-activity-page {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #181820;
+    color: #ffffff;
+    min-height: 100%;
+    width: 100%;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  /* Header */
+  .gion-page-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    position: relative;
+    z-index: 5;
+  }
+  
+  .gion-back-button {
+    background: none;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .gion-page-title {
+    flex: 1;
+    margin: 0;
+    font-size: 1.3rem;
+    text-align: center;
+    font-weight: 600;
+  }
+  
+  .header-spacer {
+    width: 40px;
+  }
+  
+  /* Filter Tabs */
+  .gion-filter-tabs {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin: 0 1rem 1.5rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .filter-tab {
+    flex: 1;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0.75rem 0.5rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .filter-tab:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .filter-tab.active {
+    background: rgba(95, 95, 196, 0.15);
+    color: white;
+  }
+  
+  /* Activity list */
+  .gion-activity-list {
+    margin: 0 1rem;
+  }
+  
+  .activity-item {
+    margin-bottom: 1.25rem;
+  }
+  
+  .activity-card {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+  }
+  
+  .activity-card:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+  
+  .activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .review-icon {
+    background: linear-gradient(135deg, #ffd700 0%, #f9a825 100%);
+    color: rgba(0, 0, 0, 0.8);
+  }
+  
+  .points-icon {
+    background: linear-gradient(135deg, #5f5fc4 0%, #4a4a8a 100%);
+    color: white;
+  }
+  
+  .reward-icon {
+    background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+    color: white;
+  }
+  
+  .activity-details {
+    flex: 1;
+  }
+  
+  .activity-details h4 {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    color: white;
+  }
+  
+  .activity-details p {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .activity-rating {
+    color: #ffd700;
+    font-size: 0.9rem;
+    margin-bottom: 0.35rem;
+    letter-spacing: 1px;
+  }
+  
+  .activity-meta {
+    display: flex;
+    align-items: center;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    gap: 0.5rem;
+  }
+  
+  .points-indicator {
+    background: rgba(76, 175, 80, 0.2);
+    color: #81c784;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+  }
+  
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+  
+  .empty-state-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .empty-state p {
+    margin: 0 0 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .start-activity-button {
+    background: linear-gradient(135deg, #5f5fc4 0%, #4a4a8a 100%);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  
+  .start-activity-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+  
+  /* Pagination */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1.5rem 0 2rem;
+  }
+  
+  .pagination-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .pagination-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  
+  .pagination-button.active {
+    background: linear-gradient(135deg, #5f5fc4 0%, #4a4a8a 100%);
+    border-color: transparent;
+  }
+  
+  .pagination-button.prev,
+  .pagination-button.next {
+    width: auto;
+    padding: 0 1rem;
+  }
+  
+  .pagination-button.disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  
+  .pagination-button.disabled:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: none;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .activity-card {
+      flex-direction: column;
+    }
+    
+    .activity-icon {
+      margin: 0 0 0.75rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .filter-tab {
+      padding: 0.6rem 0.3rem;
+      font-size: 0.8rem;
+    }
+    
+    .activity-details h4 {
+      font-size: 0.95rem;
+    }
+    
+    .activity-meta {
+      flex-wrap: wrap;
+    }
+  }

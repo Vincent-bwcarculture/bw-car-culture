@@ -1,0 +1,148 @@
+/* src/components/GION/ServiceProviderDashboards/components/ComplianceStatus.css */
+.compliance-status-container {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 20px;
+  }
+  
+  .compliance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .compliance-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .status-badge.compliant {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+  }
+  
+  .status-badge.non-compliant {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+  }
+  
+  .compliance-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .compliance-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 5px;
+  }
+  
+  .compliance-item.valid {
+    background-color: rgba(76, 175, 80, 0.05);
+  }
+  
+  .compliance-item.upcoming {
+    background-color: rgba(255, 152, 0, 0.05);
+  }
+  
+  .compliance-item.expired {
+    background-color: rgba(244, 67, 54, 0.05);
+  }
+  
+  .item-name {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  
+  .item-expiry {
+    font-size: 13px;
+  }
+  
+  .compliance-item.valid .item-expiry {
+    color: #4caf50;
+  }
+  
+  .compliance-item.upcoming .item-expiry {
+    color: #ff9800;
+  }
+  
+  .compliance-item.expired .item-expiry {
+    color: #f44336;
+  }
+  
+  .status-icon {
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  
+  .status-icon.valid {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .status-icon.upcoming {
+    background-color: #ff9800;
+    color: white;
+  }
+  
+  .status-icon.expired {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .compliance-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .action-button {
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+    flex: 1;
+    transition: all 0.2s ease;
+  }
+  
+  .action-button.primary {
+    background-color: #5f5fc4;
+    color: white;
+  }
+  
+  .action-button.secondary {
+    background-color: rgba(95, 95, 196, 0.1);
+    color: #5f5fc4;
+  }
+  
+  .action-button:hover {
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    .compliance-actions {
+      flex-direction: column;
+    }
+  }

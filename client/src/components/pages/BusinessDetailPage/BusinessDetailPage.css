@@ -1,0 +1,2081 @@
+/* src/components/pages/BusinessDetailPage/BusinessDetailPage.css */
+/* Enhanced Modern Design with Better Alignment and Theme Consistency */
+
+:root {
+  --primary-color: #ff3300;
+  --primary-gradient: linear-gradient(135deg, #ff3300, #ff5500);
+  --background-dark: #000000bb;
+  --surface-dark: rgba(18, 18, 18, 0.95);
+  --surface-lighter: rgba(25, 25, 25, 0.9);
+  --text-light: #ffffff;
+  --text-secondary: #c9c9c9;
+  --text-muted: #a0a0a0;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-accent: rgba(255, 51, 0, 0.3);
+  --shadow-default: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.4);
+  --backdrop-blur: blur(20px);
+}
+
+.bcc-business-detail-page {
+  background: var(--background-dark);
+  color: var(--text-light);
+  min-height: 100vh;
+  margin-top: 0;
+  position: relative;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Enhanced Loading and Error States */
+.bcc-business-detail-loading-page,
+.bcc-business-detail-error-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--background-dark);
+  padding: 2rem;
+}
+
+.bcc-business-detail-spinner {
+  width: 64px;
+  height: 64px;
+  position: relative;
+}
+
+.bcc-business-detail-spinner::before,
+.bcc-business-detail-spinner::after {
+  content: '';
+  position: absolute;
+  border: 3px solid transparent;
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  animation: bcc-business-detail-spin 1s linear infinite;
+}
+
+.bcc-business-detail-spinner::before {
+  width: 64px;
+  height: 64px;
+}
+
+.bcc-business-detail-spinner::after {
+  width: 48px;
+  height: 48px;
+  top: 8px;
+  left: 8px;
+  border-top-color: #ff6600;
+  animation-duration: 1.5s;
+  animation-direction: reverse;
+}
+
+@keyframes bcc-business-detail-spin {
+  to { transform: rotate(360deg); }
+}
+
+.bcc-business-detail-error-container {
+  background: var(--surface-dark);
+  border-radius: 20px;
+  padding: 3rem;
+  text-align: center;
+  max-width: 500px;
+  border: 1px solid var(--border-color);
+  backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--shadow-default);
+}
+
+.bcc-business-detail-error-container h2 {
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.bcc-business-detail-error-container p {
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.bcc-business-detail-back-button {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.3);
+}
+
+.bcc-business-detail-back-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 51, 0, 0.4);
+}
+
+/* Enhanced Banner Section */
+.bcc-business-detail-banner {
+  position: relative;
+  height: 320px;
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.bcc-business-detail-banner-image,
+.bcc-business-detail-default-banner {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s ease;
+}
+
+.bcc-business-detail-banner:hover .bcc-business-detail-banner-image {
+  transform: scale(1.05);
+}
+
+.bcc-business-detail-default-banner {
+  background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* Enhanced Action Buttons */
+.bcc-business-detail-action-buttons {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  display: flex;
+  gap: 1rem;
+  z-index: 10;
+}
+
+.bcc-business-detail-save-button,
+.bcc-business-detail-share-button {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.3s ease;
+  backdrop-filter: var(--backdrop-blur);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.bcc-business-detail-save-button:hover,
+.bcc-business-detail-share-button:hover {
+  background: var(--primary-gradient);
+  border-color: var(--primary-color);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 51, 0, 0.3);
+}
+
+.bcc-business-detail-save-button.saved {
+  background: var(--primary-gradient);
+  border-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.3);
+}
+
+/* Enhanced Content Header Section */
+.bcc-business-detail-content-header {
+  position: relative;
+  background: transparent;
+  backdrop-filter: var(--backdrop-blur);
+  padding: 2.5rem 2rem 3rem;
+  margin: 0;
+  border-color: var(--primary-color);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-default);
+  z-index: 5;
+}
+
+.bcc-business-detail-header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: start;
+  position: relative;
+}
+
+/* Enhanced Logo Styling */
+.bcc-business-detail-logo-container {
+  width: 120px;
+  height: 120px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: var(--surface-lighter);
+  border: 4px solid var(--primary-color);
+  flex-shrink: 0;
+  box-shadow: 
+    var(--shadow-default),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  margin-top: -60px;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.bcc-business-detail-logo-container:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    var(--shadow-hover),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+    0 0 30px rgba(255, 51, 0, 0.4);
+}
+
+.bcc-business-detail-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bcc-business-detail-logo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-gradient);
+  color: white;
+  font-size: 3rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced Header Info Section */
+.bcc-business-detail-header-info {
+  flex: 1;
+  min-width: 0;
+  padding-top: 0rem;
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+/* Title and Verified Badge - Enhanced Alignment */
+.bcc-business-detail-title-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+.bcc-business-detail-title-container h1 {
+  margin: 0;
+  font-size: 2.8rem;
+  color: var(--text-light);
+  font-weight: 600;
+  line-height: 1.2;
+  word-break: break-word;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #ffffff, #e0e0e0);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bcc-business-detail-verified {
+  background: linear-gradient(135deg, rgba(46, 213, 115), rgba(39, 194, 101));
+  color: white;
+  padding: 0.3rem 0.8rem;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.bcc-business-detail-verified:hover {
+  transform: translateY(-2px);
+}
+
+.bcc-business-detail-verified::before {
+  /* content: ''; */
+  font-weight: 900;
+  font-size: 1rem;
+}
+
+/* Business Type and Location - Better Alignment */
+.bcc-business-detail-business-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  align-items: center;
+  margin-bottom: 0rem;
+}
+
+.bcc-business-detail-type {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, rgba(255, 51, 0, 0.15), rgba(255, 51, 0, 0.25));
+  color: var(--primary-color);
+  border: 1px solid var(--border-accent);
+  backdrop-filter: blur(10px);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.bcc-business-detail-type:hover {
+  background: linear-gradient(135deg, rgba(255, 51, 0, 0.25), rgba(255, 51, 0, 0.35));
+  transform: translateY(-2px);
+}
+
+.bcc-business-detail-location {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.6rem 0.6rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.bcc-business-detail-location:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-accent);
+}
+
+.bcc-business-detail-location-icon {
+  color: var(--primary-color);
+  display: none;
+  font-style: normal;
+  font-size: 1.2rem;
+}
+
+/* Enhanced Bottom Info Section */
+.bcc-business-detail-bottom-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+/* Enhanced Metrics Styling */
+.bcc-business-detail-metrics {
+  display: flex;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.bcc-business-detail-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1.2rem 1.5rem;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.bcc-business-detail-metric:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+}
+
+.bcc-business-detail-metric-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  /* text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); */
+}
+
+.bcc-business-detail-stars {
+  color: #ffd700;
+  letter-spacing: -2px;
+  text-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+}
+
+.bcc-business-detail-rating-number {
+  margin-left: 0.4rem;
+  color: var(--text-light);
+}
+
+.bcc-business-detail-metric-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+/* Enhanced Action Buttons */
+.bcc-business-detail-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.bcc-business-detail-contact-button,
+.bcc-business-detail-website-button,
+.bcc-business-detail-whatsapp-button {
+  padding: 0.8rem 1.6rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 1rem;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  /* backdrop-filter: blur(10px); */
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.bcc-business-detail-contact-button::before,
+.bcc-business-detail-website-button::before,
+.bcc-business-detail-whatsapp-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.bcc-business-detail-contact-button {
+  background: var(--primary-gradient);
+  color: white;
+}
+
+.bcc-business-detail-contact-button:hover {
+  background: linear-gradient(135deg, #e62d00, #ff4400);
+  transform: translateY(-3px);
+}
+
+.bcc-business-detail-contact-button:hover::before {
+  left: 100%;
+}
+
+.bcc-business-detail-website-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+  border: 1px solid var(--border-color);
+}
+
+.bcc-business-detail-website-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--border-accent);
+  transform: translateY(-3px);
+}
+
+.bcc-business-detail-website-button:hover::before {
+  left: 100%;
+}
+
+.bcc-business-detail-whatsapp-button {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: white;
+}
+
+.bcc-business-detail-whatsapp-button:hover {
+  background: linear-gradient(135deg, #128C7E, #0d7a6b);
+  transform: translateY(-3px);
+}
+
+.bcc-business-detail-whatsapp-button:hover::before {
+  left: 100%;
+}
+
+/* Enhanced Quick Contact Section */
+.bcc-business-detail-quick-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.bcc-business-detail-phone,
+.bcc-business-detail-email {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  background: transparent;
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  flex: 1;
+  min-width: 0;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.bcc-business-detail-phone:hover,
+.bcc-business-detail-email:hover {
+  /* background: rgba(255, 255, 255, 0.08); */
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+}
+
+.bcc-business-detail-contact-label {
+  color: var(--text-light);
+  font-weight: 600;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bcc-business-detail-phone a,
+.bcc-business-detail-email a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.2s;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.bcc-business-detail-phone a:hover,
+.bcc-business-detail-email a:hover {
+  color: #ff5500;
+  text-decoration: underline;
+}
+
+/* Enhanced Main Content Section */
+.bcc-business-detail-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  background: var(--background-dark);
+}
+
+/* Enhanced Modern Tabs */
+.bcc-business-detail-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: 3rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 51, 0, 0.5) transparent;
+  gap: 0.5rem;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.5rem;
+}
+
+.bcc-business-detail-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.bcc-business-detail-tabs::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+}
+
+.bcc-business-detail-tabs::-webkit-scrollbar-thumb {
+  background: var(--primary-gradient);
+  border-radius: 2px;
+}
+
+.bcc-business-detail-tab-button {
+  padding: 0.2rem 1.2rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  /* border-radius: 12px 12px 0 0; */
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid transparent;
+}
+
+.bcc-business-detail-tab-button::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 4px;
+  background: var(--primary-gradient);
+  transition: width 0.3s ease;
+  border-radius: 4px 4px 0 0;
+}
+
+.bcc-business-detail-tab-button:hover {
+  color: var(--text-light);
+  background: rgba(255, 255, 255, 0.05);
+  /* border-color: var(--border-color); */
+  transform: translateY(-2px);
+}
+
+.bcc-business-detail-tab-button.active {
+  color: var(--text-light);
+  font-weight: 600;
+  background: var(--surface-lighter);
+  /* border: 1px solid var(--border-accent); */
+  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.15);
+}
+
+.bcc-business-detail-tab-button.active::before {
+  width: 80%;
+}
+
+.bcc-business-detail-tab-content {
+  min-height: 500px;
+  animation: fadeInUp 0.4s ease;
+}
+
+@keyframes fadeInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* Enhanced About Tab Styling */
+.bcc-business-detail-about-tab {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 4rem;
+}
+
+.bcc-business-detail-description h2,
+.bcc-business-detail-listings-tab h2,
+.bcc-business-detail-reviews-tab h2,
+.bcc-business-detail-contact-tab h2,
+.bcc-business-detail-inventory-tab h2 {
+  margin-top: 0;
+  margin-bottom: 2rem;
+  font-size: 2.2rem;
+  color: var(--text-light);
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #ffffff, #e0e0e0);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+}
+
+.bcc-business-detail-description h2::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+}
+
+.bcc-business-detail-description p {
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: 2.5rem;
+  font-size: 1.15rem;
+  background: var(--surface-lighter);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+}
+
+/* Enhanced Specialties Section */
+.bcc-business-detail-specialties-section {
+  margin-top: 3rem;
+}
+
+.bcc-business-detail-specialties-section h3 {
+  margin-bottom: 1.5rem;
+  color: var(--text-light);
+  font-size: 1.4rem;
+  font-weight: 600;
+  position: relative;
+  padding-left: 1rem;
+}
+
+.bcc-business-detail-specialties-section h3::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+}
+
+.bcc-business-detail-specialties-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.bcc-business-detail-specialty-tag {
+  background: var(--surface-lighter);
+  color: var(--primary-color);
+  padding: 0.7rem 1.4rem;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid var(--border-accent);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.bcc-business-detail-specialty-tag::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 51, 0, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.bcc-business-detail-specialty-tag:hover {
+  background: rgba(255, 51, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.2);
+}
+
+.bcc-business-detail-specialty-tag:hover::before {
+  left: 100%;
+}
+
+/* Enhanced Social Section */
+.bcc-business-detail-social-section {
+  margin-top: 3rem;
+}
+
+.bcc-business-detail-social-section h3 {
+  margin-bottom: 1.5rem;
+  color: var(--text-light);
+  font-size: 1.4rem;
+  font-weight: 600;
+  position: relative;
+  padding-left: 1rem;
+}
+
+.bcc-business-detail-social-section h3::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+}
+
+.bcc-business-detail-social-links {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.bcc-business-detail-social-link {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.4rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.bcc-business-detail-social-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.bcc-business-detail-social-facebook {
+  background: linear-gradient(135deg, #1877f2, #166fe5);
+}
+
+.bcc-business-detail-social-instagram {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.bcc-business-detail-social-twitter {
+  background: linear-gradient(135deg, #1da1f2, #1a91da);
+}
+
+.bcc-business-detail-social-whatsapp {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+}
+
+.bcc-business-detail-social-link:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.bcc-business-detail-social-link:hover::before {
+  left: 100%;
+}
+
+/* Enhanced Business Hours Card */
+.bcc-business-detail-business-hours {
+  background: var(--surface-dark);
+  border-radius: 20px;
+  padding: 2.5rem;
+  border: 1px solid var(--border-color);
+  backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--shadow-default);
+  transition: all 0.3s ease;
+}
+
+.bcc-business-detail-business-hours:hover {
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-hover);
+}
+
+.bcc-business-detail-business-hours h3 {
+  margin: 0 0 2rem 0;
+  color: var(--text-light);
+  font-size: 1.4rem;
+  font-weight: 600;
+  position: relative;
+  padding-left: 1rem;
+}
+
+.bcc-business-detail-business-hours h3::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+}
+
+.bcc-business-detail-hours-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bcc-business-detail-hours-table td {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.bcc-business-detail-hours-table tr:hover td {
+  color: var(--text-light);
+}
+
+.bcc-business-detail-hours-table td:first-child {
+  font-weight: 600;
+  color: var(--text-light);
+  width: 40%;
+}
+
+.bcc-business-detail-hours-table tr:last-child td {
+  border-bottom: none;
+}
+
+.bcc-business-detail-no-hours {
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+  text-align: center;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px dashed var(--border-color);
+}
+
+/* Enhanced Filters Section */
+.bcc-business-detail-filters {
+  background: var(--surface-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 2.5rem;
+  margin: 3rem 0;
+  backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--shadow-default);
+  transition: all 0.3s ease;
+}
+
+.bcc-business-detail-filters:hover {
+  border-color: var(--border-accent);
+}
+
+.bcc-business-detail-filters h3 {
+  margin: 0 0 2rem 0;
+  color: var(--text-light);
+  font-size: 1.6rem;
+  font-weight: 600;
+  position: relative;
+  padding-left: 1rem;
+}
+
+.bcc-business-detail-filters h3::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+}
+
+.bcc-filters-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.bcc-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.bcc-filter-group label {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bcc-filter-input,
+.bcc-filter-select {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-lighter);
+  color: var(--text-light);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.bcc-filter-input:focus,
+.bcc-filter-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(255, 51, 0, 0.2);
+}
+
+.bcc-filter-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff3300' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.2rem;
+  padding-right: 3rem;
+}
+
+.bcc-filter-actions {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.bcc-apply-filters-btn,
+.bcc-clear-filters-btn {
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.bcc-apply-filters-btn::before,
+.bcc-clear-filters-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.bcc-apply-filters-btn {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.3);
+}
+
+.bcc-apply-filters-btn:hover {
+  background: linear-gradient(135deg, #e62d00, #ff4400);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 51, 0, 0.4);
+}
+
+.bcc-apply-filters-btn:hover::before {
+  left: 100%;
+}
+
+.bcc-clear-filters-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.bcc-clear-filters-btn:hover {
+  color: var(--text-light);
+  border-color: var(--border-accent);
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-3px);
+}
+
+.bcc-clear-filters-btn:hover::before {
+  left: 100%;
+}
+
+/* Enhanced Grid Layouts */
+.bcc-business-detail-listings-grid,
+.bcc-business-detail-inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.bcc-business-detail-vehicle-card-wrapper,
+.bcc-business-detail-inventory-card-wrapper {
+  height: 100%;
+  width: 100%;
+  transition: transform 0.3s ease;
+}
+
+.bcc-business-detail-vehicle-card-wrapper:hover,
+.bcc-business-detail-inventory-card-wrapper:hover {
+  transform: translateY(-4px);
+}
+
+/* Enhanced Empty States */
+.bcc-business-detail-no-listings,
+.bcc-business-detail-no-reviews,
+.bcc-business-detail-no-inventory {
+  background: var(--surface-dark);
+  border-radius: 20px;
+  padding: 4rem 2.5rem;
+  text-align: center;
+  margin-bottom: 3rem;
+  border: 1px solid var(--border-color);
+  backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--shadow-default);
+  transition: all 0.3s ease;
+}
+
+.bcc-business-detail-no-listings:hover,
+.bcc-business-detail-no-reviews:hover,
+.bcc-business-detail-no-inventory:hover {
+  border-color: var(--border-accent);
+}
+
+.bcc-business-detail-no-listings::before,
+.bcc-business-detail-no-reviews::before,
+.bcc-business-detail-no-inventory::before {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 2rem;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  opacity: 0.1;
+}
+
+.bcc-business-detail-no-listings p,
+.bcc-business-detail-no-reviews p,
+.bcc-business-detail-no-inventory p {
+  color: var(--text-muted);
+  margin-bottom: 2.5rem;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.bcc-business-detail-write-review-button,
+.bcc-business-detail-send-message-button {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  padding: 1.2rem 2.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+  min-height: 56px;
+  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.bcc-business-detail-write-review-button::before,
+.bcc-business-detail-send-message-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.bcc-business-detail-write-review-button:hover,
+.bcc-business-detail-send-message-button:hover {
+  background: linear-gradient(135deg, #e62d00, #ff4400);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 51, 0, 0.4);
+}
+
+.bcc-business-detail-write-review-button:hover::before,
+.bcc-business-detail-send-message-button:hover::before {
+  left: 100%;
+}
+
+/* Enhanced Contact Tab Styles */
+.bcc-business-detail-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+.bcc-business-detail-contact-info,
+.bcc-business-detail-contact-location {
+  background: var(--surface-dark);
+  border-radius: 20px;
+  padding: 2.5rem;
+  border: 1px solid var(--border-color);
+  backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--shadow-default);
+  transition: all 0.3s ease;
+}
+
+.bcc-business-detail-contact-info:hover,
+.bcc-business-detail-contact-location:hover {
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-hover);
+}
+
+.bcc-business-detail-contact-info h3,
+.bcc-business-detail-contact-location h3 {
+  margin: 0 0 2rem 0;
+  color: var(--text-light);
+  font-size: 1.4rem;
+  font-weight: 600;
+  position: relative;
+  padding-left: 1rem;
+}
+
+.bcc-business-detail-contact-info h3::before,
+.bcc-business-detail-contact-location h3::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+}
+
+.bcc-business-detail-contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bcc-business-detail-contact-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.bcc-business-detail-contact-detail:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-accent);
+}
+
+.bcc-business-detail-detail-label {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bcc-business-detail-detail-value {
+  color: var(--text-light);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.bcc-business-detail-detail-value a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.2s;
+  font-weight: 600;
+}
+
+.bcc-business-detail-detail-value a:hover {
+  color: #ff5500;
+  text-decoration: underline;
+}
+
+.bcc-business-detail-location-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bcc-business-detail-address {
+  padding: 1.2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.bcc-business-detail-address p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.bcc-business-detail-map-placeholder {
+  background: var(--surface-lighter);
+  border-radius: 16px;
+  padding: 4rem;
+  text-align: center;
+  color: var(--text-muted);
+  border: 2px dashed var(--border-color);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.bcc-business-detail-map-placeholder:hover {
+  border-color: var(--border-accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Enhanced Contact Form Styles */
+.bcc-business-detail-contact-form-section {
+  background: var(--surface-dark);
+  border-radius: 20px;
+  padding: 3rem;
+  border: 1px solid var(--border-color);
+  backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--shadow-default);
+  transition: all 0.3s ease;
+}
+
+.bcc-business-detail-contact-form-section:hover {
+  border-color: var(--border-accent);
+}
+
+.bcc-business-detail-contact-form-section h3 {
+  margin: 0 0 2.5rem 0;
+  color: var(--text-light);
+  font-size: 1.6rem;
+  font-weight: 600;
+  position: relative;
+  padding-left: 1rem;
+}
+
+.bcc-business-detail-contact-form-section h3::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
+}
+
+.bcc-business-detail-contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.bcc-business-detail-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.bcc-business-detail-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.bcc-business-detail-form-group label {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bcc-business-detail-form-group input,
+.bcc-business-detail-form-group textarea {
+  padding: 1.2rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--surface-lighter);
+  color: var(--text-light);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  backdrop-filter: blur(10px);
+}
+
+.bcc-business-detail-form-group input:focus,
+.bcc-business-detail-form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(255, 51, 0, 0.2);
+}
+
+.bcc-business-detail-form-group textarea {
+  resize: vertical;
+  min-height: 140px;
+  line-height: 1.6;
+}
+
+.bcc-business-detail-form-submit {
+  margin-top: 1.5rem;
+}
+
+/* Enhanced Pagination */
+.bcc-business-detail-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 3rem;
+  flex-wrap: wrap;
+}
+
+.bcc-business-detail-page-button,
+.bcc-business-detail-page-number {
+  min-width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-lighter);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.bcc-business-detail-page-button::before,
+.bcc-business-detail-page-number::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.6s ease;
+}
+
+.bcc-business-detail-page-button {
+  padding: 0 1.5rem;
+}
+
+.bcc-business-detail-page-button:hover,
+.bcc-business-detail-page-number:hover {
+  background: rgba(255, 51, 0, 0.1);
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.2);
+}
+
+.bcc-business-detail-page-button:hover::before,
+.bcc-business-detail-page-number:hover::before {
+  left: 100%;
+}
+
+.bcc-business-detail-page-number.active {
+  background: var(--primary-gradient);
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.3);
+}
+
+.bcc-business-detail-page-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.bcc-business-detail-page-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.bcc-business-detail-page-button:disabled:hover::before {
+  left: -100%;
+}
+
+/* Enhanced Loading States */
+.bcc-business-detail-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.bcc-business-detail-reviews-placeholder {
+  background: var(--surface-dark);
+  border-radius: 20px;
+  padding: 4rem;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--shadow-default);
+}
+
+.bcc-business-detail-reviews-placeholder::before {
+  content: '💬';
+  display: block;
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+/* Enhanced Mobile Responsive Design */
+@media (max-width: 1200px) {
+  .bcc-business-detail-content {
+    padding: 2.5rem 1.5rem;
+  }
+  
+  .bcc-business-detail-listings-grid,
+  .bcc-business-detail-inventory-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .bcc-business-detail-header-container {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .bcc-business-detail-about-tab {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  
+  .bcc-business-detail-contact-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  
+  .bcc-business-detail-form-row {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .bcc-business-detail-metrics {
+    gap: 2rem;
+  }
+  
+  .bcc-business-detail-bottom-info {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2rem;
+  }
+  
+  .bcc-business-detail-actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .bcc-business-detail-page {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  
+  /* Mobile Banner */
+  .bcc-business-detail-banner {
+    height: 240px;
+  }
+
+  .bcc-business-detail-action-buttons {
+    top: 1.0rem;
+    right: 1.5rem;
+    gap: 0.8rem;
+  }
+
+  .bcc-business-detail-save-button,
+  .bcc-business-detail-share-button {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+    border-radius: 12px;
+  }
+
+  /* Mobile Header */
+  .bcc-business-detail-content-header {
+    padding: 2rem 1.5rem 2.5rem;
+  }
+
+  .bcc-business-detail-header-container {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .bcc-business-detail-logo-container {
+    width: 100px;
+    height: 100px;
+    margin-top: -50px;
+    margin-bottom: -1rem;
+    border-radius: 20px;
+  }
+
+  .bcc-business-detail-header-info {
+    width: 100%;
+    align-items: center;
+  }
+
+  .bcc-business-detail-title-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .bcc-business-detail-title-container h1 {
+    font-size: 2.2rem;
+    text-align: center;
+  }
+
+  .bcc-business-detail-business-info {
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .bcc-business-detail-metrics {
+    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  .bcc-business-detail-actions {
+    width: 100%;
+    max-width: 400px;
+    justify-content: center;
+    gap: 0.6rem;
+  }
+
+  .bcc-business-detail-contact-button,
+  .bcc-business-detail-website-button,
+  .bcc-business-detail-whatsapp-button {
+    flex: 1;
+    min-width: 100px;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.0rem;
+  }
+
+  .bcc-business-detail-quick-contact {
+    flex-direction: column;
+    max-width: 400px;
+    margin: 2rem auto 0;
+    gap: 1rem;
+  }
+
+  .bcc-business-detail-phone,
+  .bcc-business-detail-email {
+    width: 100%;
+    justify-content: center;
+    padding: 0.8rem 1.0rem;
+  }
+
+  /* Mobile Content */
+  .bcc-business-detail-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .bcc-business-detail-tab-button {
+    padding: 1rem 1.2rem;
+    font-size: 1rem;
+    min-height: 56px;
+  }
+
+  .bcc-business-detail-listings-grid,
+  .bcc-business-detail-inventory-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+
+  .bcc-business-detail-filters {
+    padding: 2rem 1.5rem;
+    margin: 2.5rem 0;
+  }
+
+  .bcc-filters-row {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .bcc-filter-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .bcc-apply-filters-btn,
+  .bcc-clear-filters-btn {
+    width: 100%;
+  }
+
+  .bcc-business-detail-pagination {
+    gap: 0.5rem;
+  }
+
+  .bcc-business-detail-page-button,
+  .bcc-business-detail-page-number {
+    min-width: 44px;
+    height: 44px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .bcc-business-detail-banner {
+    height: 200px;
+  }
+
+  .bcc-business-detail-content-header {
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  .bcc-business-detail-logo-container {
+    width: 80px;
+    height: 80px;
+    margin-top: -40px;
+    border-radius: 16px;
+  }
+
+  .bcc-business-detail-title-container h1 {
+    font-size: 1.8rem;
+  }
+
+  .bcc-business-detail-actions {
+    max-width: 350px;
+    flex-direction: column;
+  }
+
+  .bcc-business-detail-contact-button,
+  .bcc-business-detail-website-button,
+  .bcc-business-detail-whatsapp-button {
+    width: 100%;
+    font-size: 0.85rem;
+    padding: 0.8rem 1rem;
+  }
+
+  .bcc-business-detail-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .bcc-business-detail-tabs {
+    margin-bottom: 2rem;
+    gap: 0.3rem;
+  }
+
+  .bcc-business-detail-tab-button {
+    flex: 1;
+    padding: 0.8rem 0.6rem;
+    font-size: 0.85rem;
+    min-height: 48px;
+  }
+
+  .bcc-business-detail-filters {
+    padding: 1.5rem 1rem;
+  }
+  
+  .bcc-filter-input,
+  .bcc-filter-select {
+    font-size: 16px; /* Prevent zoom on iOS */
+    min-height: 52px;
+    padding: 1rem;
+  }
+
+  .bcc-business-detail-contact-form-section {
+    padding: 2rem 1.5rem;
+  }
+
+  .bcc-business-detail-business-hours {
+    padding: 2rem 1.5rem;
+  }
+
+  .bcc-business-detail-contact-info,
+  .bcc-business-detail-contact-location {
+    padding: 2rem 1.5rem;
+  }
+
+  .bcc-business-detail-form-group input,
+  .bcc-business-detail-form-group textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 1rem 1.2rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .bcc-business-detail-banner {
+    height: 180px;
+  }
+
+  .bcc-business-detail-logo-container {
+    width: 70px;
+    height: 70px;
+    margin-top: -35px;
+  }
+
+  .bcc-business-detail-title-container h1 {
+    font-size: 1.6rem;
+  }
+
+  .bcc-business-detail-actions {
+    max-width: 320px;
+  }
+
+  .bcc-business-detail-contact-button,
+  .bcc-business-detail-website-button,
+  .bcc-business-detail-whatsapp-button {
+    font-size: 0.8rem;
+    padding: 0.7rem 0.8rem;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .bcc-business-detail-contact-button,
+  .bcc-business-detail-website-button,
+  .bcc-business-detail-whatsapp-button,
+  .bcc-business-detail-tab-button,
+  .bcc-apply-filters-btn,
+  .bcc-clear-filters-btn,
+  .bcc-business-detail-page-button,
+  .bcc-business-detail-page-number {
+    min-height: 48px;
+    touch-action: manipulation;
+  }
+
+  .bcc-filter-input,
+  .bcc-filter-select,
+  .bcc-business-detail-form-group input,
+  .bcc-business-detail-form-group textarea {
+    min-height: 48px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+  .bcc-business-detail-contact-button,
+  .bcc-business-detail-website-button,
+  .bcc-business-detail-whatsapp-button,
+  .bcc-business-detail-tab-button,
+  .bcc-business-detail-save-button,
+  .bcc-business-detail-share-button,
+  .bcc-business-detail-logo-container,
+  .bcc-business-detail-banner-image,
+  .bcc-business-detail-specialty-tag,
+  .bcc-business-detail-social-link {
+    transition: none;
+    animation: none;
+  }
+
+  .bcc-business-detail-tab-button::before {
+    transition: none;
+  }
+
+  .bcc-business-detail-tab-content {
+    animation: none;
+  }
+
+  .bcc-business-detail-spinner::before,
+  .bcc-business-detail-spinner::after {
+    animation: none;
+  }
+
+  .bcc-business-detail-contact-button::before,
+  .bcc-business-detail-website-button::before,
+  .bcc-business-detail-whatsapp-button::before,
+  .bcc-business-detail-specialty-tag::before,
+  .bcc-business-detail-social-link::before {
+    display: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .bcc-business-detail-content-header {
+    border: 2px solid var(--text-light);
+  }
+
+  .bcc-business-detail-tab-button.active {
+    border: 2px solid var(--primary-color);
+  }
+
+  .bcc-business-detail-verified {
+    border: 2px solid rgba(46, 213, 115, 0.8);
+  }
+
+  .bcc-business-detail-filters,
+  .bcc-business-detail-business-hours,
+  .bcc-business-detail-contact-info,
+  .bcc-business-detail-contact-location,
+  .bcc-business-detail-contact-form-section {
+    border: 2px solid var(--border-color);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .bcc-business-detail-action-buttons,
+  .bcc-business-detail-save-button,
+  .bcc-business-detail-share-button {
+    display: none;
+  }
+
+  .bcc-business-detail-page {
+    background: white;
+    color: black;
+  }
+
+  .bcc-business-detail-content-header {
+    background: white;
+    border-bottom: 2px solid black;
+  }
+
+  .bcc-business-detail-banner {
+    height: 200px;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+/* Performance Optimizations */
+.bcc-business-detail-page {
+  contain: layout style;
+}
+
+.bcc-business-detail-content {
+  contain: layout;
+}
+
+.bcc-business-detail-listings-grid,
+.bcc-business-detail-inventory-grid {
+  contain: layout;
+}
+
+.bcc-business-detail-banner-image {
+  will-change: transform;
+}
+
+.bcc-business-detail-logo-container {
+  will-change: transform;
+}
+
+/* Enhanced Scrollbar Styling */
+.bcc-business-detail-page ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.bcc-business-detail-page ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.bcc-business-detail-page ::-webkit-scrollbar-thumb {
+  background: var(--primary-gradient);
+  border-radius: 4px;
+}
+
+.bcc-business-detail-page ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(255, 51, 0, 0.8), rgba(255, 51, 0, 1));
+}
+
+/* Focus Styles for Accessibility */
+.bcc-business-detail-contact-button:focus,
+.bcc-business-detail-website-button:focus,
+.bcc-business-detail-whatsapp-button:focus,
+.bcc-business-detail-tab-button:focus,
+.bcc-business-detail-save-button:focus,
+.bcc-business-detail-share-button:focus {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Enhanced Visual Effects */
+.bcc-business-detail-metric:hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: var(--primary-gradient);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask-composite: xor;
+  opacity: 0.5;
+}
+
+.bcc-business-detail-specialty-tag:hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 25px;
+  padding: 1px;
+  background: var(--primary-gradient);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask-composite: xor;
+  opacity: 0.3;
+}
+
+/* Loading Skeleton Animations */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.bcc-business-detail-loading-skeleton {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}

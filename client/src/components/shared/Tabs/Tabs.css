@@ -1,0 +1,92 @@
+/* src/components/shared/Tabs/Tabs.css */
+
+.tabs-container {
+    width: 100%;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+  }
+  
+  .tab {
+    padding: 0.8rem 1.2rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-right: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  
+  .tab:hover {
+    color: #333;
+  }
+  
+  .tab.active {
+    color: #ff3300;
+    border-bottom-color: #ff3300;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 768px) {
+    .tabs {
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 0.2rem;
+    }
+    
+    .tabs::-webkit-scrollbar {
+      height: 2px;
+    }
+    
+    .tabs::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    .tabs::-webkit-scrollbar-thumb {
+      background: #888;
+    }
+    
+    .tab {
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+    }
+  }
+  
+  /* Dark mode styles */
+  @media (prefers-color-scheme: dark) {
+    .tabs {
+      border-bottom-color: #444;
+    }
+    
+    .tab {
+      color: #aaa;
+    }
+    
+    .tab:hover {
+      color: #f2f2f2;
+    }
+    
+    .tab.active {
+      color: #ff3300;
+      border-bottom-color: #ff3300;
+    }
+    
+    .tabs::-webkit-scrollbar-track {
+      background: #333;
+    }
+    
+    .tabs::-webkit-scrollbar-thumb {
+      background: #666;
+    }
+  }

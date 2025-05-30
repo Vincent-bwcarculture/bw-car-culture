@@ -1,0 +1,922 @@
+/* VehicleCard.css - Updated with reduced margins and no percentage display */
+.vc-card {
+  background: rgba(20, 20, 20, 0.9);
+  border: 1px solid #2c2c2c;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.vc-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(255, 51, 0, 0.2);
+  border-color: #ff3300;
+}
+
+/* Image Container */
+.vc-image-container {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.vc-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.vc-card:hover .vc-image {
+  transform: scale(1.05);
+}
+
+/* UPDATED: Savings Badge Styles - Simplified without percentage */
+.vc-savings-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #ff3300, #ff6600);
+  color: white;
+  padding: 0.3rem 0.6rem;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  z-index: 3;
+  box-shadow: 0 2px 8px rgba(255, 51, 0, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 70px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+
+.vc-savings-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.4);
+}
+
+.vc-savings-badge-amount {
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-bottom: 1px;
+}
+
+.vc-savings-badge-label {
+  font-size: 0.65rem;
+  opacity: 0.9;
+}
+
+.vc-exclusive-badge {
+  background: linear-gradient(135deg, #8b5cf6, #a855f7);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.vc-savings-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  padding: 1rem 1.2rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  margin-bottom: 12px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 220px;
+  text-align: left;
+}
+
+.vc-savings-tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+  color: #ff6600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.vc-savings-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+  font-size: 0.8rem;
+}
+
+.vc-savings-tooltip-row:last-child {
+  margin-bottom: 0;
+  font-weight: 600;
+  color: #2ed573;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.vc-savings-tooltip-description {
+  margin-top: 0.8rem;
+  font-style: italic;
+  color: #fbbf24;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.vc-savings-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 8px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.95);
+}
+
+.vc-savings-badge:hover .vc-savings-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Image Gallery Navigation */
+.vc-image-navigation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.vc-image-container:hover .vc-image-navigation {
+  opacity: 1;
+}
+
+.vc-image-nav {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 0 10px;
+  transition: all 0.3s ease;
+  z-index: 3;
+}
+
+.vc-image-nav:hover {
+  background: #ff3300;
+  border-color: #ff3300;
+  transform: scale(1.1);
+}
+
+.vc-image-counter {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  z-index: 3;
+}
+
+.vc-verified-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(46, 213, 115, 0.9);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Card Content */
+.vc-content {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.vc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.4rem;
+}
+
+.vc-title {
+  font-size: 1.1rem;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
+  padding-right: 1rem;
+}
+
+/* UPDATED: Price styling with savings integration - no percentage */
+.vc-price-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.vc-original-price {
+  font-size: 0.8rem;
+  color: #888;
+  text-decoration: line-through;
+  margin-bottom: 0.2rem;
+  opacity: 0.8;
+}
+
+.vc-price {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #ff3300;
+  white-space: nowrap;
+}
+
+.vc-pula-price {
+  color: #0051ff;
+  font-weight: bold;
+}
+
+/* UPDATED: Savings highlight without percentage */
+.vc-savings-highlight {
+  font-size: 0.8rem;
+  color: #2ed573;
+  font-weight: 600;
+  margin-top: 0.2rem;
+  text-align: right;
+}
+
+.vc-finance-badge, .vc-lease-badge {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 10px;
+  margin-top: 5px;
+  white-space: nowrap;
+}
+
+.vc-finance-badge {
+  color: #2ed573;
+  background-color: rgba(46, 213, 115, 0.1);
+}
+
+.vc-lease-badge {
+  color: #36a2eb;
+  background-color: rgba(54, 162, 235, 0.1);
+}
+
+.vc-monthly-payment {
+  font-size: 0.85rem;
+  color: #60a5fa;
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+.vc-monthly-payment-value {
+  white-space: nowrap;
+}
+
+/* Specifications */
+.vc-specs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.vc-spec-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.vc-spec-label {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.vc-spec-value {
+  font-size: 0.85rem;
+  color: #ffffff;
+}
+
+/* Special feature badges */
+.vc-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-bottom: 0.4rem;
+}
+
+.vc-service-badge,
+.vc-warranty-badge,
+.vc-certified-badge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.vc-service-badge {
+  background-color: rgba(25, 118, 210, 0.1);
+  color: #1976d2;
+  border: 1px solid rgba(25, 118, 210, 0.3);
+}
+
+.vc-warranty-badge {
+  background-color: rgba(46, 213, 115, 0.1);
+  color: #2ed573;
+  border: 1px solid rgba(46, 213, 115, 0.3);
+}
+
+.vc-certified-badge {
+  background-color: rgba(156, 39, 176, 0.1);
+  color: #9c27b0;
+  border: 1px solid rgba(156, 39, 176, 0.3);
+}
+
+/* Dealer Information */
+.vc-dealer-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.5rem;
+  padding: 0.4rem 0;
+  border-top: 1px solid #2c2c2c;
+  border-bottom: 1px solid #2c2c2c;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.vc-dealer-info:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.vc-dealer-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.vc-dealer-info:hover .vc-dealer-avatar {
+  border-color: #ff3300;
+}
+
+.vc-dealer-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+}
+
+.vc-dealer-name {
+  font-size: 0.85rem;
+  color: #ffffff;
+  transition: color 0.2s ease;
+}
+
+.vc-dealer-info:hover .vc-dealer-name {
+  color: #ff3300;
+}
+
+.vc-dealer-location {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.vc-dealer-link {
+  font-size: 0.7rem;
+  color: #ff3300;
+  margin-top: 0.1rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.vc-dealer-info:hover .vc-dealer-link {
+  opacity: 1;
+}
+
+/* Footer */
+.vc-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.vc-condition-tag {
+  padding: 0.25rem 0.6rem;
+  border-radius: 15px;
+  font-size: 0.75rem;
+}
+
+.vc-condition-tag.excellent, 
+.vc-condition-tag.new {
+  background: rgba(46, 213, 115, 0.1);
+  color: #2ed573;
+}
+
+.vc-condition-tag.like-new {
+  background: rgba(54, 162, 235, 0.1);
+  color: #36a2eb;
+}
+
+.vc-condition-tag.used {
+  background: rgba(255, 159, 64, 0.1);
+  color: #ff9f40;
+}
+
+.vc-condition-tag.certified {
+  background: rgba(108, 92, 231, 0.1);
+  color: #8c7ae6;
+}
+
+.vc-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.vc-share-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid #2c2c2c;
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.75rem;
+}
+
+.vc-share-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #ff3300;
+}
+
+.vc-reserve-btn {
+  background: #25D366;
+  color: white;
+  border: none;
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-size: 0.75rem;
+}
+
+.vc-reserve-btn:hover {
+  background: #128C7E;
+}
+
+.vc-details-btn {
+  background: #ff3300;
+  color: white;
+  border: none;
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-size: 0.75rem;
+}
+
+.vc-details-btn:hover {
+  background: #cc2900;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .vc-specs {
+      grid-template-columns: 1fr 1fr;
+  }
+  
+  .vc-title {
+      font-size: 1rem;
+  }
+  
+  .vc-actions {
+      flex-direction: column;
+      gap: 4px;
+  }
+  
+  .vc-share-btn,
+  .vc-reserve-btn,
+  .vc-details-btn {
+      padding: 5px 8px;
+      font-size: 0.75rem;
+  }
+
+  /* Mobile savings badge adjustments */
+  .vc-savings-badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+    min-width: 60px;
+  }
+  
+  .vc-savings-tooltip {
+    padding: 0.8rem 1rem;
+    font-size: 0.8rem;
+    max-width: 280px;
+    white-space: normal;
+    min-width: 180px;
+  }
+  
+  .vc-savings-tooltip-row {
+    font-size: 0.75rem;
+  }
+  
+  .vc-original-price {
+    font-size: 0.75rem;
+  }
+  
+  .vc-savings-highlight {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .vc-image-container {
+      height: 160px;
+  }
+  
+  .vc-dealer-info {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.4rem;
+  }
+  
+  .vc-footer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.4rem;
+  }
+  
+  .vc-actions {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 3px;
+  }
+  
+  .vc-share-btn {
+      grid-column: 1;
+  }
+  
+  .vc-reserve-btn {
+      grid-column: 2;
+  }
+  
+  .vc-details-btn {
+      grid-column: span 2;
+      margin-top: 3px;
+  }
+  
+  .vc-share-btn,
+  .vc-reserve-btn,
+  .vc-details-btn {
+      text-align: center;
+  }
+
+  /* Mobile savings optimizations */
+  .vc-savings-badge {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.65rem;
+    min-width: 55px;
+  }
+  
+  .vc-savings-badge-amount {
+    font-size: 0.65rem;
+  }
+  
+  .vc-savings-badge-label {
+    font-size: 0.6rem;
+  }
+  
+  .vc-savings-tooltip {
+    padding: 0.6rem 0.8rem;
+    max-width: 250px;
+    min-width: 160px;
+  }
+}
+
+/* Performance optimizations */
+.vc-card {
+  will-change: transform;
+  contain: content;
+}
+
+/* Media query for larger screens to make buttons even more compact */
+@media (min-width: 1200px) {
+  .vc-actions {
+    gap: 4px;
+  }
+  
+  .vc-share-btn,
+  .vc-reserve-btn,
+  .vc-details-btn {
+    padding: 4px 7px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Compact mode styling */
+.vc-card.compact {
+  transform: scale(0.95);
+}
+
+.vc-card.compact .vc-image-container {
+  height: 150px;
+}
+
+.vc-card.compact .vc-title {
+  font-size: 1rem;
+  max-height: 2.6rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.vc-card.compact .vc-content {
+  padding: 0.4rem;
+}
+
+.vc-card.compact .vc-specs {
+  gap: 0.3rem;
+  margin-bottom: 0.3rem;
+}
+
+.vc-card.compact .vc-dealer-info {
+  padding: 0.3rem 0;
+  margin-bottom: 0.3rem;
+  gap: 0.4rem;
+}
+
+.vc-card.compact .vc-dealer-avatar {
+  width: 30px;
+  height: 30px;
+}
+
+.vc-card.compact .vc-footer {
+  margin-top: 0.3rem;
+}
+
+.vc-card.compact .vc-actions {
+  gap: 3px;
+}
+
+.vc-card.compact .vc-share-btn,
+.vc-card.compact .vc-reserve-btn,
+.vc-card.compact .vc-details-btn {
+  padding: 4px 6px;
+  font-size: 0.7rem;
+}
+
+/* Compact mode savings adjustments */
+.vc-card.compact .vc-savings-badge {
+  padding: 0.25rem 0.4rem;
+  font-size: 0.7rem;
+  min-width: 60px;
+}
+
+.vc-card.compact .vc-savings-tooltip {
+  padding: 0.7rem 0.9rem;
+  min-width: 180px;
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: more) {
+  .vc-savings-badge {
+    background: #ff0000;
+    border: 2px solid #ffffff;
+  }
+  
+  .vc-savings-tooltip {
+    background: #000000;
+    border: 2px solid #ffffff;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .vc-savings-badge,
+  .vc-savings-tooltip,
+  .vc-card {
+    transition: none;
+  }
+  
+  .vc-exclusive-badge {
+    animation: none;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Enhanced dealer info section */
+.vc-dealer-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.vc-dealer-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vc-verified-icon {
+  background-color: #28a745;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+/* Seller type styling */
+.vc-seller-type {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 0.25rem;
+}
+
+.vc-seller-type.private {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.vc-seller-type.dealership {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #bbdefb;
+}
+
+.vc-dealer-location {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.vc-dealer-link {
+  font-size: 0.75rem;
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.vc-dealer-link:hover {
+  color: #0056b3;
+}
+
+/* Private seller styling */
+.vc-dealer-info.private-seller {
+  cursor: default;
+}
+
+.vc-dealer-info.private-seller:hover {
+  background-color: transparent;
+}
+
+/* Enhanced savings display */
+.vc-original-price {
+  font-size: 0.8rem;
+  color: #666;
+  text-decoration: line-through;
+  margin-bottom: 0.25rem;
+}
+
+.vc-savings-highlight {
+  font-size: 0.85rem;
+  color: #28a745;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .vc-seller-type {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.3rem;
+  }
+  
+  .vc-verified-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 0.65rem;
+  }
+  
+  .vc-dealer-name {
+    font-size: 0.85rem;
+  }
+  
+  .vc-original-price {
+    font-size: 0.75rem;
+  }
+  
+  .vc-savings-highlight {
+    font-size: 0.8rem;
+  }
+}
+
+/* Compact mode adjustments */
+.vc-card.compact .vc-seller-type {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.3rem;
+}
+
+.vc-card.compact .vc-dealer-name {
+  font-size: 0.85rem;
+}
+
+.vc-card.compact .vc-verified-icon {
+  width: 14px;
+  height: 14px;
+  font-size: 0.65rem;
+}

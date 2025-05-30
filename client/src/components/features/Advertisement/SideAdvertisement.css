@@ -1,0 +1,365 @@
+/* Complete SideAdvertisement.css with updates */
+:root {
+  --primary-color: #ff3300;
+  --background-dark: rgba(20, 20, 20, 0.95);
+  --border-color: #2c2c2c;
+  --text-light: #ffffff;
+  --text-gray: #888888;
+  --transition-standard: 0.3s ease;
+}
+
+.side-advertisement {
+  width: 100%;
+  background: var(--background-dark);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.advertisement-header {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid rgba(255, 51, 0, 0.3);
+}
+
+.advertisement-header h2 {
+  font-size: 1.5rem;
+  color: var(--text-light);
+  font-weight: 600;
+  position: relative;
+  padding-left: 1rem;
+}
+
+.advertisement-header h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 70%;
+  background: var(--primary-color);
+  border-radius: 2px;
+}
+
+.listings-container {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) rgba(255, 255, 255, 0.1);
+  scroll-behavior: smooth;
+}
+
+.listings-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.listings-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.listings-container::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 3px;
+}
+
+.listing-card {
+  background: rgba(20, 20, 20, 0.9);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-height: 300px;
+  contain: content;
+  will-change: transform;
+}
+
+.listing-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(255, 51, 0, 0.2);
+  border-color: var(--primary-color);
+}
+
+.listing-image {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 66.67%;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+
+.listing-image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+  will-change: transform;
+  contain: paint;
+}
+
+.listing-image img.loaded {
+  opacity: 1;
+}
+
+.listing-card:hover .listing-image img {
+  transform: scale(1.05);
+}
+
+.verified-badge, .preview-badge {
+  position: absolute;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.verified-badge {
+  right: 15px;
+  top: 15px;
+  background: rgba(46, 213, 115, 0.9);
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.preview-badge {
+  left: 15px;
+  top: 15px;
+  background: rgba(255, 51, 0, 0.9);
+  color: var(--text-light);
+}
+
+.image-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.7) 50%,
+    rgba(0, 0, 0, 0.9) 100%
+  );
+}
+
+.overlay-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.overlay-details {
+  flex: 1;
+}
+
+.overlay-title {
+  font-size: 1.2rem;
+  color: var(--text-light);
+  margin-bottom: 0.5rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  font-weight: 600;
+}
+
+.overlay-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+}
+
+.overlay-price {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  padding: 5px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.listing-content {
+  padding: 1.5rem;
+}
+
+.listing-dealer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.dealer-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary-color);
+}
+
+.dealer-info {
+  flex: 1;
+}
+
+.dealer-name {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  margin-bottom: 0.2rem;
+}
+
+.dealer-location {
+  font-size: 0.8rem;
+  color: var(--text-gray);
+  margin-bottom: 0.2rem;
+}
+
+.dealer-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rating-stars {
+  color: #ffd700;
+  font-size: 0.9rem;
+}
+
+.rating-count {
+  color: var(--text-gray);
+  font-size: 0.8rem;
+}
+
+.contact-button {
+  width: 100%;
+  background: var(--primary-color);
+  color: var(--text-light);
+  border: none;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.contact-button:hover {
+  background: #cc2900;
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .listing-card {
+    min-height: 280px;
+  }
+
+  .overlay-title {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .side-advertisement {
+    max-width: none;
+  }
+
+  .listings-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .listing-card {
+    min-height: 260px;
+  }
+
+  .overlay-title {
+    font-size: 1rem;
+  }
+
+  .overlay-specs {
+    font-size: 0.85rem;
+  }
+
+  .overlay-price {
+    font-size: 1.2rem;
+  }
+
+  .listing-content {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .advertisement-header {
+    padding: 1rem;
+  }
+
+  .advertisement-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .listings-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .side-advertisement {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+
+  .verified-badge,
+  .preview-badge,
+  .contact-button {
+    display: none;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: more) {
+  .side-advertisement {
+    border: 2px solid #ffffff;
+  }
+  
+  .overlay-title,
+  .dealer-name,
+  .dealer-location {
+    text-shadow: none;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .listing-card,
+  .listing-image img,
+  .contact-button {
+    transition: none;
+  }
+}

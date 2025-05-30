@@ -1,0 +1,132 @@
+/* src/components/GION/ServiceProviderDashboards/components/RatingsBreakdown.css */
+.ratings-breakdown {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  
+  .ratings-breakdown h2 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .ratings-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .rating-number {
+    font-size: 42px;
+    font-weight: 700;
+    color: #333;
+    line-height: 1;
+  }
+  
+  .rating-stars {
+    color: #ffc107;
+    font-size: 22px;
+    letter-spacing: -1px;
+    margin-top: 5px;
+  }
+  
+  .rating-distributions {
+    margin-bottom: 20px;
+  }
+  
+  .rating-bar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  
+  .rating-label {
+    width: 40px;
+    flex-shrink: 0;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .rating-bar-container {
+    flex: 1;
+    height: 8px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .rating-bar {
+    height: 100%;
+    background-color: #ffc107;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+  
+  .rating-percentage {
+    width: 40px;
+    text-align: right;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .rating-insights {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+  }
+  
+  .rating-insights h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .insights-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .insight-item {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .highlight {
+    font-weight: 600;
+    border-radius: 3px;
+    padding: 2px 5px;
+    margin-right: 5px;
+  }
+  
+  .highlight.positive {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+  }
+  
+  .highlight.negative {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+  }
+  
+  .highlight.neutral {
+    background-color: rgba(33, 150, 243, 0.1);
+    color: #2196f3;
+  }
+  
+  @media (max-width: 768px) {
+    .rating-bar-item {
+      gap: 5px;
+    }
+    
+    .rating-label, .rating-percentage {
+      width: 35px;
+      font-size: 12px;
+    }
+  }

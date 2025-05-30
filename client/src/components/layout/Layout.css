@@ -1,0 +1,73 @@
+/* src/components/layout/Layout.css */
+.layout-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    background: radial-gradient(#000000bb, rgba(0, 0, 0, 0.979));
+  }
+  
+  .main-wrapper {
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 1rem;
+    overflow: hidden;
+  }
+  
+  /* Container for components */
+  .section-container {
+    width: 100%;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+  
+  /* Fix for card grids */
+  .content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem;
+  }
+  
+  /* Ensure contained scrolling */
+  .overflow-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+  
+  /* Media queries for responsive layout */
+  @media (max-width: 1400px) {
+    .main-wrapper {
+      padding: 1rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .main-wrapper {
+      padding: 0.5rem;
+    }
+    
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* Fix for horizontal scrolling issues */
+  .cover-container {
+    width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  
+  /* Fix for nested flex containers */
+  .flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    width: 100%;
+  }

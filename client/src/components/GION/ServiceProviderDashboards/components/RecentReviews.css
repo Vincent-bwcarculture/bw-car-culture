@@ -1,0 +1,116 @@
+/* src/components/GION/ServiceProviderDashboards/components/RecentReviews.css */
+.recent-reviews {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    height: 100%;
+  }
+  
+  .reviews-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .header-title h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .reviews-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .avg-rating {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .stars-display {
+    color: #ffc107;
+    font-size: 16px;
+    letter-spacing: -1px;
+  }
+  
+  .total-reviews {
+    font-size: 14px;
+    color: #777;
+  }
+  
+  .reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .review-item {
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .review-item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  
+  .review-user {
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .review-date {
+    font-size: 14px;
+    color: #777;
+  }
+  
+  .review-rating {
+    color: #ffc107;
+    margin-bottom: 8px;
+  }
+  
+  .review-comment {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.4;
+  }
+  
+  .view-all-container {
+    margin-top: 15px;
+    text-align: center;
+  }
+  
+  .view-all-button {
+    background: none;
+    border: none;
+    color: #5f5fc4;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 8px 15px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .view-all-button:hover {
+    background-color: rgba(95, 95, 196, 0.1);
+  }
+  
+  @media (max-width: 768px) {
+    .reviews-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }

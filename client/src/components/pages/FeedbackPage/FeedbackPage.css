@@ -1,0 +1,151 @@
+/* src/components/pages/FeedbackPage/FeedbackPage.css */
+
+.feedback-page {
+    min-height: 100vh;
+    background-color: #f7f7f7;
+    padding: 2rem 1rem 4rem;
+  }
+  
+  .feedback-page-header {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 3rem;
+    padding: 0 1rem;
+  }
+  
+  .feedback-page-header h1 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 2.2rem;
+  }
+  
+  .feedback-page-header p {
+    color: #666;
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+  
+  .feedback-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    padding: 0 1rem;
+  }
+  
+  .other-contact-methods {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    align-self: start;
+  }
+  
+  .other-contact-methods h3 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    text-align: center;
+  }
+  
+  .contact-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .contact-method {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .method-icon {
+    font-size: 2rem;
+    color: #ff3300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .method-details h4 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: #444;
+  }
+  
+  .method-details p {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: #666;
+    line-height: 1.4;
+  }
+  
+  .method-details a {
+    color: #ff3300;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .method-details a:hover {
+    color: #cc2900;
+    text-decoration: underline;
+  }
+  
+  .social-links {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 992px) {
+    .feedback-content {
+      grid-template-columns: 1fr;
+    }
+    
+    .other-contact-methods {
+      margin-top: 2rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .feedback-page {
+      padding: 1.5rem 0.75rem 3rem;
+    }
+    
+    .feedback-page-header h1 {
+      font-size: 1.8rem;
+    }
+    
+    .feedback-page-header p {
+      font-size: 1rem;
+    }
+    
+    .other-contact-methods {
+      padding: 1.25rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .feedback-page-header {
+      margin-bottom: 2rem;
+    }
+    
+    .feedback-page-header h1 {
+      font-size: 1.5rem;
+    }
+    
+    .contact-method {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.5rem;
+    }
+    
+    .social-links {
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  }

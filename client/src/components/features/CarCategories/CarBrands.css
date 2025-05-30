@@ -1,0 +1,315 @@
+/* Updated CarBrands.css to fix spacing issues */
+.car-brands-section {
+  padding: 1.5rem;
+  margin: 20px auto;
+  width: 100%;
+  max-width: 1200px;
+  background: rgba(15, 15, 15, 0.7);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.car-brands-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.2rem;
+  color: #ffffff;
+  font-weight: 700;
+  position: relative;
+  padding-bottom: 0.6rem;
+  text-align: center;
+}
+
+.car-brands-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: var(--primary-color, #ff3300);
+  border-radius: 3px;
+}
+
+.brands-container {
+  position: relative;
+  overflow: hidden;
+  padding: 0.5rem;
+}
+
+.brands-wrapper {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 1rem 0.5rem;
+  min-height: 280px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  align-items: stretch;
+  -webkit-overflow-scrolling: touch;
+}
+
+.brands-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.brand-card {
+  flex: 0 0 260px;
+  background: rgba(20, 20, 20, 0.9);
+  border: 1px solid #2c2c2c;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  height: 280px;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.brand-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  border-color: var(--primary-color, #ff3300);
+}
+
+.brand-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 0;
+  background: var(--primary-color, #ff3300);
+  transition: height 0.4s ease;
+  border-radius: 2px 0 0 2px;
+  z-index: 1;
+}
+
+.brand-card:hover::before {
+  height: 100%;
+}
+
+/* FIX: Adjust the brand-logo to match car-category-image exactly */
+.brand-logo {
+  width: 100% !important;
+  height: 150px !important;
+  position: relative;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px 10px 0 0;
+  margin: 0 !important; /* Remove any margins */
+  padding: 0 !important; /* Remove any padding */
+}
+
+.brand-logo::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  pointer-events: none;
+}
+
+/* FIX: Ensure vehicle image takes the full size of the logo container */
+.brand-vehicle-image {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.brand-vehicle-image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transition: transform 0.5s ease;
+}
+
+.brand-card:hover .brand-vehicle-image img {
+  transform: scale(1.1);
+}
+
+.brand-vehicle-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 20, 20, 0.5);
+  color: #ffffff;
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* FIX: Adjust the brand-info to match car-category-content and remove gap */
+.brand-info {
+  padding: 1rem !important;
+  flex-grow: 1;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  position: relative;
+  margin: 0 !important;
+  background: transparent !important; /* Ensure no background affecting spacing */
+}
+
+.brand-info h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 0 !important; /* Ensure no top margin causing gap */
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+  transition: color 0.3s ease;
+}
+
+.brand-card:hover .brand-info h3 {
+  color: var(--primary-color, #ff3300);
+}
+
+.brand-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: #c9c9c9;
+  font-size: 0.85rem;
+  margin-bottom: 0.8rem;
+}
+
+.featured-model,
+.vehicle-count {
+  color: #c9c9c9;
+}
+
+.pula-price {
+  color: #0051ff;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.view-brand-btn {
+  width: 100%;
+  background: var(--primary-color, #ff3300);
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  text-align: center;
+}
+
+.view-brand-btn:hover {
+  background: #cc2900;
+  transform: translateY(-2px);
+}
+
+.brand-scroll-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.brand-scroll-button:hover {
+  background: var(--primary-color, #ff3300);
+  border-color: var(--primary-color, #ff3300);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 15px rgba(255, 51, 0, 0.3);
+}
+
+.brand-scroll-prev {
+  left: 0.5rem;
+}
+
+.brand-scroll-next {
+  right: 0.5rem;
+}
+
+.brand-selected-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--primary-color, #ff3300);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  z-index: 5;
+}
+
+/* FIX: Hide any extra elements that could be causing spacing issues */
+.brand-overlay {
+  display: none !important;
+}
+
+/* FIX: Prevent extra spacing in the brand card */
+.brand-card * {
+  box-sizing: border-box !important;
+}
+
+/* FIX: Override any other brand-logo styles that might be causing the gap */
+.div.brand-logo {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  .car-brands-section {
+    padding: 1rem;
+  }
+  
+  .brand-card {
+    flex: 0 0 220px;
+    height: 260px;
+  }
+  
+  .brand-logo {
+    height: 130px !important;
+  }
+  
+  .brand-info h3 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .car-brands-section h2 {
+    font-size: 1.4rem;
+  }
+  
+  .brand-card {
+    flex: 0 0 180px;
+    height: 240px;
+  }
+  
+  .brand-logo {
+    height: 110px !important;
+  }
+}

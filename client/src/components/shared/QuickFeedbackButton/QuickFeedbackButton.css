@@ -1,0 +1,191 @@
+/* src/components/shared/QuickFeedbackButton/QuickFeedbackButton.css */
+
+.quick-feedback-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+/* Sizes */
+.quick-feedback-btn.size-small {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+}
+
+.quick-feedback-btn.size-medium {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+}
+
+.quick-feedback-btn.size-large {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+}
+
+/* Variants */
+.quick-feedback-btn.variant-primary {
+  background: #ff3300;
+  color: white;
+  box-shadow: 0 2px 8px rgba(255, 51, 0, 0.3);
+}
+
+.quick-feedback-btn.variant-primary:hover {
+  background: #cc2900;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.4);
+}
+
+.quick-feedback-btn.variant-secondary {
+  background: #6c757d;
+  color: white;
+  box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+.quick-feedback-btn.variant-secondary:hover {
+  background: #545b62;
+  transform: translateY(-1px);
+}
+
+.quick-feedback-btn.variant-outline {
+  background: transparent;
+  color: #ff3300;
+  border: 2px solid #ff3300;
+}
+
+.quick-feedback-btn.variant-outline:hover {
+  background: #ff3300;
+  color: white;
+}
+
+.quick-feedback-btn.variant-text {
+  background: transparent;
+  color: #ff3300;
+  box-shadow: none;
+}
+
+.quick-feedback-btn.variant-text:hover {
+  background: rgba(255, 51, 0, 0.1);
+}
+
+/* Position variants */
+.quick-feedback-btn.position-fixed-bottom-right {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  border-radius: 25px;
+}
+
+.quick-feedback-btn.position-fixed-bottom-left {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;
+  border-radius: 25px;
+}
+
+/* Icon and label */
+.btn-icon {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.btn-label {
+  white-space: nowrap;
+}
+
+/* Hide label on very small screens for fixed position buttons */
+@media (max-width: 480px) {
+  .quick-feedback-btn.position-fixed-bottom-right .btn-label,
+  .quick-feedback-btn.position-fixed-bottom-left .btn-label {
+    display: none;
+  }
+  
+  .quick-feedback-btn.position-fixed-bottom-right,
+  .quick-feedback-btn.position-fixed-bottom-left {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    padding: 0;
+  }
+}
+
+/* Modal styles */
+.quick-feedback-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.quick-feedback-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.quick-feedback-container {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1501;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .quick-feedback-modal {
+    padding: 10px;
+  }
+  
+  .quick-feedback-container {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .quick-feedback-btn.variant-outline {
+    border-color: #ff3300;
+    color: #ff3300;
+  }
+  
+  .quick-feedback-btn.variant-text {
+    color: #ff3300;
+  }
+  
+  .quick-feedback-btn.variant-text:hover {
+    background: rgba(255, 51, 0, 0.1);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .quick-feedback-btn {
+    transition: none;
+  }
+  
+  .quick-feedback-btn:hover {
+    transform: none;
+  }
+}

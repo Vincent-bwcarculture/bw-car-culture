@@ -1,0 +1,28 @@
+/* src/components/GION/GovDashboards/components/RatingsChart.css */
+.ratings-chart {
+    width: 100%;
+    padding: 20px 30px 30px 30px;
+    position: relative;
+  }
+  
+  .x-axis-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  
+  .x-label {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+  }
+  
+  @media (max-width: 600px) {
+    .ratings-chart {
+      padding: 10px 15px 20px 15px;
+    }
+    
+    .x-label {
+      font-size: 10px;
+    }
+  }

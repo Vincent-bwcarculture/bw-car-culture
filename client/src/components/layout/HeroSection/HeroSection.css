@@ -1,0 +1,1297 @@
+/* src/components/layout/HeroSection/HeroSection.css - Complete with modal-style preparation */
+.bcc-hero-section {
+  width: 100%;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.65)), url('./garage2.png');
+  background-size: cover;
+  background-position: center;
+  padding: 0;
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.bcc-hero-section span {
+  color: #c9c9c9;
+}
+
+/* Integrated Navigation Overlay */
+.bcc-hero-nav-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 0;
+}
+
+.bcc-hero-nav-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bcc-hero-brand {
+  display: flex;
+  align-items: center;
+}
+
+.bcc-hero-brand-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.bcc-hero-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.bcc-hero-nav-link {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.bcc-hero-nav-link:hover,
+.bcc-hero-nav-link.active {
+  color: #ffffff;
+}
+
+.bcc-hero-nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #ff3300;
+  border-radius: 1px;
+}
+
+.bcc-hero-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bcc-hero-nav-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.bcc-hero-nav-login {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.bcc-hero-nav-login:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.bcc-hero-nav-signup {
+  background: #ff3300;
+  color: #ffffff;
+}
+
+.bcc-hero-nav-signup:hover {
+  background: #cc2900;
+}
+
+/* Main Hero Content */
+.bcc-hero-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 8rem 2rem 3rem;
+  width: 100%;
+}
+
+.bcc-hero-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bcc-hero-tab-button {
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.bcc-hero-tab-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.bcc-hero-tab-button.active {
+  background: rgba(255, 51, 0, 0.9);
+  color: #ffffff;
+  border-color: #ff3300;
+  box-shadow: 0 4px 20px rgba(255, 51, 0, 0.3);
+}
+
+/* Buy Section */
+.bcc-hero-buy h1,
+.bcc-hero-sell h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  color: #ffffff;
+  margin: 0 0 1rem 0;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.bcc-hero-buy p,
+.bcc-hero-sell p {
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 3rem 0;
+  text-align: center;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 3rem;
+}
+
+.bcc-hero-search-container {
+  max-width: 800px;
+  margin: 0 auto 3rem;
+}
+
+.bcc-hero-search-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 0.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.bcc-hero-search-input {
+  flex: 1;
+  padding: 1.2rem 1.5rem;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #333;
+}
+
+.bcc-hero-search-input:focus {
+  outline: none;
+}
+
+.bcc-hero-search-input::placeholder {
+  color: #666;
+}
+
+.bcc-hero-search-button {
+  padding: 1.2rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: #ff3300;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.bcc-hero-search-button:hover {
+  background: #cc2900;
+  transform: translateY(-1px);
+}
+
+.bcc-hero-popular-searches {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.bcc-hero-popular-searches span {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.bcc-hero-popular-searches button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
+}
+
+.bcc-hero-popular-searches button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Enhanced Professional Savings Showcase */
+.bcc-hero-savings-showcase {
+  max-width: 700px;
+  margin: 0 auto 3rem;
+  text-align: center;
+}
+
+.bcc-savings-badge {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(248, 250, 252, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  margin-bottom: 0.75rem;
+}
+
+.bcc-savings-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.bcc-savings-badge-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.bcc-savings-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.bcc-savings-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.bcc-savings-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.bcc-savings-amount {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1;
+}
+
+.bcc-savings-action-btn {
+  background: linear-gradient(135deg, #1e293b, #334155);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 0.875rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(30, 41, 59, 0.3);
+  white-space: nowrap;
+}
+
+.bcc-savings-action-btn:hover {
+  background: linear-gradient(135deg, #334155, #475569);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(30, 41, 59, 0.4);
+}
+
+.bcc-savings-action-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.bcc-savings-action-btn:hover svg {
+  transform: translateX(2px);
+}
+
+.bcc-savings-subtitle {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+/* Sell Section */
+.bcc-hero-sell-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 3rem;
+}
+
+.bcc-hero-sell-option {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.bcc-hero-sell-option:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.bcc-hero-option-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.bcc-hero-option-icon {
+  font-size: 1.5rem;
+}
+
+.bcc-hero-option-header h3 {
+  font-size: 1.3rem;
+  color: #ffffff;
+  margin: 0;
+  font-weight: 600;
+}
+
+.bcc-hero-sell-option p {
+  font-size: 1rem;
+  color: #c9c9c9;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.bcc-hero-option-button {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: #ff3300;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.bcc-hero-option-button:hover {
+  background: #cc2900;
+  transform: translateY(-1px);
+}
+
+.bcc-hero-whatsapp-button {
+  background: #25D366;
+  font-weight: 600;
+}
+
+.bcc-hero-whatsapp-button:hover {
+  background: #128C7E;
+}
+
+.bcc-hero-call-button {
+  background: #ff3300;
+}
+
+.bcc-hero-call-button:hover {
+  background: #cc2900;
+}
+
+/* NEW: Enhanced Preparation Section - Now appears conditionally */
+.bcc-hero-sell-preparation {
+  max-width: 900px;
+  margin: 3rem auto;
+  background: linear-gradient(145deg, 
+    rgba(255, 255, 255, 0.08) 0%, 
+    rgba(255, 255, 255, 0.04) 100%);
+  border: 2px solid rgba(255, 51, 0, 0.3);
+  border-radius: 20px;
+  padding: 2.5rem;
+  backdrop-filter: blur(15px);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(255, 51, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: bcc-preparation-appear 0.5s ease-out;
+  position: relative;
+}
+
+@keyframes bcc-preparation-appear {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.bcc-preparation-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+
+.bcc-preparation-icon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.bcc-preparation-header h3 {
+  font-size: 1.6rem;
+  color: #ffffff;
+  margin: 0;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.bcc-preparation-content p {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.bcc-preparation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.8rem;
+  margin-bottom: 2.5rem;
+}
+
+.bcc-preparation-item {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.08) 0%, 
+    rgba(255, 255, 255, 0.04) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.bcc-preparation-item:hover {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.12) 0%, 
+    rgba(255, 255, 255, 0.08) 100%);
+  border-color: rgba(255, 51, 0, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.bcc-prep-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1.2rem;
+  text-align: center;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3));
+}
+
+.bcc-prep-content h4 {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 1.2rem 0;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.bcc-prep-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bcc-prep-content li {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-bottom: 0.7rem;
+  padding-left: 1.5rem;
+  position: relative;
+  font-weight: 500;
+}
+
+.bcc-prep-content li::before {
+  content: '•';
+  color: #ff3300;
+  font-weight: bold;
+  font-size: 1.2rem;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.bcc-preparation-tip {
+  background: linear-gradient(135deg, 
+    rgba(255, 51, 0, 0.15) 0%, 
+    rgba(255, 102, 0, 0.08) 100%);
+  border: 2px solid rgba(255, 51, 0, 0.3);
+  border-radius: 16px;
+  padding: 2rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 25px rgba(255, 51, 0, 0.1);
+}
+
+.bcc-tip-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.bcc-tip-content {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.bcc-tip-content strong {
+  color: #ff3300;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* NEW: Preparation Action Buttons */
+.bcc-preparation-actions {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.bcc-preparation-ready-button {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 1.2rem 2.5rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.3);
+  white-space: nowrap;
+  text-transform: none;
+}
+
+.bcc-preparation-ready-button:hover {
+  background: linear-gradient(135deg, #128C7E, #0d7a6b);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+}
+
+.bcc-preparation-back-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 1.2rem 2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+
+.bcc-preparation-back-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.bcc-prep-button-icon {
+  font-size: 1.2rem;
+}
+
+/* Features */
+.bcc-hero-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 3rem;
+}
+
+.bcc-hero-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.bcc-hero-feature-icon {
+  color: #ff3300;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* Stats */
+.bcc-hero-stats {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 3rem 2rem 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.bcc-hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bcc-hero-stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.bcc-hero-stat-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+}
+
+/* Loading state for stats */
+.bcc-hero-stat-loading {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  border: 3px solid rgba(255, 51, 0, 0.3);
+  border-radius: 50%;
+  border-top-color: #ff3300;
+  animation: bcc-hero-spin 1s linear infinite;
+}
+
+@keyframes bcc-hero-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Feedback Button in Hero Section */
+.bcc-hero-feedback-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+}
+
+.hero-feedback-btn {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  font-size: 0.85rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+
+.hero-feedback-btn:hover {
+  background: rgba(255, 255, 255, 1) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 51, 0, 0.3);
+}
+
+.hero-feedback-btn .btn-icon {
+  font-size: 1rem;
+}
+
+.hero-feedback-btn .btn-label {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .bcc-hero-nav-content {
+    padding: 0 1.5rem;
+  }
+  
+  .bcc-hero-content {
+    padding: 7rem 1.5rem 3rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .bcc-hero-nav-links {
+    display: none;
+  }
+  
+  .bcc-hero-content {
+    padding: 6rem 1.5rem 2rem;
+  }
+  
+  .bcc-hero-tabs {
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .bcc-hero-tab-button {
+    padding: 0.8rem 1.2rem;
+    font-size: 1rem;
+  }
+
+  .bcc-savings-badge {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .bcc-savings-badge-content {
+    justify-content: center;
+  }
+
+  .bcc-savings-info {
+    align-items: center;
+    text-align: center;
+  }
+
+  /* Mobile Responsive Styles for Preparation Section */
+  .bcc-hero-sell-preparation {
+    padding: 2rem 1.5rem;
+    margin: 2rem auto;
+  }
+  
+  .bcc-preparation-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .bcc-preparation-header h3 {
+    font-size: 1.4rem;
+  }
+  
+  .bcc-preparation-content p {
+    font-size: 1rem;
+  }
+
+  .bcc-preparation-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .bcc-preparation-ready-button,
+  .bcc-preparation-back-button {
+    width: 100%;
+    max-width: 320px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .bcc-hero-nav-actions {
+    gap: 0.5rem;
+  }
+  
+  .bcc-hero-nav-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .bcc-hero-section {
+    min-height: 100vh;
+  }
+
+  .bcc-hero-content {
+    padding: 5rem 1rem 2rem;
+  }
+
+  .bcc-hero-search-bar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .bcc-hero-search-button {
+    width: 100%;
+  }
+
+  .bcc-hero-stats {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 2rem 1rem;
+  }
+  
+  .bcc-hero-tabs {
+    gap: 0.5rem;
+  }
+  
+  .bcc-hero-tab-button {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    flex: 1;
+  }
+
+  .bcc-savings-badge {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .bcc-savings-badge-content {
+    gap: 0.75rem;
+  }
+
+  .bcc-savings-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .bcc-savings-amount {
+    font-size: 1.5rem;
+  }
+
+  .bcc-savings-action-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  /* Mobile adjustments for feedback button */
+  .bcc-hero-feedback-button {
+    top: 15px;
+    right: 15px;
+  }
+  
+  .hero-feedback-btn {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+  }
+  
+  .hero-feedback-btn .btn-label {
+    display: none;
+  }
+  
+  .hero-feedback-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    padding: 0;
+    justify-content: center;
+  }
+
+  /* Mobile Preparation Section */
+  .bcc-hero-sell-preparation {
+    padding: 1.5rem 1rem;
+    margin: 1.5rem auto;
+    border-radius: 16px;
+  }
+  
+  .bcc-preparation-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
+  
+  .bcc-preparation-item {
+    padding: 1.5rem;
+  }
+  
+  .bcc-preparation-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .bcc-preparation-header h3 {
+    font-size: 1.3rem;
+  }
+  
+  .bcc-preparation-tip {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .bcc-prep-content h4 {
+    font-size: 1.1rem;
+  }
+  
+  .bcc-prep-content li {
+    font-size: 0.9rem;
+  }
+
+  .bcc-preparation-ready-button {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+
+  .bcc-preparation-back-button {
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .bcc-hero-nav-content {
+    padding: 0 1rem;
+  }
+  
+  .bcc-hero-brand-text {
+    font-size: 1.3rem;
+  }
+  
+  .bcc-hero-nav-actions {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .bcc-hero-content {
+    padding: 4rem 1rem 1.5rem;
+  }
+  
+  .bcc-hero-tabs {
+    gap: 0.3rem;
+  }
+
+  .bcc-hero-tab-button {
+    padding: 0.6rem 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .bcc-hero-stats {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .bcc-hero-buy h1,
+  .bcc-hero-sell h1 {
+    font-size: 2rem;
+  }
+  
+  .bcc-hero-buy p,
+  .bcc-hero-sell p {
+    font-size: 1rem;
+  }
+
+  .bcc-savings-badge {
+    padding: 1rem;
+  }
+
+  .bcc-savings-amount {
+    font-size: 1.3rem;
+  }
+
+  .bcc-savings-label {
+    font-size: 0.75rem;
+  }
+
+  .bcc-savings-subtitle {
+    font-size: 0.8rem;
+  }
+
+  /* Mobile feedback button */
+  .bcc-hero-feedback-button {
+    top: 10px;
+    right: 10px;
+  }
+  
+  .hero-feedback-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .hero-feedback-btn .btn-icon {
+    font-size: 0.9rem;
+  }
+
+  /* Mobile Preparation Section */
+  .bcc-hero-sell-preparation {
+    padding: 1.2rem 0.8rem;
+    margin: 1rem auto;
+  }
+  
+  .bcc-preparation-item {
+    padding: 1.2rem;
+  }
+  
+  .bcc-preparation-header h3 {
+    font-size: 1.2rem;
+  }
+  
+  .bcc-preparation-content p {
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+  }
+  
+  .bcc-tip-content {
+    font-size: 1rem;
+  }
+  
+  .bcc-prep-icon {
+    font-size: 2rem;
+  }
+  
+  .bcc-preparation-icon {
+    font-size: 2rem;
+  }
+  
+  .bcc-tip-icon {
+    font-size: 1.5rem;
+  }
+
+  .bcc-preparation-ready-button {
+    padding: 0.9rem 1.8rem;
+    font-size: 0.95rem;
+  }
+
+  .bcc-preparation-back-button {
+    padding: 0.9rem 1.3rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Performance Optimizations */
+.bcc-hero-section {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.bcc-hero-sell-option {
+  will-change: transform;
+}
+
+.bcc-savings-badge {
+  will-change: transform;
+}
+
+.bcc-preparation-item {
+  will-change: transform;
+}
+
+.bcc-hero-sell-preparation {
+  will-change: transform, opacity;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .bcc-savings-badge {
+    border: 2px solid #ffffff;
+  }
+
+  .bcc-savings-badge-content {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .bcc-preparation-item {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .bcc-preparation-tip {
+    border: 2px solid rgba(255, 51, 0, 0.5);
+  }
+
+  .bcc-hero-sell-preparation {
+    border: 3px solid rgba(255, 51, 0, 0.5);
+  }
+
+  .bcc-preparation-ready-button,
+  .bcc-preparation-back-button {
+    border-width: 2px;
+  }
+
+  /* Dark mode support for hero feedback button */
+  .hero-feedback-btn {
+    border-width: 2px;
+    font-weight: 700;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .bcc-hero-sell-option:hover {
+    transform: none;
+  }
+
+  .bcc-hero-search-button:hover {
+    transform: none;
+  }
+  
+  .bcc-hero-stat-loading {
+    animation: none;
+    border: 3px solid #ff3300;
+  }
+
+  .bcc-savings-badge:hover {
+    transform: none;
+  }
+
+  .bcc-savings-action-btn:hover {
+    transform: none;
+  }
+
+  .bcc-savings-action-btn:hover svg {
+    transform: none;
+  }
+
+  .bcc-preparation-item:hover {
+    transform: none;
+  }
+
+  .hero-feedback-btn:hover {
+    transform: none;
+  }
+
+  .bcc-preparation-ready-button:hover,
+  .bcc-preparation-back-button:hover {
+    transform: none;
+  }
+
+  @keyframes bcc-preparation-appear {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+/* Dark mode support for hero feedback button */
+@media (prefers-color-scheme: dark) {
+  .hero-feedback-btn {
+    background: rgba(44, 44, 44, 0.9) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .hero-feedback-btn:hover {
+    background: rgba(44, 44, 44, 1) !important;
+    border-color: rgba(255, 51, 0, 0.5);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .bcc-hero-section {
+    background: none;
+    padding: 0;
+  }
+
+  .bcc-hero-content,
+  .bcc-hero-stats {
+    color: #000000;
+  }
+
+  .bcc-hero-sell-option {
+    break-inside: avoid;
+  }
+
+  .bcc-savings-badge {
+    display: none;
+  }
+
+  .bcc-hero-sell-preparation {
+    break-inside: avoid;
+  }
+}

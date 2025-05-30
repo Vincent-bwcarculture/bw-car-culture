@@ -1,0 +1,306 @@
+/* src/components/admin/AuctionManager/AuctionManager.css */
+.auction-manager {
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .auction-header {
+    margin-bottom: 2rem;
+  }
+  
+  .auction-header h2 {
+    font-size: 1.8rem;
+    color: #333333;
+    margin-bottom: 1.5rem;
+  }
+  
+  .auction-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .filter-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  
+  .search-input {
+    min-width: 250px;
+    padding: 0.8rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: #ff3300;
+  }
+  
+  .status-filter,
+  .sort-filter {
+    min-width: 150px;
+    padding: 0.8rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+  }
+  
+  .status-filter:focus,
+  .sort-filter:focus {
+    outline: none;
+    border-color: #ff3300;
+  }
+  
+  .add-auction-btn {
+    padding: 0.8rem 1.5rem;
+    background-color: #ff3300;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    white-space: nowrap;
+  }
+  
+  .add-auction-btn:hover {
+    background-color: #cc2900;
+  }
+  
+  /* Auctions Table */
+  .auctions-table-container {
+    overflow-x: auto;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .auctions-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+  }
+  
+  .auctions-table th,
+  .auctions-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .auctions-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #333333;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .auctions-table tr:hover {
+    background: #f8f9fa;
+  }
+  
+  .auction-image {
+    width: 80px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .auction-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .auction-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  
+  .auction-title h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #333333;
+  }
+  
+  .auction-id {
+    font-size: 0.85rem;
+    color: #666666;
+  }
+  
+  .auction-price {
+    font-weight: 600;
+    color: #333333;
+  }
+  
+  .status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+  
+  .status-active {
+    background: rgba(46, 213, 115, 0.1);
+    color: #2ed573;
+  }
+  
+  .status-pending {
+    background: rgba(255, 171, 0, 0.1);
+    color: #ffab00;
+  }
+  
+  .status-ended {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+  }
+  
+  .status-sold {
+    background: rgba(54, 162, 235, 0.1);
+    color: #36a2eb;
+  }
+  
+  .status-unsold {
+    background: rgba(255, 99, 132, 0.1);
+    color: #ff6384;
+  }
+  
+  .status-draft {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+  }
+  
+  .bid-count {
+    font-weight: 500;
+    color: #333333;
+    text-align: center;
+  }
+  
+  .time-remaining {
+    color: #ff3300;
+    font-weight: 500;
+  }
+  
+  .auction-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+  }
+  
+  .action-btn.edit {
+    background: rgba(255, 171, 0, 0.1);
+    color: #ffab00;
+  }
+  
+  .action-btn.edit:hover {
+    background: rgba(255, 171, 0, 0.2);
+  }
+  
+  .action-btn.delete {
+    background: rgba(255, 51, 0, 0.1);
+    color: #ff3300;
+  }
+  
+  .action-btn.delete:hover {
+    background: rgba(255, 51, 0, 0.2);
+  }
+  
+  .action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .no-auctions {
+    text-align: center;
+    padding: 3rem;
+    color: #666666;
+  }
+  
+  /* Loading State */
+  .auctions-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+  }
+  
+  .auctions-loader {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #ff3300;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .auction-manager {
+      padding: 1.5rem;
+    }
+  
+    .filter-controls {
+      flex-direction: column;
+      width: 100%;
+    }
+  
+    .search-input,
+    .status-filter,
+    .sort-filter {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .auction-manager {
+      padding: 1rem;
+    }
+  
+    .auction-header h2 {
+      font-size: 1.5rem;
+    }
+  
+    .auction-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .add-auction-btn {
+      width: 100%;
+      text-align: center;
+    }
+  }

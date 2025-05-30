@@ -1,0 +1,138 @@
+/* src/components/admin/InventoryManager/InventoryManager.css */
+.inventory-manager {
+    background-color: rgba(20, 20, 20, 0.95);
+    color: #f5f5f5;
+    padding: 1.5rem;
+    border-radius: 8px;
+  }
+  
+  .inventory-manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .inventory-manager-header h2 {
+    margin: 0;
+    color: #ff3300;
+    font-size: 1.8rem;
+  }
+  
+  .inventory-manager-add-button {
+    background-color: #ff3300;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.7rem 1.2rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .inventory-manager-add-button:hover {
+    background-color: #cc2900;
+  }
+  
+  .inventory-manager-add-button:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+  }
+  
+  .inventory-manager-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 0;
+  }
+  
+  .inventory-manager-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid #ff3300;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .inventory-manager-error {
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    color: #ff6b81;
+  }
+  
+  .inventory-manager-error h3 {
+    margin-top: 0;
+    color: #ff6b81;
+  }
+  
+  .inventory-manager-retry-button {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #ff6b81;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    border-radius: 4px;
+    padding: 0.7rem 1.2rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+  }
+  
+  .inventory-manager-retry-button:hover {
+    background-color: rgba(220, 53, 69, 0.3);
+  }
+  
+  .inventory-manager-no-business {
+    background-color: rgba(25, 25, 25, 0.5);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .inventory-manager-no-business h3 {
+    margin-top: 0;
+    color: #ff3300;
+  }
+  
+  .inventory-manager-action-button {
+    background-color: #ff3300;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.7rem 1.2rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 1rem;
+  }
+  
+  .inventory-manager-action-button:hover {
+    background-color: #cc2900;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .inventory-manager {
+      padding: 1rem;
+    }
+    
+    .inventory-manager-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .inventory-manager-add-button {
+      width: 100%;
+    }
+  }

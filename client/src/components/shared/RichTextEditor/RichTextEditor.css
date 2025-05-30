@@ -1,0 +1,197 @@
+/* src/components/shared/RichTextEditor/RichTextEditor.css */
+.rich-text-editor {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+  
+  .editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .toolbar-button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: #333333;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+  }
+  
+  .toolbar-button:hover:not(:disabled) {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+  }
+  
+  .toolbar-button:active:not(:disabled) {
+    background-color: #dee2e6;
+  }
+  
+  .toolbar-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .toolbar-separator {
+    width: 1px;
+    height: 24px;
+    background-color: #e0e0e0;
+    margin: 0 4px;
+  }
+  
+  .editor-content {
+    min-height: 200px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 1rem;
+    outline: none;
+    color: #333333;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  
+  .editor-content:empty::before {
+    content: attr(placeholder);
+    color: #999999;
+    pointer-events: none;
+  }
+  
+  .editor-content:focus {
+    outline: none;
+  }
+  
+  /* Content Styling */
+  .editor-content h1 {
+    font-size: 2em;
+    margin: 0.67em 0;
+  }
+  
+  .editor-content h2 {
+    font-size: 1.5em;
+    margin: 0.75em 0;
+  }
+  
+  .editor-content h3 {
+    font-size: 1.17em;
+    margin: 0.83em 0;
+  }
+  
+  .editor-content p {
+    margin: 1em 0;
+  }
+  
+  .editor-content ul, 
+  .editor-content ol {
+    margin: 1em 0;
+    padding-left: 40px;
+  }
+  
+  .editor-content a {
+    color: #0066cc;
+    text-decoration: underline;
+  }
+  
+  .editor-content blockquote {
+    margin: 1em 40px;
+    padding-left: 1em;
+    border-left: 3px solid #e0e0e0;
+    color: #666666;
+  }
+  
+  /* Disabled State */
+  .rich-text-editor.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  .rich-text-editor.disabled .editor-content {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+  }
+  
+  /* Scrollbar Styling */
+  .editor-content::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .editor-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  .editor-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+  
+  .editor-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+  
+  /* High Contrast Mode */
+  @media (prefers-contrast: more) {
+    .rich-text-editor {
+      border: 2px solid #000000;
+    }
+  
+    .toolbar-button {
+      border: 1px solid #000000;
+    }
+  
+    .toolbar-separator {
+      background-color: #000000;
+    }
+  
+    .editor-content:empty::before {
+      color: #666666;
+    }
+  }
+  
+  /* Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    .toolbar-button {
+      transition: none;
+    }
+  }
+  
+  /* Mobile Optimization */
+  @media (max-width: 768px) {
+    .editor-toolbar {
+      padding: 4px;
+    }
+  
+    .toolbar-button {
+      min-width: 28px;
+      height: 28px;
+      font-size: 0.9rem;
+    }
+  
+    .editor-content {
+      padding: 0.75rem;
+      font-size: 0.95rem;
+    }
+  }
+  
+  /* Print Styles */
+  @media print {
+    .editor-toolbar {
+      display: none;
+    }
+  
+    .editor-content {
+      border: none;
+      padding: 0;
+    }
+  }

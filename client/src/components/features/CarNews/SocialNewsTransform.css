@@ -1,0 +1,370 @@
+/* src/components/features/CarNews/SocialNewsTransform.css */
+
+/* Main container adjustments */
+.cc-newspage-container {
+  background: #000000;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* Change category tabs to look like social media tabs */
+.cc-newspage-categories {
+  padding: 0.7rem 1rem;
+  background: rgba(20, 20, 20, 0.8);
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  position: sticky;
+  top: 62px;
+  z-index: 99;
+  border-bottom: 1px solid #2c2c2c;
+}
+
+.cc-newspage-categories::-webkit-scrollbar {
+  display: none;
+}
+
+.cc-newspage-category-button {
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 20px;
+  color: #c9c9c9;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  text-transform: capitalize;
+  margin-right: 0.5rem;
+}
+
+.cc-newspage-category-button:hover {
+  background: rgba(255, 51, 0, 0.2);
+  color: #fff;
+}
+
+.cc-newspage-category-button.active {
+  background: #ff3300;
+  color: #fff;
+}
+
+/* Transform news cards to look like social posts */
+.cc-newspage-article-card {
+  background: rgba(20, 20, 20, 0.8);
+  border-radius: 12px;
+  border: 1px solid #2c2c2c;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.cc-newspage-article-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Add author section to top of each card */
+.cc-newspage-article-link {
+  display: block;
+}
+
+/* Create author header (to be prepended via JS) */
+.cc-news-author-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cc-news-author-info {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.cc-news-author-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.cc-news-author-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cc-news-author-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cc-news-author-name {
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.cc-news-author-meta {
+  display: flex;
+  font-size: 0.8rem;
+  color: #888;
+  gap: 0.5rem;
+}
+
+.cc-news-post-date {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.cc-news-verified-badge {
+  color: #ff3300;
+  margin-left: 0.2rem;
+}
+
+/* Adjust card image to be more prominent */
+.cc-newspage-article-card-image {
+  width: 100%;
+  height: 250px;
+  position: relative;
+}
+
+.cc-newspage-article-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Adjust card content */
+.cc-newspage-article-card-content {
+  padding: 1rem;
+}
+
+.cc-newspage-article-card-title {
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.cc-newspage-article-card-description {
+  font-size: 0.9rem;
+  color: #c9c9c9;
+  margin: 0 0 0.5rem 0;
+}
+
+/* Add social actions bar to bottom of each card */
+.cc-news-social-actions {
+  display: flex;
+  border-top: 1px solid #2c2c2c;
+}
+
+.cc-news-action-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  background: none;
+  border: none;
+  color: #c9c9c9;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cc-news-action-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.cc-news-action-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.cc-news-action-button.active {
+  color: #ff3300;
+}
+
+.cc-news-action-button.active svg {
+  fill: #ff3300;
+  color: #ff3300;
+}
+
+.cc-news-stats {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid #2c2c2c;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.cc-news-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Make certain parts clickable */
+.cc-news-author-avatar, 
+.cc-news-author-name,
+.cc-newspage-article-card-image,
+.cc-newspage-article-card-title {
+  cursor: pointer;
+}
+
+/* Adapt premium badge */
+.cc-newspage-premium-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #ffd700;
+  color: #000;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  z-index: 10;
+}
+
+/* Add coming soon badge */
+.cc-news-coming-soon {
+  position: relative;
+  opacity: 0.7;
+}
+
+.cc-news-coming-soon-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff3300;
+  color: white;
+  font-size: 0.6rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+/* Add social composer */
+.cc-news-composer {
+  background: rgba(20, 20, 20, 0.8);
+  border-radius: 12px;
+  margin: 1rem;
+  padding: 1rem;
+  border: 1px solid #2c2c2c;
+  position: relative;
+}
+
+.cc-news-composer-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.cc-news-composer-input {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  border: 1px solid #2c2c2c;
+  color: #888;
+  cursor: pointer;
+}
+
+.cc-news-composer-actions {
+  display: flex;
+  justify-content: space-around;
+  gap: 0.5rem;
+}
+
+.cc-news-composer-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  color: #c9c9c9;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cc-news-composer-button:hover {
+  background: rgba(255, 51, 0, 0.1);
+  border-color: rgba(255, 51, 0, 0.5);
+  color: #fff;
+}
+
+.cc-news-feature-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  z-index: 100;
+  cursor: pointer;
+}
+
+/* Enhanced responsiveness */
+@media (max-width: 768px) {
+  .cc-newspage-article-card-image {
+    height: 200px;
+  }
+  
+  .cc-news-author-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .cc-news-action-button span {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .cc-newspage-categories {
+    padding: 0.5rem;
+  }
+  
+  .cc-newspage-category-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  
+  .cc-news-composer {
+    margin: 0.5rem;
+    padding: 0.8rem;
+  }
+  
+  .cc-news-composer-actions {
+    flex-wrap: wrap;
+  }
+  
+  .cc-news-composer-button {
+    flex-basis: 48%;
+    margin-bottom: 0.5rem;
+  }
+}

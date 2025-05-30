@@ -1,0 +1,152 @@
+/* src/components/shared/ConnectionTest.css */
+.connection-status {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    padding: 1rem;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+  
+  .connection-status.checking {
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+  }
+  
+  .connection-status.error {
+    background: rgba(220, 53, 69, 0.95);
+    color: #ffffff;
+    backdrop-filter: blur(8px);
+  }
+  
+  .status-content {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .spinner {
+    width: 20px;
+    height: 20px;
+    position: relative;
+  }
+  
+  .spinner-inner {
+    width: 100%;
+    height: 100%;
+    border: 2px solid #ffffff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  .spinner-small {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    margin-right: 8px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  .error-message {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .error-icon {
+    font-size: 1.2rem;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .retry-button,
+  .reload-button {
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+  }
+  
+  .retry-button:hover:not(:disabled),
+  .reload-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .retry-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .retry-count {
+    font-size: 0.8rem;
+    opacity: 0.8;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .connection-status {
+      padding: 0.8rem;
+    }
+  
+    .action-buttons {
+      flex-direction: column;
+      width: 100%;
+    }
+  
+    .retry-button,
+    .reload-button {
+      width: 100%;
+    }
+  }
+  
+  /* Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    .connection-status {
+      transition: none;
+    }
+  
+    .spinner-inner,
+    .spinner-small {
+      animation: none;
+    }
+  }
+  
+  /* High Contrast */
+  @media (prefers-contrast: more) {
+    .connection-status.error {
+      background: #dc3545;
+    }
+  
+    .retry-button,
+    .reload-button {
+      border: 2px solid #ffffff;
+    }
+  }

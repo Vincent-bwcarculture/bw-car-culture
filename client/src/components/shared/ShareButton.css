@@ -1,0 +1,101 @@
+/* src/components/shared/ShareButton.css */
+.bcc-share-container {
+    position: relative;
+  }
+  
+  .bcc-share-button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: rgba(255, 51, 0, 0.2);
+    border: 1px solid rgba(255, 51, 0, 0.3);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .bcc-share-button:hover {
+    background-color: rgba(255, 51, 0, 0.4);
+    transform: scale(1.1);
+  }
+  
+  .bcc-share-icon {
+    font-size: 14px;
+  }
+  
+  .bcc-share-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border: 1px solid #2c2c2c;
+    width: 200px;
+    z-index: 100;
+    overflow: hidden;
+  }
+  
+  .bcc-share-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid #2c2c2c;
+    font-size: 0.9rem;
+    color: #c9c9c9;
+  }
+  
+  .bcc-share-close {
+    background: none;
+    border: none;
+    color: #c9c9c9;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+  }
+  
+  .bcc-share-close:hover {
+    color: #ff3300;
+  }
+  
+  .bcc-share-options {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+  }
+  
+  .bcc-share-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ffffff;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    text-align: left;
+    transition: background-color 0.2s;
+  }
+  
+  .bcc-share-option:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .bcc-share-option-icon {
+    font-size: 1rem;
+  }
+  
+  .bcc-share-option-name {
+    flex: 1;
+  }

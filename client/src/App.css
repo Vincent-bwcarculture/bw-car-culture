@@ -1,0 +1,242 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: transparent;
+}
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: radial-gradient(#000000bb, rgba(0, 0, 0, 0.979));
+  color: #ffffff;
+  min-height: 100vh;
+  
+}
+
+.App {
+  min-height: 100vh;
+  background: radial-gradient(#000000bb, rgba(0, 0, 0, 0.979));
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(#000000bb, rgba(0, 0, 0, 0.979));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 3px solid #ff3300;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+.loader::after {
+  content: '';  
+  box-sizing: border-box;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-bottom-color: #ff3300;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.cover-container {
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .cover-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* App.css*/
+.main-content {
+  width: 100%;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.top-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.bottom-section {
+  margin-top: 0.5rem;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns:300px 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 1400px) {
+  .main-content {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .content-grid {
+    grid-template-columns: 1fr 250px;
+  }
+}
+
+@media (max-width: 992px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .bottom-section {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+}
+
+/* In App.css, add these styles*/
+
+.placeholder-page {
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 1200px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  border: 1px solid #2c2c2c;
+}
+
+.placeholder-page h1 {
+  color: #ffffff;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #ff3300;
+  padding-bottom: 0.5rem;
+}
+
+.placeholder-page p {
+  color: #c9c9c9;
+  font-size: 1.1rem;
+} 
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Admin layout specific styles */
+.admin-layout {
+  min-height: 100vh;
+  background: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 2rem;
+  background: #1a1a1a;
+}
+
+/* Fix for nested scrollable elements */
+.scrollable-content {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 1rem; /* Prevent scrollbar from cutting off content */
+}
+
+/* Media Queries */
+@media (max-width: 1400px) {
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 0.5rem;
+  }
+  
+  .admin-content {
+    padding: 1rem;
+  }
+}
+
+/* Add to App.css */
+.connection-status {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  border-radius: 4px;
+  z-index: 9999;
+  font-size: 14px;
+  animation: fadeIn 0.3s ease;
+}
+
+.connection-status.checking {
+  background: rgba(255, 193, 7, 0.9);
+  color: #000;
+}
+
+.connection-status.error {
+  background: rgba(220, 53, 69, 0.9);
+  color: #fff;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

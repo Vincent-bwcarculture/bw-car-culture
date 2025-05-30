@@ -1,0 +1,336 @@
+/* Updated GIONSuccessScreen.css */
+.gion-success-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(135deg, #5f5fc4 0%, #3a3a8c 100%);
+    color: white;
+    padding: 2rem;
+    min-height: 350px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Dynamic background animation */
+  .success-bg-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 50%);
+    opacity: 0.5;
+    animation: pulse-bg 4s ease-in-out infinite;
+    z-index: 0;
+  }
+  
+  @keyframes pulse-bg {
+    0% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 0.5; }
+  }
+  
+  /* Confetti animation */
+  .confetti {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  
+  .confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #ffd700;
+    opacity: 0.8;
+    animation: confetti-fall 3s linear forwards;
+    z-index: 1;
+  }
+  
+  @keyframes confetti-fall {
+    0% {
+      transform: translateY(-50px) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(calc(100vh)) rotate(360deg);
+      opacity: 0;
+    }
+  }
+  
+  .success-icon {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.2);
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.75rem;
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.1);
+    animation: success-icon-pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes success-icon-pulse {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    }
+    70% {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+  }
+  
+  .success-icon svg {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+  
+  .gion-success-screen h3 {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 0.9rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #ffffff, #d0d0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .gion-success-screen p {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 1.75rem;
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 300px;
+    line-height: 1.4;
+  }
+  
+  .points-earned {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 1rem 1.75rem;
+    border-radius: 50px;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .points-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #ffd700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .points-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .total-points {
+    position: relative;
+    z-index: 1;
+    font-size: 1rem;
+    margin-bottom: 1.75rem;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .total-value {
+    font-weight: 700;
+    color: #ffffff;
+  }
+  
+  .share-button {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 1.75rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+  }
+  
+  .share-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .share-button:hover::before {
+    opacity: 1;
+  }
+  
+  .share-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .gion-logo {
+    position: relative;
+    z-index: 1;
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    background: linear-gradient(90deg, #ffffff, #d0d0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+  }
+  
+  .impact-message {
+    position: relative;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    padding: 0.9rem;
+    margin-bottom: 1.75rem;
+    font-size: 0.9rem;
+    max-width: 300px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .impact-message p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  .dismiss-timer {
+    position: relative;
+    z-index: 1;
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-bottom: 0.9rem;
+  }
+  
+  .dismiss-button {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 1.25rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+  }
+  
+  .dismiss-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .dismiss-button:hover::before {
+    opacity: 1;
+  }
+  
+  .dismiss-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  }
+  
+  .powered-by {
+    position: relative;
+    z-index: 1;
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
+  
+  /* Dynamic stars falling animation */
+  .falling-star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #ffffff;
+    border-radius: 50%;
+    opacity: 0.8;
+    z-index: 0;
+  }
+  
+  .falling-star::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    border-radius: 50%;
+    filter: blur(4px);
+    transform: scale(2);
+  }
+  
+  .falling-star::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 2px;
+    background: linear-gradient(90deg, #ffffff, transparent);
+    border-radius: 50%;
+    filter: blur(1px);
+    transform-origin: left center;
+    transform: translateX(-5px) rotateZ(45deg);
+  }
+  
+  @keyframes falling {
+    0% {
+      transform: translateY(-5vh) translateX(0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) translateX(100px) rotate(90deg);
+      opacity: 0;
+    }
+  }

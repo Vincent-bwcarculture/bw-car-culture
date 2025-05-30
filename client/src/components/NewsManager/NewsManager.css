@@ -1,0 +1,140 @@
+/* src/components/admin/NewsManager/NewsManager.css */
+.news-manager {
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .news-header {
+    margin-bottom: 2rem;
+  }
+  
+  .news-header h2 {
+    font-size: 1.8rem;
+    color: #333333;
+    margin-bottom: 1.5rem;
+  }
+  
+  .news-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .filter-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  
+  .search-input {
+    min-width: 250px;
+    padding: 0.8rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: #ff3300;
+  }
+  
+  .category-filter,
+  .status-filter {
+    min-width: 150px;
+    padding: 0.8rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+  }
+  
+  .category-filter:focus,
+  .status-filter:focus {
+    outline: none;
+    border-color: #ff3300;
+  }
+  
+  .create-article-btn {
+    padding: 0.8rem 1.5rem;
+    background-color: #ff3300;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    white-space: nowrap;
+  }
+  
+  .create-article-btn:hover {
+    background-color: #cc2900;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .news-manager {
+      padding: 1.5rem;
+    }
+  
+    .filter-controls {
+      flex-direction: column;
+      width: 100%;
+    }
+  
+    .search-input,
+    .category-filter,
+    .status-filter {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .news-manager {
+      padding: 1rem;
+    }
+  
+    .news-header h2 {
+      font-size: 1.5rem;
+    }
+  
+    .news-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .create-article-btn {
+      width: 100%;
+      text-align: center;
+    }
+  }
+  
+  /* High Contrast Mode */
+  @media (prefers-contrast: more) {
+    .news-manager {
+      border: 2px solid #000000;
+    }
+  
+    .create-article-btn {
+      border: 2px solid #000000;
+    }
+  }
+  
+  /* Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    .search-input,
+    .category-filter,
+    .status-filter,
+    .create-article-btn {
+      transition: none;
+    }
+  }

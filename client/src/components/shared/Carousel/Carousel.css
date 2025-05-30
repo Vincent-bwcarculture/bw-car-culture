@@ -1,0 +1,30 @@
+/* Carousel.css */
+.carousel {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .carousel-content {
+    transition: transform 0.3s ease;
+  }
+  
+  .carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    padding: 1rem;
+    cursor: pointer;
+    z-index: 2;
+  }
+  
+  .carousel-button.prev {
+    left: 0;
+  }
+  
+  .carousel-button.next {
+    right: 0;
+  }

@@ -1,0 +1,1064 @@
+
+/* Enhanced CarReviews.css */
+.car-reviews-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem;
+  color: var(--text-light);
+  background: rgba(15, 15, 15, 0.7);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.car-reviews-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.car-reviews-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: var(--primary-color);
+  border-radius: 3px;
+}
+
+.car-reviews-header h1 {
+  font-size: 2.8rem;
+  color: var(--text-light);
+  margin-bottom: 0.8rem;
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(90deg, #ffffff, #d0d0d0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.car-reviews-header p {
+  font-size: 1.2rem;
+  color: var(--text-gray);
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Tab Navigation */
+.car-reviews-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.8rem;
+  border-radius: 12px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.car-reviews-tab-button {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text-light);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+  font-weight: 600;
+  min-width: 180px;
+  text-align: center;
+}
+
+.car-reviews-tab-button:hover {
+  background: rgba(255, 51, 0, 0.1);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.15);
+}
+
+.car-reviews-tab-button.car-reviews-active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 15px rgba(255, 51, 0, 0.3);
+}
+
+.car-reviews-tab-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.car-reviews-tab-button:hover::before {
+  left: 100%;
+}
+
+/* Submit Review Section */
+.car-reviews-submit-section {
+  max-width: 900px;
+  margin: 0 auto;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.car-reviews-form-introduction {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.car-reviews-form-introduction h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.car-reviews-form-introduction p {
+  color: var(--text-gray);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.car-reviews-review-form {
+  background: rgba(20, 20, 20, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.car-reviews-form-section {
+  margin-bottom: 2.5rem;
+}
+
+.car-reviews-form-section h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 2px solid rgba(255, 51, 0, 0.3);
+  color: #ffffff;
+  font-weight: 600;
+  position: relative;
+}
+
+.car-reviews-form-section h3::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: var(--primary-color);
+}
+
+.car-reviews-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.car-reviews-form-group {
+  margin-bottom: 1.8rem;
+}
+
+.car-reviews-form-group label {
+  display: block;
+  margin-bottom: 0.7rem;
+  font-weight: 500;
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.car-reviews-form-group input,
+.car-reviews-form-group select,
+.car-reviews-form-group textarea {
+  width: 100%;
+  padding: 1rem 1.2rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-light);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.car-reviews-form-group input:focus,
+.car-reviews-form-group select:focus,
+.car-reviews-form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.car-reviews-form-group input::placeholder,
+.car-reviews-form-group textarea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.car-reviews-rating-instruction {
+  margin-bottom: 1.2rem;
+  color: var(--text-gray);
+  font-size: 0.95rem;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  border-left: 3px solid var(--primary-color);
+}
+
+.car-reviews-ratings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.8rem;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.car-reviews-rating-group {
+  margin-bottom: 1.2rem;
+}
+
+.car-reviews-rating-group label {
+  display: block;
+  margin-bottom: 0.8rem;
+  color: #ffffff;
+}
+
+.car-reviews-star-input {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.car-reviews-star-label {
+  cursor: pointer;
+  position: relative;
+  display: block;
+}
+
+.car-reviews-star-label input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.car-reviews-star {
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+  display: block;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+}
+
+.car-reviews-star-label:hover .car-reviews-star,
+.car-reviews-star-label:hover ~ .car-reviews-star-label .car-reviews-star {
+  color: rgba(255, 215, 0, 0.6);
+  transform: scale(1.1);
+}
+
+.car-reviews-star.car-reviews-filled {
+  color: #ffd700;
+  transform: scale(1.05);
+}
+
+.car-reviews-form-actions {
+  text-align: center;
+  margin-top: 2.5rem;
+}
+
+.car-reviews-submit-button {
+  padding: 1.2rem 3rem;
+  background: linear-gradient(to right, #ff3300, #ff5500);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 15px rgba(255, 51, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.car-reviews-submit-button:hover {
+  background: linear-gradient(to right, #e62e00, #ff4400);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 51, 0, 0.4);
+}
+
+.car-reviews-submit-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(255, 51, 0, 0.3);
+}
+
+.car-reviews-submit-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.car-reviews-submit-button:hover::before {
+  left: 100%;
+}
+
+/* View Reviews Section */
+.car-reviews-view-section {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.car-reviews-search {
+  margin-bottom: 2.5rem;
+  background: rgba(20, 20, 20, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.car-reviews-search h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 0.8rem;
+}
+
+.car-reviews-search h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: var(--primary-color);
+}
+
+.car-reviews-search-container {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1.8rem;
+}
+
+.car-reviews-search-container input {
+  flex: 1;
+  padding: 1rem 1.2rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-light);
+  font-size: 1.05rem;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.car-reviews-search-container input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.car-reviews-search-container button {
+  padding: 0 1.8rem;
+  background: linear-gradient(to right, #ff3300, #ff5500);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  font-size: 1.05rem;
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.2);
+}
+
+.car-reviews-search-container button:hover {
+  background: linear-gradient(to right, #e62e00, #ff4400);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(255, 51, 0, 0.3);
+}
+
+.car-reviews-popular-cars h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1.2rem;
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.car-reviews-car-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.car-reviews-car-buttons button {
+  padding: 0.8rem 1.5rem;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  color: var(--text-light);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.car-reviews-car-buttons button:hover {
+  background: rgba(255, 51, 0, 0.15);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.car-reviews-results {
+  min-height: 300px;
+}
+
+.car-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.car-reviews-review-card {
+  background: rgba(20, 20, 20, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.car-reviews-review-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: var(--primary-color);
+}
+
+.car-reviews-review-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 51, 0, 0.3);
+}
+
+.car-reviews-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  gap: 1.2rem;
+  position: relative;
+}
+
+.car-reviews-review-header::after {
+  content: '';
+  position: absolute;
+  bottom: -0.75rem;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, rgba(255, 51, 0, 0.5), transparent);
+}
+
+.car-reviews-review-meta h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.7rem;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.car-reviews-review-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  color: var(--text-gray);
+  font-size: 0.95rem;
+}
+
+.car-reviews-review-average-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.car-reviews-rating-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.car-reviews-star-rating {
+  display: flex;
+}
+
+.car-reviews-star-rating .car-reviews-star {
+  font-size: 1.3rem;
+  margin: 0 -1px;
+}
+
+.car-reviews-review-content {
+  margin-bottom: 1.8rem;
+  line-height: 1.8;
+  color: #e0e0e0;
+  font-size: 1.05rem;
+}
+
+.car-reviews-review-ratings {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.2rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.car-reviews-rating-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+.car-reviews-rating-label {
+  font-size: 0.95rem;
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+/* Empty States */
+.car-reviews-no-reviews,
+.car-reviews-select-car-prompt {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: rgba(20, 20, 20, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.car-reviews-no-reviews h2,
+.car-reviews-select-car-prompt h2 {
+  margin-bottom: 1.2rem;
+  font-size: 1.8rem;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.car-reviews-no-reviews p,
+.car-reviews-select-car-prompt p {
+  color: var(--text-gray);
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.car-reviews-add-review-button {
+  padding: 1rem 2.5rem;
+  background: linear-gradient(to right, #ff3300, #ff5500);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 15px rgba(255, 51, 0, 0.3);
+}
+
+.car-reviews-add-review-button:hover {
+  background: linear-gradient(to right, #e62e00, #ff4400);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 51, 0, 0.4);
+}
+
+/* Loading State */
+.car-reviews-loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: var(--text-gray);
+  font-size: 1.1rem;
+}
+
+.car-reviews-loading-spinner::after {
+  content: "";
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 51, 0, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  animation: spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+  margin-left: 1rem;
+  box-shadow: 0 0 15px rgba(255, 51, 0, 0.2);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .car-reviews-container {
+    padding: 2rem 1.5rem;
+  }
+  
+  .car-reviews-header h1 {
+    font-size: 2.3rem;
+  }
+  
+  .car-reviews-review-header {
+    flex-direction: column;
+  }
+  
+  .car-reviews-review-average-rating {
+    align-self: flex-start;
+    margin-top: 0.5rem;
+  }
+  
+  .car-reviews-tabs {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .car-reviews-tab-button {
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .car-reviews-header h1 {
+    font-size: 2rem;
+  }
+  
+  .car-reviews-tabs {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .car-reviews-tab-button {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+  }
+  
+  .car-reviews-form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .car-reviews-ratings-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .car-reviews-review-ratings {
+    grid-template-columns: 1fr;
+  }
+  
+  .car-reviews-review-form {
+    padding: 1.5rem;
+  }
+  
+  .car-reviews-search-container {
+    flex-direction: column;
+  }
+  
+  .car-reviews-search-container button {
+    width: 100%;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .car-reviews-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .car-reviews-review-card {
+    padding: 1.2rem;
+  }
+  
+  .car-reviews-review-meta h3 {
+    font-size: 1.3rem;
+  }
+  
+  .car-reviews-rating-value {
+    font-size: 1.7rem;
+  }
+  
+  .car-reviews-submit-button,
+  .car-reviews-add-review-button {
+    width: 100%;
+  }
+}
+
+/* Accessibility Improvements */
+.car-reviews-tab-button:focus,
+.car-reviews-submit-button:focus,
+.car-reviews-search-container button:focus,
+.car-reviews-car-buttons button:focus,
+.car-reviews-add-review-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 51, 0, 0.5), 0 4px 15px rgba(255, 51, 0, 0.3);
+}
+
+.car-reviews-form-group input:focus-visible,
+.car-reviews-form-group select:focus-visible,
+.car-reviews-form-group textarea:focus-visible,
+.car-reviews-search-container input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 51, 0, 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Additional Styling Touches */
+/* Subtle background pattern */
+.car-reviews-container {
+  position: relative;
+}
+
+.car-reviews-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.3;
+  border-radius: 16px;
+}
+
+/* Highlight color for active elements */
+.car-reviews-car-buttons button:active,
+.car-reviews-search-container button:active,
+.car-reviews-form-group input:focus,
+.car-reviews-form-group select:focus,
+.car-reviews-form-group textarea:focus {
+  border-color: var(--primary-color);
+}
+
+/* Custom scrollbar for textareas */
+.car-reviews-form-group textarea::-webkit-scrollbar {
+  width: 10px;
+}
+
+.car-reviews-form-group textarea::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+
+.car-reviews-form-group textarea::-webkit-scrollbar-thumb {
+  background: rgba(255, 51, 0, 0.3);
+  border-radius: 5px;
+}
+
+.car-reviews-form-group textarea::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 51, 0, 0.5);
+}
+
+/* Smooth transitions for all interactive elements */
+.car-reviews-container button,
+.car-reviews-container input,
+.car-reviews-container select,
+.car-reviews-container textarea {
+  transition: all 0.3s ease;
+}
+
+/* Review quote style */
+.car-reviews-review-content {
+  position: relative;
+  padding-left: 1.2rem;
+}
+
+.car-reviews-review-content::before {
+  content: '"';
+  position: absolute;
+  top: -0.5rem;
+  left: 0;
+  font-size: 2rem;
+  color: rgba(255, 51, 0, 0.5);
+  font-family: Georgia, serif;
+}
+
+/* Rating star animation */
+@keyframes starPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.car-reviews-star.car-reviews-filled {
+  animation: starPulse 1s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.car-reviews-star-label:hover .car-reviews-star.car-reviews-filled {
+  animation-play-state: running;
+}
+
+/* User name badge in reviews */
+.car-reviews-review-author {
+  background: rgba(255, 51, 0, 0.1);
+  padding: 0.3rem 0.8rem;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 51, 0, 0.2);
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* Date badge in reviews */
+.car-reviews-review-date {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.3rem 0.8rem;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+
+/* Modal overlay - covers the entire screen */
+.auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  /* Modal container */
+  .auth-modal {
+    width: 90%;
+    max-width: 500px;
+    background: rgba(20, 20, 20, 0.95);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 51, 0, 0.3);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  /* Modal header */
+  .auth-modal-header {
+    background: linear-gradient(to right, rgba(255, 51, 0, 0.8), rgba(255, 85, 0, 0.8));
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .auth-modal-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  .auth-modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+  
+  .auth-modal-close:hover {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Modal content */
+  .auth-modal-content {
+    padding: 1.8rem;
+  }
+  
+  .auth-modal-content p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #e0e0e0;
+    line-height: 1.6;
+    font-size: 1.05rem;
+  }
+  
+  /* Modal action buttons */
+  .auth-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .auth-modal-actions button {
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.9rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+  }
+  
+  .auth-modal-register-btn {
+    background: linear-gradient(to right, #ff3300, #ff5500);
+    color: white;
+    grid-column: span 2;
+    box-shadow: 0 4px 15px rgba(255, 51, 0, 0.3);
+  }
+  
+  .auth-modal-register-btn:hover {
+    background: linear-gradient(to right, #e62e00, #ff4400);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 51, 0, 0.4);
+  }
+  
+  .auth-modal-login-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .auth-modal-login-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .auth-modal-cancel-btn {
+    background: rgba(0, 0, 0, 0.3);
+    color: #d0d0d0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .auth-modal-cancel-btn:hover {
+    background: rgba(0, 0, 0, 0.5);
+    transform: translateY(-2px);
+  }
+  
+  /* Styles for authenticated user indicator */
+  .user-authenticated-note {
+    font-size: 0.85rem;
+    color: #2ed573;
+    margin-top: 0.5rem;
+    background: rgba(46, 213, 115, 0.1);
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    border-left: 3px solid #2ed573;
+  }
+  
+  .auth-status-note {
+    margin-top: 1rem;
+    padding: 0.8rem 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border-left: 3px solid #ff3300;
+  }
+  
+  .auth-status-note p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #f0f0f0;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 576px) {
+    .auth-modal {
+      width: 95%;
+    }
+    
+    .auth-modal-header h3 {
+      font-size: 1.2rem;
+    }
+    
+    .auth-modal-content {
+      padding: 1.2rem;
+    }
+    
+    .auth-modal-actions {
+      grid-template-columns: 1fr;
+    }
+    
+    .auth-modal-register-btn {
+      grid-column: 1;
+    }
+  }

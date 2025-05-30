@@ -1,0 +1,87 @@
+/* src/components/shared/StarRating/StarRating.css */
+.star-rating {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+  }
+  
+  .star-rating--editable {
+    cursor: pointer;
+  }
+  
+  /* Star element styling */
+  .star {
+    color: #dddddd;
+    transition: color 0.2s, transform 0.1s;
+    user-select: none;
+  }
+  
+  .star--filled {
+    color: #ffd700;
+  }
+  
+  .star--half {
+    color: #ffd700;
+    position: absolute;
+    clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+  }
+  
+  /* Size variants */
+  .star-rating--small .star {
+    font-size: 1rem;
+    padding: 0 2px;
+  }
+  
+  .star-rating--medium .star {
+    font-size: 1.5rem;
+    padding: 0 3px;
+  }
+  
+  .star-rating--large .star {
+    font-size: 2rem;
+    padding: 0 4px;
+  }
+  
+  /* Interactive elements for editable ratings */
+  .star-rating--editable .star:hover {
+    transform: scale(1.1);
+  }
+  
+  .star-rating--editable .star:focus {
+    outline: none;
+    transform: scale(1.1);
+  }
+  
+  .star-rating--editable .star[tabindex="0"]:focus {
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.3);
+    border-radius: 4px;
+  }
+  
+  /* Numeric rating value */
+  .star-rating-value {
+    margin-left: 0.75rem;
+    font-size: 0.9rem;
+    color: #a0a0a0;
+    min-width: 2.5rem;
+  }
+  
+  /* High Contrast Mode */
+  @media (prefers-contrast: more) {
+    .star--filled, 
+    .star--half {
+      color: #fc0;
+    }
+    
+    .star--empty {
+      color: #666;
+    }
+  }
+  
+  /* Reduce Motion */
+  @media (prefers-reduced-motion: reduce) {
+    .star,
+    .star-rating--editable .star:hover {
+      transition: none;
+      transform: none;
+    }
+  }

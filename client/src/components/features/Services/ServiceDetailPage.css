@@ -1,0 +1,1160 @@
+/* src/components/features/Services/ServiceDetailPage.css */
+.bcc-service-detail-page {
+    background: var(--background-dark, #000000bb);
+    color: var(--text-light, #ffffff);
+    min-height: 100vh;
+  }
+  
+  /* Loading and Error States */
+  .bcc-service-loading-page,
+  .bcc-service-error-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--background-dark, #000000bb);
+  }
+  
+  .bcc-service-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 51, 0, 0.3);
+    border-radius: 50%;
+    border-top-color: #ff3300;
+    animation: bcc-service-spin 1s linear infinite;
+  }
+  
+  @keyframes bcc-service-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .bcc-service-error-container {
+    background-color: rgba(20, 20, 20, 0.9);
+    border-radius: 12px;
+    padding: 3rem;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 2rem;
+  }
+  
+  .bcc-service-error-container h2 {
+    color: #ff3300;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+  }
+  
+  .bcc-service-error-container p {
+    color: #a0a0a0;
+    margin-bottom: 2rem;
+  }
+  
+  .bcc-service-back-button {
+    background-color: rgba(255, 51, 0, 0.1);
+    color: #ff3300;
+    border: 1px solid rgba(255, 51, 0, 0.3);
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .bcc-service-back-button:hover {
+    background-color: rgba(255, 51, 0, 0.2);
+    border-color: #ff3300;
+  }
+  
+  /* Banner Section */
+  .bcc-service-banner {
+    position: relative;
+    height: 400px;
+    overflow: hidden;
+  }
+  
+  .bcc-service-banner-image,
+  .bcc-service-default-banner {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .bcc-service-default-banner {
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+  }
+  
+  .bcc-service-banner-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.95) 100%);
+    padding: 4rem 2rem 2rem;
+  }
+  
+  .bcc-service-info-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    gap: 2rem;
+  }
+  
+  .bcc-service-logo-container {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #2c2c2c;
+    border: 4px solid #ff3300;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .bcc-service-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .bcc-service-logo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ff3300;
+    color: white;
+    font-size: 3rem;
+    font-weight: 600;
+  }
+  
+  .bcc-service-header-info {
+    flex: 1;
+  }
+  
+  .bcc-service-title-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .bcc-service-title-container h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    color: #ffffff;
+  }
+  
+  .bcc-service-verified {
+    background-color: rgba(46, 213, 115, 0.9);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: #ffffff;
+  }
+  
+  .verified-service {
+    background-color: rgba(46, 213, 115, 0.9);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  
+  .bcc-service-type-location {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .bcc-service-type {
+    color: #c9c9c9;
+    font-size: 1.1rem;
+  }
+  
+  .bcc-service-location {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 1.1rem;
+    color: #c9c9c9;
+  }
+  
+  .bcc-service-location-icon {
+    color: #ff3300;
+    font-style: normal;
+  }
+  
+  .bcc-service-metrics {
+    display: flex;
+    gap: 2rem;
+  }
+  
+  .bcc-service-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  
+  .bcc-service-metric-value {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  
+  .bcc-service-stars {
+    color: #ffd700;
+  }
+  
+  .bcc-service-rating-number {
+    margin-left: 0.3rem;
+  }
+  
+  .bcc-service-metric-label {
+    font-size: 0.9rem;
+    color: #a0a0a0;
+  }
+  
+  .bcc-service-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .bcc-service-contact-button,
+  .bcc-service-website-button {
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    white-space: nowrap;
+  }
+  
+  .bcc-service-contact-button {
+    background-color: #ff3300;
+    color: white;
+    border: none;
+  }
+  
+  .bcc-service-contact-button:hover {
+    background-color: #cc2900;
+  }
+  
+  .bcc-service-website-button {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1px solid #2c2c2c;
+  }
+  
+  .bcc-service-website-button:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 51, 0, 0.5);
+  }
+  
+  /* Content Section */
+  .bcc-service-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .bcc-service-tabs {
+    display: flex;
+    border-bottom: 1px solid #2c2c2c;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  
+  .bcc-service-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .bcc-service-tab-button {
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    color: #c9c9c9;
+    font-size: 1.1rem;
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+  }
+  
+  .bcc-service-tab-button:after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 3px;
+    background-color: #ff3300;
+    transition: width 0.3s ease;
+  }
+  
+  .bcc-service-tab-button:hover {
+    color: #ffffff;
+  }
+  
+  .bcc-service-tab-button.active {
+    color: #ffffff;
+    font-weight: 500;
+  }
+  
+  .bcc-service-tab-button.active:after {
+    width: 100%;
+  }
+  
+  .bcc-service-tab-content {
+    min-height: 500px;
+  }
+  
+  /* About Tab */
+  .bcc-service-about-tab {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+  }
+  
+  .bcc-service-description h2,
+  .bcc-service-services-tab h2,
+  .bcc-service-reviews-tab h2,
+  .bcc-service-contact-tab h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    color: #ffffff;
+  }
+  
+  .bcc-service-description p {
+    color: #c9c9c9;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+  
+  .bcc-service-specialties-section h3,
+  .bcc-service-business-hours h3 {
+    font-size: 1.3rem;
+    color: #ffffff;
+    margin-bottom: 1rem;
+  }
+  
+  .bcc-service-specialties-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+  
+  .bcc-service-specialty-tag {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #c9c9c9;
+  }
+  
+  .bcc-service-hours-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .bcc-service-hours-table td {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #2c2c2c;
+  }
+  
+  .bcc-service-hours-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .bcc-service-hours-table td:first-child {
+    color: #ffffff;
+    font-weight: 500;
+    width: 40%;
+  }
+  
+  .bcc-service-hours-table td:last-child {
+    color: #c9c9c9;
+  }
+  
+  .bcc-service-no-hours {
+    color: #888888;
+    font-style: italic;
+  }
+  
+  /* Contact Tab */
+  .bcc-service-contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+  
+  .bcc-service-contact-info h3,
+  .bcc-service-contact-location h3,
+  .bcc-service-contact-form-section h3 {
+    font-size: 1.5rem;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+  }
+  
+  .bcc-service-contact-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .bcc-service-contact-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .bcc-service-detail-label {
+    font-size: 0.9rem;
+    color: #888888;
+  }
+  
+  .bcc-service-detail-value a {
+    color: #ff3300;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .bcc-service-detail-value a:hover {
+    color: #cc2900;
+    text-decoration: underline;
+  }
+  
+  .bcc-service-address {
+    margin-bottom: 1.5rem;
+  }
+  
+  .bcc-service-address p {
+    color: #c9c9c9;
+    margin: 0.3rem 0;
+  }
+  
+  .bcc-service-map-placeholder {
+    height: 300px;
+    background-color: rgba(20, 20, 20, 0.9);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a0a0a0;
+  }
+  
+  .bcc-service-contact-form {
+    background-color: rgba(20, 20, 20, 0.9);
+    border-radius: 12px;
+    padding: 2rem;
+  }
+  
+  .bcc-service-form-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .bcc-service-form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .bcc-service-form-group label {
+    color: #c9c9c9;
+    font-size: 0.9rem;
+  }
+  
+  .bcc-service-form-group input,
+  .bcc-service-form-group textarea {
+    padding: 0.8rem;
+    border-radius: 6px;
+    border: 1px solid #2c2c2c;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    font-size: 1rem;
+  }
+  
+  .bcc-service-form-group input:focus,
+  .bcc-service-form-group textarea:focus {
+    outline: none;
+    border-color: #ff3300;
+  }
+  
+  .bcc-service-form-submit {
+    margin-top: 1rem;
+  }
+  
+  .bcc-service-send-message-button {
+    background-color: #ff3300;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .bcc-service-send-message-button:hover {
+    background-color: #cc2900;
+  }
+  
+  /* Social Media Section */
+  .bcc-service-social-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #2c2c2c;
+  }
+  
+  .bcc-service-social-section h3 {
+    font-size: 1.3rem;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+  }
+  
+  .bcc-service-social-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .bcc-service-social-link {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  
+  .bcc-service-social-facebook {
+    background-color: rgba(66, 103, 178, 0.2);
+    color: #4267B2;
+    border: 1px solid rgba(66, 103, 178, 0.3);
+  }
+  
+  .bcc-service-social-facebook:hover {
+    background-color: #4267B2;
+    color: white;
+  }
+  
+  .bcc-service-social-twitter {
+    background-color: rgba(29, 161, 242, 0.2);
+    color: #1DA1F2;
+    border: 1px solid rgba(29, 161, 242, 0.3);
+  }
+  
+  .bcc-service-social-twitter:hover {
+    background-color: #1DA1F2;
+    color: white;
+  }
+  
+  .bcc-service-social-instagram {
+    background-color: rgba(225, 48, 108, 0.2);
+    color: #E1306C;
+    border: 1px solid rgba(225, 48, 108, 0.3);
+  }
+  
+  .bcc-service-social-instagram:hover {
+    background-color: #E1306C;
+    color: white;
+  }
+  
+  .bcc-service-social-whatsapp {
+    background-color: rgba(37, 211, 102, 0.2);
+    color: #25D366;
+    border: 1px solid rgba(37, 211, 102, 0.3);
+  }
+  
+  .bcc-service-social-whatsapp:hover {
+    background-color: #25D366;
+    color: white;
+  }
+  
+  /* WhatsApp button styling */
+  .bcc-service-whatsapp-button {
+    background-color: #25D366;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .bcc-service-whatsapp-button:hover {
+    background-color: #128C7E;
+  }
+  
+  /* Contact details styling */
+  .bcc-service-quick-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+  
+  .bcc-service-phone,
+  .bcc-service-email {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    color: #c9c9c9;
+    font-size: 0.9rem;
+  }
+  
+  .bcc-service-contact-label {
+    color: #ffffff;
+    font-weight: 500;
+  }
+  
+  .bcc-service-phone a,
+  .bcc-service-email a {
+    color: #ff3300;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .bcc-service-phone a:hover,
+  .bcc-service-email a:hover {
+    color: #cc2900;
+    text-decoration: underline;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 1200px) {
+    .bcc-service-content {
+      padding: 1.5rem;
+    }
+    
+    .bcc-service-info-container {
+      padding: 0 1.5rem;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .bcc-service-banner {
+      height: 350px;
+    }
+    
+    .bcc-service-title-container h1 {
+      font-size: 2rem;
+    }
+    
+    .bcc-service-about-tab {
+      grid-template-columns: 1fr;
+    }
+    
+    .bcc-service-contact-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .bcc-service-actions {
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+      
+    .bcc-service-whatsapp-button,
+    .bcc-service-contact-button,
+    .bcc-service-website-button {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .bcc-service-banner {
+      height: 300px;
+    }
+    
+    .bcc-service-banner-overlay {
+      padding: 2rem 1rem 1.5rem;
+    }
+    
+    .bcc-service-info-container {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1rem;
+    }
+    
+    .bcc-service-logo-container {
+      width: 100px;
+      height: 100px;
+    }
+    
+    .bcc-service-title-container {
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .bcc-service-type-location {
+      justify-content: center;
+    }
+    
+    .bcc-service-metrics {
+      justify-content: center;
+    }
+    
+    .bcc-service-actions {
+      align-items: center;
+    }
+    
+    .bcc-service-content {
+      padding: 1rem;
+    }
+    
+    .bcc-service-tab-button {
+      padding: 0.8rem 1rem;
+      font-size: 1rem;
+    }
+    
+    .bcc-service-form-row {
+      flex-direction: column;
+      gap: 0;
+    }
+    
+    .bcc-service-quick-contact {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .bcc-service-banner {
+      height: 250px;
+    }
+    
+    .bcc-service-title-container h1 {
+      font-size: 1.5rem;
+    }
+    
+    .bcc-service-verified {
+      font-size: 0.8rem;
+      padding: 0.2rem 0.6rem;
+    }
+    
+    .bcc-service-contact-button,
+    .bcc-service-website-button {
+      padding: 0.7rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .bcc-service-tabs {
+      justify-content: space-between;
+    }
+    
+    .bcc-service-tab-button {
+      flex: 1;
+      padding: 0.7rem 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .bcc-service-social-links {
+      justify-content: center;
+    }
+  }
+
+  /* Add these styles to your ServiceDetailPage.css file */
+
+/* Reviews Tab Styles */
+.bcc-service-reviews-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 2rem;
+}
+
+.bcc-service-write-review-button,
+.bcc-service-cancel-review-button {
+  background-color: #ff3300;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.bcc-service-write-review-button:hover,
+.bcc-service-cancel-review-button:hover {
+  background-color: #cc2900;
+}
+
+.bcc-service-cancel-review-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid #2c2c2c;
+}
+
+.bcc-service-cancel-review-button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 51, 0, 0.5);
+}
+
+.bcc-service-review-collection {
+  background-color: rgba(20, 20, 20, 0.9);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.bcc-service-review-error {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #ff6b81;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.bcc-service-review-success {
+  background-color: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.bcc-service-qr-scanner {
+  text-align: center;
+}
+
+.bcc-service-qr-scanner h3 {
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.bcc-service-qr-scanner p {
+  color: #c9c9c9;
+  margin-bottom: 1.5rem;
+}
+
+.bcc-service-code-entry,
+.bcc-service-plate-entry {
+  text-align: center;
+}
+
+.bcc-service-code-entry h3,
+.bcc-service-plate-entry h3,
+.bcc-service-review-methods h3,
+.bcc-service-write-review-form h3 {
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.bcc-service-code-entry p,
+.bcc-service-plate-entry p {
+  color: #c9c9c9;
+  margin-bottom: 1.5rem;
+}
+
+.bcc-service-code-input-group,
+.bcc-service-plate-input-group {
+  display: flex;
+  gap: 1rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.bcc-service-code-input,
+.bcc-service-plate-input {
+  flex: 1;
+  padding: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #2c2c2c;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.bcc-service-code-input:focus,
+.bcc-service-plate-input:focus {
+  outline: none;
+  border-color: #ff3300;
+}
+
+.bcc-service-code-submit,
+.bcc-service-plate-submit {
+  background-color: #ff3300;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.bcc-service-code-submit:hover,
+.bcc-service-plate-submit:hover {
+  background-color: #cc2900;
+}
+
+.bcc-service-review-methods {
+  text-align: center;
+}
+
+.bcc-service-review-method-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.bcc-service-review-method-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 180px;
+  height: 140px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid #2c2c2c;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.bcc-service-review-method-button:hover {
+  background-color: rgba(255, 51, 0, 0.1);
+  border-color: rgba(255, 51, 0, 0.5);
+  transform: translateY(-5px);
+}
+
+.bcc-service-review-method-icon {
+  font-size: 2.5rem;
+}
+
+.bcc-service-write-review-form {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.bcc-service-review-rating-field,
+.bcc-service-review-content-field,
+.bcc-service-review-anonymous-field {
+  margin-bottom: 1.5rem;
+}
+
+.bcc-service-review-rating-field label,
+.bcc-service-review-content-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #c9c9c9;
+}
+
+.bcc-service-rating-input {
+  font-size: 2rem;
+  color: #ffd700;
+}
+
+.bcc-service-review-content {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 6px;
+  border: 1px solid #2c2c2c;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.bcc-service-review-content:focus {
+  outline: none;
+  border-color: #ff3300;
+}
+
+.bcc-service-review-anonymous-field label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #c9c9c9;
+  cursor: pointer;
+}
+
+.bcc-service-review-actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.bcc-service-submit-review-button {
+  background-color: #ff3300;
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 200px;
+}
+
+.bcc-service-submit-review-button:hover:not(:disabled) {
+  background-color: #cc2900;
+}
+
+.bcc-service-submit-review-button:disabled {
+  background-color: rgba(255, 51, 0, 0.5);
+  cursor: not-allowed;
+}
+
+.bcc-service-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.bcc-service-review-item {
+  background-color: rgba(20, 20, 20, 0.9);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #2c2c2c;
+}
+
+.bcc-service-review-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.bcc-service-review-user {
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.bcc-service-review-anonymous {
+  font-style: italic;
+  color: #a0a0a0;
+}
+
+.bcc-service-review-date {
+  color: #888888;
+  font-size: 0.9rem;
+}
+
+.bcc-service-review-rating {
+  margin-bottom: 1rem;
+  color: #ffd700;
+  font-size: 1.2rem;
+}
+
+.bcc-service-review-content {
+  margin-bottom: 1.5rem;
+  color: #c9c9c9;
+  line-height: 1.5;
+}
+
+.bcc-service-review-reply {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid #ff3300;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.bcc-service-reply-header {
+  margin-bottom: 0.5rem;
+}
+
+.bcc-service-reply-label {
+  font-weight: 500;
+  color: #ff3300;
+  font-size: 0.9rem;
+}
+
+.bcc-service-dashboard-button {
+  background-color: #2c88d9;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 0.8rem;
+}
+
+.bcc-service-dashboard-button:hover {
+  background-color: #1c68b9;
+}
+
+/* Responsive adjustments for review section */
+@media (max-width: 768px) {
+  .bcc-service-review-method-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .bcc-service-review-method-button {
+    width: 100%;
+    max-width: 300px;
+    height: 100px;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0 1.5rem;
+  }
+  
+  .bcc-service-code-input-group,
+  .bcc-service-plate-input-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .bcc-service-reviews-actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .bcc-service-review-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .bcc-service-review-collection {
+    padding: 1.5rem;
+  }
+  
+  .bcc-service-review-item {
+    padding: 1.2rem;
+  }
+}

@@ -1,0 +1,325 @@
+/* src/components/shared/FeedbackWidget/FeedbackWidget.css */
+
+/* Floating trigger button */
+.feedback-widget-trigger {
+  position: fixed;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.feedback-widget-trigger.bottom-right {
+  bottom: 20px;
+  right: 20px;
+}
+
+.feedback-widget-trigger.bottom-left {
+  bottom: 20px;
+  left: 20px;
+}
+
+.feedback-widget-trigger.top-right {
+  top: 20px;
+  right: 20px;
+}
+
+.feedback-widget-trigger.top-left {
+  top: 20px;
+  left: 20px;
+}
+
+.feedback-trigger-btn {
+  background: linear-gradient(135deg, #ff3300, #cc2900);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(255, 51, 0, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  max-width: 140px;
+  overflow: hidden;
+}
+
+.feedback-trigger-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(255, 51, 0, 0.4);
+  background: linear-gradient(135deg, #cc2900, #ff3300);
+}
+
+.trigger-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.trigger-text {
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.notification-dot {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 12px;
+  height: 12px;
+  background: #28a745;
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Minimized state */
+.feedback-widget-trigger.minimized .feedback-trigger-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  padding: 0;
+  justify-content: center;
+}
+
+.feedback-widget-trigger.minimized .trigger-text {
+  display: none;
+}
+
+/* Modal styles */
+.feedback-widget-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.feedback-widget-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.feedback-widget-container {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.feedback-widget-container.bottom-right,
+.feedback-widget-container.bottom-left {
+  align-self: flex-end;
+}
+
+.feedback-widget-container.top-right,
+.feedback-widget-container.top-left {
+  align-self: flex-start;
+}
+
+.feedback-widget-header {
+  background: linear-gradient(135deg, #ff3300, #cc2900);
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.feedback-widget-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.feedback-widget-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.minimize-btn,
+.close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+  transition: background 0.2s ease;
+}
+
+.minimize-btn:hover,
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.feedback-widget-content {
+  flex: 1;
+  overflow-y: auto;
+  max-height: calc(90vh - 60px);
+}
+
+.feedback-widget-content .feedback-form-container {
+  margin: 0;
+  padding: 20px;
+  box-shadow: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.feedback-widget-content .form-header {
+  display: none; /* Hide the form header as we have widget header */
+}
+
+.feedback-widget-content .close-button {
+  display: none; /* Hide the form close button */
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .feedback-widget-trigger {
+    bottom: 80px; /* Above mobile navigation if present */
+  }
+
+  .feedback-trigger-btn {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+
+  .feedback-widget-modal {
+    padding: 10px;
+  }
+
+  .feedback-widget-container {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+
+  .feedback-widget-content .feedback-form-container {
+    padding: 15px;
+  }
+
+  /* Stack buttons vertically on mobile */
+  .feedback-widget-content .form-actions {
+    flex-direction: column;
+  }
+
+  .feedback-widget-content .submit-feedback-btn,
+  .feedback-widget-content .whatsapp-feedback-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .feedback-widget-trigger {
+    bottom: 70px;
+    right: 15px;
+  }
+
+  .feedback-trigger-btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .trigger-icon {
+    font-size: 1rem;
+  }
+
+  .feedback-widget-container {
+    border-radius: 8px;
+  }
+
+  .feedback-widget-header {
+    padding: 12px 15px;
+  }
+
+  .feedback-widget-header h3 {
+    font-size: 1rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .feedback-widget-container {
+    background: #2c2c2c;
+  }
+
+  .feedback-widget-content .feedback-form-container {
+    background: #2c2c2c;
+    color: white;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .feedback-trigger-btn {
+    border: 2px solid #ffffff;
+  }
+
+  .feedback-widget-container {
+    border: 2px solid #000000;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .feedback-trigger-btn:hover {
+    transform: none;
+  }
+
+  .notification-dot {
+    animation: none;
+  }
+
+  .feedback-widget-trigger,
+  .minimize-btn,
+  .close-btn {
+    transition: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .feedback-widget-trigger,
+  .feedback-widget-modal {
+    display: none !important;
+  }
+}

@@ -1,0 +1,183 @@
+/* src/components/shared/QRCodeScanner/QRCodeScanner.css */
+.qr-scanner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  #qr-reader {
+    width: 100% !important;
+    max-width: 500px !important;
+    border: none !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    background-color: black !important;
+  }
+  
+  /* Override HTML5 QR Scanner styles */
+  #qr-reader__dashboard {
+    padding: 0 !important;
+    background-color: transparent !important;
+    border: none !important;
+  }
+  
+  #qr-reader__filescan_input {
+    display: none !important;
+  }
+  
+  #qr-reader__status {
+    color: #c9c9c9 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    padding: 10px !important;
+    border-radius: 6px !important;
+    margin: 8px 0 !important;
+    font-size: 14px !important;
+  }
+  
+  #qr-reader__camera_selection {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid #2c2c2c !important;
+    border-radius: 6px !important;
+    color: white !important;
+    padding: 8px !important;
+    width: 100% !important;
+    margin: 10px 0 !important;
+    font-size: 14px !important;
+  }
+  
+  #qr-reader__camera_permission_button {
+    background-color: #ff3300 !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 16px !important;
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    margin: 10px 0 !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s !important;
+  }
+  
+  #qr-reader__camera_permission_button:hover {
+    background-color: #cc2900 !important;
+  }
+  
+  /* Scanner viewport */
+  #qr-reader__scan_region {
+    background-color: black !important;
+    min-height: 300px !important;
+    position: relative !important;
+  }
+  
+  #qr-reader__scan_region::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 2px dashed rgba(255, 51, 0, 0.6);
+    border-radius: 12px;
+    pointer-events: none;
+    z-index: 10;
+  }
+  
+  #qr-reader__scan_region video {
+    border-radius: 8px !important;
+    object-fit: cover !important;
+  }
+  
+  .qr-scanner-buttons {
+    display: flex;
+    justify-content: center;
+    margin: 15px 0;
+    gap: 15px;
+    width: 100%;
+    padding: 0 15px;
+  }
+  
+  .retry-button,
+  .cancel-button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .retry-button {
+    background-color: #ff3300;
+    color: white;
+    border: none;
+  }
+  
+  .retry-button:hover {
+    background-color: #cc2900;
+  }
+  
+  .cancel-button {
+    background-color: transparent;
+    color: #c9c9c9;
+    border: 1px solid #2c2c2c;
+  }
+  
+  .cancel-button:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+  }
+  
+  .qr-scanner-error {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .error-message {
+    color: #ff6b81;
+    margin-bottom: 20px;
+  }
+  
+  .qr-scanner-instructions {
+    width: 100%;
+    padding: 0 15px 15px;
+  }
+  
+  .scanner-tip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .tip-icon {
+    font-size: 1.5rem;
+  }
+  
+  .tip-text {
+    color: #c9c9c9;
+    font-size: 14px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    #qr-reader__scan_region {
+      min-height: 250px !important;
+    }
+    
+    .qr-scanner-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .retry-button,
+    .cancel-button {
+      width: 100%;
+    }
+  }

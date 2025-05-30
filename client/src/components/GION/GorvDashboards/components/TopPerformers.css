@@ -1,0 +1,105 @@
+/* src/components/GION/GovDashboards/components/TopPerformers.css */
+.top-performers {
+    background-color: white;
+    border-radius: 5px;
+    padding: 20px;
+    height: 100%;
+  }
+  
+  .performers-title {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+  
+  .performers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .performer-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .performer-item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  
+  .performer-rank {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #4a4a8a;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  
+  .performer-details {
+    flex: 1;
+  }
+  
+  .performer-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  .performer-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+  }
+  
+  .performer-rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .rating-value {
+    font-weight: 600;
+    color: #ffc107;
+  }
+  
+  .rating-stars {
+    color: #ffc107;
+    letter-spacing: -1px;
+  }
+  
+  .performer-reviews {
+    color: #777;
+    font-size: 13px;
+  }
+  
+  .view-all-container {
+    margin-top: 15px;
+    text-align: center;
+  }
+  
+  .view-all-button {
+    background: none;
+    border: none;
+    color: #4a4a8a;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .view-all-button:hover {
+    background-color: rgba(74, 74, 138, 0.1);
+  }

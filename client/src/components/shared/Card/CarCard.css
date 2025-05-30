@@ -1,0 +1,225 @@
+.car-result-card {
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid #2c2c2c;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    will-change: transform;
+    contain: content;
+  }
+  
+  .car-result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(255, 51, 0, 0.2);
+    border-color: #ff3300;
+  }
+  
+  .car-result-image {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  .car-result-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  .car-result-card:hover .car-result-image img {
+    transform: scale(1.05);
+  }
+  
+  .verified-dealer {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(46, 213, 115, 0.9);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    backdrop-filter: blur(4px);
+  }
+  
+  .quick-actions {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+  }
+  
+  .car-result-card:hover .quick-actions {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .action-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #333;
+  }
+  
+  .action-icon:hover {
+    background: #ff3300;
+    color: white;
+    transform: translateY(-2px);
+  }
+  
+  .car-result-content {
+    padding: 1.5rem;
+  }
+  
+  .car-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+  
+  .car-result-header h4 {
+    font-size: 1.2rem;
+    color: #ffffff;
+    margin: 0;
+  }
+  
+  .car-price {
+    font-size: 1.4rem;
+    color: #ff3300;
+    font-weight: bold;
+  }
+  
+  .car-specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    color: #c9c9c9;
+    font-size: 0.9rem;
+  }
+  
+  .dealer-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #2c2c2c;
+  }
+  
+  .dealer-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .dealer-details {
+    flex: 1;
+  }
+  
+  .dealer-name {
+    color: #ffffff;
+    font-size: 0.9rem;
+  }
+  
+  .dealer-location {
+    color: #888888;
+    font-size: 0.8rem;
+  }
+  
+  .car-result-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #2c2c2c;
+  }
+  
+  .condition-tag {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  .condition-tag.new {
+    background: rgba(46, 213, 115, 0.1);
+    color: #2ed573;
+  }
+  
+  .condition-tag.like-new {
+    background: rgba(54, 162, 235, 0.1);
+    color: #36a2eb;
+  }
+  
+  .condition-tag.used {
+    background: rgba(255, 159, 64, 0.1);
+    color: #ff9f40;
+  }
+  
+  .condition-tag.fair {
+    background: rgba(255, 99, 132, 0.1);
+    color: #ff6384;
+  }
+  
+  .contact-dealer-btn {
+    padding: 0.5rem 1rem;
+    background: #ff3300;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .contact-dealer-btn:hover {
+    background: #cc2900;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    .car-result-content {
+      padding: 1rem;
+    }
+  
+    .car-result-header h4 {
+      font-size: 1.1rem;
+    }
+  
+    .car-price {
+      font-size: 1.2rem;
+    }
+  
+    .car-specs {
+      grid-template-columns: 1fr;
+    }
+  
+    .dealer-avatar {
+      width: 32px;
+      height: 32px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .quick-actions {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }

@@ -1,0 +1,86 @@
+.gion-system-metrics {
+  width: 100%;
+}
+
+.gion-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.gion-metric-item {
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  padding: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.gion-metric-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.gion-metric-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.gion-metric-status {
+  font-size: 12px;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.gion-metric-status.high {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.gion-metric-status.medium {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+}
+
+.gion-metric-status.low {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+}
+
+.gion-server-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: rgba(76, 175, 80, 0.05);
+  border-radius: 5px;
+}
+
+.gion-status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.gion-status-indicator.online {
+  background-color: #4caf50;
+}
+
+.gion-status-indicator.partial {
+  background-color: #ff9800;
+}
+
+.gion-status-indicator.offline {
+  background-color: #f44336;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .gion-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,1050 @@
+/* src/components/features/PublicTransportSection/TransportRoutePage.css */
+
+.transport-route-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    color: #fff;
+  }
+  
+  .route-back-button {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(51, 51, 51, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 1.5rem;
+  }
+  
+  .route-back-button:hover {
+    background: rgba(51, 51, 51, 0.9);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .route-loading-overlay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    width: 100%;
+  }
+  
+  .route-loader {
+    border: 5px solid rgba(255, 255, 255, 0.1);
+    border-top: 5px solid #ff3300;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .route-error-container {
+    text-align: center;
+    padding: 3rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    margin: 2rem auto;
+    max-width: 600px;
+  }
+  
+  .route-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .route-title-container {
+    flex: 1;
+  }
+  
+  .route-title {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .route-arrow {
+    color: #ff3300;
+    font-weight: bold;
+    margin: 0 0.5rem;
+  }
+  
+  .route-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  
+  .route-type-badge,
+  .route-service-badge,
+  .route-status-badge {
+    display: inline-flex;
+    padding: 0.35rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  
+  .route-type-badge {
+    background-color: rgba(255, 51, 0, 0.2);
+    color: #ff3300;
+    border: 1px solid rgba(255, 51, 0, 0.3);
+  }
+  
+  .route-service-badge {
+    background-color: rgba(75, 181, 67, 0.2);
+    color: #4bb543;
+    border: 1px solid rgba(75, 181, 67, 0.3);
+  }
+  
+  .route-type-badge.bus {
+    background-color: rgba(0, 123, 255, 0.2);
+    color: #0d6efd;
+    border: 1px solid rgba(0, 123, 255, 0.3);
+  }
+  
+  .route-type-badge.taxi {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+  }
+  
+  .route-type-badge.shuttle {
+    background-color: rgba(111, 66, 193, 0.2);
+    color: #6f42c1;
+    border: 1px solid rgba(111, 66, 193, 0.3);
+  }
+  
+  .route-service-badge.express {
+    background-color: rgba(0, 123, 255, 0.2);
+    color: #0d6efd;
+    border: 1px solid rgba(0, 123, 255, 0.3);
+  }
+  
+  .route-service-badge.premium {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+  }
+  
+  .route-service-badge.regular {
+    background-color: rgba(108, 117, 125, 0.2);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.3);
+  }
+  
+  .route-status-badge {
+    background-color: rgba(108, 117, 125, 0.2);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.3);
+  }
+  
+  .route-status-badge.on-time {
+    background-color: rgba(25, 135, 84, 0.2);
+    color: #198754;
+    border: 1px solid rgba(25, 135, 84, 0.3);
+  }
+  
+  .route-status-badge.delayed {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+  }
+  
+  .route-status-badge.cancelled {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+  }
+  
+  .route-pricing {
+    text-align: right;
+    padding: 1rem 1.5rem;
+    background: rgba(255, 51, 0, 0.1);
+    border: 1px solid rgba(255, 51, 0, 0.2);
+    border-radius: 8px;
+  }
+  
+  .route-fare {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .route-duration {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .route-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+  }
+  
+  .route-main-content {
+    background: rgba(30, 30, 30, 0.6);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .route-gallery {
+    margin-bottom: 1.5rem;
+  }
+  
+  .route-image-container {
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .route-main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .route-thumbnails {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0 1rem;
+  }
+  
+  .route-thumbnail {
+    width: 80px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+  
+  .route-thumbnail:hover {
+    border-color: #ff3300;
+  }
+  
+  .route-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .route-overview {
+    padding: 1rem;
+  }
+  
+  .route-schedule-overview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .route-schedule-item {
+    text-align: center;
+  }
+  
+  .schedule-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.25rem;
+  }
+  
+  .schedule-time {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+  }
+  
+  .schedule-location {
+    font-size: 0.9rem;
+  }
+  
+  .route-duration-indicator {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 1rem;
+  }
+  
+  .duration-line {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, #ff3300, #ff7c33);
+    position: relative;
+    margin-bottom: 0.5rem;
+  }
+  
+  .duration-line::before,
+  .duration-line::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff3300;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .duration-line::before {
+    left: 0;
+  }
+  
+  .duration-line::after {
+    right: 0;
+  }
+  
+  .duration-value {
+    font-size: 0.9rem;
+    color: #ff3300;
+  }
+  
+  .route-description {
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .route-tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 51, 0, 0.5) rgba(0, 0, 0, 0.2);
+  }
+  
+  .route-tabs::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .route-tabs::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  .route-tabs::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 51, 0, 0.5);
+    border-radius: 4px;
+  }
+  
+  .route-tab {
+    padding: 1rem 1.5rem;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+  }
+  
+  .route-tab:hover {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .route-tab.active {
+    color: #ff3300;
+    border-bottom-color: #ff3300;
+  }
+  
+  .route-tab-content {
+    padding: 1.5rem;
+  }
+  
+  .schedule-content h3,
+  .amenities-content h3,
+  .ticket-options-content h3,
+  .policies-content h3,
+  .reviews-content h3 {
+    margin-bottom: 1.25rem;
+    font-size: 1.25rem;
+    color: #fff;
+  }
+  
+  .schedule-details {
+    margin-bottom: 2rem;
+  }
+  
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .schedule-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+  }
+  
+  .detail-label {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .detail-value {
+    font-weight: 500;
+  }
+  
+  .schedule-days {
+    margin-bottom: 1.5rem;
+  }
+  
+  .schedule-days h4 {
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .days-list {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .day-item {
+    padding: 0.5rem;
+    width: 3rem;
+    text-align: center;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.2);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+  }
+  
+  .day-item.active {
+    background: rgba(255, 51, 0, 0.2);
+    color: #ff3300;
+    border: 1px solid rgba(255, 51, 0, 0.3);
+  }
+  
+  .route-stops {
+    margin-bottom: 2rem;
+  }
+  
+  .stops-timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+  
+  .stop-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .stop-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .stop-marker {
+    position: absolute;
+    left: -2rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ff3300;
+    z-index: 1;
+  }
+  
+  .stop-item:first-child .stop-marker {
+    background: #4bb543;
+  }
+  
+  .stop-item:last-child .stop-marker {
+    background: #dc3545;
+  }
+  
+  .stops-timeline::before {
+    content: '';
+    position: absolute;
+    left: calc(2rem - 6px);
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .stop-details {
+    padding-left: 0.5rem;
+  }
+  
+  .stop-name {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+  }
+  
+  .stop-label {
+    font-size: 0.8rem;
+    color: #ff3300;
+  }
+  
+  .stop-item:first-child .stop-label {
+    color: #4bb543;
+  }
+  
+  .stop-item:last-child .stop-label {
+    color: #dc3545;
+  }
+  
+  .popular-times {
+    margin-top: 2rem;
+  }
+  
+  .popular-times-explanation {
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+  }
+  
+  .graph-placeholder {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .amenities-content {
+    padding-bottom: 1rem;
+  }
+  
+  .amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .amenity-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    gap: 0.75rem;
+  }
+  
+  .amenity-icon {
+    color: #4bb543;
+  }
+  
+  .ticket-options-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .ticket-option-item {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 1.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .ticket-option-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .ticket-option-name {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+  
+  .ticket-option-price {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #ff3300;
+  }
+  
+  .ticket-option-features {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .ticket-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .feature-icon {
+    color: #4bb543;
+  }
+  
+  .policies-list {
+    counter-reset: policy-counter;
+  }
+  
+  .policy-item {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    align-items: center;
+  }
+  
+  .policy-number {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 28px;
+    height: 28px;
+    background: #ff3300;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    font-size: 0.85rem;
+  }
+  
+  .policy-text {
+    flex: 1;
+  }
+  
+  .reviews-content {
+    padding-bottom: 1rem;
+  }
+  
+  .reviews-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .review-item {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 1.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    gap: 0.5rem;
+  }
+  
+  .reviewer-name {
+    font-weight: 500;
+  }
+  
+  .review-rating {
+    color: #ffc107;
+    letter-spacing: -1px;
+  }
+  
+  .review-date {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .review-comment {
+    line-height: 1.5;
+  }
+  
+  .no-reviews {
+    text-align: center;
+    padding: 2rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .route-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .booking-card,
+  .provider-card {
+    background: rgba(30, 30, 30, 0.6);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .booking-card-title,
+  .provider-card-title {
+    padding: 1rem;
+    margin: 0;
+    font-size: 1.25rem;
+    background: rgba(255, 51, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 51, 0, 0.2);
+  }
+  
+  .booking-details {
+    padding: 1.25rem;
+  }
+  
+  .booking-route {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+  }
+  
+  .booking-arrow {
+    color: #ff3300;
+  }
+  
+  .booking-schedule {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  
+  .booking-departure,
+  .booking-arrival {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .booking-price {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+  }
+  
+  .price-label {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .price-value {
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  
+  .booking-availability {
+    display: inline-block;
+    padding: 0.35rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background-color: rgba(25, 135, 84, 0.2);
+    color: #198754;
+    border: 1px solid rgba(25, 135, 84, 0.3);
+    margin-bottom: 1.5rem;
+  }
+  
+  .booking-availability.limited {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+  }
+  
+  .booking-availability.unavailable {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+  }
+  
+  .booking-button {
+    width: 100%;
+    padding: 0.9rem;
+    background: #ff3300;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .booking-button:hover {
+    background: #e62e00;
+  }
+  
+  .provider-info {
+    padding: 1.25rem;
+    display: flex;
+    gap: 1rem;
+    cursor: pointer;
+  }
+  
+  .provider-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  
+  .provider-details {
+    flex: 1;
+  }
+  
+  .provider-name {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  
+  .provider-link {
+    color: #ff3300;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+  
+  .contact-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    padding: 0 1.25rem 1.25rem;
+  }
+  
+  .contact-button {
+    padding: 0.6rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .contact-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  .contact-button.phone {
+    background: rgba(25, 135, 84, 0.2);
+    color: #198754;
+    border: 1px solid rgba(25, 135, 84, 0.3);
+  }
+  
+  .contact-button.phone:hover {
+    background: rgba(25, 135, 84, 0.3);
+  }
+  
+  .contact-button.email {
+    background: rgba(13, 110, 253, 0.2);
+    color: #0d6efd;
+    border: 1px solid rgba(13, 110, 253, 0.3);
+  }
+  
+  .contact-button.email:hover {
+    background: rgba(13, 110, 253, 0.3);
+  }
+  
+  .contact-button.website {
+    background: rgba(108, 117, 125, 0.2);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.3);
+  }
+  
+  .contact-button.website:hover {
+    background: rgba(108, 117, 125, 0.3);
+  }
+  
+  .similar-routes-section {
+    margin-top: 3rem;
+  }
+  
+  .section-title {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+  }
+  
+  .similar-routes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+  
+  .similar-route-card {
+    background: rgba(30, 30, 30, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .similar-route-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 51, 0, 0.3);
+  }
+  
+  .similar-route-image {
+    height: 150px;
+    overflow: hidden;
+  }
+  
+  .similar-route-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  .similar-route-card:hover .similar-route-image img {
+    transform: scale(1.05);
+  }
+  
+  .similar-route-info {
+    padding: 1rem;
+  }
+  
+  .similar-route-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .similar-route-details {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .similar-route-schedule {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    margin-bottom: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.85rem;
+  }
+  
+  .similar-departure,
+  .similar-arrival {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .similar-route-price {
+    font-weight: bold;
+    color: #ff3300;
+    text-align: right;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .route-content {
+      grid-template-columns: 1.5fr 1fr;
+    }
+    
+    .route-header {
+      flex-direction: column;
+    }
+    
+    .route-pricing {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 1rem;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .route-fare {
+      margin-bottom: 0;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .route-content {
+      grid-template-columns: 1fr;
+    }
+    
+    .route-tabs {
+      justify-content: space-between;
+    }
+    
+    .route-tab {
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+    }
+    
+    .schedule-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .similar-routes-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .route-title {
+      font-size: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .route-badges {
+      flex-wrap: wrap;
+    }
+    
+    .route-tabs {
+      overflow-x: auto;
+    }
+    
+    .contact-buttons {
+      grid-template-columns: 1fr;
+    }
+    
+    .route-schedule-overview {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .route-schedule-item {
+      width: 100%;
+    }
+    
+    .route-duration-indicator {
+      width: 100%;
+      padding: 1rem 0;
+    }
+  }

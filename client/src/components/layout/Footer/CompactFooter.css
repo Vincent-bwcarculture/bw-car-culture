@@ -1,0 +1,264 @@
+/* src/components/layout/Footer/CompactFooter.css */
+.compact-footer {
+  background-color: rgba(17, 17, 17, 0.95);
+  color: #ffffff;
+  padding: 2rem 2rem 1rem;
+  margin-top: 2rem;
+  border-top: 1px solid #2c2c2c;
+}
+
+/* Footer content layout */
+.compact-footer .footer-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+}
+
+/* Brand section */
+.compact-footer .footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.compact-footer .footer-logo {
+  max-width: 150px;
+  height: auto;
+}
+
+/* Social links */
+.compact-footer .social-links {
+  display: flex;
+  gap: 0.7rem;
+}
+
+.compact-footer .social-link {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.compact-footer .social-link:hover {
+  background-color: #ff3300;
+  transform: translateY(-2px);
+}
+
+/* Footer sections layout - updated to 2 columns */
+.compact-footer .footer-sections {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+/* Section headers */
+.compact-footer .section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #ffffff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.compact-footer .section-header h3 {
+  color: #ffffff;
+  font-size: 1rem;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+  position: relative;
+}
+
+.compact-footer .section-header h3::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background-color: #ff3300;
+}
+
+/* Toggle icon - only visible on mobile */
+.compact-footer .toggle-icon {
+  display: none;
+}
+
+/* Footer links */
+.compact-footer .footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.compact-footer .footer-links li a {
+  color: #c9c9c9;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.2s ease;
+}
+
+.compact-footer .footer-links li a:hover {
+  color: #ff3300;
+}
+
+/* Footer bottom */
+.compact-footer .footer-bottom {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2c2c2c;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #888888;
+}
+
+.compact-footer .footer-bottom p {
+  margin: 0 0 0.5rem 0;
+}
+
+.compact-footer .footer-bottom-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.compact-footer .footer-bottom-links a {
+  color: #888888;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-size: 0.8rem;
+}
+
+.compact-footer .footer-bottom-links a:hover {
+  color: #ff3300;
+}
+
+/* Hidden admin link */
+.hidden-admin-link {
+  color: inherit;
+  text-decoration: none;
+  margin-left: 1px;
+  margin-right: 1px;
+  opacity: 0.99; /* Almost invisible but technically clickable */
+  cursor: default;
+}
+
+.hidden-admin-link:hover,
+.hidden-admin-link:focus {
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .compact-footer .footer-content {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .compact-footer .footer-brand {
+    align-items: center;
+    text-align: center;
+  }
+  
+  .compact-footer .footer-sections {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+/* Updated mobile layout - hide footer sections completely and remove gaps */
+@media (max-width: 768px) {
+  .compact-footer {
+    padding: 1.5rem 1.5rem 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0; /* Remove gap between footer and bottom nav */
+  }
+  
+  /* Hide the footer sections completely on mobile */
+  .compact-footer .footer-sections {
+    display: none;
+  }
+  
+  /* Center the brand section on mobile */
+  .compact-footer .footer-brand {
+    align-items: center;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  /* Adjust footer bottom spacing */
+  .compact-footer .footer-bottom {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+  }
+  
+  .compact-footer .footer-bottom-links {
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .compact-footer {
+    padding: 1.25rem 1rem 0.75rem;
+    margin-bottom: 0; /* Ensure no gap */
+  }
+  
+  .compact-footer .footer-logo {
+    max-width: 120px;
+  }
+  
+  .compact-footer .social-link {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .compact-footer .footer-bottom {
+    margin-top: 0.75rem;
+    padding-top: 0.5rem;
+  }
+  
+  .compact-footer .footer-bottom-links {
+    flex-direction: row;
+    justify-content: center;
+    gap: 1rem;
+  }
+}
+
+/* For the smallest devices */
+@media (max-width: 360px) {
+  .compact-footer {
+    padding: 1rem 0.75rem 0.5rem;
+    margin-bottom: 0; /* Ensure no gap */
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .compact-footer .social-link:hover {
+    transform: none;
+  }
+  
+  .compact-footer .footer-links {
+    transition: none;
+  }
+}

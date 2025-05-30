@@ -1,0 +1,455 @@
+/* src/components/admin/ServiceProviderManager/SubscriptionManager.css */
+
+.spm-subscription-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  overflow-y: auto;
+  padding: 2rem 0;
+}
+
+.spm-subscription-modal {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.spm-subscription-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.spm-subscription-modal-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.spm-close-button {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.spm-close-button:hover {
+  color: #ff3300;
+}
+
+.spm-subscription-modal-content {
+  padding: 1.5rem 2rem;
+  overflow-y: auto;
+  max-height: calc(90vh - 80px);
+}
+
+.spm-current-subscription-info {
+  background-color: #f5f9ff;
+  border: 1px solid #d1e5ff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.spm-current-subscription-info h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #0066cc;
+  font-size: 1.2rem;
+}
+
+.spm-current-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.spm-current-details p {
+  margin: 0.5rem 0;
+}
+
+.spm-subscription-tiers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.spm-subscription-tier-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.spm-subscription-tier-card:hover {
+  border-color: #0066cc;
+  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.15);
+}
+
+.spm-subscription-tier-card.selected {
+  border-color: #0066cc;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+}
+
+.spm-tier-header {
+  background-color: #f5f9ff;
+  padding: 1.2rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.spm-tier-header h3 {
+  margin: 0;
+  color: #0066cc;
+  font-size: 1.2rem;
+}
+
+.spm-tier-price {
+  font-weight: bold;
+  margin-top: 0.5rem;
+  color: #333;
+}
+
+.spm-tier-features {
+  padding: 1.2rem;
+}
+
+.spm-feature {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.spm-feature:last-child {
+  border-bottom: none;
+}
+
+.spm-select-tier {
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-top: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+}
+
+.spm-select-tier input[type="radio"] {
+  margin-right: 0.8rem;
+}
+
+.spm-downgrade-warning {
+  display: flex;
+  background-color: #fff8e6;
+  border: 1px solid #ffdb8b;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+
+.spm-warning-icon {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+.spm-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.spm-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.spm-form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #444;
+}
+
+.spm-form-select,
+.spm-form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.spm-form-select:focus,
+.spm-form-input:focus {
+  border-color: #0066cc;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.spm-quick-renewal-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.spm-quick-renewal-buttons button {
+  background-color: #e6f0ff;
+  border: 1px solid #b3d1ff;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  color: #0066cc;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.spm-quick-renewal-buttons button:hover {
+  background-color: #d1e5ff;
+}
+
+.spm-features-form {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.spm-features-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.spm-feature-checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.spm-feature-checkbox input[type="checkbox"] {
+  margin-right: 0.8rem;
+}
+
+.spm-payment-history {
+  margin-bottom: 1.5rem;
+}
+
+.spm-payment-history-list {
+  margin-bottom: 1.5rem;
+}
+
+.spm-payment-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  background-color: #f9f9f9;
+}
+
+.spm-payment-info {
+  display: flex;
+  align-items: center;
+}
+
+.spm-payment-amount {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-right: 1.5rem;
+}
+
+.spm-payment-details {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.spm-remove-payment-btn {
+  background: none;
+  border: none;
+  color: #cc0000;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.spm-remove-payment-btn:hover {
+  color: #ff0000;
+  transform: scale(1.1);
+}
+
+.spm-add-payment-form {
+  background-color: #f0f7ff;
+  border: 1px solid #b3d1ff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.spm-add-payment-form h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #0066cc;
+}
+
+.spm-payment-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.spm-cancel-payment-btn {
+  background-color: #f2f2f2;
+  border: 1px solid #ddd;
+  color: #666;
+}
+
+.spm-add-payment-btn {
+  background-color: #0066cc;
+  color: white;
+  border: none;
+}
+
+.spm-cancel-payment-btn,
+.spm-add-payment-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.spm-cancel-payment-btn:hover {
+  background-color: #e6e6e6;
+}
+
+.spm-add-payment-btn:hover {
+  background-color: #0052a3;
+}
+
+.spm-show-add-payment-btn {
+  background-color: #e6f0ff;
+  border: 1px solid #b3d1ff;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  color: #0066cc;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.spm-show-add-payment-btn:hover {
+  background-color: #d1e5ff;
+}
+
+.spm-subscription-error-message {
+  background-color: #ffdddd;
+  border-left: 4px solid #ff3300;
+  color: #cc0000;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+}
+
+.spm-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #ddd;
+}
+
+.spm-cancel-button,
+.spm-save-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.spm-cancel-button {
+  background-color: #f2f2f2;
+  border: 1px solid #ddd;
+  color: #444;
+}
+
+.spm-cancel-button:hover {
+  background-color: #e6e6e6;
+}
+
+.spm-save-button {
+  background-color: #0066cc;
+  border: none;
+  color: white;
+}
+
+.spm-save-button:hover {
+  background-color: #0052a3;
+}
+
+.spm-save-button:disabled,
+.spm-cancel-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .spm-subscription-modal {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .spm-form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .spm-features-checkboxes {
+    grid-template-columns: 1fr;
+  }
+  
+  .spm-subscription-tiers {
+    grid-template-columns: 1fr;
+  }
+  
+  .spm-current-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .spm-payment-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .spm-payment-amount {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+}

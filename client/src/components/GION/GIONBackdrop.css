@@ -1,0 +1,46 @@
+/* Enhanced GIONBackdrop.css */
+.gion-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 1040;
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overscroll-behavior: contain;
+  }
+  
+  .gion-backdrop.visible {
+    opacity: 1;
+  }
+  
+  /* Add this to prevent scroll-through */
+  body.gion-modal-open {
+    overflow: hidden;
+    overscroll-behavior: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Accessibility improvements */
+  @media (prefers-reduced-motion: reduce) {
+    .gion-backdrop {
+      transition: none;
+    }
+    
+    .gion-backdrop.visible {
+      opacity: 1;
+    }
+  }
+  
+  /* High contrast support */
+  @media (prefers-contrast: more) {
+    .gion-backdrop {
+      background-color: rgba(0, 0, 0, 0.9);
+    }
+  }

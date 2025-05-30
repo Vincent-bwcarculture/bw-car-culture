@@ -1,0 +1,368 @@
+/* src/components/GION/GIONAdminDashboard/components/VerificationDetailsModal.css */
+.gion-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .gion-verification-details-modal {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .gion-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .gion-modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .gion-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #888;
+  }
+  
+  .gion-modal-close:hover {
+    color: #333;
+  }
+  
+  .gion-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  .gion-modal-loading,
+  .gion-modal-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    text-align: center;
+  }
+  
+  .gion-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #4a4a8a;
+    border-radius: 50%;
+    animation: gion-spin 1s linear infinite;
+    margin-bottom: 15px;
+  }
+  
+  @keyframes gion-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .gion-verification-header-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .gion-business-name {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .gion-verification-status {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .gion-verification-status.pending {
+    background-color: rgba(255, 152, 0, 0.1);
+    color: #ff9800;
+  }
+  
+  .gion-verification-status.approved {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+  }
+  
+  .gion-verification-status.rejected {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+  }
+  
+  .gion-verification-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .gion-detail-item {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .gion-detail-item label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+  }
+  
+  .gion-detail-item span {
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .gion-contact-section,
+  .gion-location-section,
+  .gion-documents-section {
+    margin-bottom: 25px;
+  }
+  
+  .gion-contact-section h3,
+  .gion-location-section h3,
+  .gion-documents-section h3 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .gion-contact-grid,
+  .gion-location-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  .gion-contact-item,
+  .gion-location-item {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .gion-contact-item label,
+  .gion-location-item label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+  }
+  
+  .gion-contact-item span,
+  .gion-contact-item a,
+  .gion-location-item span {
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .gion-contact-item a {
+    color: #4a4a8a;
+    text-decoration: none;
+  }
+  
+  .gion-contact-item a:hover {
+    text-decoration: underline;
+  }
+  
+  .gion-documents-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 12px;
+  }
+  
+  .gion-document-item {
+    display: flex;
+    align-items: center;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+  }
+  
+  .gion-document-icon {
+    font-size: 24px;
+    margin-right: 12px;
+  }
+  
+  .gion-document-info {
+    flex: 1;
+  }
+  
+  .gion-document-name {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 4px;
+  }
+  
+  .gion-document-type {
+    font-size: 12px;
+    color: #666;
+  }
+  
+  .gion-document-view-btn {
+    background-color: #4a4a8a;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .gion-document-view-btn:hover {
+    background-color: #3c3c70;
+  }
+  
+  .gion-verification-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .gion-approve-button,
+  .gion-reject-button,
+  .gion-confirm-reject-button,
+  .gion-cancel-button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .gion-approve-button {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .gion-approve-button:hover {
+    background-color: #3d8b40;
+  }
+  
+  .gion-reject-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .gion-reject-button:hover {
+    background-color: #d32f2f;
+  }
+  
+  .gion-cancel-button {
+    background-color: #9e9e9e;
+    color: white;
+  }
+  
+  .gion-cancel-button:hover {
+    background-color: #757575;
+  }
+  
+  .gion-confirm-reject-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .gion-confirm-reject-button:hover {
+    background-color: #d32f2f;
+  }
+  
+  .gion-reject-form {
+    width: 100%;
+  }
+  
+  .gion-reject-form h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .gion-reject-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 15px;
+    resize: vertical;
+  }
+  
+  .gion-reject-form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  
+  .gion-review-notes {
+    margin-top: 25px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+  }
+  
+  .gion-review-notes h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  .gion-review-notes p {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 15px;
+  }
+  
+  .gion-reviewer-info {
+    font-size: 12px;
+    color: #666;
+  }
+  
+  .gion-reviewer-info p {
+    margin: 0;
+    font-size: 12px;
+  }
+  
+  @media (max-width: 768px) {
+    .gion-verification-details-grid,
+    .gion-contact-grid,
+    .gion-location-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .gion-verification-actions {
+      flex-direction: column;
+    }
+    
+    .gion-modal-header h2 {
+      font-size: 1.2rem;
+    }
+    
+    .gion-business-name {
+      font-size: 1.4rem;
+    }
+  }

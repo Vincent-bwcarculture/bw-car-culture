@@ -1,0 +1,362 @@
+/* components/GION/GIONApp.css */
+.gion-app-container {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --primary-color: #5f5fc4;
+    --secondary-color: #ff3300;
+    --dark-bg: #181820;
+    --card-bg: #222230;
+    --text-color: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --animation-duration: 0.3s;
+    --animation-timing: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  /* QR Scanner overlay */
+  .qr-scanner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--dark-bg);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .scanner-header {
+    background: linear-gradient(135deg, #4a4a8a 0%, #5f5fc4 100%);
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .scanner-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  .close-scanner-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+  }
+  
+  .close-scanner-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  #qr-reader {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+  }
+  
+  #qr-reader video {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  
+  .scanner-guide {
+    padding: 1rem;
+    background: #333;
+    color: white;
+    text-align: center;
+  }
+  
+  .scanner-guide p {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .scanner-guide-hint {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-top: 0.25rem !important;
+  }
+  
+  /* Support for animations */
+  @media (prefers-reduced-motion: reduce) {
+    .gion-app-container {
+      --animation-duration: 0s;
+    }
+    
+    .gion-modal, 
+    .gion-backdrop, 
+    .gion-button {
+      transition: none !important;
+      animation: none !important;
+    }
+    
+    .confetti-piece,
+    .falling-star {
+      display: none;
+    }
+  }
+  
+  /* Dark mode is default, but add light mode support */
+  @media (prefers-color-scheme: light) {
+    .gion-app-container {
+      --dark-bg: #f5f5f5;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --text-secondary: rgba(0, 0, 0, 0.7);
+      --text-muted: rgba(0, 0, 0, 0.5);
+      --border-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Force dark mode for the GION components */
+    .gion-modal {
+      --dark-bg: #181820;
+      --card-bg: #222230;
+      --text-color: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-muted: rgba(255, 255, 255, 0.5);
+      --border-color: rgba(255, 255, 255, 0.1);
+      color: var(--text-color);
+    }
+  }
+  
+  /* Embedded pages */
+  .gion-embedded-page {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background: #181820;
+    color: white;
+    position: relative;
+  }
+  
+  /* Loading indicator for embedded pages */
+  .gion-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  /* Override styles for embedded pages to ensure they work within the modal */
+  .gion-embedded-page .main-content,
+  .gion-embedded-page .page-container,
+  .gion-embedded-page .content-wrapper {
+    padding-bottom: 80px !important; /* Ensure content doesn't get hidden behind bottom nav */
+    overflow: visible !important;
+    background: transparent !important;
+  }
+  
+  /* Remove any fixed positioning from embedded pages */
+  .gion-embedded-page .navbar,
+  .gion-embedded-page .header,
+  .gion-embedded-page .fixed-element {
+    position: relative !important;
+    top: auto !important;
+  }
+  
+  /* Hide any elements that shouldn't appear in the embedded version */
+  .gion-embedded-page .mobile-bottom-nav,
+  .gion-embedded-page .navigation-container,
+  .gion-embedded-page .footer {
+    display: none !important;
+  }
+
+  /* Bottom navigation */
+  .gion-bottom-navigation {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: rgba(24, 24, 32, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 0 0.5rem;
+    box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.05);
+    position: fixed; /* Change from absolute to fixed */
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1055; /* Ensure it's above content but below modal close buttons */
+    height: 60px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    width: 100%; /* Ensure full width */
+  }
+  
+  .gion-nav-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    flex: 1;
+    transition: all 0.2s ease;
+    padding: 0.75rem 0;
+    height: 100%;
+  }
+  
+  .gion-nav-button span {
+    font-size: 0.75rem;
+  }
+  
+  .gion-nav-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .gion-nav-button:hover {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .gion-nav-button.active {
+    color: #5f5fc4;
+  }
+  
+  /* Make room for bottom navigation in expanded mode */
+  .gion-modal.expanded .gion-content {
+    padding-bottom: 70px !important; /* Increase padding to prevent content being hidden */
+  }
+
+  /* Exit button styles */
+  .exit-app-container {
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .exit-app-button {
+    background: rgba(255, 51, 0, 0.9);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .exit-app-button:hover {
+    background: rgba(255, 51, 0, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .exit-app-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Close button for expanded modal */
+  .expanded-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 51, 0, 0.9);
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1060;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+  }
+  
+  .expanded-modal-close:hover {
+    background: rgba(255, 51, 0, 1);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  }
+  
+  .expanded-modal-close:active {
+    transform: scale(0.95);
+  }
+
+  /* Animation for the modal */
+  @keyframes modalExpand {
+    from {
+      width: 375px;
+      height: 550px;
+      bottom: 100px;
+      right: 20px;
+      max-height: 75vh;
+      border-radius: 16px;
+    }
+    to {
+      width: 100%;
+      height: 100%;
+      bottom: 0;
+      right: 0;
+      max-height: 100vh;
+      border-radius: 0;
+    }
+  }
+
+  /* Responsive adjustments for different screen sizes */
+  @media (max-width: 768px) {
+    :root {
+      --bottom-nav-height: 60px;
+    }
+    
+    body.has-mobile-nav.with-chatbot .gion-button-container {
+      bottom: 140px;
+    }
+    
+    .gion-modal {
+      max-height: calc(100vh - 140px);
+    }
+
+    .expanded-modal-close {
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 36px;
+      height: 36px;
+    }
+  }
+  
+  /* Small screens optimization */
+  @media (max-width: 350px) {
+    .gion-modal {
+      width: 100% !important;
+      right: 0 !important;
+      left: 0 !important;
+      border-radius: 16px 16px 0 0 !important;
+    }
+
+    .exit-app-button {
+      width: 32px;
+      height: 32px;
+      font-size: 0.85rem;
+    }
+  }

@@ -1,0 +1,501 @@
+/* Updated GIONReviewScreen.css */
+.gion-review-screen {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    color: white;
+    min-height: 100%;
+    background-color: #181820;
+  }
+  
+  /* Service info styles */
+  .service-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .service-icon {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, #5f5fc4 0%, #4a4a8a 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .service-details h4 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: white;
+  }
+  
+  .service-details p {
+    margin: 0.35rem 0 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    gap: 0.75rem;
+  }
+  
+  .service-category {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+  
+  .service-id {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+  }
+  
+  /* Rating section styles */
+  .rating-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0;
+  }
+  
+  .rating-prompt {
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+    color: white;
+    font-weight: 500;
+  }
+  
+  .star-rating {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .star-button {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 3rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: all 0.2s ease;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .star-button:hover {
+    transform: scale(1.15);
+    color: rgba(255, 215, 0, 0.7);
+  }
+  
+  .star-button.active {
+    color: #ffd700;
+  }
+  
+  .rating-label {
+    margin-top: 0.75rem;
+    font-size: 1rem;
+    color: white;
+    font-weight: 500;
+    background: linear-gradient(90deg, #ffd700, #ffaa00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* Tags section styles */
+  .tags-section {
+    padding: 0.75rem 0;
+  }
+  
+  .tags-prompt {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+  }
+  
+  .tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+  }
+  
+  .tag-button {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0.6rem 0.9rem;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .tag-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-1px);
+  }
+  
+  .tag-button.active {
+    background: linear-gradient(135deg, #5f5fc4 0%, #4a4a8a 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(95, 95, 196, 0.3);
+  }
+  
+  /* Comment section styles */
+  .comment-section,
+  .photo-section {
+    margin-top: 0.75rem;
+  }
+  
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    color: white;
+  }
+  
+  .comment-section textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.9rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    resize: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: white;
+    transition: all 0.2s ease;
+  }
+  
+  .comment-section textarea:focus {
+    outline: none;
+    border-color: rgba(95, 95, 196, 0.5);
+    box-shadow: 0 0 0 2px rgba(95, 95, 196, 0.3);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .comment-section textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  /* Photo upload styles */
+  .photo-previews {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+    overflow-x: auto;
+    padding: 0.25rem 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+  
+  .photo-previews::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .photo-previews::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .photo-previews::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+  
+  .photo-preview {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .remove-photo {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .remove-photo:hover {
+    background: rgba(255, 51, 0, 0.8);
+    transform: scale(1.1);
+  }
+  
+  .photo-upload-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0.9rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+  
+  .photo-upload-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+  
+  /* Social share toggle */
+  .social-share {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+  }
+  
+  .switch-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+  }
+  
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: 0.3s;
+    border-radius: 24px;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  input:checked + .slider {
+    background: linear-gradient(135deg, #5f5fc4 0%, #4a4a8a 100%);
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(24px);
+  }
+  
+  /* Review actions */
+  .review-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .cancel-button {
+    flex: 1;
+    padding: 1rem;
+    border-radius: 30px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .cancel-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+  }
+  
+  /* Submit button */
+  .submit-button {
+    flex: 1;
+    background: linear-gradient(135deg, #5f5fc4 0%, #4a4a8a 100%);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .submit-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .submit-button:hover::before {
+    opacity: 1;
+  }
+  
+  .submit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(95, 95, 196, 0.4);
+  }
+  
+  .submit-button.disabled {
+    background: #333344;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  
+  /* Points indicator */
+  .points-indicator {
+    text-align: center;
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+    padding: 0.9rem;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .points-indicator::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 0%, rgba(255,215,0,0.1) 50%, transparent 100%);
+    transform: translateX(-100%);
+    animation: shimmer 3s infinite;
+  }
+  
+  /* Review Benefits Section */
+  .review-benefits {
+    margin-top: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .benefit-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .benefit-item svg {
+    color: #5f5fc4;
+  }
+  
+  /* Animation for rating section */
+  @keyframes star-scale {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+  
+  .star-rating.rated .star-button.active {
+    animation: star-scale 0.3s ease;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 340px) {
+    .gion-review-screen {
+      padding: 1rem;
+    }
+    
+    .star-button {
+      font-size: 2.5rem;
+    }
+    
+    .review-actions {
+      flex-direction: column;
+    }
+    
+    .service-icon {
+      width: 46px;
+      height: 46px;
+      font-size: 1.3rem;
+    }
+    
+    .service-details h4 {
+      font-size: 1.1rem;
+    }
+  }

@@ -1,0 +1,423 @@
+/* Enhanced GIONModal.css */
+.gion-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1040;
+    opacity: 0;
+    transition: opacity 300ms ease;
+    overscroll-behavior: contain;
+  }
+  
+  .gion-backdrop.visible {
+    opacity: 1;
+  }
+  
+  .gion-modal {
+    position: fixed;
+    bottom: -600px; /* Start offscreen */
+    right: 20px;
+    width: 375px;
+    height: 550px;
+    max-width: 375px;
+    max-height: 75vh;
+    background: #1a1a2e;
+    color: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    z-index: 1050;
+    overflow: hidden;
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), 
+                bottom 300ms cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 300ms ease,
+                border-radius 300ms ease,
+                width 300ms cubic-bezier(0.16, 1, 0.3, 1),
+                height 300ms cubic-bezier(0.16, 1, 0.3, 1),
+                max-height 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Adding transition classes for better animation control */
+  .gion-modal.visible {
+    bottom: 100px;
+    transform: translateY(0);
+  }
+  
+  .gion-modal.entering {
+    animation: modalEnter 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  .gion-modal.exiting {
+    animation: modalExit 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  @keyframes modalEnter {
+    from {
+      bottom: -600px;
+      opacity: 0;
+    }
+    to {
+      bottom: 100px;
+      opacity: 1;
+    }
+  }
+  
+  @keyframes modalExit {
+    from {
+      bottom: 100px;
+      opacity: 1;
+    }
+    to {
+      bottom: -600px;
+      opacity: 0;
+    }
+  }
+  
+  .gion-modal.success-bg {
+    background: linear-gradient(135deg, #3f51b5 0%, #303f9f 100%);
+  }
+  
+  .gion-modal.expanded {
+    width: 100% !important;
+    height: 100% !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    top: 0 !important;
+    border-radius: 0 !important;
+    max-height: 100vh !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    position: fixed !important;
+  }
+  
+  .gion-modal.expanding {
+    animation: modalExpand 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  .gion-modal.collapsing {
+    animation: modalCollapse 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  @keyframes modalExpand {
+    from {
+      width: 375px;
+      height: 550px;
+      bottom: 100px;
+      right: 20px;
+      max-height: 75vh;
+      border-radius: 16px;
+    }
+    to {
+      width: 100%;
+      height: 100%;
+      bottom: 0;
+      right: 0;
+      max-height: 100vh;
+      border-radius: 0;
+    }
+  }
+  
+  @keyframes modalCollapse {
+    from {
+      width: 100%;
+      height: 100%;
+      bottom: 0;
+      right: 0;
+      max-height: 100vh;
+      border-radius: 0;
+    }
+    to {
+      width: 375px;
+      height: 550px;
+      bottom: 100px;
+      right: 20px;
+      max-height: 75vh;
+      border-radius: 16px;
+    }
+  }
+  
+  .gion-modal.dragging {
+    transition: none !important;
+  }
+  
+  .gion-content {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+  
+  .gion-content::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .gion-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .gion-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+  
+  /* Drag indicator for mobile */
+  .gion-drag-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+    pointer-events: none;
+  }
+  
+  .drag-handle {
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+  }
+  
+  /* Fullscreen button */
+  .gion-fullscreen-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .gion-fullscreen-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .gion-fullscreen-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Expanded modal close button */
+  .expanded-modal-close {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 51, 0, 0.9);
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1060;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+  }
+  
+  .expanded-modal-close:hover {
+    background: rgba(255, 51, 0, 1);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  }
+  
+  .expanded-modal-close:active {
+    transform: scale(0.95);
+  }
+  
+  /* Bottom navigation specifically for expanded mode */
+  .gion-bottom-navigation {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: rgba(26, 26, 46, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 0 0.5rem;
+    box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.05);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    height: 64px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .gion-nav-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    flex: 1;
+    transition: all 0.2s ease;
+    padding: 0.75rem 0;
+    height: 100%;
+    min-height: 60px; 
+    min-width: 60px;
+  }
+  
+  .gion-nav-button span {
+    font-size: 0.8rem;
+  }
+  
+  .gion-nav-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .gion-nav-button:hover {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .gion-nav-button.active {
+    color: #3f51b5;
+  }
+  
+  /* Make room for bottom navigation in expanded mode */
+  .gion-modal.expanded .gion-content {
+    padding-bottom: 64px;
+  }
+  
+  /* Focus styles for accessibility */
+  .gion-modal button:focus-visible,
+  .expanded-modal-close:focus-visible,
+  .gion-fullscreen-button:focus-visible {
+    outline: 2px solid #3f51b5;
+    outline-offset: 2px;
+  }
+  
+  /* Media queries for responsive design */
+  @media screen and (max-width: 1024px) {
+    .gion-modal {
+      max-width: 350px; 
+    }
+  }
+  
+  @media screen and (max-width: 768px) {
+    /* Adjust position for default tablets/mobile */
+    .gion-modal.visible {
+      bottom: 80px;
+    }
+    
+    .gion-modal {
+      width: 340px;
+      height: 520px;
+      right: 16px;
+    }
+    
+    .with-chatbot .gion-modal.visible {
+      bottom: 140px;
+    }
+    
+    /* Adjust expanded view for mobile */
+    .gion-modal.expanded {
+      width: 100%;
+      height: 100%; 
+      bottom: 0;
+      right: 0;
+      left: 0;
+      top: 0;
+    }
+    
+    .gion-bottom-navigation {
+      height: 60px;
+    }
+    
+    /* Adjust animations for mobile */
+    @keyframes modalExpand {
+      from {
+        width: 340px;
+        height: 520px;
+        bottom: 80px;
+        right: 16px;
+      }
+      to {
+        width: 100%;
+        height: 100%;
+        bottom: 0;
+        right: 0;
+      }
+    }
+    
+    @keyframes modalCollapse {
+      from {
+        width: 100%;
+        height: 100%;
+        bottom: 0;
+        right: 0;
+      }
+      to {
+        width: 340px;
+        height: 520px;
+        bottom: 80px;
+        right: 16px;
+      }
+    }
+  }
+  
+  @media screen and (max-width: 480px) {
+    /* Smaller mobile adjustments */
+    .gion-modal {
+      width: 90%;
+      right: 5%;
+      max-width: none;
+    }
+    
+    /* Adjust positions for small screens */
+    .expanded-modal-close,
+    .gion-fullscreen-button {
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 36px;
+      height: 36px;
+    }
+    
+    /* Improve touch targets for small screens */
+    .gion-nav-button {
+      padding: 0.5rem 0;
+    }
+    
+    .gion-nav-icon {
+      width: 22px;
+      height: 22px;
+    }
+    
+    .gion-nav-button span {
+      font-size: 0.75rem;
+    }
+  }

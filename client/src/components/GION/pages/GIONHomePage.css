@@ -1,0 +1,809 @@
+/* Complete GIONHomePage.css */
+.gion-page {
+    background-color: #181820;
+    color: #ffffff;
+    min-height: 100%;
+    width: 100%;
+    position: relative;
+    padding-bottom: 60px;
+  }
+  
+  .gion-page-header {
+    padding: 1.5rem 1rem 1rem;
+  }
+  
+  .gion-title-area {
+    text-align: center;
+  }
+  
+  .gion-page-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #ffffff, #d0d0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .gion-subtitle {
+    display: block;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 0.25rem;
+  }
+  
+  .gion-back-button {
+    background: none;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: absolute;
+    left: 0.5rem;
+    top: 1rem;
+  }
+  
+  .gion-back-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Quick Actions */
+  .gion-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    padding: 0 1rem;
+    margin: 1rem 0 1.5rem; /* Adjusted margin-top since points are removed */
+  }
+  
+  .gion-action-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .gion-action-button:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .action-icon {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .gion-action-button span {
+    font-size: 0.75rem;
+  }
+  
+  .gion-action-button.scan {
+    background: rgba(95, 95, 196, 0.15);
+    border-color: rgba(95, 95, 196, 0.2);
+  }
+  
+  .gion-action-button.code {
+    background: rgba(255, 152, 0, 0.15);
+    border-color: rgba(255, 152, 0, 0.2);
+  }
+  
+  .gion-action-button.report {
+    background: rgba(231, 76, 60, 0.15);
+    border-color: rgba(231, 76, 60, 0.2);
+  }
+  
+  .gion-action-button.rewards {
+    background: rgba(46, 204, 113, 0.15);
+    border-color: rgba(46, 204, 113, 0.2);
+  }
+  
+  /* Transport Statistics Section */
+  .transport-statistics-section {
+    padding: 0 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .section-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    position: relative;
+  }
+  
+  .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(90deg, #5f5fc4, transparent);
+  }
+  
+  .ministry-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.4rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .ministry-badge.small {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+  
+  .ministry-badge.micro {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+  }
+  
+  .ministry-icon {
+    font-size: 1rem;
+  }
+  
+  .statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .statistic-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+  }
+  
+  .statistic-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    background: rgba(255, 255, 255, 0.08);
+  }
+  
+  .statistic-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .statistic-details {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .statistic-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+  }
+  
+  .statistic-title {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 0.25rem;
+  }
+  
+  .statistic-change {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 0.25rem;
+  }
+  
+  /* Search Bar */
+  .gion-search-container {
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .gion-search-bar {
+    position: relative;
+    width: 100%;
+  }
+  
+  .gion-search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .gion-search-input {
+    width: 100%;
+    padding: 0.9rem 1rem 0.9rem 2.8rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+  
+  .gion-search-input:focus {
+    outline: none;
+    border-color: rgba(95, 95, 196, 0.5);
+    box-shadow: 0 0 0 2px rgba(95, 95, 196, 0.3);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .gion-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  /* Category Tabs */
+  .gion-category-tabs {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem 1rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .gion-category-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .gion-category-tab {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 0.6rem 1.2rem;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: all 0.2s ease;
+  }
+  
+  .gion-category-tab:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+  }
+  
+  .gion-category-tab.active {
+    background: linear-gradient(135deg, #5f5fc4 0%, #4a4a8a 100%);
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(95, 95, 196, 0.3);
+  }
+  
+  .gion-category-icon {
+    font-size: 1.1rem;
+  }
+  
+  /* Sections */
+  .gion-section {
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .gion-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .gion-section-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    position: relative;
+  }
+  
+  .gion-section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(90deg, #5f5fc4, transparent);
+  }
+  
+  .gion-see-all-button {
+    font-size: 0.85rem;
+    color: #5f5fc4;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  .gion-see-all-button:hover {
+    background: rgba(95, 95, 196, 0.1);
+    transform: translateY(-1px);
+  }
+  
+  /* Services Grid */
+  .gion-services-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .gion-service-card {
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .gion-service-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  }
+  
+  .gion-service-header {
+    padding: 0.75rem;
+    position: relative;
+  }
+  
+  .gion-service-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+    z-index: 1;
+  }
+  
+  .gion-service-badge {
+    font-size: 0.7rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    position: relative;
+    z-index: 2;
+    color: white;
+  }
+  
+  .gion-service-content {
+    padding: 0.75rem;
+  }
+  
+  .gion-service-name {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .gion-service-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.25rem;
+  }
+  
+  .gion-service-rating svg {
+    color: #ffd700;
+    fill: #ffd700;
+  }
+  
+  .gion-service-location {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0.25rem;
+  }
+  
+  .gion-service-reviews {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.5rem;
+  }
+  
+  .service-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .service-badge {
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+  }
+  
+  .service-safety-score {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  /* Activity List */
+  .gion-activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .gion-activity-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.9rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+  }
+  
+  .gion-activity-item:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .gion-activity-content {
+    flex: 1;
+  }
+  
+  .gion-activity-text {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.25rem;
+  }
+  
+  .gion-activity-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .gion-activity-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .gion-activity-action:hover {
+    background: linear-gradient(135deg, #5f5fc4 0%, #4a4a8a 100%);
+    transform: scale(1.1);
+  }
+  
+  /* Safety Reports */
+  .safety-icon-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e74c3c;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .safety-reports-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .safety-report-item {
+    background: rgba(231, 76, 60, 0.08);
+    border: 1px solid rgba(231, 76, 60, 0.2);
+    border-radius: 12px;
+    padding: 0.9rem;
+  }
+  
+  .safety-report-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  
+  .safety-report-type {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #e74c3c;
+  }
+  
+  .safety-report-date {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .safety-report-text {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0 0 0.75rem;
+  }
+  
+  .safety-report-service {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+  }
+  
+  .safety-service-id {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .safety-report-status {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  /* Ministry Partnership Banner */
+  .ministry-partnership-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, rgba(95, 95, 196, 0.15) 0%, rgba(95, 95, 196, 0.05) 100%);
+    margin: 0 1rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(95, 95, 196, 0.2);
+  }
+  
+  .ministry-logo {
+    font-size: 2rem;
+    line-height: 1;
+  }
+  
+  .ministry-content {
+    flex: 1;
+  }
+  
+  .ministry-title {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+  }
+  
+  .ministry-description {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .ministry-learn-more {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .ministry-learn-more:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+  }
+  
+  /* Transport Improvement Section */
+  .transport-improvement-section {
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    margin: 0 1rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .improvement-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .improvement-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+  }
+  
+  .improvement-period {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .improvement-metrics {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .improvement-metric {
+    text-align: center;
+  }
+  
+  .metric-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  
+  .metric-label {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .improvement-chart {
+    width: 90px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+  }
+  
+  /* CTA Section */
+  .gion-cta-section {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(95, 95, 196, 0.2) 0%, rgba(74, 74, 138, 0.2) 100%);
+    margin: 0 1rem 1.5rem;
+    border-radius: 16px;
+    text-align: center;
+    border: 1px solid rgba(95, 95, 196, 0.2);
+  }
+  
+  .cta-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+  }
+  
+  .cta-description {
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+  
+  .gion-review-cta,
+  .gion-safety-cta {
+    padding: 0.8rem 1.2rem;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .gion-review-cta {
+    background: linear-gradient(135deg, #5f5fc4 0%, #4a4a8a 100%);
+    color: white;
+  }
+  
+  .gion-safety-cta {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .gion-review-cta:hover,
+  .gion-safety-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .bottom-spacing {
+    height: 80px;
+  }
+  
+  /* Media queries for responsiveness */
+  @media (max-width: 340px) {
+    .gion-services-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .statistics-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .gion-quick-actions {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+    }
+    
+    .cta-buttons {
+      flex-direction: column;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .gion-services-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }

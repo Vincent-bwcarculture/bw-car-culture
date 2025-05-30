@@ -1,0 +1,511 @@
+/* src/components/shared/RentalCard/RentalCard.css */
+.rental-card {
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid #2c2c2c;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .rental-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(255, 51, 0, 0.2);
+    border-color: #ff3300;
+  }
+  
+  /* Image Container */
+  .rental-card-image-container {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  .rental-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  .rental-card:hover .rental-card-image {
+    transform: scale(1.05);
+  }
+  
+  /* Image Gallery Navigation */
+  .rental-card-image-navigation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .rental-card-image-container:hover .rental-card-image-navigation {
+    opacity: 1;
+  }
+  
+  .rental-card-image-nav {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin: 0 10px;
+    transition: all 0.3s ease;
+    z-index: 3;
+  }
+  
+  .rental-card-image-nav:hover {
+    background: #ff3300;
+    border-color: #ff3300;
+    transform: scale(1.1);
+  }
+  
+  .rental-card-image-counter {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    z-index: 3;
+  }
+  
+  .rental-card-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(54, 162, 235, 0.1);
+    color: #36a2eb;
+    border: 1px solid rgba(54, 162, 235, 0.3);
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    backdrop-filter: blur(4px);
+    z-index: 2;
+  }
+  
+  .rental-card-badge.suv {
+    background-color: rgba(255, 159, 64, 0.1);
+    color: #ff9f40;
+    border: 1px solid rgba(255, 159, 64, 0.3);
+  }
+  
+  .rental-card-badge.luxury {
+    background-color: rgba(153, 102, 255, 0.1);
+    color: #9966ff;
+    border: 1px solid rgba(153, 102, 255, 0.3);
+  }
+  
+  .rental-card-badge.economy {
+    background-color: rgba(46, 213, 115, 0.1);
+    color: #2ed573;
+    border: 1px solid rgba(46, 213, 115, 0.3);
+  }
+  
+  .rental-card-badge.off-road {
+    background-color: rgba(255, 99, 132, 0.1);
+    color: #ff6384;
+    border: 1px solid rgba(255, 99, 132, 0.3);
+  }
+  
+  /* Card Content */
+  .rental-card-content {
+    padding: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+  
+  .rental-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.4rem;
+  }
+  
+  .rental-card-title {
+    font-size: 1.2rem;
+    color: #ffffff;
+    margin: 0;
+    line-height: 1.4;
+    flex: 1;
+    padding-right: 1rem;
+  }
+  
+  /* Price styling */
+  .rental-card-price-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  
+  .rental-card-price {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #0051ff; /* Gran Turismo blue style */
+    white-space: nowrap;
+  }
+  
+  .rental-card-security-badge {
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+    margin-top: 5px;
+    white-space: nowrap;
+    color: #ff9f40;
+    background-color: rgba(255, 159, 64, 0.1);
+  }
+  
+  .rental-card-usage-badge {
+    font-size: 0.8rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+    margin-top: 3px;
+    white-space: nowrap;
+    color: #36a2eb;
+    background-color: rgba(54, 162, 235, 0.1);
+  }
+  
+  /* Specifications */
+  .rental-card-specs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.45rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .rental-card-spec-item {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .rental-card-spec-label {
+    font-size: 0.8rem;
+    color: #888;
+  }
+  
+  .rental-card-spec-value {
+    font-size: 0.9rem;
+    color: #ffffff;
+  }
+  
+  /* Special feature badges */
+  .rental-card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .rental-card-feature-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    background-color: rgba(25, 118, 210, 0.1);
+    color: #1976d2;
+    border: 1px solid rgba(25, 118, 210, 0.3);
+  }
+  
+  .rental-card-feature-badge.insurance {
+    background-color: rgba(46, 213, 115, 0.1);
+    color: #2ed573;
+    border: 1px solid rgba(46, 213, 115, 0.3);
+  }
+  
+  .rental-card-feature-badge.unlimited-miles {
+    background-color: rgba(156, 39, 176, 0.1);
+    color: #9c27b0;
+    border: 1px solid rgba(156, 39, 176, 0.3);
+  }
+  
+  /* Provider Information */
+  .rental-card-provider-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.6rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid #2c2c2c;
+    border-bottom: 1px solid #2c2c2c;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .rental-card-provider-info:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .rental-card-provider-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid transparent;
+    transition: border-color 0.2s ease;
+  }
+  
+  .rental-card-provider-info:hover .rental-card-provider-avatar {
+    border-color: #ff3300;
+  }
+  
+  .rental-card-provider-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    flex: 1;
+  }
+  
+  .rental-card-provider-name {
+    font-size: 0.9rem;
+    color: #ffffff;
+    transition: color 0.2s ease;
+  }
+  
+  .rental-card-provider-info:hover .rental-card-provider-name {
+    color: #ff3300;
+  }
+  
+  .rental-card-provider-location {
+    font-size: 0.8rem;
+    color: #888;
+  }
+  
+  .rental-card-provider-link {
+    font-size: 0.75rem;
+    color: #ff3300;
+    margin-top: 0.2rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  
+  .rental-card-provider-info:hover .rental-card-provider-link {
+    opacity: 1;
+  }
+  
+  /* Footer */
+  .rental-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+  }
+  
+  .rental-card-availability-tag {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+  }
+  
+  .rental-card-availability-tag.available {
+    background: rgba(46, 213, 115, 0.1);
+    color: #2ed573;
+  }
+  
+  .rental-card-availability-tag.limited {
+    background: rgba(255, 159, 64, 0.1);
+    color: #ff9f40;
+  }
+  
+  .rental-card-availability-tag.unavailable {
+    background: rgba(255, 99, 132, 0.1);
+    color: #ff6384;
+  }
+  
+  .rental-card-actions {
+    display: flex;
+    gap: 6px;
+  }
+  
+  .rental-card-share-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1px solid #2c2c2c;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+  }
+  
+  .rental-card-share-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #ff3300;
+  }
+  
+  .rental-card-reserve-btn {
+    background: #25D366; /* WhatsApp green color */
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-size: 0.8rem;
+  }
+  
+  .rental-card-reserve-btn:hover {
+    background: #128C7E; /* Darker WhatsApp green on hover */
+  }
+  
+  .rental-card-details-btn {
+    background: #ff3300;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-size: 0.8rem;
+  }
+  
+  .rental-card-details-btn:hover {
+    background: #cc2900;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .rental-card-specs {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .rental-card-title {
+        font-size: 1rem;
+    }
+    
+    .rental-card-actions {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .rental-card-share-btn,
+    .rental-card-reserve-btn,
+    .rental-card-details-btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .rental-card-image-container {
+        height: 160px;
+    }
+    
+    .rental-card-provider-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .rental-card-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .rental-card-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 4px;
+    }
+    
+    .rental-card-share-btn {
+        grid-column: 1;
+    }
+    
+    .rental-card-reserve-btn {
+        grid-column: 2;
+    }
+    
+    .rental-card-details-btn {
+        grid-column: span 2;
+        margin-top: 4px;
+    }
+    
+    .rental-card-share-btn,
+    .rental-card-reserve-btn,
+    .rental-card-details-btn {
+        text-align: center;
+    }
+  }
+  
+  /* Performance optimizations */
+  .rental-card {
+    will-change: transform;
+    contain: content;
+  }
+  
+  /* Compact mode styling */
+  .rental-card.compact {
+    transform: scale(0.95);
+  }
+  
+  .rental-card.compact .rental-card-image-container {
+    height: 150px;
+  }
+  
+  .rental-card.compact .rental-card-title {
+    font-size: 1rem;
+    max-height: 2.6rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+  }
+  
+  .rental-card.compact .rental-card-content {
+    padding: 0.5rem;
+  }
+  
+  .rental-card.compact .rental-card-specs {
+    gap: 0.3rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .rental-card.compact .rental-card-provider-info {
+    padding: 0.3rem 0;
+    margin-bottom: 0.3rem;
+    gap: 0.5rem;
+  }
+  
+  .rental-card.compact .rental-card-provider-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .rental-card.compact .rental-card-footer {
+    margin-top: 0.3rem;
+  }
+  
+  .rental-card.compact .rental-card-actions {
+    gap: 4px;
+  }
+  
+  .rental-card.compact .rental-card-share-btn,
+  .rental-card.compact .rental-card-reserve-btn,
+  .rental-card.compact .rental-card-details-btn {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }

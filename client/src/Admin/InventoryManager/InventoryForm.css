@@ -1,0 +1,402 @@
+/* src/components/admin/InventoryManager/InventoryForm.css */
+.inventory-form-container {
+    background-color: rgba(20, 20, 20, 0.95);
+    color: #f5f5f5;
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  
+  .inventory-form-container h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #ff3300;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.5rem;
+  }
+  
+  .inventory-form-error {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #ff6b81;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+  }
+  
+  .inventory-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .inventory-form-section {
+    background-color: rgba(25, 25, 25, 0.5);
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid #333;
+  }
+  
+  .inventory-form-section h3 {
+    margin-top: 0;
+    margin-bottom: 1.2rem;
+    font-size: 1.3rem;
+    color: #fff;
+  }
+  
+  .inventory-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .inventory-form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.2rem;
+  }
+  
+  .inventory-form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #ccc;
+  }
+  
+  .inventory-form-input,
+  .inventory-form-select,
+  .inventory-form-textarea {
+    background-color: rgba(30, 30, 30, 0.7);
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 0.8rem;
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .inventory-form-input:focus,
+  .inventory-form-select:focus,
+  .inventory-form-textarea:focus {
+    outline: none;
+    border-color: #ff3300;
+    box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.2);
+  }
+  
+  .inventory-form-textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+  
+  .inventory-form-hint {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 0.4rem;
+  }
+  
+  .inventory-form-checkbox {
+    margin-right: 0.5rem;
+    width: 18px;
+    height: 18px;
+    accent-color: #ff3300;
+  }
+  
+  .checkbox-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .checkbox-group label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+    cursor: pointer;
+  }
+  
+  /* Specifications styles */
+  .inventory-form-specifications {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .specification-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .specification-key {
+    flex: 1;
+  }
+  
+  .specification-value {
+    flex: 2;
+  }
+  
+  /* Features styles */
+  .inventory-form-features {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .feature-input-row {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .feature-input {
+    flex: 1;
+  }
+  
+  .feature-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+  
+  .feature-tag {
+    background-color: rgba(255, 51, 0, 0.15);
+    color: #ff8566;
+    padding: 0.5rem 0.8rem;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 51, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .remove-feature-button {
+    background: none;
+    border: none;
+    color: #ff8566;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Compatible vehicles styles */
+  .inventory-form-compatibles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .compatible-vehicle-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .vehicle-make,
+  .vehicle-model {
+    flex: 1;
+  }
+  
+  .vehicle-years {
+    flex: 0.7;
+  }
+  
+  /* Images styles */
+  .inventory-form-images {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  
+  .image-upload-container {
+    background-color: rgba(30, 30, 30, 0.7);
+    border: 2px dashed #444;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+  }
+  
+  .inventory-form-file-input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  
+  .inventory-form-file-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+  }
+  
+  .upload-icon {
+    font-size: 2.5rem;
+    color: #ff3300;
+  }
+  
+  .image-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+  
+  .image-preview {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #333;
+  }
+  
+  .image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .remove-image-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: none;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .remove-image-button:hover {
+    background-color: rgba(220, 53, 69, 0.8);
+  }
+  
+  /* Form buttons */
+  .inventory-form-button {
+    padding: 0.8rem 1.2rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-size: 1rem;
+  }
+  
+  .add-button {
+    background-color: rgba(30, 30, 30, 0.7);
+    color: #ccc;
+    border: 1px solid #444;
+  }
+  
+  .add-button:hover {
+    background-color: rgba(40, 40, 40, 0.8);
+    color: #fff;
+  }
+  
+  .remove-button {
+    background-color: transparent;
+    color: #dc3545;
+    padding: 0.5rem;
+    font-size: 1.2rem;
+  }
+  
+  .remove-button:hover {
+    color: #ff4c5a;
+  }
+  
+  .inventory-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  
+  .cancel-button {
+    background-color: transparent;
+    color: #ccc;
+    border: 1px solid #444;
+  }
+  
+  .cancel-button:hover {
+    background-color: rgba(40, 40, 40, 0.8);
+    color: #fff;
+  }
+  
+  .submit-button {
+    background-color: #ff3300;
+    color: white;
+  }
+  
+  .submit-button:hover {
+    background-color: #cc2900;
+  }
+  
+  .inventory-form-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .inventory-form-container {
+      padding: 1.5rem;
+    }
+    
+    .inventory-form-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    .specification-row,
+    .compatible-vehicle-row {
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    
+    .specification-key,
+    .specification-value,
+    .vehicle-make,
+    .vehicle-model,
+    .vehicle-years {
+      width: 100%;
+    }
+    
+    .remove-button {
+      align-self: flex-end;
+    }
+    
+    .image-preview-grid {
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    
+    .image-preview {
+      height: 100px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .inventory-form-actions {
+      flex-direction: column-reverse;
+      gap: 1rem;
+    }
+    
+    .inventory-form-button {
+      width: 100%;
+    }
+  }

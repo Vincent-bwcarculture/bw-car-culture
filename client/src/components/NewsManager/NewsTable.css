@@ -1,0 +1,241 @@
+/* src/components/admin/NewsManager/NewsTable.css */
+.news-table-container {
+    overflow-x: auto;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .news-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+  }
+  
+  .news-table th,
+  .news-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .news-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #333333;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .news-table tr:hover {
+    background: #f8f9fa;
+  }
+  
+  .article-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .article-thumbnail {
+    width: 80px;
+    height: 60px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f0f0f0;
+  }
+  
+  .article-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .article-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  
+  .article-details h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #333333;
+  }
+  
+  .article-id {
+    font-size: 0.85rem;
+    color: #666666;
+  }
+  
+  .category-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    background: rgba(255, 51, 0, 0.1);
+    color: #ff3300;
+  }
+  
+  .author-info {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  
+  .author-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+  
+  .status-published {
+    background: rgba(46, 213, 115, 0.1);
+    color: #2ed573;
+  }
+  
+  .status-draft {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+  }
+  
+  .status-archived {
+    background: rgba(54, 162, 235, 0.1);
+    color: #36a2eb;
+  }
+  
+  .article-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+  }
+  
+  .action-btn.edit {
+    background: rgba(255, 171, 0, 0.1);
+    color: #ffab00;
+  }
+  
+  .action-btn.edit:hover {
+    background: rgba(255, 171, 0, 0.2);
+  }
+  
+  .action-btn.delete {
+    background: rgba(255, 51, 0, 0.1);
+    color: #ff3300;
+  }
+  
+  .action-btn.delete:hover {
+    background: rgba(255, 51, 0, 0.2);
+  }
+  
+  /* Loading State */
+  .news-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+  }
+  
+  .news-loader {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #ff3300;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .no-articles {
+    text-align: center;
+    padding: 3rem;
+    color: #666666;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .article-thumbnail {
+      width: 60px;
+      height: 45px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .news-table-container {
+      margin: 0 -1rem;
+      border-radius: 0;
+    }
+  }
+  
+  /* Print Styles */
+  @media print {
+    .news-table-container {
+      box-shadow: none;
+    }
+  
+    .news-table th {
+      background: none;
+      border-bottom: 2px solid #000000;
+    }
+  
+    .article-actions {
+      display: none;
+    }
+  
+    .status-badge {
+      border: 1px solid currentColor;
+    }
+  }
+  
+  /* High Contrast Mode */
+  @media (prefers-contrast: more) {
+    .news-table th,
+    .news-table td {
+      border: 1px solid #000000;
+    }
+  
+    .status-badge {
+      border: 1px solid currentColor;
+      background: none;
+    }
+  
+    .action-btn {
+      border: 1px solid currentColor;
+    }
+  }
+  
+  /* Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    .news-loader {
+      animation: none;
+    }
+  
+    .action-btn {
+      transition: none;
+    }
+  }
