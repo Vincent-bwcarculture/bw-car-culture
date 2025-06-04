@@ -5,7 +5,8 @@ import { imageService } from './imageService.js';
 
 class ListingService {
   constructor() {
-    this.baseUrl = process.env.REACT_APP_API_URL || '/api';
+    // FIXED: Point to Vercel API
+    this.baseUrl = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
     this.endpoint = `${this.baseUrl}/listings`;
     this.axios = axios.create({
       baseURL: this.baseUrl,
@@ -63,7 +64,7 @@ class ListingService {
         }
 
         console.log('Fetching listings with params:', { page, limit, ...filters });
-        const response = await this.axios.get(this.endpoint, {
+        const response = await this.axios.get('/listings', {
           params: {
             page,
             limit,
@@ -108,41 +109,12 @@ class ListingService {
   // Get single listing
   async getListing(id) {
     try {
-      const response = await this.axios.get(`${this.endpoint}/${id}`, {
+      const response = await this.axios.get(`/listings/${id}`, {
         headers: this.getHeaders()
       });
       const listing = response.data?.data;
       if (!listing) {
         throw new Error(`Listing with id ${id} not found`);
-      }
-      
-      // Normalize image URLs for S3
-      if (listing.images && listing.images.length > 0) {
-        listing.images = listing.images.map(img => {
-          // If it's a string, keep it as is
-          if (typeof img === 'string') {
-            return { url: img };
-          }
-          
-          // For object-based images, ensure URL is cleaned up
-          if (img && typeof img === 'object') {
-            const normalizedImg = { ...img };
-            
-            // Fix problematic URLs with duplicated image paths
-            if (normalizedImg.url && normalizedImg.url.includes('/images/images/')) {
-              normalizedImg.url = normalizedImg.url.replace(/\/images\/images\//g, '/images/');
-            }
-            
-            // Create proxied URL for S3 keys that don't have URLs
-            if (!normalizedImg.url && normalizedImg.key) {
-              normalizedImg.url = `/api/images/s3-proxy/${normalizedImg.key}`;
-            }
-            
-            return normalizedImg;
-          }
-          
-          return img;
-        });
       }
       
       return listing;
@@ -152,7 +124,7 @@ class ListingService {
     }
   }
 
-  // Create listing with S3 image upload - Fixed to handle file objects correctly and provide fallback
+  // FIXED: Create listing with proper S3 workflow
   async createListing(listingData, images = [], onProgress) {
     try {
       console.log(`Creating listing with ${images.length} images`);
@@ -178,66 +150,55 @@ class ListingService {
         throw new Error('No valid image files to upload');
       }
       
-      // Upload images to server
+      // STEP 1: Upload images to S3 and get URLs
       let imageData = [];
-      let uploadSuccess = false;
       
       try {
         onProgress?.({ phase: 'uploading', progress: 0 });
         
-        // Make the upload request
+        console.log('🔄 Step 1: Uploading images to S3...');
         imageData = await imageService.uploadMultiple(
           fileObjects,
           'listings',
           (progress) => onProgress?.({ phase: 'uploading', progress })
         );
         
-        console.log('Upload results received:', imageData);
-        uploadSuccess = true;
-      } catch (uploadError) {
-        console.error('Error during image upload:', uploadError);
+        console.log('✅ Step 1 Complete: Images uploaded to S3:', imageData);
         
-        // CRITICAL FALLBACK: If server upload fails, create local references
-        // This lets the UI continue working even if S3 is down
-        console.warn('Using fallback image paths due to upload failure');
-        imageData = fileObjects.map((file, index) => {
-          const timestamp = Date.now();
-          const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-          return {
-            url: `/uploads/listings/${timestamp}-${index}-${safeName}`,
-            key: `listings/${timestamp}-${index}-${safeName}`,
-            size: file.size,
-            mimetype: file.type,
-            isPrimary: index === (listingData.primaryImageIndex || 0),
-            isFallback: true
-          };
-        });
+        if (!imageData || imageData.length === 0) {
+          throw new Error('Image upload returned no results');
+        }
+        
+      } catch (uploadError) {
+        console.error('❌ Step 1 Failed: Image upload error:', uploadError);
+        throw new Error(`Image upload failed: ${uploadError.message}`);
       }
       
-      // If we still don't have image data, we can't proceed
-      if (!imageData || imageData.length === 0) {
-        throw new Error('Failed to process images for listing');
-      }
-      
-      // Continue with listing creation
+      // STEP 2: Create listing with S3 URLs
       onProgress?.({ phase: 'creating', progress: 0 });
       
-      // Add image metadata to the listing data
+      console.log('🔄 Step 2: Creating listing with S3 URLs...');
+      
+      // Prepare listing data with S3 URLs
       const requestData = {
         ...listingData,
         images: imageData.map((image, index) => ({
           url: image.url,
           key: image.key || image.url,
-          thumbnail: image.thumbnail?.url || image.thumbnail,
+          thumbnail: image.thumbnail?.url || image.thumbnail || image.url,
           isPrimary: index === (listingData.primaryImageIndex || 0),
           size: image.size,
           mimetype: image.mimetype
         }))
       };
       
-      console.log('Sending listing data to server');
+      console.log('Sending listing data to server:', {
+        title: requestData.title,
+        imageCount: requestData.images.length,
+        firstImageUrl: requestData.images[0]?.url
+      });
       
-      // Send listing data with images
+      // FIXED: Send as JSON to /listings endpoint
       const response = await this.axios.post('/listings', requestData, {
         headers: {
           'Content-Type': 'application/json',
@@ -253,16 +214,19 @@ class ListingService {
         throw new Error(response.data.message || 'Server reported error creating listing');
       }
       
+      console.log('✅ Step 2 Complete: Listing created successfully');
+      
       this.cache.clear();
       return response.data;
+      
     } catch (error) {
-      console.error('Error creating listing:', error);
+      console.error('❌ Error creating listing:', error);
       console.error('Error response:', error.response?.data);
       throw error;
     }
   }
 
-  // Update listing with S3 image handling
+  // FIXED: Update listing with proper S3 workflow
   async updateListing(id, listingData, newImages = [], onProgress) {
     try {
       console.log(`Updating listing ${id}`);
@@ -278,17 +242,19 @@ class ListingService {
           return img instanceof File ? img : img.file;
         }).filter(file => file instanceof File);
         
-        const uploadResults = await imageService.uploadMultiple(
+        imageData = await imageService.uploadMultiple(
           fileObjects,
           'listings',
           (progress) => onProgress?.({ phase: 'uploading', progress })
         );
         
-        imageData = uploadResults.map((result, index) => ({
+        imageData = imageData.map((result, index) => ({
           url: result.url,
           key: result.key,
-          thumbnail: result.thumbnail,
-          isPrimary: false
+          thumbnail: result.thumbnail?.url || result.thumbnail || result.url,
+          isPrimary: false,
+          size: result.size,
+          mimetype: result.mimetype
         }));
       }
       
@@ -298,16 +264,16 @@ class ListingService {
       const existingImages = listingData.existingImages || [];
       const allImages = [...existingImages, ...imageData];
       
-      // Update listing
-      const formData = new FormData();
-      formData.append('listingData', JSON.stringify({
+      // FIXED: Send as JSON, not FormData
+      const updateData = {
         ...listingData,
         images: allImages
-      }));
+      };
       
-      const response = await this.axios.put(`${this.endpoint}/${id}`, formData, {
+      const response = await this.axios.put(`/listings/${id}`, updateData, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -326,7 +292,7 @@ class ListingService {
   // Delete listing
   async deleteListing(id) {
     try {
-      const response = await this.axios.delete(`${this.endpoint}/${id}`, {
+      const response = await this.axios.delete(`/listings/${id}`, {
         headers: this.getHeaders()
       });
       this.cache.clear();
@@ -347,7 +313,7 @@ class ListingService {
     const fetchFunction = async () => {
       try {
         const timestamp = Date.now();
-        const response = await this.axios.get(`${this.endpoint}/featured`, {
+        const response = await this.axios.get(`/listings/featured`, {
           params: { limit, _t: timestamp },
           headers: this.getHeaders()
         });
@@ -372,7 +338,7 @@ class ListingService {
   async getPopularListings(limit = 5) {
     return this.getCachedData(`popular-${limit}`, async () => {
       try {
-        const response = await this.axios.get(`${this.endpoint}/popular`, {
+        const response = await this.axios.get(`/listings/popular`, {
           params: { limit },
           headers: this.getHeaders()
         });
@@ -400,7 +366,7 @@ class ListingService {
       
       console.log(`Fetching dealer listings for dealer ${id}`);
       
-      const response = await this.axios.get(`${this.endpoint}/dealer/${id}`, {
+      const response = await this.axios.get(`/listings/dealer/${id}`, {
         params: { page, limit },
         headers: this.getHeaders()
       });
@@ -415,7 +381,7 @@ class ListingService {
   async getSimilarListings(id, limit = 4) {
     return this.getCachedData(`similar-${id}`, async () => {
       try {
-        const response = await this.axios.get(`${this.endpoint}/${id}/similar`, {
+        const response = await this.axios.get(`/listings/${id}/similar`, {
           params: { limit },
           headers: this.getHeaders()
         });
@@ -431,7 +397,7 @@ class ListingService {
     return this.getCachedData('filter-options', async () => {
       try {
         console.log('Fetching filter options from server');
-        const response = await this.axios.get(`${this.endpoint}/filter-options`, {
+        const response = await this.axios.get(`/listings/filter-options`, {
           headers: this.getHeaders()
         });
         
@@ -495,7 +461,7 @@ class ListingService {
     return this.getCachedData(cacheKey, async () => {
       try {
         console.log(`Fetching models for make: ${make}`);
-        const response = await this.axios.get(`${this.endpoint}/models`, {
+        const response = await this.axios.get(`/listings/models`, {
           params: { make },
           headers: this.getHeaders()
         });
@@ -521,7 +487,7 @@ class ListingService {
       viewedListings[id] = now;
       localStorage.setItem('viewedListings', JSON.stringify(viewedListings));
       
-      await this.axios.post(`${this.endpoint}/${id}/views`, null, {
+      await this.axios.post(`/listings/${id}/views`, null, {
         headers: this.getHeaders()
       });
       
@@ -535,7 +501,7 @@ class ListingService {
 
   async updateListingStatus(id, status) {
     try {
-      const response = await this.axios.patch(`${this.endpoint}/${id}/status`, { status }, {
+      const response = await this.axios.patch(`/listings/${id}/status`, { status }, {
         headers: this.getHeaders()
       });
       this.cache.clear();
@@ -548,7 +514,7 @@ class ListingService {
 
   async toggleFeatured(id) {
     try {
-      const response = await this.axios.patch(`${this.endpoint}/${id}/featured`, {}, {
+      const response = await this.axios.patch(`/listings/${id}/featured`, {}, {
         headers: this.getHeaders()
       });
       this.cache.clear();
@@ -561,7 +527,7 @@ class ListingService {
 
   async batchDeleteListings(ids) {
     try {
-      const response = await this.axios.post(`${this.endpoint}/batch-delete`, { ids }, {
+      const response = await this.axios.post(`/listings/batch-delete`, { ids }, {
         headers: this.getHeaders()
       });
       this.cache.clear();
@@ -574,7 +540,7 @@ class ListingService {
 
   async batchUpdateStatus(ids, status) {
     try {
-      const response = await this.axios.patch(`${this.endpoint}/batch-status`, { ids, status }, {
+      const response = await this.axios.patch(`/listings/batch-status`, { ids, status }, {
         headers: this.getHeaders()
       });
       this.cache.clear();
@@ -602,25 +568,3 @@ class ListingService {
 }
 
 export const listingService = new ListingService();
-
-// API Endpoints Map Documentation
-/*
-  API Endpoints Map:
-  - GET    /api/listings                -> getListings(filters, page, limit)
-  - GET    /api/listings/:id            -> getListing(id)
-  - POST   /api/listings                -> createListing(data, onProgress)
-  - PUT    /api/listings/:id            -> updateListing(id, data, onProgress)
-  - DELETE /api/listings/:id            -> deleteListing(id)
-  - GET    /api/listings/featured       -> getFeaturedListings(limit)
-  - GET    /api/listings/popular        -> getPopularListings(limit)
-  - GET    /api/listings/:id/similar    -> getSimilarListings(id, limit)
-  - GET    /api/listings/dealer/:dealerId -> getDealerListings(dealerId, page, limit)
-  - POST   /api/listings/:id/views      -> incrementViewCount(id)
-  - PATCH  /api/listings/:id/status     -> updateListingStatus(id, status)
-  - PATCH  /api/listings/:id/featured   -> toggleFeatured(id)
-  - POST   /api/listings/batch-delete   -> batchDeleteListings(ids)
-  - PATCH  /api/listings/batch-status   -> batchUpdateStatus(ids, status)
-  - GET    /api/listings/filter-options -> getFilterOptions()
-  - GET    /api/listings/models?make=X  -> getModelsByMake(make)
-  - GET    /api/listings/test-api       -> testConnection()
-*/
