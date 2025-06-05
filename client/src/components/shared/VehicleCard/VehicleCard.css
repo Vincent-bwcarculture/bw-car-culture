@@ -160,6 +160,11 @@
 }
 
 /* Image Gallery Navigation */
+/* Smooth transitions for the zoom effect */
+.vc-image {
+  transition: transform 0.3s ease;
+}
+
 .vc-image-navigation {
   position: absolute;
   top: 0;
@@ -904,26 +909,27 @@
     font-size: 0.8rem;
   }
 
-  .vc-image {
-    object-fit: contain; /* Changed from cover to contain */
+   .vc-image {
+    transform: scale(0.9);
+    object-fit: cover;
     object-position: center;
-    background: rgba(0, 0, 0, 0.1);
+  }
+  
+  .vc-image-container {
+    overflow: hidden; /* Ensure scaled image doesn't overflow */
   }
 }
 
 @media (max-width: 480px) {
-  .vc-image {
-    object-fit: contain; /* Ensure images aren't cropped */
-    height: 100%;
-    width: 100%;
+   .vc-image {
+    transform: scale(0.85);
+    object-fit: cover;
+    object-position: center;
   }
   
   .vc-image-container {
     height: 160px;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow: hidden;
   }
   
   /* Compact mode adjustments for mobile */
@@ -931,6 +937,14 @@
     width: 30px;
     height: 30px;
     font-size: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .vc-image {
+    transform: scale(0.8);
+    object-fit: cover;
+    object-position: center;
   }
 }
 
