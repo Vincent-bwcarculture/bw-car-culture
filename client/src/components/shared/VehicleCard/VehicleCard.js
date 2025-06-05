@@ -10,6 +10,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [imageLoadError, setImageLoadError] = useState(false);
   const [hasBeenViewed, setHasBeenViewed] = useState(false);
+  const [dealerImageError, setDealerImageError] = useState(false);
 
   // Use localStorage to remember failed image URLs to avoid repeat attempts
   const checkFailedImage = useCallback((url) => {
@@ -136,6 +137,25 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     }
   }, [car, activeImageIndex, checkFailedImage]);
 
+  // Add this function to VehicleCard.js
+const getDealerImageUrl = useCallback((imagePath) => {
+  if (!imagePath) return null;
+  
+  // If it already has http/https, it's a complete URL (S3)
+  if (imagePath.startsWith('http')) {
+    return imagePath;
+  }
+  
+  // If it's already a path with /uploads
+  if (imagePath.includes('/uploads/')) {
+    return imagePath;
+  }
+  
+  // Extract filename and construct dealer path
+  const filename = imagePath.split('/').pop();
+  return `/uploads/dealers/${filename}`;
+}, []);
+
   // Calculate savings information
   const calculateSavings = useMemo(() => {
     if (!car || !car.priceOptions) return null;
@@ -237,8 +257,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         businessName: displayName,
         sellerType: isPrivateSeller ? 'private' : 'dealership',
         sellerTypeLabel: sellerTypeLabel,
-        logo: car.dealer.logo || car.dealer.profile?.logo || 
-              (isPrivateSeller ? '/images/placeholders/private-seller-avatar.jpg' : '/images/placeholders/dealer-logo.jpg'),
+        logo: car.dealer.logo || car.dealer.profile?.logo, 
         location: {
           city: car.dealer.location?.city || car.location?.city || 'Unknown Location',
           state: car.dealer.location?.state || car.location?.state || '',
@@ -770,18 +789,19 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         {/* ENHANCED: Better seller info section with proper private seller support */}
         <div className={`vc-dealer-info ${dealer?.sellerType === 'private' ? 'private-seller' : 'dealership'}`} 
              onClick={dealer?.sellerType !== 'private' ? handleDealerClick : undefined}>
-          <img 
-            src={dealer.logo} 
-            alt={dealer.name} 
-            className="vc-dealer-avatar"
-            loading="lazy"
-            onError={(e) => {
-              const fallbackImage = dealer?.sellerType === 'private' 
-                ? '/images/placeholders/private-seller-avatar.jpg'
-                : '/images/placeholders/dealer-logo.jpg';
-              e.target.src = fallbackImage;
-            }}
-          />
+     {(!dealer.logo || dealerImageError) ? (
+  <div className="vc-dealer-avatar-placeholder">
+    {dealer.businessName.charAt(0)}
+  </div>
+) : (
+  <img 
+    src={getDealerImageUrl(dealer.logo)}
+    alt={dealer.name} 
+    className="vc-dealer-avatar"
+    loading="lazy"
+    onError={() => setDealerImageError(true)}
+  />
+)}
           <div className="vc-dealer-details">
             <span className="vc-dealer-name">
               {dealer.businessName}
