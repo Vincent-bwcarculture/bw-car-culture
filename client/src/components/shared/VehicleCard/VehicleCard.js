@@ -138,10 +138,10 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   }, [car, activeImageIndex, checkFailedImage]);
 
   // Add this function to VehicleCard.js
-const getDealerImageUrl = useCallback((imagePath) => {
+const getDealerImageUrl = (imagePath, type) => {
   if (!imagePath) return null;
   
-  // If it already has http/https, it's a complete URL (S3)
+  // If it already has http/https, it's a complete URL
   if (imagePath.startsWith('http')) {
     return imagePath;
   }
@@ -151,10 +151,10 @@ const getDealerImageUrl = useCallback((imagePath) => {
     return imagePath;
   }
   
-  // Extract filename and construct dealer path
+  // Extract just the filename if it has path elements
   const filename = imagePath.split('/').pop();
   return `/uploads/dealers/${filename}`;
-}, []);
+};
 
   // Calculate savings information
   const calculateSavings = useMemo(() => {
@@ -789,17 +789,20 @@ const getDealerImageUrl = useCallback((imagePath) => {
         {/* ENHANCED: Better seller info section with proper private seller support */}
         <div className={`vc-dealer-info ${dealer?.sellerType === 'private' ? 'private-seller' : 'dealership'}`} 
              onClick={dealer?.sellerType !== 'private' ? handleDealerClick : undefined}>
-     {(!dealer.logo || dealerImageError) ? (
+  {(!car.dealer?.profile?.logo || dealerImageError) ? (
   <div className="vc-dealer-avatar-placeholder">
-    {dealer.businessName.charAt(0)}
+    {dealer.businessName?.charAt(0) || '?'}
   </div>
 ) : (
   <img 
-    src={getDealerImageUrl(dealer.logo)}
+    src={getDealerImageUrl(car.dealer.profile.logo, 'logo')}
     alt={dealer.name} 
     className="vc-dealer-avatar"
     loading="lazy"
-    onError={() => setDealerImageError(true)}
+    onError={() => {
+      console.log('Dealer image failed to load:', getDealerImageUrl(car.dealer.profile.logo, 'logo'));
+      setDealerImageError(true);
+    }}
   />
 )}
           <div className="vc-dealer-details">

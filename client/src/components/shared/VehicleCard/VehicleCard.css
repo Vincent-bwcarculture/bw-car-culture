@@ -903,6 +903,35 @@
   .vc-savings-highlight {
     font-size: 0.8rem;
   }
+
+  .vc-image {
+    object-fit: contain; /* Changed from cover to contain */
+    object-position: center;
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
+@media (max-width: 480px) {
+  .vc-image {
+    object-fit: contain; /* Ensure images aren't cropped */
+    height: 100%;
+    width: 100%;
+  }
+  
+  .vc-image-container {
+    height: 160px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Compact mode adjustments for mobile */
+  .vc-card.compact .vc-dealer-avatar-placeholder {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
 }
 
 /* Compact mode adjustments */
@@ -919,4 +948,26 @@
   width: 14px;
   height: 14px;
   font-size: 0.65rem;
+}
+
+
+/* Add this new CSS for dealer avatar placeholder */
+.vc-dealer-avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  text-transform: uppercase;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.vc-dealer-info:hover .vc-dealer-avatar-placeholder {
+  border-color: #ff3300;
 }
