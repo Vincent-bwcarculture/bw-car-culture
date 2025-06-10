@@ -9,7 +9,7 @@ class ListingService {
     this.endpoint = `${this.baseUrl}/listings`;
     this.axios = axios.create({
       baseURL: this.baseUrl,
-      timeout: 30000 // 30 second timeout
+      timeout: 300000 // 5 mins timeout
     });
     this.cache = new Map();
     this.cacheDuration = 5 * 60 * 1000; // 5 minutes

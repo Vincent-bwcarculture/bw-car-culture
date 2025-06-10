@@ -1,6 +1,7 @@
 // Need to create an API service for listings
 // src/services/api.js
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+// NEW: Call production frontend (which should proxy to backend)
+const API_URL = process.env.REACT_APP_API_URL || 'https://bw-car-culture.vercel.app/api';
 
 export const listingAPI = {
   async updateListing(id, data) {

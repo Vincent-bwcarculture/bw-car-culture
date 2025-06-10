@@ -1,4 +1,4 @@
-echo "
+echo ".env
 # Environment files with secrets
 .env
 .env.*

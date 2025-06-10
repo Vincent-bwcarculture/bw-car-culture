@@ -57,7 +57,7 @@ export const frontendAnalyticsConfig = {
 
   // API configuration
   api: {
-    baseUrl: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+    baseUrl: process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app',
     endpoints: {
       track: '/analytics/track',
       search: '/analytics/track/search',
