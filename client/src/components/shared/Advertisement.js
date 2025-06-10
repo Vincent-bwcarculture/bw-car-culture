@@ -108,10 +108,37 @@ const Advertisement = ({
     }
   };
 
-  // Fetch slide-specific data
+  // FIXED: Service-specific data validation
+  const validateServiceData = (data, serviceType) => {
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      return [];
+    }
+
+    return data.filter(item => {
+      switch (serviceType) {
+        case 'transport':
+          // Transport items should have origin/destination or route info
+          return item.origin && item.destination || item.route || item.routeName;
+        
+        case 'rental':
+          // Rental items should have rental rates or be marked as rentals
+          return item.dailyRate || item.rates?.daily || item.rentalTerms || item.category?.toLowerCase().includes('rental');
+        
+        case 'car':
+          // Car listings should have price and NOT be rentals
+          return item.price && !item.dailyRate && !item.rates?.daily;
+        
+        default:
+          return true;
+      }
+    });
+  };
+
+  // FIXED: Fetch slide-specific data with proper service filtering
   const fetchSlideData = async () => {
     try {
       setLoading(true);
+      console.log('🔄 Fetching service-specific data for advertisement slides...');
       
       await fetchRealStats();
       
@@ -130,28 +157,54 @@ const Advertisement = ({
         limit: 4
       }, 1);
 
-      // Fetch transport images for slide 3
+      // FIXED: Fetch and validate transport data
       let transportImages = [];
       try {
-        const transportResponse = await fetch('/api/transport?limit=3');
+        console.log('🚌 Fetching transport data...');
+        const transportResponse = await fetch('/api/transport?limit=6');
         if (transportResponse.ok) {
           const transportData = await transportResponse.json();
-          transportImages = transportData.routes || transportData.data || [];
+          const rawTransportData = transportData.routes || transportData.data || [];
+          
+          // FIXED: Validate that data is actually transport-related
+          transportImages = validateServiceData(rawTransportData, 'transport');
+          console.log(`✅ Valid transport items found: ${transportImages.length}`);
+          
+          // FIXED: Filter for items with images
+          transportImages = transportImages.filter(item => 
+            (item.images && item.images.length > 0) || item.image
+          ).slice(0, 3);
+          
+        } else {
+          console.log('⚠️ Transport API returned error status');
         }
       } catch (error) {
-        console.log('Transport API not available');
+        console.log('❌ Transport API not available:', error.message);
       }
 
-      // Fetch rental images for slide 4
+      // FIXED: Fetch and validate rental data  
       let rentalImages = [];
       try {
-        const rentalResponse = await fetch('/api/rentals?limit=3');
+        console.log('🔑 Fetching rental data...');
+        const rentalResponse = await fetch('/api/rentals?limit=6');
         if (rentalResponse.ok) {
           const rentalData = await rentalResponse.json();
-          rentalImages = rentalData.vehicles || rentalData.data || [];
+          const rawRentalData = rentalData.vehicles || rentalData.data || [];
+          
+          // FIXED: Validate that data is actually rental-related
+          rentalImages = validateServiceData(rawRentalData, 'rental');
+          console.log(`✅ Valid rental items found: ${rentalImages.length}`);
+          
+          // FIXED: Filter for items with images
+          rentalImages = rentalImages.filter(item => 
+            (item.images && item.images.length > 0) || item.image
+          ).slice(0, 3);
+          
+        } else {
+          console.log('⚠️ Rental API returned error status');
         }
       } catch (error) {
-        console.log('Rental API not available');
+        console.log('❌ Rental API not available:', error.message);
       }
 
       // Fetch deal listings for slide 5
@@ -162,6 +215,27 @@ const Advertisement = ({
         limit: 3
       }, 1);
 
+      // FIXED: Create placeholder images for services with no data
+      const createServicePlaceholder = (serviceType) => {
+        const placeholders = {
+          transport: {
+            image: '/images/placeholders/transport.jpg',
+            images: [{ url: '/images/placeholders/transport.jpg', isPrimary: true }],
+            title: 'Transport Service',
+            origin: 'Gaborone',
+            destination: 'Francistown'
+          },
+          rental: {
+            image: '/images/placeholders/rental.jpg', 
+            images: [{ url: '/images/placeholders/rental.jpg', isPrimary: true }],
+            title: 'Rental Vehicle',
+            dailyRate: 200,
+            category: 'Car Rental'
+          }
+        };
+        return [placeholders[serviceType]];
+      };
+
       const slidesData = [
         {
           id: 1,
@@ -171,7 +245,6 @@ const Advertisement = ({
           ctaText: "View Premium Cars",
           ctaAction: () => navigate('/marketplace?filter=verified'),
           images: premiumListings.listings || [],
-          // stats: [`${realStats?.dealerCount || 25}+ Verified Dealers`, `${realStats?.totalListings || 250}+ Quality Listings`],
           bgGradient: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
           textColor: "#ffffff"
         },
@@ -183,7 +256,6 @@ const Advertisement = ({
           ctaText: "Explore Services",
           ctaAction: () => navigate('/services'),
           images: carListings.listings || [],
-          // stats: [`${realStats?.happyCustomers || 150}+ Happy Customers`, "Trusted Network"],
           bgGradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
           textColor: "#ffffff"
         },
@@ -194,8 +266,8 @@ const Advertisement = ({
           description: "Dependable transport services across Botswana.",
           ctaText: "Book Transport",
           ctaAction: () => navigate('/services?type=transport'),
-          images: transportImages.length > 0 ? transportImages : carListings.listings?.slice(0, 2) || [],
-          // stats: [`${realStats?.transportCount || 8}+ Transport Routes`, "Nationwide Coverage"],
+          // FIXED: Use transport data or transport placeholder (NOT car listings)
+          images: transportImages.length > 0 ? transportImages : createServicePlaceholder('transport'),
           bgGradient: "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)",
           textColor: "#ffffff",
           contentType: 'transport'
@@ -207,8 +279,8 @@ const Advertisement = ({
           description: "Quality rental vehicles for every occasion and journey.",
           ctaText: "Browse Rentals",
           ctaAction: () => navigate('/services?type=rental'),
-          images: rentalImages.length > 0 ? rentalImages : carListings.listings?.slice(2, 4) || [],
-          // stats: [`${realStats?.rentalCount || 12}+ Rental Options`, "Flexible Terms"],
+          // FIXED: Use rental data or rental placeholder (NOT car listings)
+          images: rentalImages.length > 0 ? rentalImages : createServicePlaceholder('rental'),
           bgGradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
           textColor: "#ffffff",
           contentType: 'rental'
@@ -227,16 +299,24 @@ const Advertisement = ({
         }
       ];
 
+      console.log('📊 Slide data summary:', {
+        slide1_premium: premiumListings.listings?.length || 0,
+        slide2_cars: carListings.listings?.length || 0,
+        slide3_transport: slidesData[2].images.length,
+        slide4_rental: slidesData[3].images.length,
+        slide5_deals: dealListings.listings?.length || 0
+      });
+
       setSlideData(slidesData);
     } catch (error) {
-      console.error('Error fetching slide data:', error);
+      console.error('❌ Error fetching slide data:', error);
       setSlideData(getDefaultSlides());
     } finally {
       setLoading(false);
     }
   };
 
-  // Get appropriate image URL based on content type
+  // FIXED: Get appropriate image URL based on content type with better validation
   const getContentImageUrl = (item, contentType = 'car') => {
     if (!item) {
       const placeholders = {
@@ -319,7 +399,6 @@ const Advertisement = ({
       ctaText: "View Premium Cars",
       ctaAction: () => navigate('/marketplace'),
       images: [{ image: '/images/placeholders/car.jpg' }],
-      // stats: ["25+ Dealers", "250+ Listings"],
       bgGradient: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
       textColor: "#ffffff"
     },
@@ -331,7 +410,6 @@ const Advertisement = ({
       ctaText: "Explore Services",
       ctaAction: () => navigate('/services'),
       images: [{ image: '/images/placeholders/dealer-banner.jpg' }], 
-      // stats: ["150+ Customers", "Trusted Network"],
       bgGradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
       textColor: "#ffffff"
     },
@@ -343,9 +421,9 @@ const Advertisement = ({
       ctaText: "Book Transport",
       ctaAction: () => navigate('/services?type=transport'),
       images: [{ image: '/images/placeholders/transport.jpg' }],
-      // stats: ["8+ Routes", "Coverage"],
       bgGradient: "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)",
-      textColor: "#ffffff"
+      textColor: "#ffffff",
+      contentType: 'transport' // FIXED: Added contentType
     },
     {
       id: 4,
@@ -355,9 +433,9 @@ const Advertisement = ({
       ctaText: "Browse Rentals", 
       ctaAction: () => navigate('/services?type=rental'),
       images: [{ image: '/images/placeholders/rental.jpg' }],
-      // stats: ["12+ Options", "Flexible Terms"],
       bgGradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-      textColor: "#ffffff"
+      textColor: "#ffffff",
+      contentType: 'rental' // FIXED: Added contentType
     },
     {
       id: 5,
@@ -509,6 +587,7 @@ const Advertisement = ({
                   }
                 }
                 
+                // FIXED: Use service-specific placeholders
                 let placeholder = '/images/placeholders/car.jpg';
                 if (currentSlideData?.contentType === 'transport') placeholder = '/images/placeholders/transport.jpg';
                 else if (currentSlideData?.contentType === 'rental') placeholder = '/images/placeholders/rental.jpg';
