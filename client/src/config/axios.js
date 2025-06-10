@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Create axios instance with common configuration
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  baseURL: process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app',
   withCredentials: true,
   timeout: 300000, // 5 minutes
   headers: {
