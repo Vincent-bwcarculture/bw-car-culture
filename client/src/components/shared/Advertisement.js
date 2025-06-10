@@ -157,51 +157,81 @@ const Advertisement = ({
         limit: 4
       }, 1);
 
-      // FIXED: Fetch and validate transport data
+      // FIXED: Fetch and validate transport data with detailed debugging
       let transportImages = [];
       try {
         console.log('🚌 Fetching transport data...');
         const transportResponse = await fetch('/api/transport?limit=6');
         if (transportResponse.ok) {
           const transportData = await transportResponse.json();
+          console.log('🚌 Raw transport response:', transportData);
+          
           const rawTransportData = transportData.routes || transportData.data || [];
+          console.log(`🚌 Found ${rawTransportData.length} transport items`);
+          
+          // Debug first transport item structure
+          if (rawTransportData.length > 0) {
+            console.log('🚌 First transport item:', rawTransportData[0]);
+            console.log('🚌 First transport item images:', rawTransportData[0]?.images);
+          }
           
           // FIXED: Validate that data is actually transport-related
           transportImages = validateServiceData(rawTransportData, 'transport');
           console.log(`✅ Valid transport items found: ${transportImages.length}`);
           
-          // FIXED: Filter for items with images
-          transportImages = transportImages.filter(item => 
-            (item.images && item.images.length > 0) || item.image
-          ).slice(0, 3);
+          // FIXED: Filter for items with images and debug why they might fail
+          transportImages = transportImages.filter(item => {
+            const hasImages = (item.images && item.images.length > 0) || item.image;
+            if (!hasImages) {
+              console.log('🚌 Transport item without images:', item.title || item.id);
+            }
+            return hasImages;
+          }).slice(0, 3);
+          
+          console.log(`🚌 Transport items with images: ${transportImages.length}`);
           
         } else {
-          console.log('⚠️ Transport API returned error status');
+          console.log('⚠️ Transport API returned error status:', transportResponse.status);
         }
       } catch (error) {
         console.log('❌ Transport API not available:', error.message);
       }
 
-      // FIXED: Fetch and validate rental data  
+      // FIXED: Fetch and validate rental data with detailed debugging
       let rentalImages = [];
       try {
         console.log('🔑 Fetching rental data...');
         const rentalResponse = await fetch('/api/rentals?limit=6');
         if (rentalResponse.ok) {
           const rentalData = await rentalResponse.json();
+          console.log('🔑 Raw rental response:', rentalData);
+          
           const rawRentalData = rentalData.vehicles || rentalData.data || [];
+          console.log(`🔑 Found ${rawRentalData.length} rental items`);
+          
+          // Debug first rental item structure
+          if (rawRentalData.length > 0) {
+            console.log('🔑 First rental item:', rawRentalData[0]);
+            console.log('🔑 First rental item images:', rawRentalData[0]?.images);
+          }
           
           // FIXED: Validate that data is actually rental-related
           rentalImages = validateServiceData(rawRentalData, 'rental');
           console.log(`✅ Valid rental items found: ${rentalImages.length}`);
           
-          // FIXED: Filter for items with images
-          rentalImages = rentalImages.filter(item => 
-            (item.images && item.images.length > 0) || item.image
-          ).slice(0, 3);
+          // FIXED: Filter for items with images and debug why they might fail
+          rentalImages = rentalImages.filter(item => {
+            const hasImages = (item.images && item.images.length > 0) || item.image;
+            if (!hasImages) {
+              console.log('🔑 Rental item without images:', item.title || item.name || item.id);
+            }
+            return hasImages;
+          }).slice(0, 3);
+          
+          console.log(`🔑 Rental items with images: ${rentalImages.length}`);
           
         } else {
-          console.log('⚠️ Rental API returned error status');
+          console.log('⚠️ Rental API returned error status:', rentalResponse.status);
         }
       } catch (error) {
         console.log('❌ Rental API not available:', error.message);
@@ -215,25 +245,35 @@ const Advertisement = ({
         limit: 3
       }, 1);
 
-      // FIXED: Create placeholder images for services with no data
-      const createServicePlaceholder = (serviceType) => {
+      // FIXED: Simplified fallback strategy (closer to original)
+      const getSlideImages = (serviceImages, serviceType, carListings) => {
+        if (serviceImages.length > 0) {
+          console.log(`✅ Using ${serviceImages.length} real ${serviceType} images`);
+          return serviceImages;
+        }
+        
+        // Fallback to car listings like original, but log it
+        const carFallback = carListings.listings?.slice(0, 3) || [];
+        if (carFallback.length > 0) {
+          console.log(`⚠️ No ${serviceType} images, using ${carFallback.length} car listings as fallback`);
+          return carFallback;
+        }
+        
+        // Final fallback to placeholder
+        console.log(`❌ No images available, using placeholder for ${serviceType}`);
         const placeholders = {
-          transport: {
+          transport: [{ 
             image: '/images/placeholders/transport.jpg',
             images: [{ url: '/images/placeholders/transport.jpg', isPrimary: true }],
-            title: 'Transport Service',
-            origin: 'Gaborone',
-            destination: 'Francistown'
-          },
-          rental: {
-            image: '/images/placeholders/rental.jpg', 
+            title: 'Transport Service'
+          }],
+          rental: [{ 
+            image: '/images/placeholders/rental.jpg',
             images: [{ url: '/images/placeholders/rental.jpg', isPrimary: true }],
-            title: 'Rental Vehicle',
-            dailyRate: 200,
-            category: 'Car Rental'
-          }
+            title: 'Rental Vehicle'
+          }]
         };
-        return [placeholders[serviceType]];
+        return placeholders[serviceType] || [];
       };
 
       const slidesData = [
@@ -266,8 +306,8 @@ const Advertisement = ({
           description: "Dependable transport services across Botswana.",
           ctaText: "Book Transport",
           ctaAction: () => navigate('/services?type=transport'),
-          // FIXED: Use transport data or transport placeholder (NOT car listings)
-          images: transportImages.length > 0 ? transportImages : createServicePlaceholder('transport'),
+          // FIXED: Simplified fallback approach
+          images: getSlideImages(transportImages, 'transport', carListings),
           bgGradient: "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)",
           textColor: "#ffffff",
           contentType: 'transport'
@@ -279,8 +319,8 @@ const Advertisement = ({
           description: "Quality rental vehicles for every occasion and journey.",
           ctaText: "Browse Rentals",
           ctaAction: () => navigate('/services?type=rental'),
-          // FIXED: Use rental data or rental placeholder (NOT car listings)
-          images: rentalImages.length > 0 ? rentalImages : createServicePlaceholder('rental'),
+          // FIXED: Simplified fallback approach
+          images: getSlideImages(rentalImages, 'rental', carListings),
           bgGradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
           textColor: "#ffffff",
           contentType: 'rental'
@@ -299,11 +339,11 @@ const Advertisement = ({
         }
       ];
 
-      console.log('📊 Slide data summary:', {
+      console.log('📊 Final slide data summary:', {
         slide1_premium: premiumListings.listings?.length || 0,
         slide2_cars: carListings.listings?.length || 0,
-        slide3_transport: slidesData[2].images.length,
-        slide4_rental: slidesData[3].images.length,
+        slide3_transport_images: slidesData[2].images.length,
+        slide4_rental_images: slidesData[3].images.length,
         slide5_deals: dealListings.listings?.length || 0
       });
 
@@ -316,23 +356,29 @@ const Advertisement = ({
     }
   };
 
-  // FIXED: Get appropriate image URL based on content type with better validation
+  // FIXED: Get appropriate image URL with debugging
   const getContentImageUrl = (item, contentType = 'car') => {
+    console.log(`🖼️ Getting image URL for ${contentType}:`, item);
+    
     if (!item) {
       const placeholders = {
         transport: '/images/placeholders/transport.jpg',
         rental: '/images/placeholders/rental.jpg',
         car: '/images/placeholders/car.jpg'
       };
-      return placeholders[contentType] || '/images/placeholders/car.jpg';
+      const url = placeholders[contentType] || '/images/placeholders/car.jpg';
+      console.log(`🖼️ No item, using placeholder: ${url}`);
+      return url;
     }
 
     let images = [];
     
     if (item.images && Array.isArray(item.images)) {
       images = item.images;
+      console.log(`🖼️ Found ${images.length} images in images array`);
     } else if (item.image) {
       images = [item.image];
+      console.log(`🖼️ Using single image property:`, item.image);
     }
 
     if (images.length === 0) {
@@ -341,25 +387,34 @@ const Advertisement = ({
         rental: '/images/placeholders/rental.jpg',
         car: '/images/placeholders/car.jpg'
       };
-      return placeholders[contentType] || '/images/placeholders/car.jpg';
+      const url = placeholders[contentType] || '/images/placeholders/car.jpg';
+      console.log(`🖼️ No images found, using placeholder: ${url}`);
+      return url;
     }
 
     const primaryImage = images.find(img => img.isPrimary) || images[0];
+    console.log(`🖼️ Primary image:`, primaryImage);
     
     if (typeof primaryImage === 'string') {
-      return primaryImage.includes('/images/images/') 
+      const url = primaryImage.includes('/images/images/') 
         ? primaryImage.replace(/\/images\/images\//g, '/images/')
         : primaryImage;
+      console.log(`🖼️ Using string URL: ${url}`);
+      return url;
     } else if (primaryImage && typeof primaryImage === 'object') {
       const url = primaryImage.url || primaryImage.thumbnail || '';
       if (url) {
-        return url.includes('/images/images/') 
+        const finalUrl = url.includes('/images/images/') 
           ? url.replace(/\/images\/images\//g, '/images/')
           : url;
+        console.log(`🖼️ Using object URL: ${finalUrl}`);
+        return finalUrl;
       }
       
       if (primaryImage.key) {
-        return `/api/images/s3-proxy/${primaryImage.key}`;
+        const proxyUrl = `/api/images/s3-proxy/${primaryImage.key}`;
+        console.log(`🖼️ Using S3 proxy URL: ${proxyUrl}`);
+        return proxyUrl;
       }
     }
     
@@ -368,12 +423,15 @@ const Advertisement = ({
       rental: '/images/placeholders/rental.jpg',
       car: '/images/placeholders/car.jpg'
     };
-    return placeholders[contentType] || '/images/placeholders/car.jpg';
+    const url = placeholders[contentType] || '/images/placeholders/car.jpg';
+    console.log(`🖼️ Fallback to placeholder: ${url}`);
+    return url;
   };
 
-  // Get current slide image
+  // Get current slide image with debugging
   const getCurrentSlideImage = () => {
     if (!slideData[currentSlide] || !slideData[currentSlide].images) {
+      console.log('🖼️ No slide data or images, using car placeholder');
       return '/images/placeholders/car.jpg';
     }
 
@@ -381,11 +439,14 @@ const Advertisement = ({
     const images = slide.images;
     
     if (!images || images.length === 0) {
+      console.log('🖼️ No images in slide, using car placeholder');
       return '/images/placeholders/car.jpg';
     }
 
     const contentType = slide.contentType || 'car';
     const randomImage = images[Math.floor(Math.random() * images.length)];
+    console.log(`🖼️ Getting ${contentType} image from slide ${currentSlide}:`, randomImage);
+    
     return getContentImageUrl(randomImage, contentType);
   };
 
@@ -579,19 +640,27 @@ const Advertisement = ({
               src={getCurrentSlideImage()} 
               alt={currentSlideData?.title}
               onError={(e) => {
+                console.log(`❌ Image failed to load: ${e.target.src}`);
+                
+                // Try S3 proxy for AWS images first
                 if (e.target.src.includes('amazonaws.com')) {
                   const key = e.target.src.split('.amazonaws.com/').pop();
                   if (key && !e.target.src.includes('/api/images/s3-proxy/')) {
+                    console.log(`🔄 Trying S3 proxy for: ${key}`);
                     e.target.src = `/api/images/s3-proxy/${key}`;
                     return;
                   }
                 }
                 
-                // FIXED: Use service-specific placeholders
+                // Simple fallback based on content type
                 let placeholder = '/images/placeholders/car.jpg';
-                if (currentSlideData?.contentType === 'transport') placeholder = '/images/placeholders/transport.jpg';
-                else if (currentSlideData?.contentType === 'rental') placeholder = '/images/placeholders/rental.jpg';
+                if (currentSlideData?.contentType === 'transport') {
+                  placeholder = '/images/placeholders/transport.jpg';
+                } else if (currentSlideData?.contentType === 'rental') {
+                  placeholder = '/images/placeholders/rental.jpg';
+                }
                 
+                console.log(`🔄 Using placeholder: ${placeholder}`);
                 e.target.src = placeholder;
               }}
             />
