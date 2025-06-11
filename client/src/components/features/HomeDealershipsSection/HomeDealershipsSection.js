@@ -1,6 +1,5 @@
 // src/components/features/HomeDealershipsSection/HomeDealershipsSection.js
 import React, { useState, useEffect, useRef } from 'react';
-import { http } from '../../../config/axios.js';
 import { useNavigate } from 'react-router-dom';
 import { dealerService } from '../../../services/dealerService.js';
 import DealershipCard from '../../shared/DealershipCard/DealershipCard.js';
@@ -20,52 +19,35 @@ const HomeDealershipsSection = () => {
   const DEALERS_PER_PAGE = 10;
 
   useEffect(() => {
-  const fetchDealers = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    const fetchDealers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      // ✅ FIX: Use the same API call pattern as DealershipsPage
-      const response = await http.get('/dealers', {
-        params: {
+        // Fetch active dealers with pagination
+        const filters = {
           status: 'active',
-          page: currentPage,
-          limit: DEALERS_PER_PAGE
-        }
-      });
-      
-      console.log('🏠 HomeDealerships API response:', response.data);
-      
-      // ✅ FIX: Use the same data extraction as DealershipsPage
-      if (response.data && response.data.success) {
-        const dealersData = response.data.data || [];
-        console.log('✅ HomeDealerships dealers found:', dealersData.length);
-        setDealers(dealersData);
-        
-        // Set pagination
-        setPagination({
-          currentPage: response.data.pagination?.currentPage || currentPage,
-          totalPages: response.data.pagination?.totalPages || 1,
-          total: response.data.pagination?.total || 0
-        });
-        setTotalPages(response.data.pagination?.totalPages || 1);
-      } else {
-        console.warn('⚠️ API returned success:false');
-        setDealers([]);
-        setTotalPages(1);
-      }
-    } catch (error) {
-      console.error('❌ HomeDealerships error:', error);
-      setError('Unable to load dealerships');
-      setDealers([]);
-      setTotalPages(1);
-    } finally {
-      setLoading(false);
-    }
-  };
+          limit: DEALERS_PER_PAGE,
+          page: currentPage
+        };
 
-  fetchDealers();
-}, [currentPage]);
+        const response = await dealerService.getDealers(filters, currentPage);
+        setDealers(response.dealers || []);
+        
+        // Calculate total pages
+        if (response.pagination) {
+          setTotalPages(response.pagination.totalPages || 1);
+        }
+      } catch (error) {
+        console.error('Error fetching dealers:', error);
+        setError('Unable to load dealerships');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDealers();
+  }, [currentPage]);
 
   const handleViewAllDealers = () => {
     navigate('/dealerships');
