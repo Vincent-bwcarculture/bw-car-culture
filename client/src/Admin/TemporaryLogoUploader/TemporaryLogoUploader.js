@@ -65,36 +65,62 @@ const TemporaryLogoUploader = () => {
 
     try {
       const formData = new FormData();
-      formData.append('images', file); // Try 'images' for the /images/upload endpoint
+      formData.append('images', file); // For multiple upload endpoint
       formData.append('folder', 'branding');
 
-      console.log('Uploading logo to S3...');
+      console.log('Uploading logo to S3 via Vercel API...');
       
-      // Try the /images/upload endpoint first (from api/index.js)
-      let response = await fetch('/images/upload', {
-        method: 'POST',
-        body: formData
-      });
+      // Try Vercel endpoints in order of most likely to work
+      const endpoints = [
+        '/api/dealer-image-upload',    // Specific dealer upload from api/index.js
+        '/api/images/upload-multiple', // Multiple images endpoint
+        '/api/images/upload',          // Single image endpoint  
+        '/api/upload-images',          // Alternative multiple pattern
+        '/api/upload',                 // Basic upload pattern
+        '/api/image-upload',           // Alternative single pattern
+        '/api/transport-routes',       // Transport routes that accept images
+        '/api/listings',               // Listings endpoint that accepts images
+      ];
 
-      // If that fails with 405, try /api/images/upload with auth
-      if (!response.ok && response.status === 405) {
-        console.log('Trying authenticated endpoint...');
-        const token = localStorage.getItem('token');
-        const headers = {};
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
+      let response = null;
+      let lastError = null;
+
+      for (const endpoint of endpoints) {
+        try {
+          console.log(`Trying endpoint: ${endpoint}`);
+          
+          // Prepare form data based on endpoint
+          const endpointFormData = new FormData();
+          
+          if (endpoint.includes('multiple') || endpoint.includes('upload-images')) {
+            endpointFormData.append('images', file);
+          } else {
+            endpointFormData.append('image', file);
+          }
+          endpointFormData.append('folder', 'branding');
+
+          response = await fetch(endpoint, {
+            method: 'POST',
+            body: endpointFormData
+          });
+
+          if (response.ok) {
+            console.log(`✅ Success with endpoint: ${endpoint}`);
+            break; // Success, stop trying other endpoints
+          } else {
+            console.log(`❌ Failed with ${endpoint}: ${response.status} ${response.statusText}`);
+            lastError = `${endpoint}: ${response.status} ${response.statusText}`;
+          }
+        } catch (endpointError) {
+          console.log(`❌ Error with ${endpoint}:`, endpointError.message);
+          lastError = `${endpoint}: ${endpointError.message}`;
+          continue; // Try next endpoint
         }
-        
-        // Try with 'image' field name for authenticated endpoint
-        const authFormData = new FormData();
-        authFormData.append('image', file);
-        authFormData.append('folder', 'branding');
-        
-        response = await fetch('/api/images/upload', {
-          method: 'POST',
-          headers: headers,
-          body: authFormData
-        });
+      }
+
+      // If all endpoints failed
+      if (!response || !response.ok) {
+        throw new Error(`All endpoints failed. Last error: ${lastError}`);
       }
 
       // Check if response is ok
@@ -113,16 +139,41 @@ const TemporaryLogoUploader = () => {
       const data = await response.json();
       console.log('Upload response:', data);
 
-      if (data.success && data.data) {
-        // Handle both single object and array responses
-        const logoData = Array.isArray(data.data) ? data.data[0] : data.data;
-        setResult({
-          success: true,
-          url: logoData.url,
-          key: logoData.key,
-          size: logoData.size
-        });
-        console.log('✅ Logo uploaded successfully:', logoData.url);
+      // Handle different response formats from Vercel endpoints
+      let logoUrl = null;
+      let logoKey = null;
+      let logoSize = null;
+
+      if (data.success) {
+        if (data.urls && Array.isArray(data.urls) && data.urls.length > 0) {
+          // Multiple upload format: { success: true, urls: [...] }
+          logoUrl = data.urls[0];
+          logoKey = `branding/${Date.now()}-logo`;
+          logoSize = file.size;
+        } else if (data.data) {
+          // Single upload format: { success: true, data: {...} }
+          const logoData = Array.isArray(data.data) ? data.data[0] : data.data;
+          logoUrl = logoData.url || logoData.imageUrl;
+          logoKey = logoData.key || logoData.s3Key;
+          logoSize = logoData.size || file.size;
+        } else if (data.imageUrl) {
+          // Direct URL format: { success: true, imageUrl: "..." }
+          logoUrl = data.imageUrl;
+          logoKey = `branding/${Date.now()}-logo`;
+          logoSize = file.size;
+        }
+
+        if (logoUrl) {
+          setResult({
+            success: true,
+            url: logoUrl,
+            key: logoKey,
+            size: logoSize
+          });
+          console.log('✅ Logo uploaded successfully:', logoUrl);
+        } else {
+          throw new Error('No valid URL in response');
+        }
       } else {
         throw new Error(data.message || 'Upload failed');
       }
@@ -162,12 +213,12 @@ const TemporaryLogoUploader = () => {
       <div className="uploader-header">
         <h2>🚀 Upload Company Logo to S3</h2>
         <p className="uploader-description">
-          Upload your BCC logo to AWS S3 and get the URL to replace local references in your components.
-          This will try multiple upload endpoints to ensure compatibility.
+          Upload your BCC logo to AWS S3 using your live Vercel API endpoints. 
+          This will automatically try multiple endpoints to find the working one.
         </p>
         {!isLoggedIn && (
           <div className="login-warning">
-            ℹ️ <strong>Note:</strong> If upload fails, try logging in to the admin panel first.
+            ℹ️ <strong>Note:</strong> Using live Vercel API endpoints. No login required.
           </div>
         )}
       </div>
