@@ -1,6 +1,7 @@
 // src/Admin/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.js';
+import TemporaryLogoUploader from './TemporaryLogoUploader/TemporaryLogoUploader.js';
 import AdminStats from './AdminStats.js';
 import QuickActions from './QuickActions.js';
 import NewsManager from '../components/NewsManager/NewsManager.js';
@@ -144,10 +145,53 @@ const AdminDashboard = () => {
             </div>
           </>
         );
+        case 'logo-upload':
+  return (
+    <>
+      <div className="section-header">
+        <h2>🚀 Logo Upload to S3</h2>
+        <button 
+          className="back-button"
+          onClick={() => setActiveSection('dashboard')}
+        >
+          ← Back to Dashboard
+        </button>
+      </div>
+      <TemporaryLogoUploader />
+    </>
+  );
       default:
         return (
           <>
             <div className="dashboard-stats">
+              <div className="temp-logo-upload-access" style={{
+  background: '#fff3cd',
+  border: '1px solid #ffeaa7',
+  borderRadius: '8px',
+  padding: '15px',
+  marginBottom: '20px',
+  textAlign: 'center'
+}}>
+  <h3 style={{ color: '#856404', marginTop: 0 }}>🚀 Production Logo Setup</h3>
+  <p style={{ color: '#856404', margin: '10px 0' }}>
+    Upload your BCC logo to AWS S3 for production use
+  </p>
+  <button 
+    onClick={() => setActiveSection('logo-upload')}
+    style={{
+      backgroundColor: '#007bff',
+      color: 'white',
+      border: 'none',
+      padding: '10px 20px',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontSize: '16px',
+      fontWeight: '600'
+    }}
+  >
+    Upload Logo to S3
+  </button>
+</div>
               <AdminStats />
             </div>
             <div className="dashboard-content">
