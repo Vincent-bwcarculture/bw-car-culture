@@ -59,35 +59,43 @@ const TemporaryLogoUploader = () => {
       return;
     }
 
-    if (!isLoggedIn) {
-      setError('Please log in to the admin panel first');
-      return;
-    }
-
     setUploading(true);
     setError('');
     setResult(null);
 
     try {
       const formData = new FormData();
-      formData.append('image', file); // Changed from 'images' to 'image' to match endpoint
-      formData.append('folder', 'branding'); // Store in branding folder
+      formData.append('images', file); // Try 'images' for the /images/upload endpoint
+      formData.append('folder', 'branding');
 
       console.log('Uploading logo to S3...');
       
-      // Get auth token from localStorage (if available)
-      const token = localStorage.getItem('token');
-      
-      const headers = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
-      const response = await fetch('/api/images/upload', {
+      // Try the /images/upload endpoint first (from api/index.js)
+      let response = await fetch('/images/upload', {
         method: 'POST',
-        headers: headers,
         body: formData
       });
+
+      // If that fails with 405, try /api/images/upload with auth
+      if (!response.ok && response.status === 405) {
+        console.log('Trying authenticated endpoint...');
+        const token = localStorage.getItem('token');
+        const headers = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        // Try with 'image' field name for authenticated endpoint
+        const authFormData = new FormData();
+        authFormData.append('image', file);
+        authFormData.append('folder', 'branding');
+        
+        response = await fetch('/api/images/upload', {
+          method: 'POST',
+          headers: headers,
+          body: authFormData
+        });
+      }
 
       // Check if response is ok
       if (!response.ok) {
@@ -155,10 +163,11 @@ const TemporaryLogoUploader = () => {
         <h2>🚀 Upload Company Logo to S3</h2>
         <p className="uploader-description">
           Upload your BCC logo to AWS S3 and get the URL to replace local references in your components.
+          This will try multiple upload endpoints to ensure compatibility.
         </p>
         {!isLoggedIn && (
           <div className="login-warning">
-            ⚠️ <strong>Note:</strong> You need to be logged in to the admin panel to upload images.
+            ℹ️ <strong>Note:</strong> If upload fails, try logging in to the admin panel first.
           </div>
         )}
       </div>
@@ -216,15 +225,13 @@ const TemporaryLogoUploader = () => {
               <button 
                 onClick={uploadLogo} 
                 className="upload-btn"
-                disabled={uploading || !isLoggedIn}
+                disabled={uploading}
               >
                 {uploading ? (
                   <>
                     <span className="spinner"></span>
                     Uploading to S3...
                   </>
-                ) : !isLoggedIn ? (
-                  'Please log in to upload'
                 ) : (
                   'Upload to S3'
                 )}
