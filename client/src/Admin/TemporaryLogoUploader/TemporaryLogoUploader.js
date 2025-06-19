@@ -65,62 +65,29 @@ const TemporaryLogoUploader = () => {
 
     try {
       const formData = new FormData();
-      formData.append('images', file); // For multiple upload endpoint
+      formData.append('images', file); // Use 'images' field like your working uploads
       formData.append('folder', 'branding');
 
-      console.log('Uploading logo to S3 via Vercel API...');
+      console.log('Uploading logo using working listings pattern...');
       
-      // Try Vercel endpoints in order of most likely to work
-      const endpoints = [
-        '/api/dealer-image-upload',    // Specific dealer upload from api/index.js
-        '/api/images/upload-multiple', // Multiple images endpoint
-        '/api/images/upload',          // Single image endpoint  
-        '/api/upload-images',          // Alternative multiple pattern
-        '/api/upload',                 // Basic upload pattern
-        '/api/image-upload',           // Alternative single pattern
-        '/api/transport-routes',       // Transport routes that accept images
-        '/api/listings',               // Listings endpoint that accepts images
-      ];
+      // Use the exact same endpoint that works for listings
+      const response = await fetch('/images/upload-multiple', {
+        method: 'POST',
+        body: formData
+        // Don't set Content-Type, let browser handle FormData boundary
+      });
 
-      let response = null;
-      let lastError = null;
-
-      for (const endpoint of endpoints) {
+      // Check if response is ok
+      if (!response.ok) {
+        // Try to get error message from response
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
         try {
-          console.log(`Trying endpoint: ${endpoint}`);
-          
-          // Prepare form data based on endpoint
-          const endpointFormData = new FormData();
-          
-          if (endpoint.includes('multiple') || endpoint.includes('upload-images')) {
-            endpointFormData.append('images', file);
-          } else {
-            endpointFormData.append('image', file);
-          }
-          endpointFormData.append('folder', 'branding');
-
-          response = await fetch(endpoint, {
-            method: 'POST',
-            body: endpointFormData
-          });
-
-          if (response.ok) {
-            console.log(`✅ Success with endpoint: ${endpoint}`);
-            break; // Success, stop trying other endpoints
-          } else {
-            console.log(`❌ Failed with ${endpoint}: ${response.status} ${response.statusText}`);
-            lastError = `${endpoint}: ${response.status} ${response.statusText}`;
-          }
-        } catch (endpointError) {
-          console.log(`❌ Error with ${endpoint}:`, endpointError.message);
-          lastError = `${endpoint}: ${endpointError.message}`;
-          continue; // Try next endpoint
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          // If response is not JSON, use status text
         }
-      }
-
-      // If all endpoints failed
-      if (!response || !response.ok) {
-        throw new Error(`All endpoints failed. Last error: ${lastError}`);
+        throw new Error(errorMessage);
       }
 
       // Check if response is ok
@@ -139,43 +106,19 @@ const TemporaryLogoUploader = () => {
       const data = await response.json();
       console.log('Upload response:', data);
 
-      // Handle different response formats from Vercel endpoints
-      let logoUrl = null;
-      let logoKey = null;
-      let logoSize = null;
-
-      if (data.success) {
-        if (data.urls && Array.isArray(data.urls) && data.urls.length > 0) {
-          // Multiple upload format: { success: true, urls: [...] }
-          logoUrl = data.urls[0];
-          logoKey = `branding/${Date.now()}-logo`;
-          logoSize = file.size;
-        } else if (data.data) {
-          // Single upload format: { success: true, data: {...} }
-          const logoData = Array.isArray(data.data) ? data.data[0] : data.data;
-          logoUrl = logoData.url || logoData.imageUrl;
-          logoKey = logoData.key || logoData.s3Key;
-          logoSize = logoData.size || file.size;
-        } else if (data.imageUrl) {
-          // Direct URL format: { success: true, imageUrl: "..." }
-          logoUrl = data.imageUrl;
-          logoKey = `branding/${Date.now()}-logo`;
-          logoSize = file.size;
-        }
-
-        if (logoUrl) {
-          setResult({
-            success: true,
-            url: logoUrl,
-            key: logoKey,
-            size: logoSize
-          });
-          console.log('✅ Logo uploaded successfully:', logoUrl);
-        } else {
-          throw new Error('No valid URL in response');
-        }
+      // Handle response format exactly like working listings uploads
+      if (data.success && data.images && Array.isArray(data.images) && data.images.length > 0) {
+        const logoData = data.images[0]; // Get first image from array
+        setResult({
+          success: true,
+          url: logoData.url,
+          key: logoData.key,
+          size: logoData.size
+        });
+        console.log('✅ Logo uploaded successfully:', logoData.url);
       } else {
-        throw new Error(data.message || 'Upload failed');
+        console.error('API returned success but no images array:', data);
+        throw new Error(data.message || 'API returned invalid response format');
       }
     } catch (err) {
       console.error('Upload error:', err);
@@ -213,12 +156,12 @@ const TemporaryLogoUploader = () => {
       <div className="uploader-header">
         <h2>🚀 Upload Company Logo to S3</h2>
         <p className="uploader-description">
-          Upload your BCC logo to AWS S3 using your live Vercel API endpoints. 
-          This will automatically try multiple endpoints to find the working one.
+          Upload your BCC logo to AWS S3 using the same endpoint pattern as your working listings uploads.
+          This uses the proven `/images/upload-multiple` endpoint.
         </p>
         {!isLoggedIn && (
           <div className="login-warning">
-            ℹ️ <strong>Note:</strong> Using live Vercel API endpoints. No login required.
+            ✅ <strong>Using proven working pattern</strong> from your listings uploads - no authentication required.
           </div>
         )}
       </div>
