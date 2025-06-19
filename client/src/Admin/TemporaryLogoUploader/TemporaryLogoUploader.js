@@ -1,6 +1,5 @@
 // client/src/Admin/TemporaryLogoUploader/TemporaryLogoUploader.js
 import React, { useState } from 'react';
-import { imageService } from '../../services/imageService.js'; // Import your working imageService
 import './TemporaryLogoUploader.css';
 
 const TemporaryLogoUploader = () => {
@@ -157,12 +156,12 @@ const TemporaryLogoUploader = () => {
       <div className="uploader-header">
         <h2>🚀 Upload Company Logo to S3</h2>
         <p className="uploader-description">
-          Upload your BCC logo to AWS S3 using your existing working imageService.
-          This uses the exact same code that successfully uploads listings images.
+          Upload your BCC logo directly to your working `/images/upload/multiple` API endpoint.
+          Simple and direct - just like it should be.
         </p>
         {!isLoggedIn && (
           <div className="login-warning">
-            ✅ <strong>Using your proven imageService</strong> - the exact same code that works for listings uploads.
+            🎯 <strong>Direct API call</strong> to your working endpoint - no complications.
           </div>
         )}
       </div>
