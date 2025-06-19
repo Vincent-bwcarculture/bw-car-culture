@@ -1,6 +1,7 @@
 // src/components/features/CarDetailsGallery/CarDetailsGallery.js
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import SimilarVehiclesList from './SimilarVehiclesList';
 import './CarDetailsGallery.css';
 
 const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
@@ -299,6 +300,12 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
             )}
           </div>
         )}
+
+         {/* NEW: Similar Vehicles List - Shows only on bigger displays */}
+        <SimilarVehiclesList 
+          currentCar={car}
+          isPrivateSeller={car.dealer?.sellerType === 'private'}
+        />
 
         {/* Features Section */}
         {(() => {
