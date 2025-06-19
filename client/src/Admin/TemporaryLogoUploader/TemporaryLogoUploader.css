@@ -27,7 +27,17 @@
   color: #666;
   font-size: 16px;
   line-height: 1.5;
-  margin: 0;
+  margin: 0 0 15px 0;
+}
+
+.login-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 15px;
+  font-size: 14px;
 }
 
 .upload-section {

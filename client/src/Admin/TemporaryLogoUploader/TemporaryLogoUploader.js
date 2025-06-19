@@ -8,6 +8,13 @@ const TemporaryLogoUploader = () => {
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Check if user is logged in
+  React.useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, []);
 
   const handleFileSelect = (selectedFile) => {
     // Validate file type
@@ -52,34 +59,62 @@ const TemporaryLogoUploader = () => {
       return;
     }
 
+    if (!isLoggedIn) {
+      setError('Please log in to the admin panel first');
+      return;
+    }
+
     setUploading(true);
     setError('');
     setResult(null);
 
     try {
       const formData = new FormData();
-      formData.append('images', file);
+      formData.append('image', file); // Changed from 'images' to 'image' to match endpoint
       formData.append('folder', 'branding'); // Store in branding folder
 
       console.log('Uploading logo to S3...');
       
+      // Get auth token from localStorage (if available)
+      const token = localStorage.getItem('token');
+      
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetch('/api/images/upload', {
         method: 'POST',
+        headers: headers,
         body: formData
       });
+
+      // Check if response is ok
+      if (!response.ok) {
+        // Try to get error message from response
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          // If response is not JSON, use status text
+        }
+        throw new Error(errorMessage);
+      }
 
       const data = await response.json();
       console.log('Upload response:', data);
 
-      if (data.success && data.data && data.data.length > 0) {
-        const logoUrl = data.data[0].url;
+      if (data.success && data.data) {
+        // Handle both single object and array responses
+        const logoData = Array.isArray(data.data) ? data.data[0] : data.data;
         setResult({
           success: true,
-          url: logoUrl,
-          key: data.data[0].key,
-          size: data.data[0].size
+          url: logoData.url,
+          key: logoData.key,
+          size: logoData.size
         });
-        console.log('✅ Logo uploaded successfully:', logoUrl);
+        console.log('✅ Logo uploaded successfully:', logoData.url);
       } else {
         throw new Error(data.message || 'Upload failed');
       }
@@ -121,6 +156,11 @@ const TemporaryLogoUploader = () => {
         <p className="uploader-description">
           Upload your BCC logo to AWS S3 and get the URL to replace local references in your components.
         </p>
+        {!isLoggedIn && (
+          <div className="login-warning">
+            ⚠️ <strong>Note:</strong> You need to be logged in to the admin panel to upload images.
+          </div>
+        )}
       </div>
 
       {!result && (
@@ -176,13 +216,15 @@ const TemporaryLogoUploader = () => {
               <button 
                 onClick={uploadLogo} 
                 className="upload-btn"
-                disabled={uploading}
+                disabled={uploading || !isLoggedIn}
               >
                 {uploading ? (
                   <>
                     <span className="spinner"></span>
                     Uploading to S3...
                   </>
+                ) : !isLoggedIn ? (
+                  'Please log in to upload'
                 ) : (
                   'Upload to S3'
                 )}
