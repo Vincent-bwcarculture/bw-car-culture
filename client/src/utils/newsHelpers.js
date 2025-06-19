@@ -199,7 +199,7 @@ export const getAuthorInfo = (article) => {
     return {
       name: 'Car Culture News Desk',
       role: 'Editor',
-      avatar: '/images/BCC Logo.png'
+      avatar: 'https://i3wcarculture-images.s3.us-east-1.amazonaws.com/branding/bcc-logo.png'
     };
   }
   
@@ -207,14 +207,14 @@ export const getAuthorInfo = (article) => {
     return {
       name: article.author.name || 'Car Culture News Desk',
       role: article.author.role || 'Contributor',
-      avatar: article.author.avatar || '/images/BCC Logo.png'
+      avatar: article.author.avatar || 'https://i3wcarculture-images.s3.us-east-1.amazonaws.com/branding/bcc-logo.png'
     };
   }
   
   return {
     name: article.authorName || article.author || 'Car Culture News Desk',
     role: 'Contributor',
-    avatar: '/images/BCC Logo.png'
+    avatar: 'https://i3wcarculture-images.s3.us-east-1.amazonaws.com/branding/bcc-logo.png'
   };
 };
 

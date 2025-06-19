@@ -1,7 +1,6 @@
 // src/Admin/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.js';
-import TemporaryLogoUploader from './TemporaryLogoUploader/TemporaryLogoUploader.js';
 import AdminStats from './AdminStats.js';
 import QuickActions from './QuickActions.js';
 import NewsManager from '../components/NewsManager/NewsManager.js';
@@ -145,21 +144,6 @@ const AdminDashboard = () => {
             </div>
           </>
         );
-        case 'logo-upload':
-  return (
-    <>
-      <div className="section-header">
-        <h2>🚀 Logo Upload to S3</h2>
-        <button 
-          className="back-button"
-          onClick={() => setActiveSection('dashboard')}
-        >
-          ← Back to Dashboard
-        </button>
-      </div>
-      <TemporaryLogoUploader />
-    </>
-  );
       default:
         return (
           <>

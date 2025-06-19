@@ -25,7 +25,7 @@ const SplashScreen = ({ onFinished }) => {
     <div className={`splash-screen ${fadeOut ? 'fade-out' : ''}`}>
       <div className="splash-content">
         <img 
-          src="/images/BCC Logo.png" 
+          src="https://i3wcarculture-images.s3.us-east-1.amazonaws.com/branding/bcc-logo.png" 
           alt="BCC Logo" 
           className="splash-logo"
         />

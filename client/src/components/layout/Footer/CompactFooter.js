@@ -24,7 +24,7 @@ const CompactFooter = () => {
       <div className="footer-content">
         {/* Brand section - always visible */}
         <div className="footer-brand">
-          <img src="/images/BCC Logo.png" alt="I3w Car Culture" className="footer-logo" />
+          <img src="https://i3wcarculture-images.s3.us-east-1.amazonaws.com/branding/bcc-logo.png" alt="I3w Car Culture" className="footer-logo" />
           
           {/* Social links */}
           <div className="social-links">

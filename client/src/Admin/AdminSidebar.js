@@ -120,7 +120,7 @@ const AdminSidebar = ({ collapsed }) => {
     <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
         <img 
-          src="/images/BCC Logo.png" 
+          src="https://i3wcarculture-images.s3.us-east-1.amazonaws.com/branding/bcc-logo.png" 
           alt="Admin Logo" 
           className="admin-logo"
         />
