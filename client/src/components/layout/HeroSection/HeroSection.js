@@ -565,7 +565,7 @@ const HeroSection = () => {
                   <span className="bcc-hero-option-icon"></span>
                   <h3>Instant Valuation</h3>
                 </div>
-                <p>Get a guaranteed price and sell your car in 24 hours</p>
+                <p>Get a guaranteed price and sell your car fast.</p>
                 <button 
                   className="bcc-hero-option-button bcc-hero-call-button"
                   onClick={handleCallClick}
@@ -685,10 +685,7 @@ const HeroSection = () => {
             )}
 
             <div className="bcc-hero-features">
-              <div className="bcc-hero-feature">
-                <span className="bcc-hero-feature-icon">✓</span>
-                <span>Free professional inspection and photography</span>
-              </div>
+             
               <div className="bcc-hero-feature">
                 <span className="bcc-hero-feature-icon">✓</span>
                 <span>Access to thousands of growing local and international buyers</span>
