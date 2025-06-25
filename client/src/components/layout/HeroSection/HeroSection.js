@@ -483,8 +483,8 @@ const HeroSection = () => {
           </div>
         ) : activeTab === 'sell' ? (
           <div className="bcc-hero-sell">
-            <h1>Sell your car with confidence</h1>
-            <p>Get your car valued and sell it fast in Botswana</p>
+            <h1>Sell Faster. Smarter. Nationwide.</h1>
+<p>Tap into Botswana’s #1 automotive ecosystem. Get maximum exposure, real buyers, and support every step of the way.</p>
 
             {/* NEW: Pricing Information Section */}
 <div className="bcc-hero-sell-pricing-section">

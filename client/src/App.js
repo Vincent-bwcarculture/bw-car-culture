@@ -1151,9 +1151,9 @@ function App() {
                 {process.env.NODE_ENV === 'development' && <ConnectionTest />}
                 <AppRoutes />
                 {/* <Chatbot /> */}
-                {localStorage.getItem('gion_app_enabled') !== 'false' && (
-                  <GIONApp withChatbot={false} />
-                )}
+                {false && (
+  <GIONApp withChatbot={false} />
+)}
 
                  {/* Add this WelcomeModal component */}
                 {showWelcomeModal && (

@@ -31,7 +31,7 @@ const SplashScreen = ({ onFinished }) => {
         />
       </div>
       <div className="copyright-text">
-        © {new Date().getFullYear()} BW Car Culture. All rights reserved.
+        © {new Date().getFullYear()} Bw Car Culture. All rights reserved.
       </div>
     </div>
   );
