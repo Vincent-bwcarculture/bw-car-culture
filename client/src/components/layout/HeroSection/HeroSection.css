@@ -1298,8 +1298,8 @@
 
 /* Add this CSS to client/src/components/layout/HeroSection/HeroSection.css */
 
-/* Pricing Section Styles */
-.bcc-hero-pricing-section {
+/* Hero Sell Pricing Section Styles - Unique to Hero Component */
+.bcc-hero-sell-pricing-section {
   max-width: 900px;
   margin: 2rem auto 3rem;
   padding: 2rem;
@@ -1312,32 +1312,32 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
-.bcc-pricing-header {
+.bcc-hero-sell-pricing-header {
   text-align: center;
   margin-bottom: 2rem;
 }
 
-.bcc-pricing-header h3 {
+.bcc-hero-sell-pricing-header h3 {
   font-size: 1.5rem;
   color: #ffffff;
   margin-bottom: 0.5rem;
   font-weight: 600;
 }
 
-.bcc-pricing-header p {
+.bcc-hero-sell-pricing-header p {
   color: #c9c9c9;
   font-size: 1rem;
   margin: 0;
 }
 
-.bcc-pricing-tiers {
+.bcc-hero-sell-pricing-tiers {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
-.bcc-pricing-tier {
+.bcc-hero-sell-pricing-tier {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
@@ -1348,21 +1348,21 @@
   backdrop-filter: blur(10px);
 }
 
-.bcc-pricing-tier:hover {
+.bcc-hero-sell-pricing-tier:hover {
   transform: translateY(-5px);
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 51, 0, 0.3);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
 }
 
-.bcc-tier-popular {
+.bcc-hero-sell-tier-popular {
   border-color: #ff3300;
   background: linear-gradient(145deg, 
     rgba(255, 51, 0, 0.1) 0%, 
     rgba(255, 51, 0, 0.05) 100%);
 }
 
-.bcc-tier-badge {
+.bcc-hero-sell-tier-badge {
   position: absolute;
   top: -10px;
   left: 50%;
@@ -1376,7 +1376,7 @@
   white-space: nowrap;
 }
 
-.bcc-tier-header {
+.bcc-hero-sell-tier-header {
   display: flex;
   align-items: baseline;
   justify-content: center;
@@ -1384,47 +1384,47 @@
   margin-bottom: 1rem;
 }
 
-.bcc-tier-price {
+.bcc-hero-sell-tier-price {
   font-size: 2.5rem;
   font-weight: 700;
   color: #ffffff;
   line-height: 1;
 }
 
-.bcc-tier-period {
+.bcc-hero-sell-tier-period {
   font-size: 1rem;
   color: #c9c9c9;
   font-weight: 500;
 }
 
-.bcc-tier-value {
+.bcc-hero-sell-tier-value {
   font-size: 1.1rem;
   color: #ffffff;
   margin-bottom: 1.5rem;
   font-weight: 600;
 }
 
-.bcc-tier-features {
+.bcc-hero-sell-tier-features {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   text-align: left;
 }
 
-.bcc-tier-features span {
+.bcc-hero-sell-tier-features span {
   color: #c9c9c9;
   font-size: 0.9rem;
   padding-left: 0.5rem;
 }
 
-/* Dealer Notice Section */
-.bcc-pricing-dealer-note {
+/* Hero Sell Dealer Notice Section */
+.bcc-hero-sell-pricing-dealer-note {
   margin-top: 2rem;
   padding-top: 2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.bcc-dealer-notice {
+.bcc-hero-sell-dealer-notice {
   background: linear-gradient(145deg, 
     rgba(37, 211, 102, 0.1) 0%, 
     rgba(37, 211, 102, 0.05) 100%);
@@ -1434,20 +1434,20 @@
   text-align: center;
 }
 
-.bcc-dealer-notice strong {
+.bcc-hero-sell-dealer-notice strong {
   color: #ffffff;
   font-size: 1.2rem;
   display: block;
   margin-bottom: 0.5rem;
 }
 
-.bcc-dealer-notice p {
+.bcc-hero-sell-dealer-notice p {
   color: #c9c9c9;
   margin: 0 0 1.5rem 0;
   font-size: 1rem;
 }
 
-.bcc-dealer-contact-btn {
+.bcc-hero-sell-dealer-contact-btn {
   background: #25D366;
   color: #ffffff;
   border: none;
@@ -1462,118 +1462,118 @@
   gap: 0.5rem;
 }
 
-.bcc-dealer-contact-btn:hover {
+.bcc-hero-sell-dealer-contact-btn:hover {
   background: #128C7E;
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Mobile Responsive Styles */
+/* Mobile Responsive Styles for Hero Sell Pricing */
 @media (max-width: 768px) {
-  .bcc-hero-pricing-section {
+  .bcc-hero-sell-pricing-section {
     margin: 1.5rem 1rem 2rem;
     padding: 1.5rem;
   }
 
-  .bcc-pricing-header h3 {
+  .bcc-hero-sell-pricing-header h3 {
     font-size: 1.3rem;
   }
 
-  .bcc-pricing-header p {
+  .bcc-hero-sell-pricing-header p {
     font-size: 0.95rem;
   }
 
-  .bcc-pricing-tiers {
+  .bcc-hero-sell-pricing-tiers {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
 
-  .bcc-pricing-tier {
+  .bcc-hero-sell-pricing-tier {
     padding: 1.2rem;
   }
 
-  .bcc-tier-price {
+  .bcc-hero-sell-tier-price {
     font-size: 2rem;
   }
 
-  .bcc-tier-value {
+  .bcc-hero-sell-tier-value {
     font-size: 1rem;
   }
 
-  .bcc-tier-features span {
+  .bcc-hero-sell-tier-features span {
     font-size: 0.85rem;
   }
 
-  .bcc-dealer-notice {
+  .bcc-hero-sell-dealer-notice {
     padding: 1.2rem;
   }
 
-  .bcc-dealer-notice strong {
+  .bcc-hero-sell-dealer-notice strong {
     font-size: 1.1rem;
   }
 
-  .bcc-dealer-contact-btn {
+  .bcc-hero-sell-dealer-contact-btn {
     padding: 0.9rem 1.5rem;
     font-size: 0.95rem;
   }
 }
 
 @media (max-width: 480px) {
-  .bcc-hero-pricing-section {
+  .bcc-hero-sell-pricing-section {
     margin: 1rem 0.5rem 1.5rem;
     padding: 1.2rem;
   }
 
-  .bcc-pricing-header h3 {
+  .bcc-hero-sell-pricing-header h3 {
     font-size: 1.2rem;
   }
 
-  .bcc-pricing-tiers {
+  .bcc-hero-sell-pricing-tiers {
     gap: 0.8rem;
   }
 
-  .bcc-pricing-tier {
+  .bcc-hero-sell-pricing-tier {
     padding: 1rem;
   }
 
-  .bcc-tier-price {
+  .bcc-hero-sell-tier-price {
     font-size: 1.8rem;
   }
 
-  .bcc-tier-badge {
+  .bcc-hero-sell-tier-badge {
     font-size: 0.75rem;
     padding: 0.25rem 0.8rem;
   }
 
-  .bcc-dealer-contact-btn {
+  .bcc-hero-sell-dealer-contact-btn {
     width: 100%;
     padding: 1rem;
     font-size: 0.9rem;
   }
 }
 
-/* High contrast mode support */
+/* High contrast mode support for Hero Sell Pricing */
 @media (prefers-contrast: high) {
-  .bcc-pricing-tier {
+  .bcc-hero-sell-pricing-tier {
     border-width: 2px;
   }
 
-  .bcc-tier-popular {
+  .bcc-hero-sell-tier-popular {
     border-width: 3px;
   }
 
-  .bcc-dealer-notice {
+  .bcc-hero-sell-dealer-notice {
     border-width: 2px;
   }
 }
 
-/* Reduced motion support */
+/* Reduced motion support for Hero Sell Pricing */
 @media (prefers-reduced-motion: reduce) {
-  .bcc-pricing-tier:hover {
+  .bcc-hero-sell-pricing-tier:hover {
     transform: none;
   }
 
-  .bcc-dealer-contact-btn:hover {
+  .bcc-hero-sell-dealer-contact-btn:hover {
     transform: none;
   }
 }
