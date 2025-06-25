@@ -486,6 +486,73 @@ const HeroSection = () => {
             <h1>Sell your car with confidence</h1>
             <p>Get your car valued and sell it fast in Botswana</p>
 
+            {/* NEW: Pricing Information Section */}
+<div className="bcc-hero-pricing-section">
+  <div className="bcc-pricing-header">
+    <h3>Listing Prices for Private Sellers</h3>
+    <p>Choose the right plan for your vehicle's value</p>
+  </div>
+  
+  <div className="bcc-pricing-tiers">
+    <div className="bcc-pricing-tier">
+      <div className="bcc-tier-header">
+        <div className="bcc-tier-price">P50</div>
+        <div className="bcc-tier-period">/month</div>
+      </div>
+      <div className="bcc-tier-value">Cars worth P10k - P100k</div>
+      <div className="bcc-tier-features">
+        <span>✓ Featured listing</span>
+        <span>✓ Multiple photos</span>
+        <span>✓ Contact leads</span>
+      </div>
+    </div>
+    
+    <div className="bcc-pricing-tier bcc-tier-popular">
+      <div className="bcc-tier-badge">Most Popular</div>
+      <div className="bcc-tier-header">
+        <div className="bcc-tier-price">P100</div>
+        <div className="bcc-tier-period">/month</div>
+      </div>
+      <div className="bcc-tier-value">Cars worth P100k - P1M</div>
+      <div className="bcc-tier-features">
+        <span>✓ Premium placement</span>
+        <span>✓ Unlimited photos</span>
+        <span>✓ Priority support</span>
+      </div>
+    </div>
+    
+    <div className="bcc-pricing-tier">
+      <div className="bcc-tier-header">
+        <div className="bcc-tier-price">P200</div>
+        <div className="bcc-tier-period">/month</div>
+      </div>
+      <div className="bcc-tier-value">Cars worth P1M+</div>
+      <div className="bcc-tier-features">
+        <span>✓ Luxury showcase</span>
+        <span>✓ Professional photos</span>
+        <span>✓ Dedicated support</span>
+      </div>
+    </div>
+  </div>
+  
+  <div className="bcc-pricing-dealer-note">
+    <div className="bcc-dealer-notice">
+      <strong>Are you a dealer?</strong>
+      <p>We offer custom packages for dealerships. Contact us for special rates and premium features.</p>
+      <button 
+        className="bcc-dealer-contact-btn"
+        onClick={() => {
+          const whatsappNumber = '+26774122453';
+          const message = encodeURIComponent('Hi! I am a car dealer interested in listing vehicles on BW Car Culture. Please provide information about dealer packages and pricing.');
+          window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+        }}
+      >
+        Contact Us on WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
             {/* UPDATED: Initial sell options - always visible */}
             <div className="bcc-hero-sell-options">
               <div className="bcc-hero-sell-option">
