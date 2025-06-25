@@ -490,7 +490,7 @@ const HeroSection = () => {
 <div className="bcc-hero-sell-pricing-section">
   <div className="bcc-hero-sell-pricing-header">
     <h3>Listing Prices for Private Sellers</h3>
-    <p>Choose the right plan for your vehicle's value</p>
+    <p>Choose the exposure level that gets your car sold, for the right value and fast.</p>
   </div>
   
   <div className="bcc-hero-sell-pricing-tiers">
@@ -499,9 +499,8 @@ const HeroSection = () => {
         <div className="bcc-hero-sell-tier-price">P50</div>
         <div className="bcc-hero-sell-tier-period">/month</div>
       </div>
-      <div className="bcc-hero-sell-tier-value">Cars worth P10k - P100k</div>
+      <div className="bcc-hero-sell-tier-value">Basic</div>
       <div className="bcc-hero-sell-tier-features">
-        <span>✓ Featured listing</span>
         <span>✓ Multiple photos</span>
         <span>✓ Contact leads</span>
         <span>✓ Social Media Marketing</span>
@@ -514,9 +513,9 @@ const HeroSection = () => {
         <div className="bcc-hero-sell-tier-price">P100</div>
         <div className="bcc-hero-sell-tier-period">/month</div>
       </div>
-      <div className="bcc-hero-sell-tier-value">Cars worth P100k - P1M</div>
+      <div className="bcc-hero-sell-tier-value">Standard</div>
       <div className="bcc-hero-sell-tier-features">
-        <span>✓ Social media marketing</span>
+        <span>✓ 2x Social media marketing</span>
         <span>✓ Premium placement</span>
         <span>✓ Multiple photos</span>
         <span>✓ Priority support</span>
@@ -529,13 +528,14 @@ const HeroSection = () => {
         <div className="bcc-hero-sell-tier-price">P200</div>
         <div className="bcc-hero-sell-tier-period">/month</div>
       </div>
-      <div className="bcc-hero-sell-tier-value">Cars worth P1M+</div>
+      <div className="bcc-hero-sell-tier-value">Premium</div>
       <div className="bcc-hero-sell-tier-features">
-       <span>✓ 2x Social media marketing</span>
+       <span>✓ 4x Social media marketing</span>
         <span>✓ Premium priority placement</span>
         <span>✓ Multiple photos</span>
         <span>✓ Higher priority support</span>
         <span>✓ Featured placement</span>
+        <span>✓ First access to new features</span>
       </div>
     </div>
   </div>
