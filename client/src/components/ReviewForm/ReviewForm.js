@@ -5,7 +5,7 @@ import {
   CheckCircle, Clock, MapPin, Phone, Car 
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
-import axios from '../../../config/axios.js';
+import { http } from '../../config/axios.js';
 import './ReviewForm.css';
 
 const ReviewForm = ({ 
