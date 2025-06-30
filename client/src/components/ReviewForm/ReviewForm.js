@@ -4,7 +4,7 @@ import {
   Star, Send, X, User, Shield, AlertCircle, 
   CheckCircle, Clock, MapPin, Phone, Car 
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext.js';
 import axios from '../../config/axios';
 import './ReviewForm.css';
 
