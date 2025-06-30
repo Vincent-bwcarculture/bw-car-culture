@@ -73,7 +73,7 @@ const ResetPasswordPage = () => {
         <div className="auth-card">
           <div className="auth-header">
             <img 
-              src="/images/BCC Logo.png" 
+              src="https://i3wcarculture-images.s3.us-east-1.amazonaws.com/branding/bcc-logo.png" 
               alt="I3w Car Culture Logo" 
               className="auth-logo"
             />
@@ -94,7 +94,7 @@ const ResetPasswordPage = () => {
         <div className="auth-card">
           <div className="auth-header">
             <img 
-              src="/images/BCC Logo.png" 
+              src="https://i3wcarculture-images.s3.us-east-1.amazonaws.com/branding/bcc-logo.png" 
               alt="I3w Car Culture Logo" 
               className="auth-logo"
             />
@@ -121,7 +121,7 @@ const ResetPasswordPage = () => {
       <div className="auth-card">
         <div className="auth-header">
           <img 
-            src="/images/BCC Logo.png" 
+            src="https://i3wcarculture-images.s3.us-east-1.amazonaws.com/branding/bcc-logo.png" 
             alt="I3w Car Culture Logo" 
             className="auth-logo"
           />

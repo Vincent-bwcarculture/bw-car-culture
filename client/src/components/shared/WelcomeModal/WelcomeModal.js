@@ -84,7 +84,7 @@ const WelcomeModal = ({ onClose }) => {
             BW
           </div> */}
           <h1 id="welcome-modal-title" className="welcome-modal-title">
-            Welcome to BW Car Culture
+            Welcome to Bw Car Culture
           </h1>
           <p className="welcome-modal-subtitle">
             Botswana's Premier Automotive Platform
