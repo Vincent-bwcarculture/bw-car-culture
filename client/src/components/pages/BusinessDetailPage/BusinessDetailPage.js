@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { http } from '../../../config/axios.js';
 import { useInternalAnalytics } from '../../../hooks/useInternalAnalytics.js';
+import { useAuth } from '../../../context/AuthContext.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
 import RentalCard from '../../shared/RentalCard/RentalCard.js';
 import PublicTransportCard from '../../shared/PublicTransportCard/PublicTransportCard.js';
@@ -23,6 +24,7 @@ const BusinessDetailPage = () => {
   
   // Analytics hook
   const { trackListingView, trackDealerContact, trackPhoneClick, trackFavorite, trackSearch, trackFilterUsage, trackEvent } = useInternalAnalytics();
+  const { user, isAuthenticated } = useAuth();
   
   // Core state
   const [business, setBusiness] = useState(null);
