@@ -2,11 +2,16 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { debounce } from 'lodash';
+import { 
+  Star, QrCode, MessageSquare, Plus, Eye, User, Hash, Car, Heart, Share
+} from 'lucide-react';
 import { http } from '../../../config/axios.js';
 import { useInternalAnalytics } from '../../../hooks/useInternalAnalytics.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
 import RentalCard from '../../shared/RentalCard/RentalCard.js';
 import PublicTransportCard from '../../shared/PublicTransportCard/PublicTransportCard.js';
+import ReviewForm from '../../ReviewForm/ReviewForm.js';
+import QRCodeScanner from '../../QRScanner/QRCodeScanner.js';
 import InventoryCard from '../../shared/InventoryCard/InventoryCard.js';
 import ShareModal from '../../shared/ShareModal.js';
 import './BusinessDetailPage.css';
@@ -26,7 +31,17 @@ const BusinessDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('about');
-  
+   const [reviews, setReviews] = useState([]);
+  const [reviewStats, setReviewStats] = useState({
+    totalReviews: 0,
+    averageRating: 0,
+    ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+  });
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewMethod, setReviewMethod] = useState(null);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [serviceCode, setServiceCode] = useState('');
   // Pagination state
   const [listingsPage, setListingsPage] = useState(1);
   const [listingsPagination, setListingsPagination] = useState({
@@ -150,6 +165,9 @@ const BusinessDetailPage = () => {
         serviceType: serviceType,
         location: business.location?.city || business.location?.country
       });
+
+       // NEW: Load reviews when business loads
+      loadBusinessReviews();
     }
   }, [business, businessType, serviceType, trackListingView]);
 
@@ -276,6 +294,77 @@ const BusinessDetailPage = () => {
     } finally {
       setListingsLoading(false);
     }
+  };
+
+ // Load business reviews
+  const loadBusinessReviews = async () => {
+    if (!business?._id) return;
+    
+    try {
+      setReviewsLoading(true);
+      const endpoint = businessType === 'dealer' 
+        ? `/reviews/dealer/${business._id}`
+        : `/reviews/service/${business._id}`;
+        
+      const response = await http.get(endpoint);
+      if (response.data.success) {
+        setReviews(response.data.data.reviews || []);
+        setReviewStats(response.data.data.stats || {
+          totalReviews: 0,
+          averageRating: 0,
+          ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+        });
+      }
+    } catch (error) {
+      console.error('Error loading reviews:', error);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  // Handle review submission
+  const handleReviewSubmitted = (result) => {
+    if (result.success) {
+      setShowReviewModal(false);
+      setReviewMethod(null);
+      setShowQRScanner(false);
+      setServiceCode('');
+      loadBusinessReviews(); // Refresh reviews
+      
+      // Show success message
+      alert(result.message || 'Review submitted successfully!');
+    }
+  };
+
+  // Start QR code scanning
+  const handleQRScan = () => {
+    setReviewMethod('qr');
+    setShowQRScanner(true);
+  };
+
+  // Handle QR scan result
+  const handleQRResult = (qrData) => {
+    setShowQRScanner(false);
+    
+    const [serviceType, serviceId, providerId, serviceName] = qrData.split('|');
+    
+    if (providerId === business._id) {
+      setReviewMethod('qr');
+      setShowReviewModal(true);
+    } else {
+      alert('This QR code is not for this business. Please scan the correct QR code.');
+    }
+  };
+
+  // Handle service code submission
+  const handleServiceCodeSubmit = () => {
+    if (!serviceCode.trim()) {
+      alert('Please enter a service code');
+      return;
+    }
+    
+    setReviewMethod('service_code');
+    setShowReviewModal(true);
   };
 
   const fetchInventory = async () => {
@@ -858,6 +947,16 @@ return (
         >
           ↗
         </button>
+        {/* NEW: Add review button */}
+          <button 
+            className="bcc-business-detail-review-button"
+            onClick={() => setShowReviewModal(true)}
+            disabled={!isAuthenticated}
+            title={isAuthenticated ? 'Leave a review' : 'Login to leave a review'}
+          >
+            <Star size={16} />
+            <span className="button-text">Review</span>
+          </button>
       </div>
     </div>
 
@@ -1003,12 +1102,12 @@ return (
           Inventory ({inventoryPagination.total || 0})
         </button>
         
-        <button 
-          className={`bcc-business-detail-tab-button ${activeTab === 'reviews' ? 'active' : ''}`}
-          onClick={() => handleTabChange('reviews')}
-        >
-          Reviews ({business.metrics?.totalReviews || 0})
-        </button>
+          <button 
+            className={`bcc-business-detail-tab-button ${activeTab === 'reviews' ? 'active' : ''}`}
+            onClick={() => handleTabChange('reviews')}
+          >
+            Reviews ({reviewStats.totalReviews || business.metrics?.totalReviews || 0})
+          </button>
         
         <button 
           className={`bcc-business-detail-tab-button ${activeTab === 'contact' ? 'active' : ''}`}
@@ -1505,34 +1604,91 @@ return (
           </div>
         )}
         
-        {activeTab === 'reviews' && (
-          <div className="bcc-business-detail-reviews-tab">
-            <h2>Customer Reviews</h2>
-            
-            {business.metrics?.totalReviews === 0 ? (
-              <div className="bcc-business-detail-no-reviews">
-                <p>No reviews yet. Be the first to review this {businessType}!</p>
+           {/* ENHANCED REVIEWS TAB - Replace your existing reviews tab */}
+          {activeTab === 'reviews' && (
+            <div className="bcc-business-detail-reviews-tab">
+              <div className="bcc-business-detail-reviews-header">
+                <h2>Customer Reviews</h2>
                 <button 
-                  className="bcc-business-detail-write-review-button"
-                  onClick={() => {
-                    if (business && business._id) {
-                      trackEvent('write_review_initiated', {
-                        businessId: business._id,
-                        businessType
-                      });
-                    }
-                  }}
+                  className="bcc-add-review-button"
+                  onClick={() => setShowReviewModal(true)}
+                  disabled={!isAuthenticated}
                 >
-                  Write a Review
+                  <Plus size={16} />
+                  Add Review
                 </button>
               </div>
-            ) : (
-              <div className="bcc-business-detail-reviews-placeholder">
-                <p>Reviews feature is coming soon...</p>
+
+              {/* Rating Summary */}
+              <div className="bcc-rating-summary">
+                <div className="bcc-overall-rating">
+                  <div className="bcc-rating-number">
+                    {reviewStats.averageRating.toFixed(1)}
+                  </div>
+                  <div className="bcc-rating-stars">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <Star 
+                        key={star}
+                        size={20}
+                        className={`bcc-star ${star <= Math.round(reviewStats.averageRating) ? 'filled' : ''}`}
+                      />
+                    ))}
+                  </div>
+                  <div className="bcc-total-reviews">
+                    {reviewStats.totalReviews} total reviews
+                  </div>
+                </div>
+
+                <div className="bcc-rating-breakdown">
+                  {[5, 4, 3, 2, 1].map(rating => (
+                    <div key={rating} className="bcc-rating-bar">
+                      <span className="bcc-rating-label">{rating} ⭐</span>
+                      <div className="bcc-bar-container">
+                        <div 
+                          className="bcc-bar-fill"
+                          style={{ 
+                            width: `${reviewStats.totalReviews > 0 
+                              ? (reviewStats.ratingDistribution[rating] / reviewStats.totalReviews) * 100 
+                              : 0}%` 
+                          }}
+                        ></div>
+                      </div>
+                      <span className="bcc-rating-count">
+                        {reviewStats.ratingDistribution[rating] || 0}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            )}
-          </div>
-        )}
+
+              {/* Reviews List */}
+              <div className="bcc-reviews-list">
+                {reviewsLoading ? (
+                  <div className="bcc-reviews-loading">
+                    <div className="bcc-business-detail-spinner"></div>
+                    <p>Loading reviews...</p>
+                  </div>
+                ) : reviews.length === 0 ? (
+                  <div className="bcc-no-reviews">
+                    <MessageSquare size={48} />
+                    <h3>No reviews yet</h3>
+                    <p>Be the first to review this business!</p>
+                    <button 
+                      className="bcc-first-review-button"
+                      onClick={() => setShowReviewModal(true)}
+                      disabled={!isAuthenticated}
+                    >
+                      Write First Review
+                    </button>
+                  </div>
+                ) : (
+                  reviews.map(review => (
+                    <ReviewCard key={review._id} review={review} business={business} />
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         
         {activeTab === 'contact' && (
           <div className="bcc-business-detail-contact-tab">
@@ -1708,8 +1864,220 @@ return (
         buttonRef={shareButtonRef}
       />
     )}
+
+
+      {/* Review Method Selection Modal */}
+      {showReviewModal && !reviewMethod && (
+        <div className="bcc-modal-overlay" onClick={() => setShowReviewModal(false)}>
+          <div className="bcc-review-method-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="bcc-modal-header">
+              <h2>How would you like to review?</h2>
+              <button 
+                className="bcc-close-button"
+                onClick={() => setShowReviewModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="bcc-review-methods">
+              <button 
+                className="bcc-method-option"
+                onClick={handleQRScan}
+              >
+                <QrCode size={32} />
+                <h3>Scan QR Code</h3>
+                <p>Scan the QR code displayed at the business</p>
+              </button>
+              
+              <button 
+                className="bcc-method-option"
+                onClick={() => setReviewMethod('service_code')}
+              >
+                <Hash size={32} />
+                <h3>Service Code</h3>
+                <p>Enter code from your service receipt</p>
+              </button>
+              
+              <button 
+                className="bcc-method-option"
+                onClick={() => setReviewMethod('general')}
+              >
+                <Star size={32} />
+                <h3>General Review</h3>
+                <p>Leave a general review about this business</p>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+       {/* Service Code Entry Modal */}
+      {showReviewModal && reviewMethod === 'service_code' && (
+        <div className="bcc-modal-overlay" onClick={() => setShowReviewModal(false)}>
+          <div className="bcc-service-code-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="bcc-modal-header">
+              <h2>Enter Service Code</h2>
+              <button 
+                className="bcc-close-button"
+                onClick={() => setShowReviewModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="bcc-service-code-form">
+              <p>Enter the service code from your receipt or service card:</p>
+              <input
+                type="text"
+                value={serviceCode}
+                onChange={(e) => setServiceCode(e.target.value.toUpperCase())}
+                placeholder="e.g. SVC123456"
+                className="bcc-service-code-input"
+              />
+              <div className="bcc-service-code-actions">
+                <button 
+                  className="bcc-cancel-button"
+                  onClick={() => setShowReviewModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="bcc-submit-button"
+                  onClick={handleServiceCodeSubmit}
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR Scanner Modal */}
+      {showQRScanner && (
+        <div className="bcc-modal-overlay">
+          <div className="bcc-qr-scanner-modal">
+            <QRCodeScanner 
+              onResult={handleQRResult}
+              onCancel={() => setShowQRScanner(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Review Form Modal */}
+      {showReviewModal && (reviewMethod === 'qr' || reviewMethod === 'general') && (
+        <ReviewForm
+          serviceData={{
+            id: business._id,
+            name: business.businessName,
+            type: businessType,
+            provider: business.businessName
+          }}
+          verificationMethod={reviewMethod}
+          onSubmit={handleReviewSubmitted}
+          onCancel={() => {
+            setShowReviewModal(false);
+            setReviewMethod(null);
+          }}
+          serviceCode={reviewMethod === 'service_code' ? serviceCode : null}
+        />
+      )}
+
   </div>
 );
+};
+
+// ========================================
+// 6. REVIEW CARD COMPONENT
+// ========================================
+const ReviewCard = ({ review, business }) => {
+  const [showFullReview, setShowFullReview] = useState(false);
+  
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const truncateText = (text, maxLength = 150) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
+  return (
+    <div className="bcc-review-card">
+      <div className="bcc-review-header">
+        <div className="bcc-reviewer-info">
+          <div className="bcc-reviewer-avatar">
+            {review.isAnonymous ? (
+              <User size={20} />
+            ) : (
+              <img 
+                src={review.fromUserId?.avatar?.url || '/images/default-avatar.png'} 
+                alt={review.fromUserId?.name || 'Anonymous'}
+              />
+            )}
+          </div>
+          <div className="bcc-reviewer-details">
+            <div className="bcc-reviewer-name">
+              {review.isAnonymous ? 'Anonymous' : review.fromUserId?.name || 'Anonymous'}
+            </div>
+            <div className="bcc-review-date">{formatDate(review.date)}</div>
+          </div>
+        </div>
+        
+        <div className="bcc-review-rating">
+          {[1, 2, 3, 4, 5].map(star => (
+            <Star 
+              key={star}
+              size={16}
+              className={`bcc-star ${star <= review.rating ? 'filled' : ''}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="bcc-review-content">
+        <p className="bcc-review-text">
+          {showFullReview ? review.review : truncateText(review.review)}
+          {review.review.length > 150 && (
+            <button 
+              className="bcc-read-more-button"
+              onClick={() => setShowFullReview(!showFullReview)}
+            >
+              {showFullReview ? 'Show less' : 'Read more'}
+            </button>
+          )}
+        </p>
+
+        {review.verificationMethod && (
+          <div className="bcc-review-verification">
+            <span className="bcc-verification-badge">
+              {review.verificationMethod === 'qr_code' && '📱 QR Verified'}
+              {review.verificationMethod === 'service_code' && '🎫 Service Verified'}
+              {review.verificationMethod === 'plate_number' && '🚗 Plate Verified'}
+            </span>
+          </div>
+        )}
+
+        {review.response && (
+          <div className="bcc-business-response">
+            <div className="bcc-response-header">
+              <strong>Response from {business?.businessName}</strong>
+              <span className="bcc-response-date">
+                {formatDate(review.response.date)}
+              </span>
+            </div>
+            <p className="bcc-response-text">{review.response.text}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default BusinessDetailPage;
