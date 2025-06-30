@@ -1981,6 +1981,7 @@
   .bcc-business-detail-banner {
     height: 200px;
     -webkit-print-color-adjust: exact;
+   
   }
 }
 
@@ -2078,4 +2079,686 @@
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
   background-size: 200px 100%;
   animation: shimmer 1.5s infinite;
+}
+
+/* Review Button in Action Buttons */
+.bcc-business-detail-review-button {
+  background: linear-gradient(135deg, #ff6b35, #ff8e53);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.3);
+}
+
+.bcc-business-detail-review-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff8e53, #ff6b35);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+}
+
+.bcc-business-detail-review-button:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.bcc-business-detail-review-button .button-text {
+  display: none;
+}
+
+/* Enhanced Reviews Tab Header */
+.bcc-business-detail-reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.bcc-business-detail-reviews-header h2 {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 2.2rem;
+  font-weight: 700;
+  background: var(--primary-gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bcc-add-review-button {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.3);
+}
+
+.bcc-add-review-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 51, 0, 0.4);
+}
+
+.bcc-add-review-button:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Rating Summary Section */
+.bcc-rating-summary {
+  display: grid;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+  padding: 2rem;
+  background: var(--surface-dark);
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-default);
+}
+
+.bcc-overall-rating {
+  text-align: center;
+}
+
+.bcc-rating-number {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.bcc-rating-stars {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.bcc-star {
+  color: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.bcc-star.filled {
+  color: #ffd700;
+}
+
+.bcc-total-reviews {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.bcc-rating-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.bcc-rating-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.bcc-rating-label {
+  min-width: 50px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.bcc-bar-container {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bcc-bar-fill {
+  height: 100%;
+  background: var(--primary-gradient);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.bcc-rating-count {
+  min-width: 30px;
+  text-align: right;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* Reviews List */
+.bcc-reviews-loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}
+
+.bcc-reviews-loading p {
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+.bcc-no-reviews {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+  background: var(--surface-dark);
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+}
+
+.bcc-no-reviews svg {
+  color: rgba(255, 255, 255, 0.2);
+  margin-bottom: 1.5rem;
+}
+
+.bcc-no-reviews h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+}
+
+.bcc-no-reviews p {
+  margin: 0 0 2rem 0;
+  color: var(--text-muted);
+}
+
+.bcc-first-review-button {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.3);
+}
+
+.bcc-first-review-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 51, 0, 0.4);
+}
+
+.bcc-first-review-button:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Review Cards */
+.bcc-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bcc-review-card {
+  background: var(--surface-dark);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-default);
+}
+
+.bcc-review-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  border-color: var(--border-accent);
+}
+
+.bcc-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.bcc-reviewer-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bcc-reviewer-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+}
+
+.bcc-reviewer-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bcc-reviewer-avatar svg {
+  color: var(--text-muted);
+}
+
+.bcc-reviewer-name {
+  font-weight: 600;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.bcc-review-date {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.bcc-review-rating {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.bcc-review-content {
+  line-height: 1.6;
+}
+
+.bcc-review-text {
+  margin: 0 0 1rem 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.bcc-read-more-button {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0;
+  margin-left: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.bcc-read-more-button:hover {
+  text-decoration: underline;
+  color: #ff6600;
+}
+
+.bcc-review-verification {
+  margin-bottom: 1rem;
+}
+
+.bcc-verification-badge {
+  background: rgba(46, 213, 115, 0.2);
+  color: #2ecc71;
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(46, 213, 115, 0.3);
+}
+
+.bcc-business-response {
+  background: rgba(255, 51, 0, 0.05);
+  border-left: 3px solid var(--primary-color);
+  padding: 1rem;
+  border-radius: 0 8px 8px 0;
+  margin-top: 1rem;
+}
+
+.bcc-response-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.bcc-response-header strong {
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+.bcc-response-date {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.bcc-response-text {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Modal Styles */
+.bcc-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(5px);
+}
+
+.bcc-review-method-modal,
+.bcc-service-code-modal {
+  background: var(--surface-dark);
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-default);
+}
+
+.bcc-modal-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.bcc-modal-header h2 {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.bcc-close-button {
+  position: absolute;
+  top: -1rem;
+  right: -1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.bcc-close-button:hover {
+  background: rgba(255, 51, 0, 0.1);
+  color: var(--primary-color);
+}
+
+.bcc-review-methods {
+  display: grid;
+  gap: 1rem;
+}
+
+.bcc-method-option {
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  color: var(--text-light);
+}
+
+.bcc-method-option:hover {
+  border-color: var(--primary-color);
+  background: rgba(255, 51, 0, 0.05);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(255, 51, 0, 0.2);
+}
+
+.bcc-method-option h3 {
+  margin: 1rem 0 0.5rem 0;
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+
+.bcc-method-option p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Service Code Form */
+.bcc-service-code-form {
+  text-align: center;
+}
+
+.bcc-service-code-form p {
+  margin: 0 0 1.5rem 0;
+  color: var(--text-secondary);
+}
+
+.bcc-service-code-input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-light);
+  font-size: 1.1rem;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.bcc-service-code-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(255, 51, 0, 0.2);
+}
+
+.bcc-service-code-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.bcc-cancel-button {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: 2px solid var(--border-color);
+  padding: 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.bcc-cancel-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--primary-color);
+  color: var(--text-light);
+}
+
+.bcc-submit-button {
+  flex: 1;
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.3);
+}
+
+.bcc-submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 51, 0, 0.4);
+}
+
+.bcc-qr-scanner-modal {
+  background: #000;
+  border-radius: 20px;
+  overflow: hidden;
+  max-width: 500px;
+  width: 95%;
+  max-height: 80vh;
+}
+
+/* === RESPONSIVE DESIGN === */
+
+/* Tablet (768px and up) */
+@media (min-width: 768px) {
+  .bcc-business-detail-review-button .button-text {
+    display: inline;
+  }
+
+  .bcc-rating-summary {
+    grid-template-columns: 200px 1fr;
+    align-items: center;
+  }
+
+  .bcc-review-methods {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .bcc-business-detail-reviews-header {
+    flex-wrap: nowrap;
+  }
+
+  .bcc-review-method-modal,
+  .bcc-service-code-modal {
+    padding: 2.5rem;
+  }
+}
+
+/* Desktop (1024px and up) */
+@media (min-width: 1024px) {
+  .bcc-review-method-modal {
+    max-width: 600px;
+    padding: 3rem;
+  }
+
+  .bcc-method-option {
+    padding: 2rem;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+  .bcc-business-detail-reviews-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .bcc-business-detail-reviews-header h2 {
+    font-size: 1.8rem;
+  }
+
+  .bcc-rating-summary {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .bcc-rating-number {
+    font-size: 3rem;
+  }
+
+  .bcc-review-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .bcc-review-methods {
+    grid-template-columns: 1fr;
+  }
+
+  .bcc-modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .bcc-review-method-modal,
+  .bcc-service-code-modal {
+    padding: 1.5rem;
+  }
+
+  .bcc-review-card {
+    padding: 1rem;
+  }
+}
+
+/* === ACCESSIBILITY === */
+@media (prefers-reduced-motion: reduce) {
+  .bcc-business-detail-review-button,
+  .bcc-add-review-button,
+  .bcc-first-review-button,
+  .bcc-review-card,
+  .bcc-method-option {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .bcc-review-card {
+    border-width: 2px;
+    border-color: var(--text-light);
+  }
+  
+  .bcc-business-detail-review-button,
+  .bcc-add-review-button,
+  .bcc-first-review-button {
+    background: #000;
+    border: 2px solid #fff;
+  }
+  
+  .bcc-verification-badge {
+    background: #000;
+    color: #fff;
+    border: 2px solid #fff;
+  }
 }
