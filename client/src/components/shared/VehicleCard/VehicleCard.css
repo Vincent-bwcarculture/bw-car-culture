@@ -35,11 +35,11 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   border-color: #ff3300;
 }
 
-/* Image Container - INCREASED HEIGHT due to space savings */
+/* Image Container - INCREASED HEIGHT especially for mobile */
 .vc-image-container {
   position: relative;
   width: 100%;
-  height: 200px; /* Increased from 180px - utilizing space saved from optimizations */
+  height: 220px; /* Further increased from 200px for better image display */
   overflow: hidden;
   background: rgba(0, 0, 0, 0.2);
 }
@@ -176,11 +176,7 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   visibility: visible;
 }
 
-/* Image Gallery Navigation */
-.vc-image {
-  transition: transform 0.3s ease;
-}
-
+/* Image Gallery Navigation - ALWAYS VISIBLE with transparent backgrounds */
 .vc-image-navigation {
   position: absolute;
   top: 0;
@@ -190,34 +186,40 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   display: flex;
   justify-content: space-between;
   align-items: center;
-  opacity: 0;
+  opacity: 1; /* Always visible instead of on hover */
   transition: opacity 0.3s ease;
-}
-
-.vc-image-container:hover .vc-image-navigation {
-  opacity: 1;
+  pointer-events: none; /* Allow clicking through to buttons */
 }
 
 .vc-image-nav {
-  width: 32px;
-  height: 32px;
+  width: 36px; /* Slightly larger for better touch target */
+  height: 36px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.4); /* More transparent background */
+  border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  margin: 0 10px;
+  margin: 0 8px; /* Reduced margin to keep them more visible */
   transition: all 0.3s ease;
-  z-index: 3;
+  z-index: 4; /* Higher z-index to ensure visibility */
+  pointer-events: auto; /* Enable clicking on buttons */
+  backdrop-filter: blur(2px); /* Subtle blur effect */
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .vc-image-nav:hover {
-  background: #ff3300;
+  background: rgba(255, 51, 0, 0.8); /* Semi-transparent red on hover */
   border-color: #ff3300;
   transform: scale(1.1);
+  backdrop-filter: blur(4px);
+}
+
+.vc-image-nav:active {
+  transform: scale(0.95);
 }
 
 .vc-image-counter {
@@ -271,7 +273,8 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
 }
 
 .vc-title {
-  font-size: 1.1rem;
+  font-size: 1.2rem; /* Increased from 1.1rem for better readability */
+  font-weight: 600; /* Slightly bolder for better prominence */
   color: #ffffff;
   margin: 0 0 0.2rem 0; /* Reduced bottom margin for tighter spacing */
   line-height: 1.3; /* Slightly tighter line height */
@@ -326,9 +329,9 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
 }
 
 .vc-price {
-  font-size: 1.1rem;
+  font-size: 1.3rem; /* Increased from 1.1rem for better prominence */
   font-weight: bold;
-  color: #1565c0;
+  color:#0051ff;
   white-space: nowrap;
 }
 
@@ -729,7 +732,7 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
   .vc-image-container {
-    height: 180px; /* Increased from default mobile height */
+    height: 200px; /* Significantly increased from 180px for better mobile image display */
   }
   
   .vc-header {
@@ -745,7 +748,8 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   }
   
   .vc-title {
-    font-size: 1rem; /* Slightly smaller on mobile */
+    font-size: 1.1rem; /* Slightly smaller than desktop but larger than before */
+    font-weight: 600;
     -webkit-line-clamp: 2; /* Limit to 2 lines on mobile */
   }
   
@@ -761,7 +765,22 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   }
   
   .vc-price {
-    font-size: 1rem; /* Slightly smaller on mobile */
+    font-size: 1.2rem; /* Increased for better mobile readability */
+    font-weight: bold;
+  }
+  
+  /* Mobile-optimized navigation arrows */
+  .vc-image-nav {
+    width: 40px; /* Larger touch targets on mobile */
+    height: 40px;
+    margin: 0 6px;
+    background: rgba(0, 0, 0, 0.5); /* Slightly more opaque on mobile */
+    font-size: 16px; /* Larger arrows for mobile */
+  }
+  
+  .vc-image-nav:hover,
+  .vc-image-nav:active {
+    background: rgba(255, 51, 0, 0.9); /* More opaque on mobile interaction */
   }
   
   .vc-dealer-info {
@@ -814,7 +833,7 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
 
 @media (max-width: 480px) {
   .vc-image-container {
-    height: 170px; /* Increased from 160px - better image display on small screens */
+    height: 190px; /* Significantly increased from 170px for better small screen display */
   }
   
   .vc-header {
@@ -827,7 +846,8 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   }
   
   .vc-title {
-    font-size: 0.95rem; /* Smaller font on very small screens */
+    font-size: 1.05rem; /* Increased for better readability on small screens */
+    font-weight: 600;
     -webkit-line-clamp: 2;
   }
   
@@ -836,7 +856,24 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   }
   
   .vc-price {
-    font-size: 0.95rem; /* Match title size */
+    font-size: 1.1rem; /* Increased for better mobile readability */
+    font-weight: bold;
+  }
+  
+  /* Enhanced mobile navigation arrows */
+  .vc-image-nav {
+    width: 44px; /* Even larger touch targets for small screens */
+    height: 44px;
+    margin: 0 4px;
+    background: rgba(0, 0, 0, 0.6); /* More visible on small screens */
+    font-size: 18px; /* Larger arrows */
+    border-width: 2px; /* Thicker border for better visibility */
+  }
+  
+  .vc-image-nav:hover,
+  .vc-image-nav:active {
+    background: rgba(255, 51, 0, 0.95); /* Almost opaque on interaction */
+    transform: scale(1.05); /* Subtle scale to show interaction */
   }
   
   .vc-dealer-info {
