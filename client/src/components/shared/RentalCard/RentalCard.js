@@ -1,4 +1,4 @@
-// src/components/Rentals/RentalCard/RentalCard.js
+// src/components/shared/RentalCard/RentalCard.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAnalytics } from '../../../hooks/useAnalytics.js';
@@ -12,6 +12,8 @@ const RentalCard = ({ vehicle, onRent, onShare, compact = false }) => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [imageLoadError, setImageLoadError] = useState(false);
   const [hasBeenViewed, setHasBeenViewed] = useState(false);
+  const [showNavigation, setShowNavigation] = useState(false);
+  const [navigationTimeout, setNavigationTimeout] = useState(null);
 
   // Utility function to safely get string ID
   const safeGetStringId = (id) => {
@@ -82,271 +84,157 @@ const RentalCard = ({ vehicle, onRent, onShare, compact = false }) => {
   useEffect(() => {
     if (vehicle && !hasBeenViewed) {
       const timer = setTimeout(() => {
-        try {
-          const vehicleId = safeGetStringId(vehicle.id || vehicle._id);
-          analytics.trackEvent('rental_view', {
-            category: 'content',
-            elementId: vehicleId,
-            metadata: {
-              rentalId: vehicleId,
-              name: getVehicleInfo(vehicle, 'name'),
-              category: getVehicleInfo(vehicle, 'category'),
-              dailyRate: getVehicleRate(vehicle, 'daily', 0),
-              provider: vehicle.provider,
-              providerId: vehicle.providerId,
-              usageType: vehicle.usageType,
-              source: 'rental_card',
-              compact: compact
-            }
+        const vehicleStringId = safeGetStringId(vehicle._id || vehicle.id);
+        if (vehicleStringId && analytics) {
+          analytics.trackRentalView(vehicleStringId, {
+            name: getVehicleInfo(vehicle, 'name', 'Unknown'),
+            category: getVehicleInfo(vehicle, 'category', 'Unknown'),
+            provider: vehicle.provider,
+            dailyRate: getVehicleRate(vehicle, 'daily', 0)
           });
-          setHasBeenViewed(true);
-        } catch (error) {
-          console.warn('Analytics tracking failed:', error);
         }
-      }, 1000); // Track after 1 second of visibility
-
+        setHasBeenViewed(true);
+      }, 1000);
+      
       return () => clearTimeout(timer);
     }
-  }, [vehicle, hasBeenViewed, analytics, compact]);
-  
-  useEffect(() => {
-    setImageLoadError(false);
-  }, [vehicle, activeImageIndex]);
+  }, [vehicle, analytics, hasBeenViewed]);
 
-  if (!vehicle) return null;
-
-  const handleCardClick = () => {
-    const vehicleId = safeGetStringId(vehicle.id || vehicle._id);
-    
-    if (!vehicleId) {
-      console.error("Cannot navigate: Missing valid vehicle ID", vehicle);
-      return;
-    }
-
-    // Track card click
-    try {
-      analytics.trackClick('rental_card', 'card', {
-        rentalId: vehicleId,
-        name: getVehicleInfo(vehicle, 'name'),
-        provider: vehicle.provider,
-        action: 'view_details'
-      });
-    } catch (error) {
-      console.warn('Analytics tracking failed:', error);
-    }
-    
-    navigate(`/rentals/${vehicleId}`);
-  };
-
+  // Image navigation handlers
   const handleImageNavigation = (e, direction) => {
     e.stopPropagation();
     
-    if (!vehicle || !vehicle.images || !Array.isArray(vehicle.images) || vehicle.images.length <= 1) return;
+    if (!vehicle?.images || vehicle.images.length <= 1) return;
     
-    // Track image navigation
-    try {
-      const vehicleId = safeGetStringId(vehicle.id || vehicle._id);
-      analytics.trackClick('rental_image_navigation', 'button', {
-        rentalId: vehicleId,
-        direction: direction,
-        currentIndex: activeImageIndex,
-        totalImages: vehicle.images.length
-      });
-    } catch (error) {
-      console.warn('Analytics tracking failed:', error);
-    }
-    
-    setActiveImageIndex(prev => {
-      if (direction === 'next') {
-        return (prev + 1) % vehicle.images.length;
-      } else {
-        return (prev - 1 + vehicle.images.length) % vehicle.images.length;
-      }
-    });
-  };
-
-  const handleShareClick = (e) => {
-    e.stopPropagation();
-
-    // Track share action
-    try {
-      const vehicleId = safeGetStringId(vehicle.id || vehicle._id);
-      analytics.trackEvent('rental_share', {
-        category: 'engagement',
-        elementId: vehicleId,
-        metadata: {
-          rentalId: vehicleId,
-          name: getVehicleInfo(vehicle, 'name'),
-          provider: vehicle.provider,
-          shareMethod: 'button'
-        }
-      });
-    } catch (error) {
-      console.warn('Analytics tracking failed:', error);
-    }
-
-    if (onShare) {
-      onShare(vehicle, e.currentTarget);
+    if (direction === 'prev') {
+      setActiveImageIndex(prev => 
+        prev === 0 ? vehicle.images.length - 1 : prev - 1
+      );
     } else {
-      try {
-        if (navigator.share) {
-          const vehicleId = safeGetStringId(vehicle.id || vehicle._id);
-          const shareData = {
-            title: getVehicleInfo(vehicle, 'name', 'Car Rental'),
-            text: `Check out this ${getVehicleInfo(vehicle, 'name', '')} rental from ${vehicle.provider}`,
-            url: `${window.location.origin}/rentals/${vehicleId}`
-          };
-          navigator.share(shareData)
-            .catch(err => console.warn('Error sharing:', err));
-        } else {
-          const vehicleId = safeGetStringId(vehicle.id || vehicle._id);
-          const url = `${window.location.origin}/rentals/${vehicleId}`;
-          navigator.clipboard.writeText(url)
-            .then(() => alert('Link copied to clipboard!'))
-            .catch(err => console.error('Could not copy link:', err));
-        }
-      } catch (err) {
-        console.error('Share functionality error:', err);
-      }
+      setActiveImageIndex(prev => 
+        prev === vehicle.images.length - 1 ? 0 : prev + 1
+      );
     }
   };
-  
-  const handleReserveClick = (e) => {
-    e.stopPropagation();
 
-    // Track rental reservation intent
-    try {
-      const vehicleId = safeGetStringId(vehicle.id || vehicle._id);
-      analytics.trackEvent('rental_reservation', {
-        category: 'conversion',
-        elementId: vehicleId,
-        metadata: {
-          rentalId: vehicleId,
-          name: getVehicleInfo(vehicle, 'name'),
-          dailyRate: getVehicleRate(vehicle, 'daily', 0),
-          provider: vehicle.provider,
-          contactMethod: 'whatsapp'
-        }
+  // Mobile navigation reveal handler
+  const handleImageContainerClick = (e) => {
+    // Only for mobile devices (≤768px)
+    if (window.innerWidth <= 768) {
+      e.stopPropagation();
+      setShowNavigation(true);
+      
+      // Clear existing timeout
+      if (navigationTimeout) {
+        clearTimeout(navigationTimeout);
+      }
+      
+      // Set new timeout to hide arrows
+      const timeout = setTimeout(() => {
+        setShowNavigation(false);
+      }, 3000);
+      
+      setNavigationTimeout(timeout);
+    }
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (navigationTimeout) {
+        clearTimeout(navigationTimeout);
+      }
+    };
+  }, [navigationTimeout]);
+
+  // Event handlers
+  const handleCardClick = () => {
+    const vehicleStringId = safeGetStringId(vehicle._id || vehicle.id);
+    if (vehicleStringId) {
+      if (analytics) {
+        analytics.trackRentalClick(vehicleStringId, {
+          name: getVehicleInfo(vehicle, 'name', 'Unknown'),
+          provider: vehicle.provider
+        });
+      }
+      navigate(`/rentals/${vehicleStringId}`);
+    } else {
+      console.error('Cannot navigate: Invalid vehicle ID');
+    }
+  };
+
+  const handleRentClick = (e) => {
+    e.stopPropagation();
+    const vehicleStringId = safeGetStringId(vehicle._id || vehicle.id);
+    
+    if (analytics && vehicleStringId) {
+      analytics.trackRentalAction(vehicleStringId, 'rent', {
+        name: getVehicleInfo(vehicle, 'name', 'Unknown'),
+        dailyRate: getVehicleRate(vehicle, 'daily', 0)
       });
-    } catch (error) {
-      console.warn('Analytics tracking failed:', error);
     }
     
     if (onRent) {
       onRent(vehicle);
-      return;
-    }
-    
-    const name = getVehicleInfo(vehicle, 'name', 'Vehicle');
-    const category = getVehicleInfo(vehicle, 'category', '');
-    const provider = vehicle.provider || 'Rental Provider';
-    
-    const vehicleDetails = [
-      `*${name}*`,
-      `Category: ${category}`,
-      `Daily Rate: P${getVehicleRate(vehicle, 'daily', 0)}`,
-      vehicle.rates?.security ? `Security Deposit: P${vehicle.rates.security}` : '',
-      vehicle.usageType ? `Usage Type: ${vehicle.usageType}` : '',
-      vehicle.features ? `Features: ${getVehicleFeatures(vehicle).slice(0, 3).join(", ")}${getVehicleFeatures(vehicle).length > 3 ? '...' : ''}` : '',
-    ].filter(Boolean).join('\n');
-
-    let vehicleLink = '';
-    try {
-      const vehicleId = safeGetStringId(vehicle.id || vehicle._id);
-      if (vehicleId) {
-        const baseUrl = window.location.origin;
-        vehicleLink = `\n\nVehicle Link: ${baseUrl}/rentals/${vehicleId}`;
-      }
-    } catch (err) {
-      console.warn('Could not generate vehicle link:', err);
-    }
-    
-    const message = `*VEHICLE RENTAL REQUEST*\n\nHello, I would like to rent this vehicle:\n\n${vehicleDetails}${vehicleLink}\n\nPlease confirm availability and rental process.`;
-    
-    const phone = vehicle.providerContact?.phone;
-    
-    if (phone) {
-      const formattedPhone = phone.startsWith('+') ? phone.replace(/\s+/g, '') : `+267${phone.replace(/\s+/g, '')}`;
-      const encodedMessage = encodeURIComponent(message);
-      window.open(`https://wa.me/${formattedPhone}?text=${encodedMessage}`, '_blank');
     } else {
-      alert('Provider contact information is not available. Please view details to contact the provider.');
+      navigate(`/rentals/${vehicleStringId}/book`);
+    }
+  };
+
+  const handleShareClick = (e) => {
+    e.stopPropagation();
+    const vehicleStringId = safeGetStringId(vehicle._id || vehicle.id);
+    
+    if (analytics && vehicleStringId) {
+      analytics.trackRentalAction(vehicleStringId, 'share', {
+        name: getVehicleInfo(vehicle, 'name', 'Unknown')
+      });
+    }
+    
+    if (onShare) {
+      onShare(vehicle);
+    } else {
+      const shareUrl = `${window.location.origin}/rentals/${vehicleStringId}`;
+      if (navigator.share) {
+        navigator.share({
+          title: getVehicleInfo(vehicle, 'name', 'Rental Vehicle'),
+          text: `Check out this rental: ${getVehicleInfo(vehicle, 'name', 'Rental Vehicle')}`,
+          url: shareUrl
+        });
+      } else {
+        navigator.clipboard.writeText(shareUrl);
+      }
     }
   };
 
   const handleProviderClick = (e) => {
     e.stopPropagation();
-
-    // Track provider click
-    try {
-      analytics.trackClick('rental_provider', 'link', {
-        providerId: vehicle.providerId,
-        providerName: vehicle.provider,
-        rentalId: safeGetStringId(vehicle.id || vehicle._id),
-        action: 'view_provider'
-      });
-    } catch (error) {
-      console.warn('Analytics tracking failed:', error);
-    }
-    
-    const providerId = vehicle.providerId || (vehicle.provider?.id) || (vehicle.provider?._id);
-    
-    if (providerId) {
-      const providerIdString = safeGetStringId(providerId);
-      if (providerIdString) {
-        const providerType = getVehicleInfo(vehicle, 'trailerType') !== 'N/A' ? 'trailer-rentals' : 'car-rentals';
-        navigate(`/services/${providerIdString}?type=${providerType}`);
-      } else {
-        console.warn('Failed to extract valid provider ID for navigation');
-      }
-    } else {
-      const providerName = vehicle.provider?.businessName || vehicle.provider || 'provider';
-      navigate(`/services?search=${encodeURIComponent(providerName)}`);
+    if (vehicle.providerId) {
+      navigate(`/providers/${vehicle.providerId}`);
     }
   };
 
+  if (!vehicle) return null;
+
   return (
     <div className={`rental-card ${compact ? 'compact' : ''}`} onClick={handleCardClick}>
-      <div className="rental-card-image-container">
+      <div 
+        className={`rental-card-image-container ${showNavigation ? 'show-navigation' : ''}`}
+        onClick={handleImageContainerClick}
+      >
         <img 
           src={getImageUrl()} 
-          alt={getVehicleInfo(vehicle, 'name', 'Rental Vehicle')} 
+          alt={getVehicleInfo(vehicle, 'name', 'Rental Vehicle')}
           className="rental-card-image"
           loading="lazy"
           onError={(e) => {
-            console.log(`Rental image failed to load: ${e.target.src}`);
-            
-            // Track image load errors
-            try {
-              const vehicleId = safeGetStringId(vehicle.id || vehicle._id);
-              analytics.trackEvent('rental_image_error', {
-                category: 'system',
-                metadata: {
-                  rentalId: vehicleId,
-                  imageSrc: e.target.src,
-                  imageIndex: activeImageIndex
-                }
-              });
-            } catch (error) {
-              console.warn('Analytics tracking failed:', error);
-            }
-            
-            // For S3 URLs, try to use the proxy endpoint
-            if (e.target.src.includes('amazonaws.com')) {
-              // Extract key from S3 URL
-              const key = e.target.src.split('.amazonaws.com/').pop();
-              if (key) {
-                // Normalize the key to prevent duplicate segments
-                const normalizedKey = key.replace(/images\/images\//g, 'images/');
-                e.target.src = `/api/images/s3-proxy/${normalizedKey}`;
-                return;
-              }
-            }
-            
-            // For local paths, try direct rental path if not already a placeholder
-            if (!e.target.src.includes('/images/placeholders/')) {
-              const filename = e.target.src.split('/').pop();
-              if (filename && !e.target.src.includes('/uploads/rentals/')) {
+            if (!imageLoadError) {
+              setImageLoadError(true);
+              // Try different fallback paths
+              const currentSrc = e.target.src;
+              
+              if (currentSrc.includes('/api/images/s3-proxy/')) {
+                const filename = currentSrc.split('/').pop();
                 e.target.src = `/uploads/rentals/${filename}`;
                 return;
               }
@@ -384,11 +272,37 @@ const RentalCard = ({ vehicle, onRent, onShare, compact = false }) => {
             {getVehicleInfo(vehicle, 'category')}
           </div>
         )}
+
+        {/* Mobile tap hint - only shows on very small screens */}
+        <div className="rental-card-tap-hint">
+          👆 Tap for navigation
+        </div>
       </div>
       
       <div className="rental-card-content">
         <div className="rental-card-header">
-          <h4 className="rental-card-title">{getVehicleInfo(vehicle, 'name', 'Rental Vehicle')}</h4>
+          <div className="rental-card-title-section">
+            <h4 className="rental-card-title">{getVehicleInfo(vehicle, 'name', 'Rental Vehicle')}</h4>
+            
+            {/* Feature badges under title - HORIZONTAL layout */}
+            <div className="rental-card-title-badges">
+              {(() => {
+                const features = getVehicleFeatures(vehicle);
+                return features.slice(0, 2).map((feature, index) => (
+                  <div 
+                    key={index} 
+                    className={`rental-card-feature-badge ${
+                      feature.toLowerCase().includes('insurance') ? 'insurance' : 
+                      feature.toLowerCase().includes('unlimited') ? 'unlimited-miles' : ''
+                    }`}
+                  >
+                    {feature}
+                  </div>
+                ));
+              })()}
+            </div>
+          </div>
+          
           <div className="rental-card-price-container">
             <span className="rental-card-price">
               P {getVehicleRate(vehicle, 'daily', 0)}/day
@@ -427,13 +341,14 @@ const RentalCard = ({ vehicle, onRent, onShare, compact = false }) => {
         
         {(() => {
           const features = getVehicleFeatures(vehicle);
-          if (features.length === 0) return null;
+          const remainingFeatures = features.slice(2); // Skip first 2 as they're under title
+          if (remainingFeatures.length === 0) return null;
           
           return (
             <div className="rental-card-badges">
-              {features.slice(0, 3).map((feature, index) => (
+              {remainingFeatures.slice(0, 2).map((feature, index) => (
                 <div 
-                  key={index} 
+                  key={index + 2} 
                   className={`rental-card-feature-badge ${
                     feature.toLowerCase().includes('insurance') ? 'insurance' : 
                     feature.toLowerCase().includes('unlimited') ? 'unlimited-miles' : ''
@@ -442,15 +357,16 @@ const RentalCard = ({ vehicle, onRent, onShare, compact = false }) => {
                   {feature}
                 </div>
               ))}
-              {features.length > 3 && (
+              {remainingFeatures.length > 2 && (
                 <div className="rental-card-feature-badge">
-                  +{features.length - 3} more
+                  +{remainingFeatures.length - 2} more
                 </div>
               )}
             </div>
           );
         })()}
         
+        {/* OPTIMIZED: Enhanced provider info section with larger avatars and horizontal layout */}
         <div className="rental-card-provider-info" onClick={handleProviderClick}>
           <img 
             src={vehicle.providerLogo || vehicle.provider?.logo || 
@@ -463,13 +379,35 @@ const RentalCard = ({ vehicle, onRent, onShare, compact = false }) => {
             }}
           />
           <div className="rental-card-provider-details">
-            <span className="rental-card-provider-name">
-              {vehicle.provider || 'Rental Provider'}
-            </span>
-            <span className="rental-card-provider-location">
-              {vehicle.providerLocation || 'Location not specified'}
-            </span>
-            <span className="rental-card-provider-link">View Provider</span>
+            {/* First row: Provider name with verification */}
+            <div className="rental-card-provider-meta">
+              <span className="rental-card-provider-name">
+                {vehicle.provider || 'Rental Provider'}
+              </span>
+              {vehicle.provider?.verified && (
+                <div className="rental-card-verified-icon">✓</div>
+              )}
+            </div>
+            
+            {/* Second row: Provider type and location */}
+            <div className="rental-card-provider-actions">
+              <span className="rental-card-provider-type">
+                {vehicle.provider?.type || 'Rental Company'}
+              </span>
+              <span className="rental-card-provider-location">
+                {vehicle.providerLocation || 'Location not specified'}
+              </span>
+            </div>
+            
+            {/* Third row: Actions and contact preferences */}
+            <div className="rental-card-provider-links">
+              <span className="rental-card-provider-link">View Provider</span>
+              {vehicle.provider?.contactPreference && (
+                <span className="rental-card-contact-preference">
+                  📱 {vehicle.provider.contactPreference}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         
@@ -487,7 +425,7 @@ const RentalCard = ({ vehicle, onRent, onShare, compact = false }) => {
             </button>
             <button 
               className="rental-card-reserve-btn"
-              onClick={handleReserveClick}
+              onClick={handleRentClick}
               aria-label="Reserve Vehicle"
             >
               Reserve
