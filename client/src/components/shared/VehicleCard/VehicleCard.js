@@ -11,6 +11,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const [imageLoadError, setImageLoadError] = useState(false);
   const [hasBeenViewed, setHasBeenViewed] = useState(false);
   const [dealerImageError, setDealerImageError] = useState(false);
+  const [showNavigation, setShowNavigation] = useState(false); // For mobile tap-to-reveal
 
   // FIXED: Enhanced checkFailedImage function to include type
   const checkFailedImage = useCallback((url, type = 'general') => {
@@ -435,6 +436,20 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     navigate(`/marketplace/${car._id}`);
   }, [car, navigate, analytics, dealer]);
 
+  // Handle image container tap for mobile navigation reveal
+  const handleImageContainerClick = useCallback((e) => {
+    // Only handle this on mobile devices (768px and below)
+    if (window.innerWidth <= 768) {
+      e.stopPropagation(); // Prevent card click
+      setShowNavigation(true);
+      
+      // Hide navigation after 3 seconds of inactivity
+      setTimeout(() => {
+        setShowNavigation(false);
+      }, 3000);
+    }
+  }, []);
+
   const handleImageNavigation = useCallback((e, direction) => {
     e.stopPropagation();
     
@@ -648,7 +663,10 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
 
   return (
     <div className={`vc-card ${compact ? 'compact' : ''}`} onClick={handleCardClick}>
-      <div className="vc-image-container">
+      <div 
+        className={`vc-image-container ${showNavigation ? 'show-navigation' : ''}`}
+        onClick={handleImageContainerClick}
+      >
         <img 
           src={getImageUrl()} 
           alt={car.title || 'Vehicle'} 
