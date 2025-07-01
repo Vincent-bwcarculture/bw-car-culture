@@ -48,94 +48,11 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center bottom; /* Smart cropping: focus on car body, less sky */
   transition: transform 0.3s ease;
-  min-height: 100%;
 }
 
 .vc-card:hover .vc-image {
   transform: scale(1.05);
-}
-
-/* Image Gallery Navigation - Sophisticated visibility system */
-.vc-image-navigation {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  opacity: 0; /* Hidden by default for clean look */
-  transition: opacity 0.3s ease;
-  pointer-events: none; /* Allow clicking through when hidden */
-}
-
-/* Desktop/Tablet: Show on hover */
-@media (min-width: 769px) {
-  .vc-image-container:hover .vc-image-navigation {
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
-
-/* Mobile: Show when image container has active/focus state */
-@media (max-width: 768px) {
-  .vc-image-container.show-navigation .vc-image-navigation {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  
-  /* Alternative: Show on active/focus state */
-  .vc-image-container:active .vc-image-navigation,
-  .vc-image-container:focus-within .vc-image-navigation {
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
-
-.vc-image-nav {
-  width: 36px; /* Good size for desktop */
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.4); /* Transparent background */
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  margin: 0 8px;
-  transition: all 0.3s ease;
-  z-index: 4;
-  pointer-events: auto;
-  backdrop-filter: blur(2px);
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.vc-image-nav:hover {
-  background: rgba(255, 51, 0, 0.8);
-  border-color: #ff3300;
-  transform: scale(1.1);
-  backdrop-filter: blur(4px);
-}
-
-.vc-image-nav:active {
-  transform: scale(0.95);
-}
-
-.vc-image-counter {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 3px 8px;
-  border-radius: 10px;
-  font-size: 0.7rem;
-  z-index: 3;
 }
 
 /* UPDATED: Savings Badge Styles - Simplified without percentage */
@@ -259,6 +176,87 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   visibility: visible;
 }
 
+/* Image Gallery Navigation - Sophisticated visibility system */
+.vc-image-navigation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0; /* Hidden by default for clean look */
+  transition: opacity 0.3s ease;
+  pointer-events: none; /* Allow clicking through when hidden */
+}
+
+/* Desktop/Tablet: Show on hover */
+@media (min-width: 769px) {
+  .vc-image-container:hover .vc-image-navigation {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Mobile: Show when image container has active/focus state */
+@media (max-width: 768px) {
+  .vc-image-container.show-navigation .vc-image-navigation {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  
+  /* Alternative: Show on active/focus state */
+  .vc-image-container:active .vc-image-navigation,
+  .vc-image-container:focus-within .vc-image-navigation {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.vc-image-nav {
+  width: 36px; /* Good size for desktop */
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4); /* Transparent background */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 0 8px;
+  transition: all 0.3s ease;
+  z-index: 4;
+  pointer-events: auto;
+  backdrop-filter: blur(2px);
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.vc-image-nav:hover {
+  background: rgba(255, 51, 0, 0.8);
+  border-color: #ff3300;
+  transform: scale(1.1);
+  backdrop-filter: blur(4px);
+}
+
+.vc-image-nav:active {
+  transform: scale(0.95);
+}
+
+.vc-image-counter {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  z-index: 3;
+}
+
 .vc-verified-badge {
   position: absolute;
   top: 10px;
@@ -310,6 +308,12 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   -webkit-box-orient: vertical;
 }
 
+.vc-price-container {
+  flex-shrink: 0; /* Prevent price section from shrinking */
+  min-width: 0;
+  text-align: right;
+}
+
 /* New container for badges under title - HORIZONTAL layout to save vertical space */
 .vc-title-badges {
   display: flex;
@@ -332,13 +336,13 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   flex-shrink: 0;
 }
 
+/* UPDATED: Price styling with savings integration - no percentage */
 .vc-price-container {
-  flex-shrink: 0; /* Prevent price section from shrinking */
-  min-width: 0;
-  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
-/* UPDATED: Price styling with savings integration - no percentage */
 .vc-original-price {
   font-size: 0.8rem;
   color: #888;
@@ -350,7 +354,7 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
 .vc-price {
   font-size: 1.3rem; /* Increased from 1.1rem for better prominence */
   font-weight: bold;
-  color: #ff3300;
+  color:#0051ff;
   white-space: nowrap;
 }
 
@@ -587,6 +591,12 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   white-space: nowrap;
 }
 
+.vc-dealer-link:hover{
+  color:#0051ff;
+  text-decoration: underline;
+  opacity: 1;
+}
+
 .vc-dealer-info:hover .vc-dealer-link {
   opacity: 1;
 }
@@ -750,20 +760,6 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
     cursor: pointer;
   }
   
-  /* IMPORTANT: Remove scaling on mobile to show full images */
-  .vc-image {
-    transform: scale(1.0); /* Full size instead of 0.9 */
-    object-fit: cover;
-    object-position: center bottom; /* Smart cropping for car photos */
-    /* Ensure better image display on mobile */
-    width: 100%;
-    height: 100%;
-  }
-  
-  .vc-image-container {
-    overflow: hidden; /* Ensure scaled image doesn't overflow */
-  }
-  
   .vc-header {
     /* Keep side-by-side layout on mobile */
     flex-direction: row;
@@ -798,13 +794,13 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
     font-weight: bold;
   }
   
-  /* Mobile navigation arrows - reduced size for better proportions */
+  /* Mobile navigation arrows - larger touch targets */
   .vc-image-nav {
-    width: 38px; /* Reduced from 44px for better mobile proportions */
-    height: 38px;
+    width: 44px; /* Larger for better touch target */
+    height: 44px;
     margin: 0 6px;
     background: rgba(0, 0, 0, 0.6); /* More visible on mobile when shown */
-    font-size: 14px; /* Reduced from 16px */
+    font-size: 16px;
   }
   
   .vc-image-nav:hover,
@@ -848,6 +844,16 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
     width: 40px; /* Larger on mobile to maintain prominence */
     height: 40px;
     font-size: 16px;
+  }
+
+  .vc-image {
+    transform: scale(0.9);
+    object-fit: cover;
+    object-position: center;
+  }
+  
+  .vc-image-container {
+    overflow: hidden; /* Ensure scaled image doesn't overflow */
   }
 }
 
@@ -911,13 +917,13 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
     font-weight: bold;
   }
   
-  /* Enhanced mobile navigation arrows - balanced size */
+  /* Enhanced mobile navigation arrows */
   .vc-image-nav {
-    width: 40px; /* Reduced from 48px for better proportions */
-    height: 40px;
+    width: 48px; /* Even larger touch targets for small screens */
+    height: 48px;
     margin: 0 4px;
     background: rgba(0, 0, 0, 0.7); /* More visible on small screens */
-    font-size: 16px; /* Appropriate size for visibility */
+    font-size: 18px; /* Larger arrows */
     border-width: 2px; /* Thicker border for better visibility */
   }
   
@@ -966,21 +972,13 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   }
 
   .vc-image {
-    transform: scale(1.0); /* Full size for better mobile image display */
+    transform: scale(0.85);
     object-fit: cover;
-    object-position: center bottom; /* Smart cropping on mobile too */
+    object-position: center;
   }
   
   .vc-image-container {
     overflow: hidden;
-  }
-}
-
-@media (max-width: 360px) {
-  .vc-image {
-    transform: scale(0.8);
-    object-fit: cover;
-    object-position: center;
   }
 }
 
@@ -1004,46 +1002,15 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   }
 }
 
-/* Compact mode styling */
-.vc-card.compact {
-  transform: scale(0.95);
-}
-
-.vc-card.compact .vc-image-container {
-  height: 180px; /* Increased from 150px for better compact image display */
-}
-
-.vc-card.compact .vc-title {
-  font-size: 1.1rem; /* Increased for better readability in compact mode */
-  font-weight: 600;
-  max-height: 2.6rem;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.vc-card.compact .vc-price {
-  font-size: 1.2rem; /* Increased for better prominence in compact mode */
-  font-weight: bold;
-}
-
-/* Compact mode navigation arrows - proportional sizing */
-.vc-card.compact .vc-image-nav {
-  width: 30px; /* Smaller for compact cards */
-  height: 30px;
-  font-size: 11px;
-  margin: 0 6px;
-}
-
-/* Compact mode - desktop still uses hover */
-@media (min-width: 769px) {
-  .vc-card.compact .vc-image-container:hover .vc-image-navigation {
-    opacity: 1;
-    pointer-events: auto;
+@media (max-width: 360px) {
+  .vc-image {
+    transform: scale(0.8);
+    object-fit: cover;
+    object-position: center;
   }
 }
 
+/* Compact mode adjustments */
 .vc-card.compact .vc-content {
   padding: 0.4rem;
 }
