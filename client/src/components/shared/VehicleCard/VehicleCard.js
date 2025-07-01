@@ -45,17 +45,16 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       // Limit cache size to prevent localStorage bloat
       const keys = Object.keys(failedImages);
       if (keys.length > 100) {
-        const oldestKey = keys.sort((a, b) => failedImages[a.split('_')[0]] - failedImages[b.split('_')[0]])[0];
+        const oldestKey = keys.sort((a, b) => failedImages[a] - failedImages[b])[0];
         delete failedImages[oldestKey];
       }
       localStorage.setItem('failedImages', JSON.stringify(failedImages));
     } catch (e) {
       // Ignore localStorage errors
-      console.warn('Failed to cache failed image URL:', e);
     }
   }, []);
 
-  // Utility function to safely get string ID from MongoDB ObjectId or any object
+  // Helper function to safely extract IDs from various formats
   const safeGetStringId = useCallback((id) => {
     if (!id) return null;
     
@@ -91,134 +90,93 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     return null;
   }, []);
 
-  // Helper function to safely extract image URL - Updated for S3
+  // Get reliable image URL with fallbacks
   const getImageUrl = useCallback(() => {
     if (!car || !car.images || !Array.isArray(car.images) || car.images.length === 0) {
       return '/images/placeholders/car.jpg';
     }
     
+    const currentImage = car.images[activeImageIndex] || car.images[0];
+    
+    if (checkFailedImage(currentImage)) {
+      return '/images/placeholders/car.jpg';
+    }
+    
     try {
-      const image = car.images[activeImageIndex] || car.images[0];
-      let imageUrl = '';
-      
-      // Handle string-based image entries
-      if (typeof image === 'string') {
-        imageUrl = image;
-      } 
-      // Handle object-based image entries
-      else if (image && typeof image === 'object') {
-        // First try to get the main URL
-        imageUrl = image.url || image.thumbnail || '';
+      if (typeof currentImage === 'object' && currentImage.url) {
+        let imageUrl = currentImage.url;
         
-        // For S3 specific handling
-        if (!imageUrl && image.key) {
-          // If we have an S3 key but no URL, try proxy
-          imageUrl = `/api/images/s3-proxy/${image.key}`;
+        // Fix problematic S3 URLs with duplicate paths
+        if (imageUrl.includes('/images/images/')) {
+          imageUrl = imageUrl.replace(/\/images\/images\//g, '/images/');
         }
-      }
-      
-      // If we still don't have a URL, use placeholder
-      if (!imageUrl) {
-        return '/images/placeholders/car.jpg';
-      }
-      
-      // Check if this image previously failed
-      if (checkFailedImage(imageUrl)) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`Using cached fallback for previously failed image: ${imageUrl}`);
-        }
-        return '/images/placeholders/car.jpg';
-      }
-      
-      // Clean up problematic URLs
-      if (imageUrl.includes('/images/images/')) {
-        imageUrl = imageUrl.replace(/\/images\/images\//g, '/images/');
-      }
-      
-      // Handle fully-formed URLs (including S3 URLs)
-      if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+        
         return imageUrl;
       }
       
-      // Handle relative paths
-      if (!imageUrl.startsWith('/')) {
-        imageUrl = `/${imageUrl}`;
-      }
-      
-      return imageUrl;
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error(`Error getting image URL:`, error);
-      }
-      return '/images/placeholders/car.jpg';
-    }
-  }, [car, activeImageIndex, checkFailedImage]);
-
-  // FIXED: Complete getDealerImageUrl function
-  const getDealerImageUrl = useCallback((imageData, type = 'logo') => {
-    try {
-      if (!imageData) {
-        return `/images/placeholders/${type === 'logo' ? 'dealer-logo' : 'dealer-avatar'}.jpg`;
-      }
-      
-      let imageUrl = '';
-      
-      // If imageData is a string, use it directly
-      if (typeof imageData === 'string') {
-        imageUrl = imageData;
-        
-        // Check for cached failed images
-        if (checkFailedImage(imageUrl, type)) {
-          return `/images/placeholders/${type === 'logo' ? 'dealer-logo' : 'dealer-avatar'}.jpg`;
-        }
-        
-        // If it's an S3 URL, use it directly
-        if (imageUrl.includes('amazonaws.com')) {
+      if (typeof currentImage === 'string') {
+        // If it's already a full URL
+        if (currentImage.startsWith('http://') || currentImage.startsWith('https://')) {
+          let imageUrl = currentImage;
+          
+          // Fix problematic S3 URLs with duplicate paths
+          if (imageUrl.includes('/images/images/')) {
+            imageUrl = imageUrl.replace(/\/images\/images\//g, '/images/');
+          }
+          
           return imageUrl;
         }
         
-        // Fix problematic S3 URLs with duplicate paths
+        // If it's a relative path, ensure it starts with /
+        const imageUrl = currentImage.startsWith('/') ? currentImage : `/${currentImage}`;
+        
+        // Fix problematic paths
         if (imageUrl.includes('/images/images/')) {
           return imageUrl.replace(/\/images\/images\//g, '/images/');
         }
         
-        // Handle relative paths
-        if (!imageUrl.startsWith('/') && !imageUrl.startsWith('http')) {
-          // Extract just the filename if it has path elements
-          const filename = imageUrl.split('/').pop();
-          return `/uploads/dealers/${filename}`;
-        }
-        
-        // For paths that already start with a slash
         return imageUrl;
       }
       
-      // If imageData is an object with url property
-      if (imageData && typeof imageData === 'object') {
-        imageUrl = imageData.url || '';
-        
-        // If we have an S3 key but no URL, create a proper URL
-        if (!imageUrl && imageData.key) {
-          // Try to determine if it's a full S3 URL or just a key
-          if (imageData.key.includes('amazonaws.com')) {
-            return imageData.key;
-          } else {
-            return `/uploads/dealers/${imageData.key}`;
-          }
+      // Fallback
+      return '/images/placeholders/car.jpg';
+    } catch (error) {
+      console.error('Error processing image URL:', error);
+      return '/images/placeholders/car.jpg';
+    }
+  }, [car, activeImageIndex, checkFailedImage]);
+
+  // Enhanced dealer logo URL function
+  const getDealerImageUrl = useCallback((type = 'logo') => {
+    try {
+      if (!car || !car.dealer) {
+        return `/images/placeholders/${type === 'logo' ? 'dealer-logo' : 'dealer-avatar'}.jpg`;
+      }
+      
+      let imageUrl = null;
+      
+      // Try to get the image from various possible sources
+      if (type === 'logo') {
+        imageUrl = car.dealer.profile?.logo || car.dealer.logo || car.dealer.profilePicture;
+      } else {
+        imageUrl = car.dealer.profile?.avatar || car.dealer.avatar || car.dealer.profilePicture || car.dealer.logo;
+      }
+      
+      if (imageUrl) {
+        // If it's already a full URL
+        if (typeof imageUrl === 'string' && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
+          return imageUrl;
         }
         
-        if (imageUrl) {
-          // Check for cached failed images
-          if (checkFailedImage(imageUrl, type)) {
-            return `/images/placeholders/${type === 'logo' ? 'dealer-logo' : 'dealer-avatar'}.jpg`;
-          }
-          
-          // Fix problematic S3 URLs with duplicate paths
-          if (imageUrl.includes('/images/images/')) {
-            return imageUrl.replace(/\/images\/images\//g, '/images/');
-          }
-          
-          return imageUrl;
+        // If it's an object with url property
+        if (typeof imageUrl === 'object' && imageUrl.url) {
+          return imageUrl.url;
+        }
+        
+        // If it's a relative path
+        if (typeof imageUrl === 'string') {
+          const fullUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
+          return fullUrl.replace(/\/images\/images\//g, '/images/');
         }
       }
       
@@ -228,7 +186,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       console.error(`Error getting dealer ${type} URL:`, error);
       return `/images/placeholders/${type === 'logo' ? 'dealer-logo' : 'dealer-avatar'}.jpg`;
     }
-  }, [checkFailedImage]);
+  }, [car]);
 
   // Calculate savings information
   const calculateSavings = useMemo(() => {
@@ -496,78 +454,69 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     
     setActiveImageIndex(prev => {
       if (direction === 'next') {
-        return (prev + 1) % car.images.length;
+        return prev >= car.images.length - 1 ? 0 : prev + 1;
       } else {
-        return (prev - 1 + car.images.length) % car.images.length;
+        return prev <= 0 ? car.images.length - 1 : prev - 1;
       }
     });
-    
-    setImageLoadError(false);
   }, [car, activeImageIndex, analytics]);
 
   const handleShareClick = useCallback((e) => {
     e.stopPropagation();
-
-    // Track share action
+    
+    // Track share click
     try {
-      analytics.trackEvent('listing_share', {
-        category: 'engagement',
-        elementId: car._id,
-        metadata: {
-          listingId: car._id,
-          title: car.title,
-          price: car.price,
-          dealerId: dealer?.id,
-          sellerType: dealer?.sellerType,
-          shareMethod: 'button'
-        }
+      analytics.trackClick('share_button', 'button', {
+        listingId: car._id,
+        title: car.title,
+        price: car.price,
+        dealerId: dealer?.id,
+        sellerType: dealer?.sellerType,
+        action: 'share'
       });
     } catch (error) {
       console.warn('Analytics tracking failed:', error);
     }
-
+    
     if (onShare) {
-      onShare(car, e.currentTarget);
+      onShare(car);
+    } else {
+      // Fallback share functionality
+      if (navigator.share) {
+        navigator.share({
+          title: car.title,
+          text: `Check out this ${car.specifications?.make} ${car.specifications?.model} for P${car.price?.toLocaleString()}`,
+          url: window.location.origin + `/marketplace/${car._id}`
+        });
+      }
     }
   }, [car, onShare, analytics, dealer]);
-  
-  // ENHANCED: Better reservation handling for private sellers vs dealerships
+
   const handleReserveClick = useCallback((e) => {
     e.stopPropagation();
     
-    // Track reservation intent
+    // Track reserve/contact click
     try {
-      analytics.trackDealerContact(dealer?.id || 'unknown', 'whatsapp');
-      analytics.trackEvent('vehicle_reservation', {
-        category: 'conversion',
-        elementId: car._id,
-        metadata: {
-          listingId: car._id,
-          title: car.title,
-          price: car.price,
-          dealerId: dealer?.id,
-          sellerType: dealer?.sellerType,
-          contactMethod: 'whatsapp',
-          savings: calculateSavings?.amount || 0
-        }
+      analytics.trackClick('reserve_button', 'button', {
+        listingId: car._id,
+        title: car.title,
+        price: car.price,
+        dealerId: dealer?.id,
+        sellerType: dealer?.sellerType,
+        action: dealer?.sellerType === 'private' ? 'contact_seller' : 'reserve_vehicle'
       });
     } catch (error) {
       console.warn('Analytics tracking failed:', error);
     }
     
-    const make = car.specifications?.make || '';
-    const model = car.specifications?.model || '';
-    const year = car.specifications?.year || '';
-    const title = car.title || `${year} ${make} ${model}`.trim() || 'Vehicle';
-    
-    // Include savings information in WhatsApp message
-    const savingsInfo = calculateSavings ? `\n💰 *SPECIAL BW CAR CULTURE SAVINGS*\nOriginal Price: P${calculateSavings.originalPrice.toLocaleString()}\nYour Savings: P${calculateSavings.amount.toLocaleString()}\n` : '';
-    
+    // Generate message content for WhatsApp
     const vehicleDetails = [
-      `*${year} ${title}*`,
-      savingsInfo,
-      `Our Price: P${(car.price || 0).toLocaleString()}`,
-      car.specifications?.mileage ? `Mileage: ${car.specifications.mileage.toLocaleString()} km` : '',
+      `${car.title}`,
+      `Price: P${car.price?.toLocaleString()}`,
+      car.specifications?.year ? `Year: ${car.specifications.year}` : '',
+      car.specifications?.make ? `Make: ${car.specifications.make}` : '',
+      car.specifications?.model ? `Model: ${car.specifications.model}` : '',
+      car.specifications?.mileage ? `Mileage: ${car.specifications.mileage}km` : '',
       car.specifications?.transmission ? `Transmission: ${car.specifications.transmission}` : '',
       car.specifications?.fuelType ? `Fuel Type: ${car.specifications.fuelType}` : '',
       car.specifications?.engineSize ? `Engine: ${car.specifications.engineSize}` : '',
@@ -590,7 +539,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       const sellerTypeText = dealer?.sellerType === 'private' ? 'seller' : 'dealer';
       alert(`${dealer?.sellerTypeLabel || 'Seller'} contact information is not available. Please view details to contact the ${sellerTypeText}.`);
     }
-  }, [car, dealer, calculateSavings, analytics]);
+  }, [car, dealer, analytics]);
 
   // ENHANCED: Different handling for private sellers vs dealerships
   const handleDealerClick = useCallback((e) => {
@@ -623,7 +572,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     }
   }, [dealer, navigate, analytics, car]);
 
-  // Improved image error handler
   const handleImageError = useCallback((e) => {
     const originalSrc = e.target.src;
     if (process.env.NODE_ENV === 'development') {
@@ -716,34 +664,35 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             <div className="vc-savings-badge-label">SAVE</div>
             <div className="vc-savings-tooltip">
               <div className="vc-savings-tooltip-header">
-                💰 {calculateSavings.isExclusive ? 'Exclusive Bw Car Culture Deal' : 'Bw Car Culture Savings'}
+                💰 {calculateSavings.isExclusive ? 'Exclusive Deal!' : 'Great Savings!'}
               </div>
               <div className="vc-savings-tooltip-row">
                 <span>Original Price:</span>
                 <span>P{calculateSavings.originalPrice.toLocaleString()}</span>
               </div>
               <div className="vc-savings-tooltip-row">
-                <span>Our Price:</span>
+                <span>Current Price:</span>
                 <span>P{car.price.toLocaleString()}</span>
               </div>
               <div className="vc-savings-tooltip-row">
                 <span>You Save:</span>
                 <span>P{calculateSavings.amount.toLocaleString()}</span>
               </div>
-              {calculateSavings.validUntil && formatValidUntil(calculateSavings.validUntil) && (
-                <div className="vc-savings-tooltip-description">
-                  Valid until {formatValidUntil(calculateSavings.validUntil)}
-                </div>
-              )}
               {calculateSavings.description && (
                 <div className="vc-savings-tooltip-description">
                   {calculateSavings.description}
+                </div>
+              )}
+              {calculateSavings.validUntil && formatValidUntil(calculateSavings.validUntil) && (
+                <div className="vc-savings-tooltip-description">
+                  Valid until: {formatValidUntil(calculateSavings.validUntil)}
                 </div>
               )}
             </div>
           </div>
         )}
         
+        {/* Image Navigation */}
         {car.images && Array.isArray(car.images) && car.images.length > 1 && (
           <div className="vc-image-navigation">
             <button 
@@ -766,42 +715,27 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           </div>
         )}
         
-        {dealer.verification?.isVerified && (
-          <span className="vc-verified-badge">✓ Verified</span>
+        {dealer?.verification?.isVerified && (
+          <div className="vc-verified-badge">
+            ✓ Verified
+          </div>
         )}
       </div>
       
       <div className="vc-content">
         <div className="vc-header">
-          <h4 className="vc-title">{car.title || 'Untitled Vehicle'}</h4>
+          <h4 className="vc-title">{car.title || 'Vehicle Listing'}</h4>
           <div className="vc-price-container">
-            {/* Show original price if savings available */}
             {calculateSavings && (
-              <div className="vc-original-price">
-                Was: P {calculateSavings.originalPrice.toLocaleString()}
-              </div>
+              <div className="vc-original-price">P{calculateSavings.originalPrice.toLocaleString()}</div>
             )}
-            <span className="vc-price vc-pula-price">
-              {car.priceOptions?.showPriceAsPOA 
-                ? 'POA' 
-                : `P ${(car.price || 0).toLocaleString()}`}
-            </span>
-            {/* Show savings highlight */}
+            <div className="vc-price">
+              P{car.price?.toLocaleString() || '0'}
+            </div>
             {calculateSavings && (
               <div className="vc-savings-highlight">
-                You Save: P {calculateSavings.amount.toLocaleString()}
+                Save P{calculateSavings.amount.toLocaleString()}!
               </div>
-            )}
-            {car.priceOptions?.monthlyPayment && !car.priceOptions?.showPriceAsPOA && (
-              <div className="vc-monthly-payment">
-                <span className="vc-monthly-payment-value">P {car.priceOptions.monthlyPayment.toLocaleString()} p/m</span>
-              </div>
-            )}
-            {car.priceOptions?.financeAvailable && dealer?.sellerType === 'dealership' && (
-              <div className="vc-finance-badge">Finance Available</div>
-            )}
-            {car.priceOptions?.leaseAvailable && dealer?.sellerType === 'dealership' && (
-              <div className="vc-lease-badge">Lease Available</div>
             )}
           </div>
         </div>
@@ -813,11 +747,8 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           </div>
           <div className="vc-spec-item">
             <span className="vc-spec-label">Mileage:</span>
-            <span className="vc-spec-value">
-              {car.specifications?.mileage 
-                ? `${car.specifications.mileage.toLocaleString()} km` 
-                : 'N/A'}
-            </span>
+            <span className="vc-spec-value">{car.specifications?.mileage ? 
+              `${car.specifications.mileage.toLocaleString()}km` : 'N/A'}</span>
           </div>
           <div className="vc-spec-item">
             <span className="vc-spec-label">Transmission:</span>
@@ -845,7 +776,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           </div>
         )}
         
-        {/* FIXED: Enhanced seller info section with proper image handling */}
+        {/* OPTIMIZED: Compact seller info section for better space utilization */}
         <div className={`vc-dealer-info ${dealer?.sellerType === 'private' ? 'private-seller' : 'dealership'}`} 
              onClick={dealer?.sellerType !== 'private' ? handleDealerClick : undefined}>
           
@@ -875,47 +806,35 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               );
             }
             
-            // Show image with comprehensive error handling
+            // Return image with comprehensive error handling
             return (
               <img 
-                src={getDealerImageUrl(imageSource, 'logo')}
-                alt={dealer?.businessName || dealer?.name || 'Seller'} 
-                className="vc-dealer-avatar"
-                loading="lazy"
+                className="vc-dealer-avatar" 
+                src={imageSource}
+                alt={dealer?.businessName || dealer?.name || 'Seller'}
                 onError={(e) => {
+                  // Prevent infinite loop
+                  if (dealerImageError) return;
+                  
                   const originalSrc = e.target.src;
-                  console.log('Dealer image failed to load:', originalSrc, 'for dealer:', dealer?.businessName);
                   
-                  // Mark this image as failed to prevent future attempts
-                  markFailedImage(originalSrc, 'logo');
+                  // Strategy 1: Try fixing common S3 path issues
+                  if (originalSrc.includes('/images/images/')) {
+                    e.target.src = originalSrc.replace(/\/images\/images\//g, '/images/');
+                    return;
+                  }
                   
-                  // Try fallback strategies before giving up
-                  if (!originalSrc.includes('/images/placeholders/')) {
-                    
-                    // Strategy 1: For S3 URLs, try proxy approach
-                    if (originalSrc.includes('amazonaws.com')) {
-                      const key = originalSrc.split('.amazonaws.com/').pop();
-                      if (key && !originalSrc.includes('/api/images/s3-proxy/')) {
-                        const normalizedKey = key.replace(/images\/images\//g, 'images/');
-                        e.target.src = `/api/images/s3-proxy/${normalizedKey}`;
-                        return;
-                      }
-                    }
-                    
-                    // Strategy 2: Try local upload path
-                    if (!originalSrc.includes('/uploads/dealers/')) {
-                      const filename = originalSrc.split('/').pop();
-                      if (filename && filename.includes('.')) {
-                        e.target.src = `/uploads/dealers/${filename}`;
-                        return;
-                      }
-                    }
-                    
-                    // Strategy 3: Try alternative placeholder paths
-                    if (dealer?.sellerType === 'private') {
-                      e.target.src = '/images/placeholders/private-seller-avatar.jpg';
-                      return;
-                    }
+                  // Strategy 2: Try different file extensions or fallback paths
+                  if (originalSrc.includes('/api/images/s3-proxy/')) {
+                    const filename = originalSrc.split('/').pop();
+                    e.target.src = `/uploads/dealers/${filename}`;
+                    return;
+                  }
+                  
+                  // Strategy 3: Try alternative placeholder paths
+                  if (dealer?.sellerType === 'private') {
+                    e.target.src = '/images/placeholders/private-seller-avatar.jpg';
+                    return;
                   }
                   
                   // Final fallback - trigger placeholder display
@@ -932,30 +851,39 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           })()}
 
           <div className="vc-dealer-details">
-            <span className="vc-dealer-name">
+            {/* Top row: Name and verification */}
+            <div className="vc-dealer-name">
               {dealer?.businessName || dealer?.name || 'Unknown Seller'}
               {dealer?.verification?.isVerified && (
                 <span className="vc-verified-icon" title="Verified Seller">✓</span>
               )}
-            </span>
-            <span className={`vc-seller-type ${dealer?.sellerType || 'dealership'}`}>
-              {dealer?.sellerTypeLabel || (dealer?.sellerType === 'private' ? 'Private Seller' : 'Dealership')}
-            </span>
-            <span className="vc-dealer-location">
-              {dealer?.location?.city || 'Unknown Location'}
-              {dealer?.location?.country ? `, ${dealer.location.country}` : ''}
-            </span>
-            {/* Only show "View Dealership" link for actual dealerships */}
-            {dealer.id && dealer.sellerType === 'dealership' && (
-              <span className="vc-dealer-link">View Dealership</span>
-            )}
-            {/* Show contact preference for private sellers */}
-            {dealer.sellerType === 'private' && dealer.privateSeller?.preferredContactMethod && (
-              <span className="vc-contact-preference">
-                Contact: {dealer.privateSeller.preferredContactMethod === 'phone' ? 'Phone' : 
-                         dealer.privateSeller.preferredContactMethod === 'whatsapp' ? 'WhatsApp' : 'Phone/WhatsApp'}
+            </div>
+            
+            {/* Second row: Seller type and location */}
+            <div className="vc-dealer-meta">
+              <span className={`vc-seller-type ${dealer?.sellerType || 'dealership'}`}>
+                {dealer?.sellerTypeLabel || (dealer?.sellerType === 'private' ? 'Private Seller' : 'Dealership')}
               </span>
-            )}
+              <span className="vc-dealer-location">
+                {dealer?.location?.city || 'Unknown Location'}
+                {dealer?.location?.country ? `, ${dealer.location.country}` : ''}
+              </span>
+            </div>
+            
+            {/* Third row: Actions and contact preferences */}
+            <div className="vc-dealer-actions">
+              {/* Only show "View Dealership" link for actual dealerships */}
+              {dealer.id && dealer.sellerType === 'dealership' && (
+                <span className="vc-dealer-link">View Dealership</span>
+              )}
+              {/* Show contact preference for private sellers */}
+              {dealer.sellerType === 'private' && dealer.privateSeller?.preferredContactMethod && (
+                <span className="vc-contact-preference">
+                  Contact: {dealer.privateSeller.preferredContactMethod === 'phone' ? 'Phone' : 
+                           dealer.privateSeller.preferredContactMethod === 'whatsapp' ? 'WhatsApp' : 'Phone/WhatsApp'}
+                </span>
+              )}
+            </div>
           </div>
         </div>
         
