@@ -314,7 +314,7 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
 .vc-price {
   font-size: 1.1rem;
   font-weight: bold;
-  color: #ff3300;
+  color: #0051ff;
   white-space: nowrap;
 }
 
@@ -549,6 +549,12 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
   opacity: 0.8;
   transition: opacity 0.2s ease;
   white-space: nowrap;
+}
+
+.vc-dealer-link:hover{
+  color:#0051ff;
+  text-decoration: underline;
+  opacity: 1;
 }
 
 .vc-dealer-info:hover .vc-dealer-link {
