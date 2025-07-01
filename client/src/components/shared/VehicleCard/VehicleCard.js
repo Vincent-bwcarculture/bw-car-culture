@@ -724,7 +724,18 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       
       <div className="vc-content">
         <div className="vc-header">
-          <h4 className="vc-title">{car.title || 'Vehicle Listing'}</h4>
+          <div className="vc-title-section">
+            <h4 className="vc-title">{car.title || 'Vehicle Listing'}</h4>
+            {/* Only move finance/lease badges under title - keep monthly payment with price */}
+            <div className="vc-title-badges">
+              {car.priceOptions?.financeAvailable && dealer?.sellerType === 'dealership' && (
+                <div className="vc-finance-badge">Finance Available</div>
+              )}
+              {car.priceOptions?.leaseAvailable && dealer?.sellerType === 'dealership' && (
+                <div className="vc-lease-badge">Lease Available</div>
+              )}
+            </div>
+          </div>
           <div className="vc-price-container">
             {calculateSavings && (
               <div className="vc-original-price">P{calculateSavings.originalPrice.toLocaleString()}</div>
@@ -734,7 +745,12 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             </div>
             {calculateSavings && (
               <div className="vc-savings-highlight">
-                Save P{calculateSavings.amount.toLocaleString()}!
+                You Save: P {calculateSavings.amount.toLocaleString()}
+              </div>
+            )}
+            {car.priceOptions?.monthlyPayment && !car.priceOptions?.showPriceAsPOA && (
+              <div className="vc-monthly-payment">
+                <span className="vc-monthly-payment-value">P {car.priceOptions.monthlyPayment.toLocaleString()} p/m</span>
               </div>
             )}
           </div>

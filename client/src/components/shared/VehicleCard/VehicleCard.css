@@ -1,4 +1,21 @@
-/* VehicleCard.css - Optimized with compact seller layout */
+/* VehicleCard.css - Optimized with compact seller layout and future expansion capability
+
+LAYOUT STRUCTURE (Future-proof):
+- Image area (fixed height with navigation/badges)
+- Title section (title + finance/lease badges - flexible for additional badges)  
+- Price area (price, savings, monthly payment - flexible for payment options)
+- Specs grid (2 columns, expandable to 3 for additional vehicle data)
+- Feature badges (flexible wrap for any number of badges)
+- Seller info (horizontal 3-row layout with larger avatar)
+- Footer (condition + action buttons)
+
+EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
+- vc-title-badges: Additional availability/status badges
+- vc-specs: More vehicle specifications (engine details, drivetrain, etc.)
+- vc-badges: Vehicle-specific features (electric, import, certified, etc.)  
+- vc-dealer-actions: Additional dealer information/services
+*/
+
 .vc-card {
   background: rgba(20, 20, 20, 0.9);
   border: 1px solid #2c2c2c;
@@ -244,15 +261,39 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 0.4rem;
+  gap: 1rem;
+}
+
+.vc-title-section {
+  flex: 1;
+  min-width: 0; /* Allow shrinking */
 }
 
 .vc-title {
   font-size: 1.1rem;
   color: #ffffff;
-  margin: 0;
+  margin: 0 0 0.3rem 0;
   line-height: 1.4;
-  flex: 1;
-  padding-right: 1rem;
+}
+
+/* New container for badges under title - flexible for future expansion */
+.vc-title-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: flex-start;
+  margin-top: 0.3rem;
+  min-height: 0; /* Flexible height - only shows when badges are present */
+}
+
+/* Empty state handling - no visual impact when no badges */
+.vc-title-badges:empty {
+  display: none;
+}
+
+/* Future-proof: Allow for additional badge types */
+.vc-title-badges > * {
+  flex-shrink: 0;
 }
 
 /* UPDATED: Price styling with savings integration - no percentage */
@@ -320,12 +361,20 @@
   white-space: nowrap;
 }
 
-/* Specifications */
+/* Specifications - Flexible grid for future additional fields */
 .vc-specs {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.4rem;
   margin-bottom: 0.4rem;
+  /* Future-proof: Can expand to 3 columns on larger screens if needed */
+}
+
+@media (min-width: 1200px) {
+  .vc-specs {
+    /* Optional: Allow 3 columns for additional spec fields on large screens */
+    grid-template-columns: repeat(2, 1fr); /* Keep 2 for now, easy to change to 3 */
+  }
 }
 
 .vc-spec-item {
@@ -343,12 +392,24 @@
   color: #ffffff;
 }
 
-/* Special feature badges */
+/* Special feature badges - Flexible container for various badge types */
 .vc-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem;
   margin-bottom: 0.4rem;
+  /* Future-proof: Can accommodate additional badge types like:
+     - Electric/Hybrid badges
+     - Import/Export status
+     - Inspection status
+     - Insurance status
+     - Special features (4WD, Turbo, etc.)
+  */
+}
+
+/* Empty state handling */
+.vc-badges:empty {
+  margin-bottom: 0;
 }
 
 .vc-service-badge,
@@ -461,13 +522,24 @@
   min-width: 0;
 }
 
-/* Third row: Links and contact preferences */
+/* Third row: Actions and contact preferences - flexible for future additions */
 .vc-dealer-actions {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   margin-top: 0.1rem;
   flex-wrap: wrap;
+  /* Future-proof: Can accommodate additional dealer info like:
+     - Response time
+     - Languages spoken
+     - Special offers
+     - Business hours indicator
+  */
+}
+
+/* Empty state handling */
+.vc-dealer-actions:empty {
+  display: none;
 }
 
 .vc-dealer-link {
@@ -636,6 +708,21 @@
 
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
+  .vc-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+  
+  .vc-title-section {
+    order: 1;
+  }
+  
+  .vc-price-container {
+    order: 2;
+    align-self: flex-end;
+  }
+  
   .vc-dealer-info {
     padding: 0.3rem;
     margin-bottom: 0.3rem;
