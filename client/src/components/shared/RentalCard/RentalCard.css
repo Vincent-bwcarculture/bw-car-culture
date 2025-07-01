@@ -540,46 +540,43 @@ EXPANDABLE AREAS FOR FUTURE RENTAL TYPES:
 .rental-card-share-btn,
 .rental-card-reserve-btn,
 .rental-card-details-btn {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.8rem;
+  padding: 6px 10px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 
 .rental-card-share-btn {
-  background: rgba(108, 117, 125, 0.1);
-  color: #6c757d;
-  border: 1px solid rgba(108, 117, 125, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid #2c2c2c;
 }
 
 .rental-card-share-btn:hover {
-  background: rgba(108, 117, 125, 0.2);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #ff3300;
 }
 
 .rental-card-reserve-btn {
-  background: rgba(255, 193, 7, 0.1);
-  color: #ffc107;
-  border: 1px solid rgba(255, 193, 7, 0.3);
+  background: #25D366; /* WhatsApp green color */
+  color: white;
+  border: none;
 }
 
 .rental-card-reserve-btn:hover {
-  background: rgba(255, 193, 7, 0.2);
-  transform: translateY(-1px);
+  background: #128C7E; /* Darker WhatsApp green on hover */
 }
 
 .rental-card-details-btn {
-  background: rgba(255, 51, 0, 0.1);
-  color: #ff3300;
-  border: 1px solid rgba(255, 51, 0, 0.3);
+  background: #ff3300;
+  color: white;
+  border: none;
 }
 
 .rental-card-details-btn:hover {
-  background: rgba(255, 51, 0, 0.2);
-  transform: translateY(-1px);
+  background: #cc2900;
 }
 
 /* Mobile responsive adjustments */
