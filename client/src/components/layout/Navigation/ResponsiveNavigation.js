@@ -1,17 +1,16 @@
-// client/src/components/layout/Navigation/ResponsiveNavigation.js
-// COMPLETE VERSION - Slim Profile Link & No Dropdown
+// src/components/layout/Navigation/ResponsiveNavigation.js
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, ShoppingBag, Store, Settings, User, LogIn, LogOut, 
-  UserCircle, UserPlus, Star, QrCode, Hash, X, Menu
+  UserCircle, Star, QrCode, Hash, X, UserPlus
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
 import ReviewForm from '../../ReviewForm/ReviewForm.js';
 import QRCodeScanner from '../../QRScanner/QRCodeScanner.js';
 import './ResponsiveNavigation.css';
 
-// Updated navigation categories - Profile hidden on desktop
+// Updated navigation categories - Profile removed from main nav
 const categories = [
   {
     id: 'home',
@@ -80,38 +79,32 @@ const ReviewFAB = () => {
       navigate('/login', { 
         state: { 
           from: window.location.pathname,
-          message: 'Please login to leave a review' 
-        } 
+          message: 'Please log in to leave a review'
+        }
       });
       return;
     }
     setShowReviewModal(true);
   };
 
-  const handleMethodSelect = (method) => {
+  const handleReviewMethodSelect = (method) => {
     setReviewMethod(method);
-    if (method === 'qr_scan') {
+    if (method === 'qr') {
       setShowQRScanner(true);
-      setShowReviewModal(false);
-    }
-  };
-
-  const handleServiceCodeSubmit = () => {
-    if (serviceCode.trim()) {
-      // Handle service code review submission
-      console.log('Service code:', serviceCode);
-      setShowReviewModal(false);
-      setServiceCode('');
     }
   };
 
   const handleQRScanResult = (result) => {
+    setServiceCode(result);
     setShowQRScanner(false);
-    // Handle QR scan result
-    console.log('QR scan result:', result);
   };
 
-  if (!isVisible) return null;
+  const handleCloseAll = () => {
+    setShowReviewModal(false);
+    setShowQRScanner(false);
+    setReviewMethod(null);
+    setServiceCode('');
+  };
 
   return (
     <>
@@ -120,72 +113,63 @@ const ReviewFAB = () => {
         onClick={handleFABClick}
         aria-label="Leave a review"
       >
-        <Star size={20} />
-        <span className="fab-text">Review</span>
+        <Star size={24} fill="currentColor" />
       </button>
 
-      {/* Review Method Selection Modal */}
+      {/* Review Modal */}
       {showReviewModal && (
-        <div className="bcc-modal-overlay" onClick={() => setShowReviewModal(false)}>
-          <div className="bcc-modal-content" onClick={e => e.stopPropagation()}>
-            <div className="bcc-modal-header">
-              <h3>How would you like to review?</h3>
-              <button 
-                className="bcc-modal-close"
-                onClick={() => setShowReviewModal(false)}
-              >
-                <X size={20} />
-              </button>
-            </div>
+        <div className="review-modal-overlay" onClick={handleCloseAll}>
+          <div className="review-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close-button" onClick={handleCloseAll}>
+              <X size={20} />
+            </button>
             
-            <div className="bcc-method-selection">
-              <button 
-                className="bcc-method-option"
-                onClick={() => handleMethodSelect('qr_scan')}
-              >
-                <QrCode size={24} />
-                <div>
-                  <h3>Scan QR Code</h3>
-                  <p>Scan the service provider's QR code</p>
-                </div>
-              </button>
-              
-              <button 
-                className="bcc-method-option"
-                onClick={() => setReviewMethod('service_code')}
-              >
-                <Hash size={24} />
-                <div>
-                  <h3>Enter Service Code</h3>
-                  <p>Enter the service code manually</p>
-                </div>
-              </button>
-            </div>
-
-            {reviewMethod === 'service_code' && (
-              <div className="bcc-service-code-form">
-                <p>Please enter the service code provided by your service provider:</p>
-                <input
-                  type="text"
-                  className="bcc-service-code-input"
-                  placeholder="Enter service code"
-                  value={serviceCode}
-                  onChange={(e) => setServiceCode(e.target.value.toUpperCase())}
-                  maxLength={10}
-                />
-                <div className="bcc-service-code-actions">
+            {!reviewMethod && (
+              <div className="review-method-selector">
+                <h3>How would you like to leave a review?</h3>
+                <div className="review-method-buttons">
                   <button 
-                    className="bcc-cancel-button"
-                    onClick={() => {
-                      setReviewMethod(null);
-                      setServiceCode('');
-                    }}
+                    className="method-button"
+                    onClick={() => handleReviewMethodSelect('qr')}
                   >
-                    Cancel
+                    <QrCode size={24} />
+                    Scan QR Code
                   </button>
                   <button 
-                    className="bcc-submit-button"
-                    onClick={handleServiceCodeSubmit}
+                    className="method-button"
+                    onClick={() => handleReviewMethodSelect('code')}
+                  >
+                    <Hash size={24} />
+                    Enter Service Code
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {reviewMethod === 'code' && (
+              <div className="service-code-input">
+                <h3>Enter Service Code</h3>
+                <input
+                  type="text"
+                  placeholder="Enter service code"
+                  value={serviceCode}
+                  onChange={(e) => setServiceCode(e.target.value)}
+                  className="code-input"
+                />
+                <div className="code-input-buttons">
+                  <button 
+                    className="back-button"
+                    onClick={() => setReviewMethod(null)}
+                  >
+                    Back
+                  </button>
+                  <button 
+                    className="continue-button"
+                    onClick={() => {
+                      if (serviceCode.trim()) {
+                        // Continue with review process
+                      }
+                    }}
                     disabled={!serviceCode.trim()}
                   >
                     Continue
@@ -193,19 +177,33 @@ const ReviewFAB = () => {
                 </div>
               </div>
             )}
+
+            {(reviewMethod && serviceCode) && (
+              <ReviewForm 
+                serviceCode={serviceCode}
+                onSubmitSuccess={handleCloseAll}
+                onCancel={handleCloseAll}
+              />
+            )}
           </div>
         </div>
       )}
 
       {/* QR Scanner Modal */}
       {showQRScanner && (
-        <div className="bcc-modal-overlay">
-          <div className="bcc-modal-content qr-scanner-modal">
-            <QRCodeScanner
-              onResult={handleQRScanResult}
-              onClose={() => {
+        <div className="qr-scanner-overlay" onClick={() => setShowQRScanner(false)}>
+          <div className="qr-scanner-content" onClick={(e) => e.stopPropagation()}>
+            <button 
+              className="scanner-close-button" 
+              onClick={() => setShowQRScanner(false)}
+            >
+              <X size={20} />
+            </button>
+            <QRCodeScanner 
+              onScanResult={handleQRScanResult}
+              onError={(error) => {
+                console.error('QR Scan Error:', error);
                 setShowQRScanner(false);
-                setShowReviewModal(true);
               }}
             />
           </div>
@@ -215,26 +213,36 @@ const ReviewFAB = () => {
   );
 };
 
-// Slim Desktop User Menu Component (NO DROPDOWN)
+// Updated Desktop User Menu - Simple Profile Link (No Dropdown)
 const DesktopUserMenu = () => {
-  const { user, logout } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
 
-  if (!user) {
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  if (!isAuthenticated) {
     return (
       <div className="desktop-auth-buttons">
         <Link to="/login" className="auth-button login-button">
-          <LogIn size={16} />
+          <LogIn size={18} />
           Login
         </Link>
         <Link to="/register" className="auth-button register-button">
-          <UserPlus size={16} />
+          <UserPlus size={18} />
           Sign Up
         </Link>
       </div>
     );
   }
 
+  // Simple profile link - no dropdown
   return (
     <Link to="/profile" className="user-profile-link">
       <div className="user-profile-avatar">
@@ -263,7 +271,11 @@ const Breadcrumb = ({ paths }) => (
         <React.Fragment key={index}>
           <span className="breadcrumb-separator" aria-hidden="true">›</span>
           <li className="breadcrumb-item" aria-current={index === paths.length - 1 ? "page" : undefined}>
-            {path.url ? <Link to={path.url}>{path.name}</Link> : <span>{path.name}</span>}
+            {path.url ? (
+              <Link to={path.url}>{path.label}</Link>
+            ) : (
+              <span>{path.label}</span>
+            )}
           </li>
         </React.Fragment>
       ))}
@@ -271,137 +283,98 @@ const Breadcrumb = ({ paths }) => (
   </nav>
 );
 
-// Main Navigation Component
+// Main ResponsiveNavigation component
 const ResponsiveNavigation = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
   const [activePath, setActivePath] = useState([]);
-  const navRef = useRef(null);
   const [showScrollButtons, setShowScrollButtons] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const navRef = useRef();
 
-  // Scroll to top on navigation
+  // Build breadcrumb from current path
   useEffect(() => {
-    const handleScrollToTop = () => {
-      window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: 'smooth'
-      });
-    };
-
-    const timeoutId = setTimeout(handleScrollToTop, 100);
-    return () => clearTimeout(timeoutId);
-  }, [location.pathname]);
-
-  // Disable browser scroll restoration
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.history && window.history.scrollRestoration) {
-      window.history.scrollRestoration = 'manual';
-    }
-  
-    return () => {
-      if (typeof window !== 'undefined' && window.history && window.history.scrollRestoration) {
-        window.history.scrollRestoration = 'auto';
-      }
-    };
-  }, []);
-
-  // Build active path for breadcrumbs
-  useEffect(() => {
-    const pathname = location.pathname;
-    const pathSegments = pathname.split('/').filter(Boolean);
-    
+    const pathSegments = location.pathname.split('/').filter(Boolean);
     const breadcrumbs = [];
     
-    if (pathSegments.length > 0) {
-      let currentPath = '';
+    pathSegments.forEach((segment, index) => {
+      const currentPath = `/${pathSegments.slice(0, index + 1).join('/')}`;
+      const category = categories.find(cat => cat.path === currentPath);
       
-      pathSegments.forEach((segment, index) => {
-        currentPath += `/${segment}`;
-        
-        const segmentName = (() => {
-          switch (segment) {
-            case 'marketplace': return 'Car Sales';
-            case 'dealerships': return 'Dealerships';
-            case 'services': return 'Services';
-            case 'profile': return 'Profile';
-            case 'admin': return 'Admin';
-            case 'dashboard': return 'Dashboard';
-            default: 
-              return segment.charAt(0).toUpperCase() + segment.slice(1).replace(/[-_]/g, ' ');
-          }
-        })();
-        
-        breadcrumbs.push({
-          name: segmentName,
-          url: index === pathSegments.length - 1 ? null : currentPath
-        });
+      breadcrumbs.push({
+        label: category ? category.name : segment.charAt(0).toUpperCase() + segment.slice(1),
+        url: index === pathSegments.length - 1 ? null : currentPath
       });
-    }
+    });
     
     setActivePath(breadcrumbs);
   }, [location.pathname]);
 
-  // Check if category navigation should show scroll buttons
+  // Enhanced scroll detection for navigation buttons
   useEffect(() => {
-    const checkOverflow = () => {
-      if (navRef.current) {
-        const { scrollWidth, clientWidth } = navRef.current;
-        setShowScrollButtons(scrollWidth > clientWidth);
+    const checkScrollable = () => {
+      const list = navRef.current?.querySelector('.category-list');
+      if (list) {
+        const isScrollable = list.scrollWidth > list.clientWidth;
+        setShowScrollButtons(isScrollable);
       }
     };
 
-    checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
+    checkScrollable();
+    window.addEventListener('resize', checkScrollable);
+    return () => window.removeEventListener('resize', checkScrollable);
   }, []);
 
-  // Handle navigation with loading state
-  const handleNavigation = async (path) => {
-    if (isNavigating) return;
-    
-    setIsNavigating(true);
-    try {
-      navigate(path);
-      // Add small delay to show loading state
-      await new Promise(resolve => setTimeout(resolve, 150));
-    } finally {
-      setIsNavigating(false);
-    }
-  };
-
-  // Check if current path is active
-  const isActive = (path) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(path);
-  };
-
-  // Handle horizontal scrolling for category navigation
+  // Scroll navigation handler
   const handleScroll = (direction) => {
-    if (navRef.current) {
-      const scrollAmount = 200;
-      const scrollLeft = direction === 'left' 
-        ? navRef.current.scrollLeft - scrollAmount
-        : navRef.current.scrollLeft + scrollAmount;
-      
-      navRef.current.scrollTo({
-        left: scrollLeft,
-        behavior: 'smooth'
-      });
+    const list = navRef.current?.querySelector('.category-list');
+    if (list) {
+      if (direction === 'left') {
+        const scrollAmount = window.innerWidth <= 480 ? -150 : -200;
+        list.scrollBy({
+          left: scrollAmount,
+          behavior: 'smooth'
+        });
+      } else {
+        const scrollAmount = window.innerWidth <= 480 ? 150 : 200;
+        list.scrollBy({
+          left: scrollAmount,
+          behavior: 'smooth'
+        });
+      }
     }
+  };
+
+  // Enhanced navigation handler with scroll fix
+  const handleNavigation = (path) => {
+    setIsNavigating(true);
+    
+    // Navigate to the path
+    navigate(path);
+    
+    // Reset navigation state after a short delay
+    setTimeout(() => {
+      setIsNavigating(false);
+    }, 300);
+  };
+
+  // Check if a category is active
+  const isActive = (path) => {
+    if (path === '/' && location.pathname === '/') {
+      return true;
+    }
+    return path !== '/' && location.pathname.startsWith(path);
   };
 
   return (
     <>
-      <div className="navigation-container">
-        {/* Breadcrumb Navigation */}
-        {activePath.length > 0 && <Breadcrumb paths={activePath} />}
+      {/* Top Navigation */}
+      <nav className="navigation-container" ref={navRef}>
+        {/* Breadcrumb always visible */}
+        <Breadcrumb paths={activePath} />
         
-        {/* Main Category Navigation */}
-        <nav className="category-nav">
+        {/* Desktop Category Navigation with User Menu */}
+        <div className="category-nav desktop-only">
           {showScrollButtons && (
             <button 
               className="nav-scroll-button nav-scroll-left"
@@ -412,9 +385,9 @@ const ResponsiveNavigation = () => {
             </button>
           )}
 
-          <ul className="category-list" ref={navRef}>
-            {categories.map((category) => (
-              <li key={category.id} className="category-item" data-nav={category.id}>
+          <ul className="category-list" role="menubar">
+            {categories.filter(category => category.id !== 'profile').map((category) => (
+              <li key={category.id} className="category-item" role="none">
                 <Link
                   to={category.path}
                   className={`category-link ${isActive(category.path) ? 'active' : ''}`}
@@ -424,7 +397,6 @@ const ResponsiveNavigation = () => {
                     handleNavigation(category.path);
                   }}
                 >
-                  {category.icon}
                   {category.name}
                 </Link>
               </li>
@@ -443,8 +415,8 @@ const ResponsiveNavigation = () => {
               ›
             </button>
           )}
-        </nav>
-      </div>
+        </div>
+      </nav>
 
       {/* Mobile Bottom Navigation */}
       <nav className="mobile-bottom-nav">
