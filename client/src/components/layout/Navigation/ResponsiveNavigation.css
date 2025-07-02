@@ -774,9 +774,7 @@ body.has-mobile-nav {
     padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom));
 }
 
-body.has-mobile-nav .review-fab {
-    /* FAB positioning is now handled in the main .review-fab rule */
-}
+
 
 body.has-mobile-nav .main-content {
     padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom) + 20px);

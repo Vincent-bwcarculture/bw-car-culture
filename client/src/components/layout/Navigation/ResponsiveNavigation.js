@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
 import ReviewForm from '../../ReviewForm/ReviewForm.js';
-import QRCodeScanner from '../../QRCodeScanner/QRCodeScanner.js';
+import QRCodeScanner from '../../QRScanner/QRCodeScanner.js';
 import './ResponsiveNavigation.css';
 
 // Updated navigation categories - replaced News with Profile
