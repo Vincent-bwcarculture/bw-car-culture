@@ -84,60 +84,68 @@ const ReviewForm = ({
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  
+  if (!validateForm()) return;
+
+  try {
+    setLoading(true);
+    setError(null);
+
+    let submitData = {
+      rating,
+      review: reviewText.trim(),
+      isAnonymous,
+      serviceExperience,
+      businessId: serviceData.id || serviceData._id
+    };
+
+    let endpoint = '';
     
-    if (!validateForm()) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      let submitData = {
-        rating,
-        review: reviewText.trim(),
-        isAnonymous,
-        serviceExperience
-      };
-
-      let endpoint = '';
-      
-      // Determine submission method and endpoint
-      switch (verificationMethod) {
-        case 'qr_code':
-          endpoint = '/reviews/qr-scan';
-          submitData.qrData = qrData;
-          break;
-        case 'service_code':
-          endpoint = '/reviews/service-code';
-          submitData.serviceCode = serviceCode;
-          break;
-        case 'plate_number':
-          endpoint = '/reviews/plate-number';
-          submitData.plateNumber = plateNumber;
-          submitData.serviceType = 'public_transport';
-          break;
-        default:
-          throw new Error('Invalid verification method');
-      }
-
-      const response = await axios.post(endpoint, submitData);
-
-      if (response.data.success) {
-        onSubmit({
-          success: true,
-          message: response.data.message,
-          data: response.data.data
-        });
-      }
-
-    } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Failed to submit review';
-      setError(errorMessage);
-      console.error('Review submission error:', err);
-    } finally {
-      setLoading(false);
+    // Determine submission method and endpoint
+    switch (verificationMethod) {
+      case 'qr_code':
+      case 'qr': // Add support for 'qr' from BusinessDetailPage
+        endpoint = '/reviews/qr-scan';
+        submitData.qrData = qrData;
+        break;
+      case 'service_code':
+        endpoint = '/reviews/service-code';
+        submitData.serviceCode = serviceCode;
+        break;
+      case 'plate_number':
+        endpoint = '/reviews/plate-number';
+        submitData.plateNumber = plateNumber;
+        submitData.serviceType = 'public_transport';
+        break;
+      case 'general': // Add support for 'general' from BusinessDetailPage
+        endpoint = '/reviews/general';
+        // businessId is already included in submitData above
+        break;
+      default:
+        throw new Error(`Unsupported verification method: ${verificationMethod}`);
     }
-  };
+
+    console.log('Submitting review:', { endpoint, submitData, verificationMethod });
+
+    const response = await http.post(endpoint, submitData);
+
+    if (response.data.success) {
+      onSubmit({
+        success: true,
+        message: response.data.message,
+        data: response.data.data
+      });
+    }
+
+  } catch (err) {
+    const errorMessage = err.response?.data?.message || err.message || 'Failed to submit review';
+    setError(errorMessage);
+    console.error('Review submission error:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const getRatingText = (ratingValue) => {
     switch (ratingValue) {
