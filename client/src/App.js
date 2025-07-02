@@ -9,6 +9,7 @@ import MainLayout from './components/layout/MainLayout.js';
 import LoadingScreen from './components/shared/LoadingScreen/LoadingScreen.js';
 import SplashScreen from './components/SplashScreen.js';
 import { initializeGA, trackPageView, trackException, trackTiming } from './config/analytics.js';
+import UserProfilePage from './pages/UserProfilePage.js';
 
 // Add these imports
 import WelcomeModal from './components/shared/WelcomeModal/WelcomeModal.js';
@@ -639,6 +640,8 @@ const AppRoutes = () => {
             </AdminLayout>
           </ProtectedRoute>
         } />
+
+
         
         <Route path="/admin/gion" element={
           <AdminLayout>
@@ -708,6 +711,15 @@ const AppRoutes = () => {
           <MainLayout>
             <BusinessDetailPage />
           </MainLayout>
+        } />
+
+         {/* Profile Route - Protected */}
+        <Route path="/profile" element={
+          <ProtectedRoute requiredRoles={['user', 'admin']}>
+            <MainLayout>
+              <UserProfilePage />
+            </MainLayout>
+          </ProtectedRoute>
         } />
 
         {/* News Routes */}
