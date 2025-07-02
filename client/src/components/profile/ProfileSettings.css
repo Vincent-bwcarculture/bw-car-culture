@@ -1,0 +1,737 @@
+/* client/src/components/profile/ProfileSettings.css */
+/* ENHANCED PROFILE SETTINGS WITH UNIQUE CLASSES AND DARK MODE SUPPORT */
+
+/* === PROFILE SETTINGS MAIN CONTAINER === */
+.psettings-main-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.psettings-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--uprofile-text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-theme-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.psettings-theme-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--uprofile-text-secondary);
+  transition: var(--uprofile-transition);
+}
+
+.psettings-theme-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 32px;
+}
+
+.psettings-theme-toggle-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.psettings-theme-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--uprofile-bg-tertiary);
+  transition: var(--uprofile-transition);
+  border-radius: 34px;
+  border: 2px solid var(--uprofile-border-color);
+}
+
+.psettings-theme-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background: var(--uprofile-bg-primary);
+  transition: var(--uprofile-transition);
+  border-radius: 50%;
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+.psettings-theme-toggle-input:checked + .psettings-theme-toggle-slider {
+  background: var(--uprofile-primary-blue);
+  border-color: var(--uprofile-primary-blue);
+}
+
+.psettings-theme-toggle-input:checked + .psettings-theme-toggle-slider:before {
+  transform: translateX(28px);
+}
+
+.psettings-theme-toggle-slider:hover {
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+/* === SETTINGS NAVIGATION === */
+.psettings-navigation {
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 5px;
+  margin-bottom: 25px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.psettings-nav-tabs {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.psettings-nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.psettings-nav-tab {
+  background: transparent;
+  border: none;
+  padding: 12px 16px;
+  border-radius: var(--uprofile-border-radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--uprofile-text-secondary);
+  transition: var(--uprofile-transition);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.psettings-nav-tab:hover {
+  background: var(--uprofile-bg-tertiary);
+  color: var(--uprofile-text-primary);
+}
+
+.psettings-nav-tab.active {
+  background: var(--uprofile-primary-blue);
+  color: var(--uprofile-text-white);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+/* === SETTINGS CONTENT === */
+.psettings-content {
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 25px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.psettings-section-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.psettings-form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.psettings-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.psettings-form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--uprofile-text-primary);
+  transition: var(--uprofile-transition);
+}
+
+.psettings-form-input,
+.psettings-form-select,
+.psettings-form-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--uprofile-border-color);
+  border-radius: var(--uprofile-border-radius-sm);
+  font-size: 14px;
+  color: var(--uprofile-text-primary);
+  background: var(--uprofile-bg-primary);
+  transition: var(--uprofile-transition);
+  font-family: inherit;
+}
+
+.psettings-form-input:focus,
+.psettings-form-select:focus,
+.psettings-form-textarea:focus {
+  outline: none;
+  border-color: var(--uprofile-primary-blue);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.psettings-form-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.psettings-form-hint {
+  font-size: 12px;
+  color: var(--uprofile-text-muted);
+  margin-top: 4px;
+  transition: var(--uprofile-transition);
+}
+
+/* === NOTIFICATION SETTINGS === */
+.psettings-notification-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.psettings-notification-group {
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 20px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.psettings-notification-group-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0 0 15px 0;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.psettings-checkbox-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: var(--uprofile-border-radius-sm);
+  transition: var(--uprofile-transition);
+}
+
+.psettings-checkbox-item:hover {
+  background: var(--uprofile-bg-tertiary);
+}
+
+.psettings-checkbox-input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--uprofile-primary-blue);
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.psettings-checkbox-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.psettings-checkbox-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--uprofile-text-primary);
+  cursor: pointer;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-checkbox-description {
+  font-size: 13px;
+  color: var(--uprofile-text-muted);
+  line-height: 1.4;
+  transition: var(--uprofile-transition);
+}
+
+/* === PRIVACY SETTINGS === */
+.psettings-privacy-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.psettings-privacy-group {
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 20px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.psettings-privacy-group-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0 0 15px 0;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-radio-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.psettings-radio-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: var(--uprofile-border-radius-sm);
+  border: 2px solid transparent;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-radio-item:hover {
+  background: var(--uprofile-bg-tertiary);
+  border-color: var(--uprofile-border-light);
+}
+
+.psettings-radio-item.selected {
+  background: rgba(52, 152, 219, 0.05);
+  border-color: var(--uprofile-primary-blue);
+}
+
+.psettings-radio-input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--uprofile-primary-blue);
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.psettings-radio-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.psettings-radio-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--uprofile-text-primary);
+  cursor: pointer;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-radio-description {
+  font-size: 13px;
+  color: var(--uprofile-text-muted);
+  line-height: 1.4;
+  transition: var(--uprofile-transition);
+}
+
+/* === SECURITY SETTINGS === */
+.psettings-security-form {
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 25px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.psettings-password-requirements {
+  background: var(--uprofile-bg-tertiary);
+  border-radius: var(--uprofile-border-radius-sm);
+  padding: 15px;
+  margin-top: 10px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.psettings-requirements-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0 0 8px 0;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-requirements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.psettings-requirements-item {
+  font-size: 12px;
+  color: var(--uprofile-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-requirements-item.valid {
+  color: var(--uprofile-success-green);
+}
+
+.psettings-requirements-icon {
+  width: 12px;
+  height: 12px;
+}
+
+/* === ACCOUNT MANAGEMENT === */
+.psettings-account-info {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+  margin-bottom: 30px;
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 20px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.psettings-account-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.psettings-account-stat h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-account-stat p {
+  font-size: 13px;
+  color: var(--uprofile-text-secondary);
+  margin: 0;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-danger-zone {
+  background: rgba(231, 76, 60, 0.05);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+  border-radius: var(--uprofile-border-radius);
+  padding: 20px;
+  margin-top: 30px;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-danger-zone h4 {
+  color: var(--uprofile-primary-red);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-danger-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.psettings-danger-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius-sm);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+  transition: var(--uprofile-transition);
+}
+
+.psettings-danger-info h5 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0 0 5px 0;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-danger-info p {
+  font-size: 13px;
+  color: var(--uprofile-text-muted);
+  margin: 0;
+  line-height: 1.4;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-danger-btn {
+  background: var(--uprofile-primary-red);
+  color: var(--uprofile-text-white);
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--uprofile-border-radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: var(--uprofile-transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+}
+
+.psettings-danger-btn:hover {
+  background: var(--uprofile-primary-red-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+/* === FORM ACTIONS === */
+.psettings-form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid var(--uprofile-border-color);
+}
+
+.psettings-btn {
+  padding: 12px 24px;
+  border-radius: var(--uprofile-border-radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--uprofile-transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.psettings-btn-primary {
+  background: var(--uprofile-primary-blue);
+  color: var(--uprofile-text-white);
+  border: none;
+}
+
+.psettings-btn-primary:hover {
+  background: var(--uprofile-primary-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+.psettings-btn-primary:disabled {
+  background: var(--uprofile-text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.psettings-btn-secondary {
+  background: transparent;
+  color: var(--uprofile-text-secondary);
+  border: 2px solid var(--uprofile-border-color);
+}
+
+.psettings-btn-secondary:hover {
+  background: var(--uprofile-bg-secondary);
+  border-color: var(--uprofile-border-dark);
+  color: var(--uprofile-text-primary);
+}
+
+.psettings-btn-success {
+  background: var(--uprofile-success-green);
+  color: var(--uprofile-text-white);
+  border: none;
+}
+
+.psettings-btn-success:hover {
+  background: var(--uprofile-success-green-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+/* === MESSAGE ALERTS === */
+.psettings-message {
+  padding: 12px 16px;
+  border-radius: var(--uprofile-border-radius-sm);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: var(--uprofile-transition);
+}
+
+.psettings-message.success {
+  background: rgba(39, 174, 96, 0.1);
+  color: var(--uprofile-success-green);
+  border: 1px solid rgba(39, 174, 96, 0.2);
+}
+
+.psettings-message.error {
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--uprofile-primary-red);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.psettings-message.info {
+  background: rgba(52, 152, 219, 0.1);
+  color: var(--uprofile-primary-blue);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+}
+
+/* === RESPONSIVE DESIGN === */
+/* Tablet (768px and up) */
+@media (min-width: 768px) {
+  .psettings-form-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .psettings-form-row.full-width {
+    grid-template-columns: 1fr;
+  }
+  
+  .psettings-account-info {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .psettings-danger-item {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .psettings-danger-info {
+    flex: 1;
+  }
+  
+  .psettings-form-actions {
+    justify-content: flex-end;
+  }
+  
+  .psettings-header {
+    flex-wrap: nowrap;
+  }
+}
+
+/* Desktop (1024px and up) */
+@media (min-width: 1024px) {
+  .psettings-content {
+    padding: 30px;
+  }
+  
+  .psettings-account-info {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .psettings-nav-tabs {
+    overflow-x: visible;
+  }
+}
+
+/* === FOCUS STATES === */
+.psettings-nav-tab:focus,
+.psettings-btn:focus,
+.psettings-form-input:focus,
+.psettings-form-select:focus,
+.psettings-form-textarea:focus,
+.psettings-checkbox-item:focus-within,
+.psettings-radio-item:focus-within,
+.psettings-theme-toggle-input:focus + .psettings-theme-toggle-slider,
+.psettings-danger-btn:focus {
+  outline: 2px solid var(--uprofile-primary-blue);
+  outline-offset: 2px;
+}
+
+/* === DARK MODE SPECIFIC ADJUSTMENTS === */
+[data-theme="dark"] .psettings-form-input,
+[data-theme="dark"] .psettings-form-select,
+[data-theme="dark"] .psettings-form-textarea {
+  background: var(--uprofile-bg-secondary);
+}
+
+[data-theme="dark"] .psettings-danger-zone {
+  background: rgba(231, 76, 60, 0.1);
+  border-color: rgba(231, 76, 60, 0.3);
+}
+
+[data-theme="dark"] .psettings-danger-item {
+  background: var(--uprofile-bg-secondary);
+  border-color: rgba(231, 76, 60, 0.3);
+}
+
+/* === PRINT STYLES === */
+@media print {
+  .psettings-theme-controls,
+  .psettings-form-actions,
+  .psettings-danger-zone {
+    display: none;
+  }
+  
+  .psettings-main-container {
+    background: white;
+  }
+  
+  .psettings-content,
+  .psettings-navigation {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+}
