@@ -1,7 +1,7 @@
 // client/src/components/profile/RouteManagement.js
 import React, { useState, useEffect } from 'react';
 import { 
-  Route, Plus, Edit2, Trash2, MapPin, Clock, Settings,
+  Route, Plus, Edit2, Trash2, MapPin, Clock, Settings, Car,
   DollarSign, Users, Phone, Check, X, Navigation,
   Calendar, Star, Eye, Save, AlertCircle, Activity,
   ArrowRight, Map, Zap, Timer
@@ -9,7 +9,7 @@ import {
 import axios from '../../config/axios.js';
 import './RouteManagement.css';
 
-const RouteManagement = ({ profileData, refreshProfile }) => {
+const RouteManagement = ({ profileData, refreshProfile, setActiveTab }) => {
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showRouteModal, setShowRouteModal] = useState(false);
@@ -195,7 +195,9 @@ const RouteManagement = ({ profileData, refreshProfile }) => {
 
   // Service registration redirect
   const handleRegisterService = () => {
-    setActiveTab('services');
+    if (setActiveTab) {
+      setActiveTab('services');
+    }
   };
 
   // Check if user has transport services
