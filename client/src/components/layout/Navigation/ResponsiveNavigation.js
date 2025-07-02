@@ -3,9 +3,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, ShoppingBag, Store, Settings, User, LogIn, LogOut, 
-  UserCircle, ChevronDown, Star, MessageSquare, Plus, X
+  UserCircle, ChevronDown, Star, QrCode, Hash, X
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
+import ReviewForm from '../../ReviewForm/ReviewForm.js';
+import QRCodeScanner from '../../QRCodeScanner/QRCodeScanner.js';
 import './ResponsiveNavigation.css';
 
 // Updated navigation categories - replaced News with Profile
@@ -45,6 +47,9 @@ const categories = [
 // Review FAB Component for mobile devices
 const ReviewFAB = () => {
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewMethod, setReviewMethod] = useState(null);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [serviceCode, setServiceCode] = useState('');
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const { isAuthenticated } = useAuth();
@@ -80,15 +85,48 @@ const ReviewFAB = () => {
       return;
     }
     
-    // For now, redirect to a general review page or open modal
-    // This can be enhanced to detect current business context
+    // Open the review method selection modal
     setShowReviewModal(true);
+    setReviewMethod(null); // Reset method selection
   };
 
-  const handleReviewSubmit = (reviewData) => {
-    console.log('Review submitted:', reviewData);
-    setShowReviewModal(false);
-    // Handle review submission logic here
+  // Handle QR scan method selection
+  const handleQRScan = () => {
+    setReviewMethod('qr');
+    setShowQRScanner(true);
+  };
+
+  // Handle QR scan result
+  const handleQRResult = (result) => {
+    setShowQRScanner(false);
+    setReviewMethod('qr');
+    // QR data would be handled here - for now we'll just proceed to review form
+    console.log('QR scan result:', result);
+  };
+
+  // Handle service code submission
+  const handleServiceCodeSubmit = () => {
+    if (!serviceCode.trim()) {
+      alert('Please enter a service code');
+      return;
+    }
+    setReviewMethod('service_code');
+  };
+
+  // Handle review submission completion
+  const handleReviewSubmitted = (result) => {
+    if (result.success) {
+      setShowReviewModal(false);
+      setReviewMethod(null);
+      setShowQRScanner(false);
+      setServiceCode('');
+      
+      // Show success message
+      alert(result.message || 'Review submitted successfully! Thank you for your feedback.');
+    } else {
+      // Error handling is done within ReviewForm component
+      console.error('Review submission failed:', result);
+    }
   };
 
   return (
@@ -99,68 +137,127 @@ const ReviewFAB = () => {
         title={isAuthenticated ? 'Leave a quick review' : 'Login to leave a review'}
         aria-label="Quick review"
       >
-        <Star size={24} />
+        <Star size={18} />
         <span className="fab-text">Review</span>
       </button>
 
-      {/* Simple Review Modal */}
-      {showReviewModal && (
-        <div className="review-fab-modal-overlay" onClick={() => setShowReviewModal(false)}>
-          <div className="review-fab-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="review-fab-modal-header">
-              <h3>Quick Review</h3>
+      {/* Review Method Selection Modal */}
+      {showReviewModal && !reviewMethod && (
+        <div className="bcc-modal-overlay" onClick={() => setShowReviewModal(false)}>
+          <div className="bcc-review-method-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="bcc-modal-header">
+              <h2>How would you like to review?</h2>
               <button 
-                className="review-fab-close"
+                className="bcc-close-button"
                 onClick={() => setShowReviewModal(false)}
               >
-                <X size={20} />
+                ×
               </button>
             </div>
             
-            <div className="review-fab-content">
-              <p>Select what you'd like to review:</p>
+            <div className="bcc-review-methods">
+              <button 
+                className="bcc-method-option"
+                onClick={handleQRScan}
+              >
+                <QrCode size={32} />
+                <h3>Scan QR Code</h3>
+                <p>Scan the QR code displayed at the business</p>
+              </button>
               
-              <div className="review-options">
-                <button 
-                  className="review-option"
-                  onClick={() => {
-                    setShowReviewModal(false);
-                    navigate('/marketplace?action=review');
-                  }}
-                >
-                  <ShoppingBag size={20} />
-                  <span>Car Purchase</span>
-                </button>
-                
-                <button 
-                  className="review-option"
-                  onClick={() => {
-                    setShowReviewModal(false);
-                    navigate('/dealerships?action=review');
-                  }}
-                >
-                  <Store size={20} />
-                  <span>Dealership</span>
-                </button>
-                
-                <button 
-                  className="review-option"
-                  onClick={() => {
-                    setShowReviewModal(false);
-                    navigate('/services?action=review');
-                  }}
-                >
-                  <Settings size={20} />
-                  <span>Service</span>
-                </button>
-              </div>
+              <button 
+                className="bcc-method-option"
+                onClick={() => setReviewMethod('service_code')}
+              >
+                <Hash size={32} />
+                <h3>Service Code</h3>
+                <p>Enter code from your service receipt</p>
+              </button>
               
-              <p className="review-fab-hint">
-                Or visit any business page to leave a specific review
-              </p>
+              <button 
+                className="bcc-method-option"
+                onClick={() => setReviewMethod('general')}
+              >
+                <Star size={32} />
+                <h3>General Review</h3>
+                <p>Leave a general review about a business</p>
+              </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Service Code Entry Modal */}
+      {showReviewModal && reviewMethod === 'service_code' && (
+        <div className="bcc-modal-overlay" onClick={() => setShowReviewModal(false)}>
+          <div className="bcc-service-code-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="bcc-modal-header">
+              <h2>Enter Service Code</h2>
+              <button 
+                className="bcc-close-button"
+                onClick={() => setShowReviewModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="bcc-service-code-form">
+              <p>Enter the service code from your receipt or service card:</p>
+              <input
+                type="text"
+                value={serviceCode}
+                onChange={(e) => setServiceCode(e.target.value.toUpperCase())}
+                placeholder="e.g. SVC123456"
+                className="bcc-service-code-input"
+              />
+              <div className="bcc-service-code-actions">
+                <button 
+                  className="bcc-cancel-button"
+                  onClick={() => setShowReviewModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="bcc-submit-button"
+                  onClick={handleServiceCodeSubmit}
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR Scanner Modal */}
+      {showQRScanner && (
+        <div className="bcc-modal-overlay">
+          <div className="bcc-qr-scanner-modal">
+            <QRCodeScanner 
+              onResult={handleQRResult}
+              onCancel={() => setShowQRScanner(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Review Form Modal */}
+      {showReviewModal && (reviewMethod === 'qr' || reviewMethod === 'general') && (
+        <ReviewForm
+          serviceData={{
+            id: 'fab-review', // Generic ID for FAB reviews
+            name: 'Quick Review',
+            type: 'general',
+            provider: 'BW Car Culture'
+          }}
+          verificationMethod={reviewMethod}
+          onSubmit={handleReviewSubmitted}
+          onCancel={() => {
+            setShowReviewModal(false);
+            setReviewMethod(null);
+          }}
+          serviceCode={reviewMethod === 'service_code' ? serviceCode : null}
+        />
       )}
     </>
   );
@@ -361,6 +458,12 @@ const ResponsiveNavigation = () => {
     if (typeof window !== 'undefined' && window.history && window.history.scrollRestoration) {
       window.history.scrollRestoration = 'manual';
     }
+  
+    return () => {
+      if (typeof window !== 'undefined' && window.history && window.history.scrollRestoration) {
+        window.history.scrollRestoration = 'auto';
+      }
+    };
   }, []);
 
   // Build active path for breadcrumbs

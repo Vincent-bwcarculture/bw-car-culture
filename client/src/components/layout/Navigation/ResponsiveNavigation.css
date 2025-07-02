@@ -579,8 +579,8 @@
     line-height: 1;
 }
 
-/* FAB Review Modal */
-.review-fab-modal-overlay {
+/* ========== REVIEW MODALS (Same as BusinessDetailPage) ========== */
+.bcc-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -596,29 +596,28 @@
     -webkit-backdrop-filter: blur(5px);
 }
 
-.review-fab-modal {
+.bcc-review-method-modal,
+.bcc-service-code-modal {
     background-color: var(--dropdown-bg);
     border: 1px solid var(--nav-border);
     border-radius: 12px;
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;
     animation: modalSlideIn 0.3s ease-out;
 }
 
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9) translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
+.bcc-qr-scanner-modal {
+    background-color: var(--dropdown-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 12px;
+    padding: 1rem;
+    max-width: 400px;
+    width: 100%;
 }
 
-.review-fab-modal-header {
+.bcc-modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -626,14 +625,14 @@
     border-bottom: 1px solid var(--nav-border);
 }
 
-.review-fab-modal-header h3 {
+.bcc-modal-header h2 {
     color: var(--nav-text);
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: 600;
     margin: 0;
 }
 
-.review-fab-close {
+.bcc-close-button {
     background: none;
     border: none;
     color: var(--nav-text-muted);
@@ -641,55 +640,133 @@
     padding: 0.5rem;
     border-radius: 6px;
     transition: all var(--animation-duration) ease;
+    font-size: 1.5rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.review-fab-close:hover {
+.bcc-close-button:hover {
     color: var(--nav-text);
     background-color: var(--hover-bg);
 }
 
-.review-fab-content {
+.bcc-review-methods {
     padding: 1.5rem;
-}
-
-.review-fab-content p {
-    color: var(--nav-text);
-    margin: 0 0 1.5rem 0;
-    font-size: 0.9rem;
-}
-
-.review-options {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
+    gap: 1rem;
 }
 
-.review-option {
+.bcc-method-option {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem;
+    padding: 1.5rem;
     background-color: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--nav-border);
     border-radius: 8px;
     color: var(--nav-text);
     cursor: pointer;
     transition: all var(--animation-duration) ease;
+    text-align: center;
+    gap: 0.75rem;
+}
+
+.bcc-method-option:hover {
+    background-color: var(--hover-bg);
+    border-color: var(--nav-accent);
+    transform: translateY(-2px);
+}
+
+.bcc-method-option h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--nav-text);
+}
+
+.bcc-method-option p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--nav-text-muted);
+    line-height: 1.4;
+}
+
+.bcc-service-code-form {
+    padding: 1.5rem;
+}
+
+.bcc-service-code-form p {
+    color: var(--nav-text);
+    margin: 0 0 1rem 0;
     font-size: 0.9rem;
 }
 
-.review-option:hover {
-    background-color: var(--hover-bg);
-    border-color: var(--nav-accent);
+.bcc-service-code-input {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--nav-border);
+    border-radius: 6px;
+    color: var(--nav-text);
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
 }
 
-.review-fab-hint {
+.bcc-service-code-input:focus {
+    outline: none;
+    border-color: var(--nav-accent);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.bcc-service-code-input::placeholder {
     color: var(--nav-text-muted);
-    font-size: 0.8rem;
-    text-align: center;
-    margin: 0;
-    font-style: italic;
+    font-weight: normal;
+    letter-spacing: normal;
+}
+
+.bcc-service-code-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.bcc-cancel-button,
+.bcc-submit-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--animation-duration) ease;
+    border: none;
+}
+
+.bcc-cancel-button {
+    background-color: transparent;
+    color: var(--nav-text-muted);
+    border: 1px solid var(--nav-border);
+}
+
+.bcc-cancel-button:hover {
+    background-color: var(--hover-bg);
+    color: var(--nav-text);
+}
+
+.bcc-submit-button {
+    background-color: var(--nav-accent);
+    color: white;
+}
+
+.bcc-submit-button:hover {
+    background-color: #cc2900;
+    transform: translateY(-1px);
 }
 
 /* ========== BODY ADJUSTMENTS ========== */
@@ -718,6 +795,17 @@ body.has-mobile-nav .compact-footer {
     to { 
         transform: translateX(-50%) scaleX(1); 
         opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
     }
 }
 
