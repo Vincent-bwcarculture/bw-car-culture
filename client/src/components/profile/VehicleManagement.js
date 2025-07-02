@@ -1,28 +1,35 @@
 // client/src/components/profile/VehicleManagement.js
 import React, { useState, useEffect } from 'react';
 import { 
-  Car, Plus, Edit2, Trash2, Calendar, Settings, 
-  DollarSign, Eye, Bell, Camera, FileText, 
-  CheckCircle, AlertCircle, Clock, Star
+  Car, Plus, Edit2, Trash2, Settings, DollarSign, Calendar, 
+  Bell, AlertCircle, Check, X, Save, Upload, Camera, Eye,
+  Wrench, Gas, Navigation, Award, TrendingUp
 } from 'lucide-react';
 import axios from '../../config/axios.js';
+import './VehicleManagement.css';
 
 const VehicleManagement = ({ profileData, refreshProfile }) => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('my_vehicles');
   const [showVehicleModal, setShowVehicleModal] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState(null);
-  const [activeTab, setActiveTab] = useState('my_vehicles');
   const [vehicleFormData, setVehicleFormData] = useState({});
+  const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     fetchUserVehicles();
   }, []);
 
+  const showMessage = (type, text) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+  };
+
   const fetchUserVehicles = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/user/profile/vehicles');
+      const response = await axios.get('/user/vehicles');
       if (response.data.success) {
         setVehicles(response.data.data);
       }
@@ -35,63 +42,52 @@ const VehicleManagement = ({ profileData, refreshProfile }) => {
 
   const initializeVehicleForm = (vehicle = null) => {
     setVehicleFormData({
-      // Basic Information
+      year: vehicle?.year || '',
       make: vehicle?.make || '',
       model: vehicle?.model || '',
-      year: vehicle?.year || new Date().getFullYear(),
+      variant: vehicle?.variant || '',
       color: vehicle?.color || '',
-      bodyType: vehicle?.bodyType || 'sedan',
+      mileage: vehicle?.mileage || '',
       fuelType: vehicle?.fuelType || 'petrol',
       transmission: vehicle?.transmission || 'manual',
+      bodyType: vehicle?.bodyType || 'sedan',
+      condition: vehicle?.condition || 'excellent',
       
-      // Identification
+      // Vehicle identification
       vin: vehicle?.vin || '',
       licensePlate: vehicle?.licensePlate || '',
-      engineNumber: vehicle?.engineNumber || '',
+      registrationNumber: vehicle?.registrationNumber || '',
       
-      // Ownership & Documentation
+      // Ownership details
       ownershipStatus: vehicle?.ownershipStatus || 'owned',
       purchaseDate: vehicle?.purchaseDate || '',
       purchasePrice: vehicle?.purchasePrice || '',
       
-      // Current Status
-      mileage: vehicle?.mileage || '',
-      condition: vehicle?.condition || 'excellent',
-      location: vehicle?.location || profileData?.profile?.address?.city || '',
+      // Current status
+      forSale: vehicle?.forSale || false,
+      salePrice: vehicle?.salePrice || '',
+      isActive: vehicle?.isActive !== false,
       
-      // Service Tracking
+      // Service information
       lastServiceDate: vehicle?.lastServiceDate || '',
       nextServiceDue: vehicle?.nextServiceDue || '',
       preferredWorkshop: vehicle?.preferredWorkshop || '',
-      serviceReminders: vehicle?.serviceReminders || true,
       
-      // Selling Information
-      forSale: vehicle?.forSale || false,
-      askingPrice: vehicle?.askingPrice || '',
-      sellingReason: vehicle?.sellingReason || '',
-      negotiable: vehicle?.negotiable || true,
+      // Insurance & Documentation
+      insuranceProvider: vehicle?.insurance?.provider || '',
+      insurancePolicyNumber: vehicle?.insurance?.policyNumber || '',
+      insuranceExpiryDate: vehicle?.insurance?.expiryDate || '',
       
-      // Performance Tracking
-      trackPerformance: vehicle?.trackPerformance || true,
-      allowListingByOthers: vehicle?.allowListingByOthers || false,
+      // Performance tracking
+      averageFuelConsumption: vehicle?.performance?.averageFuelConsumption || '',
+      maintenanceCosts: vehicle?.performance?.maintenanceCosts || '',
       
-      // Insurance & Legal
-      insuranceCompany: vehicle?.insuranceCompany || '',
-      insuranceExpiryDate: vehicle?.insuranceExpiryDate || '',
-      licenseExpiryDate: vehicle?.licenseExpiryDate || '',
-      
-      // Additional Details
-      description: vehicle?.description || '',
-      specialFeatures: vehicle?.specialFeatures || [],
+      // Additional features
+      features: vehicle?.features || [],
       images: vehicle?.images || [],
       
-      // Notifications
-      notifications: {
-        serviceReminders: vehicle?.notifications?.serviceReminders !== false,
-        insuranceReminders: vehicle?.notifications?.insuranceReminders !== false,
-        licenseReminders: vehicle?.notifications?.licenseReminders !== false,
-        listingUpdates: vehicle?.notifications?.listingUpdates !== false
-      }
+      // Notes
+      notes: vehicle?.notes || ''
     });
   };
 
@@ -107,258 +103,318 @@ const VehicleManagement = ({ profileData, refreshProfile }) => {
     setShowVehicleModal(true);
   };
 
-  const handleDeleteVehicle = async (vehicleId) => {
-    if (!window.confirm('Are you sure you want to remove this vehicle from your profile?')) return;
-    
-    try {
-      const response = await axios.delete(`/user/profile/vehicles/${vehicleId}`);
-      if (response.data.success) {
-        await fetchUserVehicles();
-        alert('Vehicle removed successfully');
-      }
-    } catch (error) {
-      console.error('Error deleting vehicle:', error);
-      alert('Failed to remove vehicle');
-    }
-  };
-
   const handleVehicleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!vehicleFormData.year || !vehicleFormData.make || !vehicleFormData.model) {
+      showMessage('error', 'Please fill in all required fields');
+      return;
+    }
+
     try {
       setLoading(true);
       
-      const url = editingVehicle 
-        ? `/user/profile/vehicles/${editingVehicle._id}`
-        : '/user/profile/vehicles';
+      const endpoint = editingVehicle 
+        ? `/user/vehicles/${editingVehicle._id}`
+        : '/user/vehicles';
       
       const method = editingVehicle ? 'put' : 'post';
       
-      const response = await axios[method](url, vehicleFormData);
+      const response = await axios[method](endpoint, vehicleFormData);
       
       if (response.data.success) {
         await fetchUserVehicles();
+        await refreshProfile();
         setShowVehicleModal(false);
         setEditingVehicle(null);
-        alert(editingVehicle ? 'Vehicle updated successfully!' : 'Vehicle added successfully!');
+        setVehicleFormData({});
+        showMessage('success', editingVehicle ? 'Vehicle updated successfully!' : 'Vehicle added successfully!');
       }
     } catch (error) {
       console.error('Error saving vehicle:', error);
-      alert('Failed to save vehicle');
+      showMessage('error', error.response?.data?.message || 'Failed to save vehicle. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteVehicle = async (vehicleId) => {
+    if (!window.confirm('Are you sure you want to delete this vehicle?')) return;
+    
+    try {
+      setLoading(true);
+      const response = await axios.delete(`/user/vehicles/${vehicleId}`);
+      if (response.data.success) {
+        await fetchUserVehicles();
+        await refreshProfile();
+        showMessage('success', 'Vehicle deleted successfully');
+      }
+    } catch (error) {
+      console.error('Error deleting vehicle:', error);
+      showMessage('error', 'Failed to delete vehicle. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSellVehicle = async (vehicle) => {
+    const salePrice = prompt('Enter the sale price:', vehicle.salePrice || '');
+    if (!salePrice) return;
+
+    try {
+      setLoading(true);
+      const response = await axios.put(`/user/vehicles/${vehicle._id}`, {
+        ...vehicle,
+        forSale: true,
+        salePrice: parseFloat(salePrice)
+      });
+      
+      if (response.data.success) {
+        await fetchUserVehicles();
+        showMessage('success', 'Vehicle listed for sale successfully!');
+      }
+    } catch (error) {
+      console.error('Error listing vehicle for sale:', error);
+      showMessage('error', 'Failed to list vehicle for sale. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleBookService = (vehicle) => {
-    // Navigate to workshop booking with pre-filled vehicle info
-    window.location.href = `/workshops?vehicle=${vehicle._id}`;
-  };
-
-  const handleSellVehicle = (vehicle) => {
-    // Navigate to listing creation with pre-filled vehicle info
-    window.location.href = `/listings/create?vehicle=${vehicle._id}`;
-  };
-
-  const handleFormChange = (field, value) => {
-    setVehicleFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleNestedFormChange = (parent, field, value) => {
-    setVehicleFormData(prev => ({
-      ...prev,
-      [parent]: {
-        ...prev[parent],
-        [field]: value
-      }
-    }));
-  };
-
-  const getConditionBadge = (condition) => {
-    const badges = {
-      excellent: { color: 'green', icon: CheckCircle },
-      good: { color: 'blue', icon: CheckCircle },
-      fair: { color: 'yellow', icon: AlertCircle },
-      poor: { color: 'red', icon: AlertCircle }
-    };
-    
-    const badge = badges[condition] || badges.good;
-    const Icon = badge.icon;
-    
-    return (
-      <span className={`condition-badge ${badge.color}`}>
-        <Icon size={12} />
-        {condition.charAt(0).toUpperCase() + condition.slice(1)}
-      </span>
-    );
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Not set';
-    return new Date(dateString).toLocaleDateString();
+    // Redirect to service booking or show service modal
+    showMessage('info', 'Service booking feature coming soon!');
   };
 
   const isServiceDue = (vehicle) => {
     if (!vehicle.nextServiceDue) return false;
-    const serviceDate = new Date(vehicle.nextServiceDue);
-    const today = new Date();
-    const daysUntilService = Math.ceil((serviceDate - today) / (1000 * 60 * 60 * 24));
-    return daysUntilService <= 30;
+    const dueDate = new Date(vehicle.nextServiceDue);
+    const now = new Date();
+    const daysUntilDue = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+    return daysUntilDue <= 30; // Service due in 30 days or less
   };
 
+  const formatDate = (date) => {
+    if (!date) return 'Not set';
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const formatCurrency = (amount) => {
+    if (!amount) return 'N/A';
+    return new Intl.NumberFormat('en-BW', {
+      style: 'currency',
+      currency: 'BWP'
+    }).format(amount);
+  };
+
+  const getVehicleAge = (year) => {
+    const currentYear = new Date().getFullYear();
+    return currentYear - parseInt(year);
+  };
+
+  const tabs = [
+    { id: 'my_vehicles', label: 'My Vehicles', icon: Car },
+    { id: 'service_history', label: 'Service History', icon: Wrench },
+    { id: 'performance', label: 'Performance', icon: TrendingUp }
+  ];
+
   return (
-    <div className="vehicle-management-tab">
-      <div className="tab-header">
-        <h2><Car size={24} /> Vehicle Management</h2>
-        <p>Manage your vehicles, track services, and monitor listings</p>
-        <button className="add-vehicle-btn" onClick={handleAddVehicle}>
-          <Plus size={16} />
-          Add Vehicle
-        </button>
+    <div className="vmanage-main-container">
+      {/* Message Display */}
+      {message.text && (
+        <div className={`vmanage-message vmanage-message-${message.type}`}>
+          {message.type === 'success' && <Check size={16} />}
+          {message.type === 'error' && <AlertCircle size={16} />}
+          {message.text}
+        </div>
+      )}
+
+      {/* Tab Navigation */}
+      <div className="vmanage-tab-navigation">
+        {tabs.map(tab => {
+          const IconComponent = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              className={`vmanage-tab-button ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <IconComponent size={16} />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Sub Navigation */}
-      <div className="vehicle-sub-nav">
-        <button 
-          className={`sub-nav-btn ${activeTab === 'my_vehicles' ? 'active' : ''}`}
-          onClick={() => setActiveTab('my_vehicles')}
-        >
-          <Car size={16} />
-          My Vehicles
-        </button>
-        <button 
-          className={`sub-nav-btn ${activeTab === 'service_history' ? 'active' : ''}`}
-          onClick={() => setActiveTab('service_history')}
-        >
-          <Settings size={16} />
-          Service History
-        </button>
-        <button 
-          className={`sub-nav-btn ${activeTab === 'listings_tracking' ? 'active' : ''}`}
-          onClick={() => setActiveTab('listings_tracking')}
-        >
-          <Eye size={16} />
-          Listing Tracking
-        </button>
-      </div>
-
-      {/* Vehicle Content */}
+      {/* Tab Content */}
       {activeTab === 'my_vehicles' && (
-        <div className="vehicles-grid">
-          {vehicles.length > 0 ? (
-            vehicles.map((vehicle) => (
-              <div key={vehicle._id} className="vehicle-card">
-                <div className="vehicle-header">
-                  <div className="vehicle-image">
-                    {vehicle.images && vehicle.images.length > 0 ? (
-                      <img src={vehicle.images[0]} alt={`${vehicle.make} ${vehicle.model}`} />
-                    ) : (
-                      <div className="no-image">
-                        <Car size={40} />
+        <div className="vmanage-vehicles-section">
+          <div className="vmanage-section-header">
+            <h3 className="vmanage-section-title">
+              <Car size={20} />
+              My Vehicles
+            </h3>
+            <button 
+              className="vmanage-add-vehicle-btn"
+              onClick={handleAddVehicle}
+            >
+              <Plus size={16} />
+              Add Vehicle
+            </button>
+          </div>
+
+          <div className="vmanage-vehicles-grid">
+            {vehicles.length > 0 ? (
+              vehicles.map(vehicle => (
+                <div key={vehicle._id} className="vmanage-vehicle-card">
+                  <div className="vmanage-vehicle-header">
+                    <div className="vmanage-vehicle-image">
+                      {vehicle.images?.length > 0 ? (
+                        <img src={vehicle.images[0].url} alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`} />
+                      ) : (
+                        <div className="vmanage-vehicle-placeholder">
+                          <Car size={40} />
+                        </div>
+                      )}
+                      <div className="vmanage-vehicle-age-badge">
+                        {getVehicleAge(vehicle.year)} years
                       </div>
-                    )}
-                  </div>
-                  <div className="vehicle-actions">
-                    <button 
-                      className="action-btn edit"
-                      onClick={() => handleEditVehicle(vehicle)}
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button 
-                      className="action-btn delete"
-                      onClick={() => handleDeleteVehicle(vehicle._id)}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="vehicle-info">
-                  <h4>{vehicle.year} {vehicle.make} {vehicle.model}</h4>
-                  <p className="vehicle-details">
-                    {vehicle.color} • {vehicle.bodyType} • {vehicle.fuelType}
-                  </p>
-                  
-                  <div className="vehicle-status">
-                    {getConditionBadge(vehicle.condition)}
-                    {vehicle.forSale && (
-                      <span className="for-sale-badge">
-                        <DollarSign size={12} />
-                        For Sale
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="vehicle-stats">
-                    <div className="stat">
-                      <span className="stat-label">Mileage</span>
-                      <span className="stat-value">{vehicle.mileage || 'N/A'} km</span>
                     </div>
-                    <div className="stat">
-                      <span className="stat-label">Last Service</span>
-                      <span className="stat-value">{formatDate(vehicle.lastServiceDate)}</span>
-                    </div>
-                  </div>
-
-                  {isServiceDue(vehicle) && (
-                    <div className="service-alert">
-                      <AlertCircle size={14} />
-                      <span>Service due soon!</span>
-                    </div>
-                  )}
-
-                  <div className="vehicle-quick-actions">
-                    <button 
-                      className="quick-action-btn service"
-                      onClick={() => handleBookService(vehicle)}
-                    >
-                      <Settings size={14} />
-                      Book Service
-                    </button>
-                    {!vehicle.forSale && (
+                    
+                    <div className="vmanage-vehicle-actions">
                       <button 
-                        className="quick-action-btn sell"
-                        onClick={() => handleSellVehicle(vehicle)}
+                        className="vmanage-vehicle-action-btn vmanage-edit-btn"
+                        onClick={() => handleEditVehicle(vehicle)}
+                        title="Edit Vehicle"
                       >
-                        <DollarSign size={14} />
-                        Sell Vehicle
+                        <Edit2 size={16} />
                       </button>
+                      <button 
+                        className="vmanage-vehicle-action-btn vmanage-delete-btn"
+                        onClick={() => handleDeleteVehicle(vehicle._id)}
+                        title="Delete Vehicle"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="vmanage-vehicle-content">
+                    <h4 className="vmanage-vehicle-title">
+                      {vehicle.year} {vehicle.make} {vehicle.model}
+                    </h4>
+                    {vehicle.variant && (
+                      <p className="vmanage-vehicle-variant">{vehicle.variant}</p>
                     )}
+
+                    <div className="vmanage-vehicle-specs">
+                      <div className="vmanage-spec-item">
+                        <span className="vmanage-spec-label">Mileage</span>
+                        <span className="vmanage-spec-value">{vehicle.mileage || 'N/A'} km</span>
+                      </div>
+                      <div className="vmanage-spec-item">
+                        <span className="vmanage-spec-label">Fuel Type</span>
+                        <span className="vmanage-spec-value">{vehicle.fuelType}</span>
+                      </div>
+                      <div className="vmanage-spec-item">
+                        <span className="vmanage-spec-label">Transmission</span>
+                        <span className="vmanage-spec-value">{vehicle.transmission}</span>
+                      </div>
+                      <div className="vmanage-spec-item">
+                        <span className="vmanage-spec-label">Condition</span>
+                        <span className="vmanage-spec-value">{vehicle.condition}</span>
+                      </div>
+                    </div>
+
+                    <div className="vmanage-vehicle-status">
+                      <div className={`vmanage-status-badge ${vehicle.forSale ? 'for-sale' : 'not-for-sale'}`}>
+                        {vehicle.forSale ? `For Sale - ${formatCurrency(vehicle.salePrice)}` : 'Not for Sale'}
+                      </div>
+                      {isServiceDue(vehicle) && (
+                        <div className="vmanage-status-badge service-due">
+                          <Bell size={12} />
+                          Service Due
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="vmanage-vehicle-stats">
+                      <div className="vmanage-stat-item">
+                        <Calendar size={14} />
+                        <span>Last Service: {formatDate(vehicle.lastServiceDate)}</span>
+                      </div>
+                      {vehicle.nextServiceDue && (
+                        <div className="vmanage-stat-item">
+                          <Bell size={14} />
+                          <span>Next Service: {formatDate(vehicle.nextServiceDue)}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="vmanage-vehicle-quick-actions">
+                      <button 
+                        className="vmanage-quick-action-btn vmanage-service-btn"
+                        onClick={() => handleBookService(vehicle)}
+                      >
+                        <Settings size={14} />
+                        Book Service
+                      </button>
+                      {!vehicle.forSale && (
+                        <button 
+                          className="vmanage-quick-action-btn vmanage-sell-btn"
+                          onClick={() => handleSellVehicle(vehicle)}
+                        >
+                          <DollarSign size={14} />
+                          Sell Vehicle
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="vmanage-empty-state">
+                <Car size={48} />
+                <h3>No Vehicles Added</h3>
+                <p>Add your first vehicle to start tracking services and performance</p>
+                <button 
+                  className="vmanage-add-first-vehicle-btn"
+                  onClick={handleAddVehicle}
+                >
+                  <Plus size={16} />
+                  Add Your First Vehicle
+                </button>
               </div>
-            ))
-          ) : (
-            <div className="empty-state">
-              <Car size={48} />
-              <h3>No Vehicles Added</h3>
-              <p>Add your first vehicle to start tracking services and performance</p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
 
       {activeTab === 'service_history' && (
-        <div className="service-history-content">
-          <h3>Service History & Reminders</h3>
-          <div className="service-summary">
+        <div className="vmanage-service-history-section">
+          <h3 className="vmanage-section-title">
+            <Wrench size={20} />
+            Service History & Reminders
+          </h3>
+          <div className="vmanage-service-summary">
             {vehicles.map(vehicle => (
-              <div key={vehicle._id} className="vehicle-service-summary">
+              <div key={vehicle._id} className="vmanage-vehicle-service-summary">
                 <h4>{vehicle.year} {vehicle.make} {vehicle.model}</h4>
-                <div className="service-info">
-                  <div className="service-item">
+                <div className="vmanage-service-info">
+                  <div className="vmanage-service-item">
                     <Calendar size={16} />
                     <span>Last Service: {formatDate(vehicle.lastServiceDate)}</span>
                   </div>
-                  <div className="service-item">
+                  <div className="vmanage-service-item">
                     <Bell size={16} />
                     <span>Next Service: {formatDate(vehicle.nextServiceDue)}</span>
                   </div>
                   {vehicle.preferredWorkshop && (
-                    <div className="service-item">
+                    <div className="vmanage-service-item">
                       <Settings size={16} />
                       <span>Preferred Workshop: {vehicle.preferredWorkshop}</span>
                     </div>
@@ -370,30 +426,36 @@ const VehicleManagement = ({ profileData, refreshProfile }) => {
         </div>
       )}
 
-      {activeTab === 'listings_tracking' && (
-        <div className="listings-tracking-content">
-          <h3>Listing Performance & Tracking</h3>
-          <div className="tracking-summary">
-            {vehicles.filter(v => v.trackPerformance).map(vehicle => (
-              <div key={vehicle._id} className="vehicle-tracking-summary">
+      {activeTab === 'performance' && (
+        <div className="vmanage-performance-section">
+          <h3 className="vmanage-section-title">
+            <TrendingUp size={20} />
+            Vehicle Performance Analytics
+          </h3>
+          <div className="vmanage-performance-grid">
+            {vehicles.map(vehicle => (
+              <div key={vehicle._id} className="vmanage-performance-card">
                 <h4>{vehicle.year} {vehicle.make} {vehicle.model}</h4>
-                <div className="tracking-stats">
-                  <div className="tracking-stat">
-                    <Eye size={16} />
-                    <span>Views: N/A</span>
+                <div className="vmanage-performance-metrics">
+                  <div className="vmanage-performance-metric">
+                    <span className="vmanage-metric-label">Fuel Consumption</span>
+                    <span className="vmanage-metric-value">
+                      {vehicle.performance?.averageFuelConsumption || 'N/A'} L/100km
+                    </span>
                   </div>
-                  <div className="tracking-stat">
-                    <Star size={16} />
-                    <span>Favorites: N/A</span>
+                  <div className="vmanage-performance-metric">
+                    <span className="vmanage-metric-label">Maintenance Costs</span>
+                    <span className="vmanage-metric-value">
+                      {formatCurrency(vehicle.performance?.maintenanceCosts)}
+                    </span>
                   </div>
-                  <div className="tracking-stat">
-                    <FileText size={16} />
-                    <span>Inquiries: N/A</span>
+                  <div className="vmanage-performance-metric">
+                    <span className="vmanage-metric-label">Current Value</span>
+                    <span className="vmanage-metric-value">
+                      {formatCurrency(vehicle.currentValue || vehicle.purchasePrice)}
+                    </span>
                   </div>
                 </div>
-                <p className="tracking-note">
-                  Performance tracking will show data when your vehicle is listed or being sold
-                </p>
               </div>
             ))}
           </div>
@@ -402,186 +464,156 @@ const VehicleManagement = ({ profileData, refreshProfile }) => {
 
       {/* Vehicle Modal */}
       {showVehicleModal && (
-        <div className="vehicle-modal-overlay">
-          <div className="vehicle-modal">
-            <div className="vehicle-modal-header">
+        <div className="vmanage-modal-overlay">
+          <div className="vmanage-modal">
+            <div className="vmanage-modal-header">
               <h3>{editingVehicle ? 'Edit Vehicle' : 'Add New Vehicle'}</h3>
               <button 
-                className="close-modal-btn"
-                onClick={() => setShowVehicleModal(false)}
+                className="vmanage-close-modal-btn"
+                onClick={() => {
+                  setShowVehicleModal(false);
+                  setEditingVehicle(null);
+                  setVehicleFormData({});
+                }}
               >
-                ×
+                <X size={20} />
               </button>
             </div>
-            
-            <form onSubmit={handleVehicleSubmit} className="vehicle-form">
-              {/* Basic Information */}
-              <div className="form-section">
-                <h4>Vehicle Information</h4>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Make *</label>
-                    <input
-                      type="text"
-                      value={vehicleFormData.make || ''}
-                      onChange={(e) => handleFormChange('make', e.target.value)}
-                      placeholder="Toyota, BMW, etc."
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Model *</label>
-                    <input
-                      type="text"
-                      value={vehicleFormData.model || ''}
-                      onChange={(e) => handleFormChange('model', e.target.value)}
-                      placeholder="Corolla, X3, etc."
-                      required
-                    />
-                  </div>
-                </div>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Year *</label>
+            <form onSubmit={handleVehicleSubmit} className="vmanage-modal-form">
+              <div className="vmanage-form-section">
+                <h4>Basic Information</h4>
+                <div className="vmanage-form-row">
+                  <div className="vmanage-form-group">
+                    <label className="vmanage-form-label">Year *</label>
                     <input
                       type="number"
-                      min="1950"
-                      max={new Date().getFullYear() + 1}
+                      className="vmanage-form-input"
                       value={vehicleFormData.year || ''}
-                      onChange={(e) => handleFormChange('year', parseInt(e.target.value))}
+                      onChange={(e) => setVehicleFormData(prev => ({ ...prev, year: e.target.value }))}
+                      min="1980"
+                      max={new Date().getFullYear() + 1}
                       required
                     />
                   </div>
-                  <div className="form-group">
-                    <label>Color</label>
+                  <div className="vmanage-form-group">
+                    <label className="vmanage-form-label">Make *</label>
                     <input
                       type="text"
+                      className="vmanage-form-input"
+                      value={vehicleFormData.make || ''}
+                      onChange={(e) => setVehicleFormData(prev => ({ ...prev, make: e.target.value }))}
+                      placeholder="e.g., Toyota, BMW, Ford"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="vmanage-form-row">
+                  <div className="vmanage-form-group">
+                    <label className="vmanage-form-label">Model *</label>
+                    <input
+                      type="text"
+                      className="vmanage-form-input"
+                      value={vehicleFormData.model || ''}
+                      onChange={(e) => setVehicleFormData(prev => ({ ...prev, model: e.target.value }))}
+                      placeholder="e.g., Corolla, X3, Focus"
+                      required
+                    />
+                  </div>
+                  <div className="vmanage-form-group">
+                    <label className="vmanage-form-label">Variant</label>
+                    <input
+                      type="text"
+                      className="vmanage-form-input"
+                      value={vehicleFormData.variant || ''}
+                      onChange={(e) => setVehicleFormData(prev => ({ ...prev, variant: e.target.value }))}
+                      placeholder="e.g., XLE, M Sport, Titanium"
+                    />
+                  </div>
+                </div>
+
+                <div className="vmanage-form-row">
+                  <div className="vmanage-form-group">
+                    <label className="vmanage-form-label">Color</label>
+                    <input
+                      type="text"
+                      className="vmanage-form-input"
                       value={vehicleFormData.color || ''}
-                      onChange={(e) => handleFormChange('color', e.target.value)}
-                      placeholder="White, Black, etc."
+                      onChange={(e) => setVehicleFormData(prev => ({ ...prev, color: e.target.value }))}
+                      placeholder="e.g., White, Black, Silver"
                     />
                   </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>License Plate</label>
-                    <input
-                      type="text"
-                      value={vehicleFormData.licensePlate || ''}
-                      onChange={(e) => handleFormChange('licensePlate', e.target.value)}
-                      placeholder="ABC 123 GP"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Current Mileage (km)</label>
+                  <div className="vmanage-form-group">
+                    <label className="vmanage-form-label">Mileage (km)</label>
                     <input
                       type="number"
+                      className="vmanage-form-input"
                       value={vehicleFormData.mileage || ''}
-                      onChange={(e) => handleFormChange('mileage', e.target.value)}
-                      placeholder="50000"
+                      onChange={(e) => setVehicleFormData(prev => ({ ...prev, mileage: e.target.value }))}
+                      min="0"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Service Tracking */}
-              <div className="form-section">
-                <h4>Service & Maintenance</h4>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Last Service Date</label>
-                    <input
-                      type="date"
-                      value={vehicleFormData.lastServiceDate || ''}
-                      onChange={(e) => handleFormChange('lastServiceDate', e.target.value)}
-                    />
+              <div className="vmanage-form-section">
+                <h4>Vehicle Specifications</h4>
+                <div className="vmanage-form-row">
+                  <div className="vmanage-form-group">
+                    <label className="vmanage-form-label">Fuel Type</label>
+                    <select
+                      className="vmanage-form-select"
+                      value={vehicleFormData.fuelType || 'petrol'}
+                      onChange={(e) => setVehicleFormData(prev => ({ ...prev, fuelType: e.target.value }))}
+                    >
+                      <option value="petrol">Petrol</option>
+                      <option value="diesel">Diesel</option>
+                      <option value="hybrid">Hybrid</option>
+                      <option value="electric">Electric</option>
+                    </select>
                   </div>
-                  <div className="form-group">
-                    <label>Next Service Due</label>
-                    <input
-                      type="date"
-                      value={vehicleFormData.nextServiceDue || ''}
-                      onChange={(e) => handleFormChange('nextServiceDue', e.target.value)}
-                    />
+                  <div className="vmanage-form-group">
+                    <label className="vmanage-form-label">Transmission</label>
+                    <select
+                      className="vmanage-form-select"
+                      value={vehicleFormData.transmission || 'manual'}
+                      onChange={(e) => setVehicleFormData(prev => ({ ...prev, transmission: e.target.value }))}
+                    >
+                      <option value="manual">Manual</option>
+                      <option value="automatic">Automatic</option>
+                      <option value="cvt">CVT</option>
+                    </select>
                   </div>
-                </div>
-
-                <div className="form-group">
-                  <label>Preferred Workshop</label>
-                  <input
-                    type="text"
-                    value={vehicleFormData.preferredWorkshop || ''}
-                    onChange={(e) => handleFormChange('preferredWorkshop', e.target.value)}
-                    placeholder="Workshop name or location"
-                  />
                 </div>
               </div>
 
-              {/* Selling Options */}
-              <div className="form-section">
-                <h4>Selling & Tracking Options</h4>
-                <div className="checkbox-group">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={vehicleFormData.forSale || false}
-                      onChange={(e) => handleFormChange('forSale', e.target.checked)}
-                    />
-                    <span>Currently for sale</span>
-                  </label>
-                  
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={vehicleFormData.trackPerformance || false}
-                      onChange={(e) => handleFormChange('trackPerformance', e.target.checked)}
-                    />
-                    <span>Track listing performance</span>
-                  </label>
-                  
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={vehicleFormData.allowListingByOthers || false}
-                      onChange={(e) => handleFormChange('allowListingByOthers', e.target.checked)}
-                    />
-                    <span>Get notified if others list my vehicle</span>
-                  </label>
-                </div>
-
-                {vehicleFormData.forSale && (
-                  <div className="form-group">
-                    <label>Asking Price (BWP)</label>
-                    <input
-                      type="number"
-                      value={vehicleFormData.askingPrice || ''}
-                      onChange={(e) => handleFormChange('askingPrice', e.target.value)}
-                      placeholder="150000"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="form-actions">
+              <div className="vmanage-form-actions">
                 <button 
-                  type="button" 
-                  className="cancel-btn"
+                  type="button"
+                  className="vmanage-btn vmanage-btn-secondary"
                   onClick={() => setShowVehicleModal(false)}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="submit-btn"
+                  className="vmanage-btn vmanage-btn-primary"
                   disabled={loading}
                 >
-                  {loading ? 'Saving...' : (editingVehicle ? 'Update Vehicle' : 'Add Vehicle')}
+                  <Save size={16} />
+                  {loading ? 'Saving...' : editingVehicle ? 'Update Vehicle' : 'Add Vehicle'}
                 </button>
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="vmanage-loading-overlay">
+          <div className="vmanage-loading-spinner"></div>
         </div>
       )}
     </div>

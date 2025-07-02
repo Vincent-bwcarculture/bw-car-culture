@@ -5,6 +5,7 @@ import {
   Camera, Upload, X, CheckCircle, AlertCircle, BarChart3
 } from 'lucide-react';
 import axios from '../../config/axios.js';
+import './ProfileHeader.css';
 
 const ProfileHeader = ({ profileData, setProfileData, updateProfile, onAdminAccess }) => {
   const [isEditing, setIsEditing] = useState(false);

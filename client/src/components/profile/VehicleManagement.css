@@ -1,0 +1,783 @@
+/* client/src/components/profile/VehicleManagement.css */
+/* ENHANCED VEHICLE MANAGEMENT WITH UNIQUE CLASSES */
+
+/* === MAIN CONTAINER === */
+.vmanage-main-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  transition: var(--uprofile-transition);
+}
+
+/* === MESSAGE DISPLAY === */
+.vmanage-message {
+  padding: 12px 16px;
+  border-radius: var(--uprofile-border-radius-sm);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-message-success {
+  background: rgba(39, 174, 96, 0.1);
+  color: var(--uprofile-success-green);
+  border: 1px solid rgba(39, 174, 96, 0.2);
+}
+
+.vmanage-message-error {
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--uprofile-secondary-red);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.vmanage-message-info {
+  background: rgba(255, 51, 0, 0.1);
+  color: var(--uprofile-primary-accent);
+  border: 1px solid rgba(255, 51, 0, 0.2);
+}
+
+/* === TAB NAVIGATION === */
+.vmanage-tab-navigation {
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 5px;
+  margin-bottom: 25px;
+  border: 1px solid var(--uprofile-border-color);
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-tab-button {
+  background: transparent;
+  border: none;
+  padding: 12px 16px;
+  border-radius: var(--uprofile-border-radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--uprofile-text-secondary);
+  transition: var(--uprofile-transition);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.vmanage-tab-button:hover {
+  background: var(--uprofile-bg-tertiary);
+  color: var(--uprofile-text-primary);
+}
+
+.vmanage-tab-button.active {
+  background: var(--uprofile-primary-accent);
+  color: var(--uprofile-text-white);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+/* === SECTION STYLING === */
+.vmanage-section-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-vehicles-section {
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 25px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-service-history-section,
+.vmanage-performance-section {
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 25px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.vmanage-add-vehicle-btn {
+  background: var(--uprofile-primary-accent);
+  color: var(--uprofile-text-white);
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--uprofile-border-radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--uprofile-transition);
+  font-size: 14px;
+}
+
+.vmanage-add-vehicle-btn:hover {
+  background: var(--uprofile-primary-accent-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+/* === VEHICLES GRID === */
+.vmanage-vehicles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.vmanage-vehicle-card {
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+  overflow: hidden;
+}
+
+.vmanage-vehicle-card:hover {
+  box-shadow: var(--uprofile-shadow-md);
+  transform: translateY(-2px);
+}
+
+.vmanage-vehicle-header {
+  position: relative;
+  height: 180px;
+  background: var(--uprofile-bg-tertiary);
+}
+
+.vmanage-vehicle-image {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.vmanage-vehicle-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vmanage-vehicle-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--uprofile-text-muted);
+  background: var(--uprofile-bg-quaternary);
+}
+
+.vmanage-vehicle-age-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: var(--uprofile-text-white);
+  padding: 4px 8px;
+  border-radius: var(--uprofile-border-radius-sm);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.vmanage-vehicle-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 5px;
+}
+
+.vmanage-vehicle-action-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--uprofile-transition);
+  background: rgba(0, 0, 0, 0.7);
+  color: var(--uprofile-text-white);
+}
+
+.vmanage-edit-btn:hover {
+  background: #3498db;
+}
+
+.vmanage-delete-btn:hover {
+  background: var(--uprofile-secondary-red);
+}
+
+/* === VEHICLE CONTENT === */
+.vmanage-vehicle-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.vmanage-vehicle-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0;
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-vehicle-variant {
+  font-size: 14px;
+  color: var(--uprofile-text-muted);
+  margin: 0;
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-vehicle-specs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.vmanage-spec-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--uprofile-border-light);
+  font-size: 13px;
+}
+
+.vmanage-spec-item:last-child {
+  border-bottom: none;
+}
+
+.vmanage-spec-label {
+  color: var(--uprofile-text-muted);
+  font-weight: 500;
+}
+
+.vmanage-spec-value {
+  color: var(--uprofile-text-primary);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.vmanage-vehicle-status {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.vmanage-status-badge {
+  padding: 6px 12px;
+  border-radius: var(--uprofile-border-radius-xl);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vmanage-status-badge.for-sale {
+  background: var(--uprofile-success-green);
+  color: var(--uprofile-text-white);
+}
+
+.vmanage-status-badge.not-for-sale {
+  background: var(--uprofile-text-light);
+  color: var(--uprofile-text-white);
+}
+
+.vmanage-status-badge.service-due {
+  background: var(--uprofile-warning-orange);
+  color: var(--uprofile-text-white);
+}
+
+.vmanage-vehicle-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vmanage-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--uprofile-text-secondary);
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-vehicle-quick-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.vmanage-quick-action-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: var(--uprofile-border-radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-service-btn {
+  background: var(--uprofile-primary-accent);
+  color: var(--uprofile-text-white);
+}
+
+.vmanage-service-btn:hover {
+  background: var(--uprofile-primary-accent-dark);
+}
+
+.vmanage-sell-btn {
+  background: var(--uprofile-success-green);
+  color: var(--uprofile-text-white);
+}
+
+.vmanage-sell-btn:hover {
+  background: var(--uprofile-success-green-dark);
+}
+
+/* === EMPTY STATE === */
+.vmanage-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--uprofile-text-muted);
+  grid-column: 1 / -1;
+}
+
+.vmanage-empty-state h3 {
+  font-size: 1.2rem;
+  color: var(--uprofile-text-secondary);
+  margin: 15px 0 10px 0;
+}
+
+.vmanage-empty-state p {
+  color: var(--uprofile-text-muted);
+  margin: 0 0 20px 0;
+}
+
+.vmanage-add-first-vehicle-btn {
+  background: var(--uprofile-primary-accent);
+  color: var(--uprofile-text-white);
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--uprofile-border-radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--uprofile-transition);
+  margin: 0 auto;
+}
+
+.vmanage-add-first-vehicle-btn:hover {
+  background: var(--uprofile-primary-accent-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+/* === SERVICE HISTORY === */
+.vmanage-service-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.vmanage-vehicle-service-summary {
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 20px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-vehicle-service-summary h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0 0 15px 0;
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-service-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vmanage-service-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--uprofile-text-secondary);
+  transition: var(--uprofile-transition);
+}
+
+/* === PERFORMANCE SECTION === */
+.vmanage-performance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.vmanage-performance-card {
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 20px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-performance-card h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0 0 15px 0;
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-performance-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vmanage-performance-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--uprofile-border-light);
+}
+
+.vmanage-performance-metric:last-child {
+  border-bottom: none;
+}
+
+.vmanage-metric-label {
+  font-size: 14px;
+  color: var(--uprofile-text-secondary);
+  font-weight: 500;
+}
+
+.vmanage-metric-value {
+  font-size: 14px;
+  color: var(--uprofile-text-primary);
+  font-weight: 600;
+}
+
+/* === MODAL STYLING === */
+.vmanage-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.vmanage-modal {
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius);
+  border: 1px solid var(--uprofile-border-color);
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--uprofile-shadow-lg);
+}
+
+.vmanage-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 1px solid var(--uprofile-border-color);
+  background: var(--uprofile-bg-secondary);
+}
+
+.vmanage-modal-header h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0;
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-close-modal-btn {
+  background: transparent;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--uprofile-text-muted);
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-close-modal-btn:hover {
+  background: var(--uprofile-bg-tertiary);
+  color: var(--uprofile-text-primary);
+}
+
+/* === FORM STYLING === */
+.vmanage-modal-form {
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.vmanage-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.vmanage-form-section h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.vmanage-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vmanage-form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--uprofile-text-primary);
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-form-input,
+.vmanage-form-select,
+.vmanage-form-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--uprofile-border-color);
+  border-radius: var(--uprofile-border-radius-sm);
+  font-size: 14px;
+  color: var(--uprofile-text-primary);
+  background: var(--uprofile-bg-primary);
+  transition: var(--uprofile-transition);
+  font-family: inherit;
+}
+
+.vmanage-form-input:focus,
+.vmanage-form-select:focus,
+.vmanage-form-textarea:focus {
+  outline: none;
+  border-color: var(--uprofile-primary-accent);
+  box-shadow: 0 0 0 3px rgba(255, 51, 0, 0.1);
+}
+
+/* === FORM ACTIONS === */
+.vmanage-form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 15px;
+  padding-top: 20px;
+  border-top: 1px solid var(--uprofile-border-color);
+}
+
+.vmanage-btn {
+  padding: 12px 24px;
+  border-radius: var(--uprofile-border-radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--uprofile-transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.vmanage-btn-primary {
+  background: var(--uprofile-primary-accent);
+  color: var(--uprofile-text-white);
+  border: none;
+}
+
+.vmanage-btn-primary:hover {
+  background: var(--uprofile-primary-accent-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+.vmanage-btn-primary:disabled {
+  background: var(--uprofile-text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.vmanage-btn-secondary {
+  background: transparent;
+  color: var(--uprofile-text-secondary);
+  border: 2px solid var(--uprofile-border-color);
+}
+
+.vmanage-btn-secondary:hover {
+  background: var(--uprofile-bg-secondary);
+  border-color: var(--uprofile-border-dark);
+  color: var(--uprofile-text-primary);
+}
+
+/* === LOADING OVERLAY === */
+.vmanage-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.vmanage-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--uprofile-border-color);
+  border-top: 3px solid var(--uprofile-primary-accent);
+  border-radius: 50%;
+  animation: vmanage-spin 1s linear infinite;
+}
+
+@keyframes vmanage-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* === RESPONSIVE DESIGN === */
+/* Tablet (768px and up) */
+@media (min-width: 768px) {
+  .vmanage-form-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .vmanage-vehicles-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+  
+  .vmanage-tab-navigation {
+    overflow: visible;
+  }
+  
+  .vmanage-service-info {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+}
+
+/* Desktop (1024px and up) */
+@media (min-width: 1024px) {
+  .vmanage-vehicles-section,
+  .vmanage-service-history-section,
+  .vmanage-performance-section {
+    padding: 30px;
+  }
+  
+  .vmanage-modal-form {
+    padding: 30px;
+  }
+  
+  .vmanage-vehicles-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
+/* === FOCUS STATES === */
+.vmanage-tab-button:focus,
+.vmanage-add-vehicle-btn:focus,
+.vmanage-vehicle-action-btn:focus,
+.vmanage-quick-action-btn:focus,
+.vmanage-btn:focus,
+.vmanage-form-input:focus,
+.vmanage-form-select:focus,
+.vmanage-form-textarea:focus,
+.vmanage-close-modal-btn:focus {
+  outline: 2px solid var(--uprofile-primary-accent);
+  outline-offset: 2px;
+}
+
+/* === DARK MODE SPECIFIC ADJUSTMENTS === */
+[data-theme="dark"] .vmanage-form-input,
+[data-theme="dark"] .vmanage-form-select,
+[data-theme="dark"] .vmanage-form-textarea {
+  background: var(--uprofile-bg-secondary);
+}
+
+[data-theme="dark"] .vmanage-modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] .vmanage-vehicle-age-badge,
+[data-theme="dark"] .vmanage-vehicle-action-btn {
+  background: rgba(0, 0, 0, 0.8);
+}

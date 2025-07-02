@@ -1,0 +1,729 @@
+/* client/src/components/profile/BusinessDashboard.css */
+/* ENHANCED BUSINESS DASHBOARD WITH UNIQUE CLASSES */
+
+/* === MAIN CONTAINER === */
+.bdash-main-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  transition: var(--uprofile-transition);
+}
+
+/* === LOADING STATE === */
+.bdash-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 20px;
+  color: var(--uprofile-text-primary);
+  transition: var(--uprofile-transition);
+}
+
+.bdash-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--uprofile-border-color);
+  border-top: 3px solid var(--uprofile-primary-accent);
+  border-radius: 50%;
+  animation: bdash-spin 1s linear infinite;
+}
+
+@keyframes bdash-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* === MESSAGE DISPLAY === */
+.bdash-message {
+  padding: 12px 16px;
+  border-radius: var(--uprofile-border-radius-sm);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: var(--uprofile-transition);
+}
+
+.bdash-message-success {
+  background: rgba(39, 174, 96, 0.1);
+  color: var(--uprofile-success-green);
+  border: 1px solid rgba(39, 174, 96, 0.2);
+}
+
+.bdash-message-error {
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--uprofile-secondary-red);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.bdash-message-info {
+  background: rgba(255, 51, 0, 0.1);
+  color: var(--uprofile-primary-accent);
+  border: 1px solid rgba(255, 51, 0, 0.2);
+}
+
+/* === NAVIGATION === */
+.bdash-navigation {
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 5px;
+  margin-bottom: 25px;
+  border: 1px solid var(--uprofile-border-color);
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  transition: var(--uprofile-transition);
+}
+
+.bdash-nav-button {
+  background: transparent;
+  border: none;
+  padding: 12px 16px;
+  border-radius: var(--uprofile-border-radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--uprofile-text-secondary);
+  transition: var(--uprofile-transition);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.bdash-nav-button:hover {
+  background: var(--uprofile-bg-tertiary);
+  color: var(--uprofile-text-primary);
+}
+
+.bdash-nav-button.active {
+  background: var(--uprofile-primary-accent);
+  color: var(--uprofile-text-white);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+/* === SECTION STYLING === */
+.bdash-section-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: var(--uprofile-transition);
+}
+
+.bdash-subsection-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0 0 15px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--uprofile-transition);
+}
+
+.bdash-overview-section,
+.bdash-services-section,
+.bdash-analytics-section,
+.bdash-admin-section {
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 25px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+/* === METRICS GRID === */
+.bdash-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.bdash-metric-card {
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 20px;
+  border: 1px solid var(--uprofile-border-color);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: var(--uprofile-transition);
+}
+
+.bdash-metric-card:hover {
+  box-shadow: var(--uprofile-shadow-md);
+  transform: translateY(-2px);
+}
+
+.bdash-metric-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--uprofile-text-white);
+  flex-shrink: 0;
+}
+
+.bdash-metric-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bdash-metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--uprofile-text-primary);
+  transition: var(--uprofile-transition);
+}
+
+.bdash-metric-label {
+  font-size: 13px;
+  color: var(--uprofile-text-muted);
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: var(--uprofile-transition);
+}
+
+/* === ACTIVITY SECTION === */
+.bdash-activity-section {
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 20px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.bdash-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bdash-activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius-sm);
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.bdash-activity-item:hover {
+  background: var(--uprofile-bg-tertiary);
+}
+
+.bdash-activity-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--uprofile-bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--uprofile-primary-accent);
+  flex-shrink: 0;
+}
+
+.bdash-activity-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bdash-activity-description {
+  font-size: 14px;
+  color: var(--uprofile-text-primary);
+  margin: 0;
+  line-height: 1.4;
+  transition: var(--uprofile-transition);
+}
+
+.bdash-activity-time {
+  font-size: 12px;
+  color: var(--uprofile-text-muted);
+  transition: var(--uprofile-transition);
+}
+
+/* === SERVICES GRID === */
+.bdash-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.bdash-service-card {
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+  overflow: hidden;
+}
+
+.bdash-service-card:hover {
+  box-shadow: var(--uprofile-shadow-md);
+  transform: translateY(-2px);
+}
+
+.bdash-dealer-card {
+  border: 2px solid var(--uprofile-primary-accent);
+}
+
+.bdash-service-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--uprofile-border-color);
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.bdash-service-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--uprofile-bg-tertiary);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bdash-service-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bdash-service-info h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0;
+  transition: var(--uprofile-transition);
+}
+
+.bdash-service-info p {
+  font-size: 13px;
+  color: var(--uprofile-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+  transition: var(--uprofile-transition);
+}
+
+.bdash-service-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--uprofile-border-radius-xl);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.bdash-service-status.verified {
+  background: var(--uprofile-success-green);
+  color: var(--uprofile-text-white);
+}
+
+.bdash-service-status.pending {
+  background: var(--uprofile-warning-orange);
+  color: var(--uprofile-text-white);
+}
+
+.bdash-service-stats {
+  padding: 15px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bdash-stat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.bdash-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--uprofile-text-secondary);
+  flex: 1;
+  transition: var(--uprofile-transition);
+}
+
+.bdash-service-actions {
+  padding: 15px 20px;
+  border-top: 1px solid var(--uprofile-border-color);
+  display: flex;
+  gap: 10px;
+}
+
+.bdash-dashboard-btn,
+.bdash-manage-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: var(--uprofile-border-radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: var(--uprofile-transition);
+}
+
+.bdash-dashboard-btn {
+  background: var(--uprofile-primary-accent);
+  color: var(--uprofile-text-white);
+}
+
+.bdash-dashboard-btn:hover {
+  background: var(--uprofile-primary-accent-dark);
+}
+
+.bdash-manage-btn {
+  background: var(--uprofile-bg-tertiary);
+  color: var(--uprofile-text-primary);
+  border: 1px solid var(--uprofile-border-color);
+}
+
+.bdash-manage-btn:hover {
+  background: var(--uprofile-bg-quaternary);
+}
+
+/* === ANALYTICS SECTION === */
+.bdash-analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.bdash-analytics-card {
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 20px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.bdash-analytics-card h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0 0 15px 0;
+  transition: var(--uprofile-transition);
+}
+
+.bdash-performance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.bdash-performance-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bdash-performance-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bdash-performance-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--uprofile-text-primary);
+  transition: var(--uprofile-transition);
+}
+
+.bdash-performance-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bdash-performance-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--uprofile-bg-quaternary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bdash-performance-fill {
+  height: 100%;
+  background: var(--uprofile-primary-accent);
+  transition: width 0.5s ease;
+  border-radius: 4px;
+}
+
+.bdash-performance-indicator.excellent .bdash-performance-fill {
+  background: var(--uprofile-success-green);
+}
+
+.bdash-performance-indicator.good .bdash-performance-fill {
+  background: var(--uprofile-primary-accent);
+}
+
+.bdash-performance-indicator.average .bdash-performance-fill {
+  background: var(--uprofile-warning-orange);
+}
+
+.bdash-performance-indicator.poor .bdash-performance-fill {
+  background: var(--uprofile-secondary-red);
+}
+
+.bdash-performance-value {
+  font-size: 12px;
+  color: var(--uprofile-text-muted);
+  font-weight: 500;
+  min-width: 60px;
+  text-align: right;
+}
+
+.bdash-trends-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--uprofile-text-muted);
+  text-align: center;
+}
+
+.bdash-trends-placeholder p {
+  margin: 10px 0 0 0;
+  font-size: 14px;
+}
+
+/* === ADMIN SECTION === */
+.bdash-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.bdash-admin-card {
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 25px;
+  border: 1px solid var(--uprofile-border-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 15px;
+  transition: var(--uprofile-transition);
+}
+
+.bdash-admin-card:hover {
+  box-shadow: var(--uprofile-shadow-md);
+  transform: translateY(-2px);
+}
+
+.bdash-admin-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--uprofile-secondary-red) 0%, var(--uprofile-secondary-red-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--uprofile-text-white);
+}
+
+.bdash-admin-content h4 {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--uprofile-text-secondary);
+  margin: 0;
+  transition: var(--uprofile-transition);
+}
+
+.bdash-admin-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--uprofile-text-primary);
+  transition: var(--uprofile-transition);
+}
+
+.bdash-admin-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.bdash-admin-action-btn {
+  background: var(--uprofile-secondary-red);
+  color: var(--uprofile-text-white);
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--uprofile-border-radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--uprofile-transition);
+  font-size: 14px;
+}
+
+.bdash-admin-action-btn:hover {
+  background: var(--uprofile-secondary-red-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+/* === EMPTY STATES === */
+.bdash-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--uprofile-text-muted);
+  text-align: center;
+}
+
+.bdash-empty-state p {
+  margin: 10px 0 0 0;
+  font-size: 14px;
+}
+
+.bdash-empty-dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius);
+  border: 1px solid var(--uprofile-border-color);
+  color: var(--uprofile-text-muted);
+  text-align: center;
+}
+
+.bdash-empty-dashboard h3 {
+  font-size: 1.3rem;
+  color: var(--uprofile-text-secondary);
+  margin: 20px 0 10px 0;
+}
+
+.bdash-empty-dashboard p {
+  color: var(--uprofile-text-muted);
+  margin: 0 0 25px 0;
+  line-height: 1.5;
+}
+
+.bdash-register-service-btn {
+  background: var(--uprofile-primary-accent);
+  color: var(--uprofile-text-white);
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--uprofile-border-radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--uprofile-transition);
+  font-size: 14px;
+}
+
+.bdash-register-service-btn:hover {
+  background: var(--uprofile-primary-accent-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+/* === RESPONSIVE DESIGN === */
+/* Tablet (768px and up) */
+@media (min-width: 768px) {
+  .bdash-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .bdash-navigation {
+    overflow: visible;
+  }
+  
+  .bdash-stat-row {
+    justify-content: flex-start;
+    gap: 20px;
+  }
+  
+  .bdash-stat-item {
+    flex: none;
+  }
+}
+
+/* Desktop (1024px and up) */
+@media (min-width: 1024px) {
+  .bdash-overview-section,
+  .bdash-services-section,
+  .bdash-analytics-section,
+  .bdash-admin-section {
+    padding: 30px;
+  }
+  
+  .bdash-metrics-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .bdash-services-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+  
+  .bdash-admin-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* === FOCUS STATES === */
+.bdash-nav-button:focus,
+.bdash-dashboard-btn:focus,
+.bdash-manage-btn:focus,
+.bdash-admin-action-btn:focus,
+.bdash-register-service-btn:focus {
+  outline: 2px solid var(--uprofile-primary-accent);
+  outline-offset: 2px;
+}
+
+/* === DARK MODE SPECIFIC ADJUSTMENTS === */
+[data-theme="dark"] .bdash-metric-icon {
+  background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
+}
+
+[data-theme="dark"] .bdash-admin-icon {
+  background: linear-gradient(135deg, var(--uprofile-secondary-red) 0%, var(--uprofile-secondary-red-dark) 100%);
+}

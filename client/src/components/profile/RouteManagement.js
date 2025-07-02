@@ -2,9 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Route, Plus, Edit2, Trash2, MapPin, Clock, 
-  DollarSign, Users, Phone, Check, X, Navigation
+  DollarSign, Users, Phone, Check, X, Navigation,
+  Calendar, Star, Eye, Save, AlertCircle, Activity,
+  ArrowRight, Map, Zap, Timer
 } from 'lucide-react';
 import axios from '../../config/axios.js';
+import './RouteManagement.css';
 
 const RouteManagement = ({ profileData, refreshProfile }) => {
   const [routes, setRoutes] = useState([]);
@@ -12,6 +15,7 @@ const RouteManagement = ({ profileData, refreshProfile }) => {
   const [showRouteModal, setShowRouteModal] = useState(false);
   const [editingRoute, setEditingRoute] = useState(null);
   const [routeFormData, setRouteFormData] = useState({});
+  const [message, setMessage] = useState({ type: '', text: '' });
 
   // Get transport services for the user
   const transportServices = profileData?.businessProfile?.services?.filter(
@@ -24,10 +28,14 @@ const RouteManagement = ({ profileData, refreshProfile }) => {
     }
   }, [profileData]);
 
+  const showMessage = (type, text) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+  };
+
   const fetchUserRoutes = async () => {
     try {
       setLoading(true);
-      // This would be a new endpoint to get user's routes
       const response = await axios.get('/user/profile/routes');
       if (response.data.success) {
         setRoutes(response.data.data);
@@ -65,37 +73,45 @@ const RouteManagement = ({ profileData, refreshProfile }) => {
         startTime: route?.schedule?.startTime || '05:00',
         endTime: route?.schedule?.endTime || '22:00',
         frequency: route?.schedule?.frequency || 'On demand', // "On demand", "Every 30 min", etc.
-        departureTimes: route?.schedule?.departureTimes || []
+        peakHours: route?.schedule?.peakHours || ['07:00-09:00', '17:00-19:00']
       },
       
+      // Pricing structure
       pricing: {
-        baseFare: route?.pricing?.baseFare || 0,
         currency: route?.pricing?.currency || 'BWP',
-        paymentMethods: route?.pricing?.paymentMethods || ['cash'],
-        discounts: route?.pricing?.discounts || {}
+        basePrice: route?.pricing?.basePrice || '',
+        pricePerKm: route?.pricing?.pricePerKm || '',
+        priceType: route?.pricing?.priceType || 'fixed', // fixed, per_km, negotiable
+        peakPricing: route?.pricing?.peakPricing || false,
+        peakMultiplier: route?.pricing?.peakMultiplier || 1.5
       },
       
+      // Vehicle capacity and features
       vehicleInfo: {
-        vehicleType: route?.vehicleInfo?.vehicleType || 'sedan',
-        capacity: route?.vehicleInfo?.capacity || 4,
-        amenities: route?.vehicleInfo?.amenities || [],
-        licensePlate: route?.vehicleInfo?.licensePlate || ''
+        capacity: route?.vehicleInfo?.capacity || '',
+        vehicleType: route?.vehicleInfo?.vehicleType || 'combi',
+        features: route?.vehicleInfo?.features || [],
+        accessibility: route?.vehicleInfo?.accessibility || false
       },
       
-      contact: {
-        phone: route?.contact?.phone || profileData?.profile?.phone || '',
-        whatsapp: route?.contact?.whatsapp || '',
-        emergencyContact: route?.contact?.emergencyContact || ''
+      // Contact and operational details
+      contactInfo: {
+        phone: route?.contactInfo?.phone || profileData?.profile?.phone || '',
+        whatsapp: route?.contactInfo?.whatsapp || '',
+        emergencyContact: route?.contactInfo?.emergencyContact || ''
       },
       
-      accessibility: {
-        wheelchairAccessible: route?.accessibility?.wheelchairAccessible || false,
-        allowPets: route?.accessibility?.allowPets || false,
-        smokingAllowed: route?.accessibility?.smokingAllowed || false
-      },
+      // Route status and verification
+      isActive: route?.isActive !== false,
+      isVerified: route?.isVerified || false,
+      verificationStatus: route?.verificationStatus || 'pending',
       
+      // Additional information
       description: route?.description || '',
-      isActive: route?.isActive !== undefined ? route.isActive : true
+      specialInstructions: route?.specialInstructions || '',
+      landmarks: route?.landmarks || [],
+      estimatedDuration: route?.estimatedDuration || '',
+      distance: route?.distance || ''
     });
   };
 
@@ -111,273 +127,412 @@ const RouteManagement = ({ profileData, refreshProfile }) => {
     setShowRouteModal(true);
   };
 
-  const handleDeleteRoute = async (routeId) => {
-    if (!window.confirm('Are you sure you want to delete this route?')) return;
-    
-    try {
-      const response = await axios.delete(`/user/profile/routes/${routeId}`);
-      if (response.data.success) {
-        await fetchUserRoutes();
-        alert('Route deleted successfully');
-      }
-    } catch (error) {
-      console.error('Error deleting route:', error);
-      alert('Failed to delete route');
-    }
-  };
-
   const handleRouteSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!routeFormData.routeName || !routeFormData.origin.name || !routeFormData.destination.name) {
+      showMessage('error', 'Please fill in all required fields');
+      return;
+    }
+
     try {
       setLoading(true);
       
-      const url = editingRoute 
+      const endpoint = editingRoute 
         ? `/user/profile/routes/${editingRoute._id}`
         : '/user/profile/routes';
       
       const method = editingRoute ? 'put' : 'post';
       
-      const response = await axios[method](url, routeFormData);
+      const response = await axios[method](endpoint, routeFormData);
       
       if (response.data.success) {
         await fetchUserRoutes();
+        await refreshProfile();
         setShowRouteModal(false);
         setEditingRoute(null);
-        alert(editingRoute ? 'Route updated successfully!' : 'Route added successfully!');
+        setRouteFormData({});
+        showMessage('success', editingRoute ? 'Route updated successfully!' : 'Route added successfully!');
       }
     } catch (error) {
       console.error('Error saving route:', error);
-      alert('Failed to save route');
+      showMessage('error', error.response?.data?.message || 'Failed to save route. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFormChange = (field, value) => {
-    setRouteFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleNestedFormChange = (parent, field, value) => {
-    setRouteFormData(prev => ({
-      ...prev,
-      [parent]: {
-        ...prev[parent],
-        [field]: value
+  const handleDeleteRoute = async (routeId) => {
+    if (!window.confirm('Are you sure you want to delete this route?')) return;
+    
+    try {
+      setLoading(true);
+      const response = await axios.delete(`/user/profile/routes/${routeId}`);
+      if (response.data.success) {
+        await fetchUserRoutes();
+        await refreshProfile();
+        showMessage('success', 'Route deleted successfully');
       }
-    }));
+    } catch (error) {
+      console.error('Error deleting route:', error);
+      showMessage('error', 'Failed to delete route. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getServiceTypeIcon = (type) => {
-    switch (type) {
+  const toggleRouteStatus = async (route) => {
+    try {
+      setLoading(true);
+      const response = await axios.put(`/user/profile/routes/${route._id}`, {
+        ...route,
+        isActive: !route.isActive
+      });
+      
+      if (response.data.success) {
+        await fetchUserRoutes();
+        showMessage('success', `Route ${!route.isActive ? 'activated' : 'deactivated'} successfully`);
+      }
+    } catch (error) {
+      console.error('Error toggling route status:', error);
+      showMessage('error', 'Failed to update route status. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    if (!amount) return 'P 0.00';
+    return new Intl.NumberFormat('en-BW', {
+      style: 'currency',
+      currency: 'BWP'
+    }).format(amount);
+  };
+
+  const formatTime = (time) => {
+    if (!time) return 'Not set';
+    return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const getServiceTypeIcon = (serviceType) => {
+    switch (serviceType) {
       case 'taxi': return '🚕';
       case 'combi': return '🚐';
       case 'bus': return '🚌';
-      case 'ride_share': return '🚗';
       default: return '🚗';
     }
   };
 
-  const getOperationTypeLabel = (type) => {
-    switch (type) {
-      case 'on_demand': return 'On Demand';
-      case 'scheduled': return 'Scheduled';
-      case 'hybrid': return 'Hybrid';
-      default: return 'On Demand';
+  const getOperationTypeBadge = (operationType) => {
+    switch (operationType) {
+      case 'scheduled': return { text: 'Scheduled', color: 'blue' };
+      case 'on_demand': return { text: 'On Demand', color: 'green' };
+      case 'hybrid': return { text: 'Hybrid', color: 'purple' };
+      default: return { text: 'Unknown', color: 'gray' };
     }
   };
 
-  if (transportServices.length === 0) {
-    return (
-      <div className="route-management-tab">
-        <div className="tab-header">
-          <h2><Route size={24} /> Route Management</h2>
-          <p>Register a transport service first to manage routes</p>
-        </div>
-        <div className="empty-state">
-          <Route size={48} />
-          <h3>No Transport Services</h3>
-          <p>You need to register as a transport service provider first</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="route-management-tab">
-      <div className="tab-header">
-        <h2><Route size={24} /> Route Management</h2>
-        <p>Manage your transport routes and schedules</p>
-        <button className="add-route-btn" onClick={handleAddRoute}>
-          <Plus size={16} />
-          Add New Route
-        </button>
-      </div>
+    <div className="rmanage-main-container">
+      {/* Message Display */}
+      {message.text && (
+        <div className={`rmanage-message rmanage-message-${message.type}`}>
+          {message.type === 'success' && <Check size={16} />}
+          {message.type === 'error' && <AlertCircle size={16} />}
+          {message.text}
+        </div>
+      )}
 
-      {/* Routes Grid */}
-      <div className="routes-grid">
-        {routes.length > 0 ? (
-          routes.map((route) => (
-            <div key={route._id} className="route-card">
-              <div className="route-header">
-                <div className="route-title">
-                  <span className="route-icon">
-                    {getServiceTypeIcon(route.serviceType)}
-                  </span>
-                  <div>
-                    <h4>{route.routeName}</h4>
-                    {route.routeNumber && (
-                      <span className="route-number">Route #{route.routeNumber}</span>
-                    )}
-                  </div>
-                </div>
-                <div className="route-actions">
-                  <button 
-                    className="action-btn edit"
-                    onClick={() => handleEditRoute(route)}
-                  >
-                    <Edit2 size={16} />
-                  </button>
-                  <button 
-                    className="action-btn delete"
-                    onClick={() => handleDeleteRoute(route._id)}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
+      {/* Header Section */}
+      <div className="rmanage-header-section">
+        <div className="rmanage-section-header">
+          <h3 className="rmanage-section-title">
+            <Route size={20} />
+            Route Management
+          </h3>
+          {transportServices.length > 0 && (
+            <button 
+              className="rmanage-add-route-btn"
+              onClick={handleAddRoute}
+            >
+              <Plus size={16} />
+              Add New Route
+            </button>
+          )}
+        </div>
 
-              <div className="route-info">
-                <div className="route-path">
-                  <div className="location">
-                    <MapPin size={14} />
-                    <span>{route.origin.name}</span>
-                  </div>
-                  <div className="route-arrow">→</div>
-                  <div className="location">
-                    <MapPin size={14} />
-                    <span>{route.destination.name}</span>
-                  </div>
-                </div>
-
-                <div className="route-details">
-                  <div className="detail-item">
-                    <Clock size={14} />
-                    <span>{getOperationTypeLabel(route.operationType)}</span>
-                  </div>
-                  <div className="detail-item">
-                    <DollarSign size={14} />
-                    <span>P{route.pricing.baseFare}</span>
-                  </div>
-                  <div className="detail-item">
-                    <Users size={14} />
-                    <span>{route.vehicleInfo.capacity} seats</span>
-                  </div>
-                </div>
-
-                {route.contact.phone && (
-                  <div className="route-contact">
-                    <Phone size={14} />
-                    <span>{route.contact.phone}</span>
-                  </div>
-                )}
-
-                <div className="route-status">
-                  <span className={`status-badge ${route.isActive ? 'active' : 'inactive'}`}>
-                    {route.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                  <span className="service-type">
-                    {route.serviceType}
-                  </span>
-                </div>
-              </div>
+        {/* Service Type Info */}
+        {transportServices.length > 0 && (
+          <div className="rmanage-service-info">
+            <p>Managing routes for your {transportServices.length} transport service(s)</p>
+            <div className="rmanage-service-badges">
+              {transportServices.map((service, index) => (
+                <span key={index} className="rmanage-service-badge">
+                  {getServiceTypeIcon(service.businessType)} {service.serviceName}
+                </span>
+              ))}
             </div>
-          ))
-        ) : (
-          <div className="empty-state">
-            <Route size={48} />
-            <h3>No Routes Added</h3>
-            <p>Add your first transport route to start managing your service</p>
           </div>
         )}
       </div>
 
+      {/* Routes Grid */}
+      {transportServices.length > 0 ? (
+        <div className="rmanage-routes-section">
+          <div className="rmanage-routes-grid">
+            {routes.length > 0 ? (
+              routes.map(route => {
+                const operationBadge = getOperationTypeBadge(route.operationType);
+                return (
+                  <div key={route._id} className="rmanage-route-card">
+                    <div className="rmanage-route-header">
+                      <div className="rmanage-route-title-section">
+                        <h4 className="rmanage-route-title">
+                          {route.routeName}
+                          {route.routeNumber && (
+                            <span className="rmanage-route-number">#{route.routeNumber}</span>
+                          )}
+                        </h4>
+                        <div className="rmanage-route-badges">
+                          <span className={`rmanage-operation-badge rmanage-${operationBadge.color}`}>
+                            {operationBadge.text}
+                          </span>
+                          <span className={`rmanage-status-badge ${route.isActive ? 'active' : 'inactive'}`}>
+                            {route.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                          {route.isVerified && (
+                            <span className="rmanage-verified-badge">
+                              <Check size={12} />
+                              Verified
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="rmanage-route-actions">
+                        <button 
+                          className="rmanage-route-action-btn rmanage-edit-btn"
+                          onClick={() => handleEditRoute(route)}
+                          title="Edit Route"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button 
+                          className="rmanage-route-action-btn rmanage-delete-btn"
+                          onClick={() => handleDeleteRoute(route._id)}
+                          title="Delete Route"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="rmanage-route-content">
+                      {/* Route Path */}
+                      <div className="rmanage-route-path">
+                        <div className="rmanage-location">
+                          <MapPin size={16} className="rmanage-origin-icon" />
+                          <div className="rmanage-location-info">
+                            <span className="rmanage-location-name">{route.origin.name}</span>
+                            {route.origin.address && (
+                              <span className="rmanage-location-address">{route.origin.address}</span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="rmanage-route-arrow">
+                          <ArrowRight size={20} />
+                        </div>
+                        
+                        <div className="rmanage-location">
+                          <MapPin size={16} className="rmanage-destination-icon" />
+                          <div className="rmanage-location-info">
+                            <span className="rmanage-location-name">{route.destination.name}</span>
+                            {route.destination.address && (
+                              <span className="rmanage-location-address">{route.destination.address}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Route Details */}
+                      <div className="rmanage-route-details">
+                        <div className="rmanage-detail-item">
+                          <Clock size={14} />
+                          <span>
+                            {formatTime(route.schedule?.startTime)} - {formatTime(route.schedule?.endTime)}
+                          </span>
+                        </div>
+                        
+                        {route.pricing?.basePrice && (
+                          <div className="rmanage-detail-item">
+                            <DollarSign size={14} />
+                            <span>{formatCurrency(route.pricing.basePrice)}</span>
+                          </div>
+                        )}
+                        
+                        {route.vehicleInfo?.capacity && (
+                          <div className="rmanage-detail-item">
+                            <Users size={14} />
+                            <span>{route.vehicleInfo.capacity} passengers</span>
+                          </div>
+                        )}
+                        
+                        {route.estimatedDuration && (
+                          <div className="rmanage-detail-item">
+                            <Timer size={14} />
+                            <span>{route.estimatedDuration}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Route Stats */}
+                      {route.analytics && (
+                        <div className="rmanage-route-stats">
+                          <div className="rmanage-stat-item">
+                            <Eye size={12} />
+                            <span>{route.analytics.views || 0} views</span>
+                          </div>
+                          <div className="rmanage-stat-item">
+                            <Star size={12} />
+                            <span>{(route.analytics.rating || 0).toFixed(1)}/5</span>
+                          </div>
+                          <div className="rmanage-stat-item">
+                            <Activity size={12} />
+                            <span>{route.analytics.bookings || 0} bookings</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Quick Actions */}
+                      <div className="rmanage-route-quick-actions">
+                        <button 
+                          className={`rmanage-quick-action-btn ${route.isActive ? 'rmanage-deactivate-btn' : 'rmanage-activate-btn'}`}
+                          onClick={() => toggleRouteStatus(route)}
+                        >
+                          <Zap size={14} />
+                          {route.isActive ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button 
+                          className="rmanage-quick-action-btn rmanage-view-btn"
+                          onClick={() => window.open(`/routes/${route._id}`, '_blank')}
+                        >
+                          <Eye size={14} />
+                          View Public
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="rmanage-empty-state">
+                <Route size={48} />
+                <h3>No Routes Added</h3>
+                <p>Create your first route to start accepting passengers</p>
+                <button 
+                  className="rmanage-add-first-route-btn"
+                  onClick={handleAddRoute}
+                >
+                  <Plus size={16} />
+                  Add Your First Route
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="rmanage-no-service-state">
+          <Navigation size={64} />
+          <h3>No Transport Services Found</h3>
+          <p>You need to register a public transport service before you can manage routes</p>
+          <button 
+            className="rmanage-register-service-btn"
+            onClick={() => showMessage('info', 'Please register a transport service first')}
+          >
+            <Settings size={16} />
+            Register Transport Service
+          </button>
+        </div>
+      )}
+
       {/* Route Modal */}
       {showRouteModal && (
-        <div className="route-modal-overlay">
-          <div className="route-modal">
-            <div className="route-modal-header">
+        <div className="rmanage-modal-overlay">
+          <div className="rmanage-modal">
+            <div className="rmanage-modal-header">
               <h3>{editingRoute ? 'Edit Route' : 'Add New Route'}</h3>
               <button 
-                className="close-modal-btn"
-                onClick={() => setShowRouteModal(false)}
+                className="rmanage-close-modal-btn"
+                onClick={() => {
+                  setShowRouteModal(false);
+                  setEditingRoute(null);
+                  setRouteFormData({});
+                }}
               >
                 <X size={20} />
               </button>
             </div>
-            
-            <form onSubmit={handleRouteSubmit} className="route-form">
-              {/* Basic Information */}
-              <div className="form-section">
+
+            <form onSubmit={handleRouteSubmit} className="rmanage-modal-form">
+              <div className="rmanage-form-section">
                 <h4>Basic Information</h4>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Route Name *</label>
+                <div className="rmanage-form-row">
+                  <div className="rmanage-form-group">
+                    <label className="rmanage-form-label">Route Name *</label>
                     <input
                       type="text"
+                      className="rmanage-form-input"
                       value={routeFormData.routeName || ''}
-                      onChange={(e) => handleFormChange('routeName', e.target.value)}
-                      placeholder="e.g., City Center to Airport"
+                      onChange={(e) => setRouteFormData(prev => ({ ...prev, routeName: e.target.value }))}
+                      placeholder="e.g., Gaborone to Molepolole"
                       required
                     />
                   </div>
-                  <div className="form-group">
-                    <label>Route Number</label>
+                  <div className="rmanage-form-group">
+                    <label className="rmanage-form-label">Route Number</label>
                     <input
                       type="text"
+                      className="rmanage-form-input"
                       value={routeFormData.routeNumber || ''}
-                      onChange={(e) => handleFormChange('routeNumber', e.target.value)}
-                      placeholder="e.g., R1, A2"
+                      onChange={(e) => setRouteFormData(prev => ({ ...prev, routeNumber: e.target.value }))}
+                      placeholder="e.g., R001"
                     />
                   </div>
                 </div>
-
-                <div className="form-group">
-                  <label>Service Type</label>
-                  <select
-                    value={routeFormData.serviceType || 'taxi'}
-                    onChange={(e) => handleFormChange('serviceType', e.target.value)}
-                  >
-                    <option value="taxi">🚕 Taxi Service</option>
-                    <option value="combi">🚐 Combi Service</option>
-                    <option value="bus">🚌 Bus Service</option>
-                    <option value="ride_share">🚗 Ride Share</option>
-                  </select>
-                </div>
               </div>
 
-              {/* Route Details */}
-              <div className="form-section">
+              <div className="rmanage-form-section">
                 <h4>Route Details</h4>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Origin *</label>
+                <div className="rmanage-form-row">
+                  <div className="rmanage-form-group">
+                    <label className="rmanage-form-label">Origin *</label>
                     <input
                       type="text"
+                      className="rmanage-form-input"
                       value={routeFormData.origin?.name || ''}
-                      onChange={(e) => handleNestedFormChange('origin', 'name', e.target.value)}
+                      onChange={(e) => setRouteFormData(prev => ({ 
+                        ...prev, 
+                        origin: { ...prev.origin, name: e.target.value } 
+                      }))}
                       placeholder="Starting point"
                       required
                     />
                   </div>
-                  <div className="form-group">
-                    <label>Destination *</label>
+                  <div className="rmanage-form-group">
+                    <label className="rmanage-form-label">Destination *</label>
                     <input
                       type="text"
+                      className="rmanage-form-input"
                       value={routeFormData.destination?.name || ''}
-                      onChange={(e) => handleNestedFormChange('destination', 'name', e.target.value)}
+                      onChange={(e) => setRouteFormData(prev => ({ 
+                        ...prev, 
+                        destination: { ...prev.destination, name: e.target.value } 
+                      }))}
                       placeholder="End point"
                       required
                     />
@@ -385,116 +540,65 @@ const RouteManagement = ({ profileData, refreshProfile }) => {
                 </div>
               </div>
 
-              {/* Operation Type - Flexible for Botswana */}
-              <div className="form-section">
-                <h4>Operation Schedule</h4>
-                <div className="form-group">
-                  <label>Operation Type</label>
-                  <select
-                    value={routeFormData.operationType || 'on_demand'}
-                    onChange={(e) => handleFormChange('operationType', e.target.value)}
-                  >
-                    <option value="on_demand">On Demand (Call/Text based)</option>
-                    <option value="scheduled">Fixed Schedule</option>
-                    <option value="hybrid">Hybrid (Both)</option>
-                  </select>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Operating Hours From</label>
-                    <input
-                      type="time"
-                      value={routeFormData.schedule?.startTime || '05:00'}
-                      onChange={(e) => handleNestedFormChange('schedule', 'startTime', e.target.value)}
-                    />
+              <div className="rmanage-form-section">
+                <h4>Schedule & Pricing</h4>
+                <div className="rmanage-form-row">
+                  <div className="rmanage-form-group">
+                    <label className="rmanage-form-label">Operation Type</label>
+                    <select
+                      className="rmanage-form-select"
+                      value={routeFormData.operationType || 'on_demand'}
+                      onChange={(e) => setRouteFormData(prev => ({ ...prev, operationType: e.target.value }))}
+                    >
+                      <option value="on_demand">On Demand</option>
+                      <option value="scheduled">Scheduled</option>
+                      <option value="hybrid">Hybrid</option>
+                    </select>
                   </div>
-                  <div className="form-group">
-                    <label>Operating Hours To</label>
-                    <input
-                      type="time"
-                      value={routeFormData.schedule?.endTime || '22:00'}
-                      onChange={(e) => handleNestedFormChange('schedule', 'endTime', e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label>Frequency/Schedule Note</label>
-                  <input
-                    type="text"
-                    value={routeFormData.schedule?.frequency || ''}
-                    onChange={(e) => handleNestedFormChange('schedule', 'frequency', e.target.value)}
-                    placeholder="e.g., On demand, Every 30 minutes, Call ahead"
-                  />
-                </div>
-              </div>
-
-              {/* Pricing */}
-              <div className="form-section">
-                <h4>Pricing & Contact</h4>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Base Fare (BWP)</label>
+                  <div className="rmanage-form-group">
+                    <label className="rmanage-form-label">Base Price (BWP)</label>
                     <input
                       type="number"
-                      step="0.50"
-                      value={routeFormData.pricing?.baseFare || ''}
-                      onChange={(e) => handleNestedFormChange('pricing', 'baseFare', parseFloat(e.target.value))}
-                      placeholder="10.00"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Vehicle Capacity</label>
-                    <input
-                      type="number"
-                      value={routeFormData.vehicleInfo?.capacity || ''}
-                      onChange={(e) => handleNestedFormChange('vehicleInfo', 'capacity', parseInt(e.target.value))}
-                      placeholder="4"
-                    />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Contact Phone</label>
-                    <input
-                      type="tel"
-                      value={routeFormData.contact?.phone || ''}
-                      onChange={(e) => handleNestedFormChange('contact', 'phone', e.target.value)}
-                      placeholder="+267 xxxxxxxx"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>WhatsApp</label>
-                    <input
-                      type="tel"
-                      value={routeFormData.contact?.whatsapp || ''}
-                      onChange={(e) => handleNestedFormChange('contact', 'whatsapp', e.target.value)}
-                      placeholder="+267 xxxxxxxx"
+                      className="rmanage-form-input"
+                      value={routeFormData.pricing?.basePrice || ''}
+                      onChange={(e) => setRouteFormData(prev => ({ 
+                        ...prev, 
+                        pricing: { ...prev.pricing, basePrice: e.target.value } 
+                      }))}
+                      placeholder="0.00"
+                      step="0.01"
+                      min="0"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="form-actions">
+              <div className="rmanage-form-actions">
                 <button 
-                  type="button" 
-                  className="cancel-btn"
+                  type="button"
+                  className="rmanage-btn rmanage-btn-secondary"
                   onClick={() => setShowRouteModal(false)}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="submit-btn"
+                  className="rmanage-btn rmanage-btn-primary"
                   disabled={loading}
                 >
-                  {loading ? 'Saving...' : (editingRoute ? 'Update Route' : 'Add Route')}
+                  <Save size={16} />
+                  {loading ? 'Saving...' : editingRoute ? 'Update Route' : 'Add Route'}
                 </button>
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="rmanage-loading-overlay">
+          <div className="rmanage-loading-spinner"></div>
         </div>
       )}
     </div>

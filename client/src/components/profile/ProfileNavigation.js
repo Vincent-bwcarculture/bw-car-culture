@@ -1,6 +1,7 @@
 // client/src/components/profile/ProfileNavigation.js
 import React, { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import './ProfileNavigation.css';
 
 const ProfileNavigation = ({ activeTab, setActiveTab, availableTabs }) => {
   const scrollContainerRef = useRef(null);

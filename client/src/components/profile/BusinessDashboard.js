@@ -3,14 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { 
   BarChart3, TrendingUp, Users, DollarSign, Star, 
   Eye, MessageSquare, Settings, ExternalLink, 
-  Calendar, FileText, Award, AlertCircle, CheckCircle
+  Calendar, FileText, Award, AlertCircle, CheckCircle,
+  Activity, Clock, Phone, MapPin, Shield, Target
 } from 'lucide-react';
 import axios from '../../config/axios.js';
+import './BusinessDashboard.css';
 
 const BusinessDashboard = ({ profileData, refreshProfile }) => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeView, setActiveView] = useState('overview');
+  const [message, setMessage] = useState({ type: '', text: '' });
 
   // Get user's business services
   const verifiedServices = profileData?.businessProfile?.services?.filter(s => s.isVerified) || [];
@@ -23,6 +26,11 @@ const BusinessDashboard = ({ profileData, refreshProfile }) => {
     }
   }, [profileData]);
 
+  const showMessage = (type, text) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+  };
+
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
@@ -32,6 +40,7 @@ const BusinessDashboard = ({ profileData, refreshProfile }) => {
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      showMessage('error', 'Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
@@ -63,331 +72,393 @@ const BusinessDashboard = ({ profileData, refreshProfile }) => {
   };
 
   const formatCurrency = (amount) => {
+    if (!amount) return 'P 0.00';
     return new Intl.NumberFormat('en-BW', {
       style: 'currency',
       currency: 'BWP'
-    }).format(amount || 0);
+    }).format(amount);
   };
 
   const formatNumber = (num) => {
-    return new Intl.NumberFormat().format(num || 0);
+    if (!num) return '0';
+    return new Intl.NumberFormat().format(num);
   };
 
-  if (verifiedServices.length === 0 && !hasDealer && !isAdmin) {
+  const getPerformanceColor = (value, threshold = 50) => {
+    if (value >= threshold * 1.5) return 'excellent';
+    if (value >= threshold) return 'good';
+    if (value >= threshold * 0.5) return 'average';
+    return 'poor';
+  };
+
+  const viewTypes = [
+    { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'services', label: 'Services', icon: Settings },
+    { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+    { id: 'admin', label: 'Admin Tools', icon: Shield, adminOnly: true }
+  ];
+
+  if (loading && !dashboardData) {
     return (
-      <div className="business-dashboard-tab">
-        <div className="tab-header">
-          <h2><BarChart3 size={24} /> Business Dashboard</h2>
-          <p>Get your services verified to access business features</p>
-        </div>
-        <div className="empty-state">
-          <BarChart3 size={48} />
-          <h3>No Business Access</h3>
-          <p>Verify your services to unlock business dashboard features</p>
+      <div className="bdash-main-container">
+        <div className="bdash-loading-container">
+          <div className="bdash-loading-spinner"></div>
+          <p>Loading your business dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="business-dashboard-tab">
-      <div className="tab-header">
-        <h2><BarChart3 size={24} /> Business Dashboard</h2>
-        <p>Monitor and manage your business performance</p>
+    <div className="bdash-main-container">
+      {/* Message Display */}
+      {message.text && (
+        <div className={`bdash-message bdash-message-${message.type}`}>
+          {message.type === 'success' && <CheckCircle size={16} />}
+          {message.type === 'error' && <AlertCircle size={16} />}
+          {message.text}
+        </div>
+      )}
+
+      {/* Dashboard Navigation */}
+      <div className="bdash-navigation">
+        {viewTypes.map(view => {
+          if (view.adminOnly && !isAdmin) return null;
+          const IconComponent = view.icon;
+          return (
+            <button
+              key={view.id}
+              className={`bdash-nav-button ${activeView === view.id ? 'active' : ''}`}
+              onClick={() => setActiveView(view.id)}
+            >
+              <IconComponent size={16} />
+              {view.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Business Services Overview */}
-      <div className="business-services-grid">
-        {verifiedServices.map((service) => (
-          <div key={service._id} className="business-service-card">
-            <div className="service-header">
-              <div className="service-icon">
-                {getServiceTypeIcon(service.serviceType)}
+      {/* Overview Section */}
+      {activeView === 'overview' && (
+        <div className="bdash-overview-section">
+          <h3 className="bdash-section-title">
+            <BarChart3 size={20} />
+            Business Overview
+          </h3>
+          
+          {/* Key Metrics */}
+          <div className="bdash-metrics-grid">
+            <div className="bdash-metric-card">
+              <div className="bdash-metric-icon">
+                <Eye size={24} />
               </div>
-              <div className="service-info">
-                <h4>{service.serviceName}</h4>
-                <p>{service.serviceType.replace('_', ' ')}</p>
-              </div>
-              <div className="service-status">
-                <CheckCircle size={16} />
-                <span>Verified</span>
-              </div>
-            </div>
-
-            <div className="service-stats">
-              <div className="stat-row">
-                <div className="stat-item">
-                  <Eye size={14} />
-                  <span>Views: {formatNumber(service.analytics?.views || 0)}</span>
-                </div>
-                <div className="stat-item">
-                  <Star size={14} />
-                  <span>Rating: {service.analytics?.rating || 'N/A'}</span>
-                </div>
-              </div>
-              <div className="stat-row">
-                <div className="stat-item">
-                  <MessageSquare size={14} />
-                  <span>Inquiries: {formatNumber(service.analytics?.inquiries || 0)}</span>
-                </div>
-                <div className="stat-item">
-                  <Calendar size={14} />
-                  <span>Bookings: {formatNumber(service.analytics?.bookings || 0)}</span>
-                </div>
+              <div className="bdash-metric-content">
+                <span className="bdash-metric-value">
+                  {formatNumber(dashboardData?.analytics?.totalViews || 0)}
+                </span>
+                <span className="bdash-metric-label">Total Views</span>
               </div>
             </div>
 
-            <div className="service-actions">
-              <button 
-                className="dashboard-btn"
-                onClick={() => window.location.href = getServiceTypeDashboard(service.serviceType)}
-              >
-                <ExternalLink size={14} />
-                Open Dashboard
-              </button>
-              <button 
-                className="manage-btn"
-                onClick={() => window.location.href = `/services/${service._id}/manage`}
-              >
-                <Settings size={14} />
-                Manage
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {/* Dealer Dashboard Access */}
-        {hasDealer && (
-          <div className="business-service-card dealer-card">
-            <div className="service-header">
-              <div className="service-icon">🏢</div>
-              <div className="service-info">
-                <h4>Dealer Dashboard</h4>
-                <p>Vehicle sales & listings</p>
+            <div className="bdash-metric-card">
+              <div className="bdash-metric-icon">
+                <MessageSquare size={24} />
               </div>
-              <div className="service-status">
-                <CheckCircle size={16} />
-                <span>Active</span>
+              <div className="bdash-metric-content">
+                <span className="bdash-metric-value">
+                  {formatNumber(dashboardData?.analytics?.totalInquiries || 0)}
+                </span>
+                <span className="bdash-metric-label">Inquiries</span>
               </div>
             </div>
 
-            <div className="service-stats">
-              <div className="stat-row">
-                <div className="stat-item">
-                  <FileText size={14} />
-                  <span>Listings: {formatNumber(dashboardData?.dealer?.totalListings || 0)}</span>
-                </div>
-                <div className="stat-item">
-                  <DollarSign size={14} />
-                  <span>Revenue: {formatCurrency(dashboardData?.dealer?.revenue || 0)}</span>
-                </div>
+            <div className="bdash-metric-card">
+              <div className="bdash-metric-icon">
+                <Star size={24} />
+              </div>
+              <div className="bdash-metric-content">
+                <span className="bdash-metric-value">
+                  {(dashboardData?.analytics?.averageRating || 0).toFixed(1)}
+                </span>
+                <span className="bdash-metric-label">Average Rating</span>
               </div>
             </div>
 
-            <div className="service-actions">
-              <button 
-                className="dashboard-btn"
-                onClick={() => window.location.href = '/dealer/dashboard'}
-              >
-                <ExternalLink size={14} />
-                Open Dealer Dashboard
-              </button>
+            <div className="bdash-metric-card">
+              <div className="bdash-metric-icon">
+                <DollarSign size={24} />
+              </div>
+              <div className="bdash-metric-content">
+                <span className="bdash-metric-value">
+                  {formatCurrency(dashboardData?.analytics?.totalRevenue || 0)}
+                </span>
+                <span className="bdash-metric-label">Revenue</span>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Admin Dashboard Access */}
-        {isAdmin && (
-          <div className="business-service-card admin-card">
-            <div className="service-header">
-              <div className="service-icon">👑</div>
-              <div className="service-info">
-                <h4>Admin Dashboard</h4>
-                <p>Platform administration</p>
-              </div>
-              <div className="service-status">
-                <Award size={16} />
-                <span>Administrator</span>
-              </div>
-            </div>
-
-            <div className="service-stats">
-              <div className="stat-row">
-                <div className="stat-item">
-                  <Users size={14} />
-                  <span>Users: {formatNumber(dashboardData?.admin?.totalUsers || 0)}</span>
+          {/* Recent Activity */}
+          <div className="bdash-activity-section">
+            <h4 className="bdash-subsection-title">
+              <Activity size={18} />
+              Recent Activity
+            </h4>
+            <div className="bdash-activity-list">
+              {dashboardData?.recentActivity?.length > 0 ? (
+                dashboardData.recentActivity.map((activity, index) => (
+                  <div key={index} className="bdash-activity-item">
+                    <div className="bdash-activity-icon">
+                      <Clock size={16} />
+                    </div>
+                    <div className="bdash-activity-content">
+                      <p className="bdash-activity-description">{activity.description}</p>
+                      <span className="bdash-activity-time">{activity.timeAgo}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="bdash-empty-state">
+                  <Activity size={32} />
+                  <p>No recent activity</p>
                 </div>
-                <div className="stat-item">
-                  <FileText size={14} />
-                  <span>Listings: {formatNumber(dashboardData?.admin?.totalListings || 0)}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="service-actions">
-              <button 
-                className="dashboard-btn admin"
-                onClick={() => window.location.href = '/admin/dashboard'}
-              >
-                <ExternalLink size={14} />
-                Open Admin Panel
-              </button>
+              )}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Performance Overview */}
-      {dashboardData && (
-        <div className="performance-overview">
-          <h3>Performance Overview</h3>
-          <div className="metrics-grid">
-            <div className="metric-card">
-              <div className="metric-header">
-                <Eye size={20} />
-                <span>Total Views</span>
+      {/* Services Section */}
+      {activeView === 'services' && (
+        <div className="bdash-services-section">
+          <h3 className="bdash-section-title">
+            <Settings size={20} />
+            Your Business Services
+          </h3>
+
+          <div className="bdash-services-grid">
+            {verifiedServices.map((service, index) => (
+              <div key={service._id || index} className="bdash-service-card">
+                <div className="bdash-service-header">
+                  <div className="bdash-service-icon">
+                    {getServiceTypeIcon(service.serviceType)}
+                  </div>
+                  <div className="bdash-service-info">
+                    <h4>{service.serviceName}</h4>
+                    <p>{service.description?.substring(0, 80)}...</p>
+                  </div>
+                  <div className={`bdash-service-status ${service.isVerified ? 'verified' : 'pending'}`}>
+                    <CheckCircle size={16} />
+                    <span>{service.isVerified ? 'Verified' : 'Pending'}</span>
+                  </div>
+                </div>
+
+                <div className="bdash-service-stats">
+                  <div className="bdash-stat-row">
+                    <div className="bdash-stat-item">
+                      <Eye size={14} />
+                      <span>Views: {formatNumber(service.analytics?.views || 0)}</span>
+                    </div>
+                    <div className="bdash-stat-item">
+                      <Star size={14} />
+                      <span>Rating: {(service.analytics?.rating || 0).toFixed(1)}/5</span>
+                    </div>
+                  </div>
+                  <div className="bdash-stat-row">
+                    <div className="bdash-stat-item">
+                      <MessageSquare size={14} />
+                      <span>Inquiries: {formatNumber(service.analytics?.inquiries || 0)}</span>
+                    </div>
+                    <div className="bdash-stat-item">
+                      <Calendar size={14} />
+                      <span>Bookings: {formatNumber(service.analytics?.bookings || 0)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bdash-service-actions">
+                  <button 
+                    className="bdash-dashboard-btn"
+                    onClick={() => window.location.href = getServiceTypeDashboard(service.serviceType)}
+                  >
+                    <ExternalLink size={14} />
+                    Open Dashboard
+                  </button>
+                  <button 
+                    className="bdash-manage-btn"
+                    onClick={() => window.location.href = `/services/${service._id}/manage`}
+                  >
+                    <Settings size={14} />
+                    Manage
+                  </button>
+                </div>
               </div>
-              <div className="metric-value">
-                {formatNumber(dashboardData.totalViews || 0)}
+            ))}
+
+            {/* Dealer Dashboard Access */}
+            {hasDealer && (
+              <div className="bdash-service-card bdash-dealer-card">
+                <div className="bdash-service-header">
+                  <div className="bdash-service-icon">🏢</div>
+                  <div className="bdash-service-info">
+                    <h4>Dealer Dashboard</h4>
+                    <p>Vehicle sales & listings management</p>
+                  </div>
+                  <div className="bdash-service-status verified">
+                    <CheckCircle size={16} />
+                    <span>Active</span>
+                  </div>
+                </div>
+
+                <div className="bdash-service-stats">
+                  <div className="bdash-stat-row">
+                    <div className="bdash-stat-item">
+                      <FileText size={14} />
+                      <span>Listings: {formatNumber(dashboardData?.dealer?.totalListings || 0)}</span>
+                    </div>
+                    <div className="bdash-stat-item">
+                      <DollarSign size={14} />
+                      <span>Revenue: {formatCurrency(dashboardData?.dealer?.revenue || 0)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bdash-service-actions">
+                  <button 
+                    className="bdash-dashboard-btn"
+                    onClick={() => window.location.href = '/dealer/dashboard'}
+                  >
+                    <ExternalLink size={14} />
+                    Dealer Dashboard
+                  </button>
+                </div>
               </div>
-              <div className="metric-trend positive">
-                <TrendingUp size={14} />
-                <span>+12% this month</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Analytics Section */}
+      {activeView === 'analytics' && (
+        <div className="bdash-analytics-section">
+          <h3 className="bdash-section-title">
+            <TrendingUp size={20} />
+            Performance Analytics
+          </h3>
+
+          <div className="bdash-analytics-grid">
+            <div className="bdash-analytics-card">
+              <h4>Service Performance</h4>
+              <div className="bdash-performance-list">
+                {verifiedServices.map((service, index) => {
+                  const views = service.analytics?.views || 0;
+                  const performanceClass = getPerformanceColor(views, 100);
+                  return (
+                    <div key={index} className="bdash-performance-item">
+                      <div className="bdash-performance-info">
+                        <span className="bdash-performance-name">{service.serviceName}</span>
+                        <div className={`bdash-performance-indicator ${performanceClass}`}>
+                          <div className="bdash-performance-bar">
+                            <div 
+                              className="bdash-performance-fill"
+                              style={{ width: `${Math.min((views / 500) * 100, 100)}%` }}
+                            ></div>
+                          </div>
+                          <span className="bdash-performance-value">{views} views</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="metric-card">
-              <div className="metric-header">
-                <MessageSquare size={20} />
-                <span>Inquiries</span>
-              </div>
-              <div className="metric-value">
-                {formatNumber(dashboardData.totalInquiries || 0)}
-              </div>
-              <div className="metric-trend positive">
-                <TrendingUp size={14} />
-                <span>+8% this month</span>
-              </div>
-            </div>
-
-            <div className="metric-card">
-              <div className="metric-header">
-                <Star size={20} />
-                <span>Avg Rating</span>
-              </div>
-              <div className="metric-value">
-                {dashboardData.averageRating?.toFixed(1) || 'N/A'}
-              </div>
-              <div className="metric-trend neutral">
-                <span>Based on {dashboardData.totalReviews || 0} reviews</span>
-              </div>
-            </div>
-
-            <div className="metric-card">
-              <div className="metric-header">
-                <DollarSign size={20} />
-                <span>Revenue</span>
-              </div>
-              <div className="metric-value">
-                {formatCurrency(dashboardData.totalRevenue || 0)}
-              </div>
-              <div className="metric-trend positive">
-                <TrendingUp size={14} />
-                <span>+15% this month</span>
+            <div className="bdash-analytics-card">
+              <h4>Monthly Trends</h4>
+              <div className="bdash-trends-placeholder">
+                <TrendingUp size={48} />
+                <p>Analytics charts coming soon</p>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Recent Activity */}
-      <div className="recent-activity">
-        <h3>Recent Activity</h3>
-        <div className="activity-list">
-          {dashboardData?.recentActivity ? (
-            dashboardData.recentActivity.map((activity, index) => (
-              <div key={index} className="activity-item">
-                <div className="activity-icon">
-                  {activity.type === 'view' && <Eye size={16} />}
-                  {activity.type === 'inquiry' && <MessageSquare size={16} />}
-                  {activity.type === 'booking' && <Calendar size={16} />}
-                  {activity.type === 'review' && <Star size={16} />}
-                </div>
-                <div className="activity-content">
-                  <p>{activity.description}</p>
-                  <span className="activity-time">{activity.timeAgo}</span>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="no-activity">
-              <AlertCircle size={24} />
-              <p>No recent activity to display</p>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Admin Tools Section */}
+      {activeView === 'admin' && isAdmin && (
+        <div className="bdash-admin-section">
+          <h3 className="bdash-section-title">
+            <Shield size={20} />
+            Admin Tools
+          </h3>
 
-      {/* Quick Actions */}
-      <div className="quick-actions">
-        <h3>Quick Actions</h3>
-        <div className="actions-grid">
+          <div className="bdash-admin-grid">
+            <div className="bdash-admin-card">
+              <div className="bdash-admin-icon">
+                <Users size={32} />
+              </div>
+              <div className="bdash-admin-content">
+                <h4>Total Users</h4>
+                <span className="bdash-admin-value">
+                  {formatNumber(dashboardData?.admin?.totalUsers || 0)}
+                </span>
+              </div>
+            </div>
+
+            <div className="bdash-admin-card">
+              <div className="bdash-admin-icon">
+                <FileText size={32} />
+              </div>
+              <div className="bdash-admin-content">
+                <h4>Total Listings</h4>
+                <span className="bdash-admin-value">
+                  {formatNumber(dashboardData?.admin?.totalListings || 0)}
+                </span>
+              </div>
+            </div>
+
+            <div className="bdash-admin-card">
+              <div className="bdash-admin-icon">
+                <Settings size={32} />
+              </div>
+              <div className="bdash-admin-content">
+                <h4>Active Services</h4>
+                <span className="bdash-admin-value">
+                  {formatNumber(verifiedServices.length)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bdash-admin-actions">
+            <button 
+              className="bdash-admin-action-btn"
+              onClick={() => window.location.href = '/admin/dashboard'}
+            >
+              <ExternalLink size={16} />
+              Full Admin Dashboard
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {verifiedServices.length === 0 && !hasDealer && !isAdmin && (
+        <div className="bdash-empty-dashboard">
+          <Target size={64} />
+          <h3>No Business Services Found</h3>
+          <p>Register your first business service to access the dashboard</p>
           <button 
-            className="action-btn"
-            onClick={() => window.location.href = '/listings/create'}
-          >
-            <FileText size={16} />
-            Create New Listing
-          </button>
-          
-          <button 
-            className="action-btn"
-            onClick={() => window.location.href = '/services/manage'}
+            className="bdash-register-service-btn"
+            onClick={() => {
+              // Trigger switch to services tab in parent component
+              showMessage('info', 'Please register a service first to access business features');
+            }}
           >
             <Settings size={16} />
-            Manage Services
-          </button>
-          
-          <button 
-            className="action-btn"
-            onClick={() => window.location.href = '/analytics'}
-          >
-            <BarChart3 size={16} />
-            View Analytics
-          </button>
-          
-          <button 
-            className="action-btn"
-            onClick={() => window.location.href = '/reviews'}
-          >
-            <Star size={16} />
-            Manage Reviews
+            Register Service
           </button>
         </div>
-      </div>
-
-      {/* Tips and Recommendations */}
-      <div className="business-tips">
-        <h3>Business Tips</h3>
-        <div className="tips-list">
-          <div className="tip-item">
-            <CheckCircle size={16} />
-            <p>Complete your business profile to increase visibility</p>
-          </div>
-          <div className="tip-item">
-            <CheckCircle size={16} />
-            <p>Respond to inquiries quickly to improve customer satisfaction</p>
-          </div>
-          <div className="tip-item">
-            <CheckCircle size={16} />
-            <p>Upload high-quality photos to attract more customers</p>
-          </div>
-          <div className="tip-item">
-            <CheckCircle size={16} />
-            <p>Keep your service information up to date</p>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
