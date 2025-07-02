@@ -1,10 +1,14 @@
 // src/components/layout/Navigation/ResponsiveNavigation.js
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, ShoppingBag, Store, Settings, Newspaper } from 'lucide-react';
+import { 
+  Home, ShoppingBag, Store, Settings, User, LogIn, LogOut, 
+  UserCircle, ChevronDown, Star, MessageSquare, Plus, X
+} from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext.js';
 import './ResponsiveNavigation.css';
 
-// Simplified navigation categories without dropdowns
+// Updated navigation categories - replaced News with Profile
 const categories = [
   {
     id: 'home',
@@ -31,12 +35,280 @@ const categories = [
     icon: <Settings size={20} />
   },
   {
-    id: 'news',
-    name: 'News',
-    path: '/news',
-    icon: <Newspaper size={20} />
+    id: 'profile',
+    name: 'Profile',
+    path: '/profile',
+    icon: <User size={20} />
   }
 ];
+
+// Review FAB Component for mobile devices
+const ReviewFAB = () => {
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  // Hide/show FAB on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Hide FAB when scrolling down, show when scrolling up
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  const handleFABClick = () => {
+    if (!isAuthenticated) {
+      navigate('/login', { 
+        state: { 
+          from: window.location.pathname,
+          message: 'Please login to leave a review' 
+        }
+      });
+      return;
+    }
+    
+    // For now, redirect to a general review page or open modal
+    // This can be enhanced to detect current business context
+    setShowReviewModal(true);
+  };
+
+  const handleReviewSubmit = (reviewData) => {
+    console.log('Review submitted:', reviewData);
+    setShowReviewModal(false);
+    // Handle review submission logic here
+  };
+
+  return (
+    <>
+      <button 
+        className={`review-fab ${isVisible ? 'visible' : 'hidden'}`}
+        onClick={handleFABClick}
+        title={isAuthenticated ? 'Leave a quick review' : 'Login to leave a review'}
+        aria-label="Quick review"
+      >
+        <Star size={24} />
+        <span className="fab-text">Review</span>
+      </button>
+
+      {/* Simple Review Modal */}
+      {showReviewModal && (
+        <div className="review-fab-modal-overlay" onClick={() => setShowReviewModal(false)}>
+          <div className="review-fab-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="review-fab-modal-header">
+              <h3>Quick Review</h3>
+              <button 
+                className="review-fab-close"
+                onClick={() => setShowReviewModal(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="review-fab-content">
+              <p>Select what you'd like to review:</p>
+              
+              <div className="review-options">
+                <button 
+                  className="review-option"
+                  onClick={() => {
+                    setShowReviewModal(false);
+                    navigate('/marketplace?action=review');
+                  }}
+                >
+                  <ShoppingBag size={20} />
+                  <span>Car Purchase</span>
+                </button>
+                
+                <button 
+                  className="review-option"
+                  onClick={() => {
+                    setShowReviewModal(false);
+                    navigate('/dealerships?action=review');
+                  }}
+                >
+                  <Store size={20} />
+                  <span>Dealership</span>
+                </button>
+                
+                <button 
+                  className="review-option"
+                  onClick={() => {
+                    setShowReviewModal(false);
+                    navigate('/services?action=review');
+                  }}
+                >
+                  <Settings size={20} />
+                  <span>Service</span>
+                </button>
+              </div>
+              
+              <p className="review-fab-hint">
+                Or visit any business page to leave a specific review
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+// Desktop User Menu Component
+const DesktopUserMenu = () => {
+  const { user, isAuthenticated, logout } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const navigate = useNavigate();
+  const userMenuRef = useRef(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    setShowUserMenu(false);
+    navigate('/');
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="desktop-auth-buttons">
+        <Link to="/login" className="auth-button login-button">
+          <LogIn size={16} />
+          Login
+        </Link>
+        <Link to="/register" className="auth-button register-button">
+          <User size={16} />
+          Sign Up
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="desktop-user-menu" ref={userMenuRef}>
+      <button 
+        className="user-menu-trigger"
+        onClick={() => setShowUserMenu(!showUserMenu)}
+      >
+        <div className="user-avatar">
+          {user?.avatar?.url ? (
+            <img src={user.avatar.url} alt={user.name || 'User'} />
+          ) : (
+            <UserCircle size={32} />
+          )}
+        </div>
+        <div className="user-info">
+          <span className="user-name">{user?.name || 'User'}</span>
+          <span className="user-role">{user?.role || 'Member'}</span>
+        </div>
+        <ChevronDown 
+          size={16} 
+          className={`dropdown-arrow ${showUserMenu ? 'rotated' : ''}`}
+        />
+      </button>
+
+      {showUserMenu && (
+        <div className="user-dropdown-menu">
+          <div className="user-menu-header">
+            <div className="user-menu-avatar">
+              {user?.avatar?.url ? (
+                <img src={user.avatar.url} alt={user.name || 'User'} />
+              ) : (
+                <UserCircle size={40} />
+              )}
+            </div>
+            <div className="user-menu-info">
+              <strong>{user?.name || 'User'}</strong>
+              <span>{user?.email}</span>
+            </div>
+          </div>
+          
+          <div className="user-menu-divider"></div>
+          
+          <div className="user-menu-items">
+            <button 
+              className="user-menu-item"
+              onClick={() => {
+                navigate('/profile');
+                setShowUserMenu(false);
+              }}
+            >
+              <User size={16} />
+              My Profile
+            </button>
+            
+            <button 
+              className="user-menu-item"
+              onClick={() => {
+                navigate('/profile?tab=favorites');
+                setShowUserMenu(false);
+              }}
+            >
+              <ShoppingBag size={16} />
+              My Favorites
+            </button>
+            
+            <button 
+              className="user-menu-item"
+              onClick={() => {
+                navigate('/profile?tab=reviews');
+                setShowUserMenu(false);
+              }}
+            >
+              <Star size={16} />
+              My Reviews
+            </button>
+            
+            {user?.role === 'admin' && (
+              <button 
+                className="user-menu-item admin-link"
+                onClick={() => {
+                  navigate('/admin/dashboard');
+                  setShowUserMenu(false);
+                }}
+              >
+                <Settings size={16} />
+                Admin Panel
+              </button>
+            )}
+          </div>
+          
+          <div className="user-menu-divider"></div>
+          
+          <button 
+            className="user-menu-item logout-item"
+            onClick={handleLogout}
+          >
+            <LogOut size={16} />
+            Sign Out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Breadcrumb component
 const Breadcrumb = ({ paths }) => (
@@ -89,86 +361,74 @@ const ResponsiveNavigation = () => {
     if (typeof window !== 'undefined' && window.history && window.history.scrollRestoration) {
       window.history.scrollRestoration = 'manual';
     }
-    
-    return () => {
-      if (typeof window !== 'undefined' && window.history && window.history.scrollRestoration) {
-        window.history.scrollRestoration = 'auto';
-      }
-    };
   }, []);
 
-  // Generate breadcrumb paths based on current location
+  // Build active path for breadcrumbs
   useEffect(() => {
-    const generatePaths = () => {
-      const paths = location.pathname.split('/').filter(Boolean);
-      const breadcrumbs = paths.map((path, index) => {
-        const url = `/${paths.slice(0, index + 1).join('/')}`;
-        const category = categories.find(cat => cat.path === url);
+    const pathname = location.pathname;
+    const pathSegments = pathname.split('/').filter(Boolean);
+    
+    const breadcrumbs = [];
+    
+    // Dynamic breadcrumb generation
+    if (pathSegments.length > 0) {
+      let currentPath = '';
+      
+      pathSegments.forEach((segment, index) => {
+        currentPath += `/${segment}`;
         
-        let name = path.charAt(0).toUpperCase() + path.slice(1);
-        if (category) {
-          name = category.name;
-        }
-
-        return { name, url };
+        // Map common paths to readable names
+        const segmentName = (() => {
+          switch (segment) {
+            case 'marketplace': return 'Car Sales';
+            case 'dealerships': return 'Dealerships';
+            case 'services': return 'Services';
+            case 'profile': return 'Profile';
+            case 'admin': return 'Admin';
+            case 'dashboard': return 'Dashboard';
+            default: 
+              // Capitalize first letter and replace hyphens/underscores
+              return segment.charAt(0).toUpperCase() + segment.slice(1).replace(/[-_]/g, ' ');
+          }
+        })();
+        
+        breadcrumbs.push({
+          name: segmentName,
+          url: index === pathSegments.length - 1 ? null : currentPath
+        });
       });
+    }
+    
+    setActivePath(breadcrumbs);
+  }, [location.pathname]);
 
-      setActivePath(breadcrumbs);
-    };
-
-    generatePaths();
-  }, [location]);
-
-  // Check for scroll buttons visibility
+  // Enhanced scroll detection for navigation buttons
   useEffect(() => {
     const checkScrollable = () => {
-      if (navRef.current) {
-        const list = navRef.current.querySelector('.category-list');
-        if (list) {
-          const { scrollWidth, clientWidth } = list;
-          setShowScrollButtons(scrollWidth > clientWidth);
-        }
+      const list = navRef.current?.querySelector('.category-list');
+      if (list) {
+        const isScrollable = list.scrollWidth > list.clientWidth;
+        setShowScrollButtons(isScrollable);
       }
     };
 
     checkScrollable();
-    const resizeHandler = () => {
-      checkScrollable();
-    };
-    
-    window.addEventListener('resize', resizeHandler);
-    return () => window.removeEventListener('resize', resizeHandler);
-  }, []);
-  
-  // Add mobile navigation class to body and handle iOS safe areas
-  useEffect(() => {
-    const checkMobileNav = () => {
-      const isMobile = window.innerWidth <= 768;
-      
-      if (isMobile) {
-        document.body.classList.add('has-mobile-nav');
-        // Add safe area handling for iOS
-        document.documentElement.style.setProperty('--safe-area-bottom', 'env(safe-area-inset-bottom, 0px)');
-      } else {
-        document.body.classList.remove('has-mobile-nav');
-        document.documentElement.style.removeProperty('--safe-area-bottom');
-      }
-    };
-    
-    checkMobileNav();
-    window.addEventListener('resize', checkMobileNav);
-    return () => {
-      window.removeEventListener('resize', checkMobileNav);
-      document.body.classList.remove('has-mobile-nav');
-    };
+    window.addEventListener('resize', checkScrollable);
+    return () => window.removeEventListener('resize', checkScrollable);
   }, []);
 
-  // Handle scroll for category list
+  // Scroll navigation handler
   const handleScroll = (direction) => {
-    if (navRef.current) {
-      const list = navRef.current.querySelector('.category-list');
-      if (list) {
-        const scrollAmount = direction === 'left' ? -200 : 200;
+    const list = navRef.current?.querySelector('.category-list');
+    if (list) {
+      if (direction === 'left') {
+        const scrollAmount = window.innerWidth <= 480 ? -150 : -200;
+        list.scrollBy({
+          left: scrollAmount,
+          behavior: 'smooth'
+        });
+      } else {
+        const scrollAmount = window.innerWidth <= 480 ? 150 : 200;
         list.scrollBy({
           left: scrollAmount,
           behavior: 'smooth'
@@ -205,7 +465,7 @@ const ResponsiveNavigation = () => {
         {/* Breadcrumb always visible */}
         <Breadcrumb paths={activePath} />
         
-        {/* Desktop Category Navigation */}
+        {/* Desktop Category Navigation with User Menu */}
         <div className="category-nav desktop-only">
           {showScrollButtons && (
             <button 
@@ -235,6 +495,9 @@ const ResponsiveNavigation = () => {
             ))}
           </ul>
 
+          {/* Desktop User Menu */}
+          <DesktopUserMenu />
+
           {showScrollButtons && (
             <button 
               className="nav-scroll-button nav-scroll-right"
@@ -261,6 +524,9 @@ const ResponsiveNavigation = () => {
           </button>
         ))}
       </nav>
+
+      {/* Review FAB - Only show on mobile/tablet */}
+      <ReviewFAB />
     </>
   );
 };
