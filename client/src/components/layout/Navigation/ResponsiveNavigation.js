@@ -3,14 +3,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, ShoppingBag, Store, Settings, User, LogIn, LogOut, 
-  UserCircle, Star, QrCode, Hash, X, UserPlus
+  UserCircle, Star, QrCode, Hash, X, UserPlus, Newspaper
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
 import ReviewForm from '../../ReviewForm/ReviewForm.js';
 import QRCodeScanner from '../../QRScanner/QRCodeScanner.js';
 import './ResponsiveNavigation.css';
 
-// Updated navigation categories - Profile removed from main nav
+// Updated navigation categories - News added for desktop, Profile kept for mobile
 const categories = [
   {
     id: 'home',
@@ -35,6 +35,13 @@ const categories = [
     name: 'Services',
     path: '/services',
     icon: <Settings size={20} />
+  },
+  {
+    id: 'news',
+    name: 'News',
+    path: '/news',
+    icon: <Newspaper size={20} />,
+    desktopOnly: true // Only show on bigger displays
   },
   {
     id: 'profile',
@@ -420,7 +427,7 @@ const ResponsiveNavigation = () => {
 
       {/* Mobile Bottom Navigation */}
       <nav className="mobile-bottom-nav">
-        {categories.map((category) => (
+        {categories.filter(category => !category.desktopOnly).map((category) => (
           <button
             key={category.id}
             className={`mobile-nav-item ${isActive(category.path) ? 'active' : ''} ${isNavigating ? 'navigating' : ''}`}
