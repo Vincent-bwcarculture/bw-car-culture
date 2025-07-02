@@ -1,193 +1,196 @@
 // client/src/components/profile/ProfileHeader.js
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
-  Camera, Edit2, Check, X, Mail, User, Calendar, 
-  Shield, Star, Activity
+  User, Settings, Shield, Activity, Calendar, Edit2, 
+  Camera, Upload, X, CheckCircle, AlertCircle, BarChart3
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 
 const ProfileHeader = ({ profileData, setProfileData, updateProfile, onAdminAccess }) => {
-  const [editingName, setEditingName] = useState(false);
-  const [newName, setNewName] = useState(profileData?.name || '');
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const fileInputRef = useRef(null);
 
-  const handleNameEdit = () => {
-    setEditingName(true);
-    setNewName(profileData?.name || '');
+  const isAdmin = profileData?.role === 'admin';
+  const isBusinessOwner = profileData?.businessProfile?.services?.some(s => s.isVerified);
+  const hasDealer = profileData?.dealership;
+
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  const handleNameSave = async () => {
-    try {
-      await updateProfile({ name: newName });
-      setProfileData(prev => ({ ...prev, name: newName }));
-      setEditingName(false);
-    } catch (error) {
-      console.error('Error updating name:', error);
-      alert('Failed to update name');
-    }
+  const formatDate = (date) => {
+    if (!date) return 'Unknown';
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long'
+    });
   };
 
-  const handleNameCancel = () => {
-    setNewName(profileData?.name || '');
-    setEditingName(false);
+  const calculateCompleteness = () => {
+    let score = 0;
+    const fields = [
+      profileData.name,
+      profileData.email,
+      profileData.avatar?.url,
+      profileData.profile?.phone,
+      profileData.profile?.bio,
+      profileData.profile?.dateOfBirth,
+      profileData.profile?.address?.city
+    ];
+    
+    fields.forEach(field => {
+      if (field) score += 14.28; // 100/7 fields
+    });
+    
+    return Math.round(score);
   };
 
-  const handleAvatarUpload = async (event) => {
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Validate file type and size
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      setUploadError('Image must be less than 5MB');
+      return;
+    }
+
     try {
-      setUploadingAvatar(true);
+      setUploading(true);
+      setUploadError('');
+
       const formData = new FormData();
       formData.append('avatar', file);
 
-      let response;
-      try {
-        response = await axios.put('/user/profile/basic', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-      } catch (profileError) {
-        // Fallback to auth profile endpoint
-        response = await axios.put('/auth/profile', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-      }
+      const response = await axios.put('/user/profile/basic', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
 
       if (response.data.success) {
         setProfileData(prev => ({
           ...prev,
           avatar: response.data.data.avatar
         }));
+        updateProfile && updateProfile(response.data.data);
+      } else {
+        setUploadError('Failed to upload avatar');
       }
     } catch (error) {
-      console.error('Error uploading avatar:', error);
-      alert('Failed to upload avatar');
+      console.error('Avatar upload error:', error);
+      setUploadError(error.response?.data?.message || 'Failed to upload avatar');
     } finally {
-      setUploadingAvatar(false);
+      setUploading(false);
     }
   };
 
-  const formatDate = (date) => {
-    if (!date) return 'Not set';
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const calculateProfileCompleteness = () => {
-    if (!profileData) return 0;
-    
-    let completeness = 0;
-    const fields = [
-      profileData.name,
-      profileData.email,
-      profileData.avatar,
-      profileData.profile?.phone,
-      profileData.profile?.bio,
-      profileData.profile?.address?.city
-    ];
-    
-    fields.forEach(field => {
-      if (field) completeness += 16.67; // 100/6 fields
-    });
-    
-    return Math.round(completeness);
-  };
-
-  const isAdmin = profileData?.role === 'admin';
-  const isBusinessOwner = profileData?.businessProfile?.services?.some(s => s.isVerified) || 
-                          profileData?.dealership;
-  const completeness = calculateProfileCompleteness();
+  const completeness = calculateCompleteness();
 
   return (
-    <div className="profile-header">
-      <div className="profile-header-content">
+    <div className="pheader-main-container">
+      <div className="pheader-background-overlay"></div>
+      
+      <div className="pheader-content-wrapper">
         {/* Avatar Section */}
-        <div className="profile-avatar-section">
-          <div className="profile-avatar-container">
-            <img 
-              src={profileData.avatar?.url || '/images/default-avatar.png'} 
-              alt={profileData.name || 'User Avatar'}
-              className="profile-avatar"
-            />
-            <label htmlFor="avatar-upload" className="avatar-upload-button">
-              {uploadingAvatar ? (
-                <div className="upload-spinner"></div>
+        <div className="pheader-avatar-section">
+          <div className="pheader-avatar-container">
+            {profileData.avatar?.url ? (
+              <img 
+                src={profileData.avatar.url} 
+                alt={profileData.name}
+                className="pheader-avatar-image"
+                onClick={handleAvatarClick}
+              />
+            ) : (
+              <div 
+                className="pheader-avatar-placeholder"
+                onClick={handleAvatarClick}
+              >
+                {getInitials(profileData.name)}
+              </div>
+            )}
+            
+            {/* Upload Overlay */}
+            <div className="pheader-avatar-edit-overlay" onClick={handleAvatarClick}>
+              {uploading ? (
+                <div className="pheader-upload-spinner"></div>
               ) : (
                 <Camera size={16} />
               )}
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarUpload}
-                style={{ display: 'none' }}
-              />
-            </label>
+            </div>
+            
+            {/* Hidden File Input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
           </div>
+          
+          {/* Upload Error */}
+          {uploadError && (
+            <div className="pheader-upload-error">
+              <AlertCircle size={14} />
+              <span>{uploadError}</span>
+            </div>
+          )}
         </div>
 
-        {/* Profile Info */}
-        <div className="profile-info">
-          <div className="profile-name">
-            {editingName ? (
-              <div className="name-editing">
-                <input
-                  type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  className="name-input"
-                />
-                <div className="name-actions">
-                  <button onClick={handleNameSave} className="save-button">
-                    <Check size={16} />
-                  </button>
-                  <button onClick={handleNameCancel} className="cancel-button">
-                    <X size={16} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="name-display">
-                <h1>{profileData.name || 'No Name Set'}</h1>
-                <button onClick={handleNameEdit} className="edit-name-button">
-                  <Edit2 size={16} />
-                </button>
-              </div>
-            )}
-          </div>
+        {/* User Information */}
+        <div className="pheader-user-info">
+          <h1 className="pheader-user-name">{profileData.name || 'User'}</h1>
+          <p className="pheader-user-email">{profileData.email}</p>
+          
+          <button 
+            className="pheader-edit-profile-button"
+            onClick={() => setIsEditing(true)}
+          >
+            <Edit2 size={16} />
+            Edit Profile
+          </button>
 
-          <div className="profile-meta">
-            <div className="meta-item">
-              <Mail size={16} />
-              <span>{profileData.email}</span>
+          {/* Profile Meta Information */}
+          <div className="pheader-profile-meta">
+            <div className="pheader-meta-item">
+              <Calendar size={16} />
+              <span>Joined {formatDate(profileData.createdAt)}</span>
             </div>
-            <div className="meta-item">
-              <User size={16} />
-              <span className={`role-badge ${profileData.role}`}>
+            <div className="pheader-meta-item">
+              <span className={`pheader-role-badge ${profileData.role}`}>
                 {profileData.role === 'admin' ? 'Administrator' : 
                  profileData.role === 'provider' ? 'Service Provider' :
                  profileData.role === 'dealer' ? 'Dealer' : 'User'}
               </span>
             </div>
-            <div className="meta-item">
-              <Calendar size={16} />
-              <span>Joined {formatDate(profileData.createdAt)}</span>
-            </div>
+            {profileData.profile?.bio && (
+              <div className="pheader-meta-item pheader-bio">
+                <User size={16} />
+                <span>{profileData.profile.bio}</span>
+              </div>
+            )}
           </div>
 
           {/* Quick Access Buttons */}
-          <div className="quick-access-section">
+          <div className="pheader-quick-access-section">
             {isAdmin && (
               <button 
                 onClick={onAdminAccess} 
-                className="admin-panel-button"
+                className="pheader-admin-panel-button"
               >
                 <Shield size={16} />
                 Access Admin Panel
@@ -196,46 +199,56 @@ const ProfileHeader = ({ profileData, setProfileData, updateProfile, onAdminAcce
             
             {isBusinessOwner && (
               <button 
-                className="business-dashboard-button"
+                className="pheader-business-dashboard-button"
                 onClick={() => window.location.href = '/provider/dashboard'}
               >
                 <Activity size={16} />
                 Business Dashboard
               </button>
             )}
+
+            {hasDealer && (
+              <button 
+                className="pheader-dealer-dashboard-button"
+                onClick={() => window.location.href = '/dealer/dashboard'}
+              >
+                <BarChart3 size={16} />
+                Dealer Dashboard
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Profile Stats */}
-        <div className="profile-stats">
-          <div className="stat-item">
-            <span className="stat-value">{completeness}%</span>
-            <span className="stat-label">Complete</span>
+        {/* Profile Statistics */}
+        <div className="pheader-profile-stats">
+          <div className="pheader-stat-item">
+            <span className="pheader-stat-value">{completeness}%</span>
+            <span className="pheader-stat-label">Complete</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-value">{profileData.favorites?.length || 0}</span>
-            <span className="stat-label">Favorites</span>
+          <div className="pheader-stat-item">
+            <span className="pheader-stat-value">{profileData.favorites?.length || 0}</span>
+            <span className="pheader-stat-label">Favorites</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-value">{profileData.businessProfile?.services?.length || 0}</span>
-            <span className="stat-label">Services</span>
+          <div className="pheader-stat-item">
+            <span className="pheader-stat-value">{profileData.businessProfile?.services?.length || 0}</span>
+            <span className="pheader-stat-label">Services</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-value">{profileData.vehicles?.length || 0}</span>
-            <span className="stat-label">Vehicles</span>
+          <div className="pheader-stat-item">
+            <span className="pheader-stat-value">{profileData.vehicles?.length || 0}</span>
+            <span className="pheader-stat-label">Vehicles</span>
           </div>
         </div>
       </div>
 
       {/* Profile Completion Bar */}
-      <div className="profile-completion">
-        <div className="completion-text">
+      <div className="pheader-profile-completion">
+        <div className="pheader-completion-text">
           <span>Profile Completion</span>
           <span>{completeness}%</span>
         </div>
-        <div className="completion-bar">
+        <div className="pheader-completion-bar">
           <div 
-            className="completion-fill" 
+            className="pheader-completion-fill" 
             style={{ width: `${completeness}%` }}
           ></div>
         </div>

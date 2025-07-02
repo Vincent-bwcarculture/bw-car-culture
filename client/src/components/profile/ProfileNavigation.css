@@ -1,0 +1,321 @@
+/* client/src/components/profile/ProfileNavigation.css */
+/* ENHANCED PROFILE NAVIGATION WITH UNIQUE CLASSES */
+
+/* === NAVIGATION MAIN CONTAINER === */
+.pnav-main-container {
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius-lg);
+  box-shadow: var(--uprofile-shadow-md);
+  margin-bottom: 20px;
+  overflow: hidden;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* === SCROLL CONTAINER === */
+.pnav-scroll-container {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+}
+
+.pnav-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.pnav-tabs-wrapper {
+  display: flex;
+  min-width: max-content;
+  align-items: center;
+}
+
+/* === TAB BUTTONS === */
+.pnav-tab-button {
+  background: transparent;
+  border: none;
+  padding: 16px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--uprofile-text-secondary);
+  transition: var(--uprofile-transition);
+  white-space: nowrap;
+  position: relative;
+  min-width: 120px;
+  justify-content: center;
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
+.pnav-tab-button:hover {
+  background: var(--uprofile-bg-secondary);
+  color: var(--uprofile-text-primary);
+}
+
+.pnav-tab-button.active {
+  background: var(--uprofile-primary-accent);
+  color: var(--uprofile-text-white);
+  font-weight: 600;
+}
+
+.pnav-tab-icon {
+  transition: var(--uprofile-transition);
+}
+
+.pnav-tab-label {
+  transition: var(--uprofile-transition);
+  font-size: 14px;
+}
+
+.pnav-active-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--uprofile-primary-accent-dark);
+  animation: pnav-slide-in 0.3s ease;
+}
+
+@keyframes pnav-slide-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* === SCROLL BUTTONS === */
+.pnav-scroll-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--uprofile-border-color);
+  border-radius: 50%;
+  color: var(--uprofile-text-white);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: var(--uprofile-transition);
+  opacity: 0.8;
+  backdrop-filter: blur(10px);
+}
+
+.pnav-scroll-button:hover {
+  opacity: 1;
+  background: var(--uprofile-primary-accent);
+  border-color: var(--uprofile-primary-accent);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.pnav-scroll-left {
+  left: 10px;
+}
+
+.pnav-scroll-right {
+  right: 10px;
+}
+
+/* === TAB INDICATOR (Mobile) === */
+.pnav-tab-indicator {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  background: var(--uprofile-bg-secondary);
+  border: 1px solid var(--uprofile-border-color);
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--uprofile-text-muted);
+  display: none;
+  z-index: 5;
+}
+
+.pnav-current-tab {
+  color: var(--uprofile-primary-accent);
+  font-weight: 600;
+}
+
+.pnav-tab-separator {
+  margin: 0 2px;
+}
+
+.pnav-total-tabs {
+  color: var(--uprofile-text-muted);
+}
+
+/* === RESPONSIVE DESIGN === */
+/* Mobile (up to 767px) */
+@media (max-width: 767px) {
+  .pnav-main-container {
+    border-radius: var(--uprofile-border-radius);
+  }
+
+  .pnav-tab-button {
+    min-width: 100px;
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+
+  .pnav-tab-label {
+    font-size: 13px;
+  }
+
+  .pnav-tab-indicator {
+    display: flex;
+    align-items: center;
+  }
+
+  .pnav-scroll-button {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .pnav-scroll-left {
+    left: 8px;
+  }
+
+  .pnav-scroll-right {
+    right: 60px; /* Make room for tab indicator */
+  }
+}
+
+/* Small Mobile (up to 480px) */
+@media (max-width: 480px) {
+  .pnav-tab-button {
+    min-width: 80px;
+    padding: 12px 12px;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .pnav-tab-icon {
+    font-size: 14px;
+  }
+
+  .pnav-tab-label {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  .pnav-scroll-button {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Tablet (768px and up) */
+@media (min-width: 768px) {
+  .pnav-tab-button {
+    min-width: 140px;
+    padding: 18px 24px;
+    font-size: 15px;
+  }
+
+  .pnav-tab-label {
+    font-size: 15px;
+  }
+
+  .pnav-tab-indicator {
+    display: none;
+  }
+}
+
+/* Desktop (1024px and up) */
+@media (min-width: 1024px) {
+  .pnav-main-container {
+    justify-content: center;
+  }
+
+  .pnav-scroll-container {
+    overflow: visible;
+  }
+
+  .pnav-tabs-wrapper {
+    justify-content: center;
+  }
+
+  .pnav-scroll-button {
+    display: none;
+  }
+
+  .pnav-tab-button {
+    min-width: 160px;
+    padding: 20px 28px;
+  }
+}
+
+/* === ACCESSIBILITY === */
+.pnav-tab-button:focus {
+  outline: 2px solid var(--uprofile-primary-accent);
+  outline-offset: 2px;
+  z-index: 1;
+}
+
+.pnav-scroll-button:focus {
+  outline: 2px solid var(--uprofile-primary-accent);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .pnav-tab-button.active {
+    background: var(--uprofile-text-primary) !important;
+    color: var(--uprofile-bg-primary) !important;
+    border: 2px solid var(--uprofile-text-primary);
+  }
+
+  .pnav-active-indicator {
+    background: var(--uprofile-text-primary) !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .pnav-tab-button,
+  .pnav-scroll-button,
+  .pnav-active-indicator {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .pnav-scroll-container {
+    scroll-behavior: auto;
+  }
+}
+
+/* === DARK MODE SPECIFIC ADJUSTMENTS === */
+[data-theme="dark"] .pnav-scroll-button {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .pnav-scroll-button:hover {
+  background: var(--uprofile-primary-accent);
+  border-color: var(--uprofile-primary-accent);
+}
+
+[data-theme="dark"] .pnav-tab-indicator {
+  background: var(--uprofile-bg-tertiary);
+  border-color: var(--uprofile-border-light);
+}

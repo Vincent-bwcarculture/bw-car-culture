@@ -1,0 +1,448 @@
+/* client/src/components/profile/ProfileHeader.css */
+/* ENHANCED PROFILE HEADER WITH UNIQUE CLASSES */
+
+/* === PROFILE HEADER MAIN CONTAINER === */
+.pheader-main-container {
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius-lg);
+  box-shadow: var(--uprofile-shadow-md);
+  margin-bottom: 20px;
+  overflow: hidden;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+  position: relative;
+}
+
+.pheader-background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
+  opacity: 0.1;
+  z-index: 0;
+}
+
+.pheader-content-wrapper {
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* === AVATAR SECTION === */
+.pheader-avatar-section {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.pheader-avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+.pheader-avatar-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid var(--uprofile-bg-primary);
+  box-shadow: var(--uprofile-shadow-lg);
+  object-fit: cover;
+  transition: var(--uprofile-transition);
+  cursor: pointer;
+}
+
+.pheader-avatar-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 30px rgba(255, 51, 0, 0.2);
+}
+
+.pheader-avatar-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--uprofile-text-white);
+  font-size: 2.5rem;
+  font-weight: 600;
+  border: 4px solid var(--uprofile-bg-primary);
+  box-shadow: var(--uprofile-shadow-lg);
+  transition: var(--uprofile-transition);
+  cursor: pointer;
+}
+
+.pheader-avatar-placeholder:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 30px rgba(255, 51, 0, 0.2);
+}
+
+.pheader-avatar-edit-overlay {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 35px;
+  height: 35px;
+  background: var(--uprofile-primary-accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--uprofile-text-white);
+  box-shadow: var(--uprofile-shadow-md);
+  transition: var(--uprofile-transition);
+  border: 2px solid var(--uprofile-bg-primary);
+}
+
+.pheader-avatar-edit-overlay:hover {
+  background: var(--uprofile-primary-accent-dark);
+  transform: scale(1.1);
+}
+
+.pheader-upload-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid var(--uprofile-text-white);
+  border-radius: 50%;
+  animation: pheader-spin 1s linear infinite;
+}
+
+@keyframes pheader-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.pheader-upload-error {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--uprofile-secondary-red);
+  font-size: 12px;
+  margin-top: 5px;
+  padding: 5px 10px;
+  background: rgba(231, 76, 60, 0.1);
+  border-radius: var(--uprofile-border-radius-sm);
+}
+
+/* === USER INFORMATION === */
+.pheader-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.pheader-user-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--uprofile-text-primary);
+  margin: 0;
+  line-height: 1.2;
+  transition: var(--uprofile-transition);
+}
+
+.pheader-user-email {
+  color: var(--uprofile-text-secondary);
+  font-size: 1rem;
+  margin: 0;
+  transition: var(--uprofile-transition);
+}
+
+.pheader-edit-profile-button {
+  background: transparent;
+  color: var(--uprofile-primary-accent);
+  border: 2px solid var(--uprofile-primary-accent);
+  padding: 8px 20px;
+  border-radius: var(--uprofile-border-radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  transition: var(--uprofile-transition);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pheader-edit-profile-button:hover {
+  background: var(--uprofile-primary-accent);
+  color: var(--uprofile-text-white);
+  transform: translateY(-1px);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+.pheader-profile-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.pheader-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--uprofile-text-secondary);
+  font-weight: 500;
+  transition: var(--uprofile-transition);
+}
+
+.pheader-meta-item.pheader-bio {
+  text-align: center;
+  max-width: 300px;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+.pheader-role-badge {
+  padding: 6px 12px;
+  border-radius: var(--uprofile-border-radius-xl);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: var(--uprofile-transition);
+}
+
+.pheader-role-badge.admin {
+  background: var(--uprofile-secondary-red);
+  color: var(--uprofile-text-white);
+}
+
+.pheader-role-badge.provider {
+  background: var(--uprofile-warning-orange);
+  color: var(--uprofile-text-white);
+}
+
+.pheader-role-badge.dealer {
+  background: var(--uprofile-purple);
+  color: var(--uprofile-text-white);
+}
+
+.pheader-role-badge.user {
+  background: var(--uprofile-primary-accent);
+  color: var(--uprofile-text-white);
+}
+
+/* === QUICK ACCESS BUTTONS === */
+.pheader-quick-access-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.pheader-admin-panel-button,
+.pheader-business-dashboard-button,
+.pheader-dealer-dashboard-button {
+  color: var(--uprofile-text-white);
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--uprofile-border-radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--uprofile-transition);
+  text-decoration: none;
+  font-size: 14px;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.pheader-admin-panel-button {
+  background: linear-gradient(135deg, var(--uprofile-secondary-red) 0%, var(--uprofile-secondary-red-dark) 100%);
+}
+
+.pheader-admin-panel-button:hover {
+  background: linear-gradient(135deg, var(--uprofile-secondary-red-dark) 0%, #a93226 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.pheader-business-dashboard-button {
+  background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
+}
+
+.pheader-business-dashboard-button:hover {
+  background: linear-gradient(135deg, var(--uprofile-primary-accent-dark) 0%, #990000 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.3);
+}
+
+.pheader-dealer-dashboard-button {
+  background: linear-gradient(135deg, var(--uprofile-purple) 0%, var(--uprofile-purple-dark) 100%);
+}
+
+.pheader-dealer-dashboard-button:hover {
+  background: linear-gradient(135deg, var(--uprofile-purple-dark) 0%, #7d3c98 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+}
+
+/* === PROFILE STATISTICS === */
+.pheader-profile-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.pheader-stat-item {
+  text-align: center;
+  padding: 15px;
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius);
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.pheader-stat-item:hover {
+  background: var(--uprofile-bg-primary);
+  box-shadow: var(--uprofile-shadow-sm);
+  transform: translateY(-1px);
+}
+
+.pheader-stat-value {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--uprofile-text-primary);
+  margin-bottom: 5px;
+  transition: var(--uprofile-transition);
+}
+
+.pheader-stat-label {
+  font-size: 12px;
+  color: var(--uprofile-text-secondary);
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: var(--uprofile-transition);
+}
+
+/* === PROFILE COMPLETION BAR === */
+.pheader-profile-completion {
+  background: var(--uprofile-bg-secondary);
+  padding: 15px 20px;
+  border-top: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.pheader-completion-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--uprofile-text-primary);
+}
+
+.pheader-completion-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--uprofile-bg-quaternary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pheader-completion-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--uprofile-primary-accent) 0%, var(--uprofile-success-green) 100%);
+  transition: width 0.5s ease;
+  border-radius: 4px;
+}
+
+/* === RESPONSIVE DESIGN === */
+/* Tablet (768px and up) */
+@media (min-width: 768px) {
+  .pheader-content-wrapper {
+    flex-direction: row;
+    text-align: left;
+    gap: 30px;
+    padding: 40px 30px;
+  }
+
+  .pheader-user-info {
+    align-items: flex-start;
+    flex: 1;
+  }
+
+  .pheader-user-name {
+    font-size: 2.2rem;
+  }
+
+  .pheader-profile-meta {
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .pheader-quick-access-section {
+    flex-direction: row;
+    max-width: none;
+  }
+
+  .pheader-profile-stats {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: none;
+  }
+}
+
+/* Desktop (1024px and up) */
+@media (min-width: 1024px) {
+  .pheader-avatar-image,
+  .pheader-avatar-placeholder {
+    width: 140px;
+    height: 140px;
+  }
+
+  .pheader-avatar-placeholder {
+    font-size: 3rem;
+  }
+
+  .pheader-user-name {
+    font-size: 2.5rem;
+  }
+}
+
+/* === ACCESSIBILITY === */
+.pheader-edit-profile-button:focus,
+.pheader-admin-panel-button:focus,
+.pheader-business-dashboard-button:focus,
+.pheader-dealer-dashboard-button:focus,
+.pheader-avatar-edit-overlay:focus {
+  outline: 2px solid var(--uprofile-primary-accent);
+  outline-offset: 2px;
+}
+
+/* === DARK MODE SPECIFIC ADJUSTMENTS === */
+[data-theme="dark"] .pheader-upload-error {
+  background: rgba(231, 76, 60, 0.2);
+}
+
+[data-theme="dark"] .pheader-background-overlay {
+  opacity: 0.15;
+}
