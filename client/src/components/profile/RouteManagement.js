@@ -1,7 +1,7 @@
 // client/src/components/profile/RouteManagement.js
 import React, { useState, useEffect } from 'react';
 import { 
-  Route, Plus, Edit2, Trash2, MapPin, Clock, 
+  Route, Plus, Edit2, Trash2, MapPin, Clock, Settings,
   DollarSign, Users, Phone, Check, X, Navigation,
   Calendar, Star, Eye, Save, AlertCircle, Activity,
   ArrowRight, Map, Zap, Timer
@@ -73,52 +73,74 @@ const RouteManagement = ({ profileData, refreshProfile }) => {
         startTime: route?.schedule?.startTime || '05:00',
         endTime: route?.schedule?.endTime || '22:00',
         frequency: route?.schedule?.frequency || 'On demand', // "On demand", "Every 30 min", etc.
-        peakHours: route?.schedule?.peakHours || ['07:00-09:00', '17:00-19:00']
+        customSchedule: route?.schedule?.customSchedule || ''
       },
       
-      // Pricing structure
       pricing: {
-        currency: route?.pricing?.currency || 'BWP',
         basePrice: route?.pricing?.basePrice || '',
         pricePerKm: route?.pricing?.pricePerKm || '',
-        priceType: route?.pricing?.priceType || 'fixed', // fixed, per_km, negotiable
-        peakPricing: route?.pricing?.peakPricing || false,
-        peakMultiplier: route?.pricing?.peakMultiplier || 1.5
+        discounts: route?.pricing?.discounts || [],
+        specialRates: route?.pricing?.specialRates || []
       },
       
-      // Vehicle capacity and features
       vehicleInfo: {
+        vehicleType: route?.vehicleInfo?.vehicleType || '',
         capacity: route?.vehicleInfo?.capacity || '',
-        vehicleType: route?.vehicleInfo?.vehicleType || 'combi',
-        features: route?.vehicleInfo?.features || [],
-        accessibility: route?.vehicleInfo?.accessibility || false
+        amenities: route?.vehicleInfo?.amenities || [],
+        vehicleNumber: route?.vehicleInfo?.vehicleNumber || ''
       },
       
-      // Contact and operational details
+      operationalInfo: {
+        estimatedDuration: route?.operationalInfo?.estimatedDuration || '',
+        distance: route?.operationalInfo?.distance || '',
+        routeCondition: route?.operationalInfo?.routeCondition || 'good',
+        specialInstructions: route?.operationalInfo?.specialInstructions || ''
+      },
+      
       contactInfo: {
-        phone: route?.contactInfo?.phone || profileData?.profile?.phone || '',
-        whatsapp: route?.contactInfo?.whatsapp || '',
-        emergencyContact: route?.contactInfo?.emergencyContact || ''
+        primaryPhone: route?.contactInfo?.primaryPhone || profileData?.contactInfo?.primaryPhone || '',
+        secondaryPhone: route?.contactInfo?.secondaryPhone || '',
+        whatsappNumber: route?.contactInfo?.whatsappNumber || ''
       },
       
-      // Route status and verification
-      isActive: route?.isActive !== false,
-      isVerified: route?.isVerified || false,
-      verificationStatus: route?.verificationStatus || 'pending',
-      
-      // Additional information
-      description: route?.description || '',
-      specialInstructions: route?.specialInstructions || '',
-      landmarks: route?.landmarks || [],
-      estimatedDuration: route?.estimatedDuration || '',
-      distance: route?.distance || ''
+      isActive: route?.isActive !== undefined ? route.isActive : true,
+      isVerified: route?.isVerified || false
     });
   };
 
-  const handleAddRoute = () => {
-    setEditingRoute(null);
-    initializeRouteForm();
-    setShowRouteModal(true);
+  const handleRouteSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      
+      const routeData = {
+        ...routeFormData,
+        providerId: profileData._id
+      };
+
+      let response;
+      if (editingRoute) {
+        response = await axios.put(`/user/profile/routes/${editingRoute._id}`, routeData);
+      } else {
+        response = await axios.post('/user/profile/routes', routeData);
+      }
+
+      if (response.data.success) {
+        showMessage('success', editingRoute ? 'Route updated successfully!' : 'Route added successfully!');
+        await fetchUserRoutes();
+        setShowRouteModal(false);
+        setEditingRoute(null);
+        setRouteFormData({});
+        if (refreshProfile) {
+          refreshProfile();
+        }
+      }
+    } catch (error) {
+      console.error('Error saving route:', error);
+      showMessage('error', error.response?.data?.message || 'Error saving route');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEditRoute = (route) => {
@@ -127,55 +149,23 @@ const RouteManagement = ({ profileData, refreshProfile }) => {
     setShowRouteModal(true);
   };
 
-  const handleRouteSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!routeFormData.routeName || !routeFormData.origin.name || !routeFormData.destination.name) {
-      showMessage('error', 'Please fill in all required fields');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      
-      const endpoint = editingRoute 
-        ? `/user/profile/routes/${editingRoute._id}`
-        : '/user/profile/routes';
-      
-      const method = editingRoute ? 'put' : 'post';
-      
-      const response = await axios[method](endpoint, routeFormData);
-      
-      if (response.data.success) {
-        await fetchUserRoutes();
-        await refreshProfile();
-        setShowRouteModal(false);
-        setEditingRoute(null);
-        setRouteFormData({});
-        showMessage('success', editingRoute ? 'Route updated successfully!' : 'Route added successfully!');
-      }
-    } catch (error) {
-      console.error('Error saving route:', error);
-      showMessage('error', error.response?.data?.message || 'Failed to save route. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDeleteRoute = async (routeId) => {
     if (!window.confirm('Are you sure you want to delete this route?')) return;
     
     try {
       setLoading(true);
       const response = await axios.delete(`/user/profile/routes/${routeId}`);
+      
       if (response.data.success) {
+        showMessage('success', 'Route deleted successfully!');
         await fetchUserRoutes();
-        await refreshProfile();
-        showMessage('success', 'Route deleted successfully');
+        if (refreshProfile) {
+          refreshProfile();
+        }
       }
     } catch (error) {
       console.error('Error deleting route:', error);
-      showMessage('error', 'Failed to delete route. Please try again.');
+      showMessage('error', 'Error deleting route');
     } finally {
       setLoading(false);
     }
@@ -184,57 +174,49 @@ const RouteManagement = ({ profileData, refreshProfile }) => {
   const toggleRouteStatus = async (route) => {
     try {
       setLoading(true);
-      const response = await axios.put(`/user/profile/routes/${route._id}`, {
-        ...route,
+      const response = await axios.patch(`/user/profile/routes/${route._id}/status`, {
         isActive: !route.isActive
       });
       
       if (response.data.success) {
+        showMessage('success', `Route ${!route.isActive ? 'activated' : 'deactivated'} successfully!`);
         await fetchUserRoutes();
-        showMessage('success', `Route ${!route.isActive ? 'activated' : 'deactivated'} successfully`);
+        if (refreshProfile) {
+          refreshProfile();
+        }
       }
     } catch (error) {
-      console.error('Error toggling route status:', error);
-      showMessage('error', 'Failed to update route status. Please try again.');
+      console.error('Error updating route status:', error);
+      showMessage('error', 'Error updating route status');
     } finally {
       setLoading(false);
     }
   };
 
-  const formatCurrency = (amount) => {
-    if (!amount) return 'P 0.00';
-    return new Intl.NumberFormat('en-BW', {
-      style: 'currency',
-      currency: 'BWP'
-    }).format(amount);
+  // Service registration redirect
+  const handleRegisterService = () => {
+    setActiveTab('services');
   };
 
-  const formatTime = (time) => {
-    if (!time) return 'Not set';
-    return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
-  };
-
-  const getServiceTypeIcon = (serviceType) => {
-    switch (serviceType) {
-      case 'taxi': return '🚕';
-      case 'combi': return '🚐';
-      case 'bus': return '🚌';
-      default: return '🚗';
-    }
-  };
-
-  const getOperationTypeBadge = (operationType) => {
-    switch (operationType) {
-      case 'scheduled': return { text: 'Scheduled', color: 'blue' };
-      case 'on_demand': return { text: 'On Demand', color: 'green' };
-      case 'hybrid': return { text: 'Hybrid', color: 'purple' };
-      default: return { text: 'Unknown', color: 'gray' };
-    }
-  };
+  // Check if user has transport services
+  if (transportServices.length === 0) {
+    return (
+      <div className="rmanage-main-container">
+        <div className="rmanage-no-service-state">
+          <Settings size={48} />
+          <h3>No Transport Service Registered</h3>
+          <p>You need to register a transport service before you can manage routes.</p>
+          <button 
+            className="rmanage-register-service-btn"
+            onClick={handleRegisterService}
+          >
+            <Plus size={16} />
+            Register Transport Service
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="rmanage-main-container">
@@ -243,6 +225,7 @@ const RouteManagement = ({ profileData, refreshProfile }) => {
         <div className={`rmanage-message rmanage-message-${message.type}`}>
           {message.type === 'success' && <Check size={16} />}
           {message.type === 'error' && <AlertCircle size={16} />}
+          {message.type === 'info' && <AlertCircle size={16} />}
           {message.text}
         </div>
       )}
@@ -250,215 +233,218 @@ const RouteManagement = ({ profileData, refreshProfile }) => {
       {/* Header Section */}
       <div className="rmanage-header-section">
         <div className="rmanage-section-header">
-          <h3 className="rmanage-section-title">
-            <Route size={20} />
+          <h2 className="rmanage-section-title">
+            <Route size={24} />
             Route Management
-          </h3>
-          {transportServices.length > 0 && (
-            <button 
-              className="rmanage-add-route-btn"
-              onClick={handleAddRoute}
-            >
-              <Plus size={16} />
-              Add New Route
-            </button>
-          )}
+          </h2>
+          <button 
+            className="rmanage-add-route-btn"
+            onClick={() => {
+              initializeRouteForm();
+              setShowRouteModal(true);
+            }}
+          >
+            <Plus size={16} />
+            Add New Route
+          </button>
         </div>
 
-        {/* Service Type Info */}
-        {transportServices.length > 0 && (
-          <div className="rmanage-service-info">
-            <p>Managing routes for your {transportServices.length} transport service(s)</p>
-            <div className="rmanage-service-badges">
-              {transportServices.map((service, index) => (
-                <span key={index} className="rmanage-service-badge">
-                  {getServiceTypeIcon(service.businessType)} {service.serviceName}
-                </span>
-              ))}
-            </div>
+        {/* Service Info */}
+        <div className="rmanage-service-info">
+          <p>Managing routes for your transport services</p>
+          <div className="rmanage-service-badges">
+            {transportServices.map((service, index) => (
+              <div key={index} className="rmanage-service-badge">
+                <Car size={12} />
+                {service.businessType || 'Transport Service'}
+              </div>
+            ))}
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Routes Grid */}
-      {transportServices.length > 0 ? (
-        <div className="rmanage-routes-section">
+      {/* Routes Section */}
+      <div className="rmanage-routes-section">
+        <div className="rmanage-section-header">
+          <h3 className="rmanage-section-title">
+            <Map size={20} />
+            Your Routes ({routes.length})
+          </h3>
+        </div>
+
+        {routes.length === 0 ? (
+          <div className="rmanage-empty-state">
+            <Route size={48} />
+            <h3>No Routes Added Yet</h3>
+            <p>Start by adding your first transport route to help customers find your services.</p>
+            <button 
+              className="rmanage-add-first-route-btn"
+              onClick={() => {
+                initializeRouteForm();
+                setShowRouteModal(true);
+              }}
+            >
+              <Plus size={16} />
+              Add Your First Route
+            </button>
+          </div>
+        ) : (
           <div className="rmanage-routes-grid">
-            {routes.length > 0 ? (
-              routes.map(route => {
-                const operationBadge = getOperationTypeBadge(route.operationType);
-                return (
-                  <div key={route._id} className="rmanage-route-card">
-                    <div className="rmanage-route-header">
-                      <div className="rmanage-route-title-section">
-                        <h4 className="rmanage-route-title">
-                          {route.routeName}
-                          {route.routeNumber && (
-                            <span className="rmanage-route-number">#{route.routeNumber}</span>
-                          )}
-                        </h4>
-                        <div className="rmanage-route-badges">
-                          <span className={`rmanage-operation-badge rmanage-${operationBadge.color}`}>
-                            {operationBadge.text}
-                          </span>
-                          <span className={`rmanage-status-badge ${route.isActive ? 'active' : 'inactive'}`}>
-                            {route.isActive ? 'Active' : 'Inactive'}
-                          </span>
-                          {route.isVerified && (
-                            <span className="rmanage-verified-badge">
-                              <Check size={12} />
-                              Verified
-                            </span>
-                          )}
-                        </div>
-                      </div>
+            {routes.map((route) => (
+              <div key={route._id} className="rmanage-route-card">
+                {/* Route Header */}
+                <div className="rmanage-route-header">
+                  <div className="rmanage-route-title-section">
+                    <h4 className="rmanage-route-title">
+                      <Navigation size={18} />
+                      {route.routeName}
+                      {route.routeNumber && (
+                        <span className="rmanage-route-number">#{route.routeNumber}</span>
+                      )}
+                    </h4>
+                    
+                    <div className="rmanage-route-badges">
+                      <span className={`rmanage-operation-badge rmanage-blue`}>
+                        {route.operationType?.replace('_', ' ') || 'On Demand'}
+                      </span>
                       
-                      <div className="rmanage-route-actions">
-                        <button 
-                          className="rmanage-route-action-btn rmanage-edit-btn"
-                          onClick={() => handleEditRoute(route)}
-                          title="Edit Route"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button 
-                          className="rmanage-route-action-btn rmanage-delete-btn"
-                          onClick={() => handleDeleteRoute(route._id)}
-                          title="Delete Route"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                      {route.isVerified && (
+                        <span className="rmanage-verified-badge">
+                          <Check size={10} />
+                          Verified
+                        </span>
+                      )}
+                      
+                      <span className={`rmanage-status-badge ${route.isActive ? 'active' : 'inactive'}`}>
+                        {route.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="rmanage-route-actions">
+                    <button 
+                      className="rmanage-route-action-btn rmanage-edit-btn"
+                      onClick={() => handleEditRoute(route)}
+                      title="Edit Route"
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                    <button 
+                      className="rmanage-route-action-btn rmanage-delete-btn"
+                      onClick={() => handleDeleteRoute(route._id)}
+                      title="Delete Route"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Route Content */}
+                <div className="rmanage-route-content">
+                  {/* Route Path */}
+                  <div className="rmanage-route-path">
+                    <div className="rmanage-location">
+                      <MapPin className="rmanage-origin-icon" size={16} />
+                      <div className="rmanage-location-info">
+                        <div className="rmanage-location-name">{route.origin?.name}</div>
+                        {route.origin?.address && (
+                          <div className="rmanage-location-address">{route.origin.address}</div>
+                        )}
                       </div>
                     </div>
-
-                    <div className="rmanage-route-content">
-                      {/* Route Path */}
-                      <div className="rmanage-route-path">
-                        <div className="rmanage-location">
-                          <MapPin size={16} className="rmanage-origin-icon" />
-                          <div className="rmanage-location-info">
-                            <span className="rmanage-location-name">{route.origin.name}</span>
-                            {route.origin.address && (
-                              <span className="rmanage-location-address">{route.origin.address}</span>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="rmanage-route-arrow">
-                          <ArrowRight size={20} />
-                        </div>
-                        
-                        <div className="rmanage-location">
-                          <MapPin size={16} className="rmanage-destination-icon" />
-                          <div className="rmanage-location-info">
-                            <span className="rmanage-location-name">{route.destination.name}</span>
-                            {route.destination.address && (
-                              <span className="rmanage-location-address">{route.destination.address}</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Route Details */}
-                      <div className="rmanage-route-details">
-                        <div className="rmanage-detail-item">
-                          <Clock size={14} />
-                          <span>
-                            {formatTime(route.schedule?.startTime)} - {formatTime(route.schedule?.endTime)}
-                          </span>
-                        </div>
-                        
-                        {route.pricing?.basePrice && (
-                          <div className="rmanage-detail-item">
-                            <DollarSign size={14} />
-                            <span>{formatCurrency(route.pricing.basePrice)}</span>
-                          </div>
+                    
+                    <ArrowRight className="rmanage-route-arrow" size={16} />
+                    
+                    <div className="rmanage-location">
+                      <MapPin className="rmanage-destination-icon" size={16} />
+                      <div className="rmanage-location-info">
+                        <div className="rmanage-location-name">{route.destination?.name}</div>
+                        {route.destination?.address && (
+                          <div className="rmanage-location-address">{route.destination.address}</div>
                         )}
-                        
-                        {route.vehicleInfo?.capacity && (
-                          <div className="rmanage-detail-item">
-                            <Users size={14} />
-                            <span>{route.vehicleInfo.capacity} passengers</span>
-                          </div>
-                        )}
-                        
-                        {route.estimatedDuration && (
-                          <div className="rmanage-detail-item">
-                            <Timer size={14} />
-                            <span>{route.estimatedDuration}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Route Stats */}
-                      {route.analytics && (
-                        <div className="rmanage-route-stats">
-                          <div className="rmanage-stat-item">
-                            <Eye size={12} />
-                            <span>{route.analytics.views || 0} views</span>
-                          </div>
-                          <div className="rmanage-stat-item">
-                            <Star size={12} />
-                            <span>{(route.analytics.rating || 0).toFixed(1)}/5</span>
-                          </div>
-                          <div className="rmanage-stat-item">
-                            <Activity size={12} />
-                            <span>{route.analytics.bookings || 0} bookings</span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Quick Actions */}
-                      <div className="rmanage-route-quick-actions">
-                        <button 
-                          className={`rmanage-quick-action-btn ${route.isActive ? 'rmanage-deactivate-btn' : 'rmanage-activate-btn'}`}
-                          onClick={() => toggleRouteStatus(route)}
-                        >
-                          <Zap size={14} />
-                          {route.isActive ? 'Deactivate' : 'Activate'}
-                        </button>
-                        <button 
-                          className="rmanage-quick-action-btn rmanage-view-btn"
-                          onClick={() => window.open(`/routes/${route._id}`, '_blank')}
-                        >
-                          <Eye size={14} />
-                          View Public
-                        </button>
                       </div>
                     </div>
                   </div>
-                );
-              })
-            ) : (
-              <div className="rmanage-empty-state">
-                <Route size={48} />
-                <h3>No Routes Added</h3>
-                <p>Create your first route to start accepting passengers</p>
-                <button 
-                  className="rmanage-add-first-route-btn"
-                  onClick={handleAddRoute}
-                >
-                  <Plus size={16} />
-                  Add Your First Route
-                </button>
+
+                  {/* Route Details */}
+                  <div className="rmanage-route-details">
+                    {route.pricing?.basePrice && (
+                      <div className="rmanage-detail-item">
+                        <DollarSign size={14} />
+                        <span>P{route.pricing.basePrice}</span>
+                      </div>
+                    )}
+                    
+                    {route.schedule?.operatingDays && (
+                      <div className="rmanage-detail-item">
+                        <Calendar size={14} />
+                        <span>{route.schedule.operatingDays.length} days/week</span>
+                      </div>
+                    )}
+                    
+                    {route.contactInfo?.primaryPhone && (
+                      <div className="rmanage-detail-item">
+                        <Phone size={14} />
+                        <span>{route.contactInfo.primaryPhone}</span>
+                      </div>
+                    )}
+                    
+                    {route.vehicleInfo?.capacity && (
+                      <div className="rmanage-detail-item">
+                        <Users size={14} />
+                        <span>{route.vehicleInfo.capacity} passengers</span>
+                      </div>
+                    )}
+                    
+                    {route.estimatedDuration && (
+                      <div className="rmanage-detail-item">
+                        <Timer size={14} />
+                        <span>{route.estimatedDuration}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Route Stats */}
+                  {route.analytics && (
+                    <div className="rmanage-route-stats">
+                      <div className="rmanage-stat-item">
+                        <Eye size={12} />
+                        <span>{route.analytics.views || 0} views</span>
+                      </div>
+                      <div className="rmanage-stat-item">
+                        <Star size={12} />
+                        <span>{(route.analytics.rating || 0).toFixed(1)}/5</span>
+                      </div>
+                      <div className="rmanage-stat-item">
+                        <Activity size={12} />
+                        <span>{route.analytics.bookings || 0} bookings</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Quick Actions */}
+                  <div className="rmanage-route-quick-actions">
+                    <button 
+                      className={`rmanage-quick-action-btn ${route.isActive ? 'rmanage-deactivate-btn' : 'rmanage-activate-btn'}`}
+                      onClick={() => toggleRouteStatus(route)}
+                    >
+                      <Zap size={14} />
+                      {route.isActive ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button 
+                      className="rmanage-quick-action-btn rmanage-view-btn"
+                      onClick={() => {/* Handle view route details */}}
+                    >
+                      <Eye size={14} />
+                      View Details
+                    </button>
+                  </div>
+                </div>
               </div>
-            )}
+            ))}
           </div>
-        </div>
-      ) : (
-        <div className="rmanage-no-service-state">
-          <Navigation size={64} />
-          <h3>No Transport Services Found</h3>
-          <p>You need to register a public transport service before you can manage routes</p>
-          <button 
-            className="rmanage-register-service-btn"
-            onClick={() => showMessage('info', 'Please register a transport service first')}
-          >
-            <Settings size={16} />
-            Register Transport Service
-          </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Route Modal */}
       {showRouteModal && (
