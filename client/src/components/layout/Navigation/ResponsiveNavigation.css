@@ -10,10 +10,10 @@
     --hover-bg: rgba(255, 51, 0, 0.1);
     --animation-duration: 0.3s;
     --shadow-color: rgba(0, 0, 0, 0.2);
-    --bottom-nav-height: 70px;
+    --bottom-nav-height: 60px; /* Reduced from 70px */
     --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-    --fab-size: 56px;
-    --fab-offset: 80px; /* Distance from bottom nav */
+    --fab-size: 48px; /* Reduced from 56px */
+    --fab-offset: 15px; /* Much closer to bottom nav */
 }
 
 /* ========== BASE NAVIGATION CONTAINER ========== */
@@ -33,7 +33,7 @@
 
 /* ========== BREADCRUMB NAVIGATION ========== */
 .breadcrumb-container {
-    padding: 0.4rem 2rem;
+    padding: 0.25rem 1.5rem; /* Reduced from 0.4rem 2rem */
     background-color: var(--dropdown-bg);
     border-bottom: 1px solid var(--nav-border);
     overflow-x: auto;
@@ -42,7 +42,7 @@
     -ms-overflow-style: none;
     contain: content;
     -webkit-overflow-scrolling: touch;
-    min-height: 36px;
+    min-height: 28px; /* Reduced from 36px */
     display: flex;
     align-items: center;
 }
@@ -95,7 +95,7 @@
 /* ========== DESKTOP CATEGORY NAVIGATION ========== */
 .category-nav {
     position: relative;
-    padding: 0.75rem 2rem;
+    padding: 0.5rem 1.5rem; /* Reduced from 0.75rem 2rem */
     overflow: hidden;
     background-color: var(--nav-bg);
     contain: content;
@@ -135,15 +135,15 @@
     align-items: center;
     gap: 0.5rem;
     color: var(--nav-text);
-    font-size: 1rem;
-    padding: 0.75rem 1rem;
+    font-size: 0.95rem; /* Slightly smaller */
+    padding: 0.5rem 0.8rem; /* Reduced from 0.75rem 1rem */
     cursor: pointer;
     transition: all var(--animation-duration) ease;
     position: relative;
     white-space: nowrap;
     text-decoration: none;
     border-radius: 6px;
-    min-height: 44px;
+    min-height: 36px; /* Reduced from 44px */
     justify-content: center;
 }
 
@@ -533,7 +533,7 @@
 /* ========== FLOATING ACTION BUTTON (FAB) ========== */
 .review-fab {
     position: fixed;
-    bottom: var(--fab-offset);
+    bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom) + var(--fab-offset));
     right: 1rem;
     width: var(--fab-size);
     height: var(--fab-size);
@@ -549,7 +549,7 @@
     box-shadow: 0 4px 12px rgba(255, 51, 0, 0.4);
     transition: all var(--animation-duration) ease;
     z-index: 999;
-    font-size: 0.7rem;
+    font-size: 0.65rem; /* Smaller text */
     font-weight: 600;
 }
 
@@ -698,7 +698,7 @@ body.has-mobile-nav {
 }
 
 body.has-mobile-nav .review-fab {
-    bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom) + 10px);
+    /* FAB positioning is now handled in the main .review-fab rule */
 }
 
 body.has-mobile-nav .main-content {
@@ -735,17 +735,17 @@ body.has-mobile-nav .compact-footer {
     }
 
     .breadcrumb-container {
-        padding: 0.3rem 1rem;
-        min-height: 32px;
+        padding: 0.2rem 0.75rem; /* More compact on mobile */
+        min-height: 24px; /* Smaller on mobile */
     }
     
     .breadcrumb-item {
-        font-size: 0.75rem;
+        font-size: 0.7rem; /* Smaller text */
     }
 
     .breadcrumb-separator {
-        font-size: 0.7rem;
-        margin: 0 0.15rem;
+        font-size: 0.65rem;
+        margin: 0 0.1rem;
     }
     
     /* Show mobile bottom navigation */
@@ -756,75 +756,76 @@ body.has-mobile-nav .compact-footer {
     /* Show FAB on mobile */
     .review-fab {
         display: flex;
+        right: 0.75rem; /* Closer to edge on mobile */
     }
 }
 
 /* Small screens optimization */
 @media (max-width: 480px) {
     :root {
-        --bottom-nav-height: 65px;
-        --fab-size: 48px;
+        --bottom-nav-height: 55px; /* Even smaller on very small screens */
+        --fab-size: 44px; /* Smaller FAB on small screens */
+        --fab-offset: 12px; /* Very close to bottom nav */
     }
     
     .breadcrumb-container {
-        padding: 0.25rem 0.75rem;
-        min-height: 30px;
+        padding: 0.15rem 0.5rem; /* Very compact */
+        min-height: 20px; /* Minimal height */
     }
     
     .breadcrumb-item {
-        font-size: 0.7rem;
+        font-size: 0.65rem; /* Smaller text */
     }
     
     .breadcrumb-item a {
-        padding: 0.15rem 0.3rem;
-        min-height: 20px;
+        padding: 0.1rem 0.25rem; /* Minimal padding */
+        min-height: 18px;
     }
 
     .breadcrumb-separator {
-        font-size: 0.65rem;
-        margin: 0 0.1rem;
+        font-size: 0.6rem;
+        margin: 0 0.05rem;
     }
     
     .mobile-nav-item {
-        padding: 0.4rem 0.2rem;
-        margin: 0 0.1rem;
+        padding: 0.3rem 0.15rem; /* More compact */
+        margin: 0 0.05rem;
     }
     
     .mobile-nav-label {
-        font-size: 0.65rem;
+        font-size: 0.6rem; /* Smaller labels */
     }
     
     .mobile-nav-icon {
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.15rem;
     }
 
     .review-fab {
-        right: 0.75rem;
-        bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom) + 8px);
+        right: 0.5rem; /* Even closer to edge */
     }
 
     .fab-text {
-        font-size: 0.55rem;
+        font-size: 0.5rem; /* Very small text */
     }
 }
 
 /* Large desktop screens */
 @media (min-width: 1200px) {
     .category-nav {
-        padding: 0.75rem 3rem;
+        padding: 0.5rem 2.5rem; /* Slightly more padding on large screens */
     }
 
     .breadcrumb-container {
-        padding: 0.4rem 3rem;
+        padding: 0.25rem 2.5rem;
     }
 
     .desktop-user-menu {
-        margin-left: 3rem;
+        margin-left: 2.5rem;
     }
 
     /* Hide FAB on large screens */
     .review-fab {
-        display: none;
+        display: none !important;
     }
 }
 
