@@ -1,96 +1,85 @@
-// client/src/pages/UserProfilePage.js - Complete Updated Version
-
+// client/src/pages/UserProfilePage.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
-import { useTheme } from '../context/ThemeContext.js';
+import { useNavigate } from 'react-router-dom';
 import axios from '../config/axios.js';
-
-// Import components
-import CarListingManager from '../components/profile/CarListingManager/CarListingManager.js';
-
-// Import icons
 import { 
-  Eye, 
-  Settings, 
-  Route, 
-  Car, 
-  BarChart3, 
-  User, 
-  Phone, 
-  Mail, 
-  MapPin,
-  Calendar,
-  Shield,
-  Sun,
-  Moon,
-  Edit3,
-  Save,
-  X
+  User, Settings, Shield, Eye, Car, MapPin, 
+  Route, Activity, BarChart3, Calendar, CreditCard,
+  Sun, Moon
 } from 'lucide-react';
+
+// Import modular components
+import ProfileHeader from '../components/profile/ProfileHeader.js';
+import ProfileNavigation from '../components/profile/ProfileNavigation.js';
+import ProfileOverview from '../components/profile/ProfileOverview.js';
+import ServiceManagement from '../components/profile/ServiceManagement.js';
+import RouteManagement from '../components/profile/RouteManagement.js';
+import VehicleManagement from '../components/profile/VehicleManagement.js';
+import BusinessDashboard from '../components/profile/BusinessDashboard.js';
+import ProfileSettings from '../components/profile/ProfileSettings.js';
+import LoadingScreen from '../components/shared/LoadingScreen/LoadingScreen.js';
 
 import './UserProfilePage.css';
 
 const UserProfilePage = () => {
+  const { user, isAuthenticated, loading: authLoading, updateProfile } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
-  const { theme, toggleTheme } = useTheme();
-  
-  // Get tab and action from URL params
-  const urlTab = searchParams.get('tab') || 'overview';
-  const urlAction = searchParams.get('action');
-  
-  const [activeTab, setActiveTab] = useState(urlTab);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [profileData, setProfileData] = useState(null);
-  const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [theme, setTheme] = useState(() => {
+    // Get theme from localStorage or default to 'light'
+    return localStorage.getItem('user-profile-theme') || 'light';
+  });
 
-  // TARGETED FIX: Initialize profile data with user from AuthContext
+  // Apply theme to document
   useEffect(() => {
-    if (isAuthenticated && user) {
-      setProfileData(user);
-      setFormData({
-        name: user.name || '',
-        email: user.email || '',
-        phone: user.profile?.phone || '',
-        bio: user.profile?.bio || '',
-        city: user.profile?.address?.city || '',
-        area: user.profile?.address?.area || ''
-      });
-    }
-  }, [isAuthenticated, user]);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('user-profile-theme', theme);
+  }, [theme]);
 
-  // Fetch user profile data
+  const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  };
+
+  // Wait for auth to complete before making decisions
+  useEffect(() => {
+    if (!authLoading) {
+      if (isAuthenticated && user) {
+        fetchUserProfile();
+      } else {
+        setLoading(false);
+        setError('Please login to view your profile');
+      }
+    }
+  }, [isAuthenticated, user, authLoading]);
+
   const fetchUserProfile = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await axios.get('/user/profile');
+      // Try the user profile endpoint first
+      let response;
+      try {
+        response = await axios.get('/user/profile');
+      } catch (profileError) {
+        // If user profile endpoint fails, try the auth me endpoint
+        console.log('User profile endpoint failed, trying auth/me:', profileError);
+        response = await axios.get('/auth/me');
+      }
       
       if (response.data.success) {
-        setProfileData(response.data.data);
-        // Initialize form data with current profile data
-        setFormData({
-          name: response.data.data.name || '',
-          email: response.data.data.email || '',
-          phone: response.data.data.profile?.phone || '',
-          bio: response.data.data.profile?.bio || '',
-          city: response.data.data.profile?.address?.city || '',
-          area: response.data.data.profile?.address?.area || ''
-        });
+        const userData = response.data.data;
+        setProfileData(userData);
       } else {
-        setError('Failed to load profile data');
+        throw new Error(response.data.message || 'Failed to load profile data');
       }
-    } catch (err) {
-      console.error('Error fetching profile:', err);
-      // TARGETED FIX: Don't show error if we already have user data
-      if (!profileData) {
-        setError('Failed to load profile data. Please try again.');
-      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setError('Failed to load profile. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -102,38 +91,6 @@ const UserProfilePage = () => {
 
   const handleAdminPanelAccess = () => {
     navigate('/admin/dashboard');
-  };
-
-  // Update profile
-  const updateProfile = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await axios.put('/user/profile/basic', formData);
-      
-      if (response.data.success) {
-        setProfileData(response.data.data);
-        setEditMode(false);
-        // Show success message
-      } else {
-        setError('Failed to update profile');
-      }
-    } catch (err) {
-      console.error('Error updating profile:', err);
-      setError('Failed to update profile.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle form input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
   };
 
   // Determine available tabs based on user profile and permissions
@@ -150,7 +107,7 @@ const UserProfilePage = () => {
       tabs.push({ id: 'routes', label: 'Routes', icon: Route });
     }
 
-    // UPDATED: Add Vehicles tab for all users (includes car listings)
+    // Add Vehicles tab for all users
     tabs.push({ id: 'vehicles', label: 'My Vehicles', icon: Car });
 
     // Add Business Dashboard for verified business owners
@@ -166,20 +123,8 @@ const UserProfilePage = () => {
     return tabs;
   };
 
-  // Load profile data on component mount
-  useEffect(() => {
-    if (isAuthenticated && profileData) {
-      fetchUserProfile();
-    }
-  }, [isAuthenticated]);
-
-  // Update active tab when URL params change
-  useEffect(() => {
-    setActiveTab(urlTab);
-  }, [urlTab]);
-
-  // Show loading while auth is loading
-  if (authLoading) {
+  // Show loading while auth is loading or profile is loading
+  if (authLoading || loading) {
     return (
       <div className="uprofile-main-container">
         <div className="uprofile-loading-container">
@@ -190,13 +135,13 @@ const UserProfilePage = () => {
     );
   }
 
-  // Show error state if not authenticated
-  if (!isAuthenticated || !user) {
+  // Show error state if not authenticated or error occurred
+  if (error || !isAuthenticated || !user) {
     return (
       <div className="uprofile-main-container">
         <div className="uprofile-error-container">
           <h2 className="uprofile-error-title">Profile Not Available</h2>
-          <p className="uprofile-error-message">Please login to view your profile</p>
+          <p className="uprofile-error-message">{error || 'Please login to view your profile'}</p>
           <button onClick={handleLoginRedirect} className="uprofile-login-button">
             Go to Login
           </button>
@@ -205,385 +150,247 @@ const UserProfilePage = () => {
     );
   }
 
-  // TARGETED FIX: Use fallback to user data if profileData not loaded
-  const displayData = profileData || user;
+  // Show error if profile data couldn't be loaded
+  if (!profileData) {
+    return (
+      <div className="uprofile-main-container">
+        <div className="uprofile-error-container">
+          <h2 className="uprofile-error-title">Profile Not Found</h2>
+          <p className="uprofile-error-message">Unable to load profile data</p>
+          <button onClick={fetchUserProfile} className="uprofile-error-button">
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const availableTabs = getAvailableTabs();
 
-  // Render overview tab content
-  const renderOverviewContent = () => (
-    <div className="uprofile-overview">
-      <div className="uprofile-welcome-section">
-        <div className="uprofile-avatar-section">
-          <div className="uprofile-avatar">
-            {displayData.avatar ? (
-              <img src={displayData.avatar} alt={displayData.name} />
-            ) : (
-              <User size={40} />
-            )}
-          </div>
-          <div className="uprofile-user-info">
-            <h2>{displayData.name || 'User'}</h2>
-            <p>{displayData.email}</p>
-            {displayData.role === 'admin' && (
-              <span className="uprofile-admin-badge">Administrator</span>
-            )}
-          </div>
-        </div>
-        
-        {!editMode ? (
-          <button 
-            className="uprofile-edit-button"
-            onClick={() => setEditMode(true)}
-          >
-            <Edit3 size={16} />
-            Edit Profile
-          </button>
-        ) : (
-          <div className="uprofile-edit-actions">
-            <button 
-              className="uprofile-save-button"
-              onClick={updateProfile}
-              disabled={loading}
-            >
-              <Save size={16} />
-              {loading ? 'Saving...' : 'Save'}
-            </button>
-            <button 
-              className="uprofile-cancel-button"
-              onClick={() => setEditMode(false)}
-            >
-              <X size={16} />
-              Cancel
-            </button>
-          </div>
-        )}
-      </div>
-
-      {editMode ? (
-        <div className="uprofile-edit-form">
-          <div className="uprofile-form-group">
-            <label>Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Your full name"
-            />
-          </div>
-          <div className="uprofile-form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Your email address"
-            />
-          </div>
-          <div className="uprofile-form-group">
-            <label>Phone</label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              placeholder="Your phone number"
-            />
-          </div>
-          <div className="uprofile-form-group">
-            <label>Bio</label>
-            <textarea
-              name="bio"
-              value={formData.bio}
-              onChange={handleInputChange}
-              placeholder="Tell us about yourself"
-              rows="3"
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="uprofile-account-info">
-          <div className="uprofile-info-section">
-            <div className="uprofile-info-item">
-              <Phone size={20} />
-              <div>
-                <span className="uprofile-info-label">Phone</span>
-                <span className="uprofile-info-value">
-                  {displayData.profile?.phone || 'Not provided'}
-                </span>
-              </div>
-            </div>
-            
-            <div className="uprofile-info-item">
-              <Mail size={20} />
-              <div>
-                <span className="uprofile-info-label">Email</span>
-                <span className="uprofile-info-value">{displayData.email}</span>
-              </div>
-            </div>
-            
-            <div className="uprofile-info-item">
-              <MapPin size={20} />
-              <div>
-                <span className="uprofile-info-label">Location</span>
-                <span className="uprofile-info-value">
-                  {displayData.profile?.address?.city || 'Not provided'}
-                  {displayData.profile?.address?.area && `, ${displayData.profile.address.area}`}
-                </span>
-              </div>
-            </div>
-            
-            <div className="uprofile-info-item">
-              <Calendar size={20} />
-              <div>
-                <span className="uprofile-info-label">Member Since</span>
-                <span className="uprofile-info-value">
-                  {new Date(displayData.createdAt || Date.now()).toLocaleDateString()}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {displayData.profile?.bio && !editMode && (
-        <div className="uprofile-bio-section">
-          <h3>About</h3>
-          <p>{displayData.profile.bio}</p>
-        </div>
-      )}
-
-      {/* Profile Stats */}
-      <div className="uprofile-stats-section">
-        <h3>Your Activity</h3>
-        <div className="uprofile-stats-grid">
-          <div className="uprofile-stat-card">
-            <div className="uprofile-stat-number">{displayData.stats?.totalVehicles || 0}</div>
-            <div className="uprofile-stat-label">Vehicles</div>
-          </div>
-          <div className="uprofile-stat-card">
-            <div className="uprofile-stat-number">{displayData.favorites?.length || 0}</div>
-            <div className="uprofile-stat-label">Favorites</div>
-          </div>
-          <div className="uprofile-stat-card">
-            <div className="uprofile-stat-number">{displayData.stats?.totalRoutes || 0}</div>
-            <div className="uprofile-stat-label">Routes</div>
-          </div>
-          <div className="uprofile-stat-card">
-            <div className="uprofile-stat-number">{displayData.stats?.verifiedServices || 0}</div>
-            <div className="uprofile-stat-label">Services</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Admin Quick Access */}
-      {displayData.role === 'admin' && (
-        <div className="uprofile-admin-section">
-          <h3>Administrator Quick Access</h3>
-          <div className="uprofile-quick-access-section">
-            <button 
-              className="uprofile-admin-panel-button"
-              onClick={handleAdminPanelAccess}
-            >
-              <BarChart3 size={16} />
-              Admin Panel
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
-  // Render services tab content
-  const renderServicesContent = () => (
-    <div className="uprofile-services">
-      <div className="uprofile-section-header">
-        <h3>Services</h3>
-        <p>Manage your business services and verification status</p>
-      </div>
-      
-      {displayData.businessProfile?.services?.length > 0 ? (
-        <div className="uprofile-services-list">
-          {displayData.businessProfile.services.map((service, index) => (
-            <div key={index} className="uprofile-service-card">
-              <div className="uprofile-service-info">
-                <h4>{service.serviceType?.replace('_', ' ').toUpperCase()}</h4>
-                <p>{service.description}</p>
-              </div>
-              <div className="uprofile-service-status">
-                <span className={`uprofile-status-badge ${service.isVerified ? 'verified' : 'pending'}`}>
-                  {service.isVerified ? 'Verified' : 'Pending'}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="uprofile-empty-state">
-          <p>No services registered yet.</p>
-          <button className="uprofile-primary-button">Add Service</button>
-        </div>
-      )}
-    </div>
-  );
-
-  // UPDATED: Render vehicles tab content with CarListingManager
-  const renderVehiclesContent = () => (
-    <div className="uprofile-vehicles">
-      <CarListingManager action={urlAction} />
-    </div>
-  );
-
-  // Render routes tab content
-  const renderRoutesContent = () => (
-    <div className="uprofile-routes">
-      <div className="uprofile-section-header">
-        <h3>Transport Routes</h3>
-        <p>Manage your transport routes and schedules</p>
-      </div>
-      
-      {displayData.routes?.length > 0 ? (
-        <div className="uprofile-routes-list">
-          {displayData.routes.map((route, index) => (
-            <div key={index} className="uprofile-route-card">
-              <div className="uprofile-route-info">
-                <h4>{route.routeName}</h4>
-                <p>{route.serviceType?.replace('_', ' ').toUpperCase()}</p>
-              </div>
-              <div className="uprofile-route-status">
-                <span className={`uprofile-status-badge ${route.operationalStatus === 'active' ? 'verified' : 'pending'}`}>
-                  {route.operationalStatus}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="uprofile-empty-state">
-          <p>No routes configured yet.</p>
-          <button className="uprofile-primary-button">Add Route</button>
-        </div>
-      )}
-    </div>
-  );
-
-  // Render business tab content
-  const renderBusinessContent = () => (
-    <div className="uprofile-business">
-      <div className="uprofile-section-header">
-        <h3>Business Dashboard</h3>
-        <p>Monitor your business performance and analytics</p>
-      </div>
-      
-      <div className="uprofile-stats-grid">
-        <div className="uprofile-stat-card">
-          <div className="uprofile-stat-number">0</div>
-          <div className="uprofile-stat-label">Total Views</div>
-        </div>
-        <div className="uprofile-stat-card">
-          <div className="uprofile-stat-number">0</div>
-          <div className="uprofile-stat-label">Inquiries</div>
-        </div>
-        <div className="uprofile-stat-card">
-          <div className="uprofile-stat-number">0</div>
-          <div className="uprofile-stat-label">Bookings</div>
-        </div>
-        <div className="uprofile-stat-card">
-          <div className="uprofile-stat-number">0</div>
-          <div className="uprofile-stat-label">Revenue</div>
-        </div>
-      </div>
-      
-      <div className="uprofile-empty-state">
-        <p>Business analytics will appear here once you have active services.</p>
-      </div>
-    </div>
-  );
-
-  // Render settings tab content
-  const renderSettingsContent = () => (
-    <div className="uprofile-settings">
-      <div className="uprofile-section-header">
-        <h3>Account Settings</h3>
-        <p>Manage your account preferences and privacy settings</p>
-      </div>
-
-      <div className="uprofile-settings-section">
-        <h4>Appearance</h4>
-        <div className="uprofile-setting-item">
-          <div className="uprofile-setting-info">
-            <span>Theme</span>
-            <span className="uprofile-setting-description">
-              Choose your preferred color scheme
-            </span>
-          </div>
-          <button 
-            className="uprofile-theme-toggle"
-            onClick={toggleTheme}
-            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-          >
-            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
-            {theme === 'light' ? 'Dark' : 'Light'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Main render function
   return (
     <div className="uprofile-main-container">
       {/* Theme Toggle Button */}
       <button 
-        className="uprofile-theme-toggle-fixed"
+        className="uprofile-theme-toggle"
         onClick={toggleTheme}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+        title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
       >
         {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
       </button>
 
-      <div className="uprofile-container">
-        {/* Sidebar Navigation */}
-        <div className="uprofile-sidebar">
-          <div className="uprofile-sidebar-header">
-            <h2>Profile</h2>
+      {/* Enhanced Profile Header Component */}
+      <EnhancedProfileHeader 
+        profileData={profileData}
+        setProfileData={setProfileData}
+        updateProfile={updateProfile}
+        onAdminAccess={handleAdminPanelAccess}
+      />
+
+      {/* Enhanced Profile Navigation Component */}
+      <EnhancedProfileNavigation 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        availableTabs={availableTabs}
+      />
+
+      {/* Enhanced Profile Content */}
+      <div className="uprofile-content-container">
+        {activeTab === 'overview' && (
+          <ProfileOverview 
+            profileData={profileData}
+            refreshProfile={fetchUserProfile}
+          />
+        )}
+
+        {activeTab === 'services' && (
+          <ServiceManagement 
+            profileData={profileData}
+            refreshProfile={fetchUserProfile}
+          />
+        )}
+
+        {activeTab === 'routes' && (
+          <RouteManagement 
+            profileData={profileData}
+            refreshProfile={fetchUserProfile}
+          />
+        )}
+
+        {activeTab === 'vehicles' && (
+          <VehicleManagement 
+            profileData={profileData}
+            refreshProfile={fetchUserProfile}
+          />
+        )}
+
+        {activeTab === 'business' && (
+          <BusinessDashboard 
+            profileData={profileData}
+            refreshProfile={fetchUserProfile}
+          />
+        )}
+
+        {activeTab === 'settings' && (
+          <ProfileSettings 
+            profileData={profileData}
+            refreshProfile={fetchUserProfile}
+            theme={theme}
+            onThemeChange={setTheme}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Enhanced Profile Header Component
+const EnhancedProfileHeader = ({ profileData, setProfileData, updateProfile, onAdminAccess }) => {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleAvatarClick = () => {
+    // Handle avatar change functionality
+    setIsEditing(true);
+  };
+
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const formatJoinDate = (date) => {
+    if (!date) return 'Unknown';
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long'
+    });
+  };
+
+  return (
+    <div className="uprofile-header-container">
+      <div className="uprofile-header-background"></div>
+      <div className="uprofile-header-content">
+        <div className="uprofile-avatar-section">
+          <div className="uprofile-avatar-container">
+            {profileData.avatar?.url ? (
+              <img 
+                src={profileData.avatar.url} 
+                alt={profileData.name}
+                className="uprofile-avatar"
+                onClick={handleAvatarClick}
+              />
+            ) : (
+              <div 
+                className="uprofile-avatar-placeholder"
+                onClick={handleAvatarClick}
+              >
+                {getInitials(profileData.name)}
+              </div>
+            )}
+            <div className="uprofile-avatar-edit-overlay" onClick={handleAvatarClick}>
+              <User size={16} />
+            </div>
           </div>
-          
-          <nav className="uprofile-nav">
-            {availableTabs.map((tab) => {
-              const IconComponent = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  className={`uprofile-nav-item ${activeTab === tab.id ? 'active' : ''}`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  <IconComponent size={20} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </nav>
         </div>
 
-        {/* Main Content */}
-        <div className="uprofile-main-content">
-          {error && (
-            <div className="uprofile-error-banner">
-              <p>{error}</p>
-              <button onClick={() => setError(null)}>×</button>
-            </div>
-          )}
+        <div className="uprofile-user-info">
+          <h1 className="uprofile-user-name">{profileData.name || 'User'}</h1>
+          <p className="uprofile-user-email">{profileData.email}</p>
+          
+          <button 
+            className="uprofile-edit-profile-button"
+            onClick={() => setIsEditing(true)}
+          >
+            <Settings size={16} />
+            Edit Profile
+          </button>
 
-          <div className="uprofile-content">
-            {activeTab === 'overview' && renderOverviewContent()}
-            {activeTab === 'services' && renderServicesContent()}
-            {activeTab === 'vehicles' && renderVehiclesContent()}
-            {activeTab === 'routes' && renderRoutesContent()}
-            {activeTab === 'business' && renderBusinessContent()}
-            {activeTab === 'settings' && renderSettingsContent()}
+          <div className="uprofile-profile-meta">
+            <div className="uprofile-meta-item">
+              <Calendar size={16} />
+              <span>Joined {formatJoinDate(profileData.createdAt)}</span>
+            </div>
+            <div className="uprofile-meta-item">
+              <span className={`uprofile-role-badge ${profileData.role}`}>
+                {profileData.role}
+              </span>
+            </div>
           </div>
+
+          {/* Quick Access Buttons */}
+          <div className="uprofile-quick-access-section">
+            {profileData.role === 'admin' && (
+              <button 
+                className="uprofile-admin-panel-button"
+                onClick={onAdminAccess}
+              >
+                <Shield size={16} />
+                Access Admin Panel
+              </button>
+            )}
+            
+            {(profileData.businessProfile?.services?.some(s => s.isVerified) || 
+              profileData.dealership) && (
+              <button className="uprofile-business-dashboard-button">
+                <BarChart3 size={16} />
+                Business Dashboard
+              </button>
+            )}
+          </div>
+
+          {/* Profile Stats */}
+          <div className="uprofile-profile-stats">
+            <div className="uprofile-stat-item">
+              <span className="uprofile-stat-value">
+                {profileData.businessProfile?.services?.length || 0}
+              </span>
+              <span className="uprofile-stat-label">Services</span>
+            </div>
+            <div className="uprofile-stat-item">
+              <span className="uprofile-stat-value">
+                {profileData.vehicles?.length || 0}
+              </span>
+              <span className="uprofile-stat-label">Vehicles</span>
+            </div>
+            <div className="uprofile-stat-item">
+              <span className="uprofile-stat-value">
+                {profileData.businessProfile?.routes?.length || 0}
+              </span>
+              <span className="uprofile-stat-label">Routes</span>
+            </div>
+            <div className="uprofile-stat-item">
+              <span className="uprofile-stat-value">
+                {profileData.profile?.completionPercentage || 0}%
+              </span>
+              <span className="uprofile-stat-label">Complete</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Enhanced Profile Navigation Component
+const EnhancedProfileNavigation = ({ activeTab, setActiveTab, availableTabs }) => {
+  return (
+    <div className="uprofile-navigation-container">
+      <div className="uprofile-navigation-scroll">
+        <div className="uprofile-navigation-tabs">
+          {availableTabs.map(tab => {
+            const IconComponent = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                className={`uprofile-tab-button ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+                aria-pressed={activeTab === tab.id}
+              >
+                <IconComponent size={16} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
