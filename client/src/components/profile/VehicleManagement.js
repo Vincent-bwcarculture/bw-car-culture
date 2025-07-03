@@ -22,9 +22,10 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
 
-  // UPDATED: Enhanced tabs with selling and valuation
+  // UPDATED: Enhanced tabs with insurance management
   const tabs = [
     { id: 'my_vehicles', label: 'My Vehicles', icon: Car },
+    { id: 'insurance', label: 'Insurance', icon: Shield },
     { id: 'sell_vehicle', label: 'Sell Vehicle', icon: DollarSign },
     { id: 'get_valuation', label: 'Get Valuation', icon: Calculator },
     { id: 'service_history', label: 'Service History', icon: Wrench },
@@ -171,6 +172,37 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
 
   const handleBookService = (vehicle) => {
     showMessage('info', 'Service booking feature coming soon!');
+  };
+
+  const handleInsuranceAction = (vehicle, action) => {
+    switch(action) {
+      case 'renew':
+        showMessage('info', 'Insurance renewal service coming soon!');
+        break;
+      case 'compare':
+        showMessage('info', 'Insurance comparison feature coming soon!');
+        break;
+      case 'claim':
+        showMessage('info', 'Insurance claims assistance coming soon!');
+        break;
+      default:
+        showMessage('info', 'Insurance management features coming soon!');
+    }
+  };
+
+  const isInsuranceExpiringSoon = (vehicle) => {
+    if (!vehicle.insuranceExpiryDate) return false;
+    const expiryDate = new Date(vehicle.insuranceExpiryDate);
+    const now = new Date();
+    const daysUntilExpiry = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+    return daysUntilExpiry <= 30;
+  };
+
+  const isInsuranceExpired = (vehicle) => {
+    if (!vehicle.insuranceExpiryDate) return false;
+    const expiryDate = new Date(vehicle.insuranceExpiryDate);
+    const now = new Date();
+    return expiryDate < now;
   };
 
   const isServiceDue = (vehicle) => {
@@ -365,6 +397,20 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
                           Service Due
                         </span>
                       )}
+
+                      {isInsuranceExpired(vehicle) && (
+                        <span className="vmanage-status-badge insurance-expired">
+                          <AlertCircle size={12} />
+                          Insurance Expired
+                        </span>
+                      )}
+
+                      {!isInsuranceExpired(vehicle) && isInsuranceExpiringSoon(vehicle) && (
+                        <span className="vmanage-status-badge insurance-expiring">
+                          <Bell size={12} />
+                          Insurance Expiring
+                        </span>
+                      )}
                     </div>
 
                     <div className="vmanage-vehicle-stats">
@@ -404,6 +450,16 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
                         Get Valuation
                       </button>
                       
+                      <button 
+                        className="vmanage-quick-action-btn vmanage-insurance-btn"
+                        onClick={() => {
+                          setActiveTab('insurance');
+                        }}
+                      >
+                        <Shield size={14} />
+                        Insurance
+                      </button>
+                      
                       {isServiceDue(vehicle) && (
                         <button 
                           className="vmanage-quick-action-btn vmanage-service-btn"
@@ -411,6 +467,16 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
                         >
                           <Calendar size={14} />
                           Book Service
+                        </button>
+                      )}
+
+                      {(isInsuranceExpired(vehicle) || isInsuranceExpiringSoon(vehicle)) && (
+                        <button 
+                          className="vmanage-quick-action-btn vmanage-urgent-insurance-btn"
+                          onClick={() => handleInsuranceAction(vehicle, 'renew')}
+                        >
+                          <AlertCircle size={14} />
+                          Renew Insurance
                         </button>
                       )}
                     </div>
@@ -431,6 +497,142 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ADDED: Insurance Management Tab */}
+      {activeTab === 'insurance' && (
+        <div className="vmanage-insurance-section">
+          <div className="vmanage-section-header">
+            <h3 className="vmanage-section-title">
+              <Shield size={20} />
+              Insurance Management
+            </h3>
+            <p>Manage your vehicle insurance policies and get quotes from trusted providers</p>
+          </div>
+
+          {vehicles.length > 0 ? (
+            <div className="vmanage-insurance-grid">
+              {vehicles.map(vehicle => (
+                <div key={vehicle._id} className="vmanage-insurance-card">
+                  <div className="vmanage-insurance-card-header">
+                    <div className="vmanage-vehicle-basic-info">
+                      <h4>{vehicle.year} {vehicle.make} {vehicle.model}</h4>
+                      {vehicle.variant && <p className="vmanage-variant">{vehicle.variant}</p>}
+                      <span className="vmanage-license-plate">{vehicle.licensePlate || 'No plate set'}</span>
+                    </div>
+                    
+                    <div className="vmanage-insurance-status">
+                      {vehicle.insuranceProvider ? (
+                        <div className="vmanage-insurance-active">
+                          <Shield size={16} className="vmanage-insurance-icon" />
+                          <span className="vmanage-insurance-provider">{vehicle.insuranceProvider}</span>
+                          {isInsuranceExpired(vehicle) ? (
+                            <span className="vmanage-insurance-status-badge expired">Expired</span>
+                          ) : isInsuranceExpiringSoon(vehicle) ? (
+                            <span className="vmanage-insurance-status-badge expiring">Expiring Soon</span>
+                          ) : (
+                            <span className="vmanage-insurance-status-badge active">Active</span>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="vmanage-insurance-inactive">
+                          <AlertCircle size={16} className="vmanage-no-insurance-icon" />
+                          <span>No Insurance Added</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="vmanage-insurance-details">
+                    {vehicle.insuranceExpiryDate && (
+                      <div className="vmanage-insurance-expiry">
+                        <Calendar size={14} />
+                        <span>Expires: {formatDate(vehicle.insuranceExpiryDate)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="vmanage-insurance-actions">
+                    <button 
+                      className="vmanage-insurance-action-btn vmanage-renew-btn"
+                      onClick={() => handleInsuranceAction(vehicle, 'renew')}
+                    >
+                      <Shield size={14} />
+                      {vehicle.insuranceProvider ? 'Renew Policy' : 'Get Insurance'}
+                    </button>
+                    
+                    <button 
+                      className="vmanage-insurance-action-btn vmanage-compare-btn"
+                      onClick={() => handleInsuranceAction(vehicle, 'compare')}
+                    >
+                      <TrendingUp size={14} />
+                      Compare Quotes
+                    </button>
+                    
+                    {vehicle.insuranceProvider && (
+                      <button 
+                        className="vmanage-insurance-action-btn vmanage-claim-btn"
+                        onClick={() => handleInsuranceAction(vehicle, 'claim')}
+                      >
+                        <AlertCircle size={14} />
+                        File Claim
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="vmanage-empty-state">
+              <Shield size={48} />
+              <h3>No Vehicles for Insurance</h3>
+              <p>Add vehicles to manage their insurance policies</p>
+              <button 
+                className="vmanage-add-first-vehicle-btn"
+                onClick={() => setActiveTab('my_vehicles')}
+              >
+                <Plus size={16} />
+                Add Vehicle First
+              </button>
+            </div>
+          )}
+
+          {/* Insurance Services Coming Soon */}
+          <div className="vmanage-coming-soon-section">
+            <div className="vmanage-coming-soon-header">
+              <Shield size={24} />
+              <h4>Insurance Services Coming Soon!</h4>
+            </div>
+            <div className="vmanage-coming-soon-features">
+              <div className="vmanage-feature-grid">
+                <div className="vmanage-feature-item">
+                  <TrendingUp size={16} />
+                  <span>Compare insurance quotes from multiple providers</span>
+                </div>
+                <div className="vmanage-feature-item">
+                  <Shield size={16} />
+                  <span>One-click policy renewal and management</span>
+                </div>
+                <div className="vmanage-feature-item">
+                  <AlertCircle size={16} />
+                  <span>Streamlined claims assistance and tracking</span>
+                </div>
+                <div className="vmanage-feature-item">
+                  <Bell size={16} />
+                  <span>Automatic renewal reminders and notifications</span>
+                </div>
+                <div className="vmanage-feature-item">
+                  <Calculator size={16} />
+                  <span>Insurance calculator based on vehicle value</span>
+                </div>
+                <div className="vmanage-feature-item">
+                  <Car size={16} />
+                  <span>Coverage recommendations for your vehicle type</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

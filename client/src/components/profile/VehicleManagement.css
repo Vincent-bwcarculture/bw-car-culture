@@ -878,3 +878,363 @@
     width: 100%;
   }
 }
+
+/* === INSURANCE MANAGEMENT STYLES === */
+/* Add these styles to your existing VehicleManagement.css file */
+
+/* Insurance Section */
+.vmanage-insurance-section {
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 25px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+/* Insurance Grid */
+.vmanage-insurance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Insurance Card */
+.vmanage-insurance-card {
+  background: var(--uprofile-bg-secondary);
+  border: 1px solid var(--uprofile-border-color);
+  border-radius: var(--uprofile-border-radius);
+  padding: 20px;
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-insurance-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--uprofile-shadow);
+  border-color: var(--uprofile-primary-accent);
+}
+
+/* Insurance Card Header */
+.vmanage-insurance-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--uprofile-border-color);
+}
+
+.vmanage-vehicle-basic-info h4 {
+  margin: 0 0 5px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+}
+
+.vmanage-variant {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  color: var(--uprofile-text-secondary);
+}
+
+.vmanage-license-plate {
+  background: var(--uprofile-bg-tertiary);
+  color: var(--uprofile-text-primary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: monospace;
+}
+
+/* Insurance Status */
+.vmanage-insurance-status {
+  text-align: right;
+}
+
+.vmanage-insurance-active {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.vmanage-insurance-provider {
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vmanage-insurance-icon {
+  color: var(--uprofile-success-green);
+}
+
+.vmanage-insurance-inactive {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--uprofile-text-secondary);
+  font-size: 0.9rem;
+}
+
+.vmanage-no-insurance-icon {
+  color: var(--uprofile-warning-orange);
+}
+
+/* Insurance Status Badges */
+.vmanage-insurance-status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vmanage-insurance-status-badge.active {
+  background: rgba(39, 174, 96, 0.1);
+  color: var(--uprofile-success-green);
+  border: 1px solid rgba(39, 174, 96, 0.2);
+}
+
+.vmanage-insurance-status-badge.expiring {
+  background: rgba(243, 156, 18, 0.1);
+  color: var(--uprofile-warning-orange);
+  border: 1px solid rgba(243, 156, 18, 0.2);
+}
+
+.vmanage-insurance-status-badge.expired {
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--uprofile-secondary-red);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+/* Insurance Details */
+.vmanage-insurance-details {
+  margin-bottom: 15px;
+}
+
+.vmanage-insurance-expiry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--uprofile-text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Insurance Actions */
+.vmanage-insurance-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.vmanage-insurance-action-btn {
+  background: var(--uprofile-bg-tertiary);
+  color: var(--uprofile-text-primary);
+  border: 1px solid var(--uprofile-border-color);
+  padding: 10px 14px;
+  border-radius: var(--uprofile-border-radius-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--uprofile-transition);
+  flex: 1;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.vmanage-insurance-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+/* Specific insurance button colors */
+.vmanage-renew-btn {
+  background: rgba(39, 174, 96, 0.1);
+  color: var(--uprofile-success-green);
+  border-color: rgba(39, 174, 96, 0.2);
+}
+
+.vmanage-renew-btn:hover {
+  background: var(--uprofile-success-green);
+  color: var(--uprofile-text-white);
+}
+
+.vmanage-compare-btn {
+  background: rgba(255, 51, 0, 0.1);
+  color: var(--uprofile-primary-accent);
+  border-color: rgba(255, 51, 0, 0.2);
+}
+
+.vmanage-compare-btn:hover {
+  background: var(--uprofile-primary-accent);
+  color: var(--uprofile-text-white);
+}
+
+.vmanage-claim-btn {
+  background: rgba(52, 152, 219, 0.1);
+  color: #3498db;
+  border-color: rgba(52, 152, 219, 0.2);
+}
+
+.vmanage-claim-btn:hover {
+  background: #3498db;
+  color: var(--uprofile-text-white);
+}
+
+/* Insurance status badges in vehicle cards */
+.vmanage-status-badge.insurance-expired {
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--uprofile-secondary-red);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.vmanage-status-badge.insurance-expiring {
+  background: rgba(243, 156, 18, 0.1);
+  color: var(--uprofile-warning-orange);
+  border: 1px solid rgba(243, 156, 18, 0.2);
+}
+
+/* Insurance quick action button */
+.vmanage-insurance-btn {
+  background: rgba(52, 152, 219, 0.1);
+  color: #3498db;
+  border-color: rgba(52, 152, 219, 0.2);
+}
+
+.vmanage-insurance-btn:hover {
+  background: #3498db;
+  color: var(--uprofile-text-white);
+}
+
+.vmanage-urgent-insurance-btn {
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--uprofile-secondary-red);
+  border-color: rgba(231, 76, 60, 0.2);
+  animation: pulse-urgent 2s infinite;
+}
+
+.vmanage-urgent-insurance-btn:hover {
+  background: var(--uprofile-secondary-red);
+  color: var(--uprofile-text-white);
+}
+
+@keyframes pulse-urgent {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Coming Soon Section */
+.vmanage-coming-soon-section {
+  background: var(--uprofile-bg-secondary);
+  border: 2px dashed var(--uprofile-border-color);
+  border-radius: var(--uprofile-border-radius);
+  padding: 25px;
+  text-align: center;
+}
+
+.vmanage-coming-soon-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  color: var(--uprofile-primary-accent);
+}
+
+.vmanage-coming-soon-header h4 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.vmanage-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.vmanage-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius-sm);
+  border: 1px solid var(--uprofile-border-color);
+  color: var(--uprofile-text-secondary);
+  font-size: 0.9rem;
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-feature-item:hover {
+  background: var(--uprofile-bg-tertiary);
+  color: var(--uprofile-text-primary);
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 768px) {
+  .vmanage-insurance-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .vmanage-insurance-card-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  
+  .vmanage-insurance-status {
+    text-align: left;
+    width: 100%;
+  }
+  
+  .vmanage-insurance-active {
+    align-items: flex-start;
+  }
+  
+  .vmanage-insurance-actions {
+    flex-direction: column;
+  }
+  
+  .vmanage-insurance-action-btn {
+    flex: none;
+    width: 100%;
+  }
+  
+  .vmanage-feature-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .vmanage-coming-soon-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .vmanage-coming-soon-header h4 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .vmanage-insurance-section {
+    padding: 15px;
+  }
+  
+  .vmanage-insurance-card {
+    padding: 15px;
+  }
+  
+  .vmanage-coming-soon-section {
+    padding: 20px 15px;
+  }
+}
