@@ -12,7 +12,7 @@ import {
   Info
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import QRCodeScanner from '../QRScanner/QRCodeScanner';
+import QRCodeScanner from '../../QRScanner/QRCodeScanner.js';
 import './EnhancedFABModal.css';
 
 const EnhancedFABModal = ({ 
