@@ -66,16 +66,16 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
   const imageUrls = getImageUrls();
 
   if (!car) {
-    return <div className="loading-state">Loading vehicle details...</div>;
+    return <div className="cdg-loading-state">Loading vehicle details...</div>;
   }
 
   return (
-    <div className="car-details-gallery">
-      <div className="gallery-main">
+    <div className="cdg-container">
+      <div className="cdg-gallery-main">
         <img 
           src={imageUrls[selectedImage]} 
           alt={car.title || 'Vehicle'} 
-          className="main-image"
+          className="cdg-main-image"
           onError={(e) => {
             // For S3 URLs, go directly to placeholder
             if (e.target.src.includes('amazonaws.com') || e.target.src.includes('https://')) {
@@ -89,29 +89,29 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
         {imageUrls.length > 1 && (
           <>
             <button 
-              className="gallery-nav prev" 
+              className="cdg-gallery-nav cdg-prev" 
               onClick={() => setSelectedImage(prev => prev > 0 ? prev - 1 : imageUrls.length - 1)}
               aria-label="Previous image"
             >
               ❮
             </button>
             <button 
-              className="gallery-nav next" 
+              className="cdg-gallery-nav cdg-next" 
               onClick={() => setSelectedImage(prev => prev < imageUrls.length - 1 ? prev + 1 : 0)}
               aria-label="Next image"
             >
               ❯
             </button>
-            <div className="image-counter">
+            <div className="cdg-image-counter">
               {selectedImage + 1} / {imageUrls.length}
             </div>
           </>
         )}
         
-        <div className="gallery-actions">
+        <div className="cdg-gallery-actions">
           {onSave && (
             <button 
-              className="action-button save-button"
+              className="cdg-action-button cdg-save-button"
               onClick={onSave}
               aria-label="Save to favorites"
             >
@@ -120,7 +120,7 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
           )}
           {onShare && (
             <button 
-              className="action-button share-button"
+              className="cdg-action-button cdg-share-button"
               onClick={onShare}
               aria-label="Share listing"
             >
@@ -131,11 +131,11 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
       </div>
 
       {imageUrls.length > 1 && (
-        <div className="gallery-thumbnails">
+        <div className="cdg-gallery-thumbnails">
           {imageUrls.map((image, index) => (
             <div
               key={index}
-              className={`thumbnail ${selectedImage === index ? 'active' : ''}`}
+              className={`cdg-thumbnail ${selectedImage === index ? 'cdg-active' : ''}`}
               onClick={() => handleThumbnailClick(index)}
             >
               <img 
@@ -155,35 +155,35 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
         </div>
       )}
 
-      <div className="car-details">
+      <div className="cdg-details">
         {/* UPDATED: Header with title and price side by side */}
-        <div className="car-header">
-          <div className="car-title-section">
-            <h1 className="car-title">{car.title || 'Untitled Vehicle'}</h1>
+        <div className="cdg-header">
+          <div className="cdg-title-section">
+            <h1 className="cdg-title">{car.title || 'Untitled Vehicle'}</h1>
             {/* UPDATED: Finance badges under title - horizontal layout */}
-            <div className="car-title-badges">
+            <div className="cdg-title-badges">
               {car.priceOptions?.financeAvailable && (
-                <div className="finance-badge">Finance Available</div>
+                <div className="cdg-finance-badge">Finance Available</div>
               )}
               {car.priceOptions?.leaseAvailable && (
-                <div className="finance-badge lease-badge">Lease Available</div>
+                <div className="cdg-finance-badge cdg-lease-badge">Lease Available</div>
               )}
             </div>
           </div>
           
           {/* UPDATED: Price container positioned next to title */}
-          <div className="price-container">
+          <div className="cdg-price-container">
             {savings && (
-              <div className="original-price">P{savings.originalPrice.toLocaleString()}</div>
+              <div className="cdg-original-price">P{savings.originalPrice.toLocaleString()}</div>
             )}
-            <div className="car-price">{formatPrice(car.price)}</div>
+            <div className="cdg-price">{formatPrice(car.price)}</div>
             {savings && (
-              <div className="savings-highlight">
+              <div className="cdg-savings-highlight">
                 Save P{savings.amount.toLocaleString()}
               </div>
             )}
             {car.priceOptions?.monthlyPayment && !car.priceOptions?.showPriceAsPOA && (
-              <div className="monthly-payment">
+              <div className="cdg-monthly-payment">
                 P{car.priceOptions.monthlyPayment.toLocaleString()} p/m
               </div>
             )}
@@ -191,9 +191,9 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
         </div>
 
         {/* UPDATED: Status badges section */}
-        <div className="car-status-badges">
+        <div className="cdg-status-badges">
           {car.condition && (
-            <span className={`condition-tag ${car.condition.toLowerCase()}`}>
+            <span className={`cdg-condition-tag cdg-${car.condition.toLowerCase()}`}>
               {car.condition === 'new' ? 'New' : 
                car.condition === 'used' ? 'Used' : 
                car.condition === 'certified' ? 'Certified Pre-Owned' : 
@@ -201,124 +201,118 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
             </span>
           )}
           {car.featured && (
-            <span className="featured-tag">Featured</span>
+            <span className="cdg-featured-tag">Featured</span>
           )}
           {car.priceOptions?.includesVAT && (
-            <span className="vat-tag">Price Includes VAT</span>
+            <span className="cdg-vat-tag">Price Includes VAT</span>
           )}
           {car.bodyStyle && (
-            <span className="body-style-tag">{car.bodyStyle}</span>
+            <span className="cdg-body-style-tag">{car.bodyStyle}</span>
           )}
         </div>
 
         {/* UPDATED: Specs grid - responsive 2-3 column layout */}
-        <div className="specs-grid">
-          <div className="spec-item">
-            <span className="spec-label">Year</span>
-            <span className="spec-value">{car.specifications?.year || 'N/A'}</span>
+        <div className="cdg-specs-grid">
+          <div className="cdg-spec-item">
+            <span className="cdg-spec-label">Year</span>
+            <span className="cdg-spec-value">{car.specifications?.year || 'N/A'}</span>
           </div>
-          <div className="spec-item">
-            <span className="spec-label">Make</span>
-            <span className="spec-value">{car.specifications?.make || 'N/A'}</span>
+          <div className="cdg-spec-item">
+            <span className="cdg-spec-label">Make</span>
+            <span className="cdg-spec-value">{car.specifications?.make || 'N/A'}</span>
           </div>
-          <div className="spec-item">
-            <span className="spec-label">Model</span>
-            <span className="spec-value">{car.specifications?.model || 'N/A'}</span>
+          <div className="cdg-spec-item">
+            <span className="cdg-spec-label">Model</span>
+            <span className="cdg-spec-value">{car.specifications?.model || 'N/A'}</span>
           </div>
-          <div className="spec-item">
-            <span className="spec-label">Mileage</span>
-            <span className="spec-value">
+          <div className="cdg-spec-item">
+            <span className="cdg-spec-label">Mileage</span>
+            <span className="cdg-spec-value">
               {car.specifications?.mileage 
                 ? `${car.specifications.mileage.toLocaleString()} km` 
                 : 'N/A'}
             </span>
           </div>
-          <div className="spec-item">
-            <span className="spec-label">Engine</span>
-            <span className="spec-value">{car.specifications?.engineSize || 'N/A'}</span>
+          <div className="cdg-spec-item">
+            <span className="cdg-spec-label">Engine</span>
+            <span className="cdg-spec-value">{car.specifications?.engineSize || 'N/A'}</span>
           </div>
-          <div className="spec-item">
-            <span className="spec-label">Transmission</span>
-            <span className="spec-value">{car.specifications?.transmission || 'N/A'}</span>
+          <div className="cdg-spec-item">
+            <span className="cdg-spec-label">Transmission</span>
+            <span className="cdg-spec-value">{car.specifications?.transmission || 'N/A'}</span>
           </div>
-          <div className="spec-item">
-            <span className="spec-label">Fuel Type</span>
-            <span className="spec-value">{car.specifications?.fuelType || 'N/A'}</span>
+          <div className="cdg-spec-item">
+            <span className="cdg-spec-label">Fuel Type</span>
+            <span className="cdg-spec-value">{car.specifications?.fuelType || 'N/A'}</span>
           </div>
-          <div className="spec-item">
-            <span className="spec-label">Drivetrain</span>
-            <span className="spec-value">{car.specifications?.drivetrain || 'N/A'}</span>
+          <div className="cdg-spec-item">
+            <span className="cdg-spec-label">Drivetrain</span>
+            <span className="cdg-spec-value">{car.specifications?.drivetrain || 'N/A'}</span>
           </div>
           {car.specifications?.power && (
-            <div className="spec-item">
-              <span className="spec-label">Power</span>
-              <span className="spec-value">{car.specifications.power}</span>
+            <div className="cdg-spec-item">
+              <span className="cdg-spec-label">Power</span>
+              <span className="cdg-spec-value">{car.specifications.power}</span>
             </div>
           )}
           {car.specifications?.torque && (
-            <div className="spec-item">
-              <span className="spec-label">Torque</span>
-              <span className="spec-value">{car.specifications.torque}</span>
+            <div className="cdg-spec-item">
+              <span className="cdg-spec-label">Torque</span>
+              <span className="cdg-spec-value">{car.specifications.torque}</span>
             </div>
           )}
           {car.specifications?.exteriorColor && (
-            <div className="spec-item">
-              <span className="spec-label">Exterior Color</span>
-              <span className="spec-value">{car.specifications.exteriorColor}</span>
+            <div className="cdg-spec-item">
+              <span className="cdg-spec-label">Exterior Color</span>
+              <span className="cdg-spec-value">{car.specifications.exteriorColor}</span>
             </div>
           )}
           {car.specifications?.interiorColor && (
-            <div className="spec-item">
-              <span className="spec-label">Interior Color</span>
-              <span className="spec-value">{car.specifications.interiorColor}</span>
+            <div className="cdg-spec-item">
+              <span className="cdg-spec-label">Interior Color</span>
+              <span className="cdg-spec-value">{car.specifications.interiorColor}</span>
             </div>
           )}
           {car.specifications?.vin && (
-            <div className="spec-item">
-              <span className="spec-label">VIN</span>
-              <span className="spec-value">{car.specifications.vin}</span>
+            <div className="cdg-spec-item">
+              <span className="cdg-spec-label">VIN</span>
+              <span className="cdg-spec-value">{car.specifications.vin}</span>
             </div>
           )}
         </div>
 
         {/* Dealer Information */}
         {car.dealer && (
-          <div className="dealer-info">
+          <div className="cdg-dealer-info">
             <img 
               src={car.dealer.profile?.logo || car.dealer.logo || '/images/placeholders/dealer-avatar.jpg'} 
               alt={car.dealer.businessName || car.dealer.name || 'Dealer'}
-              className="dealer-avatar"
+              className="cdg-dealer-avatar"
               onError={(e) => {
                 e.target.src = '/images/placeholders/dealer-avatar.jpg';
               }}
             />
-            <div className="dealer-details">
-              <div className="dealer-name">
+            <div className="cdg-dealer-details">
+              <div className="cdg-dealer-name">
                 {showDealerLink ? (
-                  <Link to={`/dealerships/${car.dealer._id}`} className="dealer-link">
+                  <Link to={`/dealerships/${car.dealer._id}`} className="cdg-dealer-link">
                     {car.dealer.businessName || car.dealer.name || 'Dealer'}
                   </Link>
                 ) : (
                   car.dealer.businessName || car.dealer.name || 'Dealer'
                 )}
               </div>
-              <div className="dealer-meta">
-                <span className="dealer-location">
+              <div className="cdg-dealer-meta">
+                <span className="cdg-dealer-location">
                   {car.dealer.location?.city || car.dealer.city || 'Location not specified'}
                 </span>
-                <span className="dealer-contact">
+                <span className="cdg-dealer-contact">
                   {car.dealer.phone || car.dealer.contactPhone || 'Contact available'}
                 </span>
               </div>
             </div>
           </div>
         )}
-
-        {/* NEW: Similar Vehicles List - Shows only on bigger displays */}
-        {/* <SimilarVehiclesList 
-          currentCar={car}
-          isPrivateSeller={car.dealer?.sellerType === 'private'}
-        /> */}
 
         {/* Features Section */}
         {(() => {
@@ -332,11 +326,11 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
           
           if (allFeatures.length > 0) {
             return (
-              <div className="features-section">
-                <h2>Features & Equipment</h2>
-                <div className="features-grid">
+              <div className="cdg-features-section">
+                <h2 className="cdg-section-title">Features & Equipment</h2>
+                <div className="cdg-features-grid">
                   {allFeatures.map((feature, index) => (
-                    <div key={index} className="feature-item">
+                    <div key={index} className="cdg-feature-item">
                       ✓ {feature}
                     </div>
                   ))}
@@ -349,9 +343,9 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
 
         {/* Description Section */}
         {car.description && (
-          <div className="description-section">
-            <h2>Description</h2>
-            <div className="description-content">
+          <div className="cdg-description-section">
+            <h2 className="cdg-section-title">Description</h2>
+            <div className="cdg-description-content">
               {car.description}
             </div>
           </div>
@@ -359,25 +353,25 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
 
         {/* Location Section */}
         {car.location && Object.values(car.location).some(value => value) && (
-          <div className="location-section">
-            <h2>Location</h2>
-            <div className="location-details">
+          <div className="cdg-location-section">
+            <h2 className="cdg-section-title">Location</h2>
+            <div className="cdg-location-details">
               {car.location.address && (
-                <div className="location-address">
-                  <span className="location-label">Address:</span>
-                  <span className="location-value">{car.location.address}</span>
+                <div className="cdg-location-item">
+                  <span className="cdg-location-label">Address:</span>
+                  <span className="cdg-location-value">{car.location.address}</span>
                 </div>
               )}
               {car.location.city && (
-                <div className="location-city">
-                  <span className="location-label">City:</span>
-                  <span className="location-value">{car.location.city}</span>
+                <div className="cdg-location-item">
+                  <span className="cdg-location-label">City:</span>
+                  <span className="cdg-location-value">{car.location.city}</span>
                 </div>
               )}
               {car.location.state && (
-                <div className="location-state">
-                  <span className="location-label">State:</span>
-                  <span className="location-value">{car.location.state}</span>
+                <div className="cdg-location-item">
+                  <span className="cdg-location-label">State:</span>
+                  <span className="cdg-location-value">{car.location.state}</span>
                 </div>
               )}
             </div>
@@ -386,11 +380,11 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
 
         {/* Contact Section */}
         {car.dealer && (
-          <div className="contact-section">
-            <h2>Contact Dealer</h2>
-            <div className="contact-actions">
+          <div className="cdg-contact-section">
+            <h2 className="cdg-section-title">Contact Dealer</h2>
+            <div className="cdg-contact-actions">
               <button 
-                className="contact-button whatsapp"
+                className="cdg-contact-button cdg-whatsapp"
                 onClick={() => {
                   const phone = car.dealer.phone || car.dealer.contactPhone || '';
                   const message = `Hi, I'm interested in the ${car.title || 'vehicle'} listed for ${formatPrice(car.price)}.`;
@@ -400,7 +394,7 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
                 📱 WhatsApp
               </button>
               <button 
-                className="contact-button call"
+                className="cdg-contact-button cdg-call"
                 onClick={() => {
                   const phone = car.dealer.phone || car.dealer.contactPhone || '';
                   window.open(`tel:${phone}`, '_self');
@@ -409,7 +403,7 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
                 📞 Call
               </button>
               <button 
-                className="contact-button email"
+                className="cdg-contact-button cdg-email"
                 onClick={() => {
                   const email = car.dealer.email || car.dealer.contactEmail || '';
                   const subject = `Inquiry about ${car.title || 'vehicle'}`;
