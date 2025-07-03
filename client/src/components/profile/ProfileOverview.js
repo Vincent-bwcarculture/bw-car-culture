@@ -1,55 +1,34 @@
 // client/src/components/profile/ProfileOverview.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  User, Shield, Activity, Calendar, Mail, Phone, 
-  MapPin, Heart, Car, Settings, Star, CheckCircle,
-  Award, TrendingUp, Eye, Edit, Clock, Target,
-  BarChart3, Users, Route, Wrench, Plus, ExternalLink
+  User, 
+  Calendar, 
+  MapPin, 
+  Phone, 
+  Mail, 
+  Award, 
+  Heart, 
+  Settings, 
+  Car, 
+  Route,
+  ChevronRight,
+  Plus,
+  Eye
 } from 'lucide-react';
 import './ProfileOverview.css';
 
 const ProfileOverview = ({ profileData, refreshProfile }) => {
-  const [showEditSuggestions, setShowEditSuggestions] = useState(false);
+  const [showAllSuggestions, setShowAllSuggestions] = useState(false);
 
-  const formatDate = (date) => {
-    if (!date) return 'Not set';
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const getAccountAge = () => {
-    if (!profileData.createdAt) return 'Unknown';
-    
-    const createdDate = new Date(profileData.createdAt);
-    const now = new Date();
-    const diffTime = Math.abs(now - createdDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 30) {
-      return `${diffDays} days`;
-    } else if (diffDays < 365) {
-      return `${Math.floor(diffDays / 30)} months`;
-    } else {
-      return `${Math.floor(diffDays / 365)} years`;
-    }
-  };
-
-  const getUserBadges = () => {
+  const getBadges = () => {
     const badges = [];
     
+    if (profileData.isVerified) {
+      badges.push({ label: 'Verified Account', icon: Award, color: 'green' });
+    }
+    
     if (profileData.role === 'admin') {
-      badges.push({ label: 'Administrator', icon: Shield, color: 'red' });
-    }
-    
-    if (profileData.businessProfile?.services?.some(s => s.isVerified)) {
-      badges.push({ label: 'Verified Provider', icon: CheckCircle, color: 'green' });
-    }
-    
-    if (profileData.dealership) {
-      badges.push({ label: 'Dealer', icon: Car, color: 'blue' });
+      badges.push({ label: 'Administrator', icon: Settings, color: 'red' });
     }
     
     if (profileData.favorites?.length > 10) {
@@ -96,125 +75,61 @@ const ProfileOverview = ({ profileData, refreshProfile }) => {
     return 'poor';
   };
 
-  const getQuickStats = () => {
-    return [
-      {
-        label: 'Services',
-        value: profileData.businessProfile?.services?.length || 0,
-        icon: Settings,
-        trend: '+2 this month',
-        color: 'orange'
-      },
-      {
-        label: 'Vehicles',
-        value: profileData.vehicles?.length || 0,
-        icon: Car,
-        trend: 'Personal fleet',
-        color: 'blue'
-      },
-      {
-        label: 'Routes',
-        value: profileData.businessProfile?.routes?.length || 0,
-        icon: Route,
-        trend: 'Active routes',
-        color: 'green'
-      },
-      {
-        label: 'Favorites',
-        value: profileData.favorites?.length || 0,
-        icon: Heart,
-        trend: 'Saved items',
-        color: 'purple'
-      }
-    ];
-  };
-
-  const getRecentActivity = () => {
-    // Mock recent activity - in real app this would come from backend
-    return [
-      {
-        icon: Car,
-        action: 'Added new vehicle',
-        item: '2023 Toyota Corolla',
-        time: '2 hours ago',
-        type: 'vehicle'
-      },
-      {
-        icon: Settings,
-        action: 'Updated service',
-        item: 'Taxi Service',
-        time: '1 day ago',
-        type: 'service'
-      },
-      {
-        icon: Heart,
-        action: 'Favorited listing',
-        item: 'BMW X5 2022',
-        time: '3 days ago',
-        type: 'favorite'
-      },
-      {
-        icon: Star,
-        action: 'Received review',
-        item: '5-star rating',
-        time: '1 week ago',
-        type: 'review'
-      }
-    ];
-  };
-
-  const getSuggestedActions = () => {
+  const getProfileSuggestions = () => {
     const suggestions = [];
     
     if (!profileData.avatar?.url) {
       suggestions.push({
-        icon: User,
-        title: 'Add Profile Photo',
-        description: 'Upload a profile photo to build trust',
+        title: 'Add Profile Picture',
+        description: 'A profile picture helps others recognize you',
         action: 'Upload Photo',
-        priority: 'high'
+        icon: User
       });
     }
     
     if (!profileData.profile?.bio) {
       suggestions.push({
-        icon: Edit,
-        title: 'Complete Your Bio',
-        description: 'Tell others about yourself',
+        title: 'Write a Bio',
+        description: 'Tell others about yourself and your interests',
         action: 'Add Bio',
-        priority: 'medium'
+        icon: User
       });
     }
     
-    if (profileData.businessProfile?.services?.length === 0) {
+    if (!profileData.profile?.phone) {
       suggestions.push({
-        icon: Plus,
-        title: 'Register Your Service',
-        description: 'Start offering your services',
-        action: 'Add Service',
-        priority: 'high'
+        title: 'Add Phone Number',
+        description: 'Make it easier for contacts to reach you',
+        action: 'Add Phone',
+        icon: Phone
       });
     }
     
-    if (profileData.vehicles?.length === 0) {
+    if (!profileData.profile?.location) {
       suggestions.push({
-        icon: Car,
-        title: 'Add Your Vehicle',
-        description: 'Showcase your cars',
-        action: 'Add Vehicle',
-        priority: 'medium'
+        title: 'Add Location',
+        description: 'Help others find services in your area',
+        action: 'Add Location',
+        icon: MapPin
       });
     }
     
-    return suggestions.slice(0, 3); // Show top 3 suggestions
+    return suggestions;
+  };
+
+  const formatJoinDate = (date) => {
+    if (!date) return 'Unknown';
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   const profileStrength = calculateProfileStrength();
   const strengthColor = getProfileStrengthColor(profileStrength);
-  const badges = getUserBadges();
-  const quickStats = getQuickStats();
-  const recentActivity = getRecentActivity();
-  const suggestedActions = getSuggestedActions();
+  const badges = getBadges();
+  const suggestions = getProfileSuggestions();
 
   return (
     <div className="poverview-main-container">
@@ -222,10 +137,10 @@ const ProfileOverview = ({ profileData, refreshProfile }) => {
       <div className="poverview-strength-section">
         <div className="poverview-section-header">
           <h3 className="poverview-section-title">
-            <Target size={20} />
+            <Eye size={20} />
             Profile Strength
           </h3>
-          <span className={`poverview-strength-score poverview-strength-${strengthColor}`}>
+          <span className={`poverview-strength-badge poverview-strength-${strengthColor}`}>
             {profileStrength}%
           </span>
         </div>
@@ -233,45 +148,16 @@ const ProfileOverview = ({ profileData, refreshProfile }) => {
         <div className="poverview-strength-bar-container">
           <div className="poverview-strength-bar">
             <div 
-              className={`poverview-strength-progress poverview-strength-${strengthColor}`}
+              className={`poverview-strength-fill poverview-strength-${strengthColor}`}
               style={{ width: `${profileStrength}%` }}
             ></div>
           </div>
-        </div>
-        
-        <div className="poverview-strength-description">
-          {profileStrength >= 80 && "Excellent! Your profile is complete and optimized."}
-          {profileStrength >= 60 && profileStrength < 80 && "Good profile! Consider adding more details."}
-          {profileStrength >= 40 && profileStrength < 60 && "Fair profile. Add more information to improve visibility."}
-          {profileStrength < 40 && "Your profile needs more information to attract customers."}
-        </div>
-      </div>
-
-      {/* Quick Stats Grid */}
-      <div className="poverview-stats-section">
-        <div className="poverview-section-header">
-          <h3 className="poverview-section-title">
-            <BarChart3 size={20} />
-            Quick Stats
-          </h3>
-        </div>
-        
-        <div className="poverview-stats-grid">
-          {quickStats.map((stat, index) => {
-            const IconComponent = stat.icon;
-            return (
-              <div key={index} className={`poverview-stat-card poverview-stat-${stat.color}`}>
-                <div className="poverview-stat-icon">
-                  <IconComponent size={24} />
-                </div>
-                <div className="poverview-stat-content">
-                  <div className="poverview-stat-value">{stat.value}</div>
-                  <div className="poverview-stat-label">{stat.label}</div>
-                  <div className="poverview-stat-trend">{stat.trend}</div>
-                </div>
-              </div>
-            );
-          })}
+          <div className="poverview-strength-text">
+            {profileStrength >= 80 && "Your profile is complete and optimized."}
+            {profileStrength >= 60 && profileStrength < 80 && "Good profile! Consider adding more details."}
+            {profileStrength >= 40 && profileStrength < 60 && "Fair profile. Add more information to improve visibility."}
+            {profileStrength < 40 && "Your profile needs more information to attract customers."}
+          </div>
         </div>
       </div>
 
@@ -311,119 +197,104 @@ const ProfileOverview = ({ profileData, refreshProfile }) => {
         <div className="poverview-account-info">
           <div className="poverview-info-grid">
             <div className="poverview-info-item">
-              <Mail size={16} />
+              <Mail size={18} />
               <div className="poverview-info-content">
-                <div className="poverview-info-label">Email</div>
-                <div className="poverview-info-value">{profileData.email || 'Not provided'}</div>
+                <strong>Email</strong>
+                <span>{profileData.email}</span>
               </div>
             </div>
             
             {profileData.profile?.phone && (
               <div className="poverview-info-item">
-                <Phone size={16} />
+                <Phone size={18} />
                 <div className="poverview-info-content">
-                  <div className="poverview-info-label">Phone</div>
-                  <div className="poverview-info-value">{profileData.profile.phone}</div>
+                  <strong>Phone</strong>
+                  <span>{profileData.profile.phone}</span>
                 </div>
               </div>
             )}
             
             {profileData.profile?.location && (
               <div className="poverview-info-item">
-                <MapPin size={16} />
+                <MapPin size={18} />
                 <div className="poverview-info-content">
-                  <div className="poverview-info-label">Location</div>
-                  <div className="poverview-info-value">{profileData.profile.location}</div>
+                  <strong>Location</strong>
+                  <span>{profileData.profile.location}</span>
                 </div>
               </div>
             )}
             
             <div className="poverview-info-item">
-              <Calendar size={16} />
+              <Calendar size={18} />
               <div className="poverview-info-content">
-                <div className="poverview-info-label">Member Since</div>
-                <div className="poverview-info-value">{formatDate(profileData.createdAt)} • {getAccountAge()}</div>
+                <strong>Member Since</strong>
+                <span>{formatJoinDate(profileData.createdAt)}</span>
               </div>
             </div>
+            
+            <div className="poverview-info-item">
+              <User size={18} />
+              <div className="poverview-info-content">
+                <strong>Account Type</strong>
+                <span>
+                  {profileData.role === 'admin' ? 'Administrator' : 
+                   profileData.role === 'provider' ? 'Service Provider' :
+                   profileData.role === 'dealer' ? 'Dealer' : 'Personal User'}
+                </span>
+              </div>
+            </div>
+            
+            {profileData.profile?.dateOfBirth && (
+              <div className="poverview-info-item">
+                <Calendar size={18} />
+                <div className="poverview-info-content">
+                  <strong>Date of Birth</strong>
+                  <span>{new Date(profileData.profile.dateOfBirth).toLocaleDateString()}</span>
+                </div>
+              </div>
+            )}
           </div>
-          
-          {profileData.profile?.bio && (
-            <div className="poverview-bio-section">
-              <div className="poverview-bio-label">Bio</div>
-              <div className="poverview-bio-content">{profileData.profile.bio}</div>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="poverview-activity-section">
-        <div className="poverview-section-header">
-          <h3 className="poverview-section-title">
-            <Activity size={20} />
-            Recent Activity
-          </h3>
-        </div>
-        
-        <div className="poverview-activity-list">
-          {recentActivity.map((activity, index) => {
-            const IconComponent = activity.icon;
-            return (
-              <div key={index} className="poverview-activity-item">
-                <div className={`poverview-activity-icon poverview-activity-${activity.type}`}>
-                  <IconComponent size={16} />
-                </div>
-                <div className="poverview-activity-content">
-                  <div className="poverview-activity-text">
-                    <span className="poverview-activity-action">{activity.action}</span>
-                    <span className="poverview-activity-item-name">{activity.item}</span>
-                  </div>
-                  <div className="poverview-activity-time">{activity.time}</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Suggested Actions */}
-      {suggestedActions.length > 0 && (
+      {/* Profile Improvement Suggestions */}
+      {suggestions.length > 0 && (
         <div className="poverview-suggestions-section">
           <div className="poverview-section-header">
             <h3 className="poverview-section-title">
-              <TrendingUp size={20} />
-              Suggested Actions
+              <Plus size={20} />
+              Improve Your Profile
             </h3>
-            <button 
-              className="poverview-toggle-suggestions"
-              onClick={() => setShowEditSuggestions(!showEditSuggestions)}
-            >
-              {showEditSuggestions ? 'Hide' : 'Show'} Suggestions
-            </button>
+            {suggestions.length > 3 && (
+              <button 
+                className="poverview-toggle-suggestions"
+                onClick={() => setShowAllSuggestions(!showAllSuggestions)}
+              >
+                {showAllSuggestions ? 'Show Less' : `Show All (${suggestions.length})`}
+              </button>
+            )}
           </div>
           
-          {showEditSuggestions && (
-            <div className="poverview-suggestions-list">
-              {suggestedActions.map((suggestion, index) => {
-                const IconComponent = suggestion.icon;
-                return (
-                  <div key={index} className={`poverview-suggestion-item poverview-priority-${suggestion.priority}`}>
-                    <div className="poverview-suggestion-icon">
-                      <IconComponent size={20} />
-                    </div>
-                    <div className="poverview-suggestion-content">
-                      <div className="poverview-suggestion-title">{suggestion.title}</div>
-                      <div className="poverview-suggestion-description">{suggestion.description}</div>
-                    </div>
+          <div className="poverview-suggestions-grid">
+            {(showAllSuggestions ? suggestions : suggestions.slice(0, 3)).map((suggestion, index) => {
+              const IconComponent = suggestion.icon;
+              return (
+                <div key={index} className="poverview-suggestion-item">
+                  <div className="poverview-suggestion-icon">
+                    <IconComponent size={20} />
+                  </div>
+                  <div className="poverview-suggestion-content">
+                    <h4>{suggestion.title}</h4>
+                    <p>{suggestion.description}</p>
                     <button className="poverview-suggestion-action">
                       {suggestion.action}
-                      <ExternalLink size={14} />
+                      <ChevronRight size={16} />
                     </button>
                   </div>
-                );
-              })}
-            </div>
-          )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
