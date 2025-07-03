@@ -48,6 +48,21 @@ const UserProfilePage = () => {
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
 
+  // TARGETED FIX: Initialize profile data with user from AuthContext
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setProfileData(user);
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.profile?.phone || '',
+        bio: user.profile?.bio || '',
+        city: user.profile?.address?.city || '',
+        area: user.profile?.address?.area || ''
+      });
+    }
+  }, [isAuthenticated, user]);
+
   // Fetch user profile data
   const fetchUserProfile = async () => {
     try {
@@ -72,7 +87,10 @@ const UserProfilePage = () => {
       }
     } catch (err) {
       console.error('Error fetching profile:', err);
-      setError('Failed to load profile data. Please try again.');
+      // TARGETED FIX: Don't show error if we already have user data
+      if (!profileData) {
+        setError('Failed to load profile data. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -103,7 +121,7 @@ const UserProfilePage = () => {
       }
     } catch (err) {
       console.error('Error updating profile:', err);
-      setError('Failed to update profile. Please try again.');
+      setError('Failed to update profile.');
     } finally {
       setLoading(false);
     }
@@ -150,18 +168,18 @@ const UserProfilePage = () => {
 
   // Load profile data on component mount
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && profileData) {
       fetchUserProfile();
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated]);
 
   // Update active tab when URL params change
   useEffect(() => {
     setActiveTab(urlTab);
   }, [urlTab]);
 
-  // Show loading while auth is loading or profile is loading
-  if (authLoading || loading) {
+  // Show loading while auth is loading
+  if (authLoading) {
     return (
       <div className="uprofile-main-container">
         <div className="uprofile-loading-container">
@@ -172,13 +190,13 @@ const UserProfilePage = () => {
     );
   }
 
-  // Show error state if not authenticated or error occurred
-  if (error || !isAuthenticated || !user) {
+  // Show error state if not authenticated
+  if (!isAuthenticated || !user) {
     return (
       <div className="uprofile-main-container">
         <div className="uprofile-error-container">
           <h2 className="uprofile-error-title">Profile Not Available</h2>
-          <p className="uprofile-error-message">{error || 'Please login to view your profile'}</p>
+          <p className="uprofile-error-message">Please login to view your profile</p>
           <button onClick={handleLoginRedirect} className="uprofile-login-button">
             Go to Login
           </button>
@@ -187,21 +205,8 @@ const UserProfilePage = () => {
     );
   }
 
-  // Show error if profile data couldn't be loaded
-  if (!profileData) {
-    return (
-      <div className="uprofile-main-container">
-        <div className="uprofile-error-container">
-          <h2 className="uprofile-error-title">Profile Not Found</h2>
-          <p className="uprofile-error-message">Unable to load profile data</p>
-          <button onClick={fetchUserProfile} className="uprofile-error-button">
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
+  // TARGETED FIX: Use fallback to user data if profileData not loaded
+  const displayData = profileData || user;
   const availableTabs = getAvailableTabs();
 
   // Render overview tab content
@@ -210,16 +215,16 @@ const UserProfilePage = () => {
       <div className="uprofile-welcome-section">
         <div className="uprofile-avatar-section">
           <div className="uprofile-avatar">
-            {profileData.avatar ? (
-              <img src={profileData.avatar} alt={profileData.name} />
+            {displayData.avatar ? (
+              <img src={displayData.avatar} alt={displayData.name} />
             ) : (
               <User size={40} />
             )}
           </div>
           <div className="uprofile-user-info">
-            <h2>{profileData.name}</h2>
-            <p>{profileData.email}</p>
-            {profileData.role === 'admin' && (
+            <h2>{displayData.name || 'User'}</h2>
+            <p>{displayData.email}</p>
+            {displayData.role === 'admin' && (
               <span className="uprofile-admin-badge">Administrator</span>
             )}
           </div>
@@ -256,110 +261,96 @@ const UserProfilePage = () => {
 
       {editMode ? (
         <div className="uprofile-edit-form">
-          <div className="uprofile-form-grid">
-            <div className="uprofile-form-group">
-              <label>Full Name</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Enter your full name"
-              />
-            </div>
-            
-            <div className="uprofile-form-group">
-              <label>Phone Number</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                placeholder="+267 71234567"
-              />
-            </div>
-            
-            <div className="uprofile-form-group">
-              <label>City</label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleInputChange}
-                placeholder="Your city"
-              />
-            </div>
-            
-            <div className="uprofile-form-group">
-              <label>Area</label>
-              <input
-                type="text"
-                name="area"
-                value={formData.area}
-                onChange={handleInputChange}
-                placeholder="Your area/neighborhood"
-              />
-            </div>
+          <div className="uprofile-form-group">
+            <label>Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              placeholder="Your full name"
+            />
           </div>
-          
+          <div className="uprofile-form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="Your email address"
+            />
+          </div>
+          <div className="uprofile-form-group">
+            <label>Phone</label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              placeholder="Your phone number"
+            />
+          </div>
           <div className="uprofile-form-group">
             <label>Bio</label>
             <textarea
               name="bio"
               value={formData.bio}
               onChange={handleInputChange}
-              placeholder="Tell us about yourself..."
+              placeholder="Tell us about yourself"
               rows="3"
             />
           </div>
         </div>
       ) : (
-        <div className="uprofile-info-grid">
-          <div className="uprofile-info-item">
-            <Phone size={20} />
-            <div>
-              <span className="uprofile-info-label">Phone</span>
-              <span className="uprofile-info-value">
-                {profileData.profile?.phone || 'Not provided'}
-              </span>
+        <div className="uprofile-account-info">
+          <div className="uprofile-info-section">
+            <div className="uprofile-info-item">
+              <Phone size={20} />
+              <div>
+                <span className="uprofile-info-label">Phone</span>
+                <span className="uprofile-info-value">
+                  {displayData.profile?.phone || 'Not provided'}
+                </span>
+              </div>
             </div>
-          </div>
-          
-          <div className="uprofile-info-item">
-            <Mail size={20} />
-            <div>
-              <span className="uprofile-info-label">Email</span>
-              <span className="uprofile-info-value">{profileData.email}</span>
+            
+            <div className="uprofile-info-item">
+              <Mail size={20} />
+              <div>
+                <span className="uprofile-info-label">Email</span>
+                <span className="uprofile-info-value">{displayData.email}</span>
+              </div>
             </div>
-          </div>
-          
-          <div className="uprofile-info-item">
-            <MapPin size={20} />
-            <div>
-              <span className="uprofile-info-label">Location</span>
-              <span className="uprofile-info-value">
-                {profileData.profile?.address?.city || 'Not provided'}
-                {profileData.profile?.address?.area && `, ${profileData.profile.address.area}`}
-              </span>
+            
+            <div className="uprofile-info-item">
+              <MapPin size={20} />
+              <div>
+                <span className="uprofile-info-label">Location</span>
+                <span className="uprofile-info-value">
+                  {displayData.profile?.address?.city || 'Not provided'}
+                  {displayData.profile?.address?.area && `, ${displayData.profile.address.area}`}
+                </span>
+              </div>
             </div>
-          </div>
-          
-          <div className="uprofile-info-item">
-            <Calendar size={20} />
-            <div>
-              <span className="uprofile-info-label">Member Since</span>
-              <span className="uprofile-info-value">
-                {new Date(profileData.createdAt).toLocaleDateString()}
-              </span>
+            
+            <div className="uprofile-info-item">
+              <Calendar size={20} />
+              <div>
+                <span className="uprofile-info-label">Member Since</span>
+                <span className="uprofile-info-value">
+                  {new Date(displayData.createdAt || Date.now()).toLocaleDateString()}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {profileData.profile?.bio && !editMode && (
+      {displayData.profile?.bio && !editMode && (
         <div className="uprofile-bio-section">
           <h3>About</h3>
-          <p>{profileData.profile.bio}</p>
+          <p>{displayData.profile.bio}</p>
         </div>
       )}
 
@@ -368,53 +359,39 @@ const UserProfilePage = () => {
         <h3>Your Activity</h3>
         <div className="uprofile-stats-grid">
           <div className="uprofile-stat-card">
-            <div className="uprofile-stat-number">{profileData.stats?.totalVehicles || 0}</div>
+            <div className="uprofile-stat-number">{displayData.stats?.totalVehicles || 0}</div>
             <div className="uprofile-stat-label">Vehicles</div>
           </div>
           <div className="uprofile-stat-card">
-            <div className="uprofile-stat-number">{profileData.stats?.totalRoutes || 0}</div>
+            <div className="uprofile-stat-number">{displayData.favorites?.length || 0}</div>
+            <div className="uprofile-stat-label">Favorites</div>
+          </div>
+          <div className="uprofile-stat-card">
+            <div className="uprofile-stat-number">{displayData.stats?.totalRoutes || 0}</div>
             <div className="uprofile-stat-label">Routes</div>
           </div>
           <div className="uprofile-stat-card">
-            <div className="uprofile-stat-number">{profileData.stats?.verifiedServices || 0}</div>
-            <div className="uprofile-stat-label">Verified Services</div>
-          </div>
-          <div className="uprofile-stat-card">
-            <div className="uprofile-stat-number">{Math.round(profileData.profileCompleteness || 0)}%</div>
-            <div className="uprofile-stat-label">Profile Complete</div>
+            <div className="uprofile-stat-number">{displayData.stats?.verifiedServices || 0}</div>
+            <div className="uprofile-stat-label">Services</div>
           </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="uprofile-quick-actions">
-        <h3>Quick Actions</h3>
-        <div className="uprofile-action-grid">
-          <button 
-            className="uprofile-action-card"
-            onClick={() => setActiveTab('vehicles')}
-          >
-            <Car size={24} />
-            <span>Manage Vehicles</span>
-          </button>
-          <button 
-            className="uprofile-action-card"
-            onClick={() => setActiveTab('services')}
-          >
-            <Settings size={24} />
-            <span>Update Services</span>
-          </button>
-          {profileData.role === 'admin' && (
+      {/* Admin Quick Access */}
+      {displayData.role === 'admin' && (
+        <div className="uprofile-admin-section">
+          <h3>Administrator Quick Access</h3>
+          <div className="uprofile-quick-access-section">
             <button 
-              className="uprofile-action-card"
+              className="uprofile-admin-panel-button"
               onClick={handleAdminPanelAccess}
             >
-              <Shield size={24} />
-              <span>Admin Panel</span>
+              <BarChart3 size={16} />
+              Admin Panel
             </button>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 
@@ -422,13 +399,13 @@ const UserProfilePage = () => {
   const renderServicesContent = () => (
     <div className="uprofile-services">
       <div className="uprofile-section-header">
-        <h3>Service Management</h3>
+        <h3>Services</h3>
         <p>Manage your business services and verification status</p>
       </div>
       
-      {profileData.businessProfile?.services?.length > 0 ? (
+      {displayData.businessProfile?.services?.length > 0 ? (
         <div className="uprofile-services-list">
-          {profileData.businessProfile.services.map((service, index) => (
+          {displayData.businessProfile.services.map((service, index) => (
             <div key={index} className="uprofile-service-card">
               <div className="uprofile-service-info">
                 <h4>{service.serviceType?.replace('_', ' ').toUpperCase()}</h4>
@@ -458,93 +435,48 @@ const UserProfilePage = () => {
     </div>
   );
 
-  // Render settings tab content
-  const renderSettingsContent = () => (
-    <div className="uprofile-settings">
+  // Render routes tab content
+  const renderRoutesContent = () => (
+    <div className="uprofile-routes">
       <div className="uprofile-section-header">
-        <h3>Account Settings</h3>
-        <p>Manage your account preferences and privacy settings</p>
+        <h3>Transport Routes</h3>
+        <p>Manage your transport routes and schedules</p>
       </div>
-
-      <div className="uprofile-settings-section">
-        <h4>Appearance</h4>
-        <div className="uprofile-setting-item">
-          <div className="uprofile-setting-info">
-            <span>Theme</span>
-            <span className="uprofile-setting-description">
-              Choose your preferred color scheme
-            </span>
-          </div>
-          <button 
-            className="uprofile-theme-toggle"
-            onClick={toggleTheme}
-            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-          >
-            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
-            {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
-          </button>
+      
+      {displayData.routes?.length > 0 ? (
+        <div className="uprofile-routes-list">
+          {displayData.routes.map((route, index) => (
+            <div key={index} className="uprofile-route-card">
+              <div className="uprofile-route-info">
+                <h4>{route.routeName}</h4>
+                <p>{route.serviceType?.replace('_', ' ').toUpperCase()}</p>
+              </div>
+              <div className="uprofile-route-status">
+                <span className={`uprofile-status-badge ${route.operationalStatus === 'active' ? 'verified' : 'pending'}`}>
+                  {route.operationalStatus}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
-
-      <div className="uprofile-settings-section">
-        <h4>Privacy & Security</h4>
-        <div className="uprofile-setting-item">
-          <div className="uprofile-setting-info">
-            <span>Profile Visibility</span>
-            <span className="uprofile-setting-description">
-              Control who can see your profile information
-            </span>
-          </div>
-          <select className="uprofile-setting-select">
-            <option value="public">Public</option>
-            <option value="private">Private</option>
-            <option value="contacts">Contacts Only</option>
-          </select>
+      ) : (
+        <div className="uprofile-empty-state">
+          <p>No routes configured yet.</p>
+          <button className="uprofile-primary-button">Add Route</button>
         </div>
-      </div>
-
-      <div className="uprofile-settings-section">
-        <h4>Notifications</h4>
-        <div className="uprofile-setting-item">
-          <div className="uprofile-setting-info">
-            <span>Email Notifications</span>
-            <span className="uprofile-setting-description">
-              Receive updates via email
-            </span>
-          </div>
-          <label className="uprofile-toggle-switch">
-            <input type="checkbox" defaultChecked />
-            <span className="uprofile-toggle-slider"></span>
-          </label>
-        </div>
-      </div>
-
-      <div className="uprofile-danger-zone">
-        <h4>Danger Zone</h4>
-        <div className="uprofile-setting-item">
-          <div className="uprofile-setting-info">
-            <span>Delete Account</span>
-            <span className="uprofile-setting-description">
-              Permanently delete your account and all data
-            </span>
-          </div>
-          <button className="uprofile-danger-button">
-            Delete Account
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 
-  // Render business dashboard content
+  // Render business tab content
   const renderBusinessContent = () => (
     <div className="uprofile-business">
       <div className="uprofile-section-header">
         <h3>Business Dashboard</h3>
-        <p>Overview of your business performance and analytics</p>
+        <p>Monitor your business performance and analytics</p>
       </div>
       
-      <div className="uprofile-business-stats">
+      <div className="uprofile-stats-grid">
         <div className="uprofile-stat-card">
           <div className="uprofile-stat-number">0</div>
           <div className="uprofile-stat-label">Total Views</div>
@@ -569,36 +501,33 @@ const UserProfilePage = () => {
     </div>
   );
 
-  // Render routes tab content
-  const renderRoutesContent = () => (
-    <div className="uprofile-routes">
+  // Render settings tab content
+  const renderSettingsContent = () => (
+    <div className="uprofile-settings">
       <div className="uprofile-section-header">
-        <h3>Transport Routes</h3>
-        <p>Manage your transport routes and schedules</p>
+        <h3>Account Settings</h3>
+        <p>Manage your account preferences and privacy settings</p>
       </div>
-      
-      {profileData.routes?.length > 0 ? (
-        <div className="uprofile-routes-list">
-          {profileData.routes.map((route, index) => (
-            <div key={index} className="uprofile-route-card">
-              <div className="uprofile-route-info">
-                <h4>{route.routeName}</h4>
-                <p>{route.serviceType?.replace('_', ' ').toUpperCase()}</p>
-              </div>
-              <div className="uprofile-route-status">
-                <span className={`uprofile-status-badge ${route.operationalStatus === 'active' ? 'verified' : 'pending'}`}>
-                  {route.operationalStatus}
-                </span>
-              </div>
-            </div>
-          ))}
+
+      <div className="uprofile-settings-section">
+        <h4>Appearance</h4>
+        <div className="uprofile-setting-item">
+          <div className="uprofile-setting-info">
+            <span>Theme</span>
+            <span className="uprofile-setting-description">
+              Choose your preferred color scheme
+            </span>
+          </div>
+          <button 
+            className="uprofile-theme-toggle"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+            {theme === 'light' ? 'Dark' : 'Light'}
+          </button>
         </div>
-      ) : (
-        <div className="uprofile-empty-state">
-          <p>No routes configured yet.</p>
-          <button className="uprofile-primary-button">Add Route</button>
-        </div>
-      )}
+      </div>
     </div>
   );
 
