@@ -224,7 +224,7 @@ const UserProfilePage = () => {
           />
         )}
 
-        {/* UPDATED: Use VehicleManagement as main component for comprehensive vehicle management */}
+        {/* UPDATED: Use VehicleManagement with urlAction for Hero section integration */}
         {activeTab === 'vehicles' && (
           <VehicleManagement 
             profileData={displayData}

@@ -781,3 +781,100 @@
 [data-theme="dark"] .vmanage-vehicle-action-btn {
   background: rgba(0, 0, 0, 0.8);
 }
+
+/* ADD THESE STYLES TO VehicleManagement.css */
+
+/* === SELL SECTION === */
+.vmanage-sell-section,
+.vmanage-valuation-section {
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 25px;
+  border: 1px solid var(--uprofile-border-color);
+  transition: var(--uprofile-transition);
+}
+
+.vmanage-section-header p {
+  margin: 5px 0 0 0;
+  color: var(--uprofile-text-secondary);
+  font-size: 14px;
+}
+
+/* === VEHICLE QUICK ACTIONS === */
+.vmanage-vehicle-quick-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--uprofile-border-color);
+  flex-wrap: wrap;
+}
+
+.vmanage-quick-action-btn {
+  background: var(--uprofile-bg-tertiary);
+  color: var(--uprofile-text-primary);
+  border: 1px solid var(--uprofile-border-color);
+  padding: 8px 12px;
+  border-radius: var(--uprofile-border-radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--uprofile-transition);
+  flex: 1;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.vmanage-quick-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--uprofile-shadow-sm);
+}
+
+/* Specific button colors */
+.vmanage-sell-btn {
+  background: rgba(39, 174, 96, 0.1);
+  color: var(--uprofile-success-green);
+  border-color: rgba(39, 174, 96, 0.2);
+}
+
+.vmanage-sell-btn:hover {
+  background: var(--uprofile-success-green);
+  color: var(--uprofile-text-white);
+}
+
+.vmanage-valuation-btn {
+  background: rgba(255, 51, 0, 0.1);
+  color: var(--uprofile-primary-accent);
+  border-color: rgba(255, 51, 0, 0.2);
+}
+
+.vmanage-valuation-btn:hover {
+  background: var(--uprofile-primary-accent);
+  color: var(--uprofile-text-white);
+}
+
+.vmanage-service-btn {
+  background: rgba(243, 156, 18, 0.1);
+  color: var(--uprofile-warning-orange);
+  border-color: rgba(243, 156, 18, 0.2);
+}
+
+.vmanage-service-btn:hover {
+  background: var(--uprofile-warning-orange);
+  color: var(--uprofile-text-white);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .vmanage-vehicle-quick-actions {
+    flex-direction: column;
+  }
+  
+  .vmanage-quick-action-btn {
+    flex: none;
+    width: 100%;
+  }
+}
