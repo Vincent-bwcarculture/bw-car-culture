@@ -1,29 +1,8 @@
-/* CarMarketPlace.css - Complete with Mobile-First Layout Fixes */
-
-/* ===== CRITICAL LAYOUT FIXES - MOBILE FIRST ===== */
-
-/* MOBILE-FIRST BASE STYLES */
-* {
-  box-sizing: border-box;
-}
-
+/* CarMarketplace.css - Updated with Mobile Responsive Layout */
 .car-detail-container {
-  max-width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0.5rem;
-  width: 100%;
-  box-sizing: border-box;
-  overflow-x: hidden;
-  contain: layout style;
-  isolation: isolate;
-}
-
-.car-detail-container *,
-.marketplace-content *,
-.main-content *,
-.dealer-sidebar * {
-  max-width: 100%;
-  box-sizing: border-box;
 }
 
 .back-button {
@@ -44,33 +23,22 @@
   color: #ff3300;
 }
 
-/* MOBILE: Single column layout by default */
 .marketplace-content {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-  width: 100%;
-  box-sizing: border-box;
-  overflow-x: hidden;
-  contain: layout;
+  grid-template-columns: 1fr 350px;
+  gap: 0.5rem;
 }
 
-.main-content {
+.main-content{
   border: 1px solid #2c2c2c;
   background: rgba(20, 20, 20, 0.95);
   border-radius: 12px;
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  overflow-x: hidden;
 }
 
-/* Gallery Section - Mobile First */
+/* Gallery Section with Optimized Savings Badge */
 .car-gallery {
-  padding: 0.5rem;
-  margin-bottom: 0;
-  width: 100%;
-  box-sizing: border-box;
+  padding: 0rem;
+  margin-bottom: 0rem;
 }
 
 .main-image-container {
@@ -79,8 +47,6 @@
   border-radius: 8px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.2);
-  max-width: 100%;
-  box-sizing: border-box;
 }
 
 .main-image-container:hover .gallery-nav {
@@ -112,21 +78,20 @@
   transition: transform 0.3s ease;
 }
 
-/* Mobile Savings Badge */
+/* UPDATED: Desktop Savings Badge */
 .main-savings-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 15px;
+  left: 15px;
   background: linear-gradient(135deg, #ff3300, #ff6600);
   color: white;
-  padding: 0.4rem 0.6rem;
+  padding: 0.6rem 1rem;
   border-radius: 20px;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 700;
   z-index: 5;
   box-shadow: 0 3px 15px rgba(255, 51, 0, 0.4);
-  min-width: 80px;
-  max-width: 40%;
+  min-width: 100px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -134,7 +99,7 @@
   line-height: 1.2;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-sizing: border-box;
+  max-width: calc(100% - 30px);
 }
 
 .main-savings-badge:hover {
@@ -148,17 +113,17 @@
 }
 
 .main-savings-amount {
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 800;
   margin-bottom: 0.1rem;
 }
 
 .main-savings-label {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   opacity: 0.95;
 }
 
-/* Savings Detail Modal */
+/* Desktop Savings Detail Modal */
 .savings-detail-modal {
   position: absolute;
   top: 110%;
@@ -176,45 +141,295 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.main-savings-badge:hover .savings-detail-modal {
+.main-savings-badge:hover .savings-detail-modal.desktop-only {
   opacity: 1;
   visibility: visible;
 }
 
-.savings-detail-modal h3 {
-  margin: 0 0 0.8rem 0;
-  color: #ff3300;
-  font-size: 1.1rem;
+.savings-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+  font-weight: 700;
+  color: #ff6600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.6rem;
+  font-size: 0.9rem;
 }
 
-.savings-breakdown {
+.savings-detail-content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
-.savings-row {
+.savings-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.savings-detail-row.total {
+  font-weight: 700;
+  color: #2ed573;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 0.6rem;
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.savings-detail-description {
+  margin-top: 0.8rem;
+  font-style: italic;
+  color: #fbbf24;
+  font-size: 0.8rem;
+  text-align: center;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* UPDATED: Mobile Savings Modal */
+.mobile-savings-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.mobile-savings-modal {
+  background: rgba(20, 20, 20, 0.98);
+  border: 1px solid #2c2c2c;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  backdrop-filter: blur(10px);
+}
+
+.mobile-savings-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.3rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 1.2rem 0.8rem;
+  border-bottom: 1px solid #2c2c2c;
 }
 
-.savings-row:last-child {
-  border-bottom: none;
-  font-weight: 600;
-  color: #ff3300;
+.mobile-savings-modal-header h3 {
+  color: #ff6600;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
-.savings-disclaimer {
-  font-size: 0.75rem;
+.modal-close-button {
+  background: none;
+  border: none;
   color: #888;
-  margin-top: 0.5rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.2rem;
+  transition: color 0.3s ease;
+}
+
+.modal-close-button:hover {
+  color: #fff;
+}
+
+.mobile-savings-modal-content {
+  padding: 1.2rem;
+}
+
+/* UPDATED: Mobile Savings Grid */
+.mobile-savings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.mobile-savings-item {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.8rem;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-savings-item.highlight {
+  background: rgba(46, 213, 115, 0.1);
+  border-color: rgba(46, 213, 115, 0.3);
+}
+
+.mobile-savings-label {
+  display: block;
+  color: #888;
+  font-size: 0.8rem;
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobile-savings-value {
+  display: block;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.mobile-savings-value.discounted {
+  color: #60a5fa;
+}
+
+.mobile-savings-item.highlight .mobile-savings-value {
+  color: #2ed573;
+  font-size: 1.1rem;
+}
+
+.mobile-savings-description {
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 8px;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  color: #fbbf24;
+  font-size: 0.85rem;
+  text-align: center;
   font-style: italic;
 }
 
-/* Gallery Navigation */
+.mobile-savings-validity {
+  color: #ff6600;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.mobile-savings-actions {
+  margin-top: 1rem;
+}
+
+.mobile-savings-whatsapp-button {
+  width: 100%;
+  background: #25D366;
+  color: white;
+  border: none;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.mobile-savings-whatsapp-button:hover {
+  background: #1ea952;
+}
+
+.gallery-actions {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  z-index: 11;
+}
+
+.gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.action-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.action-button:hover {
+  background: rgba(255, 51, 0, 0.9);
+  border-color: #ff3300;
+  transform: scale(1.1);
+}
+
+.action-button.saved {
+  background: #ff3300;
+  border-color: #ff3300;
+}
+
+/* Full Screen Mode */
+.fullscreen-gallery {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.fullscreen-gallery.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.fullscreen-image {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+}
+
+.save-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.save-button:hover, .save-button.saved {
+  background: #ff3300;
+  border-color: #ff3300;
+}
+
 .gallery-nav {
   position: absolute;
   top: 50%;
@@ -263,15 +478,12 @@
   z-index: 2;
 }
 
-/* Mobile Thumbnail Strip */
 .thumbnail-strip {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 0.3rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.1rem;
   margin-top: 0.4rem;
-  padding: 0;
-  width: 100%;
-  box-sizing: border-box;
+  padding: 0rem;
 }
 
 .thumbnail {
@@ -319,10 +531,10 @@
   border-color: #ff3300;
 }
 
-/* Car Information - Mobile First */
+/* UPDATED: Car Information with Mobile Responsive Header Layout */
 .car-info {
   padding: 0.6rem 0.8rem;
-  margin-top: 0;
+  margin-top: 0rem;
 }
 
 .car-details h3 {
@@ -331,31 +543,30 @@
   margin-bottom: 0.5rem;
 }
 
-/* Mobile Header Layout */
+/* UPDATED: Header Layout - Side by Side like VehicleCard */
 .car-header {
   display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 1rem;
-  width: 100%;
-  box-sizing: border-box;
+  gap: 1rem;
 }
 
+/* UPDATED: Title Section (Left side) */
 .title-section {
-  width: 100%;
-  max-width: 100%;
+  flex: 1;
+  min-width: 0;
+  max-width: 65%;
 }
 
 .title {
-  font-size: clamp(1.2rem, 4vw, 1.75rem);
+  font-size: 1.75rem;
   color: #ffffff;
   margin: 0 0 0.4rem 0;
   line-height: 1.3;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
 }
 
-/* Mobile Badges */
+/* UPDATED: Horizontal badges under title like VehicleCard */
 .title-badges {
   display: flex;
   flex-direction: row;
@@ -365,62 +576,151 @@
   margin-top: 0.3rem;
 }
 
+/* UPDATED: Price Container (Right side) */
 .price-container {
-  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  min-width: 0;
+  text-align: right;
 }
 
+/* Enhanced Price Display with Savings */
 .original-price {
-  font-size: 0.8rem;
+  font-size: 1.1rem;
   color: #888;
   text-decoration: line-through;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.3rem;
   opacity: 0.8;
 }
 
-.car-price {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #ff3300;
-  margin: 0;
+.pula-price {
+  color: rgb(0, 120, 255);
+  font-weight: bold;
+  font-size: 1.4rem;
 }
 
-.pula-price::before {
-  content: 'P ';
-  font-size: 0.85em;
-  opacity: 0.8;
-}
-
-.warranty-badge, .certified-badge, .like-new-badge, .service-history-badge {
-  background: rgba(46, 213, 115, 0.1);
+.savings-highlight {
+  font-size: 1rem;
   color: #2ed573;
-  padding: 0.2rem 0.6rem;
+  font-weight: 700;
+  margin-top: 0.3rem;
+  padding: 0.4rem 0.8rem;
+  background: rgba(46, 213, 115, 0.1);
+  border-radius: 20px;
+  border: 1px solid rgba(46, 213, 115, 0.3);
+}
+
+.savings-breakdown {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  background: rgba(46, 213, 115, 0.05);
   border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
   border: 1px solid rgba(46, 213, 115, 0.2);
 }
 
-.featured-badge {
-  background: linear-gradient(135deg, #ff3300, #ff6600);
-  color: white;
-  padding: 0.3rem 0.8rem;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(255, 51, 0, 0.3);
+.savings-breakdown h4 {
+  color: #2ed573;
+  margin-bottom: 0.6rem;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.verified-badge {
-  background: rgba(54, 162, 235, 0.1);
-  color: #36a2eb;
-  padding: 0.2rem 0.6rem;
-  border-radius: 12px;
+.savings-breakdown-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.savings-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.savings-breakdown-row.total {
+  font-weight: 600;
+  color: #2ed573;
+  border-top: 1px solid rgba(46, 213, 115, 0.2);
+  padding-top: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.savings-description {
+  margin-top: 0.8rem;
+  font-style: italic;
+  color: #fbbf24;
+  font-size: 0.9rem;
+}
+
+.savings-validity {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #ff6600;
+  font-weight: 600;
+}
+
+.warranty-badge, .certified-badge, .like-new-badge, .service-history-badge {
   font-size: 0.8rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 15px;
+  white-space: nowrap;
+  display: inline-block;
   font-weight: 500;
-  border: 1px solid rgba(54, 162, 235, 0.1);
+}
+
+.warranty-badge {
+  color: #2ed573;
+  background-color: rgba(46, 213, 115, 0.1);
+  border: 1px solid rgba(46, 213, 115, 0.3);
+}
+
+.certified-badge {
+  color: rgb(255, 255, 255);
+  background-color: rgba(0, 81, 255, 0.1);
+  border: 1px solid rgba(0, 81, 255, 0.3);
+}
+
+.like-new-badge {
+  background: rgba(255, 159, 64, 0.1);
+  color: #ff9f40;
+  border: 1px solid rgba(255, 159, 64, 0.3);
+}
+
+.service-history-badge {
+  background: rgba(108, 92, 231, 0.1);
+  color: #8c7ae6;
+  border: 1px solid rgba(108, 92, 231, 0.3);
+}
+
+.vat-info {
+  font-size: 0.85rem;
+  color: #c9c9c9;
+}
+
+.monthly-payment {
+  font-size: 1rem;
+  color: #60a5fa;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.finance-badge, .lease-badge {
+  font-size: 0.8rem;
+  color: #2ed573;
+  background-color: rgba(46, 213, 115, 0.1);
+  padding: 3px 8px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+.lease-badge {
+  color: #36a2eb;
+  background-color: rgba(54, 162, 235, 0.1);
 }
 
 .condition-badge {
@@ -433,14 +733,12 @@
   display: inline-block;
 }
 
-/* Mobile Specs Grid */
+/* UPDATED: Specs Grid - Horizontal layout that fits 3 per row on mobile */
 .specs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  width: 100%;
-  box-sizing: border-box;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
 }
 
 .spec-item {
@@ -466,7 +764,7 @@
   font-weight: 500;
 }
 
-/* Features tabs */
+/* Features tabs for more compact display */
 .features-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -474,14 +772,6 @@
   margin-bottom: 0.8rem;
   border-bottom: 1px solid #2c2c2c;
   padding-bottom: 0.4rem;
-  overflow-x: auto;
-  white-space: nowrap;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.features-tabs::-webkit-scrollbar {
-  display: none;
 }
 
 .tab-button {
@@ -492,8 +782,6 @@
   color: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
-  flex: 0 0 auto;
-  min-height: 44px;
 }
 
 .tab-button:hover {
@@ -528,10 +816,8 @@
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.5rem;
-  width: 100%;
-  box-sizing: border-box;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.6rem;
 }
 
 .feature-item {
@@ -545,13 +831,10 @@
   font-size: 0.9rem;
 }
 
-/* Mobile Dealer Sidebar */
+/* Dealer Sidebar */
 .dealer-sidebar {
-  position: static;
-  top: 0;
-  margin-top: 1rem;
-  width: 100%;
-  box-sizing: border-box;
+  position: relative;
+  top: 1.2rem;
   height: fit-content;
 }
 
@@ -577,6 +860,7 @@
   padding: 0.8rem;
 }
 
+/* More compact dealer section */
 .dealer-header-compact {
   display: flex;
   align-items: center;
@@ -636,7 +920,7 @@
 .stat-value {
   font-size: 1rem;
   color: #ffffff;
-  margin-bottom: 0;
+  margin-bottom: 0rem;
 }
 
 .stat-label {
@@ -646,9 +930,9 @@
 
 .dealer-contact-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 0.4rem;
-  margin-bottom: 0;
+  margin-bottom: 0rem;
 }
 
 .contact-grid-item {
@@ -681,15 +965,15 @@
   text-decoration: underline;
 }
 
-/* Mobile Contact Buttons */
+/* Compact action buttons */
 .contact-buttons {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 0.4rem;
 }
 
 .contact-button {
-  padding: 0.8rem;
+  padding: 0.6rem;
   width: 100%;
   border-radius: 8px;
   font-weight: 500;
@@ -698,12 +982,12 @@
   border: none;
   text-align: center;
   font-size: 0.85rem;
-  min-height: 48px;
 }
 
 .contact-button.whatsapp {
   background: #25D366;
   color: white;
+  grid-column: span 2;
 }
 
 .contact-button.whatsapp:hover {
@@ -807,10 +1091,10 @@
   background: #ff3300;
 }
 
-/* News Grid */
+/* News Card Styling - Based on existing site design */
 .news-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.2rem;
   margin-top: 0.8rem;
   width: 100%;
@@ -913,7 +1197,7 @@
   font-weight: 600;
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  line-clamp: 2;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1030,6 +1314,24 @@
   border-color: rgba(255, 255, 255, 0.1);
 }
 
+.carousel-dots {
+  display: none;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 0.8rem;
+}
+
+.carousel-dot {
+  display: none;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
 .carousel-slide .vehicle-card {
   max-width: 360px;
   margin: 0 auto;
@@ -1040,6 +1342,12 @@
   transform: scale(1);
 }
 
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s ease;
+  width: calc(100% * var(--total-slides, 1));
+}
+
 .carousel-slide .vehicle-card-title {
   font-size: 1rem;
   line-height: 1.3;
@@ -1047,7 +1355,7 @@
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  line-clamp: 2;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
 }
 
@@ -1126,6 +1434,602 @@
 .no-listings p:first-child {
   font-weight: 600;
   color: #ffffff;
+}
+
+/* Hide desktop savings modal on mobile */
+@media (max-width: 768px) {
+  .savings-detail-modal.desktop-only {
+    display: none !important;
+  }
+}
+
+/* RESPONSIVE DESIGN - Mobile First Approach */
+
+/* Tablet Landscape */
+@media (max-width: 1200px) {
+  .marketplace-content {
+    grid-template-columns: 1fr 300px;
+  }
+
+  .car-detail-container {
+    padding: 0.8rem;
+  }
+
+  .carousel-slide {
+    flex: 0 0 33%;
+  }
+
+  .carousel-slide .vehicle-card {
+    max-width: 300px;
+  }
+
+  /* UPDATED: Better specs grid for tablet */
+  .specs-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
+}
+
+/* Large Desktop */
+@media (min-width: 1200px) {
+  .carousel-slide {
+    flex: 0 0 33.333%;
+  }
+
+  .carousel-slide .vehicle-card {
+    max-width: 280px;
+  }
+
+  /* UPDATED: Optimal specs grid for large screens */
+  .specs-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+/* Tablet Portrait */
+@media (max-width: 992px) {
+  .marketplace-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .dealer-sidebar {
+    position: static;
+    margin-top: 1.5rem;
+  }
+
+  .thumbnail-strip {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.4rem;
+  }
+
+  /* UPDATED: Mobile responsive header */
+  .car-header {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .title-section {
+    max-width: 60%;
+  }
+
+  .price-container {
+    align-items: flex-end;
+    min-width: 35%;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .contact-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .contact-button.whatsapp {
+    grid-column: span 1;
+  }
+
+  .news-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .carousel-slide {
+    flex: 0 0 33%;
+  }
+
+  /* UPDATED: Better mobile savings badge positioning */
+  .main-savings-badge {
+    top: 10px;
+    left: 10px;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8rem;
+    min-width: 80px;
+    max-width: 25%;
+  }
+
+  .main-savings-amount {
+    font-size: 0.85rem;
+  }
+
+  .main-savings-label {
+    font-size: 0.7rem;
+  }
+
+  /* UPDATED: Horizontal badges layout for tablet */
+  .title-badges {
+    gap: 0.4rem;
+  }
+
+  /* UPDATED: Specs grid - 3 per row on tablet */
+  .specs-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+  }
+}
+
+/* Mobile Large */
+@media (max-width: 768px) {
+  .car-detail-container {
+    padding: 0.6rem;
+  }
+
+  .marketplace-content {
+    gap: 0.8rem;
+  }
+
+  /* UPDATED: Mobile header keeps side-by-side layout */
+  .car-header {
+    flex-direction: row;
+    gap: 0.8rem;
+    align-items: flex-start;
+  }
+
+  .title-section {
+    max-width: 65%;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .car-price {
+    font-size: 1.3rem;
+  }
+
+  .car-gallery {
+    padding: 0.5rem;
+  }
+
+  .gallery-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .action-button {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .thumbnail-strip {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0.4rem;
+  }
+
+  .dealer-contact-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .features-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 0.4rem;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .features-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .tab-button {
+    flex: 0 0 auto;
+  }
+
+  .news-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .carousel-slide {
+    flex: 0 0 100%;
+  }
+
+  /* UPDATED: Optimized mobile savings badge */
+  .main-savings-badge {
+    top: 8px;
+    left: 8px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+    min-width: 70px;
+    max-width: 20%;
+    border-radius: 16px;
+  }
+
+  .main-savings-amount {
+    font-size: 0.8rem;
+  }
+
+  .main-savings-label {
+    font-size: 0.65rem;
+  }
+
+  /* UPDATED: Mobile badges - horizontal but compact */
+  .title-badges {
+    gap: 0.3rem;
+    margin-top: 0.2rem;
+  }
+
+  .warranty-badge, .certified-badge, .like-new-badge, .service-history-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+  }
+
+  /* UPDATED: Mobile specs grid - 3 per row */
+  .specs-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .spec-item {
+    padding: 0.4rem;
+    min-height: 50px;
+  }
+
+  .spec-label {
+    font-size: 0.7rem;
+  }
+
+  .spec-value {
+    font-size: 0.8rem;
+  }
+
+  /* Better mobile savings breakdown */
+  .savings-breakdown {
+    padding: 0.6rem;
+  }
+
+  .savings-breakdown-content {
+    gap: 0.3rem;
+  }
+
+  .savings-breakdown-row {
+    font-size: 0.85rem;
+  }
+
+  .original-price {
+    font-size: 1rem;
+  }
+
+  .savings-highlight {
+    font-size: 0.9rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+/* Mobile Small */
+@media (max-width: 480px) {
+  .car-detail-container {
+    padding: 0.4rem 0.3rem;
+  }
+
+  .main-content, .dealer-sidebar {
+    border-radius: 8px;
+  }
+
+  .car-info {
+    padding: 0.5rem;
+  }
+
+  /* UPDATED: Small mobile header - still side by side but more compact */
+  .car-header {
+    gap: 0.6rem;
+  }
+
+  .title-section {
+    max-width: 60%;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .price-container {
+    min-width: 40%;
+  }
+
+  .car-price {
+    font-size: 1.2rem;
+  }
+
+  .gallery-nav {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+    opacity: 1;
+  }
+
+  .image-counter {
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .action-button {
+    width: 32px;
+    height: 32px;
+  }
+
+  .dealer-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .contact-buttons {
+    gap: 0.4rem;
+  }
+  
+  .contact-button {
+    padding: 0.6rem;
+  }
+  
+  .description-section h2, .features-section h2 {
+    font-size: 1.2rem;
+  }
+  
+  .feature-item {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  /* UPDATED: Very compact mobile savings badge for small screens */
+  .main-savings-badge {
+    top: 6px;
+    left: 6px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+    min-width: 60px;
+    max-width: 18%;
+    border-radius: 14px;
+  }
+
+  .main-savings-amount {
+    font-size: 0.75rem;
+    margin-bottom: 0.05rem;
+  }
+
+  .main-savings-label {
+    font-size: 0.6rem;
+  }
+
+  /* UPDATED: Very compact badges on small screens */
+  .title-badges {
+    gap: 0.25rem;
+    margin-top: 0.15rem;
+  }
+
+  .warranty-badge, .certified-badge, .like-new-badge, .service-history-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+  }
+
+  /* UPDATED: Small mobile specs grid - still 3 per row but more compact */
+  .specs-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+  }
+
+  .spec-item {
+    padding: 0.3rem;
+    min-height: 45px;
+  }
+
+  .spec-label {
+    font-size: 0.65rem;
+  }
+
+  .spec-value {
+    font-size: 0.75rem;
+  }
+
+  /* UPDATED: Stack mobile savings grid vertically on very small screens */
+  .mobile-savings-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .mobile-savings-item {
+    padding: 0.6rem;
+  }
+
+  .mobile-savings-modal-content {
+    padding: 1rem;
+  }
+
+  .mobile-savings-whatsapp-button {
+    padding: 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  .savings-breakdown {
+    padding: 0.5rem;
+    margin-top: 0.6rem;
+  }
+
+  .savings-breakdown h4 {
+    font-size: 0.95rem;
+  }
+
+  .savings-breakdown-row {
+    font-size: 0.8rem;
+  }
+
+  .original-price {
+    font-size: 0.9rem;
+  }
+
+  .savings-highlight {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 350px) {
+  /* UPDATED: Extra small mobile - horizontal specs but 2 per row */
+  .specs-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.3rem;
+  }
+
+  .spec-item {
+    padding: 0.25rem;
+    min-height: 40px;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .car-price {
+    font-size: 1.1rem;
+  }
+
+  .main-savings-badge {
+    top: 4px;
+    left: 4px;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.65rem;
+    min-width: 50px;
+    max-width: 15%;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: more) {
+  .car-detail-container {
+    --border-color: #ffffff;
+    --text-color: #ffffff;
+  }
+
+  .gallery-nav,
+  .image-counter {
+    background: black;
+    border: 2px solid white;
+  }
+
+  .dealer-avatar {
+    border: 3px solid white;
+  }
+
+  .main-savings-badge {
+    background: #ff0000;
+    border: 2px solid #ffffff;
+  }
+
+  .mobile-savings-modal {
+    background: #000000;
+    border: 2px solid #ffffff;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .main-savings-badge.exclusive {
+    animation: none;
+  }
+}
+
+/* Touch Device Support */
+@media (hover: none) {
+  .gallery-nav,
+  .action-button {
+    opacity: 1;
+  }
+
+  /* Always show touch-friendly controls on touch devices */
+  .main-savings-badge {
+    min-height: 44px;
+    min-width: 80px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .contact-buttons,
+  .carousel-nav,
+  .carousel-dots,
+  .gallery-actions,
+  .main-savings-badge {
+    display: none;
+  }
+  
+  .dealer-card {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .seller-type-badge {
+    border: 1px solid #000;
+  }
+  
+  .car-header {
+    flex-direction: column;
+  }
+  
+  .title-section, .price-container {
+    max-width: 100%;
+  }
+}
+
+/* Error container styles */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.error-container h2 {
+  margin-bottom: 1rem;
+  color: #ff3300;
+}
+
+.error-container button {
+  background: #ff3300;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.error-container button:hover {
+  background: #cc2900;
 }
 
 /* Service history styles */
@@ -1234,811 +2138,4 @@
 
 .service-history-icon {
   font-size: 1.2rem;
-}
-
-/* Error container styles */
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-  text-align: center;
-  color: #ffffff;
-}
-
-.error-container h2 {
-  margin-bottom: 1rem;
-  color: #ff3300;
-}
-
-.error-container button {
-  background: #ff3300;
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s ease;
-}
-
-.error-container button:hover {
-  background: #cc2900;
-}
-
-/* Responsive Images */
-.main-image img,
-.thumbnail img,
-.cover-image {
-  max-width: 100% !important;
-  height: auto !important;
-  object-fit: cover;
-  box-sizing: border-box;
-}
-
-/* ===== TABLET AND UP - PROGRESSIVE ENHANCEMENT ===== */
-
-/* TABLET PORTRAIT */
-@media (min-width: 769px) {
-  .marketplace-content {
-    grid-template-columns: 1fr 280px;
-  }
-  
-  .car-header {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-  
-  .title-section {
-    max-width: 65%;
-  }
-  
-  .price-container {
-    align-items: flex-end;
-    min-width: 30%;
-  }
-  
-  .thumbnail-strip {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 0.4rem;
-  }
-  
-  .specs-grid {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.8rem;
-  }
-  
-  .contact-buttons {
-    grid-template-columns: 1fr 1fr;
-  }
-  
-  .contact-button.whatsapp {
-    grid-column: span 2;
-  }
-  
-  .news-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .carousel-slide {
-    flex: 0 0 50%;
-  }
-  
-  .dealer-contact-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  }
-}
-
-/* LARGE TABLET */
-@media (min-width: 993px) {
-  .marketplace-content {
-    grid-template-columns: 1fr 300px;
-  }
-  
-  .car-detail-container {
-    padding: 0.8rem;
-  }
-  
-  .thumbnail-strip {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  }
-  
-  .carousel-slide {
-    flex: 0 0 33.333%;
-  }
-  
-  .carousel-slide .vehicle-card {
-    max-width: 300px;
-  }
-  
-  .specs-grid {
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  }
-}
-
-/* DESKTOP */
-@media (min-width: 1201px) {
-  .marketplace-content {
-    grid-template-columns: 1fr 350px;
-  }
-  
-  .car-detail-container {
-    padding: 1rem;
-  }
-  
-  .dealer-sidebar {
-    position: relative;
-    top: 1.2rem;
-    margin-top: 0;
-  }
-  
-  .main-savings-badge {
-    top: 15px;
-    left: 15px;
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
-    min-width: 100px;
-    max-width: calc(100% - 30px);
-  }
-  
-  .main-savings-amount {
-    font-size: 1rem;
-  }
-  
-  .main-savings-label {
-    font-size: 0.75rem;
-  }
-  
-  .carousel-slide .vehicle-card {
-    max-width: 280px;
-  }
-  
-  .specs-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  }
-}
-
-/* MOBILE TOUCH OPTIMIZATIONS */
-@media (hover: none) and (pointer: coarse) {
-  .gallery-nav {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.8);
-  }
-  
-  .thumbnail {
-    min-height: 48px;
-  }
-  
-  .tab-button {
-    min-height: 44px;
-    padding: 0.6rem 1rem;
-  }
-  
-  .contact-button {
-    min-height: 48px;
-    padding: 0.8rem;
-  }
-}
-
-/* HIDE DESKTOP SAVINGS MODAL ON MOBILE */
-@media (max-width: 768px) {
-  .savings-detail-modal.desktop-only {
-    display: none !important;
-  }
-  
-  .main-savings-badge .savings-detail-modal {
-    display: none !important;
-  }
-  
-  .gallery-nav {
-    width: 36px;
-    height: 36px;
-    font-size: 1rem;
-  }
-  
-  .car-price {
-    font-size: 1.3rem;
-  }
-}
-
-/* PRINT STYLES */
-@media print {
-  .contact-buttons,
-  .carousel-nav,
-  .gallery-nav,
-  .main-savings-badge,
-  .bookmark-button {
-    display: none;
-  }
-  
-  .dealer-card {
-    box-shadow: none;
-    border: 1px solid #000;
-  }
-  
-  .seller-type-badge {
-    border: 1px solid #000;
-  }
-  
-  .car-header {
-    flex-direction: column;
-  }
-  
-  .title-section, .price-container {
-    max-width: 100%;
-  }
-  
-  .marketplace-content {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* UTILITY CLASSES */
-.prevent-overflow {
-  overflow-x: hidden !important;
-  box-sizing: border-box !important;
-}
-
-.full-width-contained {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* FORCE CONTAIN FLOATED OR ABSOLUTELY POSITIONED ELEMENTS */
-.marketplace-content {
-  contain: layout;
-}
-
-/* ACCESSIBILITY */
-@media (prefers-reduced-motion: reduce) {
-  .main-image img,
-  .thumbnail img,
-  .gallery-nav,
-  .contact-button,
-  .tab-button,
-  .news-card {
-    transition: none !important;
-    animation: none !important;
-  }
-}
-
-/* GALLERY ACTIONS AND ACTION BUTTONS */
-.gallery-actions {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  display: flex;
-  gap: 0.75rem;
-  z-index: 11;
-}
-
-.gallery-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.action-button {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(4px);
-}
-
-.action-button:hover {
-  background: rgba(255, 51, 0, 0.9);
-  border-color: #ff3300;
-  transform: scale(1.1);
-}
-
-.action-button.saved {
-  background: #ff3300;
-  border-color: #ff3300;
-}
-
-.save-button {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 2;
-}
-
-.save-button:hover, .save-button.saved {
-  background: #ff3300;
-  border-color: #ff3300;
-}
-
-/* FULL SCREEN GALLERY MODE */
-.fullscreen-gallery {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.95);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-}
-
-.fullscreen-gallery.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-.fullscreen-image {
-  max-width: 90vw;
-  max-height: 90vh;
-  object-fit: contain;
-}
-
-/* MOBILE SAVINGS MODAL AND GRID */
-.mobile-savings-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.95);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-  padding: 1rem;
-}
-
-.mobile-savings-modal.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-.mobile-savings-modal-content {
-  background: rgba(20, 20, 20, 0.98);
-  border: 1px solid #2c2c2c;
-  border-radius: 12px;
-  padding: 1.5rem;
-  max-width: 90vw;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
-  backdrop-filter: blur(10px);
-}
-
-.mobile-savings-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border: none;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mobile-savings-close:hover {
-  background: rgba(255, 51, 0, 0.3);
-  transform: scale(1.1);
-}
-
-.mobile-savings-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.mobile-savings-header h3 {
-  margin: 0 0 0.5rem 0;
-  color: #ff3300;
-  font-size: 1.3rem;
-}
-
-.mobile-savings-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.mobile-savings-item {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid #2c2c2c;
-  border-radius: 8px;
-  padding: 1rem;
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.mobile-savings-item:hover {
-  border-color: #ff3300;
-  background: rgba(255, 51, 0, 0.1);
-}
-
-.mobile-savings-item.highlight {
-  border-color: #2ed573;
-  background: rgba(46, 213, 115, 0.1);
-}
-
-.mobile-savings-label {
-  color: #888;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-.mobile-savings-value {
-  color: #ffffff;
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.mobile-savings-value.discounted {
-  color: #60a5fa;
-}
-
-.mobile-savings-item.highlight .mobile-savings-value {
-  color: #2ed573;
-  font-size: 1.1rem;
-}
-
-.mobile-savings-description {
-  background: rgba(251, 191, 36, 0.1);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  border-radius: 8px;
-  padding: 0.8rem;
-  margin-bottom: 1rem;
-  color: #fbbf24;
-  font-size: 0.85rem;
-  text-align: center;
-  font-style: italic;
-}
-
-.mobile-savings-validity {
-  color: #ff6600;
-  font-size: 0.85rem;
-  text-align: center;
-  margin-bottom: 1rem;
-  font-weight: 600;
-}
-
-.mobile-savings-actions {
-  margin-top: 1rem;
-}
-
-.mobile-savings-whatsapp-button {
-  width: 100%;
-  background: #25D366;
-  color: white;
-  border: none;
-  padding: 0.8rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.mobile-savings-whatsapp-button:hover {
-  background: #1ea952;
-}
-
-/* SAVINGS BREAKDOWN */
-.savings-breakdown {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid #2c2c2c;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-top: 1rem;
-}
-
-.savings-breakdown h4 {
-  margin: 0 0 0.8rem 0;
-  color: #ff3300;
-  font-size: 1.1rem;
-}
-
-.savings-breakdown-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.3rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 0.9rem;
-}
-
-.savings-breakdown-row:last-child {
-  border-bottom: none;
-  font-weight: 600;
-  color: #2ed573;
-}
-
-.savings-highlight {
-  background: rgba(46, 213, 115, 0.1);
-  color: #2ed573;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-top: 0.5rem;
-  text-align: center;
-}
-
-/* MOBILE RESPONSIVE - SMALLER SCREENS */
-@media (max-width: 480px) {
-  .car-detail-container {
-    padding: 0.4rem;
-  }
-  
-  .marketplace-content {
-    gap: 0.6rem;
-  }
-  
-  .main-savings-badge {
-    top: 6px;
-    left: 6px;
-    padding: 0.3rem 0.5rem;
-    font-size: 0.7rem;
-    min-width: 60px;
-    max-width: 30%;
-  }
-  
-  .main-savings-amount {
-    font-size: 0.75rem;
-  }
-  
-  .main-savings-label {
-    font-size: 0.6rem;
-  }
-  
-  .title {
-    font-size: 1.3rem;
-  }
-  
-  .car-price {
-    font-size: 1.2rem;
-  }
-  
-  /* UPDATED: Very compact badges on small screens */
-  .title-badges {
-    gap: 0.25rem;
-    margin-top: 0.15rem;
-  }
-  
-  .warranty-badge, .certified-badge, .like-new-badge, .service-history-badge {
-    font-size: 0.65rem;
-    padding: 0.15rem 0.4rem;
-  }
-  
-  /* UPDATED: Small mobile specs grid - still 3 per row but more compact */
-  .specs-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.4rem;
-  }
-  
-  .spec-item {
-    padding: 0.3rem;
-    min-height: 45px;
-  }
-  
-  .spec-label {
-    font-size: 0.65rem;
-  }
-  
-  .spec-value {
-    font-size: 0.75rem;
-  }
-  
-  /* UPDATED: Stack mobile savings grid vertically on very small screens */
-  .mobile-savings-grid {
-    grid-template-columns: 1fr;
-    gap: 0.6rem;
-  }
-  
-  .mobile-savings-item {
-    padding: 0.6rem;
-  }
-  
-  .mobile-savings-modal-content {
-    padding: 1rem;
-  }
-  
-  .mobile-savings-whatsapp-button {
-    padding: 0.7rem;
-    font-size: 0.85rem;
-  }
-  
-  .savings-breakdown {
-    padding: 0.5rem;
-    margin-top: 0.6rem;
-  }
-  
-  .savings-breakdown h4 {
-    font-size: 0.95rem;
-  }
-  
-  .savings-breakdown-row {
-    font-size: 0.8rem;
-  }
-  
-  .original-price {
-    font-size: 0.9rem;
-  }
-  
-  .savings-highlight {
-    font-size: 0.8rem;
-    padding: 0.25rem 0.5rem;
-  }
-}
-
-/* Extra Small Mobile */
-@media (max-width: 350px) {
-  .car-detail-container {
-    padding: 0.3rem;
-  }
-  
-  .marketplace-content {
-    gap: 0.4rem;
-  }
-  
-  /* UPDATED: Extra small mobile - horizontal specs but 2 per row */
-  .specs-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.3rem;
-  }
-  
-  .spec-item {
-    padding: 0.25rem;
-    min-height: 40px;
-  }
-  
-  .title {
-    font-size: 1.2rem;
-  }
-  
-  .car-price {
-    font-size: 1.1rem;
-  }
-  
-  .main-savings-badge {
-    top: 4px;
-    left: 4px;
-    padding: 0.2rem 0.4rem;
-    font-size: 0.65rem;
-    min-width: 50px;
-    max-width: 25%;
-  }
-}
-
-/* HIGH CONTRAST MODE */
-@media (prefers-contrast: high) {
-  .main-content,
-  .dealer-section,
-  .news-card {
-    border-width: 2px !important;
-  }
-  
-  .tab-button.active {
-    border-width: 2px !important;
-  }
-  
-  .car-detail-container {
-    --border-color: #ffffff;
-    --text-color: #ffffff;
-  }
-  
-  .gallery-nav,
-  .image-counter {
-    background: black;
-    border: 2px solid white;
-  }
-  
-  .dealer-avatar {
-    border: 3px solid white;
-  }
-  
-  .main-savings-badge {
-    background: #ff0000;
-    border: 2px solid #ffffff;
-  }
-  
-  .mobile-savings-modal {
-    background: #000000;
-    border: 2px solid #ffffff;
-  }
-}
-
-/* REDUCED MOTION */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.001ms !important;
-    transition-duration: 0.001ms !important;
-  }
-  
-  .main-savings-badge.exclusive {
-    animation: none;
-  }
-  
-  .main-image img,
-  .thumbnail img,
-  .gallery-nav,
-  .contact-button,
-  .tab-button,
-  .news-card {
-    transition: none !important;
-    animation: none !important;
-  }
-}
-
-/* TOUCH DEVICE SUPPORT */
-@media (hover: none) and (pointer: coarse) {
-  .gallery-nav,
-  .action-button {
-    opacity: 1;
-  }
-  
-  /* Always show touch-friendly controls on touch devices */
-  .main-savings-badge {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  
-  .gallery-nav {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.8);
-  }
-  
-  .thumbnail {
-    min-height: 48px;
-  }
-  
-  .tab-button {
-    min-height: 44px;
-    padding: 0.6rem 1rem;
-  }
-  
-  .contact-button {
-    min-height: 48px;
-    padding: 0.8rem;
-  }
-  
-  .action-button {
-    min-height: 44px;
-    min-width: 44px;
-  }
 }
