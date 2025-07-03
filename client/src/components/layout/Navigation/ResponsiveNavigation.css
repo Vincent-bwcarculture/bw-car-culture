@@ -938,3 +938,23 @@
 .user-profile-link {
     contain: layout style;
 }
+
+* Enhanced FAB visibility states */
+.review-fab.visible {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+.review-fab.hidden {
+  transform: translateY(100px);
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Desktop - Keep FAB for all screen sizes */
+@media (min-width: 1024px) {
+  .review-fab {
+    display: flex;
+  }
+}
