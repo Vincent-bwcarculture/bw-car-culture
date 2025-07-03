@@ -1240,10 +1240,13 @@ const CarMarketplace = () => {
             </div>
 
             <div className="car-info">
+              {/* UPDATED: Header Layout - Side by Side like VehicleCard */}
               <div className="car-header">
-                <div className="title-container">
+                <div className="title-section">
                   <h1 className="title">{car.title}</h1>
-                  <div className="badges-container">
+                  
+                  {/* UPDATED: Horizontal badges under title like VehicleCard */}
+                  <div className="title-badges">
                     {car.warranty && !isPrivateSeller && (
                       <div className="warranty-badge">✓ Warranty</div>
                     )}
@@ -1258,6 +1261,7 @@ const CarMarketplace = () => {
                     )}
                   </div>
                 </div>
+                
                 <div className="price-container">
                   {/* Enhanced Price Display with Savings */}
                   {calculateSavings && (
@@ -1326,64 +1330,57 @@ const CarMarketplace = () => {
                 </div>
               )}
 
+              {/* UPDATED: Specs Grid - Horizontal layout that fits 3 per row on mobile */}
               <div className="specs-grid">
-                <div className="specs-column">
-                  <div className="spec-item">
-                    <span className="spec-label">Year</span>
-                    <span className="spec-value">{car.specifications?.year || 'N/A'}</span>
-                  </div>
-                  <div className="spec-item">
-                    <span className="spec-label">Mileage</span>
-                    <span className="spec-value">
-                      {car.specifications?.mileage ? car.specifications.mileage.toLocaleString() + ' km' : 'N/A'}
-                    </span>
-                  </div>
-                  {car.specifications?.engineSize && (
-                    <div className="spec-item">
-                      <span className="spec-label">Engine</span>
-                      <span className="spec-value">{car.specifications.engineSize}</span>
-                    </div>
-                  )}
+                <div className="spec-item">
+                  <span className="spec-label">Year</span>
+                  <span className="spec-value">{car.specifications?.year || 'N/A'}</span>
                 </div>
-                
-                <div className="specs-column">
-                  <div className="spec-item">
-                    <span className="spec-label">Transmission</span>
-                    <span className="spec-value">{car.specifications?.transmission ? 
-                      (car.specifications.transmission.charAt(0).toUpperCase() + car.specifications.transmission.slice(1).replace('_', ' ')) : 'N/A'}</span>
-                  </div>
-                  <div className="spec-item">
-                    <span className="spec-label">Fuel Type</span>
-                    <span className="spec-value">{car.specifications?.fuelType ? 
-                      (car.specifications.fuelType.charAt(0).toUpperCase() + car.specifications.fuelType.slice(1).replace('_', ' ')) : 'N/A'}</span>
-                  </div>
-                  <div className="spec-item">
-                    <span className="spec-label">Drivetrain</span>
-                    <span className="spec-value">{car.specifications?.drivetrain ? 
-                      car.specifications.drivetrain.toUpperCase() : 'N/A'}</span>
-                  </div>
+                <div className="spec-item">
+                  <span className="spec-label">Mileage</span>
+                  <span className="spec-value">
+                    {car.specifications?.mileage ? car.specifications.mileage.toLocaleString() + ' km' : 'N/A'}
+                  </span>
                 </div>
-                
-                <div className="specs-column">
-                  {car.specifications?.power && (
-                    <div className="spec-item">
-                      <span className="spec-label">Power</span>
-                      <span className="spec-value">{car.specifications.power}</span>
-                    </div>
-                  )}
-                  {car.specifications?.exteriorColor && (
-                    <div className="spec-item">
-                      <span className="spec-label">Color</span>
-                      <span className="spec-value">{car.specifications.exteriorColor}</span>
-                    </div>
-                  )}
-                  {car.category && (
-                    <div className="spec-item">
-                      <span className="spec-label">Category</span>
-                      <span className="spec-value">{car.category}</span>
-                    </div>
-                  )}
+                <div className="spec-item">
+                  <span className="spec-label">Transmission</span>
+                  <span className="spec-value">{car.specifications?.transmission ? 
+                    (car.specifications.transmission.charAt(0).toUpperCase() + car.specifications.transmission.slice(1).replace('_', ' ')) : 'N/A'}</span>
                 </div>
+                <div className="spec-item">
+                  <span className="spec-label">Fuel Type</span>
+                  <span className="spec-value">{car.specifications?.fuelType ? 
+                    (car.specifications.fuelType.charAt(0).toUpperCase() + car.specifications.fuelType.slice(1).replace('_', ' ')) : 'N/A'}</span>
+                </div>
+                <div className="spec-item">
+                  <span className="spec-label">Drivetrain</span>
+                  <span className="spec-value">{car.specifications?.drivetrain ? 
+                    car.specifications.drivetrain.toUpperCase() : 'N/A'}</span>
+                </div>
+                {car.specifications?.engineSize && (
+                  <div className="spec-item">
+                    <span className="spec-label">Engine</span>
+                    <span className="spec-value">{car.specifications.engineSize}</span>
+                  </div>
+                )}
+                {car.specifications?.power && (
+                  <div className="spec-item">
+                    <span className="spec-label">Power</span>
+                    <span className="spec-value">{car.specifications.power}</span>
+                  </div>
+                )}
+                {car.specifications?.exteriorColor && (
+                  <div className="spec-item">
+                    <span className="spec-label">Color</span>
+                    <span className="spec-value">{car.specifications.exteriorColor}</span>
+                  </div>
+                )}
+                {car.category && (
+                  <div className="spec-item">
+                    <span className="spec-label">Category</span>
+                    <span className="spec-value">{car.category}</span>
+                  </div>
+                )}
               </div>
 
               {car.description && (
