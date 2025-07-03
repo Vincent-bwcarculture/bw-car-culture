@@ -1,48 +1,205 @@
-// client/src/components/layout/HeroSection/HeroSection.js - Minimal Updates Only
-
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+// src/components/layout/HeroSection/HeroSection.js - With preparation step after button click
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext.js'; // NEW: Added this import
+import { statsService } from '../../../services/statsService.js';
+import { listingService } from '../../../services/listingService.js';
 import QuickFeedbackButton from '../../shared/QuickFeedbackButton/QuickFeedbackButton.js';
 import './HeroSection.css';
 
 const HeroSection = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth(); // NEW: Added authentication context
-  
   const [activeTab, setActiveTab] = useState('buy');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPreparation, setShowPreparation] = useState(false);
-  
-  // Sample stats - replace with actual data from API
+  const [showPreparation, setShowPreparation] = useState(false); // NEW: State for preparation modal
   const [stats, setStats] = useState({
-    carListings: 1250,
-    happyCustomers: 850,
-    verifiedDealers: 100,
-    transportProviders: 125
+    carListings: 0,
+    happyCustomers: 0,
+    verifiedDealers: 0,
+    transportProviders: 0
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(false);
+  
+  // Savings data state with error handling
+  const [savingsData, setSavingsData] = useState({
+    totalSavings: 0,
+    savingsCount: 0,
+    loading: true,
+    error: false
   });
 
-  // Handle search functionality
-  const handleSearch = useCallback(async () => {
+  // Memoized popular search options
+  const popularSearches = useMemo(() => [
+    { type: 'make', value: 'BMW', label: 'BMW' },
+    { type: 'make', value: 'Mercedes-Benz', label: 'Mercedes' },
+    { type: 'make', value: 'Toyota', label: 'Toyota' },
+    { type: 'make', value: 'Audi', label: 'Audi' }
+  ], []);
+
+  // Debounced search function
+  const debouncedSearch = useCallback((query) => {
+    const timeoutId = setTimeout(() => {
+      if (query.trim()) {
+        handleSearch(query);
+      }
+    }, 300);
+    
+    return () => clearTimeout(timeoutId);
+  }, []);
+
+  // Fetch website stats with error handling and retry
+  useEffect(() => {
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    const fetchWebsiteStats = async () => {
+      setStatsLoading(true);
+      setStatsError(false);
+      
+      try {
+        const data = await statsService.getWebsiteStats();
+        setStats(data);
+        setStatsError(false);
+      } catch (error) {
+        console.error('Error fetching website statistics:', error);
+        
+        if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(fetchWebsiteStats, 2000 * retryCount); // Exponential backoff
+          return;
+        }
+        
+        // Fallback data for production
+        setStats({
+          carListings: 200,
+          happyCustomers: 450,
+          verifiedDealers: 20,
+          transportProviders: 10
+        });
+        setStatsError(true);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchWebsiteStats();
+  }, []);
+
+  // Fetch savings data with enhanced error handling
+  useEffect(() => {
+    let isMounted = true;
+    
+    const fetchSavingsData = async () => {
+      if (!isMounted) return;
+      
+      try {
+        setSavingsData(prev => ({ ...prev, loading: true, error: false }));
+        
+        const response = await listingService.getListings({}, 1, 100);
+        
+        if (!isMounted) return;
+        
+        if (response && response.listings) {
+          let totalSavings = 0;
+          let savingsCount = 0;
+          
+          response.listings.forEach(car => {
+            if (car && car.priceOptions && car.priceOptions.showSavings) {
+              const { originalPrice, savingsAmount } = car.priceOptions;
+              
+              let carSavings = 0;
+              if (savingsAmount && savingsAmount > 0) {
+                carSavings = savingsAmount;
+              } else if (originalPrice && originalPrice > car.price) {
+                carSavings = originalPrice - car.price;
+              }
+              
+              if (carSavings > 0) {
+                totalSavings += carSavings;
+                savingsCount++;
+              }
+            }
+          });
+          
+          setSavingsData({
+            totalSavings,
+            savingsCount,
+            loading: false,
+            error: false
+          });
+        } else {
+          setSavingsData({
+            totalSavings: 0,
+            savingsCount: 0,
+            loading: false,
+            error: false
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching savings data:', error);
+        if (isMounted) {
+          setSavingsData({
+            totalSavings: 0,
+            savingsCount: 0,
+            loading: false,
+            error: true
+          });
+        }
+      }
+    };
+
+    fetchSavingsData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Enhanced search change handler
+  const handleSearchChange = useCallback((e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    // Clear any existing debounced search
+    if (value.length > 2) {
+      debouncedSearch(value);
+    }
+  }, [debouncedSearch]);
+
+  // Enhanced key press handler
+  const handleKeyPress = useCallback((e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch(searchQuery);
+    }
+  }, [searchQuery]);
+
+  // Enhanced search handler with better validation
+  const handleSearch = useCallback(async (query = searchQuery) => {
     if (loading) return;
     
-    const trimmedQuery = searchQuery.trim();
-    if (!trimmedQuery) return;
-    
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      navigate('/marketplace');
+      return;
+    }
+
     setLoading(true);
+    
     try {
       const searchParams = new URLSearchParams();
+      const currentYear = new Date().getFullYear();
+      const yearMatch = trimmedQuery.match(/^\d{4}$/);
       
-      // Check if it's a price search (contains numbers/currency)
-      const priceMatch = trimmedQuery.match(/(\d+)([km]?)/i);
-      if (priceMatch) {
-        const price = parseInt(priceMatch[1]);
-        if (priceMatch[2]?.toLowerCase() === 'k') {
-          searchParams.set('maxPrice', price * 1000);
-        } else {
-          searchParams.set('maxPrice', price);
-        }
+      // Enhanced search logic
+      if (yearMatch && parseInt(trimmedQuery) >= 1990 && parseInt(trimmedQuery) <= currentYear + 1) {
+        searchParams.set('minYear', trimmedQuery);
+        searchParams.set('maxYear', trimmedQuery);
+      } else if (/^p?\d+$/i.test(trimmedQuery)) {
+        // Price search (with or without P prefix)
+        const priceValue = trimmedQuery.replace(/^p/i, '');
+        searchParams.set('maxPrice', priceValue);
       } else {
         // Text search
         searchParams.set('search', trimmedQuery);
@@ -84,41 +241,10 @@ const HeroSection = () => {
     }
   }, [navigate]);
 
-  // NEW: Handle car listing redirect - check authentication first
-  const handleListMyCarClick = useCallback(() => {
-    if (!isAuthenticated) {
-      // Redirect to login with intent to list car
-      navigate('/login', { 
-        state: { 
-          from: '/profile?tab=vehicles&action=list',
-          message: 'Please login to list your car for sale'
-        }
-      });
-    } else {
-      // Redirect to user profile vehicles tab with listing action
-      navigate('/profile?tab=vehicles&action=list');
-    }
-  }, [isAuthenticated, navigate]);
-
-  // NEW: Handle instant valuation redirect - check authentication first
-  const handleInstantValuationClick = useCallback(() => {
-    if (!isAuthenticated) {
-      // Redirect to login with intent for valuation
-      navigate('/login', { 
-        state: { 
-          from: '/profile?tab=vehicles&action=valuation',
-          message: 'Please login to get your car valued'
-        }
-      });
-    } else {
-      // Redirect to user profile with valuation action
-      navigate('/profile?tab=vehicles&action=valuation');
-    }
-  }, [isAuthenticated, navigate]);
-
-  // Show preparation step (for reference/education)
+  // NEW: Show preparation step instead of direct WhatsApp
   const handleShowPreparation = useCallback(() => {
     setShowPreparation(true);
+    // Scroll to preparation section smoothly
     setTimeout(() => {
       const preparationElement = document.querySelector('.bcc-hero-sell-preparation');
       if (preparationElement) {
@@ -130,12 +256,34 @@ const HeroSection = () => {
     }, 100);
   }, []);
 
-  // Hide preparation and go back to options
+  // NEW: Hide preparation and go back to options
   const handleHidePreparation = useCallback(() => {
     setShowPreparation(false);
   }, []);
 
-  // Legacy call handler (keep for fallback)
+  // UPDATED: Actual WhatsApp redirect with preparation message
+  const handleWhatsAppClick = useCallback(() => {
+    try {
+      const whatsappNumber = '+26774122453';
+      const message = encodeURIComponent(
+        'Hi! I would like to list my car for sale on BW Car Culture.\n\n' +
+        'I have prepared:\n' +
+        '✓ Quality photos from multiple angles\n' +
+        '✓ Complete vehicle details and documents\n' +
+        '✓ Service history information\n' +
+        '✓ Realistic pricing research\n\n' +
+        'Please help me get started with the listing process.'
+      );
+      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+      
+      if (typeof window !== 'undefined') {
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      }
+    } catch (error) {
+      console.error('WhatsApp click error:', error);
+    }
+  }, []);
+
   const handleCallClick = useCallback(() => {
     try {
       const phoneNumber = '+26774122453';
@@ -224,192 +372,208 @@ const HeroSection = () => {
             Sell my car
           </button>
           <button 
-            className={`bcc-hero-tab-button ${activeTab === 'rentals' ? 'active' : ''}`}
+            className="bcc-hero-tab-button"
             onClick={() => handleTabClick('rentals')}
             disabled={loading}
-            aria-pressed={activeTab === 'rentals'}
           >
-            Car rentals
+            Car Rentals
           </button>
           <button 
-            className={`bcc-hero-tab-button ${activeTab === 'transport' ? 'active' : ''}`}
+            className="bcc-hero-tab-button"
             onClick={() => handleTabClick('transport')}
             disabled={loading}
-            aria-pressed={activeTab === 'transport'}
           >
-            Transport
+            Public Transport
           </button>
         </div>
 
-        {/* Buy Tab Content */}
-        {activeTab === 'buy' && (
+        {activeTab === 'buy' ? (
           <div className="bcc-hero-buy">
-            <h1>Find Your Dream Car</h1>
-            <p>Discover thousands of quality vehicles from verified dealers and private sellers across Botswana.</p>
+            <h1>Find your perfect car.</h1>
+            <p>Get the best car ownership experience in Botswana.</p>
             
             <div className="bcc-hero-search-container">
-              <div className="bcc-hero-search-box">
-                <input
-                  type="text"
-                  placeholder="Search by make, model, year, or price..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  disabled={loading}
+              <div className="bcc-hero-search-bar">
+                <input 
+                  type="text" 
+                  placeholder="Enter make, model, year, or price (e.g., BMW, X5, 2020, P200000)"
                   className="bcc-hero-search-input"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onKeyPress={handleKeyPress}
+                  disabled={loading}
+                  aria-label="Search for vehicles"
                 />
                 <button 
-                  onClick={handleSearch}
-                  disabled={loading || !searchQuery.trim()}
-                  className="bcc-hero-search-button"
-                  aria-label="Search for vehicles"
+                  className="bcc-hero-search-button" 
+                  onClick={() => handleSearch()}
+                  disabled={loading}
+                  aria-label="Search vehicles"
                 >
-                  {loading ? 'Searching...' : 'Search'}
+                  {loading ? (
+                    <span className="bcc-hero-search-loading" aria-hidden="true">⟳</span>
+                  ) : (
+                    'Search'
+                  )}
                 </button>
+              </div>
+              
+              <div className="bcc-hero-popular-searches">
+                <span>Popular:</span>
+                {popularSearches.map((search, index) => (
+                  <button 
+                    key={index}
+                    onClick={() => handleQuickSearch(search.type, search.value)}
+                    disabled={loading}
+                    aria-label={`Search for ${search.label} vehicles`}
+                  >
+                    {search.label}
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div className="bcc-hero-quick-search">
-              <span className="bcc-hero-quick-label">Quick search:</span>
-              <div className="bcc-hero-quick-buttons">
-                <button 
-                  onClick={() => handleQuickSearch('make', 'Toyota')}
-                  disabled={loading}
-                  className="bcc-hero-quick-button"
-                >
-                  Toyota
-                </button>
-                <button 
-                  onClick={() => handleQuickSearch('make', 'BMW')}
-                  disabled={loading}
-                  className="bcc-hero-quick-button"
-                >
-                  BMW
-                </button>
-                <button 
-                  onClick={() => handleQuickSearch('maxPrice', '100000')}
-                  disabled={loading}
-                  className="bcc-hero-quick-button"
-                >
-                  Under P100k
-                </button>
-                <button 
-                  onClick={() => handleQuickSearch('condition', 'new')}
-                  disabled={loading}
-                  className="bcc-hero-quick-button"
-                >
-                  New Cars
-                </button>
-              </div>
-            </div>
-
-            {/* Savings Banner */}
-            <div className="bcc-hero-savings-banner" onClick={handleSavingsClick}>
-              <div className="bcc-savings-content">
-                <span className="bcc-savings-icon">💰</span>
-                <div className="bcc-savings-text">
-                  <strong>Exclusive BW Car Culture Savings!</strong>
-                  <span>Save up to P15,000 on select vehicles</span>
+            {/* Enhanced Savings Showcase */}
+            {!savingsData.loading && !savingsData.error && savingsData.savingsCount > 0 && (
+              <div className="bcc-hero-savings-showcase">
+                <div className="bcc-savings-badge">
+                  <div className="bcc-savings-badge-content">
+                    <div className="bcc-savings-icon">💰</div>
+                    <div className="bcc-savings-info">
+                      <div className="bcc-savings-label">Total Available Savings</div>
+                      <div className="bcc-savings-amount">{formatPrice(savingsData.totalSavings)}</div>
+                    </div>
+                  </div>
+                  <button 
+                    className="bcc-savings-action-btn"
+                    onClick={handleSavingsClick}
+                    disabled={loading}
+                    aria-label="View all savings deals"
+                  >
+                    View Deals
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12h14m-7-7 7 7-7 7"/>
+                    </svg>
+                  </button>
                 </div>
-                <span className="bcc-savings-arrow">→</span>
+                <p className="bcc-savings-subtitle">
+                  {savingsData.savingsCount} vehicles with exclusive savings available
+                </p>
+              </div>
+            )}
+
+            <div className="bcc-hero-features">
+              <div className="bcc-hero-feature">
+                <span className="bcc-hero-feature-icon">✓</span>
+                <span>Compare prices from local dealers</span>
+              </div>
+              <div className="bcc-hero-feature">
+                <span className="bcc-hero-feature-icon">✓</span>
+                <span>100% verified listings</span>
+              </div>
+              <div className="bcc-hero-feature">
+                <span className="bcc-hero-feature-icon">✓</span>
+                <span>Professional car inspection and accurate reports</span>
+              </div>
+              <div className="bcc-hero-feature">
+                <span className="bcc-hero-feature-icon">✓</span>
+                <span>Free valuation service</span>
               </div>
             </div>
           </div>
-        )}
-
-        {/* Sell Tab Content */}
-        {activeTab === 'sell' && (
+        ) : activeTab === 'sell' ? (
           <div className="bcc-hero-sell">
             <h1>Sell Faster. Smarter. Nationwide.</h1>
-            <p>Tap into Botswana's #1 automotive ecosystem. Get maximum exposure, real buyers, and support every step of the way.</p>
+<p>Tap into Botswana’s #1 automotive ecosystem. Get maximum exposure, real buyers, and support every step of the way.</p>
 
-            {/* Pricing Information Section */}
-            <div className="bcc-hero-sell-pricing-section">
-              <div className="bcc-hero-sell-pricing-header">
-                <h3>Listing Prices for Private Sellers</h3>
-                <p>Choose the exposure level that gets your car sold, for the right value and fast.</p>
-              </div>
-              
-              <div className="bcc-hero-sell-pricing-tiers">
-                <div className="bcc-hero-sell-pricing-tier">
-                  <div className="bcc-hero-sell-tier-header">
-                    <div className="bcc-hero-sell-tier-price">P50</div>
-                    <div className="bcc-hero-sell-tier-period">/month</div>
-                  </div>
-                  <div className="bcc-hero-sell-tier-value">Basic</div>
-                  <div className="bcc-hero-sell-tier-features">
-                    <span>✓ Multiple photos</span>
-                    <span>✓ Contact leads</span>
-                    <span>✓ Social Media Marketing</span>
-                  </div>
-                </div>
-                
-                <div className="bcc-hero-sell-pricing-tier bcc-hero-sell-tier-popular">
-                  <div className="bcc-hero-sell-tier-badge">Most Popular</div>
-                  <div className="bcc-hero-sell-tier-header">
-                    <div className="bcc-hero-sell-tier-price">P100</div>
-                    <div className="bcc-hero-sell-tier-period">/month</div>
-                  </div>
-                  <div className="bcc-hero-sell-tier-value">Standard</div>
-                  <div className="bcc-hero-sell-tier-features">
-                    <span>✓ 2x Social media marketing</span>
-                    <span>✓ Premium placement</span>
-                    <span>✓ Multiple photos</span>
-                    <span>✓ Priority support</span>
-                  </div>
-                </div>
-                
-                <div className="bcc-hero-sell-pricing-tier">
-                  <div className="bcc-hero-sell-tier-header">
-                    <div className="bcc-hero-sell-tier-price">P200</div>
-                    <div className="bcc-hero-sell-tier-period">/month</div>
-                  </div>
-                  <div className="bcc-hero-sell-tier-value">Premium</div>
-                  <div className="bcc-hero-sell-tier-features">
-                    <span>✓ 4x Social media marketing</span>
-                    <span>✓ Premium priority placement</span>
-                    <span>✓ Multiple photos</span>
-                    <span>✓ Higher priority support</span>
-                    <span>✓ Featured placement</span>
-                    <span>✓ First access to new features</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bcc-hero-sell-pricing-dealer-note">
-                <div className="bcc-hero-sell-dealer-notice">
-                  <strong>Are you a dealer?</strong>
-                  <p>Custom packages are available for dealerships. Contact us for special rates and premium features.</p>
-                  <button 
-                    className="bcc-hero-sell-dealer-contact-btn"
-                    onClick={() => {
-                      const whatsappNumber = '+26774122453';
-                      const message = encodeURIComponent('Hi! I am a car dealer interested in listing vehicles on Bw Car Culture. Please provide information about dealer packages and pricing.');
-                      window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
-                    }}
-                  >
-                    Contact Us on WhatsApp
-                  </button>
-                </div>
-              </div>
-            </div>
+            {/* NEW: Pricing Information Section */}
+<div className="bcc-hero-sell-pricing-section">
+  <div className="bcc-hero-sell-pricing-header">
+    <h3>Listing Prices for Private Sellers</h3>
+    <p>Choose the exposure level that gets your car sold, for the right value and fast.</p>
+  </div>
+  
+  <div className="bcc-hero-sell-pricing-tiers">
+    <div className="bcc-hero-sell-pricing-tier">
+      <div className="bcc-hero-sell-tier-header">
+        <div className="bcc-hero-sell-tier-price">P50</div>
+        <div className="bcc-hero-sell-tier-period">/month</div>
+      </div>
+      <div className="bcc-hero-sell-tier-value">Basic</div>
+      <div className="bcc-hero-sell-tier-features">
+        <span>✓ Multiple photos</span>
+        <span>✓ Contact leads</span>
+        <span>✓ Social Media Marketing</span>
+      </div>
+    </div>
+    
+    <div className="bcc-hero-sell-pricing-tier bcc-hero-sell-tier-popular">
+      <div className="bcc-hero-sell-tier-badge">Most Popular</div>
+      <div className="bcc-hero-sell-tier-header">
+        <div className="bcc-hero-sell-tier-price">P100</div>
+        <div className="bcc-hero-sell-tier-period">/month</div>
+      </div>
+      <div className="bcc-hero-sell-tier-value">Standard</div>
+      <div className="bcc-hero-sell-tier-features">
+        <span>✓ 2x Social media marketing</span>
+        <span>✓ Premium placement</span>
+        <span>✓ Multiple photos</span>
+        <span>✓ Priority support</span>
 
-            {/* UPDATED: Initial sell options - now redirect to profile/login */}
+      </div>
+    </div>
+    
+    <div className="bcc-hero-sell-pricing-tier">
+      <div className="bcc-hero-sell-tier-header">
+        <div className="bcc-hero-sell-tier-price">P200</div>
+        <div className="bcc-hero-sell-tier-period">/month</div>
+      </div>
+      <div className="bcc-hero-sell-tier-value">Premium</div>
+      <div className="bcc-hero-sell-tier-features">
+       <span>✓ 4x Social media marketing</span>
+        <span>✓ Premium priority placement</span>
+        <span>✓ Multiple photos</span>
+        <span>✓ Higher priority support</span>
+        <span>✓ Featured placement</span>
+        <span>✓ First access to new features</span>
+      </div>
+    </div>
+  </div>
+  
+  <div className="bcc-hero-sell-pricing-dealer-note">
+    <div className="bcc-hero-sell-dealer-notice">
+      <strong>Are you a dealer?</strong>
+      <p>Custom packages are avalable for dealerships. Contact us for special rates and premium features.</p>
+      <button 
+        className="bcc-hero-sell-dealer-contact-btn"
+        onClick={() => {
+          const whatsappNumber = '+26774122453';
+          const message = encodeURIComponent('Hi! I am a car dealer interested in listing vehicles on Bw Car Culture. Please provide information about dealer packages and pricing.');
+          window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+        }}
+      >
+        Contact Us on WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+            {/* UPDATED: Initial sell options - always visible */}
             <div className="bcc-hero-sell-options">
               <div className="bcc-hero-sell-option">
                 <div className="bcc-hero-option-header">
                   <span className="bcc-hero-option-icon"></span>
                   <h3>Instant Valuation</h3>
                 </div>
-                <p>Get a quick estimate of your car's value and start the selling process.</p>
+                <p>Get a guaranteed price and sell your car fast.</p>
                 <button 
                   className="bcc-hero-option-button bcc-hero-call-button"
-                  onClick={handleInstantValuationClick}
+                  onClick={handleCallClick}
                   disabled={loading}
-                  aria-label="Get instant vehicle valuation"
+                  aria-label="Call for vehicle valuation"
                 >
                   <span className="bcc-hero-button-icon"></span>
-                  {isAuthenticated ? 'Get Valuation' : 'Login to Get Valuation'}
+                  Call for Valuation
                 </button>
               </div>
 
@@ -421,55 +585,31 @@ const HeroSection = () => {
                 <p>Reach thousands of buyers and sell your car fast for a fair price.</p>
                 <button 
                   className="bcc-hero-option-button bcc-hero-whatsapp-button"
-                  onClick={handleListMyCarClick}
+                  onClick={handleShowPreparation}
                   disabled={loading}
-                  aria-label="List your vehicle for sale"
+                  aria-label="Get preparation guidelines for listing your vehicle"
                 >
                   <span className="bcc-hero-button-icon"></span>
-                  {isAuthenticated ? 'List My Car' : 'Login to List Car'}
+                  List My Car
                 </button>
               </div>
             </div>
 
-            {/* Preparation Information Section (Educational) */}
-            {!showPreparation && (
-              <div className="bcc-hero-sell-info-section">
-                <div className="bcc-hero-sell-info-content">
-                  <h4>New to selling online?</h4>
-                  <p>Learn what you need to prepare for the best listing experience.</p>
-                  <button 
-                    className="bcc-hero-info-button"
-                    onClick={handleShowPreparation}
-                  >
-                    Show Preparation Tips
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Conditional Preparation Section - shows educational information */}
+            {/* NEW: Conditional Preparation Section - shows after button click */}
             {showPreparation && (
               <div className="bcc-hero-sell-preparation" id="preparation-section">
                 <div className="bcc-preparation-header">
-                  <h3>Before You List - Get the Best Price</h3>
-                  <button 
-                    className="bcc-preparation-close"
-                    onClick={handleHidePreparation}
-                    aria-label="Hide preparation tips"
-                  >
-                    ×
-                  </button>
+                  <h3>Before You Proceed - Get the Best Price</h3>
                 </div>
                 <div className="bcc-preparation-content">
-                  <p>To ensure you get the best price and sell quickly, prepare the following information:</p>
+                  <p>To ensure you get the best price and sell quickly, please prepare the following information:</p>
                   <div className="bcc-preparation-grid">
                     <div className="bcc-preparation-item">
                       <div className="bcc-prep-content">
                         <h4>Quality Photos</h4>
                         <ul>
-                          <li>Front, back, and side views</li>
-                          <li>Interior dashboard and seats</li>
-                          <li>Engine bay photos</li>
+                          <li>Multiple angles (front, back, sides, interior)</li>
+                          <li>Engine bay and dashboard photos</li>
                           <li>Clear, well-lit images</li>
                           <li>Show any damage honestly</li>
                         </ul>
@@ -518,43 +658,66 @@ const HeroSection = () => {
                       <strong>Pro Tip:</strong> Vehicles with complete information and quality photos sell 3x faster and for up to 15% more than incomplete listings!
                     </div>
                   </div>
-                  
+
+                  {/* NEW: Action buttons for preparation section */}
                   <div className="bcc-preparation-actions">
                     <button 
-                      className="bcc-prep-action-button bcc-prep-primary"
-                      onClick={handleListMyCarClick}
+                      className="bcc-preparation-ready-button"
+                      onClick={handleWhatsAppClick}
+                      disabled={loading}
+                      aria-label="I'm ready - contact us on WhatsApp"
                     >
-                      {isAuthenticated ? 'Start Listing Process' : 'Login to Start Listing'}
+                      <span className="bcc-prep-button-icon"></span>
+                      I'm Ready - WhatsApp Us
                     </button>
                     <button 
-                      className="bcc-prep-action-button bcc-prep-secondary"
+                      className="bcc-preparation-back-button"
                       onClick={handleHidePreparation}
+                      disabled={loading}
+                      aria-label="Go back to options"
                     >
-                      I'll Prepare Later
+                      <span className="bcc-prep-button-icon">←</span>
+                      Go Back
                     </button>
                   </div>
                 </div>
               </div>
             )}
-          </div>
-        )}
 
-        {/* Stats Section - shows on all tabs */}
-        <div className="bcc-hero-stats">
-          <div className="bcc-hero-stats-container">
-            {statsDisplay.map((stat) => (
-              <div key={stat.key} className="bcc-hero-stat-item">
-                <div className="bcc-hero-stat-number">
-                  {formatNumber(stat.value)}{stat.suffix}
-                </div>
-                <div className="bcc-hero-stat-label">{stat.label}</div>
+            <div className="bcc-hero-features">
+             
+              <div className="bcc-hero-feature">
+                <span className="bcc-hero-feature-icon">✓</span>
+                <span>Access to thousands of growing local and international buyers</span>
               </div>
-            ))}
+              <div className="bcc-hero-feature">
+                <span className="bcc-hero-feature-icon">✓</span>
+                <span>Dedicated and professional digital sales support</span>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : null}
+      </div>
+
+      {/* Enhanced Stats Section */}
+      <div className="bcc-hero-stats">
+        {statsDisplay.map((stat) => (
+          <div key={stat.key} className="bcc-hero-stat">
+            {statsLoading ? (
+              <div className="bcc-hero-stat-loading" aria-label="Loading statistics"></div>
+            ) : (
+              <>
+                <span className="bcc-hero-stat-number">
+                  {formatNumber(stat.value)}{stat.suffix}
+                </span>
+                <span className="bcc-hero-stat-label">{stat.label}</span>
+              </>
+            )}
+          </div>
+        ))}
       </div>
     </section>
   );
 };
 
-export default HeroSection;
+export default React.memo(HeroSection);
