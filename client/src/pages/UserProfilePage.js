@@ -57,12 +57,16 @@ const UserProfilePage = () => {
   // Fetch user profile data
   useEffect(() => {
     if (isAuthenticated && user) {
+      console.log('User object:', user); // Debug log
       fetchUserProfile();
     }
   }, [isAuthenticated, user]);
 
   const fetchUserProfile = async () => {
-    if (!user?._id) {
+    console.log('fetchUserProfile called with user:', user); // Debug log
+    
+    if (!user?.id) {
+      console.log('No user ID available:', user); // Debug log
       setError('User ID not available');
       setLoading(false);
       return;
@@ -76,7 +80,7 @@ const UserProfilePage = () => {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`/api/profile/${user._id}`, {
+      const response = await fetch(`/api/user/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -92,8 +96,8 @@ const UserProfilePage = () => {
 
       const data = await response.json();
       
-      if (data.success && data.profile) {
-        setProfileData(data.profile);
+      if (data.success && data.data) {
+        setProfileData(data.data);
         setError('');
       } else {
         throw new Error(data.message || 'Failed to load profile data');
@@ -109,7 +113,7 @@ const UserProfilePage = () => {
   const updateProfile = async (updateData) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/profile/${user._id}`, {
+      const response = await fetch(`/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -125,7 +129,7 @@ const UserProfilePage = () => {
       const data = await response.json();
       
       if (data.success) {
-        setProfileData(data.profile);
+        setProfileData(data.data);
         return { success: true, message: 'Profile updated successfully' };
       } else {
         throw new Error(data.message || 'Update failed');

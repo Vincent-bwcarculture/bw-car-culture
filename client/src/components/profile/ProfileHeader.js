@@ -97,7 +97,7 @@ const ProfileHeader = ({
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await fetch('/api/profile/avatar', {
+      const response = await fetch('/api/auth/avatar', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -114,7 +114,7 @@ const ProfileHeader = ({
       // Update profile data with new avatar
       setProfileData(prev => ({
         ...prev,
-        avatar: data.avatar
+        avatar: data.data?.avatar || data.avatar
       }));
 
     } catch (error) {

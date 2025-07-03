@@ -70,7 +70,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/profile/${profileData._id}`, {
+      const response = await fetch(`/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -111,7 +111,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/profile/${profileData._id}`, {
+      const response = await fetch(`/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -147,7 +147,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/profile/${profileData._id}`, {
+      const response = await fetch(`/api/auth/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
