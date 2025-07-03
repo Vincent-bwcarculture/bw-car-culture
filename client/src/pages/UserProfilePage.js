@@ -9,15 +9,15 @@ import {
   BarChart3
 } from 'lucide-react';
 
-import ProfileHeader from '../components/profile/ProfileHeader';
-import ProfileOverview from '../components/profile/ProfileOverview';
-import ServiceManagement from '../components/profile/ServiceManagement';
-import RouteManagement from '../components/profile/RouteManagement';
-import VehicleManagement from '../components/profile/VehicleManagement';
-import BusinessDashboard from '../components/profile/BusinessDashboard';
-import ProfileSettings from '../components/profile/ProfileSettings';
+import ProfileHeader from '../components/profile/ProfileHeader.js';
+import ProfileOverview from '../components/profile/ProfileOverview.js';
+import ServiceManagement from '../components/profile/ServiceManagement.js';
+import RouteManagement from '../components/profile/RouteManagement.js';
+import VehicleManagement from '../components/profile/VehicleManagement.js';
+import BusinessDashboard from '../components/profile/BusinessDashboard.js';
+import ProfileSettings from '../components/profile/ProfileSettings.js';
 
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../context/AuthContext.js';
 import './UserProfilePage.css';
 
 const UserProfilePage = () => {
