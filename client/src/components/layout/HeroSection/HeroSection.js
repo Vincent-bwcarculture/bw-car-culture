@@ -1,14 +1,14 @@
-// client/src/components/layout/HeroSection/HeroSection.js - Updated Part 1 (Lines 1-150)
+// client/src/components/layout/HeroSection/HeroSection.js - Minimal Updates Only
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext.js';
+import { useAuth } from '../../../context/AuthContext.js'; // NEW: Added this import
 import QuickFeedbackButton from '../../shared/QuickFeedbackButton/QuickFeedbackButton.js';
 import './HeroSection.css';
 
 const HeroSection = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user } = useAuth(); // NEW: Added authentication context
   
   const [activeTab, setActiveTab] = useState('buy');
   const [searchQuery, setSearchQuery] = useState('');
@@ -241,7 +241,81 @@ const HeroSection = () => {
           </button>
         </div>
 
-        // client/src/components/layout/HeroSection/HeroSection.js - Updated Part 2 (Lines 151-400)
+        {/* Buy Tab Content */}
+        {activeTab === 'buy' && (
+          <div className="bcc-hero-buy">
+            <h1>Find Your Dream Car</h1>
+            <p>Discover thousands of quality vehicles from verified dealers and private sellers across Botswana.</p>
+            
+            <div className="bcc-hero-search-container">
+              <div className="bcc-hero-search-box">
+                <input
+                  type="text"
+                  placeholder="Search by make, model, year, or price..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  disabled={loading}
+                  className="bcc-hero-search-input"
+                />
+                <button 
+                  onClick={handleSearch}
+                  disabled={loading || !searchQuery.trim()}
+                  className="bcc-hero-search-button"
+                  aria-label="Search for vehicles"
+                >
+                  {loading ? 'Searching...' : 'Search'}
+                </button>
+              </div>
+            </div>
+
+            <div className="bcc-hero-quick-search">
+              <span className="bcc-hero-quick-label">Quick search:</span>
+              <div className="bcc-hero-quick-buttons">
+                <button 
+                  onClick={() => handleQuickSearch('make', 'Toyota')}
+                  disabled={loading}
+                  className="bcc-hero-quick-button"
+                >
+                  Toyota
+                </button>
+                <button 
+                  onClick={() => handleQuickSearch('make', 'BMW')}
+                  disabled={loading}
+                  className="bcc-hero-quick-button"
+                >
+                  BMW
+                </button>
+                <button 
+                  onClick={() => handleQuickSearch('maxPrice', '100000')}
+                  disabled={loading}
+                  className="bcc-hero-quick-button"
+                >
+                  Under P100k
+                </button>
+                <button 
+                  onClick={() => handleQuickSearch('condition', 'new')}
+                  disabled={loading}
+                  className="bcc-hero-quick-button"
+                >
+                  New Cars
+                </button>
+              </div>
+            </div>
+
+            {/* Savings Banner */}
+            <div className="bcc-hero-savings-banner" onClick={handleSavingsClick}>
+              <div className="bcc-savings-content">
+                <span className="bcc-savings-icon">💰</span>
+                <div className="bcc-savings-text">
+                  <strong>Exclusive BW Car Culture Savings!</strong>
+                  <span>Save up to P15,000 on select vehicles</span>
+                </div>
+                <span className="bcc-savings-arrow">→</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Sell Tab Content */}
         {activeTab === 'sell' && (
@@ -464,84 +538,6 @@ const HeroSection = () => {
             )}
           </div>
         )}
-
-        {/* Buy Tab Content */}
-        {activeTab === 'buy' && (
-          <div className="bcc-hero-buy">
-            <h1>Find Your Dream Car</h1>
-            <p>Discover thousands of quality vehicles from verified dealers and private sellers across Botswana.</p>
-            
-            <div className="bcc-hero-search-container">
-              <div className="bcc-hero-search-box">
-                <input
-                  type="text"
-                  placeholder="Search by make, model, year, or price..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  disabled={loading}
-                  className="bcc-hero-search-input"
-                />
-                <button 
-                  onClick={handleSearch}
-                  disabled={loading || !searchQuery.trim()}
-                  className="bcc-hero-search-button"
-                  aria-label="Search for vehicles"
-                >
-                  {loading ? 'Searching...' : 'Search'}
-                </button>
-              </div>
-            </div>
-
-            <div className="bcc-hero-quick-search">
-              <span className="bcc-hero-quick-label">Quick search:</span>
-              <div className="bcc-hero-quick-buttons">
-                <button 
-                  onClick={() => handleQuickSearch('make', 'Toyota')}
-                  disabled={loading}
-                  className="bcc-hero-quick-button"
-                >
-                  Toyota
-                </button>
-                <button 
-                  onClick={() => handleQuickSearch('make', 'BMW')}
-                  disabled={loading}
-                  className="bcc-hero-quick-button"
-                >
-                  BMW
-                </button>
-                <button 
-                  onClick={() => handleQuickSearch('maxPrice', '100000')}
-                  disabled={loading}
-                  className="bcc-hero-quick-button"
-                >
-                  Under P100k
-                </button>
-                <button 
-                  onClick={() => handleQuickSearch('condition', 'new')}
-                  disabled={loading}
-                  className="bcc-hero-quick-button"
-                >
-                  New Cars
-                </button>
-              </div>
-            </div>
-
-            {/* Savings Banner */}
-            <div className="bcc-hero-savings-banner" onClick={handleSavingsClick}>
-              <div className="bcc-savings-content">
-                <span className="bcc-savings-icon">💰</span>
-                <div className="bcc-savings-text">
-                  <strong>Exclusive BW Car Culture Savings!</strong>
-                  <span>Save up to P15,000 on select vehicles</span>
-                </div>
-                <span className="bcc-savings-arrow">→</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        // client/src/components/layout/HeroSection/HeroSection.js - Updated Part 3 (Final - Lines 401-end)
 
         {/* Stats Section - shows on all tabs */}
         <div className="bcc-hero-stats">

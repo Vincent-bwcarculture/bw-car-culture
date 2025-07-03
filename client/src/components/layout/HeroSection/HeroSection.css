@@ -1578,11 +1578,10 @@
   }
 }
 
-/* client/src/components/layout/HeroSection/HeroSection.css - Additional Styles */
+/* ADD THESE STYLES TO YOUR EXISTING HeroSection.css file */
+/* Place these at the bottom of your existing CSS file */
 
-/* Add these new styles to your existing HeroSection.css file */
-
-/* Info Section Styles */
+/* Info Section Styles - NEW */
 .bcc-hero-sell-info-section {
   max-width: 600px;
   margin: 2rem auto;
@@ -1625,7 +1624,7 @@
   transform: translateY(-1px);
 }
 
-/* Preparation Close Button */
+/* Preparation Section Styles - NEW */
 .bcc-preparation-close {
   position: absolute;
   top: 1rem;
@@ -1649,7 +1648,6 @@
   transform: scale(1.1);
 }
 
-/* Preparation Actions */
 .bcc-preparation-actions {
   display: flex;
   gap: 1rem;
@@ -1693,13 +1691,8 @@
   transform: translateY(-1px);
 }
 
-/* Enhanced Sell Options */
-.bcc-hero-sell-option {
-  position: relative;
-}
-
+/* Enhanced Button States - NEW */
 .bcc-hero-option-button {
-  transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
 }
@@ -1713,7 +1706,7 @@
   transform: translateY(-2px);
 }
 
-/* Authentication Status Indicators */
+/* Authentication Status Animation - NEW */
 .bcc-hero-option-button::before {
   content: '';
   position: absolute;
@@ -1730,7 +1723,7 @@
   transform: translateX(100%);
 }
 
-/* Mobile Responsive Updates */
+/* Mobile Responsive Updates - NEW */
 @media (max-width: 768px) {
   .bcc-hero-sell-info-section {
     margin: 1.5rem 1rem;
@@ -1777,7 +1770,7 @@
   }
 }
 
-/* High contrast mode support */
+/* High contrast mode support - NEW */
 @media (prefers-contrast: high) {
   .bcc-hero-sell-info-section {
     border-width: 2px;
@@ -1788,7 +1781,7 @@
   }
 }
 
-/* Reduced motion support */
+/* Reduced motion support - NEW */
 @media (prefers-reduced-motion: reduce) {
   .bcc-hero-option-button:hover {
     transform: none;
