@@ -82,49 +82,23 @@ const ReviewFAB = () => {
       navigate('/login', { 
         state: { 
           from: window.location.pathname,
-          message: 'Please log in to leave a review'
+          message: 'Please login to leave a review'
         }
       });
-      return;
+    } else {
+      setShowReviewModal(true);
     }
-    setShowReviewModal(true);
   };
 
-  // Handle review submission from enhanced modal
-  const handleReviewSubmit = (method, data) => {
-    console.log('Review method selected:', method, data);
-    
-    switch (method) {
-      case 'qr':
-        if (data.qrData) {
-          navigate('/review/qr', { state: { qrData: data.qrData } });
-        }
-        break;
-        
-      case 'service_code':
-        if (data.serviceCode) {
-          navigate('/review/service-code', { state: { serviceCode: data.serviceCode } });
-        }
-        break;
-        
-      case 'plate_number':
-        if (data.plateNumber) {
-          navigate('/review/plate-number', { state: { plateNumber: data.plateNumber } });
-        }
-        break;
-        
-      case 'general':
-        navigate('/review/general');
-        break;
-        
-      default:
-        console.log('Unknown review method:', method);
-    }
+  const handleReviewSubmit = (reviewData) => {
+    console.log('Review submitted:', reviewData);
+    setShowReviewModal(false);
+    // Here you would typically send the review to your backend
   };
 
   return (
     <>
-      {/* Main FAB Button */}
+      {/* Enhanced Review FAB */}
       <button 
         className={`review-fab ${isVisible ? 'visible' : 'hidden'}`}
         onClick={handleFABClick}
@@ -146,7 +120,8 @@ const ReviewFAB = () => {
 
 // Desktop User Menu Component
 const DesktopUserMenu = () => {
-  const { isAuthenticated, currentUser, logout } = useAuth();
+  // FIXED: Use 'user' instead of 'currentUser' to match AuthContext
+  const { isAuthenticated, user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const navigate = useNavigate();
 
@@ -182,7 +157,7 @@ const DesktopUserMenu = () => {
   return (
     <div className="desktop-user-menu" onMouseLeave={() => setShowDropdown(false)}>
       <UserProfileLink 
-        user={currentUser} 
+        user={user} 
         onMouseEnter={() => setShowDropdown(true)}
         onClick={() => setShowDropdown(!showDropdown)}
       />
@@ -224,7 +199,10 @@ const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
         )}
       </div>
       <div className="user-profile-info">
-        <span className="user-profile-name">{user?.name || 'User'}</span>
+        {/* FIXED: Better fallback for username display */}
+        <span className="user-profile-name">
+          {user?.name || user?.email?.split('@')[0] || 'User'}
+        </span>
         <span className="user-profile-role">{user?.role || 'Member'}</span>
       </div>
     </Link>
