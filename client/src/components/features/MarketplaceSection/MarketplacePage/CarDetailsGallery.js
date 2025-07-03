@@ -23,6 +23,26 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
     if (car.priceOptions?.showPriceAsPOA) return 'POA';
     return `P${parseInt(price).toLocaleString()}`;
   };
+
+  // Calculate savings for display
+  const calculateSavings = () => {
+    if (!car.priceOptions?.showSavings || !car.priceOptions?.originalPrice) return null;
+    
+    const originalPrice = car.priceOptions.originalPrice;
+    const currentPrice = car.price;
+    const savingsAmount = originalPrice - currentPrice;
+    
+    if (savingsAmount > 0) {
+      return {
+        originalPrice,
+        currentPrice,
+        amount: savingsAmount
+      };
+    }
+    return null;
+  };
+
+  const savings = calculateSavings();
   
   // Extract image URLs - UPDATED FOR S3
   const getImageUrls = () => {
@@ -136,19 +156,41 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
       )}
 
       <div className="car-details">
+        {/* UPDATED: Header with title and price side by side */}
         <div className="car-header">
-          <h1 className="car-title">{car.title || 'Untitled Vehicle'}</h1>
+          <div className="car-title-section">
+            <h1 className="car-title">{car.title || 'Untitled Vehicle'}</h1>
+            {/* UPDATED: Finance badges under title - horizontal layout */}
+            <div className="car-title-badges">
+              {car.priceOptions?.financeAvailable && (
+                <div className="finance-badge">Finance Available</div>
+              )}
+              {car.priceOptions?.leaseAvailable && (
+                <div className="finance-badge lease-badge">Lease Available</div>
+              )}
+            </div>
+          </div>
+          
+          {/* UPDATED: Price container positioned next to title */}
           <div className="price-container">
-            <div className="car-price">{formatPrice(car.price)}</div>
-            {car.priceOptions?.financeAvailable && (
-              <div className="finance-badge">Finance Available</div>
+            {savings && (
+              <div className="original-price">P{savings.originalPrice.toLocaleString()}</div>
             )}
-            {car.priceOptions?.leaseAvailable && (
-              <div className="finance-badge lease-badge">Lease Available</div>
+            <div className="car-price">{formatPrice(car.price)}</div>
+            {savings && (
+              <div className="savings-highlight">
+                Save P{savings.amount.toLocaleString()}
+              </div>
+            )}
+            {car.priceOptions?.monthlyPayment && !car.priceOptions?.showPriceAsPOA && (
+              <div className="monthly-payment">
+                P{car.priceOptions.monthlyPayment.toLocaleString()} p/m
+              </div>
             )}
           </div>
         </div>
 
+        {/* UPDATED: Status badges section */}
         <div className="car-status-badges">
           {car.condition && (
             <span className={`condition-tag ${car.condition.toLowerCase()}`}>
@@ -169,6 +211,7 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
           )}
         </div>
 
+        {/* UPDATED: Specs grid - responsive 2-3 column layout */}
         <div className="specs-grid">
           <div className="spec-item">
             <span className="spec-label">Year</span>
@@ -253,55 +296,25 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
               <div className="dealer-name">
                 {showDealerLink ? (
                   <Link to={`/dealerships/${car.dealer._id}`} className="dealer-link">
-                    {car.dealer.businessName || car.dealer.name || 'Unknown Dealer'}
+                    {car.dealer.businessName || car.dealer.name || 'Dealer'}
                   </Link>
                 ) : (
-                  car.dealer.businessName || car.dealer.name || 'Unknown Dealer'
-                )}
-                {car.dealer.verification?.isVerified && (
-                  <span className="verified-dealer-badge">✓ Verified</span>
+                  car.dealer.businessName || car.dealer.name || 'Dealer'
                 )}
               </div>
-              
-              <div className="dealer-metadata">
-                {car.dealer.location && (
-                  <div className="dealer-location">
-                    <span className="location-icon">📍</span>
-                    {car.dealer.location.city}
-                    {car.dealer.location.country && `, ${car.dealer.location.country}`}
-                  </div>
-                )}
-                {car.dealer.contact?.phone && (
-                  <div className="dealer-phone">
-                    <span className="phone-icon">📞</span>
-                    <a href={`tel:${car.dealer.contact.phone}`}>
-                      {car.dealer.contact.phone}
-                    </a>
-                  </div>
-                )}
-                {car.dealer.contact?.email && (
-                  <div className="dealer-email">
-                    <span className="email-icon">✉️</span>
-                    <a href={`mailto:${car.dealer.contact.email}`}>
-                      {car.dealer.contact.email}
-                    </a>
-                  </div>
-                )}
+              <div className="dealer-meta">
+                <span className="dealer-location">
+                  {car.dealer.location?.city || car.dealer.city || 'Location not specified'}
+                </span>
+                <span className="dealer-contact">
+                  {car.dealer.phone || car.dealer.contactPhone || 'Contact available'}
+                </span>
               </div>
             </div>
-            
-            {showDealerLink && (
-              <button 
-                className="view-dealer-profile"
-                onClick={navigateToDealerProfile}
-              >
-                View Dealer Profile
-              </button>
-            )}
           </div>
         )}
 
-         {/* NEW: Similar Vehicles List - Shows only on bigger displays */}
+        {/* NEW: Similar Vehicles List - Shows only on bigger displays */}
         {/* <SimilarVehiclesList 
           currentCar={car}
           isPrivateSeller={car.dealer?.sellerType === 'private'}
@@ -355,52 +368,60 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
                   <span className="location-value">{car.location.address}</span>
                 </div>
               )}
-              <div className="location-city-state">
-                {car.location.city && (
-                  <span className="location-city">{car.location.city}</span>
-                )}
-                {car.location.state && (
-                  <span className="location-state">{car.location.state}</span>
-                )}
-                {car.location.postalCode && (
-                  <span className="location-postal">{car.location.postalCode}</span>
-                )}
-                {car.location.country && (
-                  <span className="location-country">{car.location.country}</span>
-                )}
-              </div>
+              {car.location.city && (
+                <div className="location-city">
+                  <span className="location-label">City:</span>
+                  <span className="location-value">{car.location.city}</span>
+                </div>
+              )}
+              {car.location.state && (
+                <div className="location-state">
+                  <span className="location-label">State:</span>
+                  <span className="location-value">{car.location.state}</span>
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        <div className="actions">
-          {car.dealer?.contact?.phone && (
-            <a 
-              href={`tel:${car.dealer.contact.phone}`}
-              className="action-button primary contact-button"
-            >
-              Call Dealer
-            </a>
-          )}
-          {car.dealer?.contact?.email && (
-            <a 
-              href={`mailto:${car.dealer.contact.email}?subject=Inquiry about ${car.title}&body=I am interested in the ${car.title} listed on your website.`}
-              className="action-button secondary email-button"
-            >
-              Email Dealer
-            </a>
-          )}
-          {car.dealer?.contact?.phone && (
-            <a 
-              href={`https://wa.me/${car.dealer.contact.phone.replace(/[^0-9]/g, '')}?text=I am interested in the ${car.title} listed on your website.`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="action-button secondary whatsapp-button"
-            >
-              WhatsApp
-            </a>
-          )}
-        </div>
+        {/* Contact Section */}
+        {car.dealer && (
+          <div className="contact-section">
+            <h2>Contact Dealer</h2>
+            <div className="contact-actions">
+              <button 
+                className="contact-button whatsapp"
+                onClick={() => {
+                  const phone = car.dealer.phone || car.dealer.contactPhone || '';
+                  const message = `Hi, I'm interested in the ${car.title || 'vehicle'} listed for ${formatPrice(car.price)}.`;
+                  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+                }}
+              >
+                📱 WhatsApp
+              </button>
+              <button 
+                className="contact-button call"
+                onClick={() => {
+                  const phone = car.dealer.phone || car.dealer.contactPhone || '';
+                  window.open(`tel:${phone}`, '_self');
+                }}
+              >
+                📞 Call
+              </button>
+              <button 
+                className="contact-button email"
+                onClick={() => {
+                  const email = car.dealer.email || car.dealer.contactEmail || '';
+                  const subject = `Inquiry about ${car.title || 'vehicle'}`;
+                  const body = `Hi, I'm interested in the ${car.title || 'vehicle'} listed for ${formatPrice(car.price)}. Please provide more details.`;
+                  window.open(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_self');
+                }}
+              >
+                ✉️ Email
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
