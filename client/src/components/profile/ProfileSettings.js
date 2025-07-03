@@ -16,6 +16,7 @@ import {
   MapPin,
   Calendar
 } from 'lucide-react';
+import axios from '../../config/axios.js';
 import './ProfileSettings.css';
 
 const ProfileSettings = ({ profileData, refreshProfile }) => {
@@ -69,37 +70,27 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/auth/profile`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: profileForm.name,
-          email: profileForm.email,
-          profile: {
-            ...profileData.profile,
-            phone: profileForm.phone,
-            bio: profileForm.bio,
-            location: profileForm.location,
-            dateOfBirth: profileForm.dateOfBirth
-          }
-        })
+      const response = await axios.put('/auth/profile', {
+        name: profileForm.name,
+        email: profileForm.email,
+        profile: {
+          ...profileData.profile,
+          phone: profileForm.phone,
+          bio: profileForm.bio,
+          location: profileForm.location,
+          dateOfBirth: profileForm.dateOfBirth
+        }
       });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.data.success) {
         showMessage('success', 'Profile updated successfully');
         if (refreshProfile) refreshProfile();
       } else {
-        throw new Error(data.message || 'Update failed');
+        throw new Error(response.data.message || 'Update failed');
       }
     } catch (error) {
       console.error('Profile update error:', error);
-      showMessage('error', error.message || 'Failed to update profile');
+      showMessage('error', error.response?.data?.message || error.message || 'Failed to update profile');
     } finally {
       setLoading(false);
     }
@@ -110,32 +101,22 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/auth/profile`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          profile: {
-            ...profileData.profile,
-            notifications: notificationSettings
-          }
-        })
+      const response = await axios.put('/auth/profile', {
+        profile: {
+          ...profileData.profile,
+          notifications: notificationSettings
+        }
       });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.data.success) {
         showMessage('success', 'Notification preferences updated');
         if (refreshProfile) refreshProfile();
       } else {
-        throw new Error(data.message || 'Update failed');
+        throw new Error(response.data.message || 'Update failed');
       }
     } catch (error) {
       console.error('Notification update error:', error);
-      showMessage('error', error.message || 'Failed to update notifications');
+      showMessage('error', error.response?.data?.message || error.message || 'Failed to update notifications');
     } finally {
       setLoading(false);
     }
@@ -146,32 +127,22 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/auth/profile`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          profile: {
-            ...profileData.profile,
-            privacy: privacySettings
-          }
-        })
+      const response = await axios.put('/auth/profile', {
+        profile: {
+          ...profileData.profile,
+          privacy: privacySettings
+        }
       });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.data.success) {
         showMessage('success', 'Privacy settings updated');
         if (refreshProfile) refreshProfile();
       } else {
-        throw new Error(data.message || 'Update failed');
+        throw new Error(response.data.message || 'Update failed');
       }
     } catch (error) {
       console.error('Privacy update error:', error);
-      showMessage('error', error.message || 'Failed to update privacy settings');
+      showMessage('error', error.response?.data?.message || error.message || 'Failed to update privacy settings');
     } finally {
       setLoading(false);
     }
@@ -193,30 +164,20 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/auth/change-password', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword
-        })
+      const response = await axios.put('/auth/change-password', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
       });
 
-      const data = await response.json();
-
-      if (data.success) {
+      if (response.data.success) {
         showMessage('success', 'Password changed successfully');
         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
       } else {
-        throw new Error(data.message || 'Password change failed');
+        throw new Error(response.data.message || 'Password change failed');
       }
     } catch (error) {
       console.error('Password change error:', error);
-      showMessage('error', error.message || 'Failed to change password');
+      showMessage('error', error.response?.data?.message || error.message || 'Failed to change password');
     } finally {
       setLoading(false);
     }

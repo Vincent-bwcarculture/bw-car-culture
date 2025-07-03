@@ -14,6 +14,7 @@ import {
   CheckCircle,
   Truck
 } from 'lucide-react';
+import axios from '../../config/axios.js';
 import './ProfileHeader.css';
 
 const ProfileHeader = ({ 
@@ -97,24 +98,16 @@ const ProfileHeader = ({
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await fetch('/api/auth/avatar', {
-        method: 'POST',
+      const response = await axios.post('/auth/avatar', formData, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData
+          'Content-Type': 'multipart/form-data'
+        }
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to upload avatar');
-      }
-
-      const data = await response.json();
       
       // Update profile data with new avatar
       setProfileData(prev => ({
         ...prev,
-        avatar: data.data?.avatar || data.avatar
+        avatar: response.data.data?.avatar || response.data.avatar
       }));
 
     } catch (error) {
