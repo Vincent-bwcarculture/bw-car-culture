@@ -939,7 +939,7 @@
     contain: layout style;
 }
 
-* Enhanced FAB visibility states */
+/* Enhanced FAB visibility states */
 .review-fab.visible {
   transform: translateY(0);
   opacity: 1;
