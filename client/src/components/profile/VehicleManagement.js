@@ -1,9 +1,9 @@
-// client/src/components/profile/VehicleManagement.js - Complete Enhanced Version
+// client/src/components/profile/VehicleManagement.js - Complete Enhanced Version (FIXED)
 import React, { useState, useEffect } from 'react';
 import { 
   Car, Plus, Edit2, Trash2, Settings, DollarSign, Calendar, 
   Bell, AlertCircle, Check, X, Save, Upload, Camera, Eye,
-  Wrench, Gas, Navigation, Award, TrendingUp, Calculator
+  Wrench, Gas, Navigation, Award, TrendingUp, Calculator, Shield
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 
@@ -20,6 +20,7 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [vehicleFormData, setVehicleFormData] = useState({});
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
 
   // UPDATED: Enhanced tabs with selling and valuation
   const tabs = [
@@ -120,12 +121,17 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
     setShowVehicleModal(true);
   };
 
-  const handleDeleteVehicle = async (vehicleId) => {
-    if (!confirm('Are you sure you want to delete this vehicle?')) return;
+  // FIXED: Replace confirm() with custom confirmation modal
+  const handleDeleteVehicle = (vehicleId) => {
+    setShowDeleteConfirm(vehicleId);
+  };
+
+  const confirmDeleteVehicle = async () => {
+    if (!showDeleteConfirm) return;
 
     try {
       setLoading(true);
-      const response = await axios.delete(`/user/vehicles/${vehicleId}`);
+      const response = await axios.delete(`/user/vehicles/${showDeleteConfirm}`);
       if (response.data.success) {
         showMessage('success', 'Vehicle deleted successfully');
         fetchUserVehicles();
@@ -135,6 +141,7 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
       showMessage('error', 'Failed to delete vehicle');
     } finally {
       setLoading(false);
+      setShowDeleteConfirm(null);
     }
   };
 
@@ -204,6 +211,36 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
           {message.type === 'success' && <Check size={16} />}
           {message.type === 'error' && <AlertCircle size={16} />}
           {message.text}
+        </div>
+      )}
+
+      {/* ADDED: Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="vmanage-modal-overlay">
+          <div className="vmanage-confirmation-modal">
+            <div className="vmanage-confirmation-header">
+              <AlertCircle size={24} className="vmanage-warning-icon" />
+              <h3>Delete Vehicle</h3>
+            </div>
+            <div className="vmanage-confirmation-body">
+              <p>Are you sure you want to delete this vehicle? This action cannot be undone.</p>
+            </div>
+            <div className="vmanage-confirmation-actions">
+              <button 
+                className="vmanage-confirm-delete-btn"
+                onClick={confirmDeleteVehicle}
+                disabled={loading}
+              >
+                {loading ? 'Deleting...' : 'Delete'}
+              </button>
+              <button 
+                className="vmanage-cancel-btn"
+                onClick={() => setShowDeleteConfirm(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -495,7 +532,7 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
         </div>
       )}
 
-      {/* Vehicle Form Modal - Existing functionality preserved */}
+      {/* Vehicle Form Modal - Enhanced with additional fields */}
       {showVehicleModal && (
         <div className="vmanage-modal-overlay">
           <div className="vmanage-modal">
@@ -510,7 +547,7 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
             </div>
             
             <div className="vmanage-modal-body">
-              {/* Vehicle form content would go here - existing form */}
+              {/* Basic Information Section */}
               <div className="vmanage-form-section">
                 <h4>Basic Information</h4>
                 <div className="vmanage-form-grid">
@@ -521,6 +558,8 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
                       value={vehicleFormData.year}
                       onChange={(e) => setVehicleFormData({...vehicleFormData, year: e.target.value})}
                       placeholder="e.g., 2020"
+                      min="1900"
+                      max={new Date().getFullYear() + 1}
                     />
                   </div>
                   <div className="vmanage-form-group">
@@ -541,6 +580,174 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
                       placeholder="e.g., Corolla"
                     />
                   </div>
+                  <div className="vmanage-form-group">
+                    <label>Variant</label>
+                    <input
+                      type="text"
+                      value={vehicleFormData.variant}
+                      onChange={(e) => setVehicleFormData({...vehicleFormData, variant: e.target.value})}
+                      placeholder="e.g., 1.8L GLi"
+                    />
+                  </div>
+                  <div className="vmanage-form-group">
+                    <label>Color</label>
+                    <input
+                      type="text"
+                      value={vehicleFormData.color}
+                      onChange={(e) => setVehicleFormData({...vehicleFormData, color: e.target.value})}
+                      placeholder="e.g., White"
+                    />
+                  </div>
+                  <div className="vmanage-form-group">
+                    <label>Mileage (km)</label>
+                    <input
+                      type="number"
+                      value={vehicleFormData.mileage}
+                      onChange={(e) => setVehicleFormData({...vehicleFormData, mileage: e.target.value})}
+                      placeholder="e.g., 50000"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Vehicle Specifications */}
+              <div className="vmanage-form-section">
+                <h4>Specifications</h4>
+                <div className="vmanage-form-grid">
+                  <div className="vmanage-form-group">
+                    <label>Fuel Type</label>
+                    <select
+                      value={vehicleFormData.fuelType}
+                      onChange={(e) => setVehicleFormData({...vehicleFormData, fuelType: e.target.value})}
+                    >
+                      <option value="petrol">Petrol</option>
+                      <option value="diesel">Diesel</option>
+                      <option value="hybrid">Hybrid</option>
+                      <option value="electric">Electric</option>
+                      <option value="lpg">LPG</option>
+                    </select>
+                  </div>
+                  <div className="vmanage-form-group">
+                    <label>Transmission</label>
+                    <select
+                      value={vehicleFormData.transmission}
+                      onChange={(e) => setVehicleFormData({...vehicleFormData, transmission: e.target.value})}
+                    >
+                      <option value="manual">Manual</option>
+                      <option value="automatic">Automatic</option>
+                      <option value="cvt">CVT</option>
+                      <option value="semi-automatic">Semi-Automatic</option>
+                    </select>
+                  </div>
+                  <div className="vmanage-form-group">
+                    <label>Body Type</label>
+                    <select
+                      value={vehicleFormData.bodyType}
+                      onChange={(e) => setVehicleFormData({...vehicleFormData, bodyType: e.target.value})}
+                    >
+                      <option value="sedan">Sedan</option>
+                      <option value="suv">SUV</option>
+                      <option value="hatchback">Hatchback</option>
+                      <option value="pickup">Pickup</option>
+                      <option value="wagon">Wagon</option>
+                      <option value="coupe">Coupe</option>
+                      <option value="convertible">Convertible</option>
+                      <option value="van">Van</option>
+                    </select>
+                  </div>
+                  <div className="vmanage-form-group">
+                    <label>Condition</label>
+                    <select
+                      value={vehicleFormData.condition}
+                      onChange={(e) => setVehicleFormData({...vehicleFormData, condition: e.target.value})}
+                    >
+                      <option value="excellent">Excellent</option>
+                      <option value="good">Good</option>
+                      <option value="fair">Fair</option>
+                      <option value="poor">Poor</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Vehicle Identification */}
+              <div className="vmanage-form-section">
+                <h4>Vehicle Identification</h4>
+                <div className="vmanage-form-grid">
+                  <div className="vmanage-form-group">
+                    <label>VIN (Optional)</label>
+                    <input
+                      type="text"
+                      value={vehicleFormData.vin}
+                      onChange={(e) => setVehicleFormData({...vehicleFormData, vin: e.target.value})}
+                      placeholder="Vehicle Identification Number"
+                    />
+                  </div>
+                  <div className="vmanage-form-group">
+                    <label>License Plate</label>
+                    <input
+                      type="text"
+                      value={vehicleFormData.licensePlate}
+                      onChange={(e) => setVehicleFormData({...vehicleFormData, licensePlate: e.target.value})}
+                      placeholder="e.g., B123 ABC"
+                    />
+                  </div>
+                  <div className="vmanage-form-group">
+                    <label>Registration Number</label>
+                    <input
+                      type="text"
+                      value={vehicleFormData.registrationNumber}
+                      onChange={(e) => setVehicleFormData({...vehicleFormData, registrationNumber: e.target.value})}
+                      placeholder="Registration number"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Service Information */}
+              <div className="vmanage-form-section">
+                <h4>Service Information</h4>
+                <div className="vmanage-form-grid">
+                  <div className="vmanage-form-group">
+                    <label>Last Service Date</label>
+                    <input
+                      type="date"
+                      value={vehicleFormData.lastServiceDate}
+                      onChange={(e) => setVehicleFormData({...vehicleFormData, lastServiceDate: e.target.value})}
+                    />
+                  </div>
+                  <div className="vmanage-form-group">
+                    <label>Next Service Due</label>
+                    <input
+                      type="date"
+                      value={vehicleFormData.nextServiceDue}
+                      onChange={(e) => setVehicleFormData({...vehicleFormData, nextServiceDue: e.target.value})}
+                    />
+                  </div>
+                  <div className="vmanage-form-group">
+                    <label>Preferred Workshop</label>
+                    <input
+                      type="text"
+                      value={vehicleFormData.preferredWorkshop}
+                      onChange={(e) => setVehicleFormData({...vehicleFormData, preferredWorkshop: e.target.value})}
+                      placeholder="Workshop name"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Notes */}
+              <div className="vmanage-form-section">
+                <h4>Additional Notes</h4>
+                <div className="vmanage-form-group">
+                  <label>Notes</label>
+                  <textarea
+                    value={vehicleFormData.notes}
+                    onChange={(e) => setVehicleFormData({...vehicleFormData, notes: e.target.value})}
+                    placeholder="Any additional information about your vehicle..."
+                    rows="3"
+                  />
                 </div>
               </div>
               
