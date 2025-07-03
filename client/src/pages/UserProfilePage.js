@@ -12,6 +12,14 @@ import {
 // Import CarListingManager for vehicles tab
 import CarListingManager from '../components/profile/CarListingManager/CarListingManager.js';
 
+// Import all the actual profile components
+import ProfileOverview from '../components/profile/ProfileOverview.js';
+import ServiceManagement from '../components/profile/ServiceManagement.js';
+import ProfileSettings from '../components/profile/ProfileSettings.js';
+import VehicleManagement from '../components/profile/VehicleManagement.js';
+import BusinessDashboard from '../components/profile/BusinessDashboard.js';
+import RouteManagement from '../components/profile/RouteManagement.js';
+
 import './UserProfilePage.css';
 
 const UserProfilePage = () => {
@@ -216,9 +224,13 @@ const UserProfilePage = () => {
           />
         )}
 
-        {/* UPDATED: Use CarListingManager for vehicles tab */}
+        {/* UPDATED: Use VehicleManagement as main component for comprehensive vehicle management */}
         {activeTab === 'vehicles' && (
-          <CarListingManager action={urlAction} />
+          <VehicleManagement 
+            profileData={displayData}
+            refreshProfile={fetchUserProfile}
+            urlAction={urlAction}
+          />
         )}
 
         {activeTab === 'business' && (
@@ -395,47 +407,6 @@ const EnhancedProfileNavigation = ({ activeTab, setActiveTab, availableTabs }) =
   );
 };
 
-// Simple fallback components for missing imports
-const ProfileOverview = ({ profileData }) => (
-  <div className="uprofile-placeholder">
-    <h3>Profile Overview</h3>
-    <p>Welcome back, {profileData.name}!</p>
-    <p>Profile overview content coming soon.</p>
-  </div>
-);
 
-const ServiceManagement = ({ profileData }) => (
-  <div className="uprofile-placeholder">
-    <h3>Service Management</h3>
-    <p>Manage your services here.</p>
-  </div>
-);
-
-const RouteManagement = ({ profileData }) => (
-  <div className="uprofile-placeholder">
-    <h3>Route Management</h3>
-    <p>Manage your transport routes here.</p>
-  </div>
-);
-
-const BusinessDashboard = ({ profileData }) => (
-  <div className="uprofile-placeholder">
-    <h3>Business Dashboard</h3>
-    <p>Your business analytics and insights.</p>
-  </div>
-);
-
-const ProfileSettings = ({ profileData, theme, onThemeChange }) => (
-  <div className="uprofile-placeholder">
-    <h3>Profile Settings</h3>
-    <div className="uprofile-setting-item">
-      <span>Theme</span>
-      <button onClick={() => onThemeChange(theme === 'light' ? 'dark' : 'light')}>
-        {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
-        {theme === 'light' ? 'Dark' : 'Light'}
-      </button>
-    </div>
-  </div>
-);
 
 export default UserProfilePage;
