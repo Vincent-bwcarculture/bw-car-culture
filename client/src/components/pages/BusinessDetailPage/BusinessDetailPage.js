@@ -324,50 +324,60 @@ const BusinessDetailPage = () => {
     }
   };
 
-  // Handle review submission
-  const handleReviewSubmitted = (result) => {
-    if (result.success) {
-      setShowReviewModal(false);
-      setReviewMethod(null);
-      setShowQRScanner(false);
-      setServiceCode('');
-      loadBusinessReviews(); // Refresh reviews
-      
-      // Show success message
-      alert(result.message || 'Review submitted successfully!');
-    }
-  };
+ // REPLACE THE THREE EXISTING HANDLERS WITH THESE UPDATED VERSIONS:
 
-  // Start QR code scanning
-  const handleQRScan = () => {
+// NEW: Handle starting a review directly from business profile
+const handleStartReview = () => {
+  // Since user is on business profile, directly start general review
+  setReviewMethod('general');
+  setShowReviewModal(true);
+};
+
+// UPDATED: Start QR code scanning (only used when coming from navigation)
+const handleQRScan = () => {
+  setReviewMethod('qr');
+  setShowQRScanner(true);
+};
+
+// UPDATED: Handle QR scan result
+const handleQRResult = (qrData) => {
+  setShowQRScanner(false);
+  
+  const [serviceType, serviceId, providerId, serviceName] = qrData.split('|');
+  
+  if (providerId === business._id) {
     setReviewMethod('qr');
-    setShowQRScanner(true);
-  };
-
-  // Handle QR scan result
-  const handleQRResult = (qrData) => {
-    setShowQRScanner(false);
-    
-    const [serviceType, serviceId, providerId, serviceName] = qrData.split('|');
-    
-    if (providerId === business._id) {
-      setReviewMethod('qr');
-      setShowReviewModal(true);
-    } else {
-      alert('This QR code is not for this business. Please scan the correct QR code.');
-    }
-  };
-
-  // Handle service code submission
-  const handleServiceCodeSubmit = () => {
-    if (!serviceCode.trim()) {
-      alert('Please enter a service code');
-      return;
-    }
-    
-    setReviewMethod('service_code');
     setShowReviewModal(true);
-  };
+  } else {
+    alert('This QR code is not for this business. Please scan the correct QR code.');
+  }
+};
+
+// UPDATED: Handle service code submission
+const handleServiceCodeSubmit = () => {
+  if (!serviceCode.trim()) {
+    alert('Please enter a service code');
+    return;
+  }
+  
+  setReviewMethod('service_code');
+  setShowReviewModal(true);
+};
+
+// NEW: Handle review submission completion
+const handleReviewSubmitted = (result) => {
+  if (result.success) {
+    alert(result.message || 'Review submitted successfully!');
+    setShowReviewModal(false);
+    setReviewMethod(null);
+    setServiceCode('');
+    
+    // Refresh the page to show updated ratings
+    window.location.reload();
+  } else {
+    alert(result.message || 'Failed to submit review. Please try again.');
+  }
+};
 
   const fetchInventory = async () => {
     if (!business) return;
@@ -952,7 +962,7 @@ return (
         {/* NEW: Add review button */}
           <button 
             className="bcc-business-detail-review-button"
-            onClick={() => setShowReviewModal(true)}
+            onClick={handleStartReview}
             disabled={!isAuthenticated}
             title={isAuthenticated ? 'Leave a review' : 'Login to leave a review'}
           >
@@ -998,7 +1008,7 @@ return (
             </span>
             {business.location && (
               <span className="bcc-business-detail-location">
-                <i className="bcc-business-detail-location-icon">📍</i>
+                <i className="bcc-business-detail-location-icon"></i>
                 {business.location.city}{business.location.country ? `, ${business.location.country}` : ''}
               </span>
             )}
@@ -1613,7 +1623,7 @@ return (
                 <h2>Customer Reviews</h2>
                 <button 
                   className="bcc-add-review-button"
-                  onClick={() => setShowReviewModal(true)}
+                  onClick={handleStartReview}
                   disabled={!isAuthenticated}
                 >
                   <Plus size={16} />
@@ -1677,7 +1687,7 @@ return (
                     <p>Be the first to review this business!</p>
                     <button 
                       className="bcc-first-review-button"
-                      onClick={() => setShowReviewModal(true)}
+                      onClick={handleStartReview}
                       disabled={!isAuthenticated}
                     >
                       Write First Review
@@ -1869,7 +1879,7 @@ return (
 
 
       {/* Review Method Selection Modal */}
-      {showReviewModal && !reviewMethod && (
+      {/* {showReviewModal && !reviewMethod && (
         <div className="bcc-modal-overlay" onClick={() => setShowReviewModal(false)}>
           <div className="bcc-review-method-modal" onClick={(e) => e.stopPropagation()}>
             <div className="bcc-modal-header">
@@ -1912,7 +1922,7 @@ return (
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
        {/* Service Code Entry Modal */}
       {showReviewModal && reviewMethod === 'service_code' && (
@@ -1969,23 +1979,24 @@ return (
       )}
 
       {/* Review Form Modal */}
-      {showReviewModal && (reviewMethod === 'qr' || reviewMethod === 'general') && (
-        <ReviewForm
-          serviceData={{
-            id: business._id,
-            name: business.businessName,
-            type: businessType,
-            provider: business.businessName
-          }}
-          verificationMethod={reviewMethod}
-          onSubmit={handleReviewSubmitted}
-          onCancel={() => {
-            setShowReviewModal(false);
-            setReviewMethod(null);
-          }}
-          serviceCode={reviewMethod === 'service_code' ? serviceCode : null}
-        />
-      )}
+      {showReviewModal && (reviewMethod === 'qr' || reviewMethod === 'general' || reviewMethod === 'service_code') && (
+  <ReviewForm
+    serviceData={{
+      id: business._id,
+      name: business.businessName,
+      type: businessType,
+      provider: business.businessName
+    }}
+    verificationMethod={reviewMethod}
+    onSubmit={handleReviewSubmitted}  
+    onCancel={() => {
+      setShowReviewModal(false);
+      setReviewMethod(null);
+      setServiceCode('');  {/* CLEAR service code on cancel */}
+    }}
+    serviceCode={reviewMethod === 'service_code' ? serviceCode : null}
+  />
+)}
 
   </div>
 );
