@@ -216,6 +216,18 @@ const BusinessDetailPage = () => {
     }
   }, [listings]);
 
+  useEffect(() => {
+  if (showReviewModal && business) {
+    console.log('=== REVIEW FORM DEBUG ===');
+    console.log('Business object:', business);
+    console.log('business._id:', business._id);
+    console.log('business.user:', business.user);
+    console.log('reviewMethod:', reviewMethod);
+    console.log('ID being sent to ReviewForm:', business._id);
+    console.log('========================');
+  }
+}, [showReviewModal, business, reviewMethod]);
+
   const fetchBusiness = async () => {
     if (!businessType) return;
     
@@ -1983,11 +1995,21 @@ return (
         </div>
       )}
 
-      {/* Review Form Modal - Updated to use correct User ID */}
+{/* Review Form Modal - FIXED to include all review methods */}
 {showReviewModal && (reviewMethod === 'qr' || reviewMethod === 'general' || reviewMethod === 'service_code') && (
+ (() => {
+    console.log('=== REVIEW FORM DEBUG ===');
+    console.log('Business object:', business);
+    console.log('business._id:', business._id);
+    console.log('business.user:', business.user);
+    console.log('reviewMethod:', reviewMethod);
+    console.log('========================');
+    return null;
+  })(),
+
   <ReviewForm
     serviceData={{
-      id: business.user || business._id, // Use business.user (User ID) if available, fallback to business._id
+      id: business._id,
       name: business.businessName,
       type: businessType,
       provider: business.businessName
@@ -1997,7 +2019,7 @@ return (
     onCancel={() => {
       setShowReviewModal(false);
       setReviewMethod(null);
-      setServiceCode('');
+      setServiceCode(''); // Clear service code
     }}
     serviceCode={reviewMethod === 'service_code' ? serviceCode : null}
   />
