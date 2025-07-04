@@ -2007,13 +2007,13 @@ return (
     return null;
   })(),
 
-  <ReviewForm
-    serviceData={{
-      id: business._id,
-      name: business.businessName,
-      type: businessType,
-      provider: business.businessName
-    }}
+<ReviewForm
+  serviceData={{
+    id: id,  // ← Use URL parameter: 6833420039f186e3a47ee1b3
+    name: business.businessName,
+    type: businessType,
+    provider: business.businessName
+  }}
     verificationMethod={reviewMethod}
     onSubmit={handleReviewSubmitted}
     onCancel={() => {
