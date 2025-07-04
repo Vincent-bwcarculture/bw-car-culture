@@ -192,6 +192,12 @@ const BusinessDetailPage = () => {
     }
   }, [business, activeTab, inventoryPage]);
 
+  useEffect(() => {
+  if (business && business._id) {
+    loadBusinessReviews();
+  }
+}, [business, businessType]);
+
   // Check if business is saved
   useEffect(() => {
     if (business) {
@@ -311,30 +317,58 @@ const BusinessDetailPage = () => {
   };
 
  // Load business reviews
-  const loadBusinessReviews = async () => {
-    if (!business?._id) return;
+  // Load business reviews
+const loadBusinessReviews = async () => {
+  if (!business?._id) return;
+  
+  try {
+    setReviewsLoading(true);
     
-    try {
-      setReviewsLoading(true);
-      const endpoint = businessType === 'dealer' 
-        ? `/reviews/dealer/${business._id}`
-        : `/reviews/service/${business._id}`;
+    // Use the correct endpoint based on business type
+    const endpoint = businessType === 'dealer' 
+      ? `/reviews/dealer/${business._id}`
+      : `/reviews/service/${business._id}`;
+      
+    console.log('Loading reviews from endpoint:', endpoint);
+    console.log('Business ID:', business._id);
+    console.log('Business type:', businessType);
         
-      const response = await http.get(endpoint);
-      if (response.data.success) {
-        setReviews(response.data.data.reviews || []);
-        setReviewStats(response.data.data.stats || {
-          totalReviews: 0,
-          averageRating: 0,
-          ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
-        });
-      }
-    } catch (error) {
-      console.error('Error loading reviews:', error);
-    } finally {
-      setReviewsLoading(false);
+    const response = await http.get(endpoint);
+    
+    if (response.data.success) {
+      const reviewsData = response.data.data.reviews || [];
+      const statsData = response.data.data.stats || {
+        totalReviews: 0,
+        averageRating: 0,
+        ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+      };
+      
+      console.log('Reviews loaded:', reviewsData.length);
+      console.log('Review stats:', statsData);
+      
+      setReviews(reviewsData);
+      setReviewStats(statsData);
+    } else {
+      console.log('Failed to load reviews:', response.data.message);
+      setReviews([]);
+      setReviewStats({
+        totalReviews: 0,
+        averageRating: 0,
+        ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+      });
     }
-  };
+  } catch (error) {
+    console.error('Error loading reviews:', error);
+    setReviews([]);
+    setReviewStats({
+      totalReviews: 0,
+      averageRating: 0,
+      ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+    });
+  } finally {
+    setReviewsLoading(false);
+  }
+};
 
  // REPLACE THE THREE EXISTING HANDLERS WITH THESE UPDATED VERSIONS:
 
@@ -376,21 +410,19 @@ const handleServiceCodeSubmit = () => {
   setShowReviewModal(true);
 };
 
-// NEW: Handle review submission completion
+// Handle review submission
 const handleReviewSubmitted = (result) => {
-  console.log('Review submission result:', result);
-  console.log('Business data:', business);
-  console.log('Business user field:', business.user);
-  console.log('Business _id field:', business._id);
-  
   if (result.success) {
-    alert(result.message || 'Review submitted successfully!');
     setShowReviewModal(false);
     setReviewMethod(null);
+    setShowQRScanner(false);
     setServiceCode('');
     
-    // Refresh the page to show updated ratings
-    window.location.reload();
+    // Show success message
+    alert(result.message || 'Review submitted successfully!');
+    
+    // Reload reviews to show the new one
+    loadBusinessReviews();
   } else {
     alert(result.message || 'Failed to submit review. Please try again.');
   }
@@ -2036,16 +2068,33 @@ const ReviewCard = ({ review, business }) => {
   const [showFullReview, setShowFullReview] = useState(false);
   
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    try {
+      return new Date(date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return 'Unknown date';
+    }
   };
 
   const truncateText = (text, maxLength = 150) => {
-    if (text.length <= maxLength) return text;
+    if (!text || text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
+  };
+
+  // Get reviewer name safely
+  const getReviewerName = () => {
+    if (review.isAnonymous) return 'Anonymous';
+    if (review.fromUserId?.name) return review.fromUserId.name;
+    return 'Anonymous';
+  };
+
+  // Get reviewer avatar safely
+  const getReviewerAvatar = () => {
+    if (review.isAnonymous) return null;
+    return review.fromUserId?.avatar?.url || null;
   };
 
   return (
@@ -2053,58 +2102,107 @@ const ReviewCard = ({ review, business }) => {
       <div className="bcc-review-header">
         <div className="bcc-reviewer-info">
           <div className="bcc-reviewer-avatar">
-            {review.isAnonymous ? (
-              <User size={20} />
-            ) : (
+            {getReviewerAvatar() ? (
               <img 
-                src={review.fromUserId?.avatar?.url || '/images/default-avatar.png'} 
-                alt={review.fromUserId?.name || 'Anonymous'}
+                src={getReviewerAvatar()} 
+                alt={getReviewerName()}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
               />
-            )}
+            ) : null}
+            <div 
+              className="bcc-reviewer-avatar-placeholder"
+              style={{ display: getReviewerAvatar() ? 'none' : 'flex' }}
+            >
+              {getReviewerName().charAt(0).toUpperCase()}
+            </div>
           </div>
           <div className="bcc-reviewer-details">
             <div className="bcc-reviewer-name">
-              {review.isAnonymous ? 'Anonymous' : review.fromUserId?.name || 'Anonymous'}
+              {getReviewerName()}
             </div>
-            <div className="bcc-review-date">{formatDate(review.date)}</div>
+            <div className="bcc-review-date">
+              {formatDate(review.date)}
+            </div>
           </div>
         </div>
         
         <div className="bcc-review-rating">
           {[1, 2, 3, 4, 5].map(star => (
-            <Star 
+            <span 
               key={star}
-              size={16}
               className={`bcc-star ${star <= review.rating ? 'filled' : ''}`}
-            />
+            >
+              ⭐
+            </span>
           ))}
+          <span className="bcc-rating-number">({review.rating})</span>
         </div>
       </div>
 
       <div className="bcc-review-content">
         <p className="bcc-review-text">
           {showFullReview ? review.review : truncateText(review.review)}
-          {review.review.length > 150 && (
+          {review.review && review.review.length > 150 && (
             <button 
               className="bcc-read-more-button"
               onClick={() => setShowFullReview(!showFullReview)}
             >
-              {showFullReview ? 'Show less' : 'Read more'}
+              {showFullReview ? ' Show less' : ' Read more'}
             </button>
           )}
         </p>
 
+        {/* Show verification method */}
         {review.verificationMethod && (
           <div className="bcc-review-verification">
             <span className="bcc-verification-badge">
-              {review.verificationMethod === 'qr_code' && '📱 QR Verified'}
+              {review.verificationMethod === 'qr' && '📱 QR Verified'}
               {review.verificationMethod === 'service_code' && '🎫 Service Verified'}
-              {review.verificationMethod === 'plate_number' && '🚗 Plate Verified'}
+              {review.verificationMethod === 'general' && '✅ Verified Customer'}
+              {review.verificationMethod === 'plate_number' && '🚗 Vehicle Verified'}
             </span>
           </div>
         )}
 
-        {review.response && (
+        {/* Show service experience if available */}
+        {review.serviceExperience && Object.keys(review.serviceExperience).length > 0 && (
+          <div className="bcc-service-experience">
+            <h4>Service Experience:</h4>
+            <div className="bcc-experience-details">
+              {review.serviceExperience.serviceQuality && (
+                <span className="bcc-experience-item">
+                  Quality: {review.serviceExperience.serviceQuality}
+                </span>
+              )}
+              {review.serviceExperience.timeliness && (
+                <span className="bcc-experience-item">
+                  Timeliness: {review.serviceExperience.timeliness}
+                </span>
+              )}
+              {review.serviceExperience.communication && (
+                <span className="bcc-experience-item">
+                  Communication: {review.serviceExperience.communication}
+                </span>
+              )}
+              {review.serviceExperience.valueForMoney && (
+                <span className="bcc-experience-item">
+                  Value: {review.serviceExperience.valueForMoney}
+                </span>
+              )}
+              {review.serviceExperience.wouldRecommend !== undefined && (
+                <span className="bcc-experience-item">
+                  Would Recommend: {review.serviceExperience.wouldRecommend ? 'Yes' : 'No'}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Business response if available */}
+        {review.response && review.response.text && (
           <div className="bcc-business-response">
             <div className="bcc-response-header">
               <strong>Response from {business?.businessName}</strong>
