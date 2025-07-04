@@ -366,6 +366,11 @@ const handleServiceCodeSubmit = () => {
 
 // NEW: Handle review submission completion
 const handleReviewSubmitted = (result) => {
+  console.log('Review submission result:', result);
+  console.log('Business data:', business);
+  console.log('Business user field:', business.user);
+  console.log('Business _id field:', business._id);
+  
   if (result.success) {
     alert(result.message || 'Review submitted successfully!');
     setShowReviewModal(false);
@@ -1978,21 +1983,21 @@ return (
         </div>
       )}
 
-      {/* Review Form Modal */}
-      {showReviewModal && (reviewMethod === 'qr' || reviewMethod === 'general' || reviewMethod === 'service_code') && (
+      {/* Review Form Modal - Updated to use correct User ID */}
+{showReviewModal && (reviewMethod === 'qr' || reviewMethod === 'general' || reviewMethod === 'service_code') && (
   <ReviewForm
     serviceData={{
-      id: business._id,
+      id: business.user || business._id, // Use business.user (User ID) if available, fallback to business._id
       name: business.businessName,
       type: businessType,
       provider: business.businessName
     }}
     verificationMethod={reviewMethod}
-    onSubmit={handleReviewSubmitted}  
+    onSubmit={handleReviewSubmitted}
     onCancel={() => {
       setShowReviewModal(false);
       setReviewMethod(null);
-      setServiceCode('');  {/* CLEAR service code on cancel */}
+      setServiceCode('');
     }}
     serviceCode={reviewMethod === 'service_code' ? serviceCode : null}
   />
