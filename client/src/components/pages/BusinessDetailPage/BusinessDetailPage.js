@@ -2088,13 +2088,45 @@ const ReviewCard = ({ review, business }) => {
   const getReviewerName = () => {
     if (review.isAnonymous) return 'Anonymous';
     if (review.fromUserId?.name) return review.fromUserId.name;
+    if (review.reviewer?.name) return review.reviewer.name;
     return 'Anonymous';
   };
 
   // Get reviewer avatar safely
   const getReviewerAvatar = () => {
     if (review.isAnonymous) return null;
-    return review.fromUserId?.avatar?.url || null;
+    return review.fromUserId?.avatar?.url || review.reviewer?.avatar?.url || null;
+  };
+
+  // Format service experience labels for compact display
+  const formatExperienceLabel = (key, value) => {
+    const labelMap = {
+      serviceQuality: 'Quality',
+      timeliness: 'Timeliness', 
+      communication: 'Communication',
+      valueForMoney: 'Value',
+      wouldRecommend: 'Recommend'
+    };
+
+    const valueMap = {
+      excellent: 'Excellent',
+      very_good: 'Very Good',
+      good: 'Good',
+      average: 'Average',
+      poor: 'Poor',
+      very_prompt: 'Very Fast',
+      prompt: 'Fast',
+      on_time: 'On Time',
+      slightly_delayed: 'Delayed',
+      very_delayed: 'Very Late',
+      true: 'Yes',
+      false: 'No'
+    };
+
+    const label = labelMap[key] || key;
+    const displayValue = valueMap[value] || value;
+    
+    return `${label}: ${displayValue}`;
   };
 
   return (
@@ -2143,6 +2175,17 @@ const ReviewCard = ({ review, business }) => {
       </div>
 
       <div className="bcc-review-content">
+        {/* REMOVED: Verification Badge Section */}
+        {/* 
+        {review.verificationMethod === 'qr_code' && (
+          <div className="bcc-review-verification">
+            <div className="bcc-verification-badge">
+              ✅ Verified Customer
+            </div>
+          </div>
+        )}
+        */}
+
         <p className="bcc-review-text">
           {showFullReview ? review.review : truncateText(review.review)}
           {review.review && review.review.length > 150 && (
@@ -2150,62 +2193,35 @@ const ReviewCard = ({ review, business }) => {
               className="bcc-read-more-button"
               onClick={() => setShowFullReview(!showFullReview)}
             >
-              {showFullReview ? ' Show less' : ' Read more'}
+              {showFullReview ? 'Show less' : 'Read more'}
             </button>
           )}
         </p>
 
-        {/* Show verification method */}
-        {review.verificationMethod && (
-          <div className="bcc-review-verification">
-            <span className="bcc-verification-badge">
-              {review.verificationMethod === 'qr' && '📱 QR Verified'}
-              {review.verificationMethod === 'service_code' && '🎫 Service Verified'}
-              {review.verificationMethod === 'general' && '✅ Verified Customer'}
-              {review.verificationMethod === 'plate_number' && '🚗 Vehicle Verified'}
-            </span>
-          </div>
-        )}
-
-        {/* Show service experience if available */}
+        {/* OPTIMIZED: Compact Service Experience */}
         {review.serviceExperience && Object.keys(review.serviceExperience).length > 0 && (
           <div className="bcc-service-experience">
             <h4>Service Experience:</h4>
             <div className="bcc-experience-details">
-              {review.serviceExperience.serviceQuality && (
-                <span className="bcc-experience-item">
-                  Quality: {review.serviceExperience.serviceQuality}
-                </span>
-              )}
-              {review.serviceExperience.timeliness && (
-                <span className="bcc-experience-item">
-                  Timeliness: {review.serviceExperience.timeliness}
-                </span>
-              )}
-              {review.serviceExperience.communication && (
-                <span className="bcc-experience-item">
-                  Communication: {review.serviceExperience.communication}
-                </span>
-              )}
-              {review.serviceExperience.valueForMoney && (
-                <span className="bcc-experience-item">
-                  Value: {review.serviceExperience.valueForMoney}
-                </span>
-              )}
-              {review.serviceExperience.wouldRecommend !== undefined && (
-                <span className="bcc-experience-item">
-                  Would Recommend: {review.serviceExperience.wouldRecommend ? 'Yes' : 'No'}
-                </span>
-              )}
+              {Object.entries(review.serviceExperience).map(([key, value]) => {
+                // Skip empty values and wouldRecommend if false (to save space)
+                if (!value || (key === 'wouldRecommend' && !value)) return null;
+                
+                return (
+                  <div key={key} className="bcc-experience-item">
+                    {formatExperienceLabel(key, value)}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* Business response if available */}
+        {/* Business Response (if exists) */}
         {review.response && review.response.text && (
           <div className="bcc-business-response">
             <div className="bcc-response-header">
-              <strong>Response from {business?.businessName}</strong>
+              <strong>Response from {business?.businessName || 'Business'}:</strong>
               <span className="bcc-response-date">
                 {formatDate(review.response.date)}
               </span>
