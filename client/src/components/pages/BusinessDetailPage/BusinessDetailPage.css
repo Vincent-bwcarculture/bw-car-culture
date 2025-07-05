@@ -2379,7 +2379,7 @@
   align-items: center;
   justify-content: center;
   background: var(--primary-gradient);
-  color: white;
+  color: rgb(0, 255, 85);
   font-weight: 600;
   font-size: 1.2rem;
 }
