@@ -2671,3 +2671,264 @@
     padding: 0.1rem 0.25rem;
   }
 }
+
+/* ========== REVIEW MODAL THEME OVERRIDE ========== */
+/* Override the existing review modal styles to match the dark website theme */
+
+/* Modal Overlay - Override to match dark theme */
+.review-modal-overlay {
+  background: rgba(0, 0, 0, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+/* Modal Content - Override light background */
+.review-modal-content {
+  background: var(--surface-dark) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--shadow-default), 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: var(--backdrop-blur) !important;
+}
+
+/* Close Button - Match theme */
+.modal-close-button {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid var(--border-color) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 12px !important;
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.modal-close-button:hover {
+  color: var(--text-light) !important;
+  background: rgba(255, 51, 0, 0.2) !important;
+  border-color: rgba(255, 51, 0, 0.3) !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.2) !important;
+}
+
+/* Method Selector Header */
+.review-method-selector h3 {
+  color: var(--text-light) !important;
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  background: var(--primary-gradient) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* Method Buttons - Override light styling */
+.method-button {
+  background: rgba(35, 35, 35, 0.8) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 16px !important;
+  color: var(--text-light) !important;
+  padding: 1.2rem 1.5rem !important;
+  backdrop-filter: blur(10px) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.method-button::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent) !important;
+  transition: left 0.6s ease !important;
+}
+
+.method-button:hover {
+  border-color: rgba(255, 51, 0, 0.4) !important;
+  background: rgba(45, 45, 45, 0.9) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(255, 51, 0, 0.2) !important;
+}
+
+.method-button:hover::before {
+  left: 100% !important;
+}
+
+/* Service Code Input Section - Only keep what's actually used */
+.service-code-input h3 {
+  color: var(--text-light) !important;
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+}
+
+.service-code-input p {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Code Input Field - Override light styling */
+.code-input {
+  background: rgba(35, 35, 35, 0.8) !important;
+  border: 2px solid var(--border-color) !important;
+  color: var(--text-light) !important;
+  border-radius: 12px !important;
+  padding: 1rem 1.2rem !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.code-input:focus {
+  border-color: var(--primary-color) !important;
+  background: rgba(45, 45, 45, 0.9) !important;
+  box-shadow: 0 0 0 3px rgba(255, 51, 0, 0.2), 0 4px 12px rgba(255, 51, 0, 0.1) !important;
+}
+
+.code-input::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Button Overrides */
+.back-button {
+  background: rgba(35, 35, 35, 0.8) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.back-button:hover {
+  color: var(--text-light) !important;
+  background: rgba(45, 45, 45, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px) !important;
+}
+
+.continue-button {
+  background: var(--primary-gradient) !important;
+  color: white !important;
+  border-color: var(--primary-color) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.3) !important;
+}
+
+.continue-button:hover {
+  background: linear-gradient(135deg, #ff5500, #ff3300) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(255, 51, 0, 0.4) !important;
+}
+
+.continue-button:disabled {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Business Detail Page Specific Modal Overrides */
+.bcc-modal-overlay {
+  background: rgba(0, 0, 0, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.bcc-service-code-modal {
+  background: var(--surface-dark) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--shadow-default), 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: var(--backdrop-blur) !important;
+}
+
+.bcc-modal-header {
+  background: rgba(35, 35, 35, 0.8) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  border-radius: 20px 20px 0 0 !important;
+  backdrop-filter: var(--backdrop-blur) !important;
+}
+
+.bcc-modal-header h2 {
+  color: var(--text-light) !important;
+  background: var(--primary-gradient) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.bcc-close-button {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid var(--border-color) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 12px !important;
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.bcc-close-button:hover {
+  color: var(--text-light) !important;
+  background: rgba(255, 51, 0, 0.2) !important;
+  border-color: rgba(255, 51, 0, 0.3) !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.2) !important;
+}
+
+.bcc-service-code-form p {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.bcc-service-code-input {
+  background: rgba(35, 35, 35, 0.8) !important;
+  border: 2px solid var(--border-color) !important;
+  color: var(--text-light) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.bcc-service-code-input:focus {
+  border-color: var(--primary-color) !important;
+  background: rgba(45, 45, 45, 0.9) !important;
+  box-shadow: 0 0 0 3px rgba(255, 51, 0, 0.2), 0 4px 12px rgba(255, 51, 0, 0.1) !important;
+}
+
+.bcc-service-code-input::placeholder {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.bcc-cancel-button {
+  background: rgba(35, 35, 35, 0.8) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.bcc-cancel-button:hover {
+  color: var(--text-light) !important;
+  background: rgba(45, 45, 45, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px) !important;
+}
+
+.bcc-submit-button {
+  background: var(--primary-gradient) !important;
+  color: white !important;
+  border-color: var(--primary-color) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.3) !important;
+}
+
+.bcc-submit-button:hover {
+  background: linear-gradient(135deg, #ff5500, #ff3300) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(255, 51, 0, 0.4) !important;
+}
+
+.bcc-submit-button:disabled {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+  border-color: var(--border-color) !important;
+}
