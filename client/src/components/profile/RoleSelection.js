@@ -29,7 +29,7 @@ import {
   getAvailableAddons,
   SELLER_TYPES
 } from '../../constants/subscriptionConfig';
-import './EnhancedRoleSelection.css';
+import './RoleSelection.css';
 
 const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
   const [selectedRole, setSelectedRole] = useState('');
