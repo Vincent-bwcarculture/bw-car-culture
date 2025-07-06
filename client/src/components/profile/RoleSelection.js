@@ -1,4 +1,6 @@
-// client/src/components/profile/EnhancedRoleSelection.js - Updated for seller types
+// client/src/components/profile/RoleSelection.js
+// COMPLETE VERSION: Enhanced Role Selection with Rental Providers & Private Seller Add-ons
+
 import React, { useState, useEffect } from 'react';
 import { 
   Users, 
@@ -14,36 +16,73 @@ import {
   Zap,
   Crown,
   User,
-  Building
+  Building,
+  Truck,
+  Camera,
+  Video,
+  MessageCircle,
+  ExternalLink,
+  AlertCircle,
+  Info,
+  Phone,
+  Mail,
+  Globe,
+  Settings,
+  Package,
+  Calendar,
+  ArrowRight,
+  TrendingUp
 } from 'lucide-react';
+import { http } from '../../config/axios.js';
 import { 
   PRIVATE_SELLER_PLANS,
   DEALERSHIP_PLANS,
-  PROVIDER_PLANS, 
-  TRANSPORT_PLANS,
-  GOVERNMENT_PLANS,
-  FREE_ACCESS_ROLES,
+  RENTAL_PROVIDER_PLANS,
   ADDON_SERVICES,
+  PRIVATE_SELLER_ADDONS,
   formatPrice,
   calculateTotal,
   getAvailableAddons,
-  SELLER_TYPES
+  SELLER_TYPES,
+  generateWhatsAppLink
 } from '../../constants/subscriptionConfig.js';
 import './RoleSelection.css';
 
 const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
+  // Component state
   const [selectedRole, setSelectedRole] = useState('');
-  const [selectedSellerType, setSelectedSellerType] = useState(''); // NEW: For dealer type selection
+  const [selectedSellerType, setSelectedSellerType] = useState('');
   const [selectedPlan, setSelectedPlan] = useState('');
   const [selectedAddons, setSelectedAddons] = useState([]);
-  const [showSellerTypeModal, setShowSellerTypeModal] = useState(false); // NEW: Seller type selection
+  const [showSellerTypeModal, setShowSellerTypeModal] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showAddonInfo, setShowAddonInfo] = useState(false);
+  const [currentAddon, setCurrentAddon] = useState(null);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
-  // Role configurations
+  // Load pending role requests on mount
+  useEffect(() => {
+    loadPendingRequests();
+  }, []);
+
+  // Load pending role requests
+  const loadPendingRequests = async () => {
+    try {
+      const response = await http.get('/api/admin/role-requests');
+      if (response.data.success) {
+        setPendingRequests(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error loading pending requests:', error);
+    }
+  };
+
+  // Role configurations with complete information
   const roleConfigurations = {
     dealer: {
       title: 'Car Seller',
@@ -51,7 +90,7 @@ const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
       icon: Car,
       color: '#3b82f6',
       requiresSubscription: true,
-      hasSellerTypes: true, // NEW: Indicates this role has seller type options
+      hasSellerTypes: true,
       freeTrialDays: 14,
       sellerTypes: {
         [SELLER_TYPES.PRIVATE]: {
@@ -59,167 +98,191 @@ const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
           description: 'Individual selling personal vehicles',
           icon: User,
           plans: PRIVATE_SELLER_PLANS,
-          benefits: ['Sell personal vehicles', 'Basic dashboard', 'Photo uploads', 'Direct buyer contact']
+          addons: PRIVATE_SELLER_ADDONS,
+          benefits: [
+            'Sell personal vehicles',
+            'Individual dashboard',
+            'Photo uploads',
+            'Direct buyer contact',
+            'One-time add-on services',
+            'Subscribe per car'
+          ]
         },
         [SELLER_TYPES.DEALERSHIP]: {
-          title: 'Business Dealership', 
+          title: 'Business Dealership',
           description: 'Professional car dealership business',
           icon: Building,
           plans: DEALERSHIP_PLANS,
-          benefits: ['Professional inventory management', 'Advanced marketing tools', 'Business analytics', 'Add-on services']
+          addons: getAvailableAddons('dealership'),
+          benefits: [
+            'Business profile',
+            'Multiple car listings',
+            'Lead management',
+            'Professional add-ons',
+            'Bulk listing management',
+            'Monthly recurring services'
+          ]
+        },
+        [SELLER_TYPES.RENTAL]: {
+          title: 'Rental Provider',
+          description: 'Car rental service business',
+          icon: Truck,
+          plans: RENTAL_PROVIDER_PLANS,
+          addons: getAvailableAddons('rental'),
+          benefits: [
+            'Rental car fleet management',
+            'Booking calendar system',
+            'Availability tracking',
+            'Customer database',
+            'Rate management',
+            'Multi-location support'
+          ]
         }
       }
     },
-    
-    transport_company: {
-      title: 'Transport Company',
-      description: 'For taxi/combi companies, bus operators',
-      icon: MapPin,
-      color: '#f59e0b',
-      requiresSubscription: true,
-      plans: { dashboard: TRANSPORT_PLANS.COMPANY_DASHBOARD }
-    },
-    
     provider: {
       title: 'Service Provider',
-      description: 'Automotive services: mechanics, body shops, detailing',
+      description: 'Automotive service business',
       icon: Briefcase,
       color: '#059669',
       requiresSubscription: true,
-      plans: PROVIDER_PLANS
+      plans: {
+        basic: {
+          name: 'Basic Provider',
+          price: 500,
+          features: ['5 service listings', 'Basic profile', 'Customer contact']
+        },
+        professional: {
+          name: 'Professional Provider',
+          price: 1200,
+          features: ['15 service listings', 'Advanced profile', 'Booking system', 'Analytics']
+        }
+      },
+      benefits: [
+        'List automotive services',
+        'Professional service profile',
+        'Customer booking system',
+        'Service portfolio showcase',
+        'Customer reviews and ratings'
+      ]
     },
-    
-    coordinator: {
-      title: 'Transport Coordinator',
-      description: 'Manage transport stations - completely free!',
-      icon: Users,
-      color: '#8b5cf6',
-      requiresSubscription: false,
-      features: ['Free station management', 'Queue coordination', 'Route monitoring', 'Performance analytics'],
-      note: 'Always free for verified coordinators'
+    transport: {
+      title: 'Transport Operator',
+      description: 'Public transport route operator',
+      icon: MapPin,
+      color: '#7c3aed',
+      requiresSubscription: true,
+      plans: {
+        company: {
+          name: 'Transport Company',
+          price: 1000,
+          features: ['Unlimited route listings', 'Fleet management', 'Passenger tracking']
+        }
+      },
+      benefits: [
+        'Route management',
+        'Real-time tracking',
+        'Passenger information',
+        'Fleet coordination',
+        'Revenue analytics'
+      ]
     },
-    
-    ministry: {
-      title: 'Ministry Official',
-      description: 'Government transport oversight',
+    government: {
+      title: 'Government Agency',
+      description: 'Government oversight and regulation',
       icon: Shield,
       color: '#dc2626',
-      requiresSubscription: false,
-      plans: GOVERNMENT_PLANS,
-      features: ['Full system oversight', 'Compliance monitoring', 'Custom reports', 'Policy tools'],
-      note: 'Custom pricing - contact for details'
+      requiresApproval: true,
+      customPricing: true,
+      benefits: [
+        'Platform oversight',
+        'Regulatory compliance',
+        'Data analytics',
+        'Public safety monitoring',
+        'Policy enforcement'
+      ]
+    },
+    // Free roles
+    driver: {
+      title: 'Driver',
+      description: 'Public transport driver',
+      icon: Users,
+      color: '#6b7280',
+      isFree: true,
+      benefits: [
+        'Driver dashboard',
+        'Route assignments',
+        'Earnings tracking',
+        'Performance metrics',
+        'Communication tools'
+      ]
+    },
+    coordinator: {
+      title: 'Route Coordinator',
+      description: 'Transport route coordination',
+      icon: MapPin,
+      color: '#6b7280',
+      isFree: true,
+      benefits: [
+        'Route management',
+        'Driver coordination',
+        'Schedule planning',
+        'Performance monitoring',
+        'Communication hub'
+      ]
+    },
+    commuter: {
+      title: 'Commuter',
+      description: 'Public transport user',
+      icon: Users,
+      color: '#6b7280',
+      isFree: true,
+      benefits: [
+        'Route information',
+        'Real-time tracking',
+        'Trip planning',
+        'Fare information',
+        'Service updates'
+      ]
     }
   };
 
-  useEffect(() => {
-    fetchPendingRequests();
-  }, []);
-
-  const fetchPendingRequests = async () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/role-requests/my-requests', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setPendingRequests(data.data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching requests:', error);
-    }
-  };
-
-  const getCurrentRole = () => profileData?.role || 'user';
-
-  const hasRole = (roleId) => {
-    const currentRole = getCurrentRole();
-    return currentRole === roleId || 
-           (roleId === 'dealer' && (profileData?.dealership || profileData?.privateSeller)) ||
-           (roleId === 'provider' && profileData?.providerId) ||
-           (roleId === 'coordinator' && profileData?.coordinatorProfile?.isCoordinator);
-  };
-
-  const hasPendingRequest = (roleId) => {
-    return pendingRequests.some(req => req.requestType === roleId && req.status === 'pending');
-  };
-
-  const calculateTotal = () => {
-    if (!selectedRole || !selectedPlan) return 0;
-    
-    let plans;
-    if (selectedRole === 'dealer' && selectedSellerType) {
-      plans = roleConfigurations.dealer.sellerTypes[selectedSellerType].plans;
-    } else {
-      plans = roleConfigurations[selectedRole]?.plans || {};
-    }
-    
-    const plan = plans[selectedPlan];
-    if (!plan) return 0;
-    
-    let total = plan.price;
-
-    // Add addon costs (only for dealerships, and skip if premium)
-    if (selectedRole === 'dealer' && selectedSellerType === SELLER_TYPES.DEALERSHIP && selectedPlan !== 'premium') {
-      selectedAddons.forEach(addonId => {
-        const addon = ADDON_SERVICES[addonId];
-        if (addon) total += addon.price;
-      });
-    }
-
-    return total;
-  };
-
-  const handleRoleRequest = (roleId) => {
+  // Handle role selection
+  const handleRoleSelection = (roleId) => {
     const role = roleConfigurations[roleId];
     setSelectedRole(roleId);
-    setSelectedSellerType('');
-    setSelectedAddons([]);
-    
-    if (role.hasSellerTypes) {
+
+    if (role.isFree) {
+      // Handle free roles immediately
+      requestRole(roleId);
+    } else if (role.hasSellerTypes) {
       // Show seller type selection for dealer role
       setShowSellerTypeModal(true);
     } else if (role.requiresSubscription) {
+      // Show pricing for other paid roles
       setShowPricingModal(true);
-    } else {
-      // Submit free role request directly
-      submitFreeRoleRequest(roleId);
+    } else if (role.requiresApproval) {
+      // Handle government roles
+      requestRole(roleId);
     }
   };
 
+  // Handle seller type selection
   const handleSellerTypeSelection = (sellerType) => {
     setSelectedSellerType(sellerType);
     setShowSellerTypeModal(false);
     setShowPricingModal(true);
   };
 
+  // Handle plan selection
   const handlePlanSelection = (planId) => {
     setSelectedPlan(planId);
-    
-    // Clear addons if premium dealership (all included)
-    if (selectedRole === 'dealer' && selectedSellerType === SELLER_TYPES.DEALERSHIP && planId === 'premium') {
-      setSelectedAddons([]);
-    }
-    
     setShowPricingModal(false);
     setShowPaymentModal(true);
   };
 
+  // Handle addon toggle
   const handleAddonToggle = (addonId) => {
-    const addon = ADDON_SERVICES[addonId];
-    
-    // Check if addon is available for selected seller type
-    if (addon.availableFor && !addon.availableFor.includes(selectedSellerType)) {
-      alert(`${addon.name} not available for this seller type`);
-      return;
-    }
-    
-    if (addon.requiredPlan && !addon.requiredPlan.includes(selectedPlan)) {
-      alert(`${addon.name} requires ${addon.requiredPlan.join(' or ')} plan`);
-      return;
-    }
-
     setSelectedAddons(prev => 
       prev.includes(addonId) 
         ? prev.filter(id => id !== addonId)
@@ -227,197 +290,307 @@ const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
     );
   };
 
-  const submitFreeRoleRequest = async (roleId) => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/role-requests', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ requestType: roleId })
-      });
+  // Show addon information
+  const showAddonDetails = (addon) => {
+    setCurrentAddon(addon);
+    setShowAddonInfo(true);
+  };
 
-      if (response.ok) {
-        alert(`${roleId} role request submitted! You'll be notified when reviewed.`);
-        fetchPendingRequests();
+  // Request role without payment
+  const requestRole = async (roleId, additionalData = {}) => {
+    try {
+      setLoading(true);
+      
+      const requestData = {
+        role: roleId,
+        sellerType: selectedSellerType,
+        ...additionalData
+      };
+
+      const response = await http.post('/api/user/request-role', requestData);
+      
+      if (response.data.success) {
+        setMessage('Role request submitted successfully!');
+        loadPendingRequests();
+        resetSelections();
       } else {
-        const error = await response.json();
-        alert(`Error: ${error.message}`);
+        setError(response.data.message || 'Failed to submit role request');
       }
     } catch (error) {
-      alert('Network error. Please try again.');
+      console.error('Role request error:', error);
+      setError('Failed to submit role request');
     } finally {
       setLoading(false);
     }
   };
 
+  // Initiate payment for paid roles
   const initiatePayment = async () => {
-    setPaymentLoading(true);
-    try {
-      const token = localStorage.getItem('authToken');
-      
-      const payload = {
-        roleType: selectedRole,
-        planId: selectedPlan,
-        addons: selectedAddons,
-        callbackUrl: `${window.location.origin}/profile?tab=roles`
-      };
-      
-      // Add seller type for dealer role
-      if (selectedRole === 'dealer' && selectedSellerType) {
-        payload.sellerType = selectedSellerType;
-      }
-      
-      const response = await fetch('/api/payments/initiate-role-subscription', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
+    if (!selectedRole || !selectedPlan) {
+      setError('Please select a role and plan');
+      return;
+    }
 
-      const data = await response.json();
-      
-      if (data.success && data.data.paymentLink) {
-        // Redirect to Flutterwave payment page
-        window.location.href = data.data.paymentLink;
+    try {
+      setPaymentLoading(true);
+
+      const role = roleConfigurations[selectedRole];
+      let plans, sellerType;
+
+      if (role.hasSellerTypes && selectedSellerType) {
+        const sellerTypeConfig = role.sellerTypes[selectedSellerType];
+        plans = sellerTypeConfig.plans;
+        sellerType = selectedSellerType;
       } else {
-        alert(`Payment Error: ${data.message}`);
+        plans = role.plans;
+      }
+
+      const plan = plans[selectedPlan];
+      if (!plan) {
+        setError('Invalid plan selected');
+        return;
+      }
+
+      // Calculate total with add-ons
+      const total = calculateTotal(sellerType || selectedRole, selectedPlan, selectedAddons);
+
+      const paymentData = {
+        role: selectedRole,
+        sellerType,
+        subscriptionTier: selectedPlan,
+        addons: selectedAddons,
+        amount: total,
+        callbackUrl: window.location.href
+      };
+
+      const response = await http.post('/api/payments/initiate-role', paymentData);
+
+      if (response.data.success) {
+        // Redirect to payment
+        window.location.href = response.data.data.paymentLink;
+      } else {
+        setError(response.data.message || 'Failed to initiate payment');
       }
     } catch (error) {
-      alert('Payment initialization failed. Please try again.');
+      console.error('Payment initiation error:', error);
+      setError('Failed to start payment process');
     } finally {
       setPaymentLoading(false);
     }
   };
 
-  const renderRoleCard = (roleId, config) => {
-    const IconComponent = config.icon;
-    const userHasRole = hasRole(roleId);
-    const isPending = hasPendingRequest(roleId);
+  // Generate WhatsApp booking link
+  const generateBookingLink = (serviceType) => {
+    const whatsappNumber = '+26771234567'; // Replace with actual number
+    let message = 'Hi! I would like to book a service for my role subscription.';
     
+    if (serviceType === 'photography') {
+      message = 'Hi! I would like to book a photography session. Please provide details about scheduling and trip expenses.';
+    } else if (serviceType === 'review') {
+      message = 'Hi! I would like to book a professional car review session. Please provide details about scheduling and trip expenses.';
+    }
+    
+    return `https://wa.me/${whatsappNumber.replace('+', '')}?text=${encodeURIComponent(message)}`;
+  };
+
+  // Reset selections
+  const resetSelections = () => {
+    setSelectedRole('');
+    setSelectedSellerType('');
+    setSelectedPlan('');
+    setSelectedAddons([]);
+    setShowSellerTypeModal(false);
+    setShowPricingModal(false);
+    setShowPaymentModal(false);
+    setShowAddonInfo(false);
+    setCurrentAddon(null);
+  };
+
+  // Show message helper
+  const showMessage = (type, text) => {
+    if (type === 'error') setError(text);
+    else setMessage(text);
+    
+    setTimeout(() => {
+      setError('');
+      setMessage('');
+    }, 5000);
+  };
+
+  // Render main role selection grid
+  const renderRoleSelection = () => {
     return (
-      <div key={roleId} className={`role-card ${userHasRole ? 'role-active' : ''}`}>
-        <div className="role-header">
-          <div className="role-icon" style={{ backgroundColor: config.color }}>
-            <IconComponent size={24} />
-          </div>
-          <div className="role-info">
-            <h3>{config.title}</h3>
-            <p>{config.description}</p>
-          </div>
-          <div className="role-status">
-            {userHasRole ? (
-              <div className="status-badge status-active">
-                <CheckCircle size={16} />
-                <span>Active</span>
-              </div>
-            ) : isPending ? (
-              <div className="status-badge status-pending">
-                <Clock size={16} />
-                <span>Pending</span>
-              </div>
-            ) : (
-              <button 
-                className="role-request-btn"
-                onClick={() => handleRoleRequest(roleId)}
-                disabled={loading}
+      <div className="role-selection-container">
+        <div className="roles-header">
+          <h2>Choose Your Role</h2>
+          <p>Select how you want to participate in the BW Car Culture platform</p>
+        </div>
+
+        <div className="roles-grid">
+          {Object.entries(roleConfigurations).map(([roleId, role]) => {
+            const IconComponent = role.icon;
+            
+            return (
+              <div
+                key={roleId}
+                className={`role-card ${role.isFree ? 'free-role' : 'paid-role'} ${role.requiresApproval ? 'approval-required' : ''}`}
+                onClick={() => handleRoleSelection(roleId)}
+                style={{ '--role-color': role.color }}
               >
-                {config.requiresSubscription ? 'View Plans' : 'Request Access'}
-              </button>
-            )}
+                <div className="role-header">
+                  <div className="role-icon">
+                    <IconComponent size={32} />
+                  </div>
+                  <div className="role-info">
+                    <h3>{role.title}</h3>
+                    <p>{role.description}</p>
+                  </div>
+                  {role.isFree && <div className="free-badge">Free</div>}
+                  {role.requiresApproval && <div className="approval-badge">Approval Required</div>}
+                </div>
+
+                <div className="role-benefits">
+                  <h4>Benefits:</h4>
+                  <ul>
+                    {role.benefits.slice(0, 3).map((benefit, index) => (
+                      <li key={index}>✓ {benefit}</li>
+                    ))}
+                    {role.benefits.length > 3 && (
+                      <li className="more-benefits">+ {role.benefits.length - 3} more benefits</li>
+                    )}
+                  </ul>
+                </div>
+
+                {role.requiresSubscription && !role.customPricing && (
+                  <div className="role-pricing">
+                    {role.hasSellerTypes ? (
+                      <div className="pricing-range">
+                        <span>From {formatPrice(50)} - {formatPrice(6000)}/month</span>
+                        <small>Depends on seller type and plan</small>
+                      </div>
+                    ) : role.plans ? (
+                      <div className="pricing-range">
+                        <span>From {formatPrice(Math.min(...Object.values(role.plans).map(p => p.price)))}/month</span>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+
+                {role.customPricing && (
+                  <div className="role-pricing">
+                    <span>Custom Pricing</span>
+                    <small>Contact for quote</small>
+                  </div>
+                )}
+
+                <div className="role-action">
+                  <button className="select-role-btn">
+                    {role.isFree ? 'Join Free' : 
+                     role.requiresApproval ? 'Request Access' :
+                     role.hasSellerTypes ? 'Choose Seller Type' : 
+                     'Select Plan'}
+                    <ArrowRight size={16} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {pendingRequests.length > 0 && (
+          <div className="pending-requests">
+            <h3>Pending Requests</h3>
+            <div className="requests-list">
+              {pendingRequests.map((request, index) => (
+                <div key={index} className="request-item">
+                  <div className="request-info">
+                    <span className="request-role">{request.role}</span>
+                    <span className="request-status">{request.status}</span>
+                  </div>
+                  <span className="request-date">
+                    {new Date(request.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-        
-        <div className="role-features">
-          {config.features && config.features.map((feature, idx) => (
-            <div key={idx} className="feature-item">
-              <CheckCircle size={14} />
-              <span>{feature}</span>
-            </div>
-          ))}
-          
-          {config.note && (
-            <div className="role-note">{config.note}</div>
-          )}
-          
-          {config.requiresSubscription && !config.hasSellerTypes && (
-            <div className="pricing-hint">
-              {Object.keys(config.plans).length > 1 
-                ? `Plans from ${formatPrice(Math.min(...Object.values(config.plans).map(p => p.price)))}`
-                : formatPrice(Object.values(config.plans)[0].price)
-              }
-            </div>
-          )}
-          
-          {config.hasSellerTypes && (
-            <div className="seller-types-hint">
-              <div className="pricing-hint">
-                Private sellers: {formatPrice(50)} - {formatPrice(200)}/month
-              </div>
-              <div className="pricing-hint">
-                Dealerships: {formatPrice(1000)} - {formatPrice(6000)}/month
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     );
   };
 
+  // Render seller type selection modal
   const renderSellerTypeModal = () => {
-    if (!selectedRole || !showSellerTypeModal) return null;
-    
+    if (!showSellerTypeModal || !selectedRole) return null;
+
     const role = roleConfigurations[selectedRole];
-    
+    const sellerTypes = role.sellerTypes;
+
     return (
       <div className="modal-overlay">
         <div className="seller-type-modal">
           <div className="modal-header">
             <h3>Choose Your Seller Type</h3>
-            <button onClick={() => setShowSellerTypeModal(false)}>×</button>
+            <p>Select how you want to sell vehicles on our platform</p>
+            <button 
+              className="close-modal-btn"
+              onClick={() => setShowSellerTypeModal(false)}
+            >
+              ×
+            </button>
           </div>
-          
+
           <div className="seller-types-grid">
-            {Object.entries(role.sellerTypes).map(([sellerType, config]) => {
-              const IconComponent = config.icon;
-              const plans = Object.values(config.plans);
-              const minPrice = Math.min(...plans.map(p => p.price));
-              const maxPrice = Math.max(...plans.map(p => p.price));
+            {Object.entries(sellerTypes).map(([typeId, type]) => {
+              const IconComponent = type.icon;
               
               return (
-                <div key={sellerType} className="seller-type-card">
-                  <div className="seller-type-header">
-                    <IconComponent size={32} />
-                    <h4>{config.title}</h4>
-                    <p>{config.description}</p>
+                <div key={typeId} className="seller-type-card">
+                  <div className="type-header">
+                    <div className="type-icon">
+                      <IconComponent size={32} />
+                    </div>
+                    <div className="type-info">
+                      <h4>{type.title}</h4>
+                      <p>{type.description}</p>
+                    </div>
                   </div>
-                  
-                  <div className="seller-type-pricing">
-                    {minPrice === maxPrice 
-                      ? formatPrice(minPrice) 
-                      : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`
-                    }/month
+
+                  <div className="type-benefits">
+                    <h5>Features:</h5>
+                    <ul>
+                      {type.benefits.map((benefit, index) => (
+                        <li key={index}>✓ {benefit}</li>
+                      ))}
+                    </ul>
                   </div>
-                  
-                  <div className="seller-type-benefits">
-                    {config.benefits.map((benefit, idx) => (
-                      <div key={idx} className="benefit-item">
-                        <CheckCircle size={14} />
-                        <span>{benefit}</span>
+
+                  <div className="type-pricing">
+                    {typeId === 'private' && (
+                      <div className="pricing-info">
+                        <span className="price-range">{formatPrice(50)} - {formatPrice(200)} per car</span>
+                        <small>Subscribe per vehicle</small>
                       </div>
-                    ))}
+                    )}
+                    {typeId === 'dealership' && (
+                      <div className="pricing-info">
+                        <span className="price-range">{formatPrice(1000)} - {formatPrice(6000)}/month</span>
+                        <small>Multiple vehicles per subscription</small>
+                      </div>
+                    )}
+                    {typeId === 'rental' && (
+                      <div className="pricing-info">
+                        <span className="price-range">{formatPrice(350)} - {formatPrice(600)}/month</span>
+                        <small>Rental fleet management</small>
+                      </div>
+                    )}
                   </div>
-                  
-                  <button 
-                    className="select-seller-type-btn"
-                    onClick={() => handleSellerTypeSelection(sellerType)}
+
+                  <button
+                    className="select-type-btn"
+                    onClick={() => handleSellerTypeSelection(typeId)}
                   >
-                    Select {config.title}
+                    Select {type.title}
                   </button>
                 </div>
               );
@@ -428,69 +601,87 @@ const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
     );
   };
 
+  // Render pricing modal
   const renderPricingModal = () => {
-    if (!selectedRole || !showPricingModal) return null;
-    
-    let plans, modalTitle;
-    
-    if (selectedRole === 'dealer' && selectedSellerType) {
-      plans = roleConfigurations.dealer.sellerTypes[selectedSellerType].plans;
-      modalTitle = `${roleConfigurations.dealer.sellerTypes[selectedSellerType].title} Plans`;
+    if (!showPricingModal || !selectedRole) return null;
+
+    const role = roleConfigurations[selectedRole];
+    let plans, sellerTypeConfig;
+
+    if (role.hasSellerTypes && selectedSellerType) {
+      sellerTypeConfig = role.sellerTypes[selectedSellerType];
+      plans = sellerTypeConfig.plans;
     } else {
-      plans = roleConfigurations[selectedRole]?.plans || {};
-      modalTitle = `${roleConfigurations[selectedRole]?.title} Plans`;
+      plans = role.plans;
     }
-    
+
     return (
       <div className="modal-overlay">
         <div className="pricing-modal">
           <div className="modal-header">
-            <h3>{modalTitle}</h3>
-            <button onClick={() => setShowPricingModal(false)}>×</button>
+            <h3>Choose Your Plan</h3>
+            {sellerTypeConfig && (
+              <p>{sellerTypeConfig.title} - {sellerTypeConfig.description}</p>
+            )}
+            <button 
+              className="close-modal-btn"
+              onClick={() => setShowPricingModal(false)}
+            >
+              ×
+            </button>
           </div>
-          
+
           <div className="plans-grid">
             {Object.entries(plans).map(([planId, plan]) => (
-              <div key={planId} className={`plan-card ${plan.popular ? 'popular' : ''}`}>
-                {plan.badge && <div className="plan-badge">{plan.badge}</div>}
-                {plan.popular && <div className="plan-badge popular-badge">Most Popular</div>}
+              <div 
+                key={planId} 
+                className={`plan-card ${plan.popular ? 'popular' : ''}`}
+              >
+                {plan.popular && <div className="popular-badge">Most Popular</div>}
                 
-                <h4>{plan.name}</h4>
-                <div className="plan-price">
-                  {formatPrice(plan.price)}
-                  <span>/month</span>
-                </div>
-                
-                {plan.savings && (
-                  <div className="savings-note">
-                    Includes {formatPrice(plan.savings)} worth of add-ons!
+                <div className="plan-header">
+                  <h4>{plan.name}</h4>
+                  <div className="plan-price">
+                    {formatPrice(plan.price)}
+                    <span className="price-period">
+                      {selectedSellerType === 'private' ? '/car' : '/month'}
+                    </span>
                   </div>
-                )}
-                
-                <ul className="plan-features">
-                  {plan.features && typeof plan.features === 'object' ? 
-                    Object.entries(plan.features)
-                      .filter(([key, value]) => value && key !== 'includedAddons')
-                      .map(([key, value], idx) => (
-                        <li key={idx}>
-                          {key === 'maxListings' ? `${value} listings` :
-                           key === 'maxPhotosPerListing' ? `${value} photos per listing` :
-                           key === 'socialMediaMarketing' ? `${value === 'unlimited' ? 'Unlimited' : value + 'x'} social media marketing` :
-                           key === 'customerSupport' ? `${value} support` :
-                           key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())
-                          }
-                        </li>
+                  <p className="plan-description">{plan.description}</p>
+                </div>
+
+                <div className="plan-features">
+                  {selectedSellerType === 'private' ? (
+                    <div className="main-feature">
+                      <strong>1 car listing</strong> per subscription
+                    </div>
+                  ) : (
+                    <div className="main-feature">
+                      <strong>Up to {plan.features?.maxListings || 'unlimited'}</strong> listings
+                    </div>
+                  )}
+                  
+                  <div className="feature-list">
+                    {plan.features && typeof plan.features === 'object' ? (
+                      Object.entries(plan.features).map(([key, value]) => (
+                        <div key={key} className="feature-item">
+                          <CheckCircle size={14} />
+                          <span>{key.replace(/([A-Z])/g, ' $1').toLowerCase()}: {value.toString()}</span>
+                        </div>
                       ))
-                    : plan.features?.map((feature, idx) => (
-                        <li key={idx}>{feature}</li>
+                    ) : plan.features && Array.isArray(plan.features) ? (
+                      plan.features.map((feature, index) => (
+                        <div key={index} className="feature-item">
+                          <CheckCircle size={14} />
+                          <span>{feature}</span>
+                        </div>
                       ))
-                  }
-                </ul>
-                
-                {plan.note && <div className="plan-note">{plan.note}</div>}
-                
-                <button 
-                  className="select-plan-btn"
+                    ) : null}
+                  </div>
+                </div>
+
+                <button
+                  className={`select-plan-btn ${plan.popular ? 'popular-btn' : ''}`}
                   onClick={() => handlePlanSelection(planId)}
                 >
                   Select {plan.name}
@@ -498,10 +689,58 @@ const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
               </div>
             ))}
           </div>
-          
-          {roleConfigurations[selectedRole]?.freeTrialDays && (
-            <div className="trial-note">
-              🎉 {roleConfigurations[selectedRole].freeTrialDays}-day free trial available!
+
+          {/* Add-ons section for private sellers */}
+          {selectedSellerType === 'private' && (
+            <div className="addons-section">
+              <h3>Available Add-ons</h3>
+              <p>Enhance your listing with professional services (one-time payments)</p>
+              
+              <div className="addons-grid">
+                {Object.entries(PRIVATE_SELLER_ADDONS).map(([addonId, addon]) => (
+                  <div key={addonId} className="addon-card">
+                    <div className="addon-header">
+                      <div className="addon-icon">
+                        {addonId.includes('photography') && <Camera size={20} />}
+                        {addonId.includes('sponsored') && <Star size={20} />}
+                        {addonId.includes('review') && <Video size={20} />}
+                      </div>
+                      <div className="addon-info">
+                        <h4>{addon.name}</h4>
+                        <p className="addon-price">{formatPrice(addon.price)} one-time</p>
+                      </div>
+                    </div>
+
+                    <div className="addon-description">
+                      <p>{addon.description}</p>
+                    </div>
+
+                    {addon.requiresBooking && (
+                      <div className="booking-notice">
+                        <Calendar size={14} />
+                        <span>Requires WhatsApp booking</span>
+                        <button
+                          className="info-btn"
+                          onClick={() => showAddonDetails(addon)}
+                        >
+                          <Info size={14} />
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="addon-actions">
+                      <label className="addon-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={selectedAddons.includes(addonId)}
+                          onChange={() => handleAddonToggle(addonId)}
+                        />
+                        <span>Add to subscription</span>
+                      </label>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -509,82 +748,95 @@ const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
     );
   };
 
+  // Render payment modal
   const renderPaymentModal = () => {
-    if (!selectedRole || !selectedPlan || !showPaymentModal) return null;
-    
-    let plans, plan;
-    
-    if (selectedRole === 'dealer' && selectedSellerType) {
-      plans = roleConfigurations.dealer.sellerTypes[selectedSellerType].plans;
-      plan = plans[selectedPlan];
+    if (!showPaymentModal || !selectedRole || !selectedPlan) return null;
+
+    const role = roleConfigurations[selectedRole];
+    let plans, sellerTypeConfig;
+
+    if (role.hasSellerTypes && selectedSellerType) {
+      sellerTypeConfig = role.sellerTypes[selectedSellerType];
+      plans = sellerTypeConfig.plans;
     } else {
-      plans = roleConfigurations[selectedRole]?.plans || {};
-      plan = plans[selectedPlan];
+      plans = role.plans;
     }
+
+    const plan = plans[selectedPlan];
+    const availableAddons = selectedSellerType === 'private' ? 
+      Object.values(PRIVATE_SELLER_ADDONS).filter(addon => selectedAddons.includes(addon.id)) : 
+      [];
     
-    if (!plan) return null;
-    
-    const total = calculateTotal();
-    const availableAddons = selectedRole === 'dealer' && selectedSellerType === SELLER_TYPES.DEALERSHIP 
-      ? getAvailableAddons(selectedSellerType, selectedPlan)
-      : [];
-    
+    const total = calculateTotal(selectedSellerType || selectedRole, selectedPlan, selectedAddons);
+
     return (
       <div className="modal-overlay">
         <div className="payment-modal">
           <div className="modal-header">
             <h3>Complete Your Subscription</h3>
-            <button onClick={() => setShowPaymentModal(false)}>×</button>
+            <p>Review your selection and proceed with payment</p>
+            <button 
+              className="close-modal-btn"
+              onClick={() => setShowPaymentModal(false)}
+            >
+              ×
+            </button>
           </div>
           
           <div className="payment-summary">
-            <div className="summary-item">
-              <span>Plan:</span>
-              <span>{plan.name}</span>
-              <span>{formatPrice(plan.price)}</span>
+            <div className="summary-section">
+              <h4>Role & Plan</h4>
+              <div className="summary-item">
+                <span>Role:</span>
+                <span>{role.title}</span>
+              </div>
+              {sellerTypeConfig && (
+                <div className="summary-item">
+                  <span>Type:</span>
+                  <span>{sellerTypeConfig.title}</span>
+                </div>
+              )}
+              <div className="summary-item">
+                <span>Plan:</span>
+                <span>{plan.name}</span>
+                <span>{formatPrice(plan.price)}</span>
+              </div>
             </div>
             
-            {availableAddons.length > 0 && selectedPlan !== 'premium' && (
-              <div className="addons-section">
-                <h4>Available Add-ons:</h4>
-                {availableAddons.map((addon) => {
-                  const isIncluded = addon.includedInPremium && selectedPlan === 'premium';
-                  
-                  return (
-                    <div key={addon.id} className="addon-item">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={selectedAddons.includes(addon.id)}
-                          onChange={() => handleAddonToggle(addon.id)}
-                          disabled={isIncluded}
-                        />
-                        <span>{addon.name}</span>
-                        <span className="addon-price">
-                          {isIncluded ? 'Included' : formatPrice(addon.price) + (addon.perUnit ? '/listing' : '/month')}
-                        </span>
-                      </label>
-                      <div className="addon-description">{addon.description}</div>
-                    </div>
-                  );
-                })}
+            {availableAddons.length > 0 && (
+              <div className="summary-section">
+                <h4>Add-on Services</h4>
+                {availableAddons.map((addon) => (
+                  <div key={addon.id} className="summary-item">
+                    <span>{addon.name}</span>
+                    <span>{formatPrice(addon.price)}</span>
+                  </div>
+                ))}
               </div>
             )}
             
             <div className="total-section">
               <div className="total-item">
                 <span>Total:</span>
-                <span>{formatPrice(total)}/month</span>
+                <span>{formatPrice(total)}</span>
               </div>
+              <small>
+                {selectedSellerType === 'private' ? 
+                  'Per vehicle subscription + one-time add-ons' :
+                  'Monthly subscription'}
+              </small>
             </div>
           </div>
           
           <div className="payment-actions">
             <button 
-              className="cancel-btn"
-              onClick={() => setShowPaymentModal(false)}
+              className="back-btn"
+              onClick={() => {
+                setShowPaymentModal(false);
+                setShowPricingModal(true);
+              }}
             >
-              Cancel
+              Back to Plans
             </button>
             <button 
               className="pay-btn"
@@ -596,44 +848,112 @@ const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
           </div>
           
           <div className="payment-note">
-            Secure payment powered by Flutterwave. You'll be redirected to complete payment.
+            <Shield size={16} />
+            <span>Secure payment powered by Flutterwave. 30-day money-back guarantee.</span>
           </div>
         </div>
       </div>
     );
   };
 
+  // Render add-on info modal
+  const renderAddonInfoModal = () => {
+    if (!showAddonInfo || !currentAddon) return null;
+
+    const whatsappLink = generateBookingLink(
+      currentAddon.id.includes('photography') ? 'photography' : 
+      currentAddon.id.includes('review') ? 'review' : 'general'
+    );
+
+    return (
+      <div className="modal-overlay">
+        <div className="addon-info-modal">
+          <div className="modal-header">
+            <h3>{currentAddon.name}</h3>
+            <p>{formatPrice(currentAddon.price)} - One-time payment</p>
+            <button 
+              className="close-modal-btn"
+              onClick={() => setShowAddonInfo(false)}
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="addon-details">
+            <h4>Service includes:</h4>
+            <ul>
+              {currentAddon.features?.map((feature, index) => (
+                <li key={index}>✓ {feature}</li>
+              ))}
+            </ul>
+          </div>
+
+          {currentAddon.requiresBooking && (
+            <div className="booking-section">
+              <div className="booking-notice">
+                <Calendar size={20} />
+                <div>
+                  <h4>Booking Required</h4>
+                  <p>This service requires scheduling. Contact us via WhatsApp to arrange your session.</p>
+                  <p><strong>Note:</strong> Trip expenses are charged separately and will be discussed during booking.</p>
+                </div>
+              </div>
+
+              <div className="booking-actions">
+                <a 
+                  href={whatsappLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="whatsapp-btn"
+                >
+                  <MessageCircle size={16} />
+                  Book via WhatsApp
+                  <ExternalLink size={14} />
+                </a>
+              </div>
+            </div>
+          )}
+
+          <div className="modal-actions">
+            <button 
+              className="close-btn"
+              onClick={() => setShowAddonInfo(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Main render
   return (
     <div className="enhanced-role-selection">
-      <div className="section-header">
-        <h2>Role Management & Subscriptions</h2>
-        <p>Choose your role and subscription plan to unlock professional features</p>
-      </div>
-      
-      <div className="roles-grid">
-        {Object.entries(roleConfigurations).map(([roleId, config]) => 
-          renderRoleCard(roleId, config)
-        )}
-      </div>
-      
-      {pendingRequests.length > 0 && (
-        <div className="pending-requests">
-          <h3>Your Pending Requests</h3>
-          <div className="requests-list">
-            {pendingRequests.map((request, index) => (
-              <div key={index} className="request-item">
-                <span>{request.requestType} role</span>
-                <span>Submitted {new Date(request.createdAt).toLocaleDateString()}</span>
-                <span className={`status status-${request.status}`}>{request.status}</span>
-              </div>
-            ))}
-          </div>
+      {error && (
+        <div className="error-message">
+          <AlertCircle size={16} />
+          <span>{error}</span>
+          <button onClick={() => setError('')}>×</button>
         </div>
       )}
       
+      {message && (
+        <div className="success-message">
+          <CheckCircle size={16} />
+          <span>{message}</span>
+          <button onClick={() => setMessage('')}>×</button>
+        </div>
+      )}
+
+      {/* Main role selection */}
+      {renderRoleSelection()}
+
+      {/* Modals */}
       {renderSellerTypeModal()}
       {renderPricingModal()}
       {renderPaymentModal()}
+      {renderAddonInfoModal()}
     </div>
   );
 };

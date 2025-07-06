@@ -1,30 +1,29 @@
-// client/src/constants/subscriptionConfig.js - Complete pricing for both seller types
+// client/src/constants/subscriptionConfig.js - COMPLETE VERSION WITH RENTAL PROVIDERS & ADD-ONS
 
-// Keep existing tier names for compatibility
 export const SUBSCRIPTION_TIERS = {
   BASIC: 'basic',
   STANDARD: 'standard', 
   PREMIUM: 'premium'
 };
 
-// Seller types (from your existing system)
 export const SELLER_TYPES = {
   DEALERSHIP: 'dealership',
-  PRIVATE: 'private'
+  PRIVATE: 'private',
+  RENTAL: 'rental' // NEW: Rental service providers
 };
 
 // === PRIVATE/INDIVIDUAL SELLER PRICING ===
-// Lower pricing for individual car sellers
+// Each subscription = 1 car listing, can subscribe multiple times
 export const PRIVATE_SELLER_PLANS = {
   [SUBSCRIPTION_TIERS.BASIC]: {
     id: 'basic',
     name: 'Individual Basic',
-    price: 50, // Original pricing for private sellers
+    price: 50,
     currency: 'BWP',
     billingCycle: 'monthly',
-    description: 'Perfect for selling 1-2 personal vehicles',
+    description: 'Perfect for selling your personal vehicle',
     features: {
-      maxListings: 3, // Lower limits for private sellers
+      maxListings: 1,
       maxPhotosPerListing: 8,
       dashboardAccess: true,
       socialMediaMarketing: 0,
@@ -35,25 +34,31 @@ export const PRIVATE_SELLER_PLANS = {
       allowPodcasts: false,
       allowVideos: false,
       featuredListings: 0,
-      prioritySupport: false
+      prioritySupport: false,
+      listingDuration: 30,
+      searchPlacement: 'basic',
+      allowAddons: true // NEW: Allow add-ons for private sellers
     },
     popular: false,
     color: '#3b82f6',
-    targetUsers: 'Individual car owners selling personal vehicles'
+    targetUsers: 'Individual car owners selling personal vehicles',
+    subscriptionModel: 'per_car',
+    allowMultiple: true,
+    availableAddons: ['photography_management_private', 'sponsored_listing_private', 'car_review_private']
   },
   
   [SUBSCRIPTION_TIERS.STANDARD]: {
     id: 'standard', 
     name: 'Individual Plus',
-    price: 100, // Original pricing
+    price: 100,
     currency: 'BWP',
     billingCycle: 'monthly',
-    description: 'For individuals selling multiple vehicles',
+    description: 'Enhanced visibility and buyer matching for your car',
     features: {
-      maxListings: 5,
+      maxListings: 1,
       maxPhotosPerListing: 12,
       dashboardAccess: true,
-      socialMediaMarketing: 1,
+      socialMediaMarketing: 2,
       basicAnalytics: true,
       customerSupport: 'email',
       allowPhotography: true,
@@ -61,26 +66,33 @@ export const PRIVATE_SELLER_PLANS = {
       allowPodcasts: false,
       allowVideos: false,
       featuredListings: 1,
-      prioritySupport: false
+      prioritySupport: false,
+      listingDuration: 30,
+      searchPlacement: 'premium',
+      buyerMatching: true,
+      allowAddons: true
     },
     popular: true,
     color: '#10b981',
     badge: 'Most Popular',
-    targetUsers: 'Car enthusiasts, collectors, small-scale sellers'
+    targetUsers: 'Car enthusiasts wanting better visibility',
+    subscriptionModel: 'per_car',
+    allowMultiple: true,
+    availableAddons: ['photography_management_private', 'sponsored_listing_private', 'car_review_private']
   },
   
   [SUBSCRIPTION_TIERS.PREMIUM]: {
     id: 'premium',
     name: 'Individual Pro',
-    price: 200, // Original pricing  
+    price: 200,
     currency: 'BWP',
     billingCycle: 'monthly',
-    description: 'Maximum features for serious individual sellers',
+    description: 'Maximum exposure and professional features',
     features: {
-      maxListings: 10,
+      maxListings: 1,
       maxPhotosPerListing: 15,
       dashboardAccess: true,
-      socialMediaMarketing: 2,
+      socialMediaMarketing: 4,
       basicAnalytics: true,
       advancedAnalytics: true,
       customerSupport: 'phone',
@@ -88,28 +100,37 @@ export const PRIVATE_SELLER_PLANS = {
       allowReviews: true,
       allowPodcasts: true,
       allowVideos: true,
-      featuredListings: 2,
-      prioritySupport: true
+      featuredListings: 1,
+      prioritySupport: true,
+      listingDuration: 45,
+      searchPlacement: 'priority',
+      buyerMatching: true,
+      multipleListingFormats: true,
+      priorityCustomerService: true,
+      newFeatureAccess: true,
+      allowAddons: true
     },
     popular: false,
     color: '#8b5cf6',
-    badge: 'Full Features',
-    targetUsers: 'Professional individual sellers, car flippers'
+    badge: 'Max Features',
+    targetUsers: 'Serious individual sellers wanting maximum exposure',
+    subscriptionModel: 'per_car',
+    allowMultiple: true,
+    availableAddons: ['photography_management_private', 'sponsored_listing_private', 'car_review_private']
   }
 };
 
-// === DEALERSHIP PRICING (Your new pricing) ===
-// Higher pricing for business dealerships
+// === DEALERSHIP PRICING ===
 export const DEALERSHIP_PLANS = {
   [SUBSCRIPTION_TIERS.BASIC]: {
     id: 'basic',
-    name: 'Dealership Starter',
-    price: 1000, // Your new pricing
+    name: 'Dealership Basic',
+    price: 1000,
     currency: 'BWP',
     billingCycle: 'monthly',
-    description: 'Perfect for small dealerships getting started',
+    description: 'Start selling with essential business features',
     features: {
-      maxListings: 15, // Your specifications
+      maxListings: 15,
       maxPhotosPerListing: 10,
       dashboardAccess: true,
       socialMediaMarketing: 1,
@@ -119,26 +140,29 @@ export const DEALERSHIP_PLANS = {
       allowReviews: false,
       allowPodcasts: false,
       allowVideos: false,
-      featuredListings: 0,
+      featuredListings: 2,
       prioritySupport: false,
-      customBranding: false,
-      advancedAnalytics: false,
-      leadManagement: false
+      businessProfile: true,
+      leadManagement: 'basic',
+      allowAddons: true
     },
     popular: false,
-    color: '#3b82f6',
-    targetUsers: 'Small car dealerships, startup dealers'
+    color: '#f59e0b',
+    targetUsers: 'Small dealerships and car lots',
+    subscriptionModel: 'bulk_listings',
+    allowMultiple: false,
+    availableAddons: ['photography_management', 'listing_management', 'car_reviews', 'sponsored_listings']
   },
   
   [SUBSCRIPTION_TIERS.STANDARD]: {
     id: 'standard',
-    name: 'Dealership Professional', 
-    price: 2500, // Your new pricing
+    name: 'Dealership Professional',
+    price: 2500,
     currency: 'BWP',
     billingCycle: 'monthly',
-    description: 'Ideal for growing dealerships with more inventory',
+    description: 'Advanced features for growing businesses',
     features: {
-      maxListings: 35, // Your specifications
+      maxListings: 35,
       maxPhotosPerListing: 15,
       dashboardAccess: true,
       socialMediaMarketing: 3,
@@ -151,26 +175,30 @@ export const DEALERSHIP_PLANS = {
       allowVideos: false,
       featuredListings: 5,
       prioritySupport: true,
+      businessProfile: true,
+      leadManagement: 'advanced',
       customBranding: true,
-      leadManagement: true,
-      carReviews: false
+      allowAddons: true
     },
     popular: true,
     color: '#10b981',
     badge: 'Most Popular',
-    targetUsers: 'Established dealerships, growing businesses'
+    targetUsers: 'Established dealerships',
+    subscriptionModel: 'bulk_listings',
+    allowMultiple: false,
+    availableAddons: ['photography_management', 'listing_management', 'car_reviews', 'sponsored_listings']
   },
   
   [SUBSCRIPTION_TIERS.PREMIUM]: {
     id: 'premium',
     name: 'Dealership Enterprise',
-    price: 6000, // Your new pricing
-    currency: 'BWP', 
+    price: 6000,
+    currency: 'BWP',
     billingCycle: 'monthly',
-    description: 'Complete solution - includes ALL add-ons (P3,700 value)',
+    description: 'Complete solution with all add-ons included',
     features: {
-      maxListings: 100, // Your maximum
-      maxPhotosPerListing: 20,
+      maxListings: 100,
+      maxPhotosPerListing: 'unlimited',
       dashboardAccess: true,
       socialMediaMarketing: 'unlimited',
       basicAnalytics: true,
@@ -183,100 +211,175 @@ export const DEALERSHIP_PLANS = {
       allowVideos: true,
       featuredListings: 15,
       prioritySupport: true,
+      businessProfile: true,
+      leadManagement: 'enterprise',
       customBranding: true,
-      leadManagement: true,
-      carReviews: true, // P1600 add-on included
-      photographyService: true, // P1500 add-on included
-      listingManagement: true, // P600 add-on included
+      carReviews: true,
+      photographyService: true,
+      listingManagement: true,
       apiAccess: true,
       whiteLabel: true,
-      includedAddons: ['photography_management', 'listing_management', 'car_reviews']
+      includedAddons: ['photography_management', 'listing_management', 'car_reviews'],
+      allowAddons: false // All add-ons included
     },
     popular: false,
     color: '#8b5cf6',
     badge: 'All Inclusive',
     savings: 3700,
-    targetUsers: 'Large dealerships, automotive groups'
+    targetUsers: 'Large dealerships, automotive groups',
+    subscriptionModel: 'bulk_listings',
+    allowMultiple: false
   }
 };
 
-// Updated TIER_LIMITS and TIER_PRICES for backward compatibility
-// These will be used based on seller type
-export const TIER_LIMITS = {
-  // Private seller limits (original)
-  private: {
-    [SUBSCRIPTION_TIERS.BASIC]: {
-      maxListings: 3,
-      allowPhotography: true,
-      allowReviews: false,
-      allowPodcasts: false,
-      allowVideos: false,
-      price: 50
-    },
-    [SUBSCRIPTION_TIERS.STANDARD]: {
+// === NEW: RENTAL SERVICE PROVIDER PRICING ===
+export const RENTAL_PROVIDER_PLANS = {
+  [SUBSCRIPTION_TIERS.BASIC]: {
+    id: 'basic',
+    name: 'Rental Basic',
+    price: 350,
+    currency: 'BWP',
+    billingCycle: 'monthly',
+    description: 'Perfect for small rental operations',
+    features: {
       maxListings: 5,
+      maxPhotosPerListing: 10,
+      dashboardAccess: true,
+      socialMediaMarketing: 1,
+      basicAnalytics: true,
+      customerSupport: 'email',
       allowPhotography: true,
       allowReviews: true,
       allowPodcasts: false,
       allowVideos: false,
-      price: 100
+      featuredListings: 1,
+      prioritySupport: false,
+      rentalCalendar: true,
+      bookingManagement: 'basic',
+      availabilityTracking: true,
+      rentalRates: true,
+      allowAddons: true
     },
-    [SUBSCRIPTION_TIERS.PREMIUM]: {
-      maxListings: 10,
-      allowPhotography: true,
-      allowReviews: true,
-      allowPodcasts: true,
-      allowVideos: true,
-      price: 200
-    }
+    popular: true,
+    color: '#06b6d4',
+    badge: 'Most Popular',
+    targetUsers: 'Small car rental businesses',
+    subscriptionModel: 'rental_fleet',
+    allowMultiple: false,
+    availableAddons: ['photography_management', 'sponsored_listings']
   },
   
-  // Dealership limits (your new pricing)
-  dealership: {
-    [SUBSCRIPTION_TIERS.BASIC]: {
-      maxListings: 15,
-      allowPhotography: true,
-      allowReviews: false,
-      allowPodcasts: false,
-      allowVideos: false,
-      price: 1000
-    },
-    [SUBSCRIPTION_TIERS.STANDARD]: {
-      maxListings: 35,
-      allowPhotography: true,
-      allowReviews: true,
-      allowPodcasts: true,
-      allowVideos: false,
-      price: 2500
-    },
-    [SUBSCRIPTION_TIERS.PREMIUM]: {
-      maxListings: 100,
+  [SUBSCRIPTION_TIERS.STANDARD]: {
+    id: 'standard',
+    name: 'Rental Professional',
+    price: 600,
+    currency: 'BWP',
+    billingCycle: 'monthly',
+    description: 'Advanced features for established rental businesses',
+    features: {
+      maxListings: 10,
+      maxPhotosPerListing: 15,
+      dashboardAccess: true,
+      socialMediaMarketing: 3,
+      basicAnalytics: true,
+      advancedAnalytics: true,
+      customerSupport: 'phone',
       allowPhotography: true,
       allowReviews: true,
       allowPodcasts: true,
       allowVideos: true,
-      price: 6000
-    }
+      featuredListings: 3,
+      prioritySupport: true,
+      rentalCalendar: true,
+      bookingManagement: 'advanced',
+      availabilityTracking: true,
+      rentalRates: true,
+      multiLocationSupport: true,
+      customerDatabase: true,
+      reportingTools: true,
+      allowAddons: true
+    },
+    popular: false,
+    color: '#0891b2',
+    targetUsers: 'Established rental companies',
+    subscriptionModel: 'rental_fleet',
+    allowMultiple: false,
+    availableAddons: ['photography_management', 'car_reviews', 'sponsored_listings']
   }
 };
 
-// Updated TIER_PRICES with seller type support
-export const TIER_PRICES = {
-  private: {
-    [SUBSCRIPTION_TIERS.BASIC]: 50,
-    [SUBSCRIPTION_TIERS.STANDARD]: 100,
-    [SUBSCRIPTION_TIERS.PREMIUM]: 200
+// === ADD-ONS FOR PRIVATE SELLERS (One-time payments) ===
+export const PRIVATE_SELLER_ADDONS = {
+  PHOTOGRAPHY_MANAGEMENT_PRIVATE: {
+    id: 'photography_management_private',
+    name: 'Photography + Listing Management',
+    price: 800,
+    currency: 'BWP',
+    billingCycle: 'one_time',
+    description: 'Professional photography and listing optimization for your vehicle',
+    features: [
+      'Professional vehicle photography session',
+      'Photo editing and enhancement',
+      'Listing optimization and copywriting',
+      'SEO-optimized description',
+      'Multiple angle shots (interior, exterior, engine)',
+      'Trip expenses charged separately'
+    ],
+    availableFor: ['private'],
+    paymentType: 'one_time_per_vehicle',
+    requiresBooking: true,
+    whatsappBooking: true,
+    bookingNote: 'Contact us via WhatsApp to schedule your photography session'
   },
-  dealership: {
-    [SUBSCRIPTION_TIERS.BASIC]: 1000,
-    [SUBSCRIPTION_TIERS.STANDARD]: 2500,
-    [SUBSCRIPTION_TIERS.PREMIUM]: 6000
+  
+  SPONSORED_LISTING_PRIVATE: {
+    id: 'sponsored_listing_private',
+    name: 'Sponsored/Featured Listing',
+    price: 250,
+    currency: 'BWP',
+    billingCycle: 'one_time',
+    description: 'Boost your listing visibility with sponsored placement',
+    features: [
+      'Priority search placement for 30 days',
+      'Featured on homepage',
+      'Enhanced social media promotion',
+      'Premium badge display',
+      'Priority in category searches',
+      'Email marketing inclusion'
+    ],
+    availableFor: ['private'],
+    paymentType: 'one_time_per_vehicle',
+    requiresBooking: false,
+    activationTime: 'immediate'
+  },
+  
+  CAR_REVIEW_PRIVATE: {
+    id: 'car_review_private',
+    name: 'Professional Car Review',
+    price: 550,
+    currency: 'BWP',
+    billingCycle: 'one_time',
+    description: 'Professional video review of your vehicle',
+    features: [
+      'Professional video review (5-10 minutes)',
+      'Expert automotive reviewer',
+      'Interior and exterior showcase',
+      'Performance highlights',
+      'Social media distribution',
+      'YouTube channel feature',
+      'Trip expenses charged separately'
+    ],
+    availableFor: ['private'],
+    paymentType: 'one_time_per_vehicle',
+    requiresBooking: true,
+    whatsappBooking: true,
+    bookingNote: 'Contact us via WhatsApp to schedule your car review session'
   }
 };
 
-// Add-ons (primarily for dealerships)
-export const ADDON_SERVICES = {
-  PHOTOGRAPHY_PLUS_MANAGEMENT: {
+// === DEALERSHIP ADD-ONS (Monthly payments) ===
+export const DEALERSHIP_ADDONS = {
+  PHOTOGRAPHY_MANAGEMENT: {
     id: 'photography_management',
     name: 'Photography + Listing Management',
     price: 1500,
@@ -288,10 +391,12 @@ export const ADDON_SERVICES = {
       'Photo editing and enhancement', 
       'Complete listing creation and management',
       'SEO optimization for listings',
-      'Regular listing updates'
+      'Regular listing updates',
+      'Up to 10 vehicles per month'
     ],
-    availableFor: ['dealership'], // Only for dealerships
-    includedInPremium: true
+    availableFor: ['dealership'],
+    includedInPremium: true,
+    requiresBooking: true
   },
   
   LISTING_MANAGEMENT: {
@@ -308,7 +413,7 @@ export const ADDON_SERVICES = {
       'Performance monitoring',
       'Keyword optimization'
     ],
-    availableFor: ['dealership'], // Only for dealerships
+    availableFor: ['dealership'],
     includedInPremium: true
   },
   
@@ -345,198 +450,177 @@ export const ADDON_SERVICES = {
       'Enhanced visibility metrics',
       'Premium badge display'
     ],
-    availableFor: ['dealership', 'private'], // Available for both
-    unitBased: true,
-    enterpriseNote: 'Enterprise plan users get automatic featured listings instead'
+    availableFor: ['dealership', 'rental'],
+    unitBased: true
   }
 };
 
-// Other role types (unchanged)
-export const PROVIDER_PLANS = {
-  BASIC: {
-    id: 'provider_basic',
-    name: 'Service Provider Basic',
-    price: 500,
-    currency: 'BWP',
-    billingCycle: 'monthly',
-    description: 'For individual service providers',
-    features: {
-      maxServiceListings: 5,
-      basicDashboard: true,
-      customerSupport: 'email',
-      serviceBookings: true,
-      basicAnalytics: true
+// === COMBINED ADD-ONS OBJECT ===
+export const ADDON_SERVICES = {
+  ...PRIVATE_SELLER_ADDONS,
+  ...DEALERSHIP_ADDONS
+};
+
+// === WHATSAPP CONTACT INFO ===
+export const WHATSAPP_BOOKING = {
+  phoneNumber: '+26771234567', // Replace with actual WhatsApp business number
+  defaultMessage: 'Hi! I would like to book a service for my car listing.',
+  photographyMessage: 'Hi! I would like to book a photography session for my car listing.',
+  reviewMessage: 'Hi! I would like to book a professional car review session.'
+};
+
+// Updated tier limits
+export const TIER_LIMITS = {
+  private: {
+    [SUBSCRIPTION_TIERS.BASIC]: {
+      maxListings: 1,
+      allowPhotography: true,
+      allowReviews: false,
+      allowPodcasts: false,
+      allowVideos: false,
+      price: 50,
+      canSubscribeMultiple: true,
+      allowAddons: true
+    },
+    [SUBSCRIPTION_TIERS.STANDARD]: {
+      maxListings: 1,
+      allowPhotography: true,
+      allowReviews: true,
+      allowPodcasts: false,
+      allowVideos: false,
+      price: 100,
+      canSubscribeMultiple: true,
+      allowAddons: true
+    },
+    [SUBSCRIPTION_TIERS.PREMIUM]: {
+      maxListings: 1,
+      allowPhotography: true,
+      allowReviews: true,
+      allowPodcasts: true,
+      allowVideos: true,
+      price: 200,
+      canSubscribeMultiple: true,
+      allowAddons: true
     }
   },
   
-  PROFESSIONAL: {
-    id: 'provider_professional',
-    name: 'Service Provider Pro',
-    price: 1200,
-    currency: 'BWP',
-    billingCycle: 'monthly',
-    description: 'For professional service businesses',
-    features: {
-      maxServiceListings: 15,
-      advancedDashboard: true,
-      customerSupport: 'phone',
-      serviceBookings: true,
-      advancedAnalytics: true,
-      onlinePayments: true,
-      customBranding: true
+  dealership: {
+    [SUBSCRIPTION_TIERS.BASIC]: {
+      maxListings: 15,
+      allowPhotography: true,
+      allowReviews: false,
+      allowPodcasts: false,
+      allowVideos: false,
+      price: 1000,
+      canSubscribeMultiple: false,
+      allowAddons: true
+    },
+    [SUBSCRIPTION_TIERS.STANDARD]: {
+      maxListings: 35,
+      allowPhotography: true,
+      allowReviews: true,
+      allowPodcasts: true,
+      allowVideos: false,
+      price: 2500,
+      canSubscribeMultiple: false,
+      allowAddons: true
+    },
+    [SUBSCRIPTION_TIERS.PREMIUM]: {
+      maxListings: 100,
+      allowPhotography: true,
+      allowReviews: true,
+      allowPodcasts: true,
+      allowVideos: true,
+      price: 6000,
+      canSubscribeMultiple: false,
+      allowAddons: false // All included
+    }
+  },
+  
+  rental: {
+    [SUBSCRIPTION_TIERS.BASIC]: {
+      maxListings: 5,
+      allowPhotography: true,
+      allowReviews: true,
+      allowPodcasts: false,
+      allowVideos: false,
+      price: 350,
+      canSubscribeMultiple: false,
+      allowAddons: true
+    },
+    [SUBSCRIPTION_TIERS.STANDARD]: {
+      maxListings: 10,
+      allowPhotography: true,
+      allowReviews: true,
+      allowPodcasts: true,
+      allowVideos: true,
+      price: 600,
+      canSubscribeMultiple: false,
+      allowAddons: true
     }
   }
 };
 
-export const TRANSPORT_PLANS = {
-  COMPANY_DASHBOARD: {
-    id: 'transport_company',
-    name: 'Public Transport Company',
-    price: 1000,
-    currency: 'BWP',
-    billingCycle: 'monthly',
-    description: 'For transport companies like NKK Express, taxi/combi operators',
-    features: {
-      dashboardAccess: true,
-      routeListings: 'unlimited',
-      fleetManagement: true,
-      scheduleManagement: true,
-      bookingSystem: true,
-      passengerAnalytics: true,
-      routeOptimization: true,
-      driverManagement: true,
-      vehicleTracking: true,
-      customerSupport: 'phone',
-      reportGeneration: true,
-      multiLocationSupport: true
-    },
-    note: 'Route listings are completely free - pay only for dashboard access',
-    color: '#f59e0b',
-    targetUsers: ['NKK Express', 'Taxi Companies', 'Combi Operators', 'Bus Companies']
-  }
-};
-
-export const FREE_ACCESS_ROLES = {
-  DRIVER: {
-    role: 'driver',
-    name: 'Driver',
-    features: [
-      'Queue status monitoring',
-      'Route information access',
-      'Basic earnings tracking',
-      'Trip history',
-      'Rating system access'
-    ],
-    note: 'Completely free for all registered drivers'
+export const TIER_PRICES = {
+  private: {
+    [SUBSCRIPTION_TIERS.BASIC]: 50,
+    [SUBSCRIPTION_TIERS.STANDARD]: 100,
+    [SUBSCRIPTION_TIERS.PREMIUM]: 200
   },
-  
-  COORDINATOR: {
-    role: 'coordinator',
-    name: 'Transport Coordinator', 
-    features: [
-      'Station queue management',
-      'Route coordination tools',
-      'Driver assignment',
-      'Real-time monitoring',
-      'Performance analytics'
-    ],
-    note: 'Free access for verified coordinators'
+  dealership: {
+    [SUBSCRIPTION_TIERS.BASIC]: 1000,
+    [SUBSCRIPTION_TIERS.STANDARD]: 2500,
+    [SUBSCRIPTION_TIERS.PREMIUM]: 6000
   },
-  
-  COMMUTER: {
-    role: 'user',
-    name: 'Regular Commuter',
-    features: [
-      'Route search and planning',
-      'Real-time transport updates',
-      'Fare information',
-      'Service ratings and reviews',
-      'Transport notifications'
-    ],
-    note: 'Always free for all users'
+  rental: {
+    [SUBSCRIPTION_TIERS.BASIC]: 350,
+    [SUBSCRIPTION_TIERS.STANDARD]: 600
   }
 };
 
-export const GOVERNMENT_PLANS = {
-  MINISTRY_OVERSIGHT: {
-    id: 'ministry_oversight',
-    name: 'Ministry/Government Oversight',
-    price: 'CONTACT_FOR_PRICING',
-    currency: 'BWP',
-    billingCycle: 'annual',
-    description: 'Custom pricing for government oversight and compliance monitoring',
-    features: {
-      fullSystemAccess: true,
-      complianceMonitoring: true,
-      transportDataAnalytics: true,
-      policyImplementation: true,
-      licensingIntegration: true,
-      safetyOversight: true,
-      customReports: true,
-      apiAccess: true,
-      whiteLabel: true,
-      dedicatedSupport: true
-    },
-    private: true,
-    note: 'Pricing discussed privately with government entities',
-    color: '#dc2626'
+// Updated plan summary
+export const PLAN_SUMMARY = {
+  private_seller: {
+    basic: 'P50 per car - 1 listing, 8 photos, basic features (30 days)',
+    standard: 'P100 per car - 1 listing, 12 photos, reviews + priority placement (30 days)',
+    premium: 'P200 per car - 1 listing, 15 photos, full features + extended duration (45 days)',
+    note: 'Subscribe multiple times to list multiple cars. Each subscription is for 1 car.',
+    addons: 'Available: Photography + Management (P800), Sponsored Listing (P250), Car Review (P550)'
+  },
+  dealership: {
+    basic: 'P1,000/month - 15 listings, 10 photos, basic features',
+    standard: 'P2,500/month - 35 listings, 15 photos, 3x marketing',
+    premium: 'P6,000/month - 100 listings, ALL add-ons included (P3,700 value)'
+  },
+  rental_provider: {
+    basic: 'P350/month - 5 rental cars, booking calendar, basic features',
+    standard: 'P600/month - 10 rental cars, advanced booking, multi-location support'
   }
 };
 
-// Utility functions
+// Helper functions
 export const formatPrice = (price, currency = 'BWP') => {
-  if (price === 'CONTACT_FOR_PRICING') return 'Contact for Pricing';
-  
-  return new Intl.NumberFormat('en-BW', {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(price);
+  if (price === 'CONTACT_FOR_PRICING') return 'Contact for pricing';
+  return `P${price.toLocaleString()}`;
 };
 
-export const getPlansForSellerType = (sellerType) => {
-  switch (sellerType) {
-    case SELLER_TYPES.PRIVATE:
-      return PRIVATE_SELLER_PLANS;
-    case SELLER_TYPES.DEALERSHIP:
-      return DEALERSHIP_PLANS;
-    default:
-      return PRIVATE_SELLER_PLANS; // Default to private seller
+export const getPlansBySellerType = (sellerType) => {
+  switch(sellerType) {
+    case 'private': return PRIVATE_SELLER_PLANS;
+    case 'dealership': return DEALERSHIP_PLANS;
+    case 'rental': return RENTAL_PROVIDER_PLANS;
+    default: return PRIVATE_SELLER_PLANS;
   }
-};
-
-export const getTierLimitsForSellerType = (sellerType) => {
-  return TIER_LIMITS[sellerType] || TIER_LIMITS.private;
-};
-
-export const getTierPricesForSellerType = (sellerType) => {
-  return TIER_PRICES[sellerType] || TIER_PRICES.private;
 };
 
 export const getAvailableAddons = (sellerType, planId) => {
-  return Object.values(ADDON_SERVICES).filter(addon => {
-    // Check if addon is available for this seller type
-    if (addon.availableFor && !addon.availableFor.includes(sellerType)) {
-      return false;
-    }
-    
-    // Premium dealership plan has all add-ons included except sponsored listings
-    if (sellerType === 'dealership' && planId === 'premium') {
-      return addon.id === 'sponsored_listings';
-    }
-    
-    // Check plan requirements
-    if (addon.requiredPlan && !addon.requiredPlan.includes(planId)) {
-      return false;
-    }
-    
-    return true;
-  });
+  return Object.values(ADDON_SERVICES).filter(addon => 
+    addon.availableFor.includes(sellerType)
+  );
 };
 
 export const calculateTotal = (sellerType, planId, addons = []) => {
-  const plans = getPlansForSellerType(sellerType);
+  const plans = getPlansBySellerType(sellerType);
   const plan = plans[planId];
   
   if (!plan || plan.price === 'CONTACT_FOR_PRICING') {
@@ -548,9 +632,8 @@ export const calculateTotal = (sellerType, planId, addons = []) => {
   addons.forEach(addonId => {
     const addon = ADDON_SERVICES[addonId];
     if (addon) {
-      // Don't add cost for add-ons included in premium dealership plan
       if (sellerType === 'dealership' && planId === 'premium' && addon.includedInPremium) {
-        return;
+        return; // Skip adding cost for included add-ons
       }
       total += addon.price;
     }
@@ -559,39 +642,46 @@ export const calculateTotal = (sellerType, planId, addons = []) => {
   return total;
 };
 
-// Summary for easy reference
-export const PLAN_SUMMARY = {
-  private_seller: {
-    basic: 'P50/month - 3 listings, 8 photos, basic features',
-    standard: 'P100/month - 5 listings, 12 photos, reviews',
-    premium: 'P200/month - 10 listings, 15 photos, full features'
-  },
-  dealership: {
-    basic: 'P1,000/month - 15 listings, 10 photos, basic features',
-    standard: 'P2,500/month - 35 listings, 15 photos, 3x marketing',
-    premium: 'P6,000/month - 100 listings, ALL add-ons included (P3,700 value)'
-  },
-  transport: {
-    company: 'P1,000/month - Dashboard access, unlimited free route listings'
-  },
-  provider: {
-    basic: 'P500/month - 5 services, basic features',
-    professional: 'P1,200/month - 15 services, advanced features'
-  },
-  addons: {
-    photography_management: 'P1,500/month - Pro photos + listing management (dealerships only)',
-    listing_management: 'P600/month - Professional listing management (dealerships only)',
-    car_reviews: 'P1,600/month - Video reviews (dealerships only)',
-    sponsored_listings: 'P250/listing - Priority placement (both types)'
-  },
-  free: {
-    drivers: 'Free - Queue monitoring, earnings tracking',
-    coordinators: 'Free - Station management, route coordination', 
-    commuters: 'Free - Route search, real-time updates'
-  },
-  government: {
-    ministry: 'Custom pricing - Full oversight and compliance tools'
-  }
+// WhatsApp helper function
+export const generateWhatsAppLink = (serviceType = 'general') => {
+  const messages = {
+    general: WHATSAPP_BOOKING.defaultMessage,
+    photography: WHATSAPP_BOOKING.photographyMessage,
+    review: WHATSAPP_BOOKING.reviewMessage
+  };
+  
+  const message = encodeURIComponent(messages[serviceType] || messages.general);
+  return `https://wa.me/${WHATSAPP_BOOKING.phoneNumber.replace('+', '')}?text=${message}`;
+};
+
+// Subscription model info
+export const getSubscriptionModel = (sellerType) => {
+  return {
+    private: {
+      model: 'per_car',
+      description: 'Each subscription allows you to list 1 car. Subscribe multiple times to list multiple cars.',
+      allowMultiple: true,
+      maxPerSubscription: 1,
+      addonsAvailable: true,
+      addonPaymentType: 'one_time'
+    },
+    dealership: {
+      model: 'bulk_listings',
+      description: 'One subscription covers multiple car listings based on your plan.',
+      allowMultiple: false,
+      maxPerSubscription: 'varies_by_plan',
+      addonsAvailable: true,
+      addonPaymentType: 'monthly'
+    },
+    rental: {
+      model: 'rental_fleet',
+      description: 'Manage your rental car fleet with booking calendar and availability tracking.',
+      allowMultiple: false,
+      maxPerSubscription: 'varies_by_plan',
+      addonsAvailable: true,
+      addonPaymentType: 'monthly'
+    }
+  }[sellerType];
 };
 
 // Backward compatibility exports
