@@ -28,7 +28,7 @@ import {
   calculateTotal,
   getAvailableAddons,
   SELLER_TYPES
-} from '../../constants/subscriptionConfig';
+} from '../../constants/subscriptionConfig.js';
 import './RoleSelection.css';
 
 const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
