@@ -1,0 +1,810 @@
+/* client/src/components/features/PublicTransportSection/EnhancedBotswanaTransportSystem.css */
+
+.enhanced-botswana-transport {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+  background: #f8f9fa;
+}
+
+/* Transport Header */
+.transport-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.transport-header h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.transport-header p {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Destinations Grid */
+.destinations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.destination-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.destination-card:hover {
+  border-color: #3498db;
+  box-shadow: 0 4px 16px rgba(52, 152, 219, 0.2);
+  transform: translateY(-2px);
+}
+
+.destination-card.selected {
+  border-color: #2980b9;
+  background: #e8f4f8;
+  box-shadow: 0 4px 16px rgba(41, 128, 185, 0.3);
+}
+
+.destination-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.destination-info h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 4px 0;
+}
+
+.destination-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.route-count, .station-count {
+  background: #3498db;
+  color: white;
+  padding: 3px 6px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.station-count {
+  background: #27ae60;
+}
+
+.coordinator-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #f39c12;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.coordinator-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.coordinator-count {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.destination-preview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.vehicle-summary {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vehicle-type {
+  background: #ecf0f1;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.fare-summary {
+  font-weight: 600;
+  color: #27ae60;
+  font-size: 0.9rem;
+}
+
+/* Loading Station Section */
+.loading-station-section {
+  margin-bottom: 32px;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.station-header {
+  margin-bottom: 24px;
+}
+
+.station-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.station-icon {
+  width: 24px;
+  height: 24px;
+  color: #e74c3c;
+}
+
+.station-info h4 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.station-description {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Station Coordinators */
+.station-coordinators {
+  border-top: 1px solid #ecf0f1;
+  padding-top: 16px;
+}
+
+.station-coordinators h5 {
+  color: #2c3e50;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.coordinators-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.coordinator-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #ecf0f1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.coordinator-avatar {
+  width: 48px;
+  height: 48px;
+  background: #3498db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.coordinator-avatar .coordinator-icon {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.coordinator-info {
+  flex: 1;
+}
+
+.coordinator-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 4px;
+}
+
+.coordinator-details {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.coordinator-experience {
+  color: #7f8c8d;
+  font-size: 0.8rem;
+}
+
+.coordinator-rating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: #f39c12;
+  font-size: 0.8rem;
+}
+
+.star-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.coordinator-contact {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #3498db;
+  font-size: 0.8rem;
+}
+
+.contact-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.coordinator-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.status-dot.active {
+  background: #27ae60;
+  animation: pulse 2s infinite;
+}
+
+.status-dot.inactive {
+  background: #e74c3c;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-text {
+  font-size: 0.7rem;
+  color: #7f8c8d;
+  text-align: center;
+}
+
+/* Enhanced Route Card */
+.enhanced-route-card {
+  background: #fafbfc;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #ecf0f1;
+  transition: all 0.3s ease;
+}
+
+.enhanced-route-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.route-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.route-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.vehicle-icon {
+  font-size: 1.5rem;
+  margin-top: 4px;
+}
+
+.route-details h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 4px 0;
+}
+
+.route-path {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.route-arrow {
+  width: 16px;
+  height: 16px;
+  color: #3498db;
+}
+
+.operator-info {
+  display: flex;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #7f8c8d;
+}
+
+.operator-name {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.operator-type {
+  text-transform: capitalize;
+}
+
+/* Pricing Section */
+.pricing-section {
+  min-width: 160px;
+}
+
+.government-pricing {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.price-type {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.price-type.special {
+  padding: 6px 8px;
+  background: #fff3cd;
+  border-radius: 6px;
+  border: 1px solid #ffeaa7;
+}
+
+.price-label {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.price-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #27ae60;
+}
+
+.price-type.special .price-value {
+  color: #f39c12;
+}
+
+.special-icon {
+  width: 12px;
+  height: 12px;
+  color: #f39c12;
+}
+
+/* Queue Status */
+.queue-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #e8f4f8;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.queue-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.queue-icon {
+  width: 16px;
+  height: 16px;
+  color: #3498db;
+}
+
+.queue-text {
+  font-size: 0.9rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.loading-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-indicator.loading {
+  color: #27ae60;
+}
+
+.status-indicator .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #27ae60;
+  animation: pulse 1.5s infinite;
+}
+
+/* Route Stops */
+.route-stops {
+  margin-bottom: 20px;
+}
+
+.route-stops h5 {
+  color: #2c3e50;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.stops-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.stop-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.stop-marker {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3498db;
+  position: relative;
+  z-index: 2;
+}
+
+.stop-item.origin .stop-marker {
+  background: #27ae60;
+  width: 12px;
+  height: 12px;
+}
+
+.stop-item.destination .stop-marker {
+  background: #e74c3c;
+  width: 12px;
+  height: 12px;
+}
+
+.stop-connector {
+  position: absolute;
+  left: 5px;
+  top: 16px;
+  width: 2px;
+  height: 20px;
+  background: #bdc3c7;
+  z-index: 1;
+}
+
+.stop-name {
+  font-size: 0.9rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+/* Route Actions */
+.route-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.action-btn.primary {
+  background: #3498db;
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background: #2980b9;
+}
+
+.action-btn.secondary {
+  background: #f39c12;
+  color: white;
+}
+
+.action-btn.secondary:hover {
+  background: #e67e22;
+}
+
+.action-btn.special {
+  background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn.special:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+}
+
+.action-btn.special::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.action-btn.special:hover::before {
+  left: 100%;
+}
+
+.btn-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Transport Info Section */
+.transport-info-section {
+  margin-top: 40px;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.transport-info-section h3 {
+  color: #2c3e50;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.info-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #ecf0f1;
+  text-align: center;
+}
+
+.info-icon {
+  font-size: 2rem;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.info-content h4 {
+  color: #2c3e50;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.info-content p {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.info-detail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #3498db;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.detail-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .enhanced-botswana-transport {
+    padding: 12px;
+  }
+  
+  .transport-header {
+    padding: 16px;
+  }
+  
+  .transport-header h2 {
+    font-size: 1.4rem;
+  }
+  
+  .destinations-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .destination-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .coordinators-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .coordinator-card {
+    padding: 12px;
+  }
+  
+  .route-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .pricing-section {
+    min-width: auto;
+    align-self: stretch;
+  }
+  
+  .government-pricing {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .price-type {
+    align-items: flex-start;
+  }
+  
+  .queue-status {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  .route-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .action-btn {
+    min-width: auto;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .enhanced-botswana-transport {
+    padding: 8px;
+  }
+  
+  .transport-header {
+    padding: 12px;
+  }
+  
+  .transport-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .loading-station-section {
+    padding: 16px;
+  }
+  
+  .enhanced-route-card {
+    padding: 12px;
+  }
+  
+  .route-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .route-path {
+    flex-wrap: wrap;
+  }
+  
+  .stops-list {
+    padding-left: 16px;
+  }
+  
+  .coordinator-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .coordinator-details {
+    justify-content: center;
+  }
+}

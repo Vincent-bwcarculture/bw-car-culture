@@ -6,7 +6,9 @@ import {
   Settings, 
   Route, 
   Car, 
-  BarChart3
+  BarChart3,
+  BookOpen, 
+  UserCheck 
 } from 'lucide-react';
 import axios from '../config/axios.js';
 
@@ -17,6 +19,10 @@ import RouteManagement from '../components/profile/RouteManagement.js';
 import VehicleManagement from '../components/profile/VehicleManagement.js';
 import BusinessDashboard from '../components/profile/BusinessDashboard.js';
 import ProfileSettings from '../components/profile/ProfileSettings.js';
+
+import CoordinatorManagement from '../components/profile/CoordinatorManagement.js';
+import RealTimeCoordinatorDashboard from '../components/profile/RealTimeCoordinatorDashboard.js';
+import DriverOperatorDashboard from '../components/profile/DriverOperatorDashboard.js';
 
 import { useAuth } from '../context/AuthContext.js';
 import './UserProfilePage.css';
@@ -132,37 +138,40 @@ const UserProfilePage = () => {
   };
 
   // Determine available tabs based on user profile and permissions - UPDATED LOGIC
-  const getAvailableTabs = () => {
-    const tabs = [
-      { id: 'overview', label: 'Overview', icon: Eye }
-    ];
+ const getAvailableTabs = () => {
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: Eye }
+  ];
 
-    // Add Services tab for all users
-    tabs.push({ id: 'services', label: 'Services', icon: Settings });
+  // Add Services tab for all users
+  tabs.push({ id: 'services', label: 'Services', icon: Settings });
 
-    // Add Routes tab for transport service providers
-    if (profileData?.businessProfile?.services?.some(s => s.serviceType === 'public_transport')) {
-      tabs.push({ id: 'routes', label: 'Routes', icon: Route });
-    }
+  // Add Routes tab for transport service providers
+  if (profileData?.businessProfile?.services?.some(s => s.serviceType === 'public_transport')) {
+    tabs.push({ id: 'routes', label: 'Routes', icon: Route });
+  }
 
-    // Add Vehicles tab for all users
-    tabs.push({ id: 'vehicles', label: 'My Vehicles', icon: Car });
+  // ✅ ADD THESE 2 NEW TABS - Available to all users
+  tabs.push({ id: 'coordinator', label: 'Coordinator', icon: BookOpen });
+  tabs.push({ id: 'driver', label: 'Driver', icon: UserCheck });
 
-    // Add Business Dashboard for users with business profiles (NOT admin role)
-    // Business dashboard is separate from admin panel
-    const hasBusinessProfile = profileData?.businessProfile?.services?.some(s => s.isVerified) || 
-                              profileData?.businessProfile?.services?.length > 0 ||
-                              profileData?.dealership;
-    
-    if (hasBusinessProfile) {
-      tabs.push({ id: 'business', label: 'Business Dashboard', icon: BarChart3 });
-    }
+  // Add Vehicles tab for all users
+  tabs.push({ id: 'vehicles', label: 'My Vehicles', icon: Car });
 
-    // Add Settings tab
-    tabs.push({ id: 'settings', label: 'Settings', icon: Settings });
+  // Add Business Dashboard for users with business profiles
+  const hasBusinessProfile = profileData?.businessProfile?.services?.some(s => s.isVerified) || 
+                            profileData?.businessProfile?.services?.length > 0 ||
+                            profileData?.dealership;
+  
+  if (hasBusinessProfile) {
+    tabs.push({ id: 'business', label: 'Business Dashboard', icon: BarChart3 });
+  }
 
-    return tabs;
-  };
+  // Add Settings tab
+  tabs.push({ id: 'settings', label: 'Settings', icon: Settings });
+
+  return tabs;
+};
 
   // Show loading while auth is loading or profile is loading
   if (authLoading || loading) {
@@ -248,6 +257,30 @@ const UserProfilePage = () => {
           <BusinessDashboard 
             profileData={displayData}
             refreshProfile={fetchUserProfile}
+          />
+        )}
+
+        {activeTab === 'coordinator' && (
+          <div>
+            {/* Check if user is already a coordinator */}
+            {displayData?.coordinatorProfile?.isCoordinator ? (
+              <RealTimeCoordinatorDashboard 
+                profileData={displayData}
+                stationId={displayData.coordinatorProfile.stations?.[0]} // Use first station
+                refreshProfile={fetchUserProfile}
+              />
+            ) : (
+              <CoordinatorManagement 
+                profileData={displayData} 
+                refreshProfile={fetchUserProfile} 
+              />
+            )}
+          </div>
+        )}
+
+        {activeTab === 'driver' && (
+          <DriverOperatorDashboard 
+            profileData={displayData} 
           />
         )}
 

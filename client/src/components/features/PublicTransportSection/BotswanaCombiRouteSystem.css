@@ -1,0 +1,714 @@
+/* client/src/components/features/PublicTransportSection/BotswanaCombiRouteSystem.css */
+
+.botswana-combi-system {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+  background: #f8f9fa;
+}
+
+/* System Header */
+.system-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding: 24px;
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.system-header h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.system-header p {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Destinations Grid */
+.destinations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.destination-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.destination-card:hover {
+  border-color: #3498db;
+  box-shadow: 0 4px 16px rgba(52, 152, 219, 0.2);
+  transform: translateY(-2px);
+}
+
+.destination-card.selected {
+  border-color: #2980b9;
+  background: #e8f4f8;
+  box-shadow: 0 4px 16px rgba(41, 128, 185, 0.3);
+}
+
+.destination-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.destination-header h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.route-count {
+  background: #3498db;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.destination-preview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vehicle-types {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vehicle-type {
+  background: #ecf0f1;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.fare-range {
+  font-weight: 600;
+  color: #27ae60;
+  font-size: 1rem;
+}
+
+/* Route Details Section */
+.route-details-section {
+  margin-bottom: 32px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.route-details-header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.route-details-header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+}
+
+.route-details-header p {
+  color: #7f8c8d;
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Routes List */
+.routes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.route-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ecf0f1;
+  transition: all 0.3s ease;
+}
+
+.route-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.route-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.route-info {
+  flex: 1;
+}
+
+.route-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.vehicle-icon {
+  font-size: 1.5rem;
+}
+
+.route-name-section h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 4px 0;
+}
+
+.route-path {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.route-arrow {
+  width: 16px;
+  height: 16px;
+  color: #3498db;
+}
+
+.origin, .destination {
+  font-weight: 500;
+}
+
+.route-status {
+  display: flex;
+  align-items: center;
+}
+
+.status-indicator {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-indicator.available {
+  background: #d5f4e6;
+  color: #27ae60;
+}
+
+.status-indicator.scheduled {
+  background: #e8f4f8;
+  color: #3498db;
+}
+
+.route-pricing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.fare {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.fare-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.fare-amount {
+  font-size: 1.1rem;
+}
+
+.frequency {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #7f8c8d;
+  font-size: 0.85rem;
+}
+
+.frequency-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Route Card Body */
+.route-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.operator-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.operator-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.operator-details strong {
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.operator-type {
+  color: #7f8c8d;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+
+.operator-contact {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #3498db;
+  font-size: 0.9rem;
+}
+
+.contact-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Route Stops */
+.route-stops h5 {
+  color: #2c3e50;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+.stops-path {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.stop-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.stop-marker {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3498db;
+  position: relative;
+  z-index: 2;
+}
+
+.origin-stop .stop-marker {
+  background: #27ae60;
+  width: 12px;
+  height: 12px;
+}
+
+.destination-stop .stop-marker {
+  background: #e74c3c;
+  width: 12px;
+  height: 12px;
+}
+
+.stop-connector {
+  position: absolute;
+  left: 5px;
+  top: 16px;
+  width: 2px;
+  height: 20px;
+  background: #bdc3c7;
+  z-index: 1;
+}
+
+.stop-name {
+  font-size: 0.9rem;
+  color: #2c3e50;
+  font-weight: 500;
+  flex: 1;
+}
+
+.stop-fare {
+  color: #27ae60;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #d5f4e6;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Vehicle Info */
+.vehicle-info {
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.vehicle-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vehicle-icon-small {
+  width: 18px;
+  height: 18px;
+  color: #3498db;
+}
+
+.vehicle-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vehicle-type {
+  color: #2c3e50;
+  font-weight: 500;
+  font-size: 0.9rem;
+  text-transform: capitalize;
+}
+
+.amenities {
+  color: #7f8c8d;
+  font-size: 0.8rem;
+}
+
+/* Operating Hours */
+.operating-hours {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #fff3cd;
+  border-radius: 6px;
+  border: 1px solid #ffeaa7;
+}
+
+.hours-icon {
+  width: 16px;
+  height: 16px;
+  color: #f39c12;
+}
+
+.hours-info {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hours-label {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  font-weight: 500;
+}
+
+.hours-time {
+  font-size: 0.9rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+/* Route Actions */
+.route-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.action-btn.primary {
+  background: #3498db;
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background: #2980b9;
+}
+
+.action-btn.secondary {
+  background: #ecf0f1;
+  color: #2c3e50;
+}
+
+.action-btn.secondary:hover {
+  background: #d5dbdb;
+}
+
+.btn-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Popular Destinations */
+.popular-destinations {
+  margin-bottom: 32px;
+}
+
+.popular-destinations h3 {
+  color: #2c3e50;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+.popular-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.popular-destination-card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #ecf0f1;
+  text-align: center;
+}
+
+.popular-destination-card:hover {
+  border-color: #3498db;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+}
+
+.popular-destination-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.popular-destination-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #7f8c8d;
+}
+
+/* Transport Tips */
+.transport-tips {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.transport-tips h3 {
+  color: #2c3e50;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.tip-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #ecf0f1;
+}
+
+.tip-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.tip-content h4 {
+  color: #2c3e50;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.tip-content p {
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .botswana-combi-system {
+    padding: 12px;
+  }
+  
+  .system-header {
+    padding: 16px;
+  }
+  
+  .system-header h2 {
+    font-size: 1.4rem;
+  }
+  
+  .system-header p {
+    font-size: 0.9rem;
+  }
+  
+  .destinations-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .destination-card {
+    padding: 16px;
+  }
+  
+  .route-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .route-pricing {
+    flex-direction: row;
+    align-items: center;
+    align-self: stretch;
+    justify-content: space-between;
+  }
+  
+  .operator-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .route-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .popular-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .tips-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .botswana-combi-system {
+    padding: 8px;
+  }
+  
+  .system-header {
+    padding: 12px;
+  }
+  
+  .system-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .route-card {
+    padding: 12px;
+  }
+  
+  .route-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .route-path {
+    flex-wrap: wrap;
+  }
+  
+  .stops-path {
+    padding-left: 16px;
+  }
+  
+  .popular-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .popular-destination-info {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .tip-card {
+    flex-direction: column;
+    text-align: center;
+  }
+}

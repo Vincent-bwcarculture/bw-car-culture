@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PublicTransportCard from '../../shared/PublicTransportCard/PublicTransportCard.js';
+import EnhancedBotswanaTransportSystem from './EnhancedBotswanaTransportSystem.js';
+import BotswanaCombiRouteSystem from './BotswanaCombiRouteSystem.js';
 import ShareModal from '../../shared/ShareModal.js';
 import './PublicTransportPage.css';
 
@@ -198,7 +200,9 @@ const PublicTransportPage = () => {
     totalPages: 1,
     total: 0
   });
-  
+  const [viewMode, setViewMode] = useState('cards'); // 'cards', 'enhanced', 'combi'
+  const [coordinators, setCoordinators] = useState([]);
+
   // Add fetch controller ref and cooldown
   const fetchInProgress = useRef(false);
   const lastFetchTime = useRef(0);
@@ -278,6 +282,8 @@ const PublicTransportPage = () => {
     };
 
     fetchRoutes();
+ fetchCoordinators();
+
   }, [location.search]);
 
   // Filter routes based on selected filters
@@ -384,6 +390,19 @@ const PublicTransportPage = () => {
       search: searchParams.toString()
     });
   };
+
+// ✅ ADD THIS NEW FUNCTION:
+const fetchCoordinators = async () => {
+  try {
+    const response = await axios.get('/api/coordinators/by-station?station=all');
+    if (response.data.success) {
+      setCoordinators(response.data.data);
+    }
+  } catch (error) {
+    console.error('Error fetching coordinators:', error);
+    setCoordinators([]); // Continue without coordinators for now
+  }
+};
 
   // Reset filters
   const resetFilters = () => {
@@ -602,6 +621,28 @@ const PublicTransportPage = () => {
         </div>
       </div>
 
+      {/* ✅ ADD THIS VIEW SELECTOR: */}
+<div className="transport-view-selector">
+  <button 
+    className={`view-btn ${viewMode === 'cards' ? 'active' : ''}`}
+    onClick={() => setViewMode('cards')}
+  >
+    📋 List View
+  </button>
+  <button 
+    className={`view-btn ${viewMode === 'enhanced' ? 'active' : ''}`}
+    onClick={() => setViewMode('enhanced')}
+  >
+    🇧🇼 Botswana System
+  </button>
+  <button 
+    className={`view-btn ${viewMode === 'combi' ? 'active' : ''}`}
+    onClick={() => setViewMode('combi')}
+  >
+    🚐 Combi Routes
+  </button>
+</div>
+
       {loading && filteredRoutes.length === 0 ? (
         <div className="loading-overlay">
           <div className="loader"></div>
@@ -629,18 +670,34 @@ const PublicTransportPage = () => {
         </div>
       ) : (
         <>
-          <div className="bcc-transport-grid">
-            {getCurrentPageRoutes().map((route) => (
-              <PublicTransportCard 
-                key={route.id}
-                route={route}
-                onBook={handleBookRoute}
-              />
-            ))}
-          </div>
+        {/* ✅ REPLACE THE GRID WITH THIS CONDITIONAL RENDERING: */}
+{viewMode === 'cards' && (
+  <div className="bcc-transport-grid">
+    {getCurrentPageRoutes().map((route) => (
+      <PublicTransportCard 
+        key={route.id}
+        route={route}
+        onBook={handleBookRoute}
+      />
+    ))}
+  </div>
+)}
+
+{viewMode === 'enhanced' && (
+  <EnhancedBotswanaTransportSystem 
+    routes={filteredRoutes} 
+    coordinators={coordinators}
+  />
+)}
+
+{viewMode === 'combi' && (
+  <BotswanaCombiRouteSystem 
+    routes={filteredRoutes}
+  />
+)}
 
           {/* Pagination */}
-          {pagination.totalPages > 1 && (
+          {viewMode === 'cards' && pagination.totalPages > 1 && (
             <div className="pagination">
               {/* First page button */}
               {pagination.currentPage > 2 && (
