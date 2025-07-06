@@ -8,6 +8,7 @@ import {
   Car, 
   BarChart3,
   BookOpen, 
+  Shield,
   UserCheck 
 } from 'lucide-react';
 import axios from '../config/axios.js';
