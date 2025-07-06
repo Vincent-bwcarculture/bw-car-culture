@@ -48,7 +48,7 @@ import {
 } from '../../constants/subscriptionConfig.js';
 import './RoleSelection.css';
 
-const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
+const RoleSelection = ({ profileData, refreshProfile }) => {
   // Component state
   const [selectedRole, setSelectedRole] = useState('');
   const [selectedSellerType, setSelectedSellerType] = useState('');
@@ -958,4 +958,4 @@ const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
   );
 };
 
-export default EnhancedRoleSelection;
+export default RoleSelection;
