@@ -73,7 +73,7 @@ const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
     
     transport_company: {
       title: 'Transport Company',
-      description: 'For NKK Express, taxi/combi companies, bus operators',
+      description: 'For taxi/combi companies, bus operators',
       icon: MapPin,
       color: '#f59e0b',
       requiresSubscription: true,

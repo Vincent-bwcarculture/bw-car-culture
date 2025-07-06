@@ -107,7 +107,7 @@ const EnhancedCarListingManager = ({ action, userVehicles, onVehicleListed, onCa
           'Direct buyer contact',
           '30-day listing duration',
           'Basic search placement',
-          'Email notifications'
+          'Social Media Marketing'
         ],
         description: 'Perfect for selling your personal vehicle'
       },
@@ -120,11 +120,11 @@ const EnhancedCarListingManager = ({ action, userVehicles, onVehicleListed, onCa
         features: [
           'Enhanced listing visibility',
           'Up to 12 photos',
+          'Premium placement',
           'Priority search placement',
-          'Social media promotion',
+          '2x Social media promotion',
           '30-day listing duration',
           'Advanced buyer matching',
-          'SMS + Email notifications',
           'Listing performance analytics'
         ],
         popular: true,
@@ -139,13 +139,12 @@ const EnhancedCarListingManager = ({ action, userVehicles, onVehicleListed, onCa
         features: [
           'Premium listing visibility',
           'Up to 15 photos',
-          'Featured placement',
-          'Professional photography tips',
           'Extended 45-day duration',
-          'Priority customer support',
+          'Higher priority support',
           'Advanced analytics',
+          '4x Social Media Marketing',
           'Multiple listing formats',
-          'Buyer verification'
+          'First access to new features',
         ],
         description: 'Maximum exposure and professional features'
       }
@@ -162,10 +161,8 @@ const EnhancedCarListingManager = ({ action, userVehicles, onVehicleListed, onCa
           '10 photos per listing',
           'Business dashboard access',
           'Basic inventory management',
-          'Customer inquiry management',
           'Basic analytics and reporting',
-          'Email support',
-          'Mobile app access'
+           'Social media marketing',
         ],
         description: 'Perfect for small dealerships getting started'
       },
@@ -179,13 +176,8 @@ const EnhancedCarListingManager = ({ action, userVehicles, onVehicleListed, onCa
           '35 vehicle listings per month',
           '15 photos per listing',
           'Advanced business dashboard',
-          'Inventory management system',
-          'Customer relationship management',
-          '3x social media marketing boost',
+          '2x social media marketing boost',
           'Advanced analytics and insights',
-          'Phone support',
-          'API access',
-          'Custom branding options'
         ],
         popular: true,
         description: 'Ideal for growing dealerships with more inventory'
@@ -199,20 +191,17 @@ const EnhancedCarListingManager = ({ action, userVehicles, onVehicleListed, onCa
         features: [
           '100 vehicle listings per month',
           '20 photos per listing',
-          'Premium dashboard with full customization',
-          'Advanced inventory and CRM system',
-          'Unlimited social media marketing',
-          'Priority customer support',
-          'White-label solutions',
-          'Advanced API access',
+          'Premium dashboar',
+          '4x social media marketing',
+          'Priority support',
           'Professional photography service (included)',
           'Listing management service (included)',
           'Video review coverage (included)',
           'Dedicated account manager'
         ],
-        savings: 3700,
+        savings: 3000,
         badge: 'All Inclusive',
-        description: 'Complete solution with all add-ons included'
+        description: 'Complete solution with add-ons included'
       }
     }
   };
