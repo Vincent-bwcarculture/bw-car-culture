@@ -18,7 +18,7 @@ import {
   Plus,
   Minus
 } from 'lucide-react';
-import './EnhancedCarListingManager.css';
+import './CarListingManager.css';
 
 const EnhancedCarListingManager = ({ action, userVehicles, onVehicleListed, onCancel, profileData }) => {
   // Smart seller detection state
