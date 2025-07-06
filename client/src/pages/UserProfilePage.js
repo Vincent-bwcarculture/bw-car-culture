@@ -137,37 +137,145 @@ const UserProfilePage = () => {
     navigate('/admin/dashboard');
   };
 
+const getUserType = (profileData) => {
+  if (!profileData) return 'guest';
+  
+  // Transport professionals
+  if (profileData?.coordinatorProfile?.isCoordinator) return 'coordinator';
+  if (profileData?.role === 'driver' || profileData?.role === 'combi_driver') return 'driver';
+  if (profileData?.businessProfile?.services?.some(s => s.serviceType === 'public_transport')) {
+    return 'transport_operator';
+  }
+  
+  // Business owners
+  if (profileData?.dealership) return 'dealership_owner';
+  if (profileData?.businessProfile?.services?.some(s => s.isVerified)) return 'business_owner';
+  
+  // Government/Ministry
+  if (profileData?.role === 'ministry_official') return 'ministry_official';
+  if (profileData?.role === 'government_admin') return 'government_admin';
+  
+  // Vehicle owners
+  if (profileData?.vehicles?.length > 0) return 'vehicle_owner';
+  
+  // Regular users
+  return 'commuter';
+};
+
+// ✅ ADD THIS FUNCTION to show helpful hints based on user type
+const getProfileHints = (userType) => {
+  const hints = {
+    'guest': 'Complete your profile to unlock personalized features',
+    'commuter': 'Add your vehicle or explore transport services',
+    'vehicle_owner': 'Manage your vehicles and explore our marketplace',
+    'driver': 'Check queue status and manage your transport operations',
+    'coordinator': 'Manage station queues and coordinate transport',
+    'transport_operator': 'Manage your routes and fleet operations',
+    'business_owner': 'Track your business performance and listings',
+    'dealership_owner': 'Manage inventory and customer relationships',
+    'ministry_official': 'Monitor transport operations and compliance',
+    'government_admin': 'Access administrative and oversight tools'
+  };
+  
+  return hints[userType] || 'Explore all available features';
+};
+
   // Determine available tabs based on user profile and permissions - UPDATED LOGIC
- const getAvailableTabs = () => {
+
+
+const getAvailableTabs = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Eye }
   ];
 
-  // Add Services tab for all users
-  tabs.push({ id: 'services', label: 'Services', icon: Settings });
+  // === UNIVERSAL TABS (Everyone gets these) ===
+  
+  // Always show vehicles for anyone who might own a car
+  tabs.push({ id: 'vehicles', label: 'My Vehicles', icon: Car });
 
-  // Add Routes tab for transport service providers
-  if (profileData?.businessProfile?.services?.some(s => s.serviceType === 'public_transport')) {
+  // === BUSINESS & SERVICE TABS ===
+  
+  // Show Services tab for users who have or want business services
+  const hasBusinessInterest = profileData?.businessProfile?.services?.length > 0 || 
+                              profileData?.role === 'business_owner' ||
+                              profileData?.dealership;
+  
+  if (hasBusinessInterest) {
+    tabs.push({ id: 'services', label: 'Services', icon: Settings });
+  }
+
+  // === TRANSPORT-SPECIFIC TABS ===
+  
+  // Show Routes tab ONLY for transport service providers
+  const isTransportProvider = profileData?.businessProfile?.services?.some(s => 
+    s.serviceType === 'public_transport' && s.isVerified
+  );
+  
+  if (isTransportProvider) {
     tabs.push({ id: 'routes', label: 'Routes', icon: Route });
   }
 
-  // ✅ ADD THESE 2 NEW TABS - Available to all users
-  tabs.push({ id: 'coordinator', label: 'Coordinator', icon: BookOpen });
-  tabs.push({ id: 'driver', label: 'Driver', icon: UserCheck });
+  // === COORDINATOR TAB - Smart Logic ===
+  const shouldShowCoordinator = 
+    // 1. Already a registered coordinator
+    profileData?.coordinatorProfile?.isCoordinator ||
+    // 2. Works in transport industry
+    isTransportProvider ||
+    // 3. Has transport-related role
+    profileData?.role === 'transport_coordinator' ||
+    profileData?.role === 'station_manager' ||
+    // 4. Ministry official with transport oversight
+    (profileData?.role === 'ministry_official' && 
+     profileData?.ministryProfile?.department?.toLowerCase().includes('transport')) ||
+    // 5. Expressed interest in coordination
+    profileData?.interests?.includes('transport_coordination');
 
-  // Add Vehicles tab for all users
-  tabs.push({ id: 'vehicles', label: 'My Vehicles', icon: Car });
+  if (shouldShowCoordinator) {
+    tabs.push({ id: 'coordinator', label: 'Coordinator', icon: BookOpen });
+  }
 
-  // Add Business Dashboard for users with business profiles
+  // === DRIVER TAB - Smart Logic ===
+  const shouldShowDriver = 
+    // 1. Professional transport driver
+    profileData?.role === 'driver' ||
+    profileData?.role === 'combi_driver' ||
+    profileData?.role === 'taxi_driver' ||
+    // 2. Owns commercial vehicles
+    profileData?.vehicles?.some(v => v.vehicleType === 'commercial' || v.isCommercial) ||
+    // 3. Active in transport business
+    isTransportProvider ||
+    // 4. Currently in transport queue (from localStorage or session)
+    localStorage.getItem('inTransportQueue') === 'true' ||
+    // 5. Frequently uses transport (commuter who might want to see queue status)
+    profileData?.transportUsage?.frequency === 'daily' ||
+    // 6. Expressed interest in driving
+    profileData?.interests?.includes('transport_driving');
+
+  if (shouldShowDriver) {
+    tabs.push({ id: 'driver', label: 'Driver', icon: UserCheck });
+  }
+
+  // === BUSINESS DASHBOARD ===
+  
+  // Show Business Dashboard for verified businesses
   const hasBusinessProfile = profileData?.businessProfile?.services?.some(s => s.isVerified) || 
                             profileData?.businessProfile?.services?.length > 0 ||
-                            profileData?.dealership;
+                            profileData?.dealership ||
+                            profileData?.role === 'business_owner' ||
+                            profileData?.role === 'dealership_owner';
   
   if (hasBusinessProfile) {
     tabs.push({ id: 'business', label: 'Business Dashboard', icon: BarChart3 });
   }
 
-  // Add Settings tab
+  // === MINISTRY/ADMIN TABS ===
+  
+  // Show admin features for ministry officials
+  if (profileData?.role === 'ministry_official' || profileData?.role === 'government_admin') {
+    tabs.push({ id: 'ministry', label: 'Ministry Dashboard', icon: Shield });
+  }
+
+  // === UNIVERSAL TABS (Always at the end) ===
   tabs.push({ id: 'settings', label: 'Settings', icon: Settings });
 
   return tabs;

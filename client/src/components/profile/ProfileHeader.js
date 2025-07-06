@@ -118,6 +118,8 @@ const ProfileHeader = ({
     }
   };
 
+
+  
   return (
     <div className="pheader-main-container">
       <div className="pheader-background-overlay"></div>

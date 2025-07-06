@@ -400,3 +400,227 @@ body {
     border: 1px solid #ccc;
   }
 }
+
+
+/* Add this to your UserProfilePage.css */
+
+/* Smart Profile Type Indicator */
+.profile-type-indicator {
+  background: rgba(20, 20, 20, 0.9);
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-type-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ff3300;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-hint {
+  font-size: 0.8rem;
+  color: #aaaaaa;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Smart Onboarding Suggestions */
+.smart-suggestions {
+  background: rgba(20, 20, 20, 0.9);
+  border: 1px solid #2c2c2c;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.smart-suggestions h4 {
+  color: #ffffff;
+  font-size: 1.1rem;
+  margin: 0 0 16px 0;
+  font-weight: 600;
+}
+
+.suggestions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.suggestion-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.suggestion-card:hover {
+  background: rgba(255, 51, 0, 0.1);
+  border-color: rgba(255, 51, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.suggestion-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.suggestion-content h5 {
+  color: #ffffff;
+  font-size: 0.95rem;
+  margin: 0 0 4px 0;
+  font-weight: 600;
+}
+
+.suggestion-content p {
+  color: #aaaaaa;
+  font-size: 0.8rem;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Enhanced Tab Styling Based on User Type */
+.uprofile-nav-tab.coordinator-tab {
+  border-left: 3px solid #f39c12;
+}
+
+.uprofile-nav-tab.driver-tab {
+  border-left: 3px solid #3498db;
+}
+
+.uprofile-nav-tab.business-tab {
+  border-left: 3px solid #27ae60;
+}
+
+.uprofile-nav-tab.ministry-tab {
+  border-left: 3px solid #9b59b6;
+}
+
+/* Contextual Help Messages */
+.tab-context-help {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-context-help.info {
+  background: rgba(52, 152, 219, 0.1);
+  border-color: rgba(52, 152, 219, 0.3);
+}
+
+.tab-context-help.success {
+  background: rgba(39, 174, 96, 0.1);
+  border-color: rgba(39, 174, 96, 0.3);
+}
+
+.tab-context-help-icon {
+  color: #ffc107;
+  font-size: 1.1rem;
+}
+
+.tab-context-help.info .tab-context-help-icon {
+  color: #3498db;
+}
+
+.tab-context-help.success .tab-context-help-icon {
+  color: #27ae60;
+}
+
+.tab-context-help-text {
+  color: #ffffff;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* User Type Badges */
+.user-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.user-type-badge.coordinator {
+  background: rgba(243, 156, 18, 0.2);
+  color: #f39c12;
+  border: 1px solid rgba(243, 156, 18, 0.3);
+}
+
+.user-type-badge.driver {
+  background: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+  border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.user-type-badge.business {
+  background: rgba(39, 174, 96, 0.2);
+  color: #27ae60;
+  border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+.user-type-badge.ministry {
+  background: rgba(155, 89, 182, 0.2);
+  color: #9b59b6;
+  border: 1px solid rgba(155, 89, 182, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .suggestions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .suggestion-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .profile-type-indicator {
+    padding: 8px 12px;
+  }
+  
+  .smart-suggestions {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-type-label {
+    font-size: 0.8rem;
+  }
+  
+  .profile-hint {
+    font-size: 0.75rem;
+  }
+  
+  .suggestion-content h5 {
+    font-size: 0.9rem;
+  }
+  
+  .suggestion-content p {
+    font-size: 0.75rem;
+  }
+}
