@@ -1,4 +1,4 @@
-// client/src/components/profile/RoleSelection.js
+// client/src/components/profile/EnhancedRoleSelection.js - Updated for seller types
 import React, { useState, useEffect } from 'react';
 import { 
   Users, 
@@ -7,64 +7,109 @@ import {
   Shield, 
   Briefcase, 
   MapPin,
-  FileText,
+  CreditCard,
   CheckCircle,
   Clock,
-  AlertCircle
+  Star,
+  Zap,
+  Crown,
+  User,
+  Building
 } from 'lucide-react';
-import './RoleSelection.css';
+import { 
+  PRIVATE_SELLER_PLANS,
+  DEALERSHIP_PLANS,
+  PROVIDER_PLANS, 
+  TRANSPORT_PLANS,
+  GOVERNMENT_PLANS,
+  FREE_ACCESS_ROLES,
+  ADDON_SERVICES,
+  formatPrice,
+  calculateTotal,
+  getAvailableAddons,
+  SELLER_TYPES
+} from '../../constants/subscriptionConfig';
+import './EnhancedRoleSelection.css';
 
-const RoleSelection = ({ profileData, refreshProfile }) => {
+const EnhancedRoleSelection = ({ profileData, refreshProfile }) => {
   const [selectedRole, setSelectedRole] = useState('');
-  const [isRequestingRole, setIsRequestingRole] = useState(false);
-  const [showRequestForm, setShowRequestForm] = useState(false);
-  const [requestData, setRequestData] = useState({});
+  const [selectedSellerType, setSelectedSellerType] = useState(''); // NEW: For dealer type selection
+  const [selectedPlan, setSelectedPlan] = useState('');
+  const [selectedAddons, setSelectedAddons] = useState([]);
+  const [showSellerTypeModal, setShowSellerTypeModal] = useState(false); // NEW: Seller type selection
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   // Role configurations
-  const availableRoles = [
-    {
-      id: 'dealer',
-      title: 'Dealer',
-      description: 'Sell cars and manage inventory',
+  const roleConfigurations = {
+    dealer: {
+      title: 'Car Seller',
+      description: 'Sell cars as private seller or business dealership',
       icon: Car,
       color: '#3b82f6',
-      requiresVerification: true,
-      benefits: ['List unlimited vehicles', 'Access dealer dashboard', 'Advanced analytics'],
-      requirements: ['Business registration', 'Valid trading license', 'Address verification']
+      requiresSubscription: true,
+      hasSellerTypes: true, // NEW: Indicates this role has seller type options
+      freeTrialDays: 14,
+      sellerTypes: {
+        [SELLER_TYPES.PRIVATE]: {
+          title: 'Private Seller',
+          description: 'Individual selling personal vehicles',
+          icon: User,
+          plans: PRIVATE_SELLER_PLANS,
+          benefits: ['Sell personal vehicles', 'Basic dashboard', 'Photo uploads', 'Direct buyer contact']
+        },
+        [SELLER_TYPES.DEALERSHIP]: {
+          title: 'Business Dealership', 
+          description: 'Professional car dealership business',
+          icon: Building,
+          plans: DEALERSHIP_PLANS,
+          benefits: ['Professional inventory management', 'Advanced marketing tools', 'Business analytics', 'Add-on services']
+        }
+      }
     },
-    {
-      id: 'provider',
+    
+    transport_company: {
+      title: 'Transport Company',
+      description: 'For NKK Express, taxi/combi companies, bus operators',
+      icon: MapPin,
+      color: '#f59e0b',
+      requiresSubscription: true,
+      plans: { dashboard: TRANSPORT_PLANS.COMPANY_DASHBOARD }
+    },
+    
+    provider: {
       title: 'Service Provider',
-      description: 'Offer automotive services',
+      description: 'Automotive services: mechanics, body shops, detailing',
       icon: Briefcase,
       color: '#059669',
-      requiresVerification: true,
-      benefits: ['List services', 'Manage bookings', 'Customer reviews'],
-      requirements: ['Service certification', 'Business details', 'Insurance proof']
+      requiresSubscription: true,
+      plans: PROVIDER_PLANS
     },
-    {
-      id: 'ministry',
+    
+    coordinator: {
+      title: 'Transport Coordinator',
+      description: 'Manage transport stations - completely free!',
+      icon: Users,
+      color: '#8b5cf6',
+      requiresSubscription: false,
+      features: ['Free station management', 'Queue coordination', 'Route monitoring', 'Performance analytics'],
+      note: 'Always free for verified coordinators'
+    },
+    
+    ministry: {
       title: 'Ministry Official',
       description: 'Government transport oversight',
       icon: Shield,
       color: '#dc2626',
-      requiresVerification: true,
-      benefits: ['Access transport data', 'Monitor compliance', 'Approve services'],
-      requirements: ['Government ID', 'Department verification', 'Official documents']
-    },
-    {
-      id: 'coordinator',
-      title: 'Transport Coordinator',
-      description: 'Manage transport stations',
-      icon: MapPin,
-      color: '#f59e0b',
-      requiresVerification: true,
-      benefits: ['Manage queues', 'Coordinate routes', 'Monitor operations'],
-      requirements: ['Station assignment', 'Training certificate', 'Authorization letter']
+      requiresSubscription: false,
+      plans: GOVERNMENT_PLANS,
+      features: ['Full system oversight', 'Compliance monitoring', 'Custom reports', 'Policy tools'],
+      note: 'Custom pricing - contact for details'
     }
-  ];
+  };
 
   useEffect(() => {
     fetchPendingRequests();
@@ -74,9 +119,7 @@ const RoleSelection = ({ profileData, refreshProfile }) => {
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch('/api/role-requests/my-requests', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       
       if (response.ok) {
@@ -84,101 +127,188 @@ const RoleSelection = ({ profileData, refreshProfile }) => {
         setPendingRequests(data.data || []);
       }
     } catch (error) {
-      console.error('Error fetching pending requests:', error);
+      console.error('Error fetching requests:', error);
     }
   };
 
-  const getCurrentUserRole = () => {
-    if (!profileData) return 'user';
-    return profileData.role || 'user';
-  };
+  const getCurrentRole = () => profileData?.role || 'user';
 
   const hasRole = (roleId) => {
-    const currentRole = getCurrentUserRole();
+    const currentRole = getCurrentRole();
     return currentRole === roleId || 
-           (roleId === 'dealer' && profileData?.dealership) ||
+           (roleId === 'dealer' && (profileData?.dealership || profileData?.privateSeller)) ||
            (roleId === 'provider' && profileData?.providerId) ||
            (roleId === 'coordinator' && profileData?.coordinatorProfile?.isCoordinator);
   };
 
   const hasPendingRequest = (roleId) => {
-    return pendingRequests.some(req => 
-      req.requestType === roleId && req.status === 'pending'
+    return pendingRequests.some(req => req.requestType === roleId && req.status === 'pending');
+  };
+
+  const calculateTotal = () => {
+    if (!selectedRole || !selectedPlan) return 0;
+    
+    let plans;
+    if (selectedRole === 'dealer' && selectedSellerType) {
+      plans = roleConfigurations.dealer.sellerTypes[selectedSellerType].plans;
+    } else {
+      plans = roleConfigurations[selectedRole]?.plans || {};
+    }
+    
+    const plan = plans[selectedPlan];
+    if (!plan) return 0;
+    
+    let total = plan.price;
+
+    // Add addon costs (only for dealerships, and skip if premium)
+    if (selectedRole === 'dealer' && selectedSellerType === SELLER_TYPES.DEALERSHIP && selectedPlan !== 'premium') {
+      selectedAddons.forEach(addonId => {
+        const addon = ADDON_SERVICES[addonId];
+        if (addon) total += addon.price;
+      });
+    }
+
+    return total;
+  };
+
+  const handleRoleRequest = (roleId) => {
+    const role = roleConfigurations[roleId];
+    setSelectedRole(roleId);
+    setSelectedSellerType('');
+    setSelectedAddons([]);
+    
+    if (role.hasSellerTypes) {
+      // Show seller type selection for dealer role
+      setShowSellerTypeModal(true);
+    } else if (role.requiresSubscription) {
+      setShowPricingModal(true);
+    } else {
+      // Submit free role request directly
+      submitFreeRoleRequest(roleId);
+    }
+  };
+
+  const handleSellerTypeSelection = (sellerType) => {
+    setSelectedSellerType(sellerType);
+    setShowSellerTypeModal(false);
+    setShowPricingModal(true);
+  };
+
+  const handlePlanSelection = (planId) => {
+    setSelectedPlan(planId);
+    
+    // Clear addons if premium dealership (all included)
+    if (selectedRole === 'dealer' && selectedSellerType === SELLER_TYPES.DEALERSHIP && planId === 'premium') {
+      setSelectedAddons([]);
+    }
+    
+    setShowPricingModal(false);
+    setShowPaymentModal(true);
+  };
+
+  const handleAddonToggle = (addonId) => {
+    const addon = ADDON_SERVICES[addonId];
+    
+    // Check if addon is available for selected seller type
+    if (addon.availableFor && !addon.availableFor.includes(selectedSellerType)) {
+      alert(`${addon.name} not available for this seller type`);
+      return;
+    }
+    
+    if (addon.requiredPlan && !addon.requiredPlan.includes(selectedPlan)) {
+      alert(`${addon.name} requires ${addon.requiredPlan.join(' or ')} plan`);
+      return;
+    }
+
+    setSelectedAddons(prev => 
+      prev.includes(addonId) 
+        ? prev.filter(id => id !== addonId)
+        : [...prev, addonId]
     );
   };
 
-  const handleRoleRequest = async (roleId) => {
-    setSelectedRole(roleId);
-    setShowRequestForm(true);
-    setRequestData({});
-  };
-
-  const submitRoleRequest = async () => {
-    if (!selectedRole) return;
-    
+  const submitFreeRoleRequest = async (roleId) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('authToken');
-      const endpoint = `/api/${selectedRole}-requests`;
-      
-      const response = await fetch(endpoint, {
+      const response = await fetch('/api/role-requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          requestType: selectedRole,
-          ...requestData
-        })
+        body: JSON.stringify({ requestType: roleId })
       });
 
       if (response.ok) {
-        setShowRequestForm(false);
-        setSelectedRole('');
-        setRequestData({});
+        alert(`${roleId} role request submitted! You'll be notified when reviewed.`);
         fetchPendingRequests();
-        
-        // Show success message
-        alert(`${selectedRole} role request submitted successfully! You'll receive an email when it's reviewed.`);
       } else {
-        const errorData = await response.json();
-        alert(`Error: ${errorData.message || 'Failed to submit request'}`);
+        const error = await response.json();
+        alert(`Error: ${error.message}`);
       }
     } catch (error) {
-      console.error('Error submitting role request:', error);
       alert('Network error. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const getRequestStatus = (roleId) => {
-    const request = pendingRequests.find(req => req.requestType === roleId);
-    if (!request) return null;
-    
-    return {
-      status: request.status,
-      submittedAt: request.createdAt,
-      reviewNotes: request.reviewNotes
-    };
+  const initiatePayment = async () => {
+    setPaymentLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      
+      const payload = {
+        roleType: selectedRole,
+        planId: selectedPlan,
+        addons: selectedAddons,
+        callbackUrl: `${window.location.origin}/profile?tab=roles`
+      };
+      
+      // Add seller type for dealer role
+      if (selectedRole === 'dealer' && selectedSellerType) {
+        payload.sellerType = selectedSellerType;
+      }
+      
+      const response = await fetch('/api/payments/initiate-role-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.data.paymentLink) {
+        // Redirect to Flutterwave payment page
+        window.location.href = data.data.paymentLink;
+      } else {
+        alert(`Payment Error: ${data.message}`);
+      }
+    } catch (error) {
+      alert('Payment initialization failed. Please try again.');
+    } finally {
+      setPaymentLoading(false);
+    }
   };
 
-  const renderRoleCard = (role) => {
-    const IconComponent = role.icon;
-    const userHasRole = hasRole(role.id);
-    const isPending = hasPendingRequest(role.id);
-    const requestStatus = getRequestStatus(role.id);
+  const renderRoleCard = (roleId, config) => {
+    const IconComponent = config.icon;
+    const userHasRole = hasRole(roleId);
+    const isPending = hasPendingRequest(roleId);
     
     return (
-      <div key={role.id} className={`role-card ${userHasRole ? 'role-card-active' : ''}`}>
-        <div className="role-card-header">
-          <div className="role-icon" style={{ backgroundColor: role.color }}>
+      <div key={roleId} className={`role-card ${userHasRole ? 'role-active' : ''}`}>
+        <div className="role-header">
+          <div className="role-icon" style={{ backgroundColor: config.color }}>
             <IconComponent size={24} />
           </div>
           <div className="role-info">
-            <h3 className="role-title">{role.title}</h3>
-            <p className="role-description">{role.description}</p>
+            <h3>{config.title}</h3>
+            <p>{config.description}</p>
           </div>
           <div className="role-status">
             {userHasRole ? (
@@ -193,45 +323,45 @@ const RoleSelection = ({ profileData, refreshProfile }) => {
               </div>
             ) : (
               <button 
-                className="request-role-btn"
-                onClick={() => handleRoleRequest(role.id)}
+                className="role-request-btn"
+                onClick={() => handleRoleRequest(roleId)}
+                disabled={loading}
               >
-                Request Access
+                {config.requiresSubscription ? 'View Plans' : 'Request Access'}
               </button>
             )}
           </div>
         </div>
         
-        <div className="role-details">
-          <div className="role-benefits">
-            <h4>Benefits:</h4>
-            <ul>
-              {role.benefits.map((benefit, index) => (
-                <li key={index}>{benefit}</li>
-              ))}
-            </ul>
-          </div>
+        <div className="role-features">
+          {config.features && config.features.map((feature, idx) => (
+            <div key={idx} className="feature-item">
+              <CheckCircle size={14} />
+              <span>{feature}</span>
+            </div>
+          ))}
           
-          {role.requiresVerification && (
-            <div className="role-requirements">
-              <h4>Requirements:</h4>
-              <ul>
-                {role.requirements.map((req, index) => (
-                  <li key={index}>{req}</li>
-                ))}
-              </ul>
+          {config.note && (
+            <div className="role-note">{config.note}</div>
+          )}
+          
+          {config.requiresSubscription && !config.hasSellerTypes && (
+            <div className="pricing-hint">
+              {Object.keys(config.plans).length > 1 
+                ? `Plans from ${formatPrice(Math.min(...Object.values(config.plans).map(p => p.price)))}`
+                : formatPrice(Object.values(config.plans)[0].price)
+              }
             </div>
           )}
           
-          {requestStatus && (
-            <div className="request-status">
-              <h4>Request Status:</h4>
-              <p className={`status-text status-${requestStatus.status}`}>
-                {requestStatus.status.charAt(0).toUpperCase() + requestStatus.status.slice(1)}
-              </p>
-              {requestStatus.reviewNotes && (
-                <p className="review-notes">{requestStatus.reviewNotes}</p>
-              )}
+          {config.hasSellerTypes && (
+            <div className="seller-types-hint">
+              <div className="pricing-hint">
+                Private sellers: {formatPrice(50)} - {formatPrice(200)}/month
+              </div>
+              <div className="pricing-hint">
+                Dealerships: {formatPrice(1000)} - {formatPrice(6000)}/month
+              </div>
             </div>
           )}
         </div>
@@ -239,193 +369,234 @@ const RoleSelection = ({ profileData, refreshProfile }) => {
     );
   };
 
-  const renderRequestForm = () => {
-    const role = availableRoles.find(r => r.id === selectedRole);
-    if (!role) return null;
-
+  const renderSellerTypeModal = () => {
+    if (!selectedRole || !showSellerTypeModal) return null;
+    
+    const role = roleConfigurations[selectedRole];
+    
     return (
-      <div className="request-form-overlay">
-        <div className="request-form">
-          <div className="form-header">
-            <h3>Request {role.title} Access</h3>
-            <button 
-              className="close-btn"
-              onClick={() => setShowRequestForm(false)}
-            >
-              ×
-            </button>
+      <div className="modal-overlay">
+        <div className="seller-type-modal">
+          <div className="modal-header">
+            <h3>Choose Your Seller Type</h3>
+            <button onClick={() => setShowSellerTypeModal(false)}>×</button>
           </div>
           
-          <div className="form-content">
-            {selectedRole === 'dealer' && (
-              <>
-                <div className="form-group">
-                  <label>Business Name *</label>
-                  <input
-                    type="text"
-                    value={requestData.businessName || ''}
-                    onChange={(e) => setRequestData({...requestData, businessName: e.target.value})}
-                    placeholder="Enter your business name"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Business Type *</label>
-                  <select
-                    value={requestData.businessType || ''}
-                    onChange={(e) => setRequestData({...requestData, businessType: e.target.value})}
-                    required
+          <div className="seller-types-grid">
+            {Object.entries(role.sellerTypes).map(([sellerType, config]) => {
+              const IconComponent = config.icon;
+              const plans = Object.values(config.plans);
+              const minPrice = Math.min(...plans.map(p => p.price));
+              const maxPrice = Math.max(...plans.map(p => p.price));
+              
+              return (
+                <div key={sellerType} className="seller-type-card">
+                  <div className="seller-type-header">
+                    <IconComponent size={32} />
+                    <h4>{config.title}</h4>
+                    <p>{config.description}</p>
+                  </div>
+                  
+                  <div className="seller-type-pricing">
+                    {minPrice === maxPrice 
+                      ? formatPrice(minPrice) 
+                      : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`
+                    }/month
+                  </div>
+                  
+                  <div className="seller-type-benefits">
+                    {config.benefits.map((benefit, idx) => (
+                      <div key={idx} className="benefit-item">
+                        <CheckCircle size={14} />
+                        <span>{benefit}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <button 
+                    className="select-seller-type-btn"
+                    onClick={() => handleSellerTypeSelection(sellerType)}
                   >
-                    <option value="">Select business type</option>
-                    <option value="dealership">Dealership</option>
-                    <option value="private_seller">Private Seller</option>
-                    <option value="auction_house">Auction House</option>
-                  </select>
+                    Select {config.title}
+                  </button>
                 </div>
-                <div className="form-group">
-                  <label>Trading License Number *</label>
-                  <input
-                    type="text"
-                    value={requestData.licenseNumber || ''}
-                    onChange={(e) => setRequestData({...requestData, licenseNumber: e.target.value})}
-                    placeholder="Enter license number"
-                    required
-                  />
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderPricingModal = () => {
+    if (!selectedRole || !showPricingModal) return null;
+    
+    let plans, modalTitle;
+    
+    if (selectedRole === 'dealer' && selectedSellerType) {
+      plans = roleConfigurations.dealer.sellerTypes[selectedSellerType].plans;
+      modalTitle = `${roleConfigurations.dealer.sellerTypes[selectedSellerType].title} Plans`;
+    } else {
+      plans = roleConfigurations[selectedRole]?.plans || {};
+      modalTitle = `${roleConfigurations[selectedRole]?.title} Plans`;
+    }
+    
+    return (
+      <div className="modal-overlay">
+        <div className="pricing-modal">
+          <div className="modal-header">
+            <h3>{modalTitle}</h3>
+            <button onClick={() => setShowPricingModal(false)}>×</button>
+          </div>
+          
+          <div className="plans-grid">
+            {Object.entries(plans).map(([planId, plan]) => (
+              <div key={planId} className={`plan-card ${plan.popular ? 'popular' : ''}`}>
+                {plan.badge && <div className="plan-badge">{plan.badge}</div>}
+                {plan.popular && <div className="plan-badge popular-badge">Most Popular</div>}
+                
+                <h4>{plan.name}</h4>
+                <div className="plan-price">
+                  {formatPrice(plan.price)}
+                  <span>/month</span>
                 </div>
-              </>
+                
+                {plan.savings && (
+                  <div className="savings-note">
+                    Includes {formatPrice(plan.savings)} worth of add-ons!
+                  </div>
+                )}
+                
+                <ul className="plan-features">
+                  {plan.features && typeof plan.features === 'object' ? 
+                    Object.entries(plan.features)
+                      .filter(([key, value]) => value && key !== 'includedAddons')
+                      .map(([key, value], idx) => (
+                        <li key={idx}>
+                          {key === 'maxListings' ? `${value} listings` :
+                           key === 'maxPhotosPerListing' ? `${value} photos per listing` :
+                           key === 'socialMediaMarketing' ? `${value === 'unlimited' ? 'Unlimited' : value + 'x'} social media marketing` :
+                           key === 'customerSupport' ? `${value} support` :
+                           key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())
+                          }
+                        </li>
+                      ))
+                    : plan.features?.map((feature, idx) => (
+                        <li key={idx}>{feature}</li>
+                      ))
+                  }
+                </ul>
+                
+                {plan.note && <div className="plan-note">{plan.note}</div>}
+                
+                <button 
+                  className="select-plan-btn"
+                  onClick={() => handlePlanSelection(planId)}
+                >
+                  Select {plan.name}
+                </button>
+              </div>
+            ))}
+          </div>
+          
+          {roleConfigurations[selectedRole]?.freeTrialDays && (
+            <div className="trial-note">
+              🎉 {roleConfigurations[selectedRole].freeTrialDays}-day free trial available!
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderPaymentModal = () => {
+    if (!selectedRole || !selectedPlan || !showPaymentModal) return null;
+    
+    let plans, plan;
+    
+    if (selectedRole === 'dealer' && selectedSellerType) {
+      plans = roleConfigurations.dealer.sellerTypes[selectedSellerType].plans;
+      plan = plans[selectedPlan];
+    } else {
+      plans = roleConfigurations[selectedRole]?.plans || {};
+      plan = plans[selectedPlan];
+    }
+    
+    if (!plan) return null;
+    
+    const total = calculateTotal();
+    const availableAddons = selectedRole === 'dealer' && selectedSellerType === SELLER_TYPES.DEALERSHIP 
+      ? getAvailableAddons(selectedSellerType, selectedPlan)
+      : [];
+    
+    return (
+      <div className="modal-overlay">
+        <div className="payment-modal">
+          <div className="modal-header">
+            <h3>Complete Your Subscription</h3>
+            <button onClick={() => setShowPaymentModal(false)}>×</button>
+          </div>
+          
+          <div className="payment-summary">
+            <div className="summary-item">
+              <span>Plan:</span>
+              <span>{plan.name}</span>
+              <span>{formatPrice(plan.price)}</span>
+            </div>
+            
+            {availableAddons.length > 0 && selectedPlan !== 'premium' && (
+              <div className="addons-section">
+                <h4>Available Add-ons:</h4>
+                {availableAddons.map((addon) => {
+                  const isIncluded = addon.includedInPremium && selectedPlan === 'premium';
+                  
+                  return (
+                    <div key={addon.id} className="addon-item">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={selectedAddons.includes(addon.id)}
+                          onChange={() => handleAddonToggle(addon.id)}
+                          disabled={isIncluded}
+                        />
+                        <span>{addon.name}</span>
+                        <span className="addon-price">
+                          {isIncluded ? 'Included' : formatPrice(addon.price) + (addon.perUnit ? '/listing' : '/month')}
+                        </span>
+                      </label>
+                      <div className="addon-description">{addon.description}</div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
             
-            {selectedRole === 'provider' && (
-              <>
-                <div className="form-group">
-                  <label>Service Type *</label>
-                  <select
-                    value={requestData.serviceType || ''}
-                    onChange={(e) => setRequestData({...requestData, serviceType: e.target.value})}
-                    required
-                  >
-                    <option value="">Select service type</option>
-                    <option value="mechanic">Mechanic</option>
-                    <option value="body_shop">Body Shop</option>
-                    <option value="detailing">Car Detailing</option>
-                    <option value="towing">Towing Service</option>
-                    <option value="parts_dealer">Parts Dealer</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Business Name *</label>
-                  <input
-                    type="text"
-                    value={requestData.businessName || ''}
-                    onChange={(e) => setRequestData({...requestData, businessName: e.target.value})}
-                    placeholder="Enter your business name"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Years of Experience *</label>
-                  <input
-                    type="number"
-                    value={requestData.experience || ''}
-                    onChange={(e) => setRequestData({...requestData, experience: e.target.value})}
-                    placeholder="Years in business"
-                    min="0"
-                    required
-                  />
-                </div>
-              </>
-            )}
-            
-            {selectedRole === 'ministry' && (
-              <>
-                <div className="form-group">
-                  <label>Ministry/Department *</label>
-                  <input
-                    type="text"
-                    value={requestData.ministryName || ''}
-                    onChange={(e) => setRequestData({...requestData, ministryName: e.target.value})}
-                    placeholder="e.g., Ministry of Transport"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Your Position *</label>
-                  <input
-                    type="text"
-                    value={requestData.position || ''}
-                    onChange={(e) => setRequestData({...requestData, position: e.target.value})}
-                    placeholder="Your official position"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Employee ID *</label>
-                  <input
-                    type="text"
-                    value={requestData.employeeId || ''}
-                    onChange={(e) => setRequestData({...requestData, employeeId: e.target.value})}
-                    placeholder="Government employee ID"
-                    required
-                  />
-                </div>
-              </>
-            )}
-            
-            {selectedRole === 'coordinator' && (
-              <>
-                <div className="form-group">
-                  <label>Station/Terminal *</label>
-                  <input
-                    type="text"
-                    value={requestData.stationName || ''}
-                    onChange={(e) => setRequestData({...requestData, stationName: e.target.value})}
-                    placeholder="Station you want to coordinate"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Transport Experience *</label>
-                  <select
-                    value={requestData.experience || ''}
-                    onChange={(e) => setRequestData({...requestData, experience: e.target.value})}
-                    required
-                  >
-                    <option value="">Select experience level</option>
-                    <option value="less_than_1">Less than 1 year</option>
-                    <option value="1_to_3">1-3 years</option>
-                    <option value="3_to_5">3-5 years</option>
-                    <option value="more_than_5">More than 5 years</option>
-                  </select>
-                </div>
-              </>
-            )}
-            
-            <div className="form-group">
-              <label>Additional Information</label>
-              <textarea
-                value={requestData.reason || ''}
-                onChange={(e) => setRequestData({...requestData, reason: e.target.value})}
-                placeholder="Tell us why you need this role and any additional information..."
-                rows="4"
-              />
+            <div className="total-section">
+              <div className="total-item">
+                <span>Total:</span>
+                <span>{formatPrice(total)}/month</span>
+              </div>
             </div>
           </div>
           
-          <div className="form-actions">
+          <div className="payment-actions">
             <button 
-              className="btn-cancel"
-              onClick={() => setShowRequestForm(false)}
-              disabled={loading}
+              className="cancel-btn"
+              onClick={() => setShowPaymentModal(false)}
             >
               Cancel
             </button>
             <button 
-              className="btn-submit"
-              onClick={submitRoleRequest}
-              disabled={loading || !requestData.businessName}
+              className="pay-btn"
+              onClick={initiatePayment}
+              disabled={paymentLoading}
             >
-              {loading ? 'Submitting...' : 'Submit Request'}
+              {paymentLoading ? 'Processing...' : `Pay ${formatPrice(total)}`}
             </button>
+          </div>
+          
+          <div className="payment-note">
+            Secure payment powered by Flutterwave. You'll be redirected to complete payment.
           </div>
         </div>
       </div>
@@ -433,23 +604,16 @@ const RoleSelection = ({ profileData, refreshProfile }) => {
   };
 
   return (
-    <div className="role-selection-container">
+    <div className="enhanced-role-selection">
       <div className="section-header">
-        <div className="header-content">
-          <Users size={24} />
-          <div>
-            <h2>Role Management</h2>
-            <p>Request access to additional features and capabilities</p>
-          </div>
-        </div>
-        <div className="current-role">
-          <span>Current Role: </span>
-          <span className="role-badge">{getCurrentUserRole()}</span>
-        </div>
+        <h2>Role Management & Subscriptions</h2>
+        <p>Choose your role and subscription plan to unlock professional features</p>
       </div>
       
       <div className="roles-grid">
-        {availableRoles.map(renderRoleCard)}
+        {Object.entries(roleConfigurations).map(([roleId, config]) => 
+          renderRoleCard(roleId, config)
+        )}
       </div>
       
       {pendingRequests.length > 0 && (
@@ -458,24 +622,20 @@ const RoleSelection = ({ profileData, refreshProfile }) => {
           <div className="requests-list">
             {pendingRequests.map((request, index) => (
               <div key={index} className="request-item">
-                <div className="request-info">
-                  <span className="request-type">{request.requestType}</span>
-                  <span className="request-date">
-                    Submitted {new Date(request.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className={`request-status status-${request.status}`}>
-                  {request.status}
-                </div>
+                <span>{request.requestType} role</span>
+                <span>Submitted {new Date(request.createdAt).toLocaleDateString()}</span>
+                <span className={`status status-${request.status}`}>{request.status}</span>
               </div>
             ))}
           </div>
         </div>
       )}
       
-      {showRequestForm && renderRequestForm()}
+      {renderSellerTypeModal()}
+      {renderPricingModal()}
+      {renderPaymentModal()}
     </div>
   );
 };
 
-export default RoleSelection;
+export default EnhancedRoleSelection;
