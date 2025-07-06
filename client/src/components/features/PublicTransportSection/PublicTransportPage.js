@@ -1,5 +1,6 @@
 // src/components/features/PublicTransportSection/PublicTransportPage.js
 import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PublicTransportCard from '../../shared/PublicTransportCard/PublicTransportCard.js';
 import EnhancedBotswanaTransportSystem from './EnhancedBotswanaTransportSystem.js';
