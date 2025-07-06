@@ -14,6 +14,7 @@ import {
 import axios from '../config/axios.js';
 
 import ProfileHeader from '../components/profile/ProfileHeader.js';
+import RoleSelection from '../components/profile/RoleSelection.js';
 import ProfileOverview from '../components/profile/ProfileOverview.js';
 import ServiceManagement from '../components/profile/ServiceManagement.js';
 import RouteManagement from '../components/profile/RouteManagement.js';
@@ -194,6 +195,8 @@ const getAvailableTabs = () => {
   // Always show vehicles for anyone who might own a car
   tabs.push({ id: 'vehicles', label: 'My Vehicles', icon: Car });
 
+  
+
   // === BUSINESS & SERVICE TABS ===
   
   // Show Services tab for users who have or want business services
@@ -276,7 +279,10 @@ const getAvailableTabs = () => {
     tabs.push({ id: 'ministry', label: 'Ministry Dashboard', icon: Shield });
   }
 
+  
+
   // === UNIVERSAL TABS (Always at the end) ===
+  tabs.push({ id: 'roles', label: 'Role Management', icon: Shield })
   tabs.push({ id: 'settings', label: 'Settings', icon: Settings });
 
   return tabs;
@@ -390,6 +396,13 @@ const getAvailableTabs = () => {
         {activeTab === 'driver' && (
           <DriverOperatorDashboard 
             profileData={displayData} 
+          />
+        )}
+
+           {activeTab === 'roles' && (
+          <RoleSelection 
+            profileData={displayData}
+            refreshProfile={fetchUserProfile}
           />
         )}
 
