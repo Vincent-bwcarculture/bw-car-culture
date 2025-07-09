@@ -1027,12 +1027,59 @@ const MarketplaceList = () => {
   // Mobile horizontal car row component
   const MobileHorizontalCarRow = ({ mainCar, similarCars }) => {
     const allCarsInRow = [mainCar, ...similarCars];
+    const rowRef = useRef(null);
+    const scrollContainerRef = useRef(null);
+    const [isVisible, setIsVisible] = useState(true);
+    const [isTransitioning, setIsTransitioning] = useState(false);
+    
+    // Use intersection observer to detect when row is going out of view
+    useEffect(() => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          const wasVisible = isVisible;
+          const nowVisible = entry.isIntersecting;
+          
+          if (wasVisible && !nowVisible) {
+            // Row is going out of view - start smooth transition back to main car
+            setIsTransitioning(true);
+            
+            // Smoothly scroll back to main car (first card)
+            if (scrollContainerRef.current) {
+              scrollContainerRef.current.scrollTo({
+                left: 0,
+                behavior: 'smooth'
+              });
+            }
+            
+            // Remove transition state after animation completes
+            setTimeout(() => {
+              setIsTransitioning(false);
+            }, 500);
+          }
+          
+          setIsVisible(nowVisible);
+        },
+        { threshold: 0.3 } // Trigger when 30% of row is visible
+      );
+      
+      if (rowRef.current) {
+        observer.observe(rowRef.current);
+      }
+      
+      return () => observer.disconnect();
+    }, [isVisible]);
     
     return (
-      <div className="mobile-horizontal-scroll">
-        <div className="mobile-cards-row">
+      <div ref={rowRef} className="mobile-horizontal-scroll">
+        <div 
+          ref={scrollContainerRef}
+          className={`mobile-cards-row ${isTransitioning ? 'transitioning' : ''}`}
+        >
           {allCarsInRow.map((car, index) => (
-            <div key={car._id || car.id || `car-${index}`} className="mobile-car-card">
+            <div 
+              key={car._id || car.id || `car-${index}`} 
+              className={`mobile-car-card ${isTransitioning ? 'returning-to-main' : ''}`}
+            >
               <VehicleCard 
                 car={car}
                 onShare={handleShare}
