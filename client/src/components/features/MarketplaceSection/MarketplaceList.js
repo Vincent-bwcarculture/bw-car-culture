@@ -13,6 +13,7 @@ const PREMIUM_CARS_PER_SECTION = 9;
 const SAVINGS_CARS_PER_SECTION = 9;
 const PRIVATE_CARS_PER_SECTION = 12;
 const MOBILE_BREAKPOINT = 768;
+const SIMILAR_CARS_LIMIT = 3; // Number of similar cars to show
 
 const MarketplaceList = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const MarketplaceList = () => {
   const fetchTimeoutRef = useRef(null);
   const scrollTimeoutRef = useRef(null);
   const lastScrollY = useRef(0);
+  const similarCarsCache = useRef(new Map());
   
   // Main state
   const [allCars, setAllCars] = useState([]);
@@ -51,121 +53,112 @@ const MarketplaceList = () => {
   const shareButtonRef = useRef(null);
   const [loadingText, setLoadingText] = useState('Loading vehicles...');
 
-  // Initialize active section from URL immediately with caching
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const sectionParam = searchParams.get('section');
-    
-    if (sectionParam && ['premium', 'savings', 'private', 'all'].includes(sectionParam)) {
-      setActiveSection(sectionParam);
-    } else {
-      // Check for cached section preference
-      try {
-        const cachedSection = sessionStorage.getItem('preferredSection');
-        if (cachedSection && ['premium', 'savings', 'private', 'all'].includes(cachedSection)) {
-          setActiveSection(cachedSection);
-        }
-      } catch (e) {
-        // Ignore localStorage errors
-        console.warn('Could not access sessionStorage:', e);
-      }
-    }
+  // Similar cars functionality
+  const [similarCarsData, setSimilarCarsData] = useState(new Map());
+  const [showScrollHints, setShowScrollHints] = useState(true);
+
+  // Initialize active section from URL
+  const initializeActiveSection = useCallback(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const section = urlParams.get('section') || 'all';
+    setActiveSection(section);
   }, [location.search]);
 
-  // Cache section preference
+  // Mobile detection
   useEffect(() => {
-    try {
-      sessionStorage.setItem('preferredSection', activeSection);
-    } catch (e) {
-      // Ignore localStorage errors
-      console.warn('Could not access sessionStorage:', e);
-    }
-  }, [activeSection]);
+    const handleResize = throttle(() => {
+      setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
+    }, 100);
 
-  // Optimized mobile detection with debounce
-  const debouncedResizeHandler = useMemo(
-    () => debounce(() => {
-      const newIsMobile = window.innerWidth <= MOBILE_BREAKPOINT;
-      if (newIsMobile !== isMobile) {
-        setIsMobile(newIsMobile);
-        
-        // Adjust visible items for mobile
-        if (newIsMobile) {
-          setVisibleItems(prev => Math.min(prev, 8));
-        }
-      }
-    }, 250),
-    [isMobile]
-  );
-
-  useEffect(() => {
-    window.addEventListener('resize', debouncedResizeHandler, { passive: true });
-    return () => {
-      window.removeEventListener('resize', debouncedResizeHandler);
-      debouncedResizeHandler.cancel();
-    };
-  }, [debouncedResizeHandler]);
-
-  // Memoized car classification functions
-  const carHasSavings = useCallback((car) => {
-    if (!car?.priceOptions) return false;
-    
-    const { originalPrice, savingsAmount, showSavings } = car.priceOptions;
-    
-    if (!showSavings) return false;
-    
-    return (savingsAmount && savingsAmount > 0) || 
-           (originalPrice && originalPrice > car.price);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const calculateCarSavings = useCallback((car) => {
-    if (!carHasSavings(car)) return 0;
+  // Similar car matching algorithm
+  const calculateSimilarityScore = useCallback((mainCar, compareCar) => {
+    let score = 0;
     
-    const { originalPrice, savingsAmount } = car.priceOptions || {};
+    // Category match (highest priority)
+    if (mainCar.category === compareCar.category) score += 100;
     
-    if (savingsAmount && savingsAmount > 0) {
-      return savingsAmount;
+    // Price similarity
+    const mainPrice = parseFloat(mainCar.price) || 0;
+    const comparePrice = parseFloat(compareCar.price) || 0;
+    if (mainPrice > 0 && comparePrice > 0) {
+      const priceDiff = Math.abs(mainPrice - comparePrice) / mainPrice;
+      if (priceDiff <= 0.2) score += 80; // Within 20%
+      else if (priceDiff <= 0.4) score += 40; // Within 40%
     }
     
-    if (originalPrice && originalPrice > car.price) {
-      return originalPrice - car.price;
+    // Brand match
+    if (mainCar.specifications?.make === compareCar.specifications?.make) score += 60;
+    
+    // Year similarity
+    const mainYear = parseInt(mainCar.specifications?.year) || 0;
+    const compareYear = parseInt(compareCar.specifications?.year) || 0;
+    if (mainYear > 0 && compareYear > 0) {
+      const yearDiff = Math.abs(mainYear - compareYear);
+      if (yearDiff <= 1) score += 40;
+      else if (yearDiff <= 3) score += 20;
     }
     
-    return 0;
-  }, [carHasSavings]);
+    // Fuel type match
+    if (mainCar.specifications?.fuelType === compareCar.specifications?.fuelType) score += 30;
+    
+    // Transmission match
+    if (mainCar.specifications?.transmission === compareCar.specifications?.transmission) score += 20;
+    
+    // Location proximity (same city/region)
+    if (mainCar.location?.city === compareCar.location?.city) score += 15;
+    
+    // Mileage similarity
+    const mainMileage = parseInt(mainCar.specifications?.mileage) || 0;
+    const compareMileage = parseInt(compareCar.specifications?.mileage) || 0;
+    if (mainMileage > 0 && compareMileage > 0) {
+      const mileageDiff = Math.abs(mainMileage - compareMileage) / mainMileage;
+      if (mileageDiff <= 0.3) score += 10; // Within 30%
+    }
+    
+    return score;
+  }, []);
 
-  const carIsPremium = useCallback((car) => {
-    if (!car || carHasSavings(car)) return false;
+  const findSimilarCars = useCallback((mainCar, allCars, maxResults = SIMILAR_CARS_LIMIT) => {
+    if (!mainCar || !allCars || allCars.length === 0) return [];
     
-    const price = parseFloat(car.price) || 0;
-    const premiumCategories = ['luxury', 'sports car', 'exotic', 'premium'];
-    const premiumMakes = ['BMW', 'Mercedes-Benz', 'Audi', 'Lexus', 'Porsche', 'Ferrari', 'Lamborghini', 'Maserati'];
+    const carId = mainCar._id || mainCar.id;
     
-    const category = (car.category || '').toLowerCase();
-    const make = (car.make || car.specifications?.make || '').toLowerCase();
+    // Check cache first
+    if (similarCarsCache.current.has(carId)) {
+      return similarCarsCache.current.get(carId);
+    }
     
-    return price > 500000 || 
-           premiumCategories.some(cat => category.includes(cat)) ||
-           premiumMakes.some(brand => make.includes(brand.toLowerCase()));
-  }, [carHasSavings]);
+    const similar = allCars
+      .filter(car => (car._id || car.id) !== carId) // Exclude main car
+      .map(car => ({
+        ...car,
+        similarityScore: calculateSimilarityScore(mainCar, car)
+      }))
+      .sort((a, b) => b.similarityScore - a.similarityScore) // Sort by highest score
+      .slice(0, maxResults); // Take top matches
+    
+    // Cache the result
+    similarCarsCache.current.set(carId, similar);
+    return similar;
+  }, [calculateSimilarityScore]);
 
-  // ENHANCED: Improved private seller detection with better logic
+  // Enhanced car classification with private seller detection
   const carIsFromPrivateSeller = useCallback((car) => {
-    if (!car || !car.dealer) return false;
+    if (!car?.dealer) return false;
     
-    // Primary check: explicit seller type
-    if (car.dealer.sellerType === 'private') return true;
-    
-    // Secondary check: has private seller data structure
-    if (car.dealer.privateSeller && 
-        car.dealer.privateSeller.firstName && 
-        car.dealer.privateSeller.lastName) {
-      return true;
-    }
-    
-    // Tertiary check: business name patterns that indicate private sellers
     const businessName = (car.dealer.businessName || '').toLowerCase();
-    const privateIndicators = ['private seller', 'private', 'individual', 'owner', 'personal'];
+    const sellerType = car.dealer.sellerType;
+    
+    // Direct check for seller type
+    if (sellerType === 'private') return true;
+    if (sellerType === 'dealership') return false;
+    
+    // Check for private seller indicators
+    const privateIndicators = ['private', 'personal', 'individual', 'owner', 'self'];
     const dealershipIndicators = ['dealership', 'motors', 'auto', 'cars', 'automotive', 'garage', 'ltd', 'pty'];
     
     // If it has dealership indicators, it's likely not private
@@ -188,7 +181,57 @@ const MarketplaceList = () => {
     return false;
   }, []);
 
-  // ENHANCED: Better classification with exclusivity rules
+  const carHasSavings = useCallback((car) => {
+    if (!car) return false;
+    
+    const originalPrice = parseFloat(car.originalPrice) || 0;
+    const currentPrice = parseFloat(car.price) || 0;
+    
+    if (originalPrice > 0 && currentPrice > 0) {
+      const savings = originalPrice - currentPrice;
+      return savings > 5000; // Minimum savings threshold
+    }
+    
+    return false;
+  }, []);
+
+  const calculateCarSavings = useCallback((car) => {
+    if (!car) return 0;
+    
+    const originalPrice = parseFloat(car.originalPrice) || 0;
+    const currentPrice = parseFloat(car.price) || 0;
+    
+    if (originalPrice > 0 && currentPrice > 0) {
+      return originalPrice - currentPrice;
+    }
+    
+    return 0;
+  }, []);
+
+  const carIsPremium = useCallback((car) => {
+    if (!car) return false;
+    
+    const price = parseFloat(car.price) || 0;
+    const specifications = car.specifications || {};
+    
+    // Premium indicators
+    const premiumBrands = ['bmw', 'mercedes', 'audi', 'lexus', 'infiniti', 'acura', 'cadillac', 'tesla'];
+    const make = (specifications.make || '').toLowerCase();
+    
+    // High-end price threshold (adjust for local market)
+    const highEndPrice = 500000; // P500,000
+    
+    // Premium features
+    const hasPremiumFeatures = car.featured || 
+                              car.isCertified || 
+                              (car.images && car.images.length > 5) ||
+                              (car.dealer?.verification?.isVerified);
+    
+    return premiumBrands.includes(make) || 
+           price > highEndPrice || 
+           hasPremiumFeatures;
+  }, []);
+
   const getCarClassification = useCallback((car) => {
     if (!car) return 'regular';
     
@@ -263,7 +306,92 @@ const MarketplaceList = () => {
     return score;
   }, [carHasSavings, calculateCarSavings, carIsPremium, carIsFromPrivateSeller]);
 
-  // Memoized and optimized car filtering functions
+  // Generate similar cars data for all main cars
+  const generateSimilarCarsData = useCallback((cars) => {
+    const similarData = new Map();
+    
+    cars.forEach(car => {
+      const carId = car._id || car.id;
+      if (carId) {
+        const similarCars = findSimilarCars(car, cars);
+        similarData.set(carId, similarCars);
+      }
+    });
+    
+    setSimilarCarsData(similarData);
+  }, [findSimilarCars]);
+
+  // Horizontal scroll initialization
+  const initializeHorizontalScroll = useCallback(() => {
+    const containers = document.querySelectorAll('.horizontal-scroll-wrapper');
+    
+    containers.forEach(container => {
+      let isScrolling = false;
+      let startX = 0;
+      let scrollLeft = 0;
+      
+      // Mouse events for desktop
+      const handleMouseDown = (e) => {
+        isScrolling = true;
+        startX = e.pageX - container.offsetLeft;
+        scrollLeft = container.scrollLeft;
+        container.style.cursor = 'grabbing';
+      };
+      
+      const handleMouseLeave = () => {
+        isScrolling = false;
+        container.style.cursor = 'grab';
+      };
+      
+      const handleMouseUp = () => {
+        isScrolling = false;
+        container.style.cursor = 'grab';
+      };
+      
+      const handleMouseMove = (e) => {
+        if (!isScrolling) return;
+        e.preventDefault();
+        const x = e.pageX - container.offsetLeft;
+        const walk = (x - startX) * 2;
+        container.scrollLeft = scrollLeft - walk;
+      };
+      
+      // Touch events for mobile
+      const handleTouchStart = (e) => {
+        startX = e.touches[0].pageX;
+        scrollLeft = container.scrollLeft;
+      };
+      
+      const handleTouchMove = (e) => {
+        const x = e.touches[0].pageX;
+        const walk = (x - startX) * 1.5;
+        container.scrollLeft = scrollLeft - walk;
+      };
+      
+      const handleTouchEnd = () => {
+        const cardWidth = 320;
+        const gap = 15;
+        const itemWidth = cardWidth + gap;
+        const currentIndex = Math.round(container.scrollLeft / itemWidth);
+        
+        container.scrollTo({
+          left: currentIndex * itemWidth,
+          behavior: 'smooth'
+        });
+      };
+      
+      // Add event listeners
+      container.addEventListener('mousedown', handleMouseDown);
+      container.addEventListener('mouseleave', handleMouseLeave);
+      container.addEventListener('mouseup', handleMouseUp);
+      container.addEventListener('mousemove', handleMouseMove);
+      container.addEventListener('touchstart', handleTouchStart);
+      container.addEventListener('touchmove', handleTouchMove);
+      container.addEventListener('touchend', handleTouchEnd);
+    });
+  }, []);
+
+  // Memoized car filtering functions
   const getPremiumListings = useCallback((cars, limit = PREMIUM_CARS_PER_SECTION) => {
     if (!Array.isArray(cars) || cars.length === 0) return [];
     
@@ -279,7 +407,6 @@ const MarketplaceList = () => {
         const priceA = parseFloat(a.price) || 0;
         const priceB = parseFloat(b.price) || 0;
         
-        // Primary sort by score, secondary by price (higher first for premium)
         if (Math.abs(scoreA - scoreB) > 10) {
           return scoreB - scoreA;
         }
@@ -303,7 +430,6 @@ const MarketplaceList = () => {
         const scoreA = calculateListingScore(a);
         const scoreB = calculateListingScore(b);
         
-        // Primary sort by savings amount, secondary by score
         if (Math.abs(savingsA - savingsB) > 5000) {
           return savingsB - savingsA;
         }
@@ -312,7 +438,6 @@ const MarketplaceList = () => {
       .slice(0, limit);
   }, [getCarClassification, calculateCarSavings, calculateListingScore]);
 
-  // ENHANCED: Better private seller listings with improved sorting
   const getPrivateSellerListings = useCallback((cars, limit = PRIVATE_CARS_PER_SECTION) => {
     if (!Array.isArray(cars) || cars.length === 0) return [];
     
@@ -328,7 +453,6 @@ const MarketplaceList = () => {
         const classificationA = getCarClassification(a);
         const classificationB = getCarClassification(b);
         
-        // Prioritize private sellers with savings or premium features
         const priorityA = classificationA.includes('savings') ? 2 : classificationA.includes('premium') ? 1 : 0;
         const priorityB = classificationB.includes('savings') ? 2 : classificationB.includes('premium') ? 1 : 0;
         
@@ -341,7 +465,6 @@ const MarketplaceList = () => {
       .slice(0, limit);
   }, [getCarClassification, calculateListingScore]);
 
-  // ENHANCED: Better mixed listing algorithm
   const getAllListings = useCallback((cars, limit = CARS_PER_PAGE) => {
     if (!Array.isArray(cars) || cars.length === 0) return [];
     
@@ -354,7 +477,6 @@ const MarketplaceList = () => {
       regular: []
     };
     
-    // Categorize all cars
     cars.forEach(car => {
       const classification = getCarClassification(car);
       switch (classification) {
@@ -383,24 +505,29 @@ const MarketplaceList = () => {
       categorizedCars[category].sort((a, b) => calculateListingScore(b) - calculateListingScore(a));
     });
     
-    // Intelligent interleaving for variety
-    const mixed = [];
-    const maxLength = Math.max(...Object.values(categorizedCars).map(arr => arr.length));
+    // Mix categories for better diversity
+    const mixedCars = [];
+    const maxPerCategory = Math.ceil(limit / 6);
     
-    for (let i = 0; i < maxLength && mixed.length < limit; i++) {
-      // Priority order: savings (including private), premium (including private), private, regular
-      if (categorizedCars.privateSavings[i] && mixed.length < limit) mixed.push(categorizedCars.privateSavings[i]);
-      if (categorizedCars.savings[i] && mixed.length < limit) mixed.push(categorizedCars.savings[i]);
-      if (categorizedCars.privatePremium[i] && mixed.length < limit) mixed.push(categorizedCars.privatePremium[i]);
-      if (categorizedCars.premium[i] && mixed.length < limit) mixed.push(categorizedCars.premium[i]);
-      if (categorizedCars.private[i] && mixed.length < limit) mixed.push(categorizedCars.private[i]);
-      if (categorizedCars.regular[i] && mixed.length < limit) mixed.push(categorizedCars.regular[i]);
+    for (let i = 0; i < maxPerCategory && mixedCars.length < limit; i++) {
+      [
+        categorizedCars.privateSavings,
+        categorizedCars.premium,
+        categorizedCars.savings,
+        categorizedCars.privatePremium,
+        categorizedCars.private,
+        categorizedCars.regular
+      ].forEach(category => {
+        if (category[i] && mixedCars.length < limit) {
+          mixedCars.push(category[i]);
+        }
+      });
     }
     
-    return mixed.slice(0, limit);
+    return mixedCars.slice(0, limit);
   }, [getCarClassification, calculateListingScore]);
 
-  // Enhanced total savings calculation including private sellers
+  // Enhanced total savings calculation
   const totalSavingsAmount = useMemo(() => {
     if (!Array.isArray(allCars) || allCars.length === 0) return 0;
     
@@ -409,7 +536,7 @@ const MarketplaceList = () => {
       .reduce((total, car) => total + calculateCarSavings(car), 0);
   }, [allCars, carHasSavings, calculateCarSavings]);
 
-  // ENHANCED: Get comprehensive section statistics
+  // Get comprehensive section statistics
   const getSectionStatistics = useMemo(() => {
     const stats = {
       total: Array.isArray(allCars) ? allCars.length : 0,
@@ -461,7 +588,7 @@ const MarketplaceList = () => {
     return stats;
   }, [allCars, getCarClassification, calculateCarSavings]);
 
-  // Get current section's cars with memoization
+  // Get current section's cars
   const getCurrentSectionCars = useCallback(() => {
     switch (activeSection) {
       case 'premium':
@@ -476,24 +603,20 @@ const MarketplaceList = () => {
     }
   }, [activeSection, allCars, getPremiumListings, getSavingsListings, getPrivateSellerListings, getAllListings, visibleItems]);
 
-  // ENHANCED: Better search filters with private seller support
+  // Enhanced search filters
   const prepareSearchFilters = useCallback((searchParams) => {
     const filters = {};
     
-    // Enhanced text search
     const searchTerm = searchParams.get('search') || searchParams.get('q') || searchParams.get('query');
     if (searchTerm?.trim()) {
-      const cleanSearch = searchTerm.trim();
-      filters.search = cleanSearch;
+      filters.search = searchTerm.trim();
     }
     
-    // ENHANCED: Add seller type filter
     const sellerType = searchParams.get('sellerType');
     if (sellerType && (sellerType === 'private' || sellerType === 'dealership')) {
       filters.sellerType = sellerType;
     }
     
-    // Standard filters with validation
     const filterMappings = {
       make: searchParams.get('make'),
       model: searchParams.get('model'),
@@ -526,7 +649,7 @@ const MarketplaceList = () => {
     return filters;
   }, []);
 
-  // ENHANCED: Client-side filtering with private seller support
+  // Client-side text filtering
   const filterCarsByText = useCallback((cars, searchTerm) => {
     if (!searchTerm?.trim() || !Array.isArray(cars)) return cars;
     
@@ -546,10 +669,8 @@ const MarketplaceList = () => {
         car.specifications?.color,
         car.dealer?.businessName,
         car.dealer?.name,
-        // ENHANCED: Include private seller names in search
         car.dealer?.privateSeller?.firstName,
         car.dealer?.privateSeller?.lastName,
-        // Include seller type in search
         carIsFromPrivateSeller(car) ? 'private seller' : 'dealership',
         car.category,
         car.bodyStyle,
@@ -559,33 +680,27 @@ const MarketplaceList = () => {
       ].filter(Boolean);
       
       const searchText = searchableFields.join(' ').toLowerCase();
-      
-      // Match all search words
       return searchWords.every(word => searchText.includes(word));
     });
   }, [carIsFromPrivateSeller]);
 
-  // ENHANCED: Apply other filters with seller type support
+  // Apply other filters
   const applyOtherFilters = useCallback((cars, filters) => {
     if (!Array.isArray(cars)) return [];
     
     let filtered = [...cars];
     
-    // Use array methods efficiently
-    const filterFunctions = [];
-    
-    // ENHANCED: Seller type filter
     if (filters.sellerType) {
       if (filters.sellerType === 'private') {
-        filterFunctions.push(car => carIsFromPrivateSeller(car));
+        filtered = filtered.filter(car => carIsFromPrivateSeller(car));
       } else if (filters.sellerType === 'dealership') {
-        filterFunctions.push(car => !carIsFromPrivateSeller(car));
+        filtered = filtered.filter(car => !carIsFromPrivateSeller(car));
       }
     }
     
     if (filters.make) {
       const makeLower = filters.make.toLowerCase();
-      filterFunctions.push(car => {
+      filtered = filtered.filter(car => {
         const carMake = car.make || car.specifications?.make;
         return carMake && carMake.toLowerCase().includes(makeLower);
       });
@@ -593,35 +708,35 @@ const MarketplaceList = () => {
     
     if (filters.model) {
       const modelLower = filters.model.toLowerCase();
-      filterFunctions.push(car => {
+      filtered = filtered.filter(car => {
         const carModel = car.model || car.specifications?.model;
         return carModel && carModel.toLowerCase().includes(modelLower);
       });
     }
     
     if (filters.minPrice) {
-      filterFunctions.push(car => {
+      filtered = filtered.filter(car => {
         const price = parseFloat(car.price);
         return !isNaN(price) && price >= filters.minPrice;
       });
     }
     
     if (filters.maxPrice) {
-      filterFunctions.push(car => {
+      filtered = filtered.filter(car => {
         const price = parseFloat(car.price);
         return !isNaN(price) && price <= filters.maxPrice;
       });
     }
     
     if (filters.minYear) {
-      filterFunctions.push(car => {
+      filtered = filtered.filter(car => {
         const year = parseInt(car.year || car.specifications?.year);
         return !isNaN(year) && year >= filters.minYear;
       });
     }
     
     if (filters.maxYear) {
-      filterFunctions.push(car => {
+      filtered = filtered.filter(car => {
         const year = parseInt(car.year || car.specifications?.year);
         return !isNaN(year) && year <= filters.maxYear;
       });
@@ -629,7 +744,7 @@ const MarketplaceList = () => {
     
     if (filters.category) {
       const categoryLower = filters.category.toLowerCase();
-      filterFunctions.push(car => {
+      filtered = filtered.filter(car => {
         const category = car.category || car.bodyStyle;
         return category && category.toLowerCase().includes(categoryLower);
       });
@@ -637,21 +752,16 @@ const MarketplaceList = () => {
     
     if (filters.city) {
       const cityLower = filters.city.toLowerCase();
-      filterFunctions.push(car => {
+      filtered = filtered.filter(car => {
         const city = car.location?.city || car.dealer?.location?.city;
         return city && city.toLowerCase().includes(cityLower);
       });
     }
     
-    // Apply all filters
-    for (const filterFn of filterFunctions) {
-      filtered = filtered.filter(filterFn);
-    }
-    
     return filtered;
   }, [carIsFromPrivateSeller]);
 
-  // Enhanced search with better error handling and retry logic
+  // Enhanced search with retry logic
   const performSearch = useCallback(async (filters, page, retryCount = 0) => {
     const maxRetries = 3;
     
@@ -664,7 +774,6 @@ const MarketplaceList = () => {
       };
       setLoadingText(loadingMessages[activeSection] || 'Loading vehicles...');
       
-      // First attempt: Try the normal search
       let response = await listingService.getListings(filters, page, 100);
       
       if (response?.listings?.length > 0) {
@@ -679,7 +788,6 @@ const MarketplaceList = () => {
         };
       }
       
-      // If text search didn't work, try client-side filtering
       if (filters.search) {
         const allListingsResponse = await listingService.getListings({}, 1, 100);
         
@@ -703,7 +811,6 @@ const MarketplaceList = () => {
         }
       }
       
-      // Handle different response formats
       if (response && Array.isArray(response)) {
         return {
           success: true,
@@ -725,9 +832,8 @@ const MarketplaceList = () => {
     } catch (error) {
       console.error(`Search attempt ${retryCount + 1} failed:`, error);
       
-      // Retry logic with exponential backoff
       if (retryCount < maxRetries) {
-        const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+        const delay = Math.pow(2, retryCount) * 1000;
         await new Promise(resolve => setTimeout(resolve, delay));
         return performSearch(filters, page, retryCount + 1);
       }
@@ -758,8 +864,10 @@ const MarketplaceList = () => {
           setAllCars(result.listings || []);
           setPagination(result.pagination);
           
-          // Clear score cache when new data arrives
+          // Clear caches and generate similar cars
           listingScoreCache.current.clear();
+          similarCarsCache.current.clear();
+          generateSimilarCarsData(result.listings || []);
         } else {
           setError(result.error || 'Failed to load vehicles');
           setAllCars([]);
@@ -776,19 +884,17 @@ const MarketplaceList = () => {
         fetchInProgress.current = false;
       }
     }, 300),
-    [prepareSearchFilters, performSearch]
+    [prepareSearchFilters, performSearch, generateSimilarCarsData]
   );
 
-  // Load cars effect with cleanup
+  // Load cars effect
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     
-    // Clear previous timeout
     if (fetchTimeoutRef.current) {
       clearTimeout(fetchTimeoutRef.current);
     }
     
-    // Add small delay to prevent excessive API calls
     fetchTimeoutRef.current = setTimeout(() => {
       debouncedSearch(searchParams);
     }, 100);
@@ -803,7 +909,21 @@ const MarketplaceList = () => {
     };
   }, [location.search, debouncedSearch]);
 
-  // Optimized section change handler
+  // Initialize horizontal scroll after data loads
+  useEffect(() => {
+    if (!loading && allCars.length > 0) {
+      setTimeout(() => {
+        initializeHorizontalScroll();
+      }, 100);
+    }
+  }, [loading, allCars, initializeHorizontalScroll]);
+
+  // Initialize active section
+  useEffect(() => {
+    initializeActiveSection();
+  }, [initializeActiveSection]);
+
+  // Section change handler
   const handleSectionChange = useCallback((section) => {
     if (section === activeSection) return;
     
@@ -817,32 +937,35 @@ const MarketplaceList = () => {
       pathname: location.pathname,
       search: searchParams.toString()
     }, { replace: true });
-    
   }, [activeSection, navigate, location]);
 
-  // Optimized sharing handler
+  // Sharing handler
   const handleShare = useCallback((car, buttonRef) => {
     setSelectedCar(car);
     shareButtonRef.current = buttonRef;
     setShareModalOpen(true);
   }, []);
 
-  // Virtual scrolling for large datasets
+  const handleShareClose = useCallback(() => {
+    setShareModalOpen(false);
+    setSelectedCar(null);
+    shareButtonRef.current = null;
+  }, []);
+
+  // Load more handler
   const handleLoadMore = useCallback(() => {
     if (allCars.length > visibleItems) {
       setVisibleItems(prev => Math.min(prev + 6, allCars.length));
     }
   }, [allCars.length, visibleItems]);
 
-  // Retry handler with better UX
+  // Retry handler
   const handleRetry = useCallback(async () => {
     setIsRetrying(true);
     setError(null);
     
     try {
-      // Wait a bit for better UX
       await new Promise(resolve => setTimeout(resolve, 500));
-      
       const searchParams = new URLSearchParams(location.search);
       await debouncedSearch(searchParams);
     } finally {
@@ -850,49 +973,16 @@ const MarketplaceList = () => {
     }
   }, [location.search, debouncedSearch]);
 
-  // Intersection Observer for infinite scrolling
-  useEffect(() => {
-    if (!containerRef.current || allCars.length <= visibleItems) return;
-    
-    const options = {
-      rootMargin: '200px',
-      threshold: 0.1
-    };
-    
-    const currentObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          handleLoadMore();
-        }
-      });
-    }, options);
-    
-    observerRef.current = currentObserver;
-    
-    const sentinel = containerRef.current.querySelector('.load-more-sentinel');
-    if (sentinel) {
-      currentObserver.observe(sentinel);
-    }
-    
-    return () => {
-      if (currentObserver) {
-        currentObserver.disconnect();
-      }
-    };
-  }, [allCars.length, visibleItems, handleLoadMore]);
-
-  // Smooth scroll handler for better UX
+  // Smooth scroll handler
   const handleScrollOptimization = useMemo(
     () => throttle(() => {
       const currentScrollY = window.scrollY;
       
-      // Add scrolling class for CSS optimizations
       if (!isScrolling) {
         setIsScrolling(true);
         document.body.classList.add('is-scrolling');
       }
       
-      // Clear scrolling state after delay
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
@@ -903,7 +993,7 @@ const MarketplaceList = () => {
       }, 150);
       
       lastScrollY.current = currentScrollY;
-    }, 16), // 60fps
+    }, 16),
     [isScrolling]
   );
 
@@ -920,7 +1010,7 @@ const MarketplaceList = () => {
     };
   }, [handleScrollOptimization]);
 
-  // Get display cars and counts with memoization
+  // Get display data
   const displayData = useMemo(() => {
     const displayCars = getCurrentSectionCars();
     const stats = getSectionStatistics;
@@ -931,7 +1021,40 @@ const MarketplaceList = () => {
     };
   }, [getCurrentSectionCars, getSectionStatistics, visibleItems]);
 
-  // Early return if there's a critical error
+  // Component for horizontal scrolling car row
+  const HorizontalCarRow = ({ mainCar, similarCars }) => {
+    const allCarsInRow = [mainCar, ...similarCars];
+    
+    return (
+      <div className="listing-container">
+        <div className="horizontal-scroll-wrapper">
+          <div className="cards-row">
+            {allCarsInRow.map((car, index) => (
+              <div 
+                key={car._id || car.id || `car-${index}`}
+                className={`car-card ${index === 0 ? 'main-listing' : 'similar-listing'}`}
+              >
+                <VehicleCard 
+                  car={car}
+                  onShare={handleShare}
+                  compact={isMobile}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Scroll hint */}
+        {showScrollHints && similarCars.length > 0 && (
+          <div className="scroll-hint">
+            👈 Swipe left to see similar cars
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Early return for critical errors
   if (!location || !navigate) {
     return <div>Loading...</div>;
   }
@@ -941,6 +1064,12 @@ const MarketplaceList = () => {
       <MarketplaceFilters 
         activeSection={activeSection}
         onSectionChange={handleSectionChange}
+        counts={{
+          all: displayData.total,
+          premium: displayData.premium,
+          savings: displayData.savings,
+          private: displayData.private
+        }}
       />
       
       <div className="marketplace-header">
@@ -1028,15 +1157,19 @@ const MarketplaceList = () => {
                       )}
                     </p>
                   </div>
-                  <div className="marketplace-grid premium-grid">
-                    {displayData.displayCars.map((car, index) => (
-                      <VehicleCard 
-                        key={car._id || car.id || `premium-${index}`}
-                        car={car}
-                        onShare={handleShare}
-                        compact={isMobile}
-                      />
-                    ))}
+                  <div className="horizontal-listings">
+                    {displayData.displayCars.map((car) => {
+                      const carId = car._id || car.id;
+                      const similarCars = similarCarsData.get(carId) || [];
+                      
+                      return (
+                        <HorizontalCarRow
+                          key={carId}
+                          mainCar={car}
+                          similarCars={similarCars}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -1055,47 +1188,60 @@ const MarketplaceList = () => {
                       )}
                       {displayData.privateSavings > 0 && (
                         <span className="private-seller-count">
-                          • {displayData.privateSavings} savings deals from private sellers
+                          • {displayData.privateSavings} deals from private sellers
                         </span>
                       )}
                     </p>
                   </div>
-                  <div className="marketplace-grid savings-grid">
-                    {displayData.displayCars.map((car, index) => (
-                      <VehicleCard 
-                        key={car._id || car.id || `savings-${index}`}
-                        car={car}
-                        onShare={handleShare}
-                        compact={isMobile}
-                      />
-                    ))}
+                  <div className="horizontal-listings">
+                    {displayData.displayCars.map((car) => {
+                      const carId = car._id || car.id;
+                      const similarCars = similarCarsData.get(carId) || [];
+                      
+                      return (
+                        <HorizontalCarRow
+                          key={carId}
+                          mainCar={car}
+                          similarCars={similarCars}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
-              {/* Private Sellers Section - ENHANCED */}
+              {/* Private Sellers Section */}
               {activeSection === 'private' && (
                 <div className="private-section" id="private-panel" role="tabpanel">
                   <div className="section-header">
-                    <h2>🤝 Private Seller Marketplace</h2>
+                    <h2>🤝 Private Sellers</h2>
                     <p>
-                      Connect directly with individual vehicle owners across Botswana
-                      <span className="section-features">
-                        • No dealer fees • Direct negotiation • Personal service • Meet the owner
-                        {displayData.privateSavings > 0 && ` • ${displayData.privateSavings} vehicles with special savings`}
-                        {displayData.privatePremium > 0 && ` • ${displayData.privatePremium} premium vehicles`}
-                      </span>
+                      Quality vehicles from individual owners with personal stories
+                      {displayData.privateSavings > 0 && (
+                        <span className="private-seller-count">
+                          • {displayData.privateSavings} with exclusive savings
+                        </span>
+                      )}
+                      {displayData.privatePremium > 0 && (
+                        <span className="private-seller-count">
+                          • {displayData.privatePremium} premium listings
+                        </span>
+                      )}
                     </p>
                   </div>
-                  <div className="marketplace-grid private-grid">
-                    {displayData.displayCars.map((car, index) => (
-                      <VehicleCard 
-                        key={car._id || car.id || `private-${index}`}
-                        car={car}
-                        onShare={handleShare}
-                        compact={isMobile}
-                      />
-                    ))}
+                  <div className="horizontal-listings">
+                    {displayData.displayCars.map((car) => {
+                      const carId = car._id || car.id;
+                      const similarCars = similarCarsData.get(carId) || [];
+                      
+                      return (
+                        <HorizontalCarRow
+                          key={carId}
+                          mainCar={car}
+                          similarCars={similarCars}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -1114,21 +1260,24 @@ const MarketplaceList = () => {
                       )}
                     </p>
                   </div>
-                  <div className="marketplace-grid all-grid">
-                    {displayData.displayCars.map((car, index) => (
-                      <VehicleCard 
-                        key={car._id || car.id || `all-${index}`}
-                        car={car}
-                        onShare={handleShare}
-                        compact={isMobile}
-                      />
-                    ))}
+                  <div className="horizontal-listings">
+                    {displayData.displayCars.map((car) => {
+                      const carId = car._id || car.id;
+                      const similarCars = similarCarsData.get(carId) || [];
+                      
+                      return (
+                        <HorizontalCarRow
+                          key={carId}
+                          mainCar={car}
+                          similarCars={similarCars}
+                        />
+                      );
+                    })}
                   </div>
                   
-                  {/* Load More Sentinel for Infinite Scroll */}
+                  {/* Load More Button */}
                   {allCars.length > visibleItems && (
                     <div className="load-more-container">
-                      <div className="load-more-sentinel"></div>
                       <button 
                         className="load-more-btn"
                         onClick={handleLoadMore}
@@ -1164,8 +1313,8 @@ const MarketplaceList = () => {
                   : activeSection === 'savings'
                   ? 'Check back soon for new exclusive deals and savings opportunities from all our sellers.'
                   : activeSection === 'private'
-                  ? 'Try adjusting your filters or check back later for new private seller listings. Private sellers offer personal service and direct negotiation.'
-                  : 'Try adjusting your search filters or check back later for new listings from dealers and private sellers.'
+                  ? 'Try adjusting your filters or check back later for new private seller listings.'
+                  : 'Try adjusting your search filters or check back later for new listings.'
                 }
               </p>
               <div className="empty-actions">
@@ -1177,47 +1326,23 @@ const MarketplaceList = () => {
                     View All Vehicles
                   </button>
                 )}
-                {activeSection === 'premium' && displayData.savings > 0 && (
-                  <button 
-                    className="switch-section-btn" 
-                    onClick={() => handleSectionChange('savings')}
-                  >
-                    View Savings Instead
-                  </button>
-                )}
-                {activeSection === 'savings' && displayData.premium > 0 && (
-                  <button 
-                    className="switch-section-btn" 
-                    onClick={() => handleSectionChange('premium')}
-                  >
-                    View Premium Instead
-                  </button>
-                )}
-                {activeSection === 'private' && (displayData.premium > 0 || displayData.savings > 0) && (
-                  <button 
-                    className="switch-section-btn" 
-                    onClick={() => handleSectionChange(displayData.savings > 0 ? 'savings' : 'premium')}
-                  >
-                    View {displayData.savings > 0 ? 'Savings' : 'Premium'} Instead
-                  </button>
-                )}
                 <button 
-                  className="clear-filters-btn" 
+                  className="clear-filters-button" 
                   onClick={() => navigate('/marketplace')}
                 >
-                  Clear All Filters
+                  Clear Filters
                 </button>
               </div>
             </div>
           )}
         </>
       )}
-
+      
       {/* Share Modal */}
       {shareModalOpen && selectedCar && (
-        <ShareModal 
+        <ShareModal
           car={selectedCar}
-          onClose={() => setShareModalOpen(false)}
+          onClose={handleShareClose}
           buttonRef={shareButtonRef}
         />
       )}
@@ -1225,4 +1350,4 @@ const MarketplaceList = () => {
   );
 };
 
-export default React.memo(MarketplaceList);
+export default MarketplaceList;
