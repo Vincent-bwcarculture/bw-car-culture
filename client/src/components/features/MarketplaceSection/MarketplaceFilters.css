@@ -312,7 +312,7 @@
   left: 100%;
 }
 
-/* ===== ADVANCED FILTERS - ULTRA-COMPACT LAYOUT ===== */
+/* ===== ADVANCED FILTERS - TRUE ULTRA-COMPACT GRID LAYOUT ===== */
 .advanced-filters {
   margin-top: 1.25rem;
   padding-top: 1.25rem;
@@ -320,36 +320,37 @@
   animation: slideDown 0.3s ease;
 }
 
+/* INDIVIDUAL FILTER CELLS - MAXIMUM SPACE EFFICIENCY */
 .filters-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.3rem;
   margin-bottom: 0.5rem;
+  align-items: end;
 }
 
+/* Each filter control gets its own grid cell */
+.filter-control,
 .filter-group {
   display: flex;
   flex-direction: column;
 }
 
+.filter-control label,
 .filter-group label {
   display: block;
   color: #c9c9c9;
   margin-bottom: 0.15rem;
   font-size: 0.7rem;
   font-weight: 500;
+  line-height: 1.2;
 }
 
-/* ULTRA-COMPACT RANGE INPUTS */
-.range-inputs {
-  display: flex;
-  align-items: center;
-  gap: 0.15rem;
-}
-
-.range-inputs input,
-.range-inputs select {
-  flex: 1;
+.filter-control input,
+.filter-control select,
+.filter-group input,
+.filter-group select {
+  width: 100%;
   padding: 0.3rem 0.4rem;
   border-radius: 3px;
   border: 1px solid #2c2c2c;
@@ -361,19 +362,37 @@
   min-height: 28px;
 }
 
-.range-inputs input:focus,
-.range-inputs select:focus {
+.filter-control input:focus,
+.filter-control select:focus,
+.filter-group input:focus,
+.filter-group select:focus {
   border-color: #ff3300;
   background-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.1);
 }
 
+.filter-control select,
+.filter-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff3300' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.4rem center;
+  background-size: 0.6rem;
+  padding-right: 1.4rem;
+}
+
+/* RANGE INPUTS - COMPACT SIDE BY SIDE */
+.range-inputs {
+  display: contents; /* This makes children participate in parent grid */
+}
+
+.range-inputs input,
+.range-inputs select {
+  /* Inherit from parent styles above */
+}
+
 .range-inputs span {
-  color: #888888;
-  font-size: 0.65rem;
-  font-weight: 500;
-  min-width: 12px;
-  text-align: center;
+  display: none; /* Hide "to" text to save space - it's implied by the layout */
 }
 
 .filters-actions {
@@ -416,6 +435,11 @@
   .filter-control {
     min-width: auto;
   }
+  
+  .filters-row {
+    grid-template-columns: repeat(2, 1fr); /* 2 COLUMNS ON SMALL TABLET */
+    gap: 0.75rem;
+  }
 }
 
 @media (min-width: 768px) {
@@ -438,7 +462,30 @@
   }
   
   .filters-row {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(3, 1fr); /* 3 COLUMNS ON TABLET */
+    gap: 0.5rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .filters-row {
+    grid-template-columns: repeat(4, 1fr); /* 4 COLUMNS ON DESKTOP */
+    gap: 0.75rem;
+  }
+  
+  .filter-control input,
+  .filter-control select,
+  .filter-group input,
+  .filter-group select {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    min-height: 32px;
+  }
+  
+  .filter-control label,
+  .filter-group label {
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
   }
 }
 
@@ -694,24 +741,31 @@
   }
 
   .filters-row {
+    grid-template-columns: 1fr 1fr; /* 2 COLUMNS ON SMALL PHONES */
     gap: 0.15rem;
     margin-bottom: 0.15rem;
   }
 
+  .filter-control label,
   .filter-group label {
     margin-bottom: 0.05rem;
     font-size: 0.6rem;
   }
 
-  .range-inputs {
-    gap: 0.08rem;
-  }
-
-  .range-inputs input,
-  .range-inputs select {
+  .filter-control input,
+  .filter-control select,
+  .filter-group input,
+  .filter-group select {
     padding: 0.2rem 0.25rem;
     font-size: 0.6rem;
     min-height: 24px;
+  }
+
+  .filter-control select,
+  .filter-group select {
+    background-size: 0.45rem;
+    background-position: right 0.25rem center;
+    padding-right: 1rem;
   }
 
   .range-inputs span {
