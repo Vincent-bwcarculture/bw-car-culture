@@ -1,4 +1,4 @@
-/* client/src/components/features/MarketplaceSection/MarketplaceList.css - Complete Original with Only Scroll-Snap Removed */
+/* client/src/components/features/MarketplaceSection/MarketplaceList.css - ORIGINAL WITH ONLY SCROLL-SNAP REMOVED */
 
 /* ===== PERFORMANCE OPTIMIZATIONS ===== */
 .marketplace-container {
@@ -424,7 +424,7 @@ body.section-transitioning * {
   }
 }
 
-/* ===== MOBILE HORIZONTAL SCROLLING (SCROLL-SNAP REMOVED) ===== */
+/* ===== MOBILE HORIZONTAL SCROLLING (ORIGINAL - ONLY SCROLL-SNAP REMOVED) ===== */
 
 /* Only apply horizontal scrolling on mobile */
 @media (max-width: 768px) {
@@ -441,7 +441,6 @@ body.section-transitioning * {
     -ms-overflow-style: none;
     margin-bottom: 20px;
     -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
   }
   
   .mobile-horizontal-scroll::-webkit-scrollbar {

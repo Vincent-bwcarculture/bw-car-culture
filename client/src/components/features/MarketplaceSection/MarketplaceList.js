@@ -837,25 +837,18 @@ const MarketplaceList = () => {
     }
   }, [location.search, debouncedSearch]);
 
-  // FIXED: Mobile horizontal scroll initialization (NO auto-snapping)
+  // Mobile horizontal scroll initialization (remove snapping only)
   useEffect(() => {
     if (!isMobile || !allCars.length) return;
 
     const containers = document.querySelectorAll('.mobile-horizontal-scroll');
     
-    // Add smooth scrolling behavior but NO auto-snapping
     containers.forEach(container => {
-      // Ensure smooth momentum scrolling on iOS
+      // Keep the container setup but remove the snapping behavior
       container.style.webkitOverflowScrolling = 'touch';
       
-      // Optional: Add scroll position persistence if needed
-      const handleScroll = () => {
-        // Store scroll position in case we need it later
-        const scrollPosition = container.scrollLeft;
-        container.setAttribute('data-scroll-position', scrollPosition);
-      };
-      
-      container.addEventListener('scroll', handleScroll, { passive: true });
+      // Remove the handleTouchEnd function - this was causing the snapping
+      // Just let natural scrolling work without forced positioning
     });
   }, [isMobile, allCars.length]);
 
