@@ -431,7 +431,7 @@ body.section-transitioning * {
   .marketplace-grid.mobile-horizontal {
     display: block;
     gap: 0;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
   }
   
   .mobile-horizontal-scroll {
@@ -439,7 +439,7 @@ body.section-transitioning * {
     overflow-y: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     -webkit-overflow-scrolling: touch;
   }
   
@@ -449,8 +449,8 @@ body.section-transitioning * {
   
   .mobile-cards-row {
     display: flex;
-    gap: 15px;
-    padding: 0 10px;
+    gap: 8px;
+    padding: 0 6px;
     width: max-content;
   }
   
@@ -469,8 +469,8 @@ body.section-transitioning * {
   }
   
   .mobile-cards-row {
-    gap: 12px;
-    padding: 0 8px;
+    gap: 6px;
+    padding: 0 4px;
   }
 }
 
