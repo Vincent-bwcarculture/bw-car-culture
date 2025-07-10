@@ -47,7 +47,8 @@ const MarketplaceFilters = ({
     availability: '',
     city: '',
     minMileage: '',
-    maxMileage: ''
+    maxMileage: '',
+    sortBy: '' // NEW: Add sort by filter
   });
 
   // ENHANCED: Section configurations with better descriptions and features
@@ -63,7 +64,7 @@ const MarketplaceFilters = ({
     savings: {
       title: 'Save with BW Car Culture',
       description: 'Exclusive deals and savings from dealers and private sellers',
-      icon: '',
+      icon: '💰',
       features: ['Special Offers', 'Price Reductions', 'Exclusive Deals', 'Limited Time'],
       badge: 'savings',
       searchPlaceholder: 'Search savings deals...'
@@ -71,7 +72,7 @@ const MarketplaceFilters = ({
     private: {
       title: 'Private Seller Marketplace', 
       description: 'Connect directly with individual vehicle owners',
-      icon: '',
+      icon: '🤝',
       features: ['No Dealer Fees', 'Direct Negotiation', 'Personal Service', 'Meet the Owner'],
       badge: 'private',
       searchPlaceholder: 'Search private seller listings...'
@@ -79,7 +80,7 @@ const MarketplaceFilters = ({
     all: {
       title: 'All Vehicles',
       description: 'Complete inventory from dealers and private sellers',
-      icon: '',
+      icon: '🚗',
       features: ['All Categories', 'All Sellers', 'Complete Range', 'Best Selection'],
       badge: 'all',
       searchPlaceholder: 'Search all vehicles...'
@@ -135,7 +136,7 @@ const MarketplaceFilters = ({
     loadVehicles();
   }, [loadVehicles]);
 
-  // Initialize filters from URL
+  // Initialize filters from URL - Updated to include sortBy
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const initialFilters = { ...filters };
@@ -155,7 +156,8 @@ const MarketplaceFilters = ({
       'minMileage': 'minMileage',
       'maxMileage': 'maxMileage',
       'dealerId': 'dealerId',
-      'sellerType': 'sellerType' // ENHANCED: Add seller type to URL params
+      'sellerType': 'sellerType',
+      'sort': 'sortBy' // Map 'sort' URL param to 'sortBy' filter state
     };
     
     let hasChanges = false;
@@ -224,74 +226,64 @@ const MarketplaceFilters = ({
           }));
         }
       } catch (error) {
-        console.warn('Failed to load sellers:', error);
+        console.warn('Could not load sellers:', error);
       }
     };
-    
+
     loadSellers();
   }, []);
 
-  // Get models for selected make
-  const availableModels = useMemo(() => {
-    if (!filters.make) return [];
-    
-    if (allVehicles.length === 0) {
-      const fallbackModels = {
-        'BMW': ['1 Series', '2 Series', '3 Series', '4 Series', '5 Series', 'X3', 'X5', 'M3', 'M4', 'M5'],
-        'Mercedes-Benz': ['A-Class', 'C-Class', 'E-Class', 'S-Class', 'GLA', 'GLC', 'GLE'],
-        'Toyota': ['Camry', 'Corolla', 'RAV4', 'Hilux', 'Land Cruiser', 'Prado'],
-        'Honda': ['Civic', 'Accord', 'CR-V', 'HR-V', 'Pilot'],
-        'Ford': ['Ranger', 'F-150', 'Mustang', 'Explorer', 'Focus']
-      };
-      return fallbackModels[filters.make] || [];
+  // Update models when make changes
+  useEffect(() => {
+    if (!filters.make || allVehicles.length === 0) {
+      setFilterOptions(prev => ({ ...prev, models: [] }));
+      return;
     }
-    
-    const modelSet = new Set();
-    const normalizedMake = filters.make.toLowerCase();
-    
-    allVehicles.forEach(vehicle => {
-      const vehicleMake = (vehicle.make || vehicle.specifications?.make || '').toLowerCase();
-      const vehicleModel = vehicle.model || vehicle.specifications?.model;
-      
-      if (vehicleMake === normalizedMake && vehicleModel) {
-        modelSet.add(vehicleModel);
-      }
-    });
-    
-    return Array.from(modelSet).sort();
+
+    const filteredModels = allVehicles
+      .filter(vehicle => {
+        const vehicleMake = vehicle.make || vehicle.specifications?.make;
+        return vehicleMake && vehicleMake.toLowerCase() === filters.make.toLowerCase();
+      })
+      .map(vehicle => vehicle.model || vehicle.specifications?.model)
+      .filter(Boolean);
+
+    const uniqueModels = [...new Set(filteredModels)].sort();
+    setFilterOptions(prev => ({ ...prev, models: uniqueModels }));
   }, [filters.make, allVehicles]);
 
-  useEffect(() => {
-    setFilterOptions(prev => ({ ...prev, models: availableModels }));
-  }, [availableModels]);
-
-  // Filter change handler
-  const handleFilterChange = useCallback((name, value) => {
+  // Handle filter changes
+  const handleFilterChange = useCallback((key, value) => {
     setFilters(prev => {
-      const newFilters = { ...prev, [name]: value };
-      if (name === 'make') {
+      const newFilters = { ...prev, [key]: value };
+      
+      // Clear model when make changes
+      if (key === 'make') {
         newFilters.model = '';
       }
-      // ENHANCED: Clear dealer selection when changing seller type
-      if (name === 'sellerType') {
-        newFilters.dealerId = '';
-      }
+      
       return newFilters;
     });
   }, []);
-  
-  // Debounced apply filters
-  const debouncedApplyFilters = useMemo(
-    () => debounce(() => {
+
+  // Debounced apply filters with sort parameter conversion
+  const debouncedApplyFilters = useCallback(
+    debounce(() => {
       const searchParams = new URLSearchParams();
       
       if (activeSection) {
         searchParams.set('section', activeSection);
       }
       
+      // Process all filters and convert sortBy to sort for the API
       Object.entries(filters).forEach(([key, value]) => {
         if (value && value.toString().trim() !== '') {
-          searchParams.set(key, value);
+          // Convert sortBy to sort for API compatibility
+          if (key === 'sortBy') {
+            searchParams.set('sort', value);
+          } else {
+            searchParams.set(key, value);
+          }
         }
       });
       
@@ -312,7 +304,7 @@ const MarketplaceFilters = ({
     setTimeout(() => setLoading(false), 500);
   }, [debouncedApplyFilters]);
   
-  // Reset filters
+  // Reset filters - Updated to include sortBy
   const resetFilters = useCallback(() => {
     const resetFiltersObj = {
       search: '',
@@ -329,7 +321,8 @@ const MarketplaceFilters = ({
       availability: '',
       city: '',
       minMileage: '',
-      maxMileage: ''
+      maxMileage: '',
+      sortBy: '' // Reset sort by option as well
     };
     
     setFilters(resetFiltersObj);
@@ -385,47 +378,44 @@ const MarketplaceFilters = ({
                 key={key}
                 className={`section-btn ${activeSection === key ? 'active' : ''}`}
                 onClick={() => handleSectionChange(key)}
-                type="button"
                 role="tab"
                 aria-selected={activeSection === key}
+                aria-controls={`section-${key}`}
               >
                 <span className="section-icon">{config.icon}</span>
-                <span className="section-text">{config.title}</span>
+                <span className="section-label">{config.title}</span>
+                <span className={`section-badge ${config.badge}`}>
+                  {config.badge.toUpperCase()}
+                </span>
               </button>
             ))}
           </div>
           
-          {/* ENHANCED: Better section description with features */}
-          <div className="section-description">
-            <div className="section-info">
-              <span className={`section-badge ${currentSectionConfig.badge}`}>
-                {currentSectionConfig.icon} {currentSectionConfig.title}
-              </span>
-              <p>{currentSectionConfig.description}</p>
-            </div>
-            {/* <div className="section-features">
+          {/* Section description and features */}
+          <div className="section-info">
+            <p className="section-description">{currentSectionConfig.description}</p>
+            <div className="section-features">
               {currentSectionConfig.features.map((feature, index) => (
-                <span key={index} className="feature-tag">
-                  {feature}
-                </span>
+                <span key={index}>{feature}</span>
               ))}
-            </div> */}
+            </div>
           </div>
         </div>
 
+        {/* Filters Header */}
         <div className="filters-header">
-          <h2>{currentSectionConfig.title}</h2>
+          <h2>Vehicle Filters</h2>
           <button 
             className="toggle-filters-btn"
             onClick={() => setExpanded(!expanded)}
-            type="button"
             aria-expanded={expanded}
+            aria-controls="advanced-filters"
           >
             {expanded ? 'Less Filters' : 'More Filters'}
           </button>
         </div>
         
-        {/* Quick Search Row */}
+        {/* Quick Search Row - Updated with Sort By */}
         <div className="filters-quick-row">
           <div className="filter-control search-filter">
             <input
@@ -463,6 +453,35 @@ const MarketplaceFilters = ({
               ))}
             </select>
           </div>
+
+          {/* NEW: Sort By Dropdown */}
+          <div className="filter-control">
+            <select
+              value={filters.sortBy || ''}
+              onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+              aria-label="Sort listings by"
+            >
+              <option value="">Sort By</option>
+              <option value="-createdAt">Newest First</option>
+              <option value="createdAt">Oldest First</option>
+              <option value="price">Price: Low to High</option>
+              <option value="-price">Price: High to Low</option>
+              <option value="specifications.year">Year: Old to New</option>
+              <option value="-specifications.year">Year: New to Old</option>
+              <option value="specifications.mileage">Mileage: Low to High</option>
+              <option value="-specifications.mileage">Mileage: High to Low</option>
+              {activeSection === 'savings' && (
+                <option value="-priceOptions.savingsAmount">Highest Savings</option>
+              )}
+              {activeSection === 'auctions' && (
+                <>
+                  <option value="endDate">Ending Soon</option>
+                  <option value="-startingBid">Highest Starting Bid</option>
+                  <option value="startingBid">Lowest Starting Bid</option>
+                </>
+              )}
+            </select>
+          </div>
           
           <div className="quick-action-buttons">
             <button 
@@ -479,7 +498,7 @@ const MarketplaceFilters = ({
         
         {/* Advanced Filters */}
         {expanded && (
-          <div className="advanced-filters">
+          <div className="advanced-filters" id="advanced-filters">
             <div className="filters-row">
               {/* ENHANCED: Seller Type Filter */}
               {activeSection === 'all' && (
@@ -500,7 +519,12 @@ const MarketplaceFilters = ({
               {/* ENHANCED: Seller Selection with better labeling */}
               <div className="filter-control">
                 <label htmlFor="seller-select">
-                  {activeSection === 'private' ? 'Private Seller' : 'Seller'}
+                  {activeSection === 'private' ? 
+                    'Private Seller' : 
+                    activeSection === 'all' ? 
+                      'Seller' : 
+                      'Dealer/Seller'
+                  }
                 </label>
                 <select
                   id="seller-select"
@@ -508,26 +532,65 @@ const MarketplaceFilters = ({
                   onChange={(e) => handleFilterChange('dealerId', e.target.value)}
                 >
                   <option value="">
-                    {activeSection === 'private' ? 'All Private Sellers' : 'All Sellers'}
+                    {activeSection === 'private' ? 
+                      'All Private Sellers' : 
+                      'All Sellers'
+                    }
                   </option>
-                  {getSellerOptions.map(seller => {
-                    // ENHANCED: Better display names for sellers
-                    const displayName = seller.sellerType === 'private' || seller.privateSeller?.firstName
-                      ? (seller.privateSeller?.firstName && seller.privateSeller?.lastName
-                          ? `${seller.privateSeller.firstName} ${seller.privateSeller.lastName}`
-                          : seller.businessName || 'Private Seller')
-                      : seller.businessName || 'Unnamed Seller';
-                    
-                    const sellerTypeLabel = (seller.sellerType === 'private' || seller.privateSeller?.firstName) 
-                      ? 'Private'
-                      : 'Dealer';
-                    
-                    return (
-                      <option key={seller._id} value={seller._id}>
-                        {displayName} ({sellerTypeLabel})
-                      </option>
-                    );
-                  })}
+                  {getSellerOptions.map(seller => (
+                    <option key={seller._id} value={seller._id}>
+                      {seller.displayName || seller.businessName}
+                      {seller.verification?.isVerified && ' ✓'}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="filter-control">
+                <label htmlFor="category-select">Category</label>
+                <select
+                  id="category-select"
+                  value={filters.category}
+                  onChange={(e) => handleFilterChange('category', e.target.value)}
+                >
+                  <option value="">All Categories</option>
+                  {VEHICLE_CATEGORIES.map(category => (
+                    <option key={category.value} value={category.value}>
+                      {category.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="filter-control">
+                <label htmlFor="city-select">City</label>
+                <select
+                  id="city-select"
+                  value={filters.city}
+                  onChange={(e) => handleFilterChange('city', e.target.value)}
+                >
+                  <option value="">All Cities</option>
+                  {filterOptions.cities.map(city => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div className="filters-row">
+              <div className="filter-control">
+                <label htmlFor="drivetrain-select">Drivetrain</label>
+                <select
+                  id="drivetrain-select"
+                  value={filters.drivetrain}
+                  onChange={(e) => handleFilterChange('drivetrain', e.target.value)}
+                >
+                  <option value="">All Drivetrains</option>
+                  {DRIVETRAIN_TYPES.map(type => (
+                    <option key={type} value={type}>
+                      {DRIVETRAIN_LABELS[type] || type}
+                    </option>
+                  ))}
                 </select>
               </div>
               
@@ -538,61 +601,15 @@ const MarketplaceFilters = ({
                   value={filters.availability}
                   onChange={(e) => handleFilterChange('availability', e.target.value)}
                 >
-                  <option value="">All Status</option>
-                  <option value="local">Available Now</option>
-                  <option value="enroute">En Route</option>
-                  <option value="on_order">On Order</option>
-                </select>
-              </div>
-              
-              <div className="filter-control">
-                <label htmlFor="drivetrain-select">Drivetrain</label>
-                <select
-                  id="drivetrain-select"
-                  value={filters.drivetrain}
-                  onChange={(e) => handleFilterChange('drivetrain', e.target.value)}
-                >
-                  <option value="">All Drivetrains</option>
-                  {Object.entries(DRIVETRAIN_TYPES).map(([key, value]) => (
-                    <option key={value} value={value}>
-                      {DRIVETRAIN_LABELS[value]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <div className="filters-row">
-              <div className="filter-control">
-                <label htmlFor="category-select">Body Type</label>
-                <select
-                  id="category-select"
-                  value={filters.category}
-                  onChange={(e) => handleFilterChange('category', e.target.value)}
-                >
-                  <option value="">All Body Types</option>
-                  {VEHICLE_CATEGORIES.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="filter-control">
-                <label htmlFor="city-select">Location</label>
-                <select
-                  id="city-select"
-                  value={filters.city}
-                  onChange={(e) => handleFilterChange('city', e.target.value)}
-                >
-                  <option value="">All Locations</option>
-                  {filterOptions.cities.map(city => (
-                    <option key={city} value={city}>{city}</option>
-                  ))}
+                  <option value="">All Vehicles</option>
+                  <option value="available">Available Now</option>
+                  <option value="reserved">Reserved</option>
+                  <option value="sold">Recently Sold</option>
                 </select>
               </div>
               
               <div className="filter-group">
-                <label>Price Range (P)</label>
+                <label>Price Range (BWP)</label>
                 <div className="range-inputs">
                   <input
                     type="number"
@@ -611,18 +628,16 @@ const MarketplaceFilters = ({
                   />
                 </div>
               </div>
-            </div>
-            
-            <div className="filters-row">
+              
               <div className="filter-group">
-                <label>Year</label>
+                <label>Year Range</label>
                 <div className="range-inputs">
                   <select
                     value={filters.minYear}
                     onChange={(e) => handleFilterChange('minYear', e.target.value)}
                     aria-label="Minimum year"
                   >
-                    <option value="">From</option>
+                    <option value="">Min Year</option>
                     {filterOptions.years.map(year => (
                       <option key={`min-${year}`} value={year}>{year}</option>
                     ))}
@@ -633,7 +648,7 @@ const MarketplaceFilters = ({
                     onChange={(e) => handleFilterChange('maxYear', e.target.value)}
                     aria-label="Maximum year"
                   >
-                    <option value="">To</option>
+                    <option value="">Max Year</option>
                     {filterOptions.years.map(year => (
                       <option key={`max-${year}`} value={year}>{year}</option>
                     ))}

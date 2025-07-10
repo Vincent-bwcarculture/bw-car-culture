@@ -1,16 +1,22 @@
-/* client/src/components/features/MarketplaceSection/MarketplaceFilters.css - Mobile Space Optimized */
-
-/* ===== BASE CONTAINER ===== */
+/* ===== MARKETPLACE FILTERS COMPONENT ===== */
 .marketplace-filters {
-  background: rgba(20, 20, 20, 0.95);
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid #2c2c2c;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1.25rem;
   margin-bottom: 1.5rem;
-  backdrop-filter: blur(10px);
   position: relative;
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   transition: all 0.3s ease;
   contain: layout style;
+}
+
+.marketplace-filters:hover {
+  border-color: #444444;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .marketplace-filters.loading::after {
@@ -19,45 +25,63 @@
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  pointer-events: none;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    #ff3300, 
+    transparent
+  );
+  animation: loadingBar 1.5s infinite;
+}
+
+@keyframes loadingBar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.filters-content {
+  width: 100%;
 }
 
 /* ===== SECTION SELECTOR ===== */
 .section-selector {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #2c2c2c;
 }
 
 .section-buttons {
   display: flex;
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 8px;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  background: rgba(0, 0, 0, 0.2);
   padding: 4px;
-  gap: 2px;
-  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  border: 1px solid #1a1a1a;
 }
 
 .section-btn {
-  flex: 1;
-  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   background: transparent;
   color: #c9c9c9;
-  border: none;
+  border: 1px solid transparent;
+  padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
   font-size: 12px;
   font-weight: 500;
-  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  position: relative;
+  overflow: hidden;
   min-height: 32px;
-  display: flex;
-  flex-direction: column;
+  flex: 1;
   justify-content: center;
-  align-items: center;
+  text-align: center;
 }
 
 .section-btn::before {
@@ -68,61 +92,85 @@
   width: 100%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.3s ease;
+  transition: left 0.4s ease;
 }
 
 .section-btn:hover:not(.active) {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #333333;
+  transform: translateY(-1px);
 }
 
-.section-btn:hover::before {
+.section-btn:hover:not(.active)::before {
   left: 100%;
 }
 
 .section-btn.active {
   background: linear-gradient(135deg, #ff3300, #e62e00);
   color: white;
+  border-color: rgba(255, 51, 0, 0.3);
   box-shadow: 
     0 2px 8px rgba(255, 51, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-.section-badge {
-  display: inline-block;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-size: 9px;
-  margin-top: 2px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+.section-btn.active:hover::before {
+  left: 100%;
 }
 
-.section-description {
-  margin-top: 1rem;
-  text-align: center;
-  color: #c9c9c9;
+.section-icon {
+  font-size: 14px;
 }
 
-.section-description h3 {
-  font-size: 1.1rem;
-  color: #ffffff;
-  margin-bottom: 0.5rem;
+.section-label {
   font-weight: 600;
 }
 
-.section-description p {
-  font-size: 0.85rem;
+.section-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.section-badge.premium {
+  background: linear-gradient(45deg, #ffd700, #ffed4e);
+  color: #1a1a1a;
+}
+
+.section-badge.savings {
+  background: linear-gradient(45deg, #10b981, #34d399);
+  color: white;
+}
+
+.section-badge.private {
+  background: linear-gradient(45deg, #8b5cf6, #a78bfa);
+  color: white;
+}
+
+.section-badge.all {
+  background: linear-gradient(45deg, #6b7280, #9ca3af);
+  color: white;
+}
+
+.section-info {
+  text-align: center;
+}
+
+.section-description {
+  color: #c9c9c9;
+  font-size: 0.9rem;
+  margin: 0 0 0.75rem 0;
   line-height: 1.4;
-  margin-bottom: 0.75rem;
 }
 
 .section-features {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .section-features span {
@@ -167,10 +215,10 @@
   border-color: rgba(255, 51, 0, 0.2);
 }
 
-/* ===== QUICK FILTERS ===== */
+/* ===== QUICK FILTERS - UPDATED FOR SORT BY ===== */
 .filters-quick-row {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0.75rem;
   width: 100%;
   margin-bottom: 0.75rem;
@@ -418,326 +466,48 @@
 }
 
 /* ===== RESPONSIVE DESIGN - MOBILE OPTIMIZED ===== */
-@media (min-width: 576px) {
-  .marketplace-filters {
-    padding: 1.5rem;
-  }
 
-  .filters-header h2 {
-    font-size: 1.3rem;
-  }
-
+/* Mobile First - Stack all filters vertically */
+@media (max-width: 575px) {
   .filters-quick-row {
-    grid-template-columns: 2fr 1fr 1fr auto;
-    gap: 1rem;
-  }
-
-  .filter-control {
-    min-width: auto;
-  }
-  
-  .filters-row {
-    grid-template-columns: repeat(2, 1fr); /* 2 COLUMNS ON SMALL TABLET */
-    gap: 0.75rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .filters-header h2 {
-    font-size: 1.4rem;
-  }
-
-  .section-btn {
-    font-size: 14px;
-    padding: 10px 16px;
-    min-height: 36px;
-  }
-
-  .section-text {
-    font-size: 13px;
-  }
-  
-  .filters-quick-row {
-    grid-template-columns: 2fr 1fr 1fr auto;
-  }
-  
-  .filters-row {
-    grid-template-columns: repeat(3, 1fr); /* 3 COLUMNS ON TABLET */
+    grid-template-columns: 1fr;
     gap: 0.5rem;
   }
-}
-
-@media (min-width: 992px) {
-  .filters-row {
-    grid-template-columns: repeat(4, 1fr); /* 4 COLUMNS ON DESKTOP */
-    gap: 0.75rem;
-  }
-  
-  .filter-control input,
-  .filter-control select,
-  .filter-group input,
-  .filter-group select {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.8rem;
-    min-height: 32px;
-  }
-  
-  .filter-control label,
-  .filter-group label {
-    font-size: 0.8rem;
-    margin-bottom: 0.3rem;
-  }
-}
-
-/* ===== MOBILE SPACE OPTIMIZATION - ULTRA COMPACT ===== */
-@media (max-width: 767px) {
-  .marketplace-filters {
-    padding: 0.25rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .section-selector {
-    margin-bottom: 0.5rem;
-  }
-  
-  .section-buttons {
-    padding: 2px;
-    gap: 1px;
-  }
-  
-  .section-btn {
-    padding: 3px 4px;
-    min-height: 24px;
-    font-size: 9px;
-  }
-  
-  .section-badge {
-    font-size: 7px;
-    padding: 1px 2px;
-    margin-top: 1px;
-  }
-  
-  .section-description {
-    margin-top: 0.3rem;
-    padding: 0.3rem;
-  }
-  
-  .section-description h3 {
-    font-size: 0.8rem;
-    margin-bottom: 0.2rem;
-  }
-  
-  .section-description p {
-    font-size: 0.7rem;
-    margin-bottom: 0.3rem;
-  }
-  
-  .section-features {
-    gap: 2px;
-  }
-  
-  .section-features span {
-    padding: 1px 3px;
-    font-size: 0.6rem;
-  }
-  
-  .filters-header {
-    margin-bottom: 0.3rem;
-  }
-  
-  .filters-header h2 {
-    font-size: 0.9rem;
-  }
-  
-  .toggle-filters-btn {
-    padding: 3px 6px;
-    font-size: 0.7rem;
-  }
-  
-  .filters-quick-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.25rem;
-  }
   
   .filter-control {
-    width: 100%;
-    min-width: auto;
-  }
-  
-  .filter-control input,
-  .filter-control select {
-    padding: 0.3rem 0.4rem;
-    font-size: 0.75rem;
-  }
-  
-  .filter-control label {
-    margin-bottom: 0.1rem;
-    font-size: 0.7rem;
-  }
-  
-  .search-filter {
-    grid-column: 1 / -1;
-  }
-  
-  .search-filter input {
-    padding-left: 1.3rem;
-    background-size: 0.6rem;
-    background-position: left 0.4rem center;
+    min-width: unset;
   }
   
   .quick-action-buttons {
-    grid-column: 1 / -1;
-    margin-top: 0.2rem;
+    min-width: unset;
+    width: 100%;
   }
   
   .apply-filters-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.75rem;
-  }
-  
-  .advanced-filters {
-    margin: 0.4rem 0.25rem 0.25rem 0.25rem;
-    padding-top: 0.4rem;
-  }
-  
-  .filters-row {
-    grid-template-columns: 1fr 1fr; /* 2 COLUMNS */
-    gap: 0.2rem;
-    margin-bottom: 0.2rem;
-  }
-  
-  .filter-group {
     width: 100%;
-    min-width: auto;
   }
-  
-  .filter-group label {
-    margin-bottom: 0.1rem;
-    font-size: 0.65rem;
-  }
-  
-  .range-inputs {
-    gap: 0.1rem;
-  }
-  
-  .range-inputs input,
-  .range-inputs select {
-    padding: 0.25rem 0.3rem;
-    font-size: 0.65rem;
-    min-height: 26px;
-  }
-  
-  .range-inputs span {
-    font-size: 0.6rem;
-    min-width: 10px;
-  }
-  
-  .filters-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.25rem;
-    margin-top: 0.3rem;
-    padding-top: 0.3rem;
-  }
-  
-  .reset-filters-btn {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.75rem;
-  }
-}
 
-/* ===== ULTRA-MOBILE OPTIMIZATION (Small Phones) - MAXIMUM COMPACTNESS ===== */
-@media (max-width: 480px) {
-  .marketplace-filters {
-    padding: 0.2rem;
-    margin-bottom: 0.3rem;
+  .section-buttons {
+    gap: 0.25rem;
   }
-  
-  .section-selector {
-    margin-bottom: 0.3rem;
-  }
-  
+
   .section-btn {
-    padding: 2px 3px;
-    min-height: 20px;
-    font-size: 8px;
+    font-size: 10px;
+    padding: 6px 8px;
+    min-height: 28px;
   }
-  
+
+  .section-icon {
+    font-size: 12px;
+  }
+
   .section-badge {
-    font-size: 6px;
-    padding: 1px;
+    font-size: 8px;
+    padding: 1px 4px;
   }
-  
-  .section-description {
-    margin-top: 0.2rem;
-    padding: 0.2rem;
-  }
-  
-  .section-description h3 {
-    font-size: 0.75rem;
-    margin-bottom: 0.1rem;
-  }
-  
-  .section-description p {
-    font-size: 0.65rem;
-    margin-bottom: 0.2rem;
-  }
-  
-  .section-features span {
-    padding: 1px 2px;
-    font-size: 0.55rem;
-  }
-  
-  .filters-header {
-    margin-bottom: 0.2rem;
-  }
-  
-  .filters-header h2 {
-    font-size: 0.8rem;
-  }
-  
-  .toggle-filters-btn {
-    padding: 2px 4px;
-    font-size: 0.65rem;
-  }
-  
-  .filters-quick-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.2rem;
-  }
-  
-  .filter-control input,
-  .filter-control select {
-    padding: 0.25rem 0.3rem;
-    font-size: 0.7rem;
-  }
-  
-  .filter-control label {
-    margin-bottom: 0.05rem;
-    font-size: 0.65rem;
-  }
-  
-  .search-filter input {
-    padding-left: 1.1rem;
-    background-size: 0.5rem;
-    background-position: left 0.3rem center;
-  }
-  
-  .quick-action-buttons {
-    margin-top: 0.15rem;
-  }
-  
-  .apply-filters-btn,
-  .reset-filters-btn {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.7rem;
-  }
-  
-  .advanced-filters {
-    margin: 0.3rem 0.2rem 0.2rem 0.2rem;
-    padding-top: 0.3rem;
+
+  .marketplace-filters {
+    padding: 1rem;
   }
 
   .filters-row {
@@ -777,6 +547,125 @@
     gap: 0.2rem;
     margin-top: 0.25rem;
     padding-top: 0.25rem;
+  }
+}
+
+/* Small phones - 2 columns layout */
+@media (min-width: 480px) {
+  .filters-quick-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  
+  .search-filter {
+    grid-column: 1 / -1; /* Search takes full width */
+  }
+  
+  .quick-action-buttons {
+    grid-column: 1 / -1; /* Button takes full width */
+  }
+}
+
+/* Tablets - 3 columns with search spanning */
+@media (min-width: 576px) {
+  .marketplace-filters {
+    padding: 1.5rem;
+  }
+
+  .filters-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .filters-quick-row {
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 0.75rem;
+  }
+  
+  .search-filter {
+    grid-column: 1; /* Search in first column */
+  }
+  
+  .quick-action-buttons {
+    grid-column: 1 / -1; /* Button spans all columns */
+    margin-top: 0.5rem;
+  }
+
+  .filter-control {
+    min-width: auto;
+  }
+  
+  .filters-row {
+    grid-template-columns: repeat(2, 1fr); /* 2 COLUMNS ON SMALL TABLET */
+    gap: 0.75rem;
+  }
+}
+
+/* Medium tablets - 4 filters + button row */
+@media (min-width: 768px) {
+  .filters-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .section-btn {
+    font-size: 14px;
+    padding: 10px 16px;
+    min-height: 36px;
+  }
+
+  .filters-quick-row {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .search-filter {
+    grid-column: 1;
+  }
+  
+  .quick-action-buttons {
+    grid-column: 1 / -1;
+    margin-top: 0.5rem;
+  }
+
+  .filters-row {
+    grid-template-columns: repeat(3, 1fr); /* 3 COLUMNS ON MEDIUM TABLET */
+    gap: 1rem;
+  }
+}
+
+/* Large screens - all filters in one row */
+@media (min-width: 992px) {
+  .filters-quick-row {
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 1rem;
+    align-items: end;
+  }
+  
+  .search-filter {
+    grid-column: 1;
+  }
+  
+  .quick-action-buttons {
+    grid-column: 5;
+    margin-top: 0;
+    min-width: 120px;
+  }
+
+  .filters-row {
+    grid-template-columns: repeat(4, 1fr); /* 4 COLUMNS ON LARGE SCREENS */
+    gap: 1rem;
+  }
+}
+
+/* Extra large screens - more breathing room */
+@media (min-width: 1200px) {
+  .filters-quick-row {
+    grid-template-columns: 2.5fr 1fr 1fr 1fr auto;
+    gap: 1.2rem;
+  }
+
+  .filters-row {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
   }
 }
 
