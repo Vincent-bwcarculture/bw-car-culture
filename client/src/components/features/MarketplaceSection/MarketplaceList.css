@@ -912,16 +912,15 @@ body.section-transitioning * {
     margin-bottom: 20px;
   }
   
-  .mobile-horizontal-scroll {
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    scroll-snap-type: x mandatory;
-    margin-bottom: 20px;
-    -webkit-overflow-scrolling: touch;
-  }
-  
+ .mobile-horizontal-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  margin-bottom: 20px;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
   .mobile-horizontal-scroll::-webkit-scrollbar {
     display: none;
   }
@@ -934,11 +933,10 @@ body.section-transitioning * {
   }
   
   .mobile-car-card {
-    min-width: 300px;
-    max-width: 300px;
-    flex-shrink: 0;
-    scroll-snap-align: start;
-  }
+  min-width: 300px;
+  max-width: 300px;
+  flex-shrink: 0;
+}
 }
 
 

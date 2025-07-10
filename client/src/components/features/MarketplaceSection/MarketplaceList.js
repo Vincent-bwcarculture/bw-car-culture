@@ -902,27 +902,26 @@ const MarketplaceList = () => {
   }, [location.search, debouncedSearch]);
 
   // Simple horizontal scroll initialization (mobile only)
-  useEffect(() => {
-    if (!isMobile || !allCars.length) return;
+useEffect(() => {
+  if (!isMobile || !allCars.length) return;
 
-    const containers = document.querySelectorAll('.mobile-horizontal-scroll');
+  const containers = document.querySelectorAll('.mobile-horizontal-scroll');
+  
+  // Add smooth scrolling behavior but no auto-snapping
+  containers.forEach(container => {
+    // Ensure smooth momentum scrolling on iOS
+    container.style.webkitOverflowScrolling = 'touch';
     
-    containers.forEach(container => {
-      const handleTouchEnd = () => {
-        const cardWidth = 300;
-        const gap = 15;
-        const itemWidth = cardWidth + gap;
-        const currentIndex = Math.round(container.scrollLeft / itemWidth);
-        
-        container.scrollTo({
-          left: currentIndex * itemWidth,
-          behavior: 'smooth'
-        });
-      };
-      
-      container.addEventListener('touchend', handleTouchEnd, { passive: true });
-    });
-  }, [isMobile, allCars.length]);
+    // Optional: Add scroll position persistence if needed
+    const handleScroll = () => {
+      // Store scroll position in case we need it later
+      const scrollPosition = container.scrollLeft;
+      container.setAttribute('data-scroll-position', scrollPosition);
+    };
+    
+    container.addEventListener('scroll', handleScroll, { passive: true });
+  });
+}, [isMobile, allCars.length]);
 
   // Intersection Observer for infinite scrolling
   useEffect(() => {
