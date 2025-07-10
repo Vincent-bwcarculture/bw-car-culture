@@ -1,4 +1,7 @@
-/* client/src/components/features/MarketplaceSection/MarketplaceFilters.css - Mobile Space Optimized */
+.filter-control {
+  width: 100%;
+  min-width: auto;
+}/* client/src/components/features/MarketplaceSection/MarketplaceFilters.css - Mobile Space Optimized */
 
 /* ===== BASE CONTAINER ===== */
 .marketplace-filters {
@@ -407,11 +410,12 @@
   }
 
   .filters-quick-row {
+    grid-template-columns: 2fr 1fr 1fr auto;
     gap: 1rem;
   }
 
   .filter-control {
-    min-width: 160px;
+    min-width: auto;
   }
 }
 
@@ -429,164 +433,30 @@
   .section-text {
     font-size: 13px;
   }
+  
+  .filters-quick-row {
+    grid-template-columns: 2fr 1fr 1fr auto;
+  }
+  
+  .filters-row {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
 }
 
-/* ===== MOBILE SPACE OPTIMIZATION ===== */
+/* ===== MOBILE SPACE OPTIMIZATION - ULTRA COMPACT ===== */
 @media (max-width: 767px) {
   .marketplace-filters {
-    padding: 0.5rem;
-    margin-bottom: 0.75rem;
+    padding: 0.25rem;
+    margin-bottom: 0.5rem;
   }
   
   .section-selector {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
   }
   
   .section-buttons {
     padding: 2px;
     gap: 1px;
-  }
-  
-  .section-btn {
-    padding: 4px 6px;
-    min-height: 28px;
-    font-size: 10px;
-  }
-  
-  .section-badge {
-    font-size: 8px;
-    padding: 1px 3px;
-    margin-top: 1px;
-  }
-  
-  .section-description {
-    margin-top: 0.5rem;
-    padding: 0.5rem;
-  }
-  
-  .section-description h3 {
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-  }
-  
-  .section-description p {
-    font-size: 0.75rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .section-features {
-    gap: 3px;
-  }
-  
-  .section-features span {
-    padding: 2px 4px;
-    font-size: 0.65rem;
-  }
-  
-  .filters-header {
-    margin-bottom: 0.5rem;
-  }
-  
-  .filters-header h2 {
-    font-size: 1rem;
-  }
-  
-  .toggle-filters-btn {
-    padding: 4px 8px;
-    font-size: 0.75rem;
-  }
-  
-  .filters-quick-row {
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-  
-  .filter-control {
-    width: 100%;
-    min-width: auto;
-  }
-  
-  .filter-control input,
-  .filter-control select {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.8rem;
-  }
-  
-  .filter-control label {
-    margin-bottom: 0.2rem;
-    font-size: 0.75rem;
-  }
-  
-  .search-filter input {
-    padding-left: 1.5rem;
-    background-size: 0.7rem;
-    background-position: left 0.6rem center;
-  }
-  
-  .quick-action-buttons {
-    width: 100%;
-    margin-top: 0.25rem;
-  }
-  
-  .apply-filters-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-  }
-  
-  .advanced-filters {
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-  }
-  
-  .filters-row {
-    flex-direction: column;
-    gap: 0.4rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .filter-group {
-    width: 100%;
-    min-width: auto;
-  }
-  
-  .range-inputs {
-    gap: 0.25rem;
-  }
-  
-  .range-inputs input,
-  .range-inputs select {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.8rem;
-  }
-  
-  .range-inputs span {
-    font-size: 0.7rem;
-    min-width: 15px;
-  }
-  
-  .filters-actions {
-    flex-direction: column;
-    gap: 0.4rem;
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-  }
-  
-  .reset-filters-btn {
-    width: 100%;
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-  }
-}
-
-/* ===== ULTRA-MOBILE OPTIMIZATION (Small Phones) ===== */
-@media (max-width: 480px) {
-  .marketplace-filters {
-    padding: 0.4rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .section-selector {
-    margin-bottom: 0.5rem;
   }
   
   .section-btn {
@@ -598,11 +468,12 @@
   .section-badge {
     font-size: 7px;
     padding: 1px 2px;
+    margin-top: 1px;
   }
   
   .section-description {
-    margin-top: 0.25rem;
-    padding: 0.25rem;
+    margin-top: 0.3rem;
+    padding: 0.3rem;
   }
   
   .section-description h3 {
@@ -612,7 +483,11 @@
   
   .section-description p {
     font-size: 0.7rem;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .section-features {
+    gap: 2px;
   }
   
   .section-features span {
@@ -621,7 +496,7 @@
   }
   
   .filters-header {
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.3rem;
   }
   
   .filters-header h2 {
@@ -634,26 +509,43 @@
   }
   
   .filters-quick-row {
-    gap: 0.3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem;
+  }
+  
+  .filter-control {
+    width: 100%;
+    min-width: auto;
   }
   
   .filter-control input,
   .filter-control select {
-    padding: 0.35rem 0.5rem;
+    padding: 0.3rem 0.4rem;
     font-size: 0.75rem;
   }
   
   .filter-control label {
-    margin-bottom: 0.15rem;
+    margin-bottom: 0.1rem;
     font-size: 0.7rem;
   }
   
+  .search-filter {
+    grid-column: 1 / -1;
+  }
+  
+  .search-filter input {
+    padding-left: 1.3rem;
+    background-size: 0.6rem;
+    background-position: left 0.4rem center;
+  }
+  
   .quick-action-buttons {
+    grid-column: 1 / -1;
     margin-top: 0.2rem;
   }
   
-  .apply-filters-btn,
-  .reset-filters-btn {
+  .apply-filters-btn {
     padding: 0.4rem 0.8rem;
     font-size: 0.75rem;
   }
@@ -664,29 +556,163 @@
   }
   
   .filters-row {
-    gap: 0.3rem;
-    margin-bottom: 0.4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .filter-group {
+    width: 100%;
+    min-width: auto;
   }
   
   .range-inputs {
-    gap: 0.2rem;
+    gap: 0.15rem;
   }
   
   .range-inputs input,
   .range-inputs select {
-    padding: 0.35rem 0.5rem;
+    padding: 0.3rem 0.4rem;
     font-size: 0.75rem;
   }
   
   .range-inputs span {
     font-size: 0.65rem;
-    min-width: 12px;
+    min-width: 10px;
   }
   
   .filters-actions {
-    gap: 0.3rem;
-    margin-top: 0.4rem;
-    padding-top: 0.4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem;
+    margin-top: 0.3rem;
+    padding-top: 0.3rem;
+  }
+  
+  .reset-filters-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* ===== ULTRA-MOBILE OPTIMIZATION (Small Phones) - MAXIMUM COMPACTNESS ===== */
+@media (max-width: 480px) {
+  .marketplace-filters {
+    padding: 0.2rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .section-selector {
+    margin-bottom: 0.3rem;
+  }
+  
+  .section-btn {
+    padding: 2px 3px;
+    min-height: 20px;
+    font-size: 8px;
+  }
+  
+  .section-badge {
+    font-size: 6px;
+    padding: 1px;
+  }
+  
+  .section-description {
+    margin-top: 0.2rem;
+    padding: 0.2rem;
+  }
+  
+  .section-description h3 {
+    font-size: 0.75rem;
+    margin-bottom: 0.1rem;
+  }
+  
+  .section-description p {
+    font-size: 0.65rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .section-features span {
+    padding: 1px 2px;
+    font-size: 0.55rem;
+  }
+  
+  .filters-header {
+    margin-bottom: 0.2rem;
+  }
+  
+  .filters-header h2 {
+    font-size: 0.8rem;
+  }
+  
+  .toggle-filters-btn {
+    padding: 2px 4px;
+    font-size: 0.65rem;
+  }
+  
+  .filters-quick-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.2rem;
+  }
+  
+  .filter-control input,
+  .filter-control select {
+    padding: 0.25rem 0.3rem;
+    font-size: 0.7rem;
+  }
+  
+  .filter-control label {
+    margin-bottom: 0.05rem;
+    font-size: 0.65rem;
+  }
+  
+  .search-filter input {
+    padding-left: 1.1rem;
+    background-size: 0.5rem;
+    background-position: left 0.3rem center;
+  }
+  
+  .quick-action-buttons {
+    margin-top: 0.15rem;
+  }
+  
+  .apply-filters-btn,
+  .reset-filters-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
+  
+  .advanced-filters {
+    margin-top: 0.3rem;
+    padding-top: 0.3rem;
+  }
+  
+  .filters-row {
+    gap: 0.2rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .range-inputs {
+    gap: 0.1rem;
+  }
+  
+  .range-inputs input,
+  .range-inputs select {
+    padding: 0.25rem 0.3rem;
+    font-size: 0.7rem;
+  }
+  
+  .range-inputs span {
+    font-size: 0.6rem;
+    min-width: 8px;
+  }
+  
+  .filters-actions {
+    gap: 0.2rem;
+    margin-top: 0.25rem;
+    padding-top: 0.25rem;
   }
 }
 
