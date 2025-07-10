@@ -431,7 +431,7 @@ body.section-transitioning * {
   .marketplace-grid.mobile-horizontal {
     display: block;
     gap: 0;
-    margin-bottom: 12px;
+    margin-bottom: 6px;
   }
   
   .mobile-horizontal-scroll {
@@ -439,7 +439,7 @@ body.section-transitioning * {
     overflow-y: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
     -webkit-overflow-scrolling: touch;
   }
   
