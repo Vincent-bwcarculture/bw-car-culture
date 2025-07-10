@@ -908,24 +908,7 @@ const MarketplaceList = () => {
     const containers = document.querySelectorAll('.mobile-horizontal-scroll');
     
     containers.forEach(container => {
-      let isScrolling = false;
-      let startX = 0;
-      let scrollLeft = 0;
-      
-      const handleTouchStart = (e) => {
-        startX = e.touches[0].pageX;
-        scrollLeft = container.scrollLeft;
-      };
-      
-      const handleTouchMove = (e) => {
-        if (!isScrolling) return;
-        const x = e.touches[0].pageX;
-        const walk = (x - startX) * 1.5;
-        container.scrollLeft = scrollLeft - walk;
-      };
-      
       const handleTouchEnd = () => {
-        isScrolling = false;
         const cardWidth = 300;
         const gap = 15;
         const itemWidth = cardWidth + gap;
@@ -937,8 +920,6 @@ const MarketplaceList = () => {
         });
       };
       
-      container.addEventListener('touchstart', handleTouchStart, { passive: true });
-      container.addEventListener('touchmove', handleTouchMove, { passive: true });
       container.addEventListener('touchend', handleTouchEnd, { passive: true });
     });
   }, [isMobile, allCars.length]);
@@ -1027,58 +1008,14 @@ const MarketplaceList = () => {
   // Mobile horizontal car row component
   const MobileHorizontalCarRow = ({ mainCar, similarCars }) => {
     const allCarsInRow = [mainCar, ...similarCars];
-    const rowRef = useRef(null);
-    const scrollContainerRef = useRef(null);
-    const [isVisible, setIsVisible] = useState(true);
-    const [isTransitioning, setIsTransitioning] = useState(false);
-    
-    // Use intersection observer to detect when row is going out of view
-    useEffect(() => {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          const wasVisible = isVisible;
-          const nowVisible = entry.isIntersecting;
-          
-          if (wasVisible && !nowVisible) {
-            // Row is going out of view - start smooth transition back to main car
-            setIsTransitioning(true);
-            
-            // Smoothly scroll back to main car (first card)
-            if (scrollContainerRef.current) {
-              scrollContainerRef.current.scrollTo({
-                left: 0,
-                behavior: 'smooth'
-              });
-            }
-            
-            // Remove transition state after animation completes
-            setTimeout(() => {
-              setIsTransitioning(false);
-            }, 500);
-          }
-          
-          setIsVisible(nowVisible);
-        },
-        { threshold: 0.3 } // Trigger when 30% of row is visible
-      );
-      
-      if (rowRef.current) {
-        observer.observe(rowRef.current);
-      }
-      
-      return () => observer.disconnect();
-    }, [isVisible]);
     
     return (
-      <div ref={rowRef} className="mobile-horizontal-scroll">
-        <div 
-          ref={scrollContainerRef}
-          className={`mobile-cards-row ${isTransitioning ? 'transitioning' : ''}`}
-        >
+      <div className="mobile-horizontal-scroll">
+        <div className="mobile-cards-row">
           {allCarsInRow.map((car, index) => (
             <div 
               key={car._id || car.id || `car-${index}`} 
-              className={`mobile-car-card ${isTransitioning ? 'returning-to-main' : ''}`}
+              className="mobile-car-card"
             >
               <VehicleCard 
                 car={car}
