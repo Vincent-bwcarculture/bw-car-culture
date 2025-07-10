@@ -1043,7 +1043,7 @@ const MarketplaceList = () => {
           {activeSection === 'premium' && (
             <div className="premium-section" id="premium-panel" role="tabpanel">
               <div className="section-header">
-                <h2>✨ Premium Vehicles</h2>
+                <h2>Premium Vehicles</h2>
                 <p>
                   Exceptional vehicles with premium features and verified quality
                   {displayData.privatePremium > 0 && (
@@ -1130,7 +1130,7 @@ const MarketplaceList = () => {
           {activeSection === 'private' && (
             <div className="private-section" id="private-panel" role="tabpanel">
               <div className="section-header">
-                <h2>🤝 Private Sellers</h2>
+                <h2>Private Sellers</h2>
                 <p>
                   Quality vehicles from individual owners with personal stories
                   {displayData.privateSavings > 0 && (
@@ -1177,7 +1177,7 @@ const MarketplaceList = () => {
           {activeSection === 'all' && (
             <div className="all-section" id="all-panel" role="tabpanel">
               <div className="section-header">
-                <h2>🚗 All Vehicles</h2>
+                <h2>All Vehicles</h2>
                 <p>
                   Browse our complete inventory of vehicles from dealers and private sellers
                   {(displayData.premium > 0 || displayData.savings > 0 || displayData.private > 0) && (
