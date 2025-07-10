@@ -1,4 +1,4 @@
-/* client/src/components/features/MarketplaceSection/MarketplaceList.css - ORIGINAL WITH ONLY SCROLL-SNAP REMOVED */
+/* client/src/components/features/MarketplaceSection/MarketplaceList.css - COMPACT SPACING OPTIMIZED */
 
 /* ===== PERFORMANCE OPTIMIZATIONS ===== */
 .marketplace-container {
@@ -32,10 +32,10 @@ body.section-transitioning * {
   transition: opacity 0.3s ease;
 }
 
-/* ===== ENHANCED HEADER STYLES ===== */
+/* ===== ENHANCED HEADER STYLES - COMPACT ===== */
 .marketplace-header {
-  margin-bottom: 25px;
-  padding-bottom: 20px;
+  margin-bottom: 8px; /* REDUCED from 25px */
+  padding-bottom: 8px; /* REDUCED from 20px */
   border-bottom: 1px solid rgba(255, 51, 0, 0.3);
   position: sticky;
   top: 0;
@@ -48,8 +48,8 @@ body.section-transitioning * {
 .header-content {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 6px; /* REDUCED from 10px */
+  margin-bottom: 8px; /* REDUCED from 20px */
 }
 
 .marketplace-header h1 {
@@ -160,19 +160,25 @@ body.section-transitioning * {
   50% { opacity: 0.6; }
 }
 
-/* ===== SECTION HEADERS ===== */
+/* ===== SECTION HEADERS - HORIZONTAL LAYOUT FOR SPACE EFFICIENCY ===== */
 .section-header {
-  margin-bottom: 30px;
-  text-align: center;
+  margin-bottom: 8px; /* REDUCED from 30px */
+  text-align: left; /* CHANGED from center */
   position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .section-header h2 {
   font-size: 24px;
   color: #ffffff;
-  margin: 0 0 10px 0;
+  margin: 0;
   font-weight: 700;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
 }
 
 .section-header p {
@@ -180,13 +186,16 @@ body.section-transitioning * {
   font-size: 14px;
   margin: 0;
   line-height: 1.5;
+  flex: 1;
+  text-align: right; /* POSITION TEXT TO THE RIGHT */
+  min-width: 200px;
 }
 
 .section-stats {
   display: block;
   color: #ff3300;
   font-weight: 500;
-  margin-top: 5px;
+  margin-top: 2px; /* REDUCED from 5px */
 }
 
 .premium-count,
@@ -195,29 +204,29 @@ body.section-transitioning * {
   display: block;
   color: #ff6600;
   font-size: 0.9em;
-  margin-top: 3px;
+  margin-top: 1px; /* REDUCED from 3px */
 }
 
-/* ===== MARKETPLACE GRID ===== */
+/* ===== MARKETPLACE GRID - COMPACT ===== */
 .marketplace-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 15px;
-  margin-bottom: 30px;
+  gap: 8px; /* REDUCED from 15px */
+  margin-bottom: 12px; /* REDUCED from 30px */
   contain: layout;
 }
 
-/* ===== SECTION BACKGROUNDS ===== */
+/* ===== SECTION BACKGROUNDS - COMPACT ===== */
 .premium-section,
 .savings-section,
 .private-section,
 .all-section {
   position: relative;
-  padding: 30px 20px;
+  padding: 12px 10px; /* REDUCED from 30px 20px */
   border-radius: 12px;
   background: rgba(20, 20, 20, 0.8);
   border: 1px solid #2c2c2c;
-  margin-bottom: 40px;
+  margin-bottom: 12px; /* REDUCED from 40px */
   backdrop-filter: blur(10px);
 }
 
@@ -391,13 +400,13 @@ body.section-transitioning * {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 30px;
-  padding: 20px;
+  margin-top: 15px; /* REDUCED from 30px */
+  padding: 10px; /* REDUCED from 20px */
 }
 
 .load-more-sentinel {
   height: 1px;
-  margin-top: 50px;
+  margin-top: 25px; /* REDUCED from 50px */
 }
 
 /* ===== ENHANCED ANIMATIONS ===== */
@@ -424,14 +433,14 @@ body.section-transitioning * {
   }
 }
 
-/* ===== MOBILE HORIZONTAL SCROLLING (ORIGINAL - ONLY SCROLL-SNAP REMOVED) ===== */
+/* ===== MOBILE HORIZONTAL SCROLLING (COMPACT SPACING) ===== */
 
 /* Only apply horizontal scrolling on mobile */
 @media (max-width: 768px) {
   .marketplace-grid.mobile-horizontal {
     display: block;
     gap: 0;
-    margin-bottom: 6px;
+    margin-bottom: 4px; /* REDUCED from 6px */
   }
   
   .mobile-horizontal-scroll {
@@ -439,8 +448,9 @@ body.section-transitioning * {
     overflow-y: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    margin-bottom: 4px;
+    margin-bottom: 2px; /* REDUCED from 4px */
     -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
   
   .mobile-horizontal-scroll::-webkit-scrollbar {
@@ -449,8 +459,8 @@ body.section-transitioning * {
   
   .mobile-cards-row {
     display: flex;
-    gap: 8px;
-    padding: 0 6px;
+    gap: 6px; /* REDUCED from 8px */
+    padding: 0 4px; /* REDUCED from 6px */
     width: max-content;
   }
   
@@ -469,8 +479,8 @@ body.section-transitioning * {
   }
   
   .mobile-cards-row {
-    gap: 6px;
-    padding: 0 4px;
+    gap: 4px; /* REDUCED from 6px */
+    padding: 0 3px; /* REDUCED from 4px */
   }
 }
 
@@ -490,7 +500,7 @@ body.section-transitioning * {
 
   .marketplace-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 18px;
+    gap: 10px; /* REDUCED from 18px */
   }
 
   .section-header h2 {
@@ -530,14 +540,27 @@ body.section-transitioning * {
 
   .marketplace-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    gap: 12px; /* REDUCED from 20px */
+  }
+
+  /* TABLET: Keep horizontal layout for section headers */
+  .section-header {
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .section-header p {
+    text-align: right;
+    max-width: 300px;
   }
 }
 
 @media (min-width: 992px) {
   .marketplace-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
+    gap: 14px; /* REDUCED from 22px */
   }
 
   .section-header h2 {
@@ -552,7 +575,7 @@ body.section-transitioning * {
 
   .marketplace-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    gap: 16px; /* REDUCED from 24px */
   }
 
   .loading-container {
@@ -577,19 +600,19 @@ body.section-transitioning * {
 @media (min-width: 1400px) {
   .marketplace-grid {
     grid-template-columns: repeat(4, 1fr);
-    gap: 26px;
+    gap: 18px; /* REDUCED from 26px */
   }
 }
 
-/* ===== MOBILE SPECIFIC OPTIMIZATIONS FOR SMARTPHONE USERS ===== */
+/* ===== MOBILE SPECIFIC OPTIMIZATIONS FOR SMARTPHONE USERS - ULTRA COMPACT ===== */
 @media (max-width: 767px) {
   .marketplace-container {
-    padding: 12px;
+    padding: 8px; /* REDUCED from 12px */
   }
 
   .marketplace-header {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
+    margin-bottom: 6px; /* REDUCED from 20px */
+    padding-bottom: 6px; /* REDUCED from 15px */
     position: static;
     background: transparent;
     backdrop-filter: none;
@@ -601,7 +624,10 @@ body.section-transitioning * {
   }
 
   .section-header {
-    margin-bottom: 20px;
+    margin-bottom: 6px; /* REDUCED from 20px */
+    flex-direction: column; /* STACK ON MOBILE */
+    text-align: left;
+    gap: 4px;
   }
 
   .section-header h2 {
@@ -610,12 +636,22 @@ body.section-transitioning * {
 
   .section-header p {
     font-size: 13px;
+    text-align: left; /* LEFT ALIGN ON MOBILE */
+    max-width: none;
   }
 
   .marketplace-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 25px;
+    gap: 6px; /* REDUCED from 12px */
+    margin-bottom: 10px; /* REDUCED from 25px */
+  }
+
+  .premium-section,
+  .savings-section,
+  .private-section,
+  .all-section {
+    padding: 8px 6px; /* REDUCED from 12px 10px */
+    margin-bottom: 6px; /* REDUCED from 12px */
   }
 
   .loading-container {
@@ -665,8 +701,8 @@ body.section-transitioning * {
   }
 
   .load-more-container {
-    margin-top: 20px;
-    padding: 15px;
+    margin-top: 8px; /* REDUCED from 20px */
+    padding: 8px; /* REDUCED from 15px */
   }
 
   .load-more-btn {
@@ -684,10 +720,19 @@ body.section-transitioning * {
   }
 }
 
-/* Ultra-mobile optimization (small phones) */
+/* Ultra-mobile optimization (small phones) - MAXIMUM COMPACTNESS */
 @media (max-width: 480px) {
   .marketplace-container {
-    padding: 10px;
+    padding: 6px; /* REDUCED from 10px */
+  }
+
+  .marketplace-header {
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+  }
+
+  .section-header {
+    margin-bottom: 4px;
   }
 
   .section-header h2 {
@@ -700,6 +745,19 @@ body.section-transitioning * {
 
   .marketplace-stats {
     font-size: 12px;
+  }
+
+  .marketplace-grid {
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .premium-section,
+  .savings-section,
+  .private-section,
+  .all-section {
+    padding: 6px 4px;
+    margin-bottom: 4px;
   }
 
   .loading-content h3 {
