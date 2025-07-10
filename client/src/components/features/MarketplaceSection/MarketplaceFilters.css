@@ -1,87 +1,63 @@
-/* src/components/features/MarketplaceSection/MarketplaceFilters.css */
+/* client/src/components/features/MarketplaceSection/MarketplaceFilters.css - Mobile Space Optimized */
 
-/* Base styles - clean and professional */
+/* ===== BASE CONTAINER ===== */
 .marketplace-filters {
   background: rgba(20, 20, 20, 0.95);
+  border: 1px solid #2c2c2c;
   border-radius: 8px;
   padding: 1.25rem;
   margin-bottom: 1.5rem;
-  border: 1px solid #2c2c2c;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
   position: relative;
-}
-
-.marketplace-filters.loading {
-  pointer-events: none;
-  opacity: 0.8;
+  transition: all 0.3s ease;
+  contain: layout style;
 }
 
 .marketplace-filters.loading::after {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 20px;
-  height: 20px;
-  margin: -10px 0 0 -10px;
-  border: 2px solid transparent;
-  border-top: 2px solid #ff3300;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  z-index: 1001;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  pointer-events: none;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Content visibility */
-.filters-content {
-  transition: all 0.3s ease;
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Section Selector - Slimmer Professional Design */
+/* ===== SECTION SELECTOR ===== */
 .section-selector {
   margin-bottom: 1.25rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid #2c2c2c;
 }
 
 .section-buttons {
   display: flex;
-  gap: 4px;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
   padding: 4px;
-  border-radius: 6px;
+  gap: 2px;
   border: 1px solid #2c2c2c;
-  margin-bottom: 0.75rem;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .section-btn {
   flex: 1;
-  background: transparent;
-  border: none;
-  color: #aaaaaa;
   padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 600;
+  background: transparent;
+  color: #c9c9c9;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 32px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
   position: relative;
   overflow: hidden;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  min-height: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .section-btn::before {
@@ -91,14 +67,13 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-  transition: left 0.4s ease;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.3s ease;
 }
 
-.section-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
+.section-btn:hover:not(.active) {
   color: #ffffff;
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .section-btn:hover::before {
@@ -107,82 +82,64 @@
 
 .section-btn.active {
   background: linear-gradient(135deg, #ff3300, #e62e00);
-  color: #ffffff;
+  color: white;
   box-shadow: 
     0 2px 8px rgba(255, 51, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transform: translateY(-1px);
-  font-weight: 700;
-}
-
-.section-btn.active::before {
-  display: none;
-}
-
-.section-text {
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.section-description {
-  text-align: center;
-}
-
-.section-description p {
-  margin: 0;
-  color: #aaaaaa;
-  font-size: 12px;
-  line-height: 1.3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  flex-wrap: wrap;
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .section-badge {
-  padding: 2px 6px;
-  border-radius: 8px;
-  font-size: 10px;
-  font-weight: 700;
-  white-space: nowrap;
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 9px;
+  margin-top: 2px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.section-badge.premium {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 193, 7, 0.08));
-  color: #ffd700;
-  border: 1px solid rgba(255, 215, 0, 0.3);
+.section-description {
+  margin-top: 1rem;
+  text-align: center;
+  color: #c9c9c9;
 }
 
-.section-badge.savings {
-  background: linear-gradient(135deg, rgba(46, 213, 115, 0.15), rgba(26, 188, 156, 0.08));
-  color: #2ed573;
-  border: 1px solid rgba(46, 213, 115, 0.3);
+.section-description h3 {
+  font-size: 1.1rem;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
 }
 
-.section-badge.private {
-  background: linear-gradient(135deg, rgba(108, 99, 255, 0.15), rgba(85, 75, 255, 0.08));
-  color: #6c63ff;
-  border: 1px solid rgba(108, 99, 255, 0.3);
+.section-description p {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
 }
 
-.section-badge.all {
-  background: linear-gradient(135deg, rgba(60, 162, 255, 0.15), rgba(52, 152, 219, 0.08));
-  color: #3ca2ff;
-  border: 1px solid rgba(60, 162, 255, 0.3);
+.section-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
 }
 
-/* Filters Header */
+.section-features span {
+  background: rgba(255, 51, 0, 0.1);
+  color: #ff6633;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  border: 1px solid rgba(255, 51, 0, 0.2);
+}
+
+/* ===== FILTERS HEADER ===== */
 .filters-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .filters-header h2 {
@@ -190,20 +147,14 @@
   color: #ffffff;
   margin: 0;
   font-weight: 600;
-  background: linear-gradient(135deg, #ffffff, #cccccc);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .toggle-filters-btn {
   background: transparent;
-  color: #ff3300;
-  border: 1px solid transparent;
-  font-size: 0.8rem;
-  font-weight: 600;
+  color: #c9c9c9;
+  border: 1px solid #2c2c2c;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   text-transform: uppercase;
   letter-spacing: 0.4px;
   padding: 6px 12px;
@@ -216,7 +167,7 @@
   border-color: rgba(255, 51, 0, 0.2);
 }
 
-/* Quick Filters */
+/* ===== QUICK FILTERS ===== */
 .filters-quick-row {
   display: flex;
   flex-wrap: wrap;
@@ -289,7 +240,7 @@
   min-width: 120px;
 }
 
-/* Action Buttons */
+/* ===== ACTION BUTTONS ===== */
 .apply-filters-btn,
 .reset-filters-btn {
   padding: 0.6rem 1.2rem;
@@ -361,7 +312,7 @@
   left: 100%;
 }
 
-/* Advanced Filters */
+/* ===== ADVANCED FILTERS ===== */
 .advanced-filters {
   margin-top: 1.25rem;
   padding-top: 1.25rem;
@@ -445,7 +396,7 @@
   }
 }
 
-/* RESPONSIVE DESIGN */
+/* ===== RESPONSIVE DESIGN - MOBILE OPTIMIZED ===== */
 @media (min-width: 576px) {
   .marketplace-filters {
     padding: 1.5rem;
@@ -480,19 +431,74 @@
   }
 }
 
+/* ===== MOBILE SPACE OPTIMIZATION ===== */
 @media (max-width: 767px) {
   .marketplace-filters {
-    padding: 1rem;
-    margin-bottom: 1.25rem;
+    padding: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .section-selector {
+    margin-bottom: 0.75rem;
+  }
+  
+  .section-buttons {
+    padding: 2px;
+    gap: 1px;
+  }
+  
+  .section-btn {
+    padding: 4px 6px;
+    min-height: 28px;
+    font-size: 10px;
+  }
+  
+  .section-badge {
+    font-size: 8px;
+    padding: 1px 3px;
+    margin-top: 1px;
+  }
+  
+  .section-description {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .section-description h3 {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .section-description p {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .section-features {
+    gap: 3px;
+  }
+  
+  .section-features span {
+    padding: 2px 4px;
+    font-size: 0.65rem;
+  }
+  
+  .filters-header {
+    margin-bottom: 0.5rem;
   }
   
   .filters-header h2 {
-    font-size: 1.1rem;
+    font-size: 1rem;
+  }
+  
+  .toggle-filters-btn {
+    padding: 4px 8px;
+    font-size: 0.75rem;
   }
   
   .filters-quick-row {
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.4rem;
   }
   
   .filter-control {
@@ -500,81 +506,191 @@
     min-width: auto;
   }
   
+  .filter-control input,
+  .filter-control select {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+  
+  .filter-control label {
+    margin-bottom: 0.2rem;
+    font-size: 0.75rem;
+  }
+  
+  .search-filter input {
+    padding-left: 1.5rem;
+    background-size: 0.7rem;
+    background-position: left 0.6rem center;
+  }
+  
   .quick-action-buttons {
     width: 100%;
-    margin-top: 0.4rem;
+    margin-top: 0.25rem;
+  }
+  
+  .apply-filters-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+  
+  .advanced-filters {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
   }
   
   .filters-row {
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .filter-group {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .range-inputs {
+    gap: 0.25rem;
+  }
+  
+  .range-inputs input,
+  .range-inputs select {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+  
+  .range-inputs span {
+    font-size: 0.7rem;
+    min-width: 15px;
   }
   
   .filters-actions {
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
   }
   
-  .reset-filters-btn,
-  .apply-filters-btn {
+  .reset-filters-btn {
     width: 100%;
-  }
-
-  .section-btn {
-    min-height: 40px;
-    padding: 8px 12px;
-    flex: 1;
-  }
-
-  .section-text {
-    font-size: 11px;
-  }
-
-  .section-description p {
-    flex-direction: column;
-    gap: 4px;
-    text-align: center;
-    font-size: 11px;
-  }
-
-  .section-badge {
-    font-size: 9px;
-    padding: 2px 4px;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
   }
 }
 
+/* ===== ULTRA-MOBILE OPTIMIZATION (Small Phones) ===== */
 @media (max-width: 480px) {
+  .marketplace-filters {
+    padding: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .section-selector {
+    margin-bottom: 0.5rem;
+  }
+  
+  .section-btn {
+    padding: 3px 4px;
+    min-height: 24px;
+    font-size: 9px;
+  }
+  
+  .section-badge {
+    font-size: 7px;
+    padding: 1px 2px;
+  }
+  
+  .section-description {
+    margin-top: 0.25rem;
+    padding: 0.25rem;
+  }
+  
+  .section-description h3 {
+    font-size: 0.8rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .section-description p {
+    font-size: 0.7rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .section-features span {
+    padding: 1px 3px;
+    font-size: 0.6rem;
+  }
+  
   .filters-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .filters-header h2 {
+    font-size: 0.9rem;
   }
   
   .toggle-filters-btn {
-    align-self: flex-end;
+    padding: 3px 6px;
+    font-size: 0.7rem;
   }
-
-  .section-buttons {
-    padding: 3px;
+  
+  .filters-quick-row {
+    gap: 0.3rem;
   }
-
-  .section-btn {
-    min-height: 36px;
-    padding: 6px 8px;
-    font-size: 11px;
+  
+  .filter-control input,
+  .filter-control select {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
   }
-
-  .section-description p {
-    font-size: 10px;
+  
+  .filter-control label {
+    margin-bottom: 0.15rem;
+    font-size: 0.7rem;
   }
-
-  .section-badge {
-    font-size: 8px;
-    padding: 1px 3px;
+  
+  .quick-action-buttons {
+    margin-top: 0.2rem;
+  }
+  
+  .apply-filters-btn,
+  .reset-filters-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+  }
+  
+  .advanced-filters {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+  }
+  
+  .filters-row {
+    gap: 0.3rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .range-inputs {
+    gap: 0.2rem;
+  }
+  
+  .range-inputs input,
+  .range-inputs select {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .range-inputs span {
+    font-size: 0.65rem;
+    min-width: 12px;
+  }
+  
+  .filters-actions {
+    gap: 0.3rem;
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
   }
 }
 
-/* Touch Device Optimizations */
+/* ===== TOUCH DEVICE OPTIMIZATIONS ===== */
 @media (hover: none) and (pointer: coarse) {
   .section-btn,
   .apply-filters-btn,
@@ -600,7 +716,7 @@
   }
 }
 
-/* Accessibility */
+/* ===== ACCESSIBILITY ===== */
 @media (prefers-reduced-motion: reduce) {
   .section-btn,
   .apply-filters-btn,
@@ -655,7 +771,7 @@
   }
 }
 
-/* Performance optimizations */
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
 .marketplace-filters {
   contain: layout style;
 }
@@ -665,16 +781,4 @@
 .reset-filters-btn {
   contain: layout style;
   will-change: transform;
-}
-
-.section-description {
-  padding: 16px;
-  border-radius: 8px;
-  margin-top: 16px;
-}
-
-.section-features {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 }
