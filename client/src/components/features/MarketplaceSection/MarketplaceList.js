@@ -558,45 +558,31 @@ const MarketplaceList = () => {
     };
     
     Object.entries(filterMappings).forEach(([key, value]) => {
-      if (value && value !== 'all' && value !== 'All') {
-        if (['minPrice', 'maxPrice', 'minYear', 'maxYear', 'minMileage', 'maxMileage'].includes(key)) {
-          const numValue = parseFloat(value);
-          if (!isNaN(numValue) && numValue > 0) {
-            filters[key] = numValue;
-          }
-        } else if (value.trim()) {
-          filters[key] = value;
-        }
+      if (value && value.trim() !== '') {
+        filters[key] = value.trim();
       }
     });
     
     return filters;
   }, []);
 
-  // ENHANCED: Client-side filtering with private seller support
-  const filterCarsByText = useCallback((cars, searchTerm) => {
-    if (!searchTerm?.trim() || !Array.isArray(cars)) return cars;
+  // Enhanced search function with text matching
+  const applyTextSearch = useCallback((cars, searchTerm) => {
+    if (!searchTerm || !Array.isArray(cars)) return cars;
     
-    const search = searchTerm.toLowerCase().trim();
-    const searchWords = search.split(/\s+/).filter(word => word.length > 0);
+    const searchWords = searchTerm.toLowerCase().split(' ').filter(word => word.length > 0);
     
     return cars.filter(car => {
-      if (!car) return false;
-      
       const searchableFields = [
         car.title,
+        car.description,
         car.make,
         car.model,
-        car.description,
         car.specifications?.make,
         car.specifications?.model,
-        car.specifications?.color,
         car.dealer?.businessName,
-        car.dealer?.name,
-        // ENHANCED: Include private seller names in search
         car.dealer?.privateSeller?.firstName,
         car.dealer?.privateSeller?.lastName,
-        // Include seller type in search
         carIsFromPrivateSeller(car) ? 'private seller' : 'dealership',
         car.category,
         car.bodyStyle,
@@ -711,82 +697,51 @@ const MarketplaceList = () => {
       };
       setLoadingText(loadingMessages[activeSection] || 'Loading vehicles...');
       
-      // First attempt: Try the normal search
-      let response = await listingService.getListings(filters, page, 100);
+      // Enhanced API call with better error handling
+      const response = await listingService.getListings(filters, page);
       
-      if (response?.listings?.length > 0) {
-        return {
-          success: true,
-          listings: response.listings,
-          pagination: {
-            currentPage: response.currentPage || page,
-            totalPages: response.totalPages || 1,
-            total: response.total || response.listings.length
-          }
-        };
+      if (!response || !response.listings) {
+        throw new Error('Invalid response from server');
       }
       
-      // If text search didn't work, try client-side filtering
+      let cars = response.listings;
+      
+      // Apply client-side filtering if needed
       if (filters.search) {
-        const allListingsResponse = await listingService.getListings({}, 1, 100);
-        
-        if (allListingsResponse?.listings) {
-          const allListings = allListingsResponse.listings;
-          const searchTerm = filters.search;
-          
-          const textFilteredCars = filterCarsByText(allListings, searchTerm);
-          const fullyFilteredCars = applyOtherFilters(textFilteredCars, filters);
-          
-          return {
-            success: true,
-            listings: fullyFilteredCars,
-            pagination: {
-              currentPage: 1,
-              totalPages: 1,
-              total: fullyFilteredCars.length
-            },
-            isClientSideFiltered: true
-          };
-        }
+        cars = applyTextSearch(cars, filters.search);
       }
       
-      // Handle different response formats
-      if (response && Array.isArray(response)) {
-        return {
-          success: true,
-          listings: response,
-          pagination: {
-            currentPage: page,
-            totalPages: Math.ceil(response.length / CARS_PER_PAGE),
-            total: response.length
-          }
-        };
+      cars = applyOtherFilters(cars, filters);
+      
+      setAllCars(cars);
+      setPagination({
+        currentPage: response.pagination?.currentPage || 1,
+        totalPages: response.pagination?.totalPages || 1,
+        total: cars.length
+      });
+      
+      // Generate similar cars for mobile
+      if (isMobile && cars.length > 0) {
+        generateSimilarCarsData(cars);
       }
       
-      return {
-        success: true,
-        listings: [],
-        pagination: { currentPage: 1, totalPages: 1, total: 0 }
-      };
+      setError(null);
       
     } catch (error) {
-      console.error(`Search attempt ${retryCount + 1} failed:`, error);
+      console.error('Search error:', error);
       
-      // Retry logic with exponential backoff
       if (retryCount < maxRetries) {
-        const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
-        await new Promise(resolve => setTimeout(resolve, delay));
-        return performSearch(filters, page, retryCount + 1);
+        setTimeout(() => performSearch(filters, page, retryCount + 1), 1000 * (retryCount + 1));
+        return;
       }
       
-      return {
-        success: false,
-        error: error.message || 'Failed to load vehicles'
-      };
+      setError(error.message || 'Failed to load vehicles. Please try again.');
+      setAllCars([]);
+      setPagination({ currentPage: 1, totalPages: 1, total: 0 });
     }
-  }, [activeSection, filterCarsByText, applyOtherFilters]);
+  }, [activeSection, applyTextSearch, applyOtherFilters, isMobile, generateSimilarCarsData]);
 
-  // Debounced search execution
+  // Debounced search function
   const debouncedSearch = useMemo(
     () => debounce(async (searchParams) => {
       if (fetchInProgress.current) return;
@@ -796,30 +751,11 @@ const MarketplaceList = () => {
       setError(null);
       
       try {
-        const page = Math.max(1, parseInt(searchParams.get('page')) || 1);
         const filters = prepareSearchFilters(searchParams);
-        
-        const result = await performSearch(filters, page);
-        
-        if (result.success) {
-          setAllCars(result.listings || []);
-          setPagination(result.pagination);
-          
-          // Clear score cache when new data arrives
-          listingScoreCache.current.clear();
-          similarCarsCache.current.clear();
-          
-          // Generate similar cars data for mobile
-          generateSimilarCarsData(result.listings || []);
-        } else {
-          setError(result.error || 'Failed to load vehicles');
-          setAllCars([]);
-          setPagination({ currentPage: 1, totalPages: 1, total: 0 });
-        }
-        
+        await performSearch(filters, 1);
       } catch (error) {
-        console.error('Critical search error:', error);
-        setError('An unexpected error occurred. Please try again.');
+        console.error('Search error:', error);
+        setError('Failed to search vehicles. Please try again.');
         setAllCars([]);
         setPagination({ currentPage: 1, totalPages: 1, total: 0 });
       } finally {
@@ -901,27 +837,27 @@ const MarketplaceList = () => {
     }
   }, [location.search, debouncedSearch]);
 
-  // Simple horizontal scroll initialization (mobile only)
-useEffect(() => {
-  if (!isMobile || !allCars.length) return;
+  // FIXED: Mobile horizontal scroll initialization (NO auto-snapping)
+  useEffect(() => {
+    if (!isMobile || !allCars.length) return;
 
-  const containers = document.querySelectorAll('.mobile-horizontal-scroll');
-  
-  // Add smooth scrolling behavior but no auto-snapping
-  containers.forEach(container => {
-    // Ensure smooth momentum scrolling on iOS
-    container.style.webkitOverflowScrolling = 'touch';
+    const containers = document.querySelectorAll('.mobile-horizontal-scroll');
     
-    // Optional: Add scroll position persistence if needed
-    const handleScroll = () => {
-      // Store scroll position in case we need it later
-      const scrollPosition = container.scrollLeft;
-      container.setAttribute('data-scroll-position', scrollPosition);
-    };
-    
-    container.addEventListener('scroll', handleScroll, { passive: true });
-  });
-}, [isMobile, allCars.length]);
+    // Add smooth scrolling behavior but NO auto-snapping
+    containers.forEach(container => {
+      // Ensure smooth momentum scrolling on iOS
+      container.style.webkitOverflowScrolling = 'touch';
+      
+      // Optional: Add scroll position persistence if needed
+      const handleScroll = () => {
+        // Store scroll position in case we need it later
+        const scrollPosition = container.scrollLeft;
+        container.setAttribute('data-scroll-position', scrollPosition);
+      };
+      
+      container.addEventListener('scroll', handleScroll, { passive: true });
+    });
+  }, [isMobile, allCars.length]);
 
   // Intersection Observer for infinite scrolling
   useEffect(() => {
@@ -1073,22 +1009,14 @@ useEffect(() => {
           </div>
           <div className="loading-content">
             <h3>{loadingText}</h3>
-            <p>
-              {activeSection === 'premium' 
-                ? 'Finding the finest vehicles from dealers and private sellers...'
-                : activeSection === 'savings'
-                ? 'Calculating your potential savings across all sellers...'
-                : activeSection === 'private'
-                ? 'Loading listings from verified private sellers...'
-                : 'Loading all available vehicles from dealers and private sellers...'
-              }
-            </p>
+            <p>Finding the best vehicles for you...</p>
           </div>
         </div>
       ) : error ? (
+        /* Error State */
         <div className="error-message">
           <div className="error-icon">⚠️</div>
-          <h3>Search Error</h3>
+          <h3>Oops! Something went wrong</h3>
           <p>{error}</p>
           <div className="error-actions">
             <button 
@@ -1096,264 +1024,223 @@ useEffect(() => {
               onClick={handleRetry}
               disabled={isRetrying}
             >
-              {isRetrying ? 'Retrying...' : 'Retry'}
+              {isRetrying ? 'Retrying...' : 'Try Again'}
             </button>
+          </div>
+        </div>
+      ) : displayData.displayCars.length === 0 ? (
+        /* Empty State */
+        <div className="empty-state">
+          <div className="empty-icon">🔍</div>
+          <h3>No vehicles found</h3>
+          <p>Try adjusting your search criteria or browse all available vehicles.</p>
+          <div className="empty-actions">
             <button 
-              className="clear-filters-button" 
-              onClick={() => navigate('/marketplace')}
+              className="switch-section-btn"
+              onClick={() => handleSectionChange('all')}
             >
-              Clear Filters
+              View All Vehicles
             </button>
           </div>
         </div>
       ) : (
-        <>
-          {/* Main Section Display */}
-          {displayData.displayCars.length > 0 ? (
-            <div className="marketplace-sections">
-              {/* Premium Section */}
-              {activeSection === 'premium' && (
-                <div className="premium-section" id="premium-panel" role="tabpanel">
-                  <div className="section-header">
-                    <h2>👑 Premium Collection</h2>
-                    <p>
-                      Discover our finest selection of luxury and high-end vehicles from verified dealers and private sellers
-                      {displayData.privatePremium > 0 && (
-                        <span className="private-seller-count">
-                          • {displayData.privatePremium} premium vehicles from private sellers
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <div className={`marketplace-grid premium-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
-                    {isMobile ? (
-                      displayData.displayCars.map((car) => {
-                        const carId = car._id || car.id;
-                        const similarCars = similarCarsData.get(carId) || [];
-                        
-                        return (
-                          <MobileHorizontalCarRow
-                            key={carId}
-                            mainCar={car}
-                            similarCars={similarCars}
-                          />
-                        );
-                      })
-                    ) : (
-                      displayData.displayCars.map((car, index) => (
-                        <VehicleCard 
-                          key={car._id || car.id || `premium-${index}`}
-                          car={car}
-                          onShare={handleShare}
-                          compact={isMobile}
-                        />
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Savings Section */}
-              {activeSection === 'savings' && (
-                <div className="savings-section" id="savings-panel" role="tabpanel">
-                  <div className="section-header">
-                    <h2>💰 Save with BW Car Culture</h2>
-                    <p>
-                      Exclusive deals and savings available from dealers and private sellers
-                      {totalSavingsAmount > 0 && (
-                        <span className="total-savings">
-                          • Total potential savings: <strong>P{totalSavingsAmount.toLocaleString()}</strong>
-                        </span>
-                      )}
-                      {displayData.privateSavings > 0 && (
-                        <span className="private-seller-count">
-                          • {displayData.privateSavings} deals from private sellers
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <div className={`marketplace-grid savings-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
-                    {isMobile ? (
-                      displayData.displayCars.map((car) => {
-                        const carId = car._id || car.id;
-                        const similarCars = similarCarsData.get(carId) || [];
-                        
-                        return (
-                          <MobileHorizontalCarRow
-                            key={carId}
-                            mainCar={car}
-                            similarCars={similarCars}
-                          />
-                        );
-                      })
-                    ) : (
-                      displayData.displayCars.map((car, index) => (
-                        <VehicleCard 
-                          key={car._id || car.id || `savings-${index}`}
-                          car={car}
-                          onShare={handleShare}
-                          compact={isMobile}
-                        />
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Private Sellers Section */}
-              {activeSection === 'private' && (
-                <div className="private-section" id="private-panel" role="tabpanel">
-                  <div className="section-header">
-                    <h2>🤝 Private Sellers</h2>
-                    <p>
-                      Quality vehicles from individual owners with personal stories
-                      {displayData.privateSavings > 0 && (
-                        <span className="private-seller-count">
-                          • {displayData.privateSavings} with exclusive savings
-                        </span>
-                      )}
-                      {displayData.privatePremium > 0 && (
-                        <span className="private-seller-count">
-                          • {displayData.privatePremium} premium listings
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <div className={`marketplace-grid private-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
-                    {isMobile ? (
-                      displayData.displayCars.map((car) => {
-                        const carId = car._id || car.id;
-                        const similarCars = similarCarsData.get(carId) || [];
-                        
-                        return (
-                          <MobileHorizontalCarRow
-                            key={carId}
-                            mainCar={car}
-                            similarCars={similarCars}
-                          />
-                        );
-                      })
-                    ) : (
-                      displayData.displayCars.map((car, index) => (
-                        <VehicleCard 
-                          key={car._id || car.id || `private-${index}`}
-                          car={car}
-                          onShare={handleShare}
-                          compact={isMobile}
-                        />
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* All Vehicles Section */}
-              {activeSection === 'all' && (
-                <div className="all-section" id="all-panel" role="tabpanel">
-                  <div className="section-header">
-                    <h2>🚗 All Vehicles</h2>
-                    <p>
-                      Browse our complete inventory of vehicles from dealers and private sellers
-                      {(displayData.premium > 0 || displayData.savings > 0 || displayData.private > 0) && (
-                        <span className="section-stats">
-                          • {displayData.premium} premium • {displayData.savings} with savings • {displayData.private} private sellers
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <div className={`marketplace-grid all-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
-                    {isMobile ? (
-                      displayData.displayCars.map((car) => {
-                        const carId = car._id || car.id;
-                        const similarCars = similarCarsData.get(carId) || [];
-                        
-                        return (
-                          <MobileHorizontalCarRow
-                            key={carId}
-                            mainCar={car}
-                            similarCars={similarCars}
-                          />
-                        );
-                      })
-                    ) : (
-                      displayData.displayCars.map((car, index) => (
-                        <VehicleCard 
-                          key={car._id || car.id || `all-${index}`}
-                          car={car}
-                          onShare={handleShare}
-                          compact={isMobile}
-                        />
-                      ))
-                    )}
-                  </div>
-                  
-                  {/* Load More Sentinel for Infinite Scroll */}
-                  {allCars.length > visibleItems && (
-                    <div className="load-more-container">
-                      <div className="load-more-sentinel"></div>
-                      <button 
-                        className="load-more-btn"
-                        onClick={handleLoadMore}
-                        disabled={isScrolling}
-                      >
-                        {isScrolling ? 'Loading...' : `Load More (${allCars.length - visibleItems} remaining)`}
-                      </button>
-                    </div>
+        /* Vehicle Listings */
+        <div className="marketplace-sections">
+          {/* Premium Section */}
+          {activeSection === 'premium' && (
+            <div className="premium-section" id="premium-panel" role="tabpanel">
+              <div className="section-header">
+                <h2>✨ Premium Vehicles</h2>
+                <p>
+                  Exceptional vehicles with premium features and verified quality
+                  {displayData.privatePremium > 0 && (
+                    <span className="premium-count">
+                      • {displayData.privatePremium} from trusted private sellers
+                    </span>
                   )}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <div className="empty-icon">
-                {activeSection === 'premium' ? '👑' : 
-                 activeSection === 'savings' ? '💰' : 
-                 activeSection === 'private' ? '🤝' : '🚗'}
+                </p>
               </div>
-              <h2>
-                {activeSection === 'premium' 
-                  ? 'No premium vehicles found'
-                  : activeSection === 'savings'
-                  ? 'No savings available right now'
-                  : activeSection === 'private'
-                  ? 'No private seller listings found'
-                  : 'No vehicles found'
-                }
-              </h2>
-              <p>
-                {activeSection === 'premium' 
-                  ? 'Try adjusting your filters or check back later for new premium listings from dealers and private sellers.'
-                  : activeSection === 'savings'
-                  ? 'Check back soon for new exclusive deals and savings opportunities from all our sellers.'
-                  : activeSection === 'private'
-                  ? 'Try adjusting your filters or check back later for new private seller listings.'
-                  : 'Try adjusting your search filters or check back later for new listings.'
-                }
-              </p>
-              <div className="empty-actions">
-                {activeSection !== 'all' && (
-                  <button 
-                    className="switch-section-btn" 
-                    onClick={() => handleSectionChange('all')}
-                  >
-                    View All Vehicles
-                  </button>
+              <div className={`marketplace-grid premium-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
+                {isMobile ? (
+                  displayData.displayCars.map((car) => {
+                    const carId = car._id || car.id;
+                    const similarCars = similarCarsData.get(carId) || [];
+                    
+                    return (
+                      <MobileHorizontalCarRow
+                        key={carId}
+                        mainCar={car}
+                        similarCars={similarCars}
+                      />
+                    );
+                  })
+                ) : (
+                  displayData.displayCars.map((car, index) => (
+                    <VehicleCard 
+                      key={car._id || car.id || `premium-${index}`}
+                      car={car}
+                      onShare={handleShare}
+                      compact={isMobile}
+                    />
+                  ))
                 )}
-                <button 
-                  className="clear-filters-button" 
-                  onClick={() => navigate('/marketplace')}
-                >
-                  Clear Filters
-                </button>
               </div>
             </div>
           )}
-        </>
+
+          {/* Savings Section */}
+          {activeSection === 'savings' && (
+            <div className="savings-section" id="savings-panel" role="tabpanel">
+              <div className="section-header">
+                <h2>💰 Best Savings</h2>
+                <p>
+                  Vehicles with the biggest savings and best value deals
+                  <span className="total-savings">
+                    • Total savings available: P{displayData.totalSavings.toLocaleString()}
+                  </span>
+                  {displayData.privateSavings > 0 && (
+                    <span className="private-seller-count">
+                      • {displayData.privateSavings} exclusive deals from private sellers
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className={`marketplace-grid savings-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
+                {isMobile ? (
+                  displayData.displayCars.map((car) => {
+                    const carId = car._id || car.id;
+                    const similarCars = similarCarsData.get(carId) || [];
+                    
+                    return (
+                      <MobileHorizontalCarRow
+                        key={carId}
+                        mainCar={car}
+                        similarCars={similarCars}
+                      />
+                    );
+                  })
+                ) : (
+                  displayData.displayCars.map((car, index) => (
+                    <VehicleCard 
+                      key={car._id || car.id || `savings-${index}`}
+                      car={car}
+                      onShare={handleShare}
+                      compact={isMobile}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Private Sellers Section */}
+          {activeSection === 'private' && (
+            <div className="private-section" id="private-panel" role="tabpanel">
+              <div className="section-header">
+                <h2>🤝 Private Sellers</h2>
+                <p>
+                  Quality vehicles from individual owners with personal stories
+                  {displayData.privateSavings > 0 && (
+                    <span className="private-seller-count">
+                      • {displayData.privateSavings} with exclusive savings
+                    </span>
+                  )}
+                  {displayData.privatePremium > 0 && (
+                    <span className="private-seller-count">
+                      • {displayData.privatePremium} premium listings
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className={`marketplace-grid private-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
+                {isMobile ? (
+                  displayData.displayCars.map((car) => {
+                    const carId = car._id || car.id;
+                    const similarCars = similarCarsData.get(carId) || [];
+                    
+                    return (
+                      <MobileHorizontalCarRow
+                        key={carId}
+                        mainCar={car}
+                        similarCars={similarCars}
+                      />
+                    );
+                  })
+                ) : (
+                  displayData.displayCars.map((car, index) => (
+                    <VehicleCard 
+                      key={car._id || car.id || `private-${index}`}
+                      car={car}
+                      onShare={handleShare}
+                      compact={isMobile}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* All Vehicles Section */}
+          {activeSection === 'all' && (
+            <div className="all-section" id="all-panel" role="tabpanel">
+              <div className="section-header">
+                <h2>🚗 All Vehicles</h2>
+                <p>
+                  Browse our complete inventory of vehicles from dealers and private sellers
+                  {(displayData.premium > 0 || displayData.savings > 0 || displayData.private > 0) && (
+                    <span className="section-stats">
+                      • {displayData.premium} premium • {displayData.savings} with savings • {displayData.private} private sellers
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className={`marketplace-grid all-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
+                {isMobile ? (
+                  displayData.displayCars.map((car) => {
+                    const carId = car._id || car.id;
+                    const similarCars = similarCarsData.get(carId) || [];
+                    
+                    return (
+                      <MobileHorizontalCarRow
+                        key={carId}
+                        mainCar={car}
+                        similarCars={similarCars}
+                      />
+                    );
+                  })
+                ) : (
+                  displayData.displayCars.map((car, index) => (
+                    <VehicleCard 
+                      key={car._id || car.id || `all-${index}`}
+                      car={car}
+                      onShare={handleShare}
+                      compact={isMobile}
+                    />
+                  ))
+                )}
+              </div>
+              
+              {/* Load More Sentinel for Infinite Scroll */}
+              {allCars.length > visibleItems && (
+                <div className="load-more-container">
+                  <div className="load-more-sentinel"></div>
+                  <button 
+                    className="load-more-btn"
+                    onClick={handleLoadMore}
+                    disabled={isScrolling}
+                  >
+                    {isScrolling ? 'Loading...' : `Load More (${allCars.length - visibleItems} remaining)`}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       )}
-      
+
       {/* Share Modal */}
       {shareModalOpen && selectedCar && (
-        <ShareModal
+        <ShareModal 
           car={selectedCar}
           onClose={() => setShareModalOpen(false)}
           buttonRef={shareButtonRef}
