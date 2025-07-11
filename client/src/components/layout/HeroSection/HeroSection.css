@@ -1037,7 +1037,7 @@
 }
 
 @media (max-width: 480px) {
-  .bcc-hero-nav-content {
+ .bcc-hero-nav-content {
     padding: 0 1rem;
   }
   
@@ -1063,11 +1063,21 @@
     font-size: 0.8rem;
   }
 
-  .bcc-hero-stats {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+ .bcc-hero-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 0.8rem; /* Reduced gap - row gap, column gap */
+    padding: 1.5rem 1rem; /* Reduced top/bottom padding */
   }
   
+ .bcc-hero-stat-number {
+    font-size: 2rem; /* Reduced from 2.5rem */
+  }
+
+  .bcc-hero-stat-label {
+    font-size: 0.75rem; /* Reduced for better fit */
+    line-height: 1.2;
+  }
+
   .bcc-hero-buy h1,
   .bcc-hero-sell h1 {
     font-size: 2rem;
