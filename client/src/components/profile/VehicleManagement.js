@@ -1,11 +1,11 @@
 // client/src/components/profile/VehicleManagement.js
-// COMPLETE FULL VERSION with all updates integrated
+// COMPLETE FULL VERSION with all updates integrated - FIXED Lucide React Import
 
 import React, { useState, useEffect } from 'react';
 import { 
   Car, Plus, Edit2, Trash2, Settings, DollarSign, Calendar, 
   Bell, AlertCircle, Check, X, Save, Upload, Camera, Eye,
-  Wrench, Gas, Navigation, Award, TrendingUp, Calculator, Shield,
+  Wrench, Fuel, Navigation, Award, TrendingUp, Calculator, Shield,
   User, Phone, MapPin, Clock, Star
 } from 'lucide-react';
 import axios from '../../config/axios.js';
@@ -700,7 +700,7 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
               <p>Advanced analytics and insights for your vehicles:</p>
               <div className="vmanage-feature-list">
                 <div className="vmanage-feature-item">
-                  <Gas size={16} />
+                  <Fuel size={16} />
                   <span>Fuel efficiency tracking and optimization</span>
                 </div>
                 <div className="vmanage-feature-item">
