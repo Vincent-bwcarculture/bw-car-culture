@@ -6,6 +6,7 @@ import {
   Settings, 
   Route, 
   Car, 
+  Gas,
   BarChart3,
   BookOpen, 
   Shield,

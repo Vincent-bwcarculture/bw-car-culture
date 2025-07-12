@@ -6,7 +6,7 @@ import {
   Car, Plus, Edit2, Trash2, Settings, DollarSign, Calendar, 
   Bell, AlertCircle, Check, X, Save, Upload, Camera, Eye,
   Wrench, Gas, Navigation, Award, TrendingUp, Calculator, Shield,
-  User, Phone, MapPin, Clock, Star
+  User, Phone, MapPin, Gas, Clock, Star
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 
