@@ -1,0 +1,469 @@
+/* client/src/components/profile/UserCarListingForm.css */
+
+.user-listing-form-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-border-radius);
+  padding: 2rem;
+  border: 1px solid var(--uprofile-border-color);
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.form-header h2 {
+  color: var(--uprofile-text-primary);
+  margin-bottom: 0.5rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.form-header p {
+  color: var(--uprofile-text-secondary);
+  margin-bottom: 1rem;
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.message.success {
+  background: rgba(39, 174, 96, 0.1);
+  color: var(--uprofile-success-green);
+  border: 1px solid rgba(39, 174, 96, 0.2);
+}
+
+.message.error {
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--uprofile-secondary-red);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+/* Form Tabs */
+.form-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--uprofile-border-color);
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--uprofile-text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.tab-button:hover {
+  background: var(--uprofile-bg-tertiary);
+  color: var(--uprofile-text-primary);
+}
+
+.tab-button.active {
+  background: var(--uprofile-primary-accent);
+  color: white;
+}
+
+/* Form Sections */
+.form-section {
+  margin-bottom: 2rem;
+}
+
+.form-section h3 {
+  color: var(--uprofile-text-primary);
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  color: var(--uprofile-text-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid var(--uprofile-border-color);
+  border-radius: 6px;
+  background: var(--uprofile-bg-secondary);
+  color: var(--uprofile-text-primary);
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--uprofile-primary-accent);
+}
+
+.form-group input.error,
+.form-group select.error,
+.form-group textarea.error {
+  border-color: var(--uprofile-secondary-red);
+}
+
+.error-text {
+  color: var(--uprofile-secondary-red);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.form-group small {
+  color: var(--uprofile-text-muted);
+  font-size: 0.8rem;
+}
+
+/* Price Input */
+.price-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--uprofile-text-secondary);
+  font-weight: 600;
+  z-index: 1;
+}
+
+.price-input input {
+  padding-left: 2rem;
+}
+
+/* Checkbox Labels */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: var(--uprofile-text-primary);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+}
+
+/* Features Grid */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.feature-category h4 {
+  color: var(--uprofile-text-primary);
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.feature-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.feature-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.feature-checkbox:hover {
+  background: var(--uprofile-bg-tertiary);
+}
+
+.feature-checkbox input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.feature-checkbox span {
+  color: var(--uprofile-text-primary);
+  font-size: 0.9rem;
+}
+
+/* Service History Section */
+.service-history-section {
+  background: var(--uprofile-bg-secondary);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--uprofile-border-color);
+  margin-top: 2rem;
+}
+
+/* Image Upload Section */
+.image-upload-section {
+  margin-bottom: 2rem;
+}
+
+.upload-area {
+  border: 2px dashed var(--uprofile-border-color);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.2s ease;
+}
+
+.upload-area:hover {
+  border-color: var(--uprofile-primary-accent);
+}
+
+.upload-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: var(--uprofile-text-primary);
+}
+
+.upload-button span {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.upload-button small {
+  color: var(--uprofile-text-secondary);
+  font-size: 0.9rem;
+}
+
+.uploading-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--uprofile-primary-accent);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.uploaded-images h4 {
+  color: var(--uprofile-text-primary);
+  margin-bottom: 1rem;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.image-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--uprofile-border-color);
+}
+
+.image-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.remove-image {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(231, 76, 60, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.remove-image:hover {
+  background: var(--uprofile-secondary-red);
+}
+
+.image-tips {
+  background: var(--uprofile-bg-secondary);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--uprofile-border-color);
+}
+
+.image-tips h4 {
+  color: var(--uprofile-text-primary);
+  margin-bottom: 1rem;
+}
+
+.image-tips ul {
+  color: var(--uprofile-text-secondary);
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.image-tips li {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Pricing Note */
+.pricing-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--uprofile-bg-secondary);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--uprofile-border-color);
+  margin-top: 1.5rem;
+}
+
+.pricing-note p {
+  color: var(--uprofile-text-secondary);
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 2rem;
+  border-top: 1px solid var(--uprofile-border-color);
+}
+
+.cancel-button,
+.submit-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-button {
+  background: var(--uprofile-bg-tertiary);
+  color: var(--uprofile-text-secondary);
+  border: 1px solid var(--uprofile-border-color);
+}
+
+.cancel-button:hover {
+  background: var(--uprofile-bg-quaternary);
+  color: var(--uprofile-text-primary);
+}
+
+.submit-button {
+  background: var(--uprofile-primary-accent);
+  color: white;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: var(--uprofile-primary-accent-dark);
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .user-listing-form-container {
+    padding: 1rem;
+  }
+  
+  .form-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .form-tabs {
+    flex-wrap: wrap;
+  }
+  
+  .tab-button {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.8rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .feature-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .cancel-button,
+  .submit-button {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -357,7 +357,7 @@ const CarListingManager = ({ user, onUpdate }) => {
 
   // Generate WhatsApp booking link
   const generateBookingLink = (serviceType) => {
-    const whatsappNumber = '+26771234567'; // Replace with actual number
+    const whatsappNumber = '+26774122453'; // Replace with actual number
     let message = 'Hi! I would like to book a service for my car listing.';
     
     if (serviceType === 'photography') {

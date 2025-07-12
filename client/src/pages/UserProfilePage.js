@@ -14,7 +14,7 @@ import {
 import axios from '../config/axios.js';
 
 import ProfileHeader from '../components/profile/ProfileHeader.js';
-import RoleSelection from '../components/profile/RoleSelection.js';
+// REMOVED: import RoleSelection from '../components/profile/RoleSelection.js';
 import ProfileOverview from '../components/profile/ProfileOverview.js';
 import ServiceManagement from '../components/profile/ServiceManagement.js';
 import RouteManagement from '../components/profile/RouteManagement.js';
@@ -54,8 +54,14 @@ const UserProfilePage = () => {
     const tab = params.get('tab');
     const action = params.get('action');
     
-    if (tab && ['overview', 'services', 'routes', 'vehicles', 'business', 'settings'].includes(tab)) {
-      setActiveTab(tab);
+    // UPDATED: Enhanced tab handling for car selling
+    if (tab) {
+      if (tab === 'sell-car' || tab === 'sell_car') {
+        setActiveTab('vehicles'); // Redirect to vehicles tab
+        setUrlAction('sell'); // Set action to sell
+      } else if (['overview', 'services', 'routes', 'vehicles', 'business', 'settings'].includes(tab)) {
+        setActiveTab(tab);
+      }
     }
     
     if (action) {
@@ -282,7 +288,7 @@ const getAvailableTabs = () => {
   
 
   // === UNIVERSAL TABS (Always at the end) ===
-  tabs.push({ id: 'roles', label: 'Role Management', icon: Shield })
+  // REMOVED: tabs.push({ id: 'roles', label: 'Role Management', icon: Shield })
   tabs.push({ id: 'settings', label: 'Settings', icon: Settings });
 
   return tabs;
@@ -399,12 +405,15 @@ const getAvailableTabs = () => {
           />
         )}
 
-           {activeTab === 'roles' && (
+        {/* REMOVED: roles tab content */}
+        {/*
+        {activeTab === 'roles' && (
           <RoleSelection 
             profileData={displayData}
             refreshProfile={fetchUserProfile}
           />
         )}
+        */}
 
         {activeTab === 'settings' && (
           <ProfileSettings 
