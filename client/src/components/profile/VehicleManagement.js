@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Car, Plus, Edit2, Trash2, Settings, DollarSign, Calendar, 
-  Bell, AlertCircle, Check, X, Save, Upload, Camera, Eye,
+  Bell, AlertCircle, Check, CheckCircle, X, Save, Upload, Camera, Eye,
   Wrench, Fuel, Navigation, Award, TrendingUp, Calculator, Shield,
   User, Phone, MapPin, Clock, Star
 } from 'lucide-react';

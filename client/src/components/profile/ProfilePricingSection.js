@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   DollarSign, Star, CheckCircle, Camera, Video, 
   TrendingUp, Phone, Info, ExternalLink, Zap,
-  Award, Shield, Clock, Users
+  Award, Shield, Clock, Users, AlertCircle
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import './ProfilePricingSection.css';
