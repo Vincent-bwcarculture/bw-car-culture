@@ -1,0 +1,584 @@
+/* client/src/components/profile/ProfilePricingSection.css */
+
+.profile-pricing-section {
+  background: var(--uprofile-bg-primary);
+  border: 1px solid var(--uprofile-border-color);
+  border-radius: var(--uprofile-border-radius);
+  padding: 24px;
+  margin-bottom: 24px;
+  transition: var(--uprofile-transition);
+}
+
+/* === HEADER === */
+.profile-pricing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.profile-pricing-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-pricing-title h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+}
+
+.profile-seller-type {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.seller-type-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 51, 0, 0.1);
+  border: 1px solid rgba(255, 51, 0, 0.2);
+  border-radius: 8px;
+  color: var(--uprofile-primary-accent);
+}
+
+.seller-type-info div {
+  display: flex;
+  flex-direction: column;
+}
+
+.seller-type-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.seller-type-note {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin: 0;
+}
+
+/* === PRICING TIERS === */
+.profile-pricing-tiers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.profile-pricing-tier {
+  background: var(--uprofile-bg-secondary);
+  border: 2px solid var(--uprofile-border-color);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  text-align: center;
+}
+
+.profile-pricing-tier:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: var(--uprofile-primary-accent);
+}
+
+.profile-pricing-tier.popular {
+  border-color: var(--uprofile-primary-accent);
+  background: linear-gradient(145deg, 
+    rgba(255, 51, 0, 0.05) 0%, 
+    var(--uprofile-bg-secondary) 100%);
+}
+
+.profile-pricing-tier.selected {
+  border-color: var(--uprofile-success-green);
+  background: linear-gradient(145deg, 
+    rgba(39, 174, 96, 0.05) 0%, 
+    var(--uprofile-bg-secondary) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(39, 174, 96, 0.2);
+}
+
+.profile-tier-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--uprofile-primary-accent);
+  color: white;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.profile-tier-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.profile-tier-price {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--uprofile-text-primary);
+  line-height: 1;
+}
+
+.profile-tier-period {
+  font-size: 0.9rem;
+  color: var(--uprofile-text-secondary);
+  font-weight: 500;
+}
+
+.profile-tier-name {
+  font-size: 1.1rem;
+  color: var(--uprofile-text-primary);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.profile-tier-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.profile-tier-feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--uprofile-text-secondary);
+  font-size: 0.85rem;
+}
+
+.profile-tier-feature svg {
+  color: var(--uprofile-success-green);
+  flex-shrink: 0;
+}
+
+.profile-tier-button {
+  width: 100%;
+  padding: 12px 24px;
+  background: var(--uprofile-primary-accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.profile-tier-button:hover {
+  background: var(--uprofile-primary-accent-dark);
+  transform: translateY(-1px);
+}
+
+.profile-tier-button.selected {
+  background: var(--uprofile-success-green);
+}
+
+.profile-tier-button.selected:hover {
+  background: var(--uprofile-success-green-dark);
+}
+
+/* === ADDONS SECTION === */
+.profile-addons-section {
+  border-top: 1px solid var(--uprofile-border-color);
+  padding-top: 24px;
+  margin-bottom: 24px;
+}
+
+.profile-addons-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.profile-addons-header h4 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+}
+
+.profile-addons-header p {
+  margin: 0;
+  color: var(--uprofile-text-secondary);
+  font-size: 0.9rem;
+}
+
+.profile-addons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.profile-addon-card {
+  background: var(--uprofile-bg-tertiary);
+  border: 2px solid var(--uprofile-border-color);
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-addon-card:hover {
+  border-color: var(--uprofile-primary-accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.profile-addon-card.selected {
+  border-color: var(--uprofile-success-green);
+  background: linear-gradient(145deg, 
+    rgba(39, 174, 96, 0.05) 0%, 
+    var(--uprofile-bg-tertiary) 100%);
+}
+
+.profile-addon-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 51, 0, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--uprofile-primary-accent);
+  flex-shrink: 0;
+}
+
+.profile-addon-content {
+  flex: 1;
+}
+
+.profile-addon-name {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+}
+
+.profile-addon-description {
+  margin: 0 0 8px 0;
+  font-size: 0.85rem;
+  color: var(--uprofile-text-secondary);
+  line-height: 1.4;
+}
+
+.profile-addon-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.profile-addon-price .price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--uprofile-text-primary);
+}
+
+.profile-addon-price .period {
+  font-size: 0.8rem;
+  color: var(--uprofile-text-secondary);
+}
+
+.profile-addon-select {
+  display: flex;
+  align-items: center;
+}
+
+.profile-addon-select input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--uprofile-success-green);
+  cursor: pointer;
+}
+
+.profile-addons-summary {
+  background: rgba(39, 174, 96, 0.05);
+  border: 1px solid rgba(39, 174, 96, 0.2);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.addons-total {
+  font-size: 1rem;
+  color: var(--uprofile-text-primary);
+}
+
+.addons-total strong {
+  font-size: 1.2rem;
+  color: var(--uprofile-success-green);
+}
+
+/* === DEALER NOTICE === */
+.profile-dealer-notice {
+  background: linear-gradient(145deg, 
+    rgba(37, 211, 102, 0.05) 0%, 
+    rgba(37, 211, 102, 0.02) 100%);
+  border: 1px solid rgba(37, 211, 102, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.dealer-notice-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.dealer-notice-content svg {
+  color: var(--uprofile-success-green);
+  flex-shrink: 0;
+}
+
+.dealer-notice-content h4 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+}
+
+.dealer-notice-content p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--uprofile-text-secondary);
+}
+
+.dealer-contact-btn {
+  background: var(--uprofile-success-green);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.dealer-contact-btn:hover {
+  background: var(--uprofile-success-green-dark);
+  transform: translateY(-1px);
+}
+
+/* === INFO SECTION === */
+.profile-pricing-info {
+  background: rgba(255, 51, 0, 0.05);
+  border: 1px solid rgba(255, 51, 0, 0.1);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.profile-pricing-info svg {
+  color: var(--uprofile-primary-accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.profile-pricing-info h4 {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+}
+
+.profile-pricing-info ul {
+  margin: 0;
+  padding-left: 16px;
+  color: var(--uprofile-text-secondary);
+  font-size: 0.85rem;
+}
+
+.profile-pricing-info li {
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+/* === LOADING AND ERROR STATES === */
+.profile-pricing-loading,
+.profile-pricing-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--uprofile-text-secondary);
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--uprofile-border-color);
+  border-top: 3px solid var(--uprofile-primary-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.profile-pricing-error {
+  color: var(--uprofile-error-red);
+}
+
+.profile-pricing-error svg {
+  margin-bottom: 8px;
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 768px) {
+  .profile-pricing-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .profile-pricing-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .profile-pricing-title h3 {
+    font-size: 1.2rem;
+  }
+
+  .profile-pricing-tiers {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .profile-tier-price {
+    font-size: 1.8rem;
+  }
+
+  .profile-addons-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .profile-addon-card {
+    padding: 12px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-addon-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .profile-dealer-notice {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .dealer-contact-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-pricing-section {
+    padding: 12px;
+  }
+
+  .profile-pricing-tier {
+    padding: 16px;
+  }
+
+  .profile-tier-price {
+    font-size: 1.6rem;
+  }
+
+  .seller-type-info {
+    padding: 6px 12px;
+  }
+
+  .seller-type-title {
+    font-size: 0.8rem;
+  }
+
+  .seller-type-note {
+    font-size: 0.7rem;
+  }
+}
+
+/* === DARK MODE ADJUSTMENTS === */
+[data-theme="dark"] .profile-pricing-section {
+  background: var(--uprofile-bg-primary);
+  border-color: var(--uprofile-border-color);
+}
+
+[data-theme="dark"] .profile-pricing-tier {
+  background: var(--uprofile-bg-secondary);
+}
+
+[data-theme="dark"] .profile-addon-card {
+  background: var(--uprofile-bg-tertiary);
+}
+
+/* === HIGH CONTRAST SUPPORT === */
+@media (prefers-contrast: high) {
+  .profile-pricing-tier {
+    border-width: 3px;
+  }
+
+  .profile-addon-card {
+    border-width: 3px;
+  }
+}
+
+/* === REDUCED MOTION SUPPORT === */
+@media (prefers-reduced-motion: reduce) {
+  .profile-pricing-tier:hover,
+  .profile-addon-card:hover,
+  .dealer-contact-btn:hover {
+    transform: none;
+  }
+
+  .loading-spinner {
+    animation: none;
+  }
+}
