@@ -1,4 +1,6 @@
-// src/config/axios.js
+// client/src/config/axios.js
+// REMOVE THE ROUTING LOGIC - Let everything go to main API
+
 import axios from 'axios';
 
 // Create axios instance with common configuration
@@ -11,20 +13,6 @@ const api = axios.create({
     'Cache-Control': 'no-cache'
   }
 });
-
-// 🎯 NEW: Endpoints that should be routed to user-services.js
-const USER_SERVICE_ENDPOINTS = [
-  '/api/user/profile',
-  '/api/user/vehicles',
-  '/api/user/listings',
-  '/api/user/listings/stats',
-  '/api/payments/available-tiers',
-  '/api/payments/initiate', 
-  '/api/payments/history',
-  '/api/addons/available',
-  '/api/addons/purchase',
-  '/api/addons/my-addons'
-];
 
 // Normalize URL paths to prevent duplicate /api prefixes and fix formatting
 const normalizeUrlPath = (url) => {
@@ -58,8 +46,8 @@ const normalizeUrlPath = (url) => {
 api.interceptors.request.use(
   (config) => {
     try {
-      // Normalize URL to prevent duplicate /api prefixes (but skip user-services routing)
-      if (config.url && !config.url.includes('user-services')) {
+      // Just normalize URL - NO ROUTING LOGIC
+      if (config.url) {
         const originalUrl = config.url;
         config.url = normalizeUrlPath(config.url);
         
@@ -67,27 +55,6 @@ api.interceptors.request.use(
         if (originalUrl !== config.url && process.env.NODE_ENV === 'development') {
           console.log(`URL normalized: ${originalUrl} → ${config.url}`);
         }
-      }
-
-      // 🎯 NEW: Route specific endpoints to user-services.js
-      const fullPath = `/api${config.url}`;
-      const shouldUseUserServices = USER_SERVICE_ENDPOINTS.some(endpoint => 
-        fullPath === endpoint || fullPath.startsWith(endpoint.split('?')[0])
-      );
-      
-      if (shouldUseUserServices) {
-        console.log(`🔄 Routing ${fullPath} → user-services.js`);
-        
-        // Store original path as query parameter for user-services.js
-        config.params = {
-          ...config.params,
-          path: fullPath
-        };
-        
-        // Route to user-services.js (needs /api prefix for Vercel)
-        config.url = '/api/user-services';
-      } else if (process.env.NODE_ENV === 'development') {
-        console.log(`🔄 Routing ${fullPath} → main index.js`);
       }
     
       // Add auth token if available
