@@ -10,6 +10,7 @@ import LoadingScreen from './components/shared/LoadingScreen/LoadingScreen.js';
 import SplashScreen from './components/SplashScreen.js';
 import { initializeGA, trackPageView, trackException, trackTiming } from './config/analytics.js';
 import UserProfilePage from './pages/UserProfilePage.js';
+import AdminUserSubmissions from './Admin/components/AdminUserSubmissions.js';
 
 // Add these imports
 import WelcomeModal from './components/shared/WelcomeModal/WelcomeModal.js';
@@ -575,7 +576,18 @@ const AppRoutes = () => {
             </AdminLayout>
           </ProtectedRoute>
         } />
-        
+
+        <Route 
+  path="/admin/user-submissions" 
+  element={
+    <ProtectedRoute adminOnly={true}>
+      <AdminLayout>
+        <AdminUserSubmissions />
+      </AdminLayout>
+    </ProtectedRoute>
+  } 
+/>
+
         <Route path="/admin/auctions" element={
           <ProtectedRoute requiredRoles={['admin']}>
             <AdminLayout>

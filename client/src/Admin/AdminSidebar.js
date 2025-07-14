@@ -56,6 +56,7 @@ const AdminSidebar = ({ collapsed }) => {
       icon: '🚗',
       submenu: [
         { title: 'Vehicle Listings', path: '/admin/listings' },
+        { title: 'User Submissions', path: '/admin/user-submissions' },
         { title: 'Pending Listings', path: '/admin/pending-listings' },
         { title: 'Featured Listings', path: '/admin/featured-listings' }
       ]
