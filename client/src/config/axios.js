@@ -58,8 +58,8 @@ const normalizeUrlPath = (url) => {
 api.interceptors.request.use(
   (config) => {
     try {
-      // Normalize URL to prevent duplicate /api prefixes
-      if (config.url) {
+      // Normalize URL to prevent duplicate /api prefixes (but skip user-services routing)
+      if (config.url && !config.url.includes('user-services')) {
         const originalUrl = config.url;
         config.url = normalizeUrlPath(config.url);
         
@@ -84,8 +84,8 @@ api.interceptors.request.use(
           path: fullPath
         };
         
-        // Route to user-services.js
-        config.url = '/user-services';
+        // Route to user-services.js (needs /api prefix for Vercel)
+        config.url = '/api/user-services';
       } else if (process.env.NODE_ENV === 'development') {
         console.log(`🔄 Routing ${fullPath} → main index.js`);
       }
