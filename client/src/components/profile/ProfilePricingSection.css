@@ -1,4 +1,5 @@
 /* client/src/components/profile/ProfilePricingSection.css */
+/* Complete CSS with Mobile Horizontal Scrolling Updates */
 
 .profile-pricing-section {
   background: var(--uprofile-bg-primary);
@@ -7,6 +8,7 @@
   padding: 24px;
   margin-bottom: 24px;
   transition: var(--uprofile-transition);
+  position: relative;
 }
 
 /* === HEADER === */
@@ -333,118 +335,71 @@
   color: var(--uprofile-success-green);
 }
 
-/* === DEALER NOTICE === */
-.profile-dealer-notice {
-  background: linear-gradient(145deg, 
-    rgba(37, 211, 102, 0.05) 0%, 
-    rgba(37, 211, 102, 0.02) 100%);
-  border: 1px solid rgba(37, 211, 102, 0.2);
-  border-radius: 12px;
-  padding: 20px;
+/* === SCROLL CONTROLS FOR MOBILE === */
+.scroll-container {
+  position: relative;
+}
+
+.scroll-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--uprofile-border-color);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 24px;
-}
-
-.dealer-notice-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-}
-
-.dealer-notice-content svg {
-  color: var(--uprofile-success-green);
-  flex-shrink: 0;
-}
-
-.dealer-notice-content h4 {
-  margin: 0 0 4px 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--uprofile-text-primary);
-}
-
-.dealer-notice-content p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--uprofile-text-secondary);
-}
-
-.dealer-contact-btn {
-  background: var(--uprofile-success-green);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  justify-content: center;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  z-index: 10;
   transition: all 0.3s ease;
-  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.dealer-contact-btn:hover {
-  background: var(--uprofile-success-green-dark);
-  transform: translateY(-1px);
+.scroll-button:hover {
+  background: var(--uprofile-primary-accent);
+  color: white;
+  transform: translateY(-50%) scale(1.1);
 }
 
-/* === INFO SECTION === */
-.profile-pricing-info {
-  background: rgba(255, 51, 0, 0.05);
-  border: 1px solid rgba(255, 51, 0, 0.1);
-  border-radius: 8px;
-  padding: 16px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
+.scroll-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: translateY(-50%);
 }
 
-.profile-pricing-info svg {
-  color: var(--uprofile-primary-accent);
-  flex-shrink: 0;
-  margin-top: 2px;
+.scroll-button.left {
+  left: -18px;
 }
 
-.profile-pricing-info h4 {
-  margin: 0 0 8px 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--uprofile-text-primary);
+.scroll-button.right {
+  right: -18px;
 }
 
-.profile-pricing-info ul {
-  margin: 0;
-  padding-left: 16px;
+.scroll-hint {
+  font-size: 0.7rem;
   color: var(--uprofile-text-secondary);
-  font-size: 0.85rem;
-}
-
-.profile-pricing-info li {
-  margin-bottom: 4px;
-  line-height: 1.4;
+  text-align: center;
+  margin-top: -8px;
+  margin-bottom: 16px;
+  opacity: 0.7;
 }
 
 /* === LOADING AND ERROR STATES === */
-.profile-pricing-loading,
-.profile-pricing-error {
+.profile-pricing-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
   text-align: center;
-  color: var(--uprofile-text-secondary);
 }
 
 .loading-spinner {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border: 3px solid var(--uprofile-border-color);
   border-top: 3px solid var(--uprofile-primary-accent);
   border-radius: 50%;
@@ -465,7 +420,41 @@
   margin-bottom: 8px;
 }
 
-/* === RESPONSIVE DESIGN === */
+/* === DEALER NOTICE === */
+.profile-dealer-notice {
+  background: linear-gradient(145deg, 
+    rgba(255, 51, 0, 0.05) 0%, 
+    var(--uprofile-bg-secondary) 100%);
+  border: 1px solid rgba(255, 51, 0, 0.2);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.dealer-contact-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--uprofile-primary-accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.dealer-contact-btn:hover {
+  background: var(--uprofile-primary-accent-dark);
+  transform: translateY(-1px);
+}
+
+/* === MOBILE RESPONSIVE DESIGN === */
 @media (max-width: 768px) {
   .profile-pricing-section {
     padding: 16px;
@@ -482,29 +471,175 @@
     font-size: 1.2rem;
   }
 
+  /* 🎯 HORIZONTAL PRICING TIERS ON MOBILE */
   .profile-pricing-tiers {
-    grid-template-columns: 1fr;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
     gap: 12px;
+    padding: 8px 4px 16px 4px;
+    margin-bottom: 24px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--uprofile-primary-accent) transparent;
+  }
+
+  .profile-pricing-tiers::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .profile-pricing-tiers::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+  }
+
+  .profile-pricing-tiers::-webkit-scrollbar-thumb {
+    background: var(--uprofile-primary-accent);
+    border-radius: 2px;
+  }
+
+  .profile-pricing-tier {
+    min-width: 240px;
+    max-width: 240px;
+    flex-shrink: 0;
+    padding: 16px;
+    margin-bottom: 0;
   }
 
   .profile-tier-price {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
   }
 
+  .profile-tier-name {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+
+  .profile-tier-features {
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .profile-tier-feature {
+    font-size: 0.8rem;
+  }
+
+  .profile-tier-button {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    min-height: 44px; /* iOS recommended minimum touch target */
+  }
+
+  /* 🎯 HORIZONTAL ADDONS ON MOBILE */
   .profile-addons-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
     gap: 12px;
+    padding: 8px 4px 16px 4px;
+    margin-bottom: 16px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--uprofile-primary-accent) transparent;
+  }
+
+  .profile-addons-grid::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .profile-addons-grid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+  }
+
+  .profile-addons-grid::-webkit-scrollbar-thumb {
+    background: var(--uprofile-primary-accent);
+    border-radius: 2px;
   }
 
   .profile-addon-card {
-    padding: 12px;
+    min-width: 280px;
+    max-width: 280px;
+    flex-shrink: 0;
+    padding: 14px;
     flex-direction: column;
     text-align: center;
+    gap: 12px;
+    min-height: 44px; /* iOS recommended minimum touch target */
   }
 
   .profile-addon-icon {
     width: 40px;
     height: 40px;
+    margin: 0 auto;
+  }
+
+  .profile-addon-content {
+    flex: none;
+  }
+
+  .profile-addon-name {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+
+  .profile-addon-description {
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .profile-addon-price .price {
+    font-size: 1rem;
+  }
+
+  .profile-addon-price .period {
+    font-size: 0.75rem;
+  }
+
+  .profile-addon-select input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    margin: 8px;
+  }
+
+  /* Mobile scroll controls */
+  .scroll-button {
+    display: none; /* Hide on mobile, rely on touch scrolling */
+  }
+
+  /* Compact addons section */
+  .profile-addons-section {
+    padding-top: 16px;
+    margin-bottom: 16px;
+  }
+
+  .profile-addons-header {
+    margin-bottom: 16px;
+  }
+
+  .profile-addons-header h4 {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+  }
+
+  .profile-addons-header p {
+    font-size: 0.85rem;
+  }
+
+  .profile-addons-summary {
+    padding: 12px;
+    margin-top: 12px;
+  }
+
+  .addons-total {
+    font-size: 0.9rem;
+  }
+
+  .addons-total strong {
+    font-size: 1.1rem;
   }
 
   .profile-dealer-notice {
@@ -519,17 +654,54 @@
   }
 }
 
+/* === EXTRA SMALL MOBILE DEVICES === */
 @media (max-width: 480px) {
   .profile-pricing-section {
     padding: 12px;
   }
 
+  /* 🎯 EVEN MORE COMPACT FOR SMALL PHONES */
   .profile-pricing-tier {
-    padding: 16px;
+    min-width: 200px;
+    max-width: 200px;
+    padding: 12px;
   }
 
   .profile-tier-price {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
+  }
+
+  .profile-tier-name {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+
+  .profile-tier-features {
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+
+  .profile-tier-feature {
+    font-size: 0.75rem;
+  }
+
+  .profile-tier-button {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+
+  .profile-addon-card {
+    min-width: 240px;
+    max-width: 240px;
+    padding: 12px;
+  }
+
+  .profile-addon-name {
+    font-size: 0.9rem;
+  }
+
+  .profile-addon-description {
+    font-size: 0.75rem;
   }
 
   .seller-type-info {
@@ -542,6 +714,45 @@
 
   .seller-type-note {
     font-size: 0.7rem;
+  }
+}
+
+/* === DESKTOP SCROLL CONTROLS === */
+@media (min-width: 769px) {
+  .scroll-button {
+    display: flex; /* Show scroll buttons on desktop */
+  }
+}
+
+/* === ACCESSIBILITY IMPROVEMENTS === */
+@media (prefers-reduced-motion: reduce) {
+  .profile-pricing-tiers,
+  .profile-addons-grid {
+    scroll-behavior: auto;
+  }
+
+  .profile-pricing-tier:hover,
+  .profile-addon-card:hover,
+  .dealer-contact-btn:hover,
+  .scroll-button:hover {
+    transform: none;
+  }
+
+  .loading-spinner {
+    animation: none;
+  }
+}
+
+/* === HIGH CONTRAST MODE === */
+@media (prefers-contrast: high) {
+  .profile-pricing-tier,
+  .profile-addon-card {
+    border-width: 3px;
+  }
+
+  .profile-pricing-tiers::-webkit-scrollbar-thumb,
+  .profile-addons-grid::-webkit-scrollbar-thumb {
+    background: #000;
   }
 }
 
@@ -559,26 +770,12 @@
   background: var(--uprofile-bg-tertiary);
 }
 
-/* === HIGH CONTRAST SUPPORT === */
-@media (prefers-contrast: high) {
-  .profile-pricing-tier {
-    border-width: 3px;
-  }
-
-  .profile-addon-card {
-    border-width: 3px;
-  }
+[data-theme="dark"] .scroll-button {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-color: var(--uprofile-border-color);
 }
 
-/* === REDUCED MOTION SUPPORT === */
-@media (prefers-reduced-motion: reduce) {
-  .profile-pricing-tier:hover,
-  .profile-addon-card:hover,
-  .dealer-contact-btn:hover {
-    transform: none;
-  }
-
-  .loading-spinner {
-    animation: none;
-  }
+[data-theme="dark"] .scroll-button:hover {
+  background: var(--uprofile-primary-accent);
 }

@@ -1,11 +1,12 @@
 // client/src/components/profile/ProfilePricingSection.js
-// Pricing and Addons section for user profile car listing
+// Complete Pricing and Addons section with Mobile Horizontal Scrolling
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   DollarSign, Star, CheckCircle, Camera, Video, 
   TrendingUp, Phone, Info, ExternalLink, Zap,
-  Award, Shield, Clock, Users, AlertCircle
+  Award, Shield, Clock, Users, AlertCircle, 
+  ChevronLeft, ChevronRight 
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import './ProfilePricingSection.css';
@@ -17,6 +18,7 @@ const ProfilePricingSection = ({
   listingId = null,
   showAddons = true 
 }) => {
+  // === EXISTING STATE ===
   const [availableTiers, setAvailableTiers] = useState({});
   const [availableAddons, setAvailableAddons] = useState({});
   const [loading, setLoading] = useState(true);
@@ -24,7 +26,27 @@ const ProfilePricingSection = ({
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedAddons, setSelectedAddons] = useState([]);
 
-  // Fetch pricing and addon data
+  // === NEW MOBILE SCROLL STATE ===
+  const pricingScrollRef = useRef(null);
+  const addonsScrollRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [pricingCanScrollLeft, setPricingCanScrollLeft] = useState(false);
+  const [pricingCanScrollRight, setPricingCanScrollRight] = useState(false);
+  const [addonsCanScrollLeft, setAddonsCanScrollLeft] = useState(false);
+  const [addonsCanScrollRight, setAddonsCanScrollRight] = useState(false);
+
+  // === MOBILE DETECTION ===
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // === DATA FETCHING ===
   useEffect(() => {
     fetchPricingData();
     if (showAddons) {
@@ -32,6 +54,85 @@ const ProfilePricingSection = ({
     }
   }, [sellerType, showAddons]);
 
+  // === UPDATE SCROLL INDICATORS ===
+  const updateScrollIndicators = (scrollElement, setLeft, setRight) => {
+    if (!scrollElement) return;
+    
+    const { scrollLeft, scrollWidth, clientWidth } = scrollElement;
+    setLeft(scrollLeft > 5); // Small threshold to account for rounding
+    setRight(scrollLeft < scrollWidth - clientWidth - 5);
+  };
+
+  // === SCROLL FUNCTIONS ===
+  const scrollHorizontal = (elementRef, direction, setLeft, setRight) => {
+    const element = elementRef.current;
+    if (!element) return;
+    
+    const scrollAmount = element.clientWidth * 0.8; // Scroll 80% of visible width
+    const targetScroll = direction === 'left' 
+      ? element.scrollLeft - scrollAmount
+      : element.scrollLeft + scrollAmount;
+    
+    element.scrollTo({
+      left: targetScroll,
+      behavior: 'smooth'
+    });
+
+    // Update indicators after scroll animation
+    setTimeout(() => {
+      updateScrollIndicators(element, setLeft, setRight);
+    }, 300);
+  };
+
+  // === SCROLL EVENT HANDLERS ===
+  const handlePricingScroll = () => {
+    updateScrollIndicators(
+      pricingScrollRef.current, 
+      setPricingCanScrollLeft, 
+      setPricingCanScrollRight
+    );
+  };
+
+  const handleAddonsScroll = () => {
+    updateScrollIndicators(
+      addonsScrollRef.current, 
+      setAddonsCanScrollLeft, 
+      setAddonsCanScrollRight
+    );
+  };
+
+  // === SETUP SCROLL INDICATORS ===
+  useEffect(() => {
+    const pricingElement = pricingScrollRef.current;
+    const addonsElement = addonsScrollRef.current;
+
+    if (pricingElement) {
+      pricingElement.addEventListener('scroll', handlePricingScroll);
+      // Initial check
+      setTimeout(() => {
+        updateScrollIndicators(pricingElement, setPricingCanScrollLeft, setPricingCanScrollRight);
+      }, 100);
+    }
+
+    if (addonsElement) {
+      addonsElement.addEventListener('scroll', handleAddonsScroll);
+      // Initial check
+      setTimeout(() => {
+        updateScrollIndicators(addonsElement, setAddonsCanScrollLeft, setAddonsCanScrollRight);
+      }, 100);
+    }
+
+    return () => {
+      if (pricingElement) {
+        pricingElement.removeEventListener('scroll', handlePricingScroll);
+      }
+      if (addonsElement) {
+        addonsElement.removeEventListener('scroll', handleAddonsScroll);
+      }
+    };
+  }, [availableTiers, availableAddons]);
+
+  // === API FUNCTIONS ===
   const fetchPricingData = async () => {
     try {
       const response = await axios.get('/api/payments/available-tiers');
@@ -58,6 +159,7 @@ const ProfilePricingSection = ({
     }
   };
 
+  // === EVENT HANDLERS ===
   const handlePlanSelection = (planId) => {
     setSelectedPlan(planId);
     if (onPlanSelect) {
@@ -72,196 +174,163 @@ const ProfilePricingSection = ({
     
     setSelectedAddons(newSelectedAddons);
     if (onAddonSelect) {
-      onAddonSelect(newSelectedAddons);
+      onAddonSelect(addonId, availableAddons[addonId]);
     }
   };
 
-  const getSellerTypeInfo = () => {
-    const info = {
-      private: {
-        title: 'Individual Seller',
-        description: 'Perfect for selling your personal vehicle',
-        icon: <Users size={20} />,
-        note: 'Each subscription covers 1 car listing'
-      },
-      dealership: {
-        title: 'Dealership',
-        description: 'Professional car sales business',
-        icon: <Award size={20} />,
-        note: 'Multiple car listings per subscription'
-      },
-      rental: {
-        title: 'Car Rental',
-        description: 'Rental car fleet management',
-        icon: <Clock size={20} />,
-        note: 'Fleet management features included'
-      }
+  // === CALCULATE TOTALS ===
+  const calculateSelectedAddonsTotal = () => {
+    return selectedAddons.reduce((total, addonId) => {
+      return total + (availableAddons[addonId]?.price || 0);
+    }, 0);
+  };
+
+  // === ICON MAPPING ===
+  const getAddonIcon = (addonId) => {
+    const iconMap = {
+      photography: Camera,
+      review: Video,
+      featured: Star,
+      detailing: Zap,
+      inspection: Shield,
+      warranty: Award
     };
-    return info[sellerType] || info.private;
+    return iconMap[addonId] || Info;
   };
 
-  const renderPricingTier = (tierId, tier) => {
-    const isPopular = tierId === 'standard';
-    const isSelected = selectedPlan === tierId;
-
-    return (
-      <div 
-        key={tierId}
-        className={`profile-pricing-tier ${isPopular ? 'popular' : ''} ${isSelected ? 'selected' : ''}`}
-        onClick={() => handlePlanSelection(tierId)}
-      >
-        {isPopular && <div className="profile-tier-badge">Most Popular</div>}
-        
-        <div className="profile-tier-header">
-          <div className="profile-tier-price">P{tier.price}</div>
-          <div className="profile-tier-period">/{tier.duration} days</div>
-        </div>
-        
-        <div className="profile-tier-name">{tier.name}</div>
-        
-        <div className="profile-tier-features">
-          <div className="profile-tier-feature">
-            <CheckCircle size={16} />
-            <span>Up to {tier.maxListings} car listing{tier.maxListings > 1 ? 's' : ''}</span>
-          </div>
-          <div className="profile-tier-feature">
-            <CheckCircle size={16} />
-            <span>Social media promotion</span>
-          </div>
-          <div className="profile-tier-feature">
-            <CheckCircle size={16} />
-            <span>Contact lead management</span>
-          </div>
-          {tierId !== 'basic' && (
-            <div className="profile-tier-feature">
-              <CheckCircle size={16} />
-              <span>Premium placement</span>
-            </div>
-          )}
-          {tierId === 'premium' && (
-            <>
-              <div className="profile-tier-feature">
-                <CheckCircle size={16} />
-                <span>Featured listing badge</span>
-              </div>
-              <div className="profile-tier-feature">
-                <CheckCircle size={16} />
-                <span>Priority support</span>
-              </div>
-            </>
-          )}
-        </div>
-        
-        <button 
-          className={`profile-tier-button ${isSelected ? 'selected' : ''}`}
-          onClick={(e) => {
-            e.stopPropagation();
-            handlePlanSelection(tierId);
-          }}
-        >
-          {isSelected ? 'Selected' : 'Select Plan'}
-        </button>
-      </div>
-    );
-  };
-
-  const renderAddonCard = (addonId, addon) => {
-    const isSelected = selectedAddons.includes(addonId);
-    
-    const getAddonIcon = (id) => {
-      switch(id) {
-        case 'photography': return <Camera size={24} />;
-        case 'sponsored': return <TrendingUp size={24} />;
-        case 'review': return <Video size={24} />;
-        case 'podcast': return <Zap size={24} />;
-        case 'listing_assistance': return <Shield size={24} />;
-        case 'full_assistance': return <Award size={24} />;
-        default: return <Star size={24} />;
-      }
-    };
-
-    return (
-      <div 
-        key={addonId}
-        className={`profile-addon-card ${isSelected ? 'selected' : ''}`}
-        onClick={() => handleAddonToggle(addonId)}
-      >
-        <div className="profile-addon-icon">
-          {getAddonIcon(addonId)}
-        </div>
-        
-        <div className="profile-addon-content">
-          <h4 className="profile-addon-name">{addon.name}</h4>
-          <p className="profile-addon-description">{addon.description}</p>
-          
-          <div className="profile-addon-price">
-            <span className="price">P{addon.price}</span>
-            <span className="period">one-time</span>
-          </div>
-        </div>
-        
-        <div className="profile-addon-select">
-          <input 
-            type="checkbox" 
-            checked={isSelected}
-            onChange={(e) => {
-              e.stopPropagation();
-              handleAddonToggle(addonId);
-            }}
-          />
-        </div>
-      </div>
-    );
-  };
-
+  // === LOADING STATE ===
   if (loading) {
     return (
-      <div className="profile-pricing-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading pricing information...</p>
+      <div className="profile-pricing-section">
+        <div className="profile-pricing-loading">
+          <div className="loading-spinner"></div>
+          <p>Loading pricing information...</p>
+        </div>
       </div>
     );
   }
 
+  // === ERROR STATE ===
   if (error) {
     return (
-      <div className="profile-pricing-error">
-        <AlertCircle size={24} />
-        <p>{error}</p>
+      <div className="profile-pricing-section">
+        <div className="profile-pricing-error">
+          <AlertCircle size={48} />
+          <p>{error}</p>
+          <button 
+            onClick={() => {
+              setError('');
+              setLoading(true);
+              fetchPricingData();
+              if (showAddons) fetchAddonsData();
+            }}
+            className="profile-tier-button"
+            style={{ maxWidth: '200px', margin: '0 auto' }}
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
-
-  const sellerInfo = getSellerTypeInfo();
 
   return (
     <div className="profile-pricing-section">
-      {/* Header */}
+      {/* === HEADER === */}
       <div className="profile-pricing-header">
         <div className="profile-pricing-title">
           <DollarSign size={24} />
           <h3>Choose Your Listing Plan</h3>
         </div>
-        
         <div className="profile-seller-type">
           <div className="seller-type-info">
-            {sellerInfo.icon}
+            <Users size={16} />
             <div>
-              <span className="seller-type-title">{sellerInfo.title}</span>
-              <span className="seller-type-note">{sellerInfo.note}</span>
+              <p className="seller-type-title">Individual Seller</p>
+              <p className="seller-type-note">Each plan = 1 listing</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Pricing Tiers */}
-      <div className="profile-pricing-tiers">
-        {Object.entries(availableTiers).map(([tierId, tier]) => 
-          renderPricingTier(tierId, tier)
+      {/* === PRICING TIERS === */}
+      <div className="scroll-container">
+        {!isMobile && (
+          <>
+            <button 
+              className={`scroll-button left ${!pricingCanScrollLeft ? 'disabled' : ''}`}
+              onClick={() => scrollHorizontal(
+                pricingScrollRef, 
+                'left', 
+                setPricingCanScrollLeft, 
+                setPricingCanScrollRight
+              )}
+              disabled={!pricingCanScrollLeft}
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button 
+              className={`scroll-button right ${!pricingCanScrollRight ? 'disabled' : ''}`}
+              onClick={() => scrollHorizontal(
+                pricingScrollRef, 
+                'right', 
+                setPricingCanScrollLeft, 
+                setPricingCanScrollRight
+              )}
+              disabled={!pricingCanScrollRight}
+            >
+              <ChevronRight size={20} />
+            </button>
+          </>
+        )}
+        
+        <div 
+          className="profile-pricing-tiers" 
+          ref={pricingScrollRef}
+        >
+          {Object.entries(availableTiers).map(([tierId, tier]) => (
+            <div
+              key={tierId}
+              className={`profile-pricing-tier ${selectedPlan === tierId ? 'selected' : ''} ${tierId === 'standard' ? 'popular' : ''}`}
+              onClick={() => handlePlanSelection(tierId)}
+            >
+              {tierId === 'standard' && (
+                <div className="profile-tier-badge">Most Popular</div>
+              )}
+              
+              <div className="profile-tier-header">
+                <span className="profile-tier-price">P{tier.price}</span>
+                <span className="profile-tier-period">/{tier.duration} days</span>
+              </div>
+              
+              <div className="profile-tier-name">{tier.name}</div>
+              
+              <div className="profile-tier-features">
+                {tier.features?.map((feature, index) => (
+                  <div key={index} className="profile-tier-feature">
+                    <CheckCircle size={16} />
+                    <span>{feature}</span>
+                  </div>
+                ))}
+              </div>
+              
+              <button 
+                className={`profile-tier-button ${selectedPlan === tierId ? 'selected' : ''}`}
+              >
+                {selectedPlan === tierId ? 'Selected' : 'Select Plan'}
+              </button>
+            </div>
+          ))}
+        </div>
+        
+        {isMobile && (
+          <div className="scroll-hint">
+            ← Swipe to see all plans →
+          </div>
         )}
       </div>
 
-      {/* Addons Section */}
+      {/* === ADDONS SECTION === */}
       {showAddons && Object.keys(availableAddons).length > 0 && (
         <div className="profile-addons-section">
           <div className="profile-addons-header">
@@ -271,65 +340,113 @@ const ProfilePricingSection = ({
             </h4>
             <p>Optional services to sell your car faster and get better offers</p>
           </div>
-          
-          <div className="profile-addons-grid">
-            {Object.entries(availableAddons).map(([addonId, addon]) => 
-              renderAddonCard(addonId, addon)
+
+          <div className="scroll-container">
+            {!isMobile && (
+              <>
+                <button 
+                  className={`scroll-button left ${!addonsCanScrollLeft ? 'disabled' : ''}`}
+                  onClick={() => scrollHorizontal(
+                    addonsScrollRef, 
+                    'left', 
+                    setAddonsCanScrollLeft, 
+                    setAddonsCanScrollRight
+                  )}
+                  disabled={!addonsCanScrollLeft}
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button 
+                  className={`scroll-button right ${!addonsCanScrollRight ? 'disabled' : ''}`}
+                  onClick={() => scrollHorizontal(
+                    addonsScrollRef, 
+                    'right', 
+                    setAddonsCanScrollLeft, 
+                    setAddonsCanScrollRight
+                  )}
+                  disabled={!addonsCanScrollRight}
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </>
+            )}
+            
+            <div 
+              className="profile-addons-grid" 
+              ref={addonsScrollRef}
+            >
+              {Object.entries(availableAddons).map(([addonId, addon]) => {
+                const IconComponent = getAddonIcon(addonId);
+                const isSelected = selectedAddons.includes(addonId);
+                
+                return (
+                  <div
+                    key={addonId}
+                    className={`profile-addon-card ${isSelected ? 'selected' : ''}`}
+                    onClick={() => handleAddonToggle(addonId)}
+                  >
+                    <div className="profile-addon-icon">
+                      <IconComponent size={24} />
+                    </div>
+                    
+                    <div className="profile-addon-content">
+                      <h5 className="profile-addon-name">{addon.name}</h5>
+                      <p className="profile-addon-description">{addon.description}</p>
+                      <div className="profile-addon-price">
+                        <span className="price">P{addon.price}</span>
+                        {addon.duration && (
+                          <span className="period">• {addon.duration}</span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="profile-addon-select">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleAddonToggle(addonId)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {isMobile && (
+              <div className="scroll-hint">
+                ← Swipe to see all add-ons →
+              </div>
             )}
           </div>
-          
+
+          {/* === ADDONS SUMMARY === */}
           {selectedAddons.length > 0 && (
             <div className="profile-addons-summary">
               <div className="addons-total">
-                <span>Selected Add-ons Total: </span>
-                <strong>
-                  P{selectedAddons.reduce((total, addonId) => 
-                    total + (availableAddons[addonId]?.price || 0), 0
-                  )}
-                </strong>
+                Selected add-ons total: <strong>P{calculateSelectedAddonsTotal()}</strong>
               </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Dealer Contact Section */}
-      {sellerType === 'private' && (
-        <div className="profile-dealer-notice">
-          <div className="dealer-notice-content">
-            <Shield size={24} />
-            <div>
-              <h4>Are you a car dealer?</h4>
-              <p>Get special dealer rates and bulk listing packages. Contact us for custom pricing.</p>
-            </div>
-          </div>
-          <button 
-            className="dealer-contact-btn"
-            onClick={() => {
-              const whatsappNumber = '+26774122453';
-              const message = encodeURIComponent('Hi! I am a car dealer interested in listing vehicles on BW Car Culture. Please provide information about dealer packages.');
-              window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
-            }}
-          >
-            <Phone size={16} />
-            Contact Us
-          </button>
-        </div>
-      )}
-
-      {/* Info Section */}
-      <div className="profile-pricing-info">
-        <Info size={20} />
+      {/* === DEALER NOTICE === */}
+      <div className="profile-dealer-notice">
         <div>
-          <h4>How it works</h4>
-          <ul>
-            <li>Choose a plan that fits your needs</li>
-            <li>Add optional services to boost visibility</li>
-            <li>Complete your car listing form</li>
-            <li>Make payment to activate your listing</li>
-            <li>Your car goes live immediately after payment</li>
-          </ul>
+          <h4>Need help or have questions?</h4>
+          <p>Contact our team for personalized assistance with your car listing.</p>
         </div>
+        <a 
+          href="https://wa.me/26774122453" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="dealer-contact-btn"
+        >
+          <Phone size={16} />
+          Contact Support
+          <ExternalLink size={14} />
+        </a>
       </div>
     </div>
   );
