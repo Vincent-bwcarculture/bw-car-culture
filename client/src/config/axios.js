@@ -12,6 +12,20 @@ const api = axios.create({
   }
 });
 
+// 🎯 NEW: Endpoints that should be routed to user-services.js
+const USER_SERVICE_ENDPOINTS = [
+  '/api/user/profile',
+  '/api/user/vehicles',
+  '/api/user/listings',
+  '/api/user/listings/stats',
+  '/api/payments/available-tiers',
+  '/api/payments/initiate', 
+  '/api/payments/history',
+  '/api/addons/available',
+  '/api/addons/purchase',
+  '/api/addons/my-addons'
+];
+
 // Normalize URL paths to prevent duplicate /api prefixes and fix formatting
 const normalizeUrlPath = (url) => {
   if (!url) return '';
@@ -53,6 +67,27 @@ api.interceptors.request.use(
         if (originalUrl !== config.url && process.env.NODE_ENV === 'development') {
           console.log(`URL normalized: ${originalUrl} → ${config.url}`);
         }
+      }
+
+      // 🎯 NEW: Route specific endpoints to user-services.js
+      const fullPath = `/api${config.url}`;
+      const shouldUseUserServices = USER_SERVICE_ENDPOINTS.some(endpoint => 
+        fullPath === endpoint || fullPath.startsWith(endpoint.split('?')[0])
+      );
+      
+      if (shouldUseUserServices) {
+        console.log(`🔄 Routing ${fullPath} → user-services.js`);
+        
+        // Store original path as query parameter for user-services.js
+        config.params = {
+          ...config.params,
+          path: fullPath
+        };
+        
+        // Route to user-services.js
+        config.url = '/user-services';
+      } else if (process.env.NODE_ENV === 'development') {
+        console.log(`🔄 Routing ${fullPath} → main index.js`);
       }
     
       // Add auth token if available
