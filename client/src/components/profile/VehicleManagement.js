@@ -27,7 +27,7 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
   const [vehicleFormData, setVehicleFormData] = useState({});
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
-
+  const [userSubmissions, setUserSubmissions] = useState([]);
   // Car listing flow state
   const [listingStep, setListingStep] = useState('form'); // 'form' or 'subscription'
   const [pendingListingData, setPendingListingData] = useState(null);
@@ -52,6 +52,14 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
     fetchUserVehicles();
     fetchUserSellerType(); // NEW: Get user's seller type
   }, []);
+
+  // Call fetchUserSubmissions in useEffect alongside other data fetching:
+useEffect(() => {
+  if (activeSection === 'vehicles') {
+    fetchUserVehicles();
+    fetchUserSubmissions(); // Add this line
+  }
+}, [activeSection]);
 
   // Handle URL actions from Hero section or other components
   useEffect(() => {
@@ -174,35 +182,65 @@ const VehicleManagement = ({ profileData, refreshProfile, urlAction }) => {
     }
   };
 
-  // Handle car listing form submission
-  const handleListingFormSubmit = async (listingData) => {
-    try {
-      setLoading(true);
-      
-      // Check if plan is selected
-      if (!selectedPlan) {
-        showMessage('error', 'Please select a listing plan first');
-        return;
-      }
+const handleListingFormSubmit = async (listingData) => {
+  try {
+    setLoading(true);
+    console.log('Submitting user listing to backend...', listingData);
+    
+    // Check if plan is selected
+    if (!selectedPlan) {
+      showMessage('error', 'Please select a listing plan first');
+      return;
+    }
 
-      // Store listing data and proceed to payment
-      setPendingListingData({
+    // FIXED: Submit to the correct user submission endpoint
+    const response = await axios.post('/api/user/submit-listing', {
+      listingData: {
         ...listingData,
         selectedPlan,
         selectedAddons
-      });
+      }
+    });
+
+    if (response.data.success) {
+      showMessage('success', 'Your listing has been submitted for admin review! You should hear back within 24-48 hours.');
       
-      // Move to subscription step
-      setListingStep('subscription');
-      showMessage('info', 'Listing saved! Now complete your payment to publish.');
+      // Reset form data
+      setPendingListingData(null);
+      setSelectedPlan(null);
+      setSelectedAddons([]);
       
-    } catch (error) {
-      console.error('Error processing listing:', error);
-      showMessage('error', 'Failed to process listing');
-    } finally {
-      setLoading(false);
+      // Optionally close the listing form or redirect
+      setShowListingForm(false);
+      
+      // Refresh user data to show the submission
+      await fetchUserVehicles();
+      
+    } else {
+      showMessage('error', response.data.message || 'Failed to submit listing');
     }
-  };
+    
+  } catch (error) {
+    console.error('Error submitting listing:', error);
+    const errorMessage = error.response?.data?.message || 'Failed to submit listing for review';
+    showMessage('error', errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Also add this function to VehicleManagement.js to fetch user submissions:
+
+const fetchUserSubmissions = async () => {
+  try {
+    const response = await axios.get('/api/user/my-submissions');
+    if (response.data.success) {
+      setUserSubmissions(response.data.data || []);
+    }
+  } catch (error) {
+    console.error('Error fetching user submissions:', error);
+  }
+};
 
   // NEW: Handle plan selection from pricing section
   const handlePlanSelection = (planId, planDetails) => {
