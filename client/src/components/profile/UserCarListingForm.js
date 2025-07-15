@@ -16,7 +16,8 @@ const UserCarListingForm = ({
   initialData = null,
   selectedPlan = null,
   selectedAddons = [],
-  showPlanSelection = false // NEW: Option to hide plan selection
+  showPlanSelection = false, // Option to hide plan selection
+  showSelectedPlanSummary = false // NEW: Show selected plan info
 }) => {
   const [activeTab, setActiveTab] = useState('basic');
   const [loading, setLoading] = useState(false);
@@ -434,62 +435,98 @@ const UserCarListingForm = ({
 
   // Render selected plan and addons summary
   const renderSelectionSummary = () => {
-    // FIXED: Only show plan selection summary if plan selection is enabled
-    if (!showPlanSelection) {
+    // Show selected plan summary from previous step
+    if (showSelectedPlanSummary && selectedPlan) {
       return (
         <div className="form-selection-summary">
           <h4>
             <CheckCircle size={20} />
-            Free Submission for Review
+            Selected Plan for After Approval
           </h4>
-          <p>
-            Your listing will be submitted for admin review at no cost. 
-            After approval, you'll be contacted about selecting a plan and payment.
-          </p>
-        </div>
-      );
-    }
-
-    if (!selectedPlan && selectedAddons.length === 0) {
-      return (
-        <div className="form-selection-warning">
-          <AlertCircle size={20} />
-          <div>
-            <h4>No Plan Selected</h4>
-            <p>Please scroll up and select a listing plan to continue</p>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="form-selection-summary">
-        <h4>
-          <CheckCircle size={20} />
-          Your Selection Summary
-        </h4>
-        
-        {selectedPlan && (
+          
           <div className="selected-plan">
             <div className="plan-info">
               <span className="plan-label">Selected Plan:</span>
               <span className="plan-name">{selectedPlan}</span>
             </div>
+            <p className="plan-note">
+              💡 You'll pay for this plan only after admin approval. Submit your listing details below for free review first.
+            </p>
           </div>
-        )}
-        
-        {selectedAddons.length > 0 && (
-          <div className="selected-addons">
-            <div className="addons-info">
-              <span className="addons-label">Selected Add-ons:</span>
-              <div className="addons-list">
-                {selectedAddons.map((addon, index) => (
-                  <span key={index} className="addon-tag">{addon}</span>
-                ))}
+          
+          {selectedAddons.length > 0 && (
+            <div className="selected-addons">
+              <div className="addons-info">
+                <span className="addons-label">Selected Add-ons:</span>
+                <div className="addons-list">
+                  {selectedAddons.map((addon, index) => (
+                    <span key={index} className="addon-tag">{addon}</span>
+                  ))}
+                </div>
               </div>
             </div>
+          )}
+        </div>
+      );
+    }
+
+    // Original plan selection mode
+    if (showPlanSelection) {
+      if (!selectedPlan && selectedAddons.length === 0) {
+        return (
+          <div className="form-selection-warning">
+            <AlertCircle size={20} />
+            <div>
+              <h4>No Plan Selected</h4>
+              <p>Please scroll up and select a listing plan to continue</p>
+            </div>
           </div>
-        )}
+        );
+      }
+
+      return (
+        <div className="form-selection-summary">
+          <h4>
+            <CheckCircle size={20} />
+            Your Selection Summary
+          </h4>
+          
+          {selectedPlan && (
+            <div className="selected-plan">
+              <div className="plan-info">
+                <span className="plan-label">Selected Plan:</span>
+                <span className="plan-name">{selectedPlan}</span>
+              </div>
+            </div>
+          )}
+          
+          {selectedAddons.length > 0 && (
+            <div className="selected-addons">
+              <div className="addons-info">
+                <span className="addons-label">Selected Add-ons:</span>
+                <div className="addons-list">
+                  {selectedAddons.map((addon, index) => (
+                    <span key={index} className="addon-tag">{addon}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Free submission mode (no plan selection)
+    return (
+      <div className="form-selection-summary">
+        <h4>
+          <CheckCircle size={20} />
+          Free Submission for Review
+        </h4>
+        <p>
+          Your listing will be submitted for admin review at no cost. 
+          After approval, you'll be contacted about selecting a plan and payment.
+        </p>
       </div>
     );
   };
@@ -544,7 +581,18 @@ const UserCarListingForm = ({
 
       {/* Form Header */}
       <div className="form-header">
-        <h3>Create Your Car Listing</h3>
+        <div className="form-header-content">
+          <h3>Create Your Car Listing</h3>
+          {showSelectedPlanSummary && selectedPlan && (
+            <button 
+              type="button"
+              className="back-to-plans-btn"
+              onClick={onCancel}
+            >
+              ← Back to Plans
+            </button>
+          )}
+        </div>
         {userProfile && (
           <p className="auto-populated-notice">
             <User size={16} />

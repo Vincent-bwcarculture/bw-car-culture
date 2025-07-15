@@ -24,7 +24,7 @@ const VehicleManagement = () => {
   
   // === LISTING STATE ===
   const [showListingForm, setShowListingForm] = useState(false); // Fixed: setShowListingForm defined
-  const [listingStep, setListingStep] = useState('form'); // 'form' -> submit for review -> admin approves -> payment
+  const [listingStep, setListingStep] = useState('pricing'); // Show pricing first for browsing, but no payment required
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedAddons, setSelectedAddons] = useState([]);
   const [pendingListingData, setPendingListingData] = useState(null);
@@ -545,7 +545,8 @@ const VehicleManagement = () => {
           <button 
             className="btn-primary"
             onClick={() => {
-              setActiveSection('create-listing'); // Go directly to form
+              setActiveSection('create-listing');
+              setListingStep('pricing'); // Start with pricing/plan showcase
             }}
           >
             Create Your First Listing
@@ -576,27 +577,65 @@ const VehicleManagement = () => {
   );
 
   const renderCreateListing = () => {
-    // FIXED: Start with form, not pricing - user submits for free review first
-    return (
-      <div className="create-listing-section">
-        <div className="section-header">
-          <h3>Create New Car Listing</h3>
-          <p className="flow-description">
-            📝 Fill out your car details → 🔍 Admin reviews (24-48hrs) → 💳 Choose plan & pay → 🚀 Listing goes live
-          </p>
+    if (listingStep === 'pricing') {
+      return (
+        <div className="create-listing-section">
+          <div className="section-header">
+            <h3>Create New Car Listing</h3>
+            <div className="flow-info">
+              <p className="flow-description">
+                📋 <strong>How it works:</strong> Browse plans below → Fill out your car details → Admin reviews (FREE) → Pay for approved plan → Listing goes live
+              </p>
+              <div className="flow-highlight">
+                <Info size={16} />
+                <span>No payment required upfront! Select a plan to see what you'll get, then submit for free review.</span>
+              </div>
+            </div>
+          </div>
+          
+          <CarListingManager
+            onPlanSelected={handlePlanSelection}
+            onAddonsSelected={handleAddonSelection}
+            onProceedToForm={() => setListingStep('form')}
+            selectedPlan={selectedPlan}
+            selectedAddons={selectedAddons}
+            mode="preview" // NEW: Preview mode - no payment required
+            showPaymentInfo={false} // Hide payment buttons
+            submitButtonText="Continue to Listing Form"
+            allowSkipPlan={true} // Allow proceeding without plan selection
+          />
         </div>
-        
-        <UserCarListingForm
-          onSubmit={handleListingFormSubmit}
-          onCancel={() => {
-            setActiveSection('vehicles'); // Go back to vehicles tab
-          }}
-          selectedPlan={null} // No plan selected yet - that comes after approval
-          selectedAddons={[]}
-          showPlanSelection={false} // Hide plan selection in form
-        />
-      </div>
-    );
+      );
+    }
+
+    if (listingStep === 'form') {
+      return (
+        <div className="create-listing-section">
+          <div className="section-header">
+            <h3>Car Listing Details</h3>
+            <div className="step-indicator">
+              <span className="step completed">1. Plan Selected</span>
+              <span className="step active">2. Car Details</span>
+              <span className="step">3. Admin Review</span>
+              <span className="step">4. Payment</span>
+            </div>
+          </div>
+          
+          <UserCarListingForm
+            onSubmit={handleListingFormSubmit}
+            onCancel={() => {
+              setListingStep('pricing'); // Go back to plan selection
+            }}
+            selectedPlan={selectedPlan}
+            selectedAddons={selectedAddons}
+            showPlanSelection={false} // Don't show plan selection in form
+            showSelectedPlanSummary={true} // Show what they selected
+          />
+        </div>
+      );
+    }
+
+    return null;
   };
 
   // === MAIN RENDER ===
