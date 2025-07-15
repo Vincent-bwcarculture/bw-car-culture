@@ -1,5 +1,5 @@
 // client/src/components/profile/CarListingManager/CarListingManager.js
-// COMPLETE car listing manager with subscription and addon handling
+// COMPLETE car listing manager with subscription and addon handling - FIXED VERSION
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -57,6 +57,7 @@ const CarListingManager = ({
     }
   }, [listingData]);
 
+  // === API FUNCTIONS ===
   const fetchPricingData = async () => {
     try {
       const response = await axios.get('/api/payments/available-tiers');
@@ -82,19 +83,72 @@ const CarListingManager = ({
     }
   };
 
+  // === UTILITY FUNCTIONS ===
   const showMessage = (type, text) => {
     setMessage({ type, text });
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
-  // Handle plan selection
+  const getSellerTypeInfo = () => {
+    const info = {
+      private: {
+        title: 'Individual Seller',
+        description: 'Perfect for selling your personal vehicle',
+        icon: <User size={20} />,
+        note: 'Each subscription covers 1 car listing'
+      },
+      dealership: {
+        title: 'Dealership',
+        description: 'Professional car sales business',
+        icon: <Award size={20} />,
+        note: 'Multiple car listings per subscription'
+      },
+      rental: {
+        title: 'Car Rental',
+        description: 'Rental car fleet management',
+        icon: <Clock size={20} />,
+        note: 'Fleet management features included'
+      }
+    };
+    return info[sellerType] || info.private;
+  };
+
+  const getAddonIcon = (addonId) => {
+    const iconMap = {
+      photography: <Camera size={24} />,
+      sponsored: <TrendingUp size={24} />,
+      review: <Video size={24} />,
+      podcast: <Zap size={24} />,
+      listing_assistance: <Shield size={24} />,
+      full_assistance: <Award size={24} />,
+      featured: <Star size={24} />
+    };
+    return iconMap[addonId] || <Star size={24} />;
+  };
+
+  const calculateTotal = () => {
+    let total = 0;
+    
+    if (selectedPlan && availableTiers[selectedPlan]) {
+      total += availableTiers[selectedPlan].price;
+    }
+    
+    selectedAddons.forEach(addonId => {
+      if (availableAddons[addonId]) {
+        total += availableAddons[addonId].price;
+      }
+    });
+    
+    return total;
+  };
+
+  // === EVENT HANDLERS ===
   const handlePlanSelection = (planId) => {
     setSelectedPlan(planId);
     setPaymentType('subscription');
     showMessage('success', `${availableTiers[planId]?.name} plan selected`);
   };
 
-  // Handle addon selection
   const handleAddonToggle = (addonId) => {
     const addon = availableAddons[addonId];
     if (!addon) return;
@@ -114,7 +168,6 @@ const CarListingManager = ({
     }
   };
 
-  // Handle addon booking confirmation
   const handleAddonBookingConfirm = async (bookingDetails) => {
     try {
       setLoading(true);
@@ -146,7 +199,7 @@ const CarListingManager = ({
     }
   };
 
-  // Initiate subscription payment
+  // === PAYMENT FUNCTIONS ===
   const initiateSubscriptionPayment = async () => {
     if (!selectedPlan) {
       setError('Please select a subscription plan');
@@ -183,7 +236,6 @@ const CarListingManager = ({
     }
   };
 
-  // Initiate addon payment
   const initiateAddonPayment = async (addonIds, bookingId = null) => {
     if (!addonIds || addonIds.length === 0) {
       setError('Please select at least one add-on');
@@ -221,7 +273,7 @@ const CarListingManager = ({
     }
   };
 
-  // Handle combined payment (subscription + addons)
+  // FIXED: Handle combined payment (subscription + addons)
   const initiateCombinedPayment = async () => {
     if (!selectedPlan && selectedAddons.length === 0) {
       setError('Please select at least a subscription plan or add-ons');
@@ -243,10 +295,12 @@ const CarListingManager = ({
       console.error('Combined payment error:', error);
       setError('Failed to process payment');
       setCurrentStep('pricing');
+    } finally {
+      // FIXED: Added finally block to reset loading state
+      setLoading(false);
     }
   };
 
-  // Redirect to payment
   const redirectToPayment = () => {
     if (paymentLink) {
       window.open(paymentLink, '_blank');
@@ -255,7 +309,6 @@ const CarListingManager = ({
     }
   };
 
-  // Poll payment status
   const pollPaymentStatus = () => {
     const interval = setInterval(async () => {
       try {
@@ -273,30 +326,7 @@ const CarListingManager = ({
     setTimeout(() => clearInterval(interval), 600000);
   };
 
-  const getSellerTypeInfo = () => {
-    const info = {
-      private: {
-        title: 'Individual Seller',
-        description: 'Perfect for selling your personal vehicle',
-        icon: <User size={20} />,
-        note: 'Each subscription covers 1 car listing'
-      },
-      dealership: {
-        title: 'Dealership',
-        description: 'Professional car sales business',
-        icon: <Award size={20} />,
-        note: 'Multiple car listings per subscription'
-      },
-      rental: {
-        title: 'Car Rental',
-        description: 'Rental car fleet management',
-        icon: <Clock size={20} />,
-        note: 'Fleet management features included'
-      }
-    };
-    return info[sellerType] || info.private;
-  };
-
+  // === RENDER FUNCTIONS ===
   const renderPricingTier = (tierId, tier) => {
     const isPopular = tierId === 'standard';
     const isSelected = selectedPlan === tierId;
@@ -355,18 +385,6 @@ const CarListingManager = ({
   const renderAddonCard = (addonId, addon) => {
     const isSelected = selectedAddons.includes(addonId);
     
-    const getAddonIcon = (id) => {
-      switch(id) {
-        case 'photography': return <Camera size={24} />;
-        case 'sponsored': return <TrendingUp size={24} />;
-        case 'review': return <Video size={24} />;
-        case 'podcast': return <Zap size={24} />;
-        case 'listing_assistance': return <Shield size={24} />;
-        case 'full_assistance': return <Award size={24} />;
-        default: return <Star size={24} />;
-      }
-    };
-
     return (
       <div 
         key={addonId}
@@ -412,25 +430,11 @@ const CarListingManager = ({
     );
   };
 
-  const calculateTotal = () => {
-    let total = 0;
-    
-    if (selectedPlan && availableTiers[selectedPlan]) {
-      total += availableTiers[selectedPlan].price;
-    }
-    
-    selectedAddons.forEach(addonId => {
-      if (availableAddons[addonId]) {
-        total += availableAddons[addonId].price;
-      }
-    });
-    
-    return total;
-  };
-
+  // === COMPONENT VARIABLES ===
   const sellerInfo = getSellerTypeInfo();
   const totalAmount = calculateTotal();
 
+  // === MAIN RENDER ===
   return (
     <div className="car-listing-manager">
       {/* Message Display */}
