@@ -1,4 +1,4 @@
-/* client/src/components/profile/UserCarListingForm.css - COMPLETE VERSION */
+/* client/src/components/profile/UserCarListingForm.css - COMPLETE ENHANCED VERSION */
 
 /* ===== CSS VARIABLES ===== */
 :root {
@@ -91,59 +91,42 @@
 }
 
 .auto-fill-loading span {
-  color: var(--uprofile-text-secondary);
-  font-size: 0.9rem;
+  color: var(--uprofile-primary-accent);
   font-weight: 500;
 }
 
 /* ===== AUTO-FILL PROMPT ===== */
 .auto-fill-prompt {
-  background: linear-gradient(135deg, rgba(255, 51, 0, 0.08) 0%, rgba(255, 51, 0, 0.03) 100%);
-  border: 2px solid rgba(255, 51, 0, 0.15);
-  border-radius: var(--uprofile-radius-xl);
+  background: var(--uprofile-bg-secondary);
+  border: 2px solid var(--uprofile-primary-accent);
+  border-radius: var(--uprofile-radius-lg);
   padding: 24px;
   margin-bottom: 32px;
-  animation: slideInDown 0.4s ease-out;
-  position: relative;
-  overflow: hidden;
-}
-
-.auto-fill-prompt::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--uprofile-primary-accent), var(--uprofile-secondary-accent));
+  animation: slideInDown 0.3s ease;
+  box-shadow: var(--uprofile-shadow-lg);
 }
 
 .auto-fill-content h4 {
-  margin: 0 0 12px 0;
-  font-size: 1.3rem;
-  font-weight: 700;
+  margin: 0 0 8px 0;
   color: var(--uprofile-text-primary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 .auto-fill-content p {
   margin: 0 0 20px 0;
   color: var(--uprofile-text-secondary);
   font-size: 0.95rem;
-  line-height: 1.5;
 }
 
-/* ===== AUTO-FILL PREVIEW ===== */
 .auto-fill-preview {
-  background: var(--uprofile-bg-secondary);
-  border: 1px solid var(--uprofile-border-color);
-  border-radius: var(--uprofile-radius-lg);
+  background: var(--uprofile-bg-primary);
+  border-radius: var(--uprofile-radius-md);
   padding: 16px;
-  margin-bottom: 20px;
+  margin: 16px 0 24px 0;
+  border: 1px solid var(--uprofile-border-color);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
 }
 
@@ -160,25 +143,22 @@
 }
 
 .auto-fill-item .field-name {
-  font-weight: 600;
-  color: var(--uprofile-text-primary);
-  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--uprofile-text-secondary);
+  font-size: 0.85rem;
 }
 
 .auto-fill-item .field-value {
-  color: var(--uprofile-text-secondary);
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
   font-size: 0.9rem;
-  font-family: monospace;
-  background: rgba(255, 51, 0, 0.1);
-  padding: 4px 8px;
-  border-radius: var(--uprofile-radius-sm);
-  max-width: 200px;
+  max-width: 150px;
+  text-align: right;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ===== AUTO-FILL ACTIONS ===== */
 .auto-fill-actions {
   display: flex;
   gap: 12px;
@@ -427,25 +407,12 @@
   border-bottom: 2px solid var(--uprofile-border-color);
 }
 
-/* ===== FORM GRID - HORIZONTAL LAYOUT OPTIMIZED ===== */
+/* ===== OPTIMIZED FORM GRID - MOBILE-FIRST HORIZONTAL LAYOUT ===== */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  margin-bottom: 32px;
-}
-
-/* Responsive grid adjustments */
-@media (min-width: 768px) {
-  .form-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .form-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  grid-template-columns: 1fr; /* Mobile: Single column */
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 /* ===== FORM GROUPS ===== */
@@ -536,11 +503,12 @@
   font-size: 0.8rem;
 }
 
-/* ===== CHECKBOX GROUPS - HORIZONTAL LAYOUT ===== */
+/* ===== OPTIMIZED CHECKBOX GROUPS - MOBILE-FIRST HORIZONTAL LAYOUT ===== */
 .checkbox-group {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
+  /* Mobile: 2 columns for optimal space usage */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 12px; /* vertical gap smaller, horizontal gap larger */
   margin-top: 8px;
 }
 
@@ -549,42 +517,75 @@
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.85rem; /* Slightly smaller for mobile */
   color: var(--uprofile-text-primary);
-  padding: 8px 12px;
+  padding: 6px 8px; /* Reduced padding for mobile */
   border-radius: var(--uprofile-radius-md);
   transition: var(--uprofile-transition);
+  background: var(--uprofile-bg-primary);
+  border: 1px solid transparent;
+  min-height: 36px; /* Better touch target */
 }
 
 .checkbox-label:hover {
   background: var(--uprofile-bg-secondary);
+  border-color: var(--uprofile-border-color);
+}
+
+.checkbox-label.checked {
+  background: rgba(255, 51, 0, 0.05);
+  border-color: var(--uprofile-primary-accent);
+  color: var(--uprofile-primary-accent);
+}
+
+.checkbox-label:active {
+  transform: scale(0.98);
 }
 
 .checkbox-label input[type="checkbox"] {
-  width: 18px;
+  width: 18px; /* Good size for mobile */
   height: 18px;
   accent-color: var(--uprofile-primary-accent);
   cursor: pointer;
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .checkbox-label span {
   user-select: none;
   flex: 1;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* ===== FEATURES SECTION ===== */
+/* ===== OPTIMIZED FEATURES SECTION ===== */
 .features-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 24px;
+  /* Mobile: Single column for feature categories */
+  grid-template-columns: 1fr;
+  gap: 16px; /* Reduced gap */
 }
 
 .feature-category {
   background: var(--uprofile-bg-secondary);
   border: 1px solid var(--uprofile-border-color);
   border-radius: var(--uprofile-radius-lg);
-  padding: 20px;
+  padding: 16px; /* Reduced padding */
   transition: var(--uprofile-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-category::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--uprofile-primary-accent), var(--uprofile-secondary-accent));
+  opacity: 0.7;
 }
 
 .feature-category:hover {
@@ -592,29 +593,40 @@
 }
 
 .feature-category h5 {
-  margin: 0 0 16px 0;
-  font-size: 1.1rem;
+  margin: 0 0 12px 0; /* Reduced margin */
+  font-size: 1rem; /* Slightly smaller */
   font-weight: 600;
   color: var(--uprofile-text-primary);
-  padding-bottom: 8px;
+  padding-bottom: 6px; /* Reduced padding */
   border-bottom: 2px solid var(--uprofile-primary-accent);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.feature-category h5::before {
+  content: attr(data-icon);
+  font-size: 0.9rem;
 }
 
 .feature-category .checkbox-group {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 8px;
+  /* Mobile: 2 columns for features */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 8px; /* Very compact spacing */
 }
 
 .feature-category .checkbox-label {
-  padding: 6px 8px;
-  font-size: 0.85rem;
+  padding: 4px 6px; /* Very compact padding */
+  font-size: 0.8rem; /* Smaller text for features */
+  min-height: 32px; /* Consistent height */
 }
 
-/* ===== SOCIAL MEDIA GRID ===== */
+/* ===== COMPACT SOCIAL MEDIA GRID ===== */
 .social-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  /* Mobile: 2 columns */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
   margin-top: 12px;
 }
 
@@ -635,8 +647,9 @@
 
 .image-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
+  /* Mobile: 2 columns for images */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
 .image-preview {
@@ -659,7 +672,7 @@
 
 .image-preview img {
   width: 100%;
-  height: 150px;
+  height: 120px; /* Smaller height for mobile */
   object-fit: cover;
   display: block;
 }
@@ -857,16 +870,47 @@
   100% { transform: rotate(360deg); }
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
-@media (max-width: 768px) {
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Small mobile phones (up to 480px) */
+@media (max-width: 480px) {
   .user-car-listing-form {
     padding: 16px;
     margin: 0 8px;
   }
   
-  .form-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+  .checkbox-group {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px 6px;
+  }
+  
+  .checkbox-label {
+    padding: 4px 6px;
+    font-size: 0.8rem;
+    min-height: 32px;
+  }
+  
+  .checkbox-label span {
+    font-size: 0.75rem;
+  }
+  
+  .checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .feature-category {
+    padding: 12px;
+  }
+  
+  .feature-category h5 {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+  
+  .feature-category .checkbox-label {
+    padding: 3px 4px;
+    min-height: 28px;
   }
   
   .form-tab-navigation {
@@ -876,11 +920,12 @@
   
   .form-tab-button {
     justify-content: center;
-    padding: 12px 16px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
   }
   
   .auto-fill-prompt {
-    padding: 20px 16px;
+    padding: 16px;
   }
   
   .auto-fill-actions {
@@ -919,20 +964,8 @@
     max-width: none;
   }
   
-  .features-container {
-    grid-template-columns: 1fr;
-  }
-  
-  .checkbox-group {
-    grid-template-columns: 1fr;
-  }
-  
   .social-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .image-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
   
   .form-actions {
@@ -942,6 +975,7 @@
   .form-cancel-btn,
   .form-submit-btn {
     width: 100%;
+    padding: 14px 24px;
   }
   
   .summary-items {
@@ -949,71 +983,182 @@
   }
 }
 
-/* ===== TABLET STYLES ===== */
-@media (min-width: 769px) and (max-width: 1023px) {
+/* Large mobile phones and small tablets (481px to 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .checkbox-group {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px 10px;
+  }
+  
+  .feature-category .checkbox-group {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .features-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .social-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .image-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
   .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablets (769px to 1023px) */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .checkbox-group {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px 12px;
+  }
+  
+  .feature-category .checkbox-group {
     grid-template-columns: repeat(2, 1fr);
   }
   
   .features-container {
     grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .social-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
   
   .image-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+  
+  .image-preview img {
+    height: 140px;
+  }
+  
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
 }
 
-/* ===== DESKTOP STYLES ===== */
+/* Desktop (1024px and up) */
 @media (min-width: 1024px) {
   .user-car-listing-form {
     padding: 32px;
   }
   
-  .form-grid {
+  .checkbox-group {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px 16px;
+  }
+  
+  .feature-category .checkbox-group {
     grid-template-columns: repeat(3, 1fr);
+    gap: 8px 12px;
   }
   
   .features-container {
     grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  
+  .social-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
   
   .image-grid {
     grid-template-columns: repeat(4, 1fr);
   }
   
-  .checkbox-group {
-    grid-template-columns: repeat(2, 1fr);
+  .image-preview img {
+    height: 150px;
   }
   
-  .social-grid {
+  .checkbox-label {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}
+
+/* Large desktop (1200px and up) */
+@media (min-width: 1200px) {
+  .checkbox-group {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  
+  .feature-category .checkbox-group {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .form-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-/* ===== ACCESSIBILITY ===== */
+/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+.checkbox-label:focus-within {
+  outline: 2px solid var(--uprofile-primary-accent);
+  outline-offset: 2px;
+}
+
 .form-cancel-btn:focus,
 .form-submit-btn:focus,
+.form-tab-button:focus,
 .auto-fill-accept:focus,
 .auto-fill-selective:focus,
-.auto-fill-decline:focus,
-.manual-auto-fill:focus,
-.form-tab-button:focus {
+.auto-fill-decline:focus {
   outline: 3px solid var(--uprofile-primary-accent);
   outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkbox-label,
+  .feature-category,
+  .form-tab-button,
+  .image-preview,
+  .auto-fill-loading .spinner {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ===== HIGH CONTRAST MODE ===== */
+@media (prefers-contrast: high) {
+  .feature-category,
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    border: 2px solid var(--uprofile-text-primary);
+  }
+  
+  .checkbox-label {
+    border: 1px solid var(--uprofile-text-secondary);
+  }
+  
+  .form-tab-button.active {
+    border: 2px solid var(--uprofile-primary-accent);
+  }
 }
 
 /* ===== PRINT STYLES ===== */
 @media print {
   .user-car-listing-form {
     box-shadow: none;
-    border: 1px solid #ccc;
+    background: white;
+    color: black;
   }
   
   .form-tab-navigation,
-  .form-actions,
-  .auto-fill-prompt,
-  .profile-completion-status {
+  .form-actions {
     display: none;
   }
   
@@ -1021,114 +1166,12 @@
     display: block !important;
   }
   
-  .form-section h4 {
-    page-break-after: avoid;
-  }
-}
-
-/* ===== CUSTOM SCROLLBAR ===== */
-.form-tab-navigation::-webkit-scrollbar {
-  height: 4px;
-}
-
-.form-tab-navigation::-webkit-scrollbar-track {
-  background: var(--uprofile-bg-tertiary);
-  border-radius: 2px;
-}
-
-.form-tab-navigation::-webkit-scrollbar-thumb {
-  background: var(--uprofile-primary-accent);
-  border-radius: 2px;
-}
-
-.form-tab-navigation::-webkit-scrollbar-thumb:hover {
-  background: var(--uprofile-primary-accent-dark);
-}
-
-/* ===== UTILITY CLASSES ===== */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-left {
-  text-align: left;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.mb-0 { margin-bottom: 0; }
-.mb-1 { margin-bottom: 8px; }
-.mb-2 { margin-bottom: 16px; }
-.mb-3 { margin-bottom: 24px; }
-.mb-4 { margin-bottom: 32px; }
-
-.mt-0 { margin-top: 0; }
-.mt-1 { margin-top: 8px; }
-.mt-2 { margin-top: 16px; }
-.mt-3 { margin-top: 24px; }
-.mt-4 { margin-top: 32px; }
-
-/* ===== REDUCED MOTION ===== */
-@media (prefers-reduced-motion: reduce) {
-  .auto-fill-prompt,
-  .auto-fill-loading,
-  .form-message,
-  .image-preview,
-  .form-tab-button,
-  .form-submit-btn,
-  .form-cancel-btn,
-  .auto-fill-accept,
-  .auto-fill-selective,
-  .auto-fill-decline,
-  .manual-auto-fill,
-  .feature-category,
-  .image-overlay {
-    animation: none;
-    transition: none;
+  .checkbox-group {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
   }
   
-  .auto-fill-accept:hover,
-  .form-submit-btn:hover,
-  .manual-auto-fill:hover,
-  .image-preview:hover {
-    transform: none;
-  }
-  
-  .loading-spinner {
-    animation: none;
-  }
-}
-
-/* ===== HIGH CONTRAST MODE ===== */
-@media (prefers-contrast: high) {
-  :root {
-    --uprofile-border-color: #000000;
-    --uprofile-border-color-dark: #000000;
-    --uprofile-text-secondary: #000000;
-    --uprofile-text-muted: #333333;
-  }
-  
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    border-width: 3px;
-  }
-  
-  .form-tab-button.active {
-    border: 3px solid #000000;
+  .features-container {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
