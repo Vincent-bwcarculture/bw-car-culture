@@ -16,7 +16,12 @@ const CarListingManager = ({
   listingData, 
   onPaymentComplete, 
   onCancel,
-  pendingListingId = null 
+  onProceedToForm, // NEW: Callback to proceed to listing form
+  pendingListingId = null,
+  mode = 'payment', // NEW: 'preview' or 'payment' mode
+  showPaymentInfo = true, // NEW: Hide payment buttons in preview mode
+  submitButtonText = 'Pay', // NEW: Customizable button text
+  allowSkipPlan = false // NEW: Allow proceeding without plan selection
 }) => {
   // Component state
   const [currentStep, setCurrentStep] = useState('pricing'); // 'pricing', 'payment', 'confirmation'
@@ -147,6 +152,13 @@ const CarListingManager = ({
     setSelectedPlan(planId);
     setPaymentType('subscription');
     showMessage('success', `${availableTiers[planId]?.name} plan selected`);
+  };
+
+  // NEW: Handle proceeding to listing form (preview mode)
+  const handleProceedToForm = () => {
+    if (onProceedToForm) {
+      onProceedToForm();
+    }
   };
 
   const handleAddonToggle = (addonId) => {
@@ -473,7 +485,7 @@ const CarListingManager = ({
           <div className="pricing-header">
             <div className="pricing-title">
               <DollarSign size={24} />
-              <h3>Complete Your Listing</h3>
+              <h3>{mode === 'preview' ? 'Choose Your Listing Plan' : 'Complete Your Listing'}</h3>
             </div>
             
             <div className="seller-type-display">
@@ -516,6 +528,21 @@ const CarListingManager = ({
 
           {/* Summary and Actions */}
           <div className="pricing-summary">
+            {/* Preview Mode Info */}
+            {mode === 'preview' && (
+              <div className="preview-mode-info">
+                <Info size={16} />
+                <div>
+                  <h4>How it works:</h4>
+                  <p>1. Select your plan and add-ons below</p>
+                  <p>2. Fill out your car listing details</p>
+                  <p>3. Admin reviews for FREE (24-48 hours)</p>
+                  <p>4. Pay only after approval</p>
+                  <p>5. Your listing goes live!</p>
+                </div>
+              </div>
+            )}
+            
             <div className="summary-content">
               <h4>Order Summary</h4>
               
@@ -535,7 +562,9 @@ const CarListingManager = ({
               
               <div className="summary-total">
                 <span>Total</span>
-                <span>P{totalAmount}</span>
+                <span>{mode === 'preview' ? 
+                  `P${totalAmount} (Pay after admin approval)` : 
+                  `P${totalAmount}`}</span>
               </div>
             </div>
             
@@ -550,18 +579,20 @@ const CarListingManager = ({
               
               <button 
                 className="proceed-btn"
-                onClick={initiateCombinedPayment}
-                disabled={loading || (!selectedPlan && selectedAddons.length === 0)}
+                onClick={mode === 'preview' ? handleProceedToForm : initiateCombinedPayment}
+                disabled={loading || (!allowSkipPlan && !selectedPlan && selectedAddons.length === 0)}
               >
-                {loading ? 'Processing...' : `Pay P${totalAmount}`}
+                {loading ? 'Processing...' : 
+                 mode === 'preview' ? submitButtonText : 
+                 `Pay P${totalAmount}`}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Payment Step */}
-      {currentStep === 'payment' && (
+      {/* Payment Step - Only show in payment mode */}
+      {currentStep === 'payment' && mode === 'payment' && (
         <div className="payment-step">
           <div className="payment-loading">
             <div className="loading-spinner"></div>
@@ -571,8 +602,8 @@ const CarListingManager = ({
         </div>
       )}
 
-      {/* Confirmation Step */}
-      {currentStep === 'confirmation' && (
+      {/* Confirmation Step - Only show in payment mode */}
+      {currentStep === 'confirmation' && mode === 'payment' && (
         <div className="confirmation-step">
           <div className="confirmation-content">
             <div className="confirmation-icon">

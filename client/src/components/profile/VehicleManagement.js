@@ -1,5 +1,5 @@
 // client/src/components/profile/VehicleManagement.js
-// COMPLETE FIXED VERSION with all required state variables and dependencies
+// FIXED VERSION - Correct flow: Plan Selection → Car Form → Admin Review → Payment → Live
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -13,7 +13,7 @@ import './VehicleManagement.css';
 
 const VehicleManagement = () => {
   // === MAIN STATE VARIABLES ===
-  const [activeSection, setActiveSection] = useState('vehicles'); // Fixed: activeSection defined
+  const [activeSection, setActiveSection] = useState('vehicles');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   
@@ -23,8 +23,7 @@ const VehicleManagement = () => {
   const [editingVehicle, setEditingVehicle] = useState(null);
   
   // === LISTING STATE ===
-  const [showListingForm, setShowListingForm] = useState(false); // Fixed: setShowListingForm defined
-  const [listingStep, setListingStep] = useState('pricing'); // Show pricing first for browsing, but no payment required
+  const [listingStep, setListingStep] = useState('pricing'); // 'pricing' → 'form' → 'submitted'
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedAddons, setSelectedAddons] = useState([]);
   const [pendingListingData, setPendingListingData] = useState(null);
@@ -51,7 +50,7 @@ const VehicleManagement = () => {
     notes: ''
   });
 
-  // === VEHICLE MODAL MANAGEMENT ===
+  // === UTILITY FUNCTIONS ===
   const showMessage = (type, text) => {
     setMessage({ type, text });
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
@@ -78,69 +77,128 @@ const VehicleManagement = () => {
 
   const fetchUserSubmissions = async () => {
     try {
-      const response = await axios.get('/api/user/my-submissions');
+      setLoading(true);
+      const response = await axios.get('/api/user/submissions');
+      
       if (response.data.success) {
-        setUserSubmissions(response.data.data || []);
-        
-        // Calculate stats
-        const submissions = response.data.data || [];
-        const stats = {
-          total: submissions.length,
-          pending: submissions.filter(s => s.status === 'pending_review').length,
-          approved: submissions.filter(s => s.status === 'approved').length,
-          rejected: submissions.filter(s => s.status === 'rejected').length
-        };
-        setSubmissionStats(stats);
+        setUserSubmissions(response.data.data.submissions || []);
+        setSubmissionStats(response.data.data.stats || submissionStats);
+      } else {
+        showMessage('error', 'Failed to load submissions');
       }
     } catch (error) {
-      console.error('Error fetching user submissions:', error);
+      console.error('Error fetching submissions:', error);
+      showMessage('error', 'Failed to load submissions');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // === VEHICLE CRUD OPERATIONS ===
-  const handleVehicleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!vehicleForm.make.trim() || !vehicleForm.model.trim()) {
-      showMessage('error', 'Make and model are required');
-      return;
+  useEffect(() => {
+    if (activeSection === 'vehicles') {
+      fetchUserVehicles();
+    } else if (activeSection === 'submissions') {
+      fetchUserSubmissions();
     }
+  }, [activeSection]);
 
+  // === LISTING MANAGEMENT FUNCTIONS ===
+  
+  // Handle plan selection in preview mode
+  const handlePlanSelection = (planId) => {
+    setSelectedPlan(planId);
+    showMessage('success', 'Plan selected! Continue to fill out your car details.');
+  };
+
+  // Handle addon selection in preview mode
+  const handleAddonSelection = (addonIds) => {
+    setSelectedAddons(addonIds);
+    showMessage('info', `${addonIds.length} add-on(s) selected.`);
+  };
+
+  // Proceed from plan selection to listing form
+  const handleProceedToForm = () => {
+    setListingStep('form');
+    showMessage('info', 'Now fill out your car details for admin review.');
+  };
+
+  // Handle car listing form submission (FREE - for admin review)
+  const handleListingFormSubmit = async (listingData) => {
     try {
       setLoading(true);
       
-      const vehicleData = {
-        ...vehicleForm,
-        year: parseInt(vehicleForm.year),
-        mileage: vehicleForm.mileage ? parseInt(vehicleForm.mileage) : null
-      };
+      // Submit listing for FREE admin review
+      const response = await axios.post('/api/user/submit-listing', {
+        listingData: {
+          ...listingData,
+          selectedPlan,
+          selectedAddons,
+          status: 'pending_review',
+          submissionType: 'free_review'
+        }
+      });
 
-      const response = editingVehicle 
-        ? await axios.put(`/api/user/vehicles/${editingVehicle._id}`, vehicleData)
-        : await axios.post('/api/user/vehicles', vehicleData);
+      if (response.data.success) {
+        setPendingListingData(response.data.data);
+        setListingStep('submitted');
+        showMessage('success', '🎉 Listing submitted for review! We\'ll contact you within 24-48 hours.');
+        
+        // Refresh submissions
+        fetchUserSubmissions();
+        
+        // Reset form state
+        setTimeout(() => {
+          setSelectedPlan(null);
+          setSelectedAddons([]);
+          setActiveSection('submissions');
+        }, 3000);
+      } else {
+        showMessage('error', response.data.message || 'Failed to submit listing');
+      }
+    } catch (error) {
+      console.error('Listing submission error:', error);
+      showMessage('error', 'Failed to submit listing for review');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Handle payment after admin approval (separate flow)
+  const handlePaymentComplete = (paymentData) => {
+    showMessage('success', '🎉 Payment successful! Your listing is now live.');
+    fetchUserSubmissions(); // Refresh to show updated status
+  };
+
+  // === VEHICLE MANAGEMENT FUNCTIONS ===
+  const handleVehicleSubmit = async (e) => {
+    e.preventDefault();
+    
+    const isEditing = editingVehicle !== null;
+    const url = isEditing 
+      ? `/api/user/vehicles/${editingVehicle._id}` 
+      : '/api/user/vehicles';
+    const method = isEditing ? 'put' : 'post';
+
+    try {
+      setLoading(true);
+      const response = await axios[method](url, vehicleForm);
+      
       if (response.data.success) {
         await fetchUserVehicles();
         setShowVehicleModal(false);
         setEditingVehicle(null);
         setVehicleForm({
-          make: '',
-          model: '',
-          year: new Date().getFullYear(),
-          vin: '',
-          licensePlate: '',
-          color: '',
-          mileage: '',
-          purchaseDate: '',
-          notes: ''
+          make: '', model: '', year: new Date().getFullYear(),
+          vin: '', licensePlate: '', color: '', mileage: '',
+          purchaseDate: '', notes: ''
         });
-        showMessage('success', editingVehicle ? 'Vehicle updated successfully' : 'Vehicle added successfully');
+        showMessage('success', `Vehicle ${isEditing ? 'updated' : 'added'} successfully`);
       } else {
-        showMessage('error', response.data.message || 'Failed to save vehicle');
+        showMessage('error', response.data.message || `Failed to ${isEditing ? 'update' : 'add'} vehicle`);
       }
     } catch (error) {
-      console.error('Error saving vehicle:', error);
-      showMessage('error', 'Failed to save vehicle');
+      console.error('Vehicle submit error:', error);
+      showMessage('error', `Failed to ${isEditing ? 'update' : 'add'} vehicle`);
     } finally {
       setLoading(false);
     }
@@ -155,8 +213,9 @@ const VehicleManagement = () => {
       vin: vehicle.vin || '',
       licensePlate: vehicle.licensePlate || '',
       color: vehicle.color || '',
-      mileage: vehicle.mileage || '',
-      purchaseDate: vehicle.purchaseDate ? vehicle.purchaseDate.split('T')[0] : '',
+      mileage: vehicle.mileage?.toString() || '',
+      purchaseDate: vehicle.purchaseDate ? 
+        vehicle.purchaseDate.split('T')[0] : '',
       notes: vehicle.notes || ''
     });
     setShowVehicleModal(true);
@@ -185,275 +244,37 @@ const VehicleManagement = () => {
     }
   };
 
-  // === LISTING MANAGEMENT FUNCTIONS ===
-  
-  // FIXED: Handle car listing form submission - NO PAYMENT REQUIRED YET
-  const handleListingFormSubmit = async (listingData) => {
-    try {
-      setLoading(true);
-      console.log('Submitting user listing for admin review...', listingData);
-      
-      // NO PLAN REQUIRED - user submits for free review first
-      // Payment happens AFTER admin approval
+  // === RENDER HELPER FUNCTIONS ===
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      pending_review: { icon: Clock, color: '#f39c12', text: 'Under Review' },
+      approved: { icon: CheckCircle, color: '#27ae60', text: 'Approved - Ready for Payment' },
+      rejected: { icon: X, color: '#e74c3c', text: 'Needs Revision' },
+      active: { icon: CheckCircle, color: '#27ae60', text: 'Live' },
+      expired: { icon: AlertCircle, color: '#95a5a6', text: 'Expired' }
+    };
 
-      // FIXED: Submit to the correct user submission endpoint
-      const response = await axios.post('/api/user/submit-listing', {
-        listingData: {
-          ...listingData,
-          // Don't include plan/addons yet - those come after admin approval
-          status: 'pending_review',
-          submissionType: 'free_review' // Mark as free submission for review
-        }
-      });
+    const config = statusConfig[status] || { icon: AlertCircle, color: '#95a5a6', text: status };
+    const IconComponent = config.icon;
 
-      if (response.data.success) {
-        showMessage('success', '🎉 Listing submitted successfully! Our team will review it within 24-48 hours and contact you about next steps.');
-        
-        // Reset form data
-        setPendingListingData(null);
-        
-        // Close the listing form and go back to submissions view
-        setShowListingForm(false);
-        setListingStep('form'); // Reset to form step
-        setActiveSection('submissions'); // Show user their submissions
-        
-        // Refresh submissions to show the new one
-        await fetchUserSubmissions();
-        
-      } else {
-        showMessage('error', response.data.message || 'Failed to submit listing');
-      }
-      
-    } catch (error) {
-      console.error('Error submitting listing:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to submit listing for review';
-      showMessage('error', errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    return (
+      <span className="status-badge" style={{ color: config.color }}>
+        <IconComponent size={14} />
+        {config.text}
+      </span>
+    );
   };
 
-  // Handle plan selection from pricing section
-  const handlePlanSelection = (planId, planDetails) => {
-    setSelectedPlan(planId);
-    showMessage('success', `${planDetails?.name || planId} plan selected`);
-  };
-
-  // Handle addon selection from pricing section
-  const handleAddonSelection = (addonIds) => {
-    setSelectedAddons(addonIds);
-    if (addonIds.length > 0) {
-      showMessage('info', `${addonIds.length} add-on${addonIds.length > 1 ? 's' : ''} selected`);
-    }
-  };
-
-  // === FORM INPUT HANDLERS ===
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setVehicleForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // === LIFECYCLE HOOKS ===
-  useEffect(() => {
-    if (activeSection === 'vehicles') {
-      fetchUserVehicles();
-    } else if (activeSection === 'submissions') {
-      fetchUserSubmissions();
-    }
-  }, [activeSection]);
-
-  // === UTILITY FUNCTIONS ===
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-GB', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     });
   };
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      'pending_review': { icon: Clock, color: 'orange', label: 'Pending Review' },
-      'approved': { icon: CheckCircle, color: 'green', label: 'Approved' },
-      'rejected': { icon: X, color: 'red', label: 'Rejected' },
-      'listing_created': { icon: Car, color: 'blue', label: 'Listing Created' }
-    };
-
-    const config = statusConfig[status] || statusConfig.pending_review;
-    const IconComponent = config.icon;
-
-    return (
-      <span className={`status-badge status-${config.color}`}>
-        <IconComponent size={14} />
-        {config.label}
-      </span>
-    );
-  };
-
-  // === RENDER FUNCTIONS ===
-  const renderVehicleModal = () => {
-    if (!showVehicleModal) return null;
-
-    return (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h3>{editingVehicle ? 'Edit Vehicle' : 'Add New Vehicle'}</h3>
-            <button 
-              className="modal-close"
-              onClick={() => {
-                setShowVehicleModal(false);
-                setEditingVehicle(null);
-              }}
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          <form onSubmit={handleVehicleSubmit} className="vehicle-form">
-            <div className="form-grid">
-              <div className="form-group">
-                <label htmlFor="make">Make *</label>
-                <input
-                  type="text"
-                  id="make"
-                  name="make"
-                  value={vehicleForm.make}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Toyota"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="model">Model *</label>
-                <input
-                  type="text"
-                  id="model"
-                  name="model"
-                  value={vehicleForm.model}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Camry"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="year">Year</label>
-                <input
-                  type="number"
-                  id="year"
-                  name="year"
-                  value={vehicleForm.year}
-                  onChange={handleInputChange}
-                  min="1900"
-                  max={new Date().getFullYear() + 1}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="color">Color</label>
-                <input
-                  type="text"
-                  id="color"
-                  name="color"
-                  value={vehicleForm.color}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Silver"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="vin">VIN</label>
-                <input
-                  type="text"
-                  id="vin"
-                  name="vin"
-                  value={vehicleForm.vin}
-                  onChange={handleInputChange}
-                  placeholder="Vehicle Identification Number"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="licensePlate">License Plate</label>
-                <input
-                  type="text"
-                  id="licensePlate"
-                  name="licensePlate"
-                  value={vehicleForm.licensePlate}
-                  onChange={handleInputChange}
-                  placeholder="License plate number"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="mileage">Mileage (km)</label>
-                <input
-                  type="number"
-                  id="mileage"
-                  name="mileage"
-                  value={vehicleForm.mileage}
-                  onChange={handleInputChange}
-                  placeholder="Current mileage"
-                  min="0"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="purchaseDate">Purchase Date</label>
-                <input
-                  type="date"
-                  id="purchaseDate"
-                  name="purchaseDate"
-                  value={vehicleForm.purchaseDate}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div className="form-group full-width">
-                <label htmlFor="notes">Notes</label>
-                <textarea
-                  id="notes"
-                  name="notes"
-                  value={vehicleForm.notes}
-                  onChange={handleInputChange}
-                  placeholder="Any additional notes about this vehicle"
-                  rows="3"
-                />
-              </div>
-            </div>
-
-            <div className="modal-actions">
-              <button 
-                type="button" 
-                className="btn-secondary"
-                onClick={() => {
-                  setShowVehicleModal(false);
-                  setEditingVehicle(null);
-                }}
-              >
-                Cancel
-              </button>
-              <button 
-                type="submit" 
-                className="btn-primary"
-                disabled={loading}
-              >
-                {loading ? 'Saving...' : (editingVehicle ? 'Update Vehicle' : 'Add Vehicle')}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  };
-
-  const renderVehiclesList = () => (
+  // === RENDER SECTIONS ===
+  const renderVehicles = () => (
     <div className="vehicles-section">
       <div className="section-header">
         <h3>My Vehicles</h3>
@@ -474,8 +295,8 @@ const VehicleManagement = () => {
       ) : vehicles.length === 0 ? (
         <div className="empty-state">
           <Car size={48} />
-          <h4>No vehicles yet</h4>
-          <p>Add your first vehicle to get started with listings</p>
+          <h4>No vehicles added yet</h4>
+          <p>Add your vehicles to start creating listings</p>
           <button 
             className="btn-primary"
             onClick={() => setShowVehicleModal(true)}
@@ -487,28 +308,33 @@ const VehicleManagement = () => {
         <div className="vehicles-grid">
           {vehicles.map(vehicle => (
             <div key={vehicle._id} className="vehicle-card">
-              <div className="vehicle-info">
+              <div className="vehicle-header">
                 <h4>{vehicle.make} {vehicle.model}</h4>
-                <p className="vehicle-year">{vehicle.year}</p>
-                {vehicle.color && <p className="vehicle-detail">Color: {vehicle.color}</p>}
-                {vehicle.mileage && <p className="vehicle-detail">Mileage: {vehicle.mileage.toLocaleString()} km</p>}
-                {vehicle.licensePlate && <p className="vehicle-detail">Plate: {vehicle.licensePlate}</p>}
+                <span className="vehicle-year">{vehicle.year}</span>
+              </div>
+              
+              <div className="vehicle-details">
+                <p><strong>Color:</strong> {vehicle.color}</p>
+                <p><strong>Mileage:</strong> {vehicle.mileage} km</p>
+                {vehicle.licensePlate && (
+                  <p><strong>License:</strong> {vehicle.licensePlate}</p>
+                )}
               </div>
               
               <div className="vehicle-actions">
                 <button 
-                  className="btn-icon"
+                  className="btn-secondary"
                   onClick={() => handleEditVehicle(vehicle)}
-                  title="Edit vehicle"
                 >
-                  <Edit size={16} />
+                  <Edit size={14} />
+                  Edit
                 </button>
                 <button 
-                  className="btn-icon"
+                  className="btn-danger"
                   onClick={() => handleDeleteVehicle(vehicle._id)}
-                  title="Delete vehicle"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={14} />
+                  Delete
                 </button>
               </div>
             </div>
@@ -518,17 +344,23 @@ const VehicleManagement = () => {
     </div>
   );
 
-  const renderSubmissionsList = () => (
+  const renderSubmissions = () => (
     <div className="submissions-section">
       <div className="section-header">
-        <h3>My Listing Submissions</h3>
-        <div className="stats-summary">
-          <span className="stat">Total: {submissionStats.total}</span>
-          <span className="stat pending">Pending: {submissionStats.pending}</span>
-          <span className="stat approved">Approved: {submissionStats.approved}</span>
-          {submissionStats.rejected > 0 && (
-            <span className="stat rejected">Rejected: {submissionStats.rejected}</span>
-          )}
+        <h3>My Submissions</h3>
+        <div className="submission-stats">
+          <div className="stat">
+            <span className="stat-number">{submissionStats.total}</span>
+            <span className="stat-label">Total</span>
+          </div>
+          <div className="stat">
+            <span className="stat-number">{submissionStats.pending}</span>
+            <span className="stat-label">Pending</span>
+          </div>
+          <div className="stat">
+            <span className="stat-number">{submissionStats.approved}</span>
+            <span className="stat-label">Approved</span>
+          </div>
         </div>
       </div>
 
@@ -546,7 +378,7 @@ const VehicleManagement = () => {
             className="btn-primary"
             onClick={() => {
               setActiveSection('create-listing');
-              setListingStep('pricing'); // Start with pricing/plan showcase
+              setListingStep('pricing');
             }}
           >
             Create Your First Listing
@@ -569,6 +401,21 @@ const VehicleManagement = () => {
                   <p><strong>Review Notes:</strong> {submission.adminReview.notes}</p>
                 )}
               </div>
+              
+              {submission.status === 'approved' && (
+                <div className="submission-actions">
+                  <button 
+                    className="btn-primary"
+                    onClick={() => {
+                      // Trigger payment flow for approved listing
+                      showMessage('info', 'Redirecting to payment...');
+                    }}
+                  >
+                    <DollarSign size={14} />
+                    Complete Payment
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -577,6 +424,7 @@ const VehicleManagement = () => {
   );
 
   const renderCreateListing = () => {
+    // Step 1: Plan Selection (Preview Mode)
     if (listingStep === 'pricing') {
       return (
         <div className="create-listing-section">
@@ -584,30 +432,30 @@ const VehicleManagement = () => {
             <h3>Create New Car Listing</h3>
             <div className="flow-info">
               <p className="flow-description">
-                📋 <strong>How it works:</strong> Browse plans below → Fill out your car details → Admin reviews (FREE) → Pay for approved plan → Listing goes live
+                📋 <strong>How it works:</strong> Select plan → Fill car details → FREE admin review → Pay after approval → Listing goes live
               </p>
               <div className="flow-highlight">
                 <Info size={16} />
-                <span>No payment required upfront! Select a plan to see what you'll get, then submit for free review.</span>
+                <span>No payment required upfront! Pay only after admin approval.</span>
               </div>
             </div>
           </div>
           
           <CarListingManager
-            onPlanSelected={handlePlanSelection}
-            onAddonsSelected={handleAddonSelection}
-            onProceedToForm={() => setListingStep('form')}
+            onProceedToForm={handleProceedToForm}
             selectedPlan={selectedPlan}
             selectedAddons={selectedAddons}
-            mode="preview" // NEW: Preview mode - no payment required
+            mode="preview" // PREVIEW MODE - no payment required
             showPaymentInfo={false} // Hide payment buttons
             submitButtonText="Continue to Listing Form"
             allowSkipPlan={true} // Allow proceeding without plan selection
+            onCancel={() => setActiveSection('vehicles')}
           />
         </div>
       );
     }
 
+    // Step 2: Car Listing Form
     if (listingStep === 'form') {
       return (
         <div className="create-listing-section">
@@ -623,19 +471,193 @@ const VehicleManagement = () => {
           
           <UserCarListingForm
             onSubmit={handleListingFormSubmit}
-            onCancel={() => {
-              setListingStep('pricing'); // Go back to plan selection
-            }}
+            onCancel={() => setListingStep('pricing')}
             selectedPlan={selectedPlan}
             selectedAddons={selectedAddons}
-            showPlanSelection={false} // Don't show plan selection in form
-            showSelectedPlanSummary={true} // Show what they selected
           />
         </div>
       );
     }
 
+    // Step 3: Submission Confirmation
+    if (listingStep === 'submitted') {
+      return (
+        <div className="create-listing-section">
+          <div className="submission-success">
+            <CheckCircle size={64} color="#27ae60" />
+            <h3>Listing Submitted Successfully!</h3>
+            <p>Your car listing has been submitted for admin review.</p>
+            <div className="next-steps">
+              <h4>What happens next?</h4>
+              <ul>
+                <li>✅ Admin reviews your listing (FREE)</li>
+                <li>📧 You'll receive email notification within 24-48 hours</li>
+                <li>💳 Pay for your selected plan after approval</li>
+                <li>🚗 Your listing goes live immediately after payment</li>
+              </ul>
+            </div>
+            <button 
+              className="btn-primary"
+              onClick={() => setActiveSection('submissions')}
+            >
+              View My Submissions
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     return null;
+  };
+
+  // === VEHICLE MODAL ===
+  const renderVehicleModal = () => {
+    if (!showVehicleModal) return null;
+
+    return (
+      <div className="modal-overlay">
+        <div className="modal">
+          <div className="modal-header">
+            <h3>{editingVehicle ? 'Edit Vehicle' : 'Add New Vehicle'}</h3>
+            <button 
+              className="close-btn"
+              onClick={() => {
+                setShowVehicleModal(false);
+                setEditingVehicle(null);
+                setVehicleForm({
+                  make: '', model: '', year: new Date().getFullYear(),
+                  vin: '', licensePlate: '', color: '', mileage: '',
+                  purchaseDate: '', notes: ''
+                });
+              }}
+            >
+              <X size={20} />
+            </button>
+          </div>
+          
+          <form onSubmit={handleVehicleSubmit} className="modal-form">
+            <div className="form-grid">
+              <div className="form-group">
+                <label htmlFor="make">Make*</label>
+                <input
+                  type="text"
+                  id="make"
+                  value={vehicleForm.make}
+                  onChange={(e) => setVehicleForm(prev => ({ ...prev, make: e.target.value }))}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="model">Model*</label>
+                <input
+                  type="text"
+                  id="model"
+                  value={vehicleForm.model}
+                  onChange={(e) => setVehicleForm(prev => ({ ...prev, model: e.target.value }))}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="year">Year*</label>
+                <input
+                  type="number"
+                  id="year"
+                  value={vehicleForm.year}
+                  onChange={(e) => setVehicleForm(prev => ({ ...prev, year: parseInt(e.target.value) }))}
+                  min="1900"
+                  max={new Date().getFullYear() + 1}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="color">Color</label>
+                <input
+                  type="text"
+                  id="color"
+                  value={vehicleForm.color}
+                  onChange={(e) => setVehicleForm(prev => ({ ...prev, color: e.target.value }))}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="mileage">Mileage (km)</label>
+                <input
+                  type="number"
+                  id="mileage"
+                  value={vehicleForm.mileage}
+                  onChange={(e) => setVehicleForm(prev => ({ ...prev, mileage: e.target.value }))}
+                  min="0"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="licensePlate">License Plate</label>
+                <input
+                  type="text"
+                  id="licensePlate"
+                  value={vehicleForm.licensePlate}
+                  onChange={(e) => setVehicleForm(prev => ({ ...prev, licensePlate: e.target.value }))}
+                />
+              </div>
+            </div>
+            
+            <div className="form-group full-width">
+              <label htmlFor="vin">VIN</label>
+              <input
+                type="text"
+                id="vin"
+                value={vehicleForm.vin}
+                onChange={(e) => setVehicleForm(prev => ({ ...prev, vin: e.target.value }))}
+              />
+            </div>
+            
+            <div className="form-group full-width">
+              <label htmlFor="purchaseDate">Purchase Date</label>
+              <input
+                type="date"
+                id="purchaseDate"
+                value={vehicleForm.purchaseDate}
+                onChange={(e) => setVehicleForm(prev => ({ ...prev, purchaseDate: e.target.value }))}
+              />
+            </div>
+            
+            <div className="form-group full-width">
+              <label htmlFor="notes">Notes</label>
+              <textarea
+                id="notes"
+                value={vehicleForm.notes}
+                onChange={(e) => setVehicleForm(prev => ({ ...prev, notes: e.target.value }))}
+                rows="3"
+              />
+            </div>
+            
+            <div className="modal-actions">
+              <button 
+                type="button" 
+                className="btn-secondary"
+                onClick={() => {
+                  setShowVehicleModal(false);
+                  setEditingVehicle(null);
+                }}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                className="btn-primary"
+                disabled={loading}
+              >
+                {loading ? 'Saving...' : editingVehicle ? 'Update Vehicle' : 'Add Vehicle'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
   };
 
   // === MAIN RENDER ===
@@ -671,7 +693,10 @@ const VehicleManagement = () => {
         
         <button 
           className={`tab-button ${activeSection === 'create-listing' ? 'active' : ''}`}
-          onClick={() => setActiveSection('create-listing')}
+          onClick={() => {
+            setActiveSection('create-listing');
+            setListingStep('pricing');
+          }}
         >
           <Plus size={16} />
           Create Listing
@@ -683,20 +708,15 @@ const VehicleManagement = () => {
         >
           <Upload size={16} />
           My Submissions
-          {submissionStats.pending > 0 && (
-            <span className="notification-badge">{submissionStats.pending}</span>
-          )}
         </button>
       </div>
 
-      {/* Content Area */}
-      <div className="content-area">
-        {activeSection === 'vehicles' && renderVehiclesList()}
-        {activeSection === 'create-listing' && renderCreateListing()}
-        {activeSection === 'submissions' && renderSubmissionsList()}
-      </div>
+      {/* Content Areas */}
+      {activeSection === 'vehicles' && renderVehicles()}
+      {activeSection === 'create-listing' && renderCreateListing()}
+      {activeSection === 'submissions' && renderSubmissions()}
 
-      {/* Modals */}
+      {/* Vehicle Modal */}
       {renderVehicleModal()}
     </div>
   );
