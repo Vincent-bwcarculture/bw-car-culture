@@ -15,9 +15,7 @@ const UserCarListingForm = ({
   onCancel, 
   initialData = null,
   selectedPlan = null,
-  selectedAddons = [],
-  showPlanSelection = false, // Option to hide plan selection
-  showSelectedPlanSummary = false // NEW: Show selected plan info
+  selectedAddons = []
 }) => {
   const [activeTab, setActiveTab] = useState('basic');
   const [loading, setLoading] = useState(false);
@@ -277,8 +275,8 @@ const UserCarListingForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // FIXED: Don't require plan for free submission flow
-    if (showPlanSelection && !selectedPlan) {
+    // Basic validation
+    if (!selectedPlan) {
       showMessage('error', 'Please select a listing plan first');
       return;
     }
@@ -296,8 +294,8 @@ const UserCarListingForm = ({
       // Prepare submission data
       const submissionData = {
         ...formData,
-        selectedPlan: showPlanSelection ? selectedPlan : null,
-        selectedAddons: showPlanSelection ? selectedAddons : [],
+        selectedPlan,
+        selectedAddons,
         status: 'pending_review'
       };
       
@@ -435,98 +433,46 @@ const UserCarListingForm = ({
 
   // Render selected plan and addons summary
   const renderSelectionSummary = () => {
-    // Show selected plan summary from previous step
-    if (showSelectedPlanSummary && selectedPlan) {
+    if (!selectedPlan && selectedAddons.length === 0) {
       return (
-        <div className="form-selection-summary">
-          <h4>
-            <CheckCircle size={20} />
-            Selected Plan for After Approval
-          </h4>
-          
+        <div className="form-selection-warning">
+          <AlertCircle size={20} />
+          <div>
+            <h4>No Plan Selected</h4>
+            <p>Please scroll up and select a listing plan to continue</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="form-selection-summary">
+        <h4>
+          <CheckCircle size={20} />
+          Your Selection Summary
+        </h4>
+        
+        {selectedPlan && (
           <div className="selected-plan">
             <div className="plan-info">
               <span className="plan-label">Selected Plan:</span>
               <span className="plan-name">{selectedPlan}</span>
             </div>
-            <p className="plan-note">
-              💡 You'll pay for this plan only after admin approval. Submit your listing details below for free review first.
-            </p>
           </div>
-          
-          {selectedAddons.length > 0 && (
-            <div className="selected-addons">
-              <div className="addons-info">
-                <span className="addons-label">Selected Add-ons:</span>
-                <div className="addons-list">
-                  {selectedAddons.map((addon, index) => (
-                    <span key={index} className="addon-tag">{addon}</span>
-                  ))}
-                </div>
+        )}
+        
+        {selectedAddons.length > 0 && (
+          <div className="selected-addons">
+            <div className="addons-info">
+              <span className="addons-label">Selected Add-ons:</span>
+              <div className="addons-list">
+                {selectedAddons.map((addon, index) => (
+                  <span key={index} className="addon-tag">{addon}</span>
+                ))}
               </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    // Original plan selection mode
-    if (showPlanSelection) {
-      if (!selectedPlan && selectedAddons.length === 0) {
-        return (
-          <div className="form-selection-warning">
-            <AlertCircle size={20} />
-            <div>
-              <h4>No Plan Selected</h4>
-              <p>Please scroll up and select a listing plan to continue</p>
             </div>
           </div>
-        );
-      }
-
-      return (
-        <div className="form-selection-summary">
-          <h4>
-            <CheckCircle size={20} />
-            Your Selection Summary
-          </h4>
-          
-          {selectedPlan && (
-            <div className="selected-plan">
-              <div className="plan-info">
-                <span className="plan-label">Selected Plan:</span>
-                <span className="plan-name">{selectedPlan}</span>
-              </div>
-            </div>
-          )}
-          
-          {selectedAddons.length > 0 && (
-            <div className="selected-addons">
-              <div className="addons-info">
-                <span className="addons-label">Selected Add-ons:</span>
-                <div className="addons-list">
-                  {selectedAddons.map((addon, index) => (
-                    <span key={index} className="addon-tag">{addon}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    // Free submission mode (no plan selection)
-    return (
-      <div className="form-selection-summary">
-        <h4>
-          <CheckCircle size={20} />
-          Free Submission for Review
-        </h4>
-        <p>
-          Your listing will be submitted for admin review at no cost. 
-          After approval, you'll be contacted about selecting a plan and payment.
-        </p>
+        )}
       </div>
     );
   };
@@ -581,18 +527,7 @@ const UserCarListingForm = ({
 
       {/* Form Header */}
       <div className="form-header">
-        <div className="form-header-content">
-          <h3>Create Your Car Listing</h3>
-          {showSelectedPlanSummary && selectedPlan && (
-            <button 
-              type="button"
-              className="back-to-plans-btn"
-              onClick={onCancel}
-            >
-              ← Back to Plans
-            </button>
-          )}
-        </div>
+        <h3>Create Your Car Listing</h3>
         {userProfile && (
           <p className="auto-populated-notice">
             <User size={16} />
@@ -1244,7 +1179,7 @@ const UserCarListingForm = ({
           <button
             type="submit"
             className="form-submit-btn"
-            disabled={loading || (showPlanSelection && !selectedPlan)}
+            disabled={loading || !selectedPlan}
           >
             {loading ? (
               <>
@@ -1254,7 +1189,7 @@ const UserCarListingForm = ({
             ) : (
               <>
                 <CheckCircle size={16} />
-                {showPlanSelection ? 'Submit for Review' : 'Submit for Free Review'}
+                Submit for Review
               </>
             )}
           </button>
