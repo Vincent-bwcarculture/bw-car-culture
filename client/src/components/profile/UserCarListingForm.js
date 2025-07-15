@@ -1,5 +1,5 @@
 // client/src/components/profile/UserCarListingForm.js
-// COMPLETE car listing form for users with all tabs and functionality
+// COMPLETE car listing form for users with all tabs and functionality + DEBUG INTEGRATION
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -56,7 +56,8 @@ const UserCarListingForm = ({
       currency: 'BWP',
       negotiable: false,
       tradeIn: false,
-      financing: false
+      financing: false,
+      monthlyPayment: ''
     },
     
     // Contact Information
@@ -64,17 +65,15 @@ const UserCarListingForm = ({
       sellerName: '',
       phone: '',
       email: '',
-      preferredContactMethod: 'whatsapp',
+      preferredContact: 'phone',
       location: {
         city: '',
         area: '',
-        allowViewings: true,
-        viewingNotes: ''
+        address: ''
       }
     },
     
     // Features
-    features: [],
     safetyFeatures: [],
     comfortFeatures: [],
     exteriorFeatures: [],
@@ -83,47 +82,67 @@ const UserCarListingForm = ({
     // Images
     images: [],
     
-    // Additional Details
+    // Additional Info
     hasServiceHistory: false,
     serviceHistory: '',
-    reasonForSelling: '',
-    additionalNotes: '',
-    keyCount: '2',
-    accidents: false,
-    accidentDetails: '',
-    modifications: false,
+    hasModifications: false,
     modificationDetails: '',
     warranty: false,
-    warrantyDetails: ''
+    warrantyDetails: '',
+    reasonForSelling: '',
+    additionalNotes: ''
   });
+
+  // Static data
+  const CONDITION_OPTIONS = [
+    { value: 'new', label: 'New' },
+    { value: 'used', label: 'Used' },
+    { value: 'certified', label: 'Certified Pre-Owned' }
+  ];
+
+  const BODY_STYLE_OPTIONS = [
+    'Sedan', 'SUV', 'Hatchback', 'Coupe', 'Convertible', 
+    'Wagon', 'Pickup', 'Van', 'Crossover', 'Other'
+  ];
+
+  const TRANSMISSION_OPTIONS = [
+    'Manual', 'Automatic', 'CVT', 'Semi-Automatic'
+  ];
+
+  const FUEL_TYPE_OPTIONS = [
+    'Petrol', 'Diesel', 'Hybrid', 'Electric', 'LPG', 'CNG'
+  ];
+
+  const DRIVETRAIN_OPTIONS = [
+    'Front-Wheel Drive', 'Rear-Wheel Drive', 'All-Wheel Drive', '4WD'
+  ];
+
+  const PRICE_TYPE_OPTIONS = [
+    { value: 'fixed', label: 'Fixed Price' },
+    { value: 'negotiable', label: 'Negotiable' },
+    { value: 'auction', label: 'Auction' }
+  ];
 
   // Feature options
   const featureOptions = {
     safety: [
-      'ABS', 'Airbags (Multiple)', 'Electronic Stability Control', 
-      'Traction Control', 'Parking Sensors', 'Reverse Camera', 
-      'Blind Spot Monitoring', 'Lane Departure Warning', 
-      'Adaptive Cruise Control', 'Emergency Braking', 
-      'Hill Start Assist', 'Roll Stability Control'
+      'ABS', 'Airbags', 'Electronic Stability Control', 'Traction Control',
+      'Blind Spot Monitoring', 'Lane Departure Warning', 'Collision Warning',
+      'Backup Camera', 'Parking Sensors', 'Adaptive Cruise Control'
     ],
     comfort: [
-      'Air Conditioning', 'Climate Control', 'Heated Seats', 
-      'Cooled Seats', 'Power Windows', 'Power Steering', 
-      'Cruise Control', 'Keyless Entry', 'Push Button Start', 
-      'Remote Start', 'Memory Seats', 'Lumbar Support',
-      'Adjustable Steering Wheel', 'Cup Holders'
+      'Air Conditioning', 'Climate Control', 'Heated Seats', 'Cooled Seats',
+      'Power Seats', 'Memory Seats', 'Sunroof', 'Moonroof', 'Remote Start',
+      'Keyless Entry', 'Push Button Start', 'Auto Windows'
     ],
     exterior: [
-      'Alloy Wheels', 'LED Headlights', 'Fog Lights', 
-      'Sunroof', 'Roof Rails', 'Running Boards', 
-      'Tinted Windows', 'Chrome Trim', 'Spoiler',
-      'Bull Bar', 'Tow Bar', 'Side Steps'
+      'Alloy Wheels', 'LED Headlights', 'Fog Lights', 'Roof Rails',
+      'Chrome Trim', 'Spoiler', 'Bull Bar', 'Tow Bar', 'Side Steps'
     ],
     interior: [
-      'Leather Seats', 'Fabric Seats', 'Navigation System', 
-      'Bluetooth', 'USB Ports', 'Aux Input', 'CD Player', 
-      'Premium Sound System', 'Touchscreen Display',
-      'Apple CarPlay', 'Android Auto', 'Wireless Charging'
+      'Leather Seats', 'Fabric Seats', 'Navigation System', 'Bluetooth',
+      'USB Ports', 'Aux Input', 'CD Player', 'Premium Sound System',
+      'Touchscreen Display', 'Apple CarPlay', 'Android Auto', 'Wireless Charging'
     ]
   };
 
@@ -157,7 +176,7 @@ const UserCarListingForm = ({
     
     // Basic validation
     if (!selectedPlan) {
-      showMessage('error', 'Please select a listing plan first');
+      showMessage('error', 'Please go back and select a listing plan first');
       return;
     }
 
@@ -176,9 +195,10 @@ const UserCarListingForm = ({
         ...formData,
         selectedPlan,
         selectedAddons,
-        status: 'draft' // Will be activated after payment
+        status: 'pending_review' // Will be reviewed by admin first
       };
       
+      console.log('Submitting form with:', submissionData);
       await onSubmit(submissionData);
     } catch (error) {
       console.error('Form submission error:', error);
@@ -301,15 +321,23 @@ const UserCarListingForm = ({
     }));
   };
 
-  // Render selected plan and addons summary
+  // FIXED: Render selected plan and addons summary with debug info
   const renderSelectionSummary = () => {
+    // Debug logging
+    console.log('UserCarListingForm - selectedPlan:', selectedPlan);
+    console.log('UserCarListingForm - selectedAddons:', selectedAddons);
+    
     if (!selectedPlan && selectedAddons.length === 0) {
       return (
         <div className="form-selection-warning">
           <AlertCircle size={20} />
           <div>
             <h4>No Plan Selected</h4>
-            <p>Please scroll up and select a listing plan to continue</p>
+            <p>Please go back and select a listing plan to continue</p>
+            <small style={{color: '#666', fontSize: '12px', marginTop: '8px', display: 'block'}}>
+              Debug: selectedPlan = {JSON.stringify(selectedPlan)}, 
+              selectedAddons = {JSON.stringify(selectedAddons)}
+            </small>
           </div>
         </div>
       );
@@ -343,12 +371,26 @@ const UserCarListingForm = ({
             </div>
           </div>
         )}
+        
+        {/* Debug Info */}
+        <div style={{
+          marginTop: '10px', 
+          padding: '8px', 
+          background: '#f5f5f5', 
+          borderRadius: '4px',
+          fontSize: '12px',
+          color: '#666'
+        }}>
+          <strong>Debug Info:</strong><br/>
+          Plan: {JSON.stringify(selectedPlan)}<br/>
+          Addons: {JSON.stringify(selectedAddons)}
+        </div>
       </div>
     );
   };
 
   // Render feature selection
-  const renderFeatureSection = (category, title, features) => {
+  const renderFeatureSection = (category, title) => {
     const categoryKey = category === 'safety' ? 'safetyFeatures' : 
                        category === 'comfort' ? 'comfortFeatures' :
                        category === 'exterior' ? 'exteriorFeatures' : 'interiorFeatures';
@@ -438,40 +480,37 @@ const UserCarListingForm = ({
                   onChange={handleInputChange}
                   placeholder="e.g., 2020 BMW M4 Competition - Pristine Condition"
                   className={errors.title ? 'error' : ''}
-                  required
                 />
                 {errors.title && <span className="error-message">{errors.title}</span>}
               </div>
 
-              <div className="form-group">
-                <label htmlFor="category">Category*</label>
-                <select
-                  id="category"
-                  name="category"
-                  value={formData.category}
+              <div className="form-group full-width">
+                <label htmlFor="description">Description*</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
                   onChange={handleInputChange}
-                  required
-                >
-                  <option value="car">Car</option>
-                  <option value="suv">SUV</option>
-                  <option value="truck">Truck</option>
-                  <option value="motorcycle">Motorcycle</option>
-                  <option value="commercial">Commercial Vehicle</option>
-                </select>
+                  placeholder="Describe your vehicle in detail..."
+                  rows="4"
+                  className={errors.description ? 'error' : ''}
+                />
+                {errors.description && <span className="error-message">{errors.description}</span>}
               </div>
 
               <div className="form-group">
-                <label htmlFor="condition">Condition*</label>
+                <label htmlFor="condition">Condition</label>
                 <select
                   id="condition"
                   name="condition"
                   value={formData.condition}
                   onChange={handleInputChange}
-                  required
                 >
-                  <option value="new">New</option>
-                  <option value="used">Used</option>
-                  <option value="certified">Certified Pre-Owned</option>
+                  {CONDITION_OPTIONS.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -484,30 +523,12 @@ const UserCarListingForm = ({
                   onChange={handleInputChange}
                 >
                   <option value="">Select Body Style</option>
-                  <option value="sedan">Sedan</option>
-                  <option value="hatchback">Hatchback</option>
-                  <option value="suv">SUV</option>
-                  <option value="coupe">Coupe</option>
-                  <option value="convertible">Convertible</option>
-                  <option value="wagon">Wagon</option>
-                  <option value="pickup">Pickup Truck</option>
-                  <option value="van">Van</option>
+                  {BODY_STYLE_OPTIONS.map(style => (
+                    <option key={style} value={style}>
+                      {style}
+                    </option>
+                  ))}
                 </select>
-              </div>
-
-              <div className="form-group full-width">
-                <label htmlFor="description">Description*</label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Describe your vehicle's condition, features, and any important details..."
-                  rows="6"
-                  className={errors.description ? 'error' : ''}
-                  required
-                />
-                {errors.description && <span className="error-message">{errors.description}</span>}
               </div>
             </div>
           </div>
@@ -529,7 +550,6 @@ const UserCarListingForm = ({
                   onChange={handleInputChange}
                   placeholder="e.g., BMW"
                   className={errors['specifications.make'] ? 'error' : ''}
-                  required
                 />
                 {errors['specifications.make'] && <span className="error-message">{errors['specifications.make']}</span>}
               </div>
@@ -544,7 +564,6 @@ const UserCarListingForm = ({
                   onChange={handleInputChange}
                   placeholder="e.g., M4 Competition"
                   className={errors['specifications.model'] ? 'error' : ''}
-                  required
                 />
                 {errors['specifications.model'] && <span className="error-message">{errors['specifications.model']}</span>}
               </div>
@@ -560,7 +579,6 @@ const UserCarListingForm = ({
                   min="1900"
                   max={new Date().getFullYear() + 1}
                   className={errors['specifications.year'] ? 'error' : ''}
-                  required
                 />
                 {errors['specifications.year'] && <span className="error-message">{errors['specifications.year']}</span>}
               </div>
@@ -573,7 +591,8 @@ const UserCarListingForm = ({
                   name="specifications.mileage"
                   value={formData.specifications.mileage}
                   onChange={handleInputChange}
-                  placeholder="e.g., 45000"
+                  placeholder="0"
+                  min="0"
                 />
               </div>
 
@@ -586,10 +605,11 @@ const UserCarListingForm = ({
                   onChange={handleInputChange}
                 >
                   <option value="">Select Transmission</option>
-                  <option value="manual">Manual</option>
-                  <option value="automatic">Automatic</option>
-                  <option value="cvt">CVT</option>
-                  <option value="semi-automatic">Semi-Automatic</option>
+                  {TRANSMISSION_OPTIONS.map(type => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -602,11 +622,11 @@ const UserCarListingForm = ({
                   onChange={handleInputChange}
                 >
                   <option value="">Select Fuel Type</option>
-                  <option value="petrol">Petrol</option>
-                  <option value="diesel">Diesel</option>
-                  <option value="hybrid">Hybrid</option>
-                  <option value="electric">Electric</option>
-                  <option value="lpg">LPG</option>
+                  {FUEL_TYPE_OPTIONS.map(type => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -631,10 +651,11 @@ const UserCarListingForm = ({
                   onChange={handleInputChange}
                 >
                   <option value="">Select Drivetrain</option>
-                  <option value="fwd">Front Wheel Drive</option>
-                  <option value="rwd">Rear Wheel Drive</option>
-                  <option value="awd">All Wheel Drive</option>
-                  <option value="4wd">4 Wheel Drive</option>
+                  {DRIVETRAIN_OPTIONS.map(type => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -670,9 +691,8 @@ const UserCarListingForm = ({
                   value={formData.specifications.doors}
                   onChange={handleInputChange}
                 >
-                  <option value="">Select Doors</option>
+                  <option value="">Select</option>
                   <option value="2">2 Doors</option>
-                  <option value="3">3 Doors</option>
                   <option value="4">4 Doors</option>
                   <option value="5">5 Doors</option>
                 </select>
@@ -686,24 +706,24 @@ const UserCarListingForm = ({
                   value={formData.specifications.seats}
                   onChange={handleInputChange}
                 >
-                  <option value="">Select Seats</option>
+                  <option value="">Select</option>
                   <option value="2">2 Seats</option>
                   <option value="4">4 Seats</option>
                   <option value="5">5 Seats</option>
                   <option value="7">7 Seats</option>
-                  <option value="8">8 Seats</option>
+                  <option value="8">8+ Seats</option>
                 </select>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="vin">VIN Number</label>
+              <div className="form-group full-width">
+                <label htmlFor="vin">VIN (Vehicle Identification Number)</label>
                 <input
                   type="text"
                   id="vin"
                   name="specifications.vin"
                   value={formData.specifications.vin}
                   onChange={handleInputChange}
-                  placeholder="Vehicle Identification Number"
+                  placeholder="17-character VIN"
                 />
               </div>
             </div>
@@ -717,16 +737,16 @@ const UserCarListingForm = ({
             
             <div className="form-grid">
               <div className="form-group">
-                <label htmlFor="price">Price (BWP)*</label>
+                <label htmlFor="price">Price* (BWP)</label>
                 <input
                   type="number"
                   id="price"
                   name="pricing.price"
                   value={formData.pricing.price}
                   onChange={handleInputChange}
-                  placeholder="e.g., 150000"
+                  placeholder="0"
+                  min="0"
                   className={errors['pricing.price'] ? 'error' : ''}
-                  required
                 />
                 {errors['pricing.price'] && <span className="error-message">{errors['pricing.price']}</span>}
               </div>
@@ -739,24 +759,26 @@ const UserCarListingForm = ({
                   value={formData.pricing.priceType}
                   onChange={handleInputChange}
                 >
-                  <option value="fixed">Fixed Price</option>
-                  <option value="negotiable">Negotiable</option>
-                  <option value="best_offer">Best Offer</option>
+                  {PRICE_TYPE_OPTIONS.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div className="form-group">
-                <label htmlFor="currency">Currency</label>
-                <select
-                  id="currency"
-                  name="pricing.currency"
-                  value={formData.pricing.currency}
+                <label htmlFor="monthlyPayment">Monthly Payment (BWP)</label>
+                <input
+                  type="number"
+                  id="monthlyPayment"
+                  name="pricing.monthlyPayment"
+                  value={formData.pricing.monthlyPayment}
                   onChange={handleInputChange}
-                >
-                  <option value="BWP">BWP</option>
-                  <option value="USD">USD</option>
-                  <option value="ZAR">ZAR</option>
-                </select>
+                  placeholder="Optional"
+                  min="0"
+                />
+                <small>If financing is available</small>
               </div>
 
               <div className="form-group full-width">
@@ -778,7 +800,7 @@ const UserCarListingForm = ({
                       checked={formData.pricing.tradeIn}
                       onChange={handleInputChange}
                     />
-                    <span>Accept trade-ins</span>
+                    <span>Accept trade-in</span>
                   </label>
 
                   <label className="checkbox-label">
@@ -810,9 +832,8 @@ const UserCarListingForm = ({
                   name="contact.sellerName"
                   value={formData.contact.sellerName}
                   onChange={handleInputChange}
-                  placeholder="Your name or business name"
+                  placeholder="Your name"
                   className={errors['contact.sellerName'] ? 'error' : ''}
-                  required
                 />
                 {errors['contact.sellerName'] && <span className="error-message">{errors['contact.sellerName']}</span>}
               </div>
@@ -825,9 +846,8 @@ const UserCarListingForm = ({
                   name="contact.phone"
                   value={formData.contact.phone}
                   onChange={handleInputChange}
-                  placeholder="e.g., +26771234567"
+                  placeholder="+267 XX XXX XXX"
                   className={errors['contact.phone'] ? 'error' : ''}
-                  required
                 />
                 {errors['contact.phone'] && <span className="error-message">{errors['contact.phone']}</span>}
               </div>
@@ -840,22 +860,21 @@ const UserCarListingForm = ({
                   name="contact.email"
                   value={formData.contact.email}
                   onChange={handleInputChange}
-                  placeholder="your.email@example.com"
+                  placeholder="your@email.com"
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="preferredContactMethod">Preferred Contact Method</label>
+                <label htmlFor="preferredContact">Preferred Contact Method</label>
                 <select
-                  id="preferredContactMethod"
-                  name="contact.preferredContactMethod"
-                  value={formData.contact.preferredContactMethod}
+                  id="preferredContact"
+                  name="contact.preferredContact"
+                  value={formData.contact.preferredContact}
                   onChange={handleInputChange}
                 >
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="phone">Phone Call</option>
-                  <option value="both">Both WhatsApp & Phone</option>
+                  <option value="phone">Phone</option>
                   <option value="email">Email</option>
+                  <option value="whatsapp">WhatsApp</option>
                 </select>
               </div>
 
@@ -869,7 +888,6 @@ const UserCarListingForm = ({
                   onChange={handleInputChange}
                   placeholder="e.g., Gaborone"
                   className={errors['contact.location.city'] ? 'error' : ''}
-                  required
                 />
                 {errors['contact.location.city'] && <span className="error-message">{errors['contact.location.city']}</span>}
               </div>
@@ -882,35 +900,21 @@ const UserCarListingForm = ({
                   name="contact.location.area"
                   value={formData.contact.location.area}
                   onChange={handleInputChange}
-                  placeholder="e.g., CBD"
+                  placeholder="e.g., Block 6"
                 />
               </div>
 
               <div className="form-group full-width">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="contact.location.allowViewings"
-                    checked={formData.contact.location.allowViewings}
-                    onChange={handleInputChange}
-                  />
-                  <span>Allow vehicle viewings</span>
-                </label>
+                <label htmlFor="address">Full Address (Optional)</label>
+                <textarea
+                  id="address"
+                  name="contact.location.address"
+                  value={formData.contact.location.address}
+                  onChange={handleInputChange}
+                  placeholder="Full address for serious buyers"
+                  rows="2"
+                />
               </div>
-
-              {formData.contact.location.allowViewings && (
-                <div className="form-group full-width">
-                  <label htmlFor="viewingNotes">Viewing Notes</label>
-                  <textarea
-                    id="viewingNotes"
-                    name="contact.location.viewingNotes"
-                    value={formData.contact.location.viewingNotes}
-                    onChange={handleInputChange}
-                    placeholder="Any specific instructions for viewing the vehicle..."
-                    rows="3"
-                  />
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -921,10 +925,10 @@ const UserCarListingForm = ({
             <h4>Vehicle Features</h4>
             
             <div className="features-container">
-              {renderFeatureSection('safety', 'Safety Features', formData.safetyFeatures)}
-              {renderFeatureSection('comfort', 'Comfort Features', formData.comfortFeatures)}
-              {renderFeatureSection('exterior', 'Exterior Features', formData.exteriorFeatures)}
-              {renderFeatureSection('interior', 'Interior Features', formData.interiorFeatures)}
+              {renderFeatureSection('safety', 'Safety Features')}
+              {renderFeatureSection('comfort', 'Comfort & Convenience')}
+              {renderFeatureSection('exterior', 'Exterior Features')}
+              {renderFeatureSection('interior', 'Interior Features')}
             </div>
           </div>
         )}
@@ -934,7 +938,7 @@ const UserCarListingForm = ({
           <div className="form-section active">
             <h4>Vehicle Photos</h4>
             
-            <div className="images-upload-section">
+            <div className="images-container">
               <div className="upload-area">
                 <input
                   type="file"
@@ -944,10 +948,10 @@ const UserCarListingForm = ({
                   onChange={handleImageUpload}
                   style={{ display: 'none' }}
                 />
-                <label htmlFor="imageUpload" className="upload-button">
-                  <Upload size={24} />
-                  <span>Upload Images</span>
-                  <small>Click to select multiple photos</small>
+                <label htmlFor="imageUpload" className="upload-label">
+                  <Upload size={32} />
+                  <span>Click to upload photos</span>
+                  <small>Select multiple files (JPG, PNG)</small>
                 </label>
               </div>
 
@@ -966,7 +970,7 @@ const UserCarListingForm = ({
                       className="remove-image"
                       onClick={() => removeImage(index)}
                     >
-                      <Trash2 size={16} />
+                      <X size={16} />
                     </button>
                   </div>
                 ))}
@@ -1019,59 +1023,19 @@ const UserCarListingForm = ({
                 </div>
               )}
 
-              <div className="form-group">
-                <label htmlFor="keyCount">Number of Keys</label>
-                <select
-                  id="keyCount"
-                  name="keyCount"
-                  value={formData.keyCount}
-                  onChange={handleInputChange}
-                >
-                  <option value="1">1 Key</option>
-                  <option value="2">2 Keys</option>
-                  <option value="3">3+ Keys</option>
-                </select>
-              </div>
-
               <div className="form-group full-width">
                 <label className="checkbox-label">
                   <input
                     type="checkbox"
-                    name="accidents"
-                    checked={formData.accidents}
+                    name="hasModifications"
+                    checked={formData.hasModifications}
                     onChange={handleInputChange}
                   />
-                  <span>Vehicle has been in an accident</span>
+                  <span>Vehicle has modifications or upgrades</span>
                 </label>
               </div>
 
-              {formData.accidents && (
-                <div className="form-group full-width">
-                  <label htmlFor="accidentDetails">Accident Details</label>
-                  <textarea
-                    id="accidentDetails"
-                    name="accidentDetails"
-                    value={formData.accidentDetails}
-                    onChange={handleInputChange}
-                    placeholder="Describe any accidents and repairs..."
-                    rows="3"
-                  />
-                </div>
-              )}
-
-              <div className="form-group full-width">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="modifications"
-                    checked={formData.modifications}
-                    onChange={handleInputChange}
-                  />
-                  <span>Vehicle has modifications</span>
-                </label>
-              </div>
-
-              {formData.modifications && (
+              {formData.hasModifications && (
                 <div className="form-group full-width">
                   <label htmlFor="modificationDetails">Modification Details</label>
                   <textarea
@@ -1162,9 +1126,9 @@ const UserCarListingForm = ({
             <button 
               type="submit" 
               className="form-submit-btn"
-              disabled={loading || !selectedPlan}
+              disabled={loading}
             >
-              {loading ? 'Processing...' : 'Continue to Payment'}
+              {loading ? 'Submitting...' : 'Submit for Review'}
             </button>
           </div>
         </div>

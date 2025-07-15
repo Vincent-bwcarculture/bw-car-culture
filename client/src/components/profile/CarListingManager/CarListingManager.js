@@ -17,6 +17,10 @@ const CarListingManager = ({
   onPaymentComplete, 
   onCancel,
   onProceedToForm, // NEW: Callback to proceed to listing form
+  onPlanSelected, // NEW: Callback when plan is selected
+  onAddonSelected, // NEW: Callback when addons change
+  selectedPlan: propSelectedPlan, // NEW: Direct prop for selected plan
+  selectedAddons: propSelectedAddons = [], // NEW: Direct prop for selected addons
   pendingListingId = null,
   mode = 'payment', // NEW: 'preview' or 'payment' mode
   showPaymentInfo = true, // NEW: Hide payment buttons in preview mode
@@ -152,6 +156,11 @@ const CarListingManager = ({
     setSelectedPlan(planId);
     setPaymentType('subscription');
     showMessage('success', `${availableTiers[planId]?.name} plan selected`);
+    
+    // FIXED: Call parent callback to update parent state
+    if (onPlanSelected) {
+      onPlanSelected(planId);
+    }
   };
 
   // NEW: Handle proceeding to listing form (preview mode)
@@ -177,6 +186,11 @@ const CarListingManager = ({
       
       setSelectedAddons(newSelectedAddons);
       showMessage('info', `${addon.name} ${selectedAddons.includes(addonId) ? 'removed' : 'added'}`);
+      
+      // FIXED: Call parent callback to update parent state
+      if (onAddonSelected) {
+        onAddonSelected(newSelectedAddons);
+      }
     }
   };
 
@@ -192,14 +206,22 @@ const CarListingManager = ({
 
       if (response.data.success) {
         setBookingData(response.data.data);
-        setSelectedAddons(prev => [...prev, currentAddon.id]);
+        const newSelectedAddons = [...selectedAddons, currentAddon.id];
+        setSelectedAddons(newSelectedAddons);
         setShowAddonModal(false);
         showMessage('success', 'Booking confirmed! Proceeding to payment...');
         
-        // Automatically initiate payment after booking
-        setTimeout(() => {
-          initiateAddonPayment([currentAddon.id], response.data.data.bookingId);
-        }, 1000);
+        // FIXED: Call parent callback to update parent state
+        if (onAddonSelected) {
+          onAddonSelected(newSelectedAddons);
+        }
+        
+        // Automatically initiate payment after booking (only in payment mode)
+        if (mode === 'payment') {
+          setTimeout(() => {
+            initiateAddonPayment([currentAddon.id], response.data.data.bookingId);
+          }, 1000);
+        }
       } else {
         setError(response.data.message || 'Failed to confirm booking');
       }

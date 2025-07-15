@@ -107,17 +107,20 @@ const VehicleManagement = () => {
   // Handle plan selection in preview mode
   const handlePlanSelection = (planId) => {
     setSelectedPlan(planId);
+    console.log('Plan selected:', planId); // Debug log
     showMessage('success', 'Plan selected! Continue to fill out your car details.');
   };
 
   // Handle addon selection in preview mode
   const handleAddonSelection = (addonIds) => {
     setSelectedAddons(addonIds);
+    console.log('Addons selected:', addonIds); // Debug log
     showMessage('info', `${addonIds.length} add-on(s) selected.`);
   };
 
   // Proceed from plan selection to listing form
   const handleProceedToForm = () => {
+    console.log('Proceeding to form with:', { selectedPlan, selectedAddons }); // Debug log
     setListingStep('form');
     showMessage('info', 'Now fill out your car details for admin review.');
   };
@@ -443,6 +446,8 @@ const VehicleManagement = () => {
           
           <CarListingManager
             onProceedToForm={handleProceedToForm}
+            onPlanSelected={handlePlanSelection}
+            onAddonSelected={handleAddonSelection}
             selectedPlan={selectedPlan}
             selectedAddons={selectedAddons}
             mode="preview" // PREVIEW MODE - no payment required
