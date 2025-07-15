@@ -24,7 +24,7 @@ const VehicleManagement = () => {
   
   // === LISTING STATE ===
   const [showListingForm, setShowListingForm] = useState(false); // Fixed: setShowListingForm defined
-  const [listingStep, setListingStep] = useState('pricing'); // 'pricing', 'form', 'subscription'
+  const [listingStep, setListingStep] = useState('form'); // 'form' -> submit for review -> admin approves -> payment
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedAddons, setSelectedAddons] = useState([]);
   const [pendingListingData, setPendingListingData] = useState(null);
@@ -187,40 +187,37 @@ const VehicleManagement = () => {
 
   // === LISTING MANAGEMENT FUNCTIONS ===
   
-  // FIXED: Handle car listing form submission
+  // FIXED: Handle car listing form submission - NO PAYMENT REQUIRED YET
   const handleListingFormSubmit = async (listingData) => {
     try {
       setLoading(true);
-      console.log('Submitting user listing to backend...', listingData);
+      console.log('Submitting user listing for admin review...', listingData);
       
-      // Check if plan is selected
-      if (!selectedPlan) {
-        showMessage('error', 'Please select a listing plan first');
-        return;
-      }
+      // NO PLAN REQUIRED - user submits for free review first
+      // Payment happens AFTER admin approval
 
       // FIXED: Submit to the correct user submission endpoint
       const response = await axios.post('/api/user/submit-listing', {
         listingData: {
           ...listingData,
-          selectedPlan,
-          selectedAddons
+          // Don't include plan/addons yet - those come after admin approval
+          status: 'pending_review',
+          submissionType: 'free_review' // Mark as free submission for review
         }
       });
 
       if (response.data.success) {
-        showMessage('success', 'Your listing has been submitted for admin review! You should hear back within 24-48 hours.');
+        showMessage('success', '🎉 Listing submitted successfully! Our team will review it within 24-48 hours and contact you about next steps.');
         
         // Reset form data
         setPendingListingData(null);
-        setSelectedPlan(null);
-        setSelectedAddons([]);
         
-        // Close the listing form
+        // Close the listing form and go back to submissions view
         setShowListingForm(false);
-        setListingStep('pricing');
+        setListingStep('form'); // Reset to form step
+        setActiveSection('submissions'); // Show user their submissions
         
-        // Refresh user data to show the submission
+        // Refresh submissions to show the new one
         await fetchUserSubmissions();
         
       } else {
@@ -548,8 +545,7 @@ const VehicleManagement = () => {
           <button 
             className="btn-primary"
             onClick={() => {
-              setActiveSection('create-listing');
-              setListingStep('pricing');
+              setActiveSection('create-listing'); // Go directly to form
             }}
           >
             Create Your First Listing
@@ -580,34 +576,27 @@ const VehicleManagement = () => {
   );
 
   const renderCreateListing = () => {
-    if (listingStep === 'pricing') {
-      return (
-        <CarListingManager
-          onPlanSelected={handlePlanSelection}
-          onAddonsSelected={handleAddonSelection}
-          onProceedToForm={() => setListingStep('form')}
-          selectedPlan={selectedPlan}
-          selectedAddons={selectedAddons}
-        />
-      );
-    }
-
-    if (listingStep === 'form') {
-      return (
+    // FIXED: Start with form, not pricing - user submits for free review first
+    return (
+      <div className="create-listing-section">
+        <div className="section-header">
+          <h3>Create New Car Listing</h3>
+          <p className="flow-description">
+            📝 Fill out your car details → 🔍 Admin reviews (24-48hrs) → 💳 Choose plan & pay → 🚀 Listing goes live
+          </p>
+        </div>
+        
         <UserCarListingForm
           onSubmit={handleListingFormSubmit}
           onCancel={() => {
-            setListingStep('pricing');
-            setSelectedPlan(null);
-            setSelectedAddons([]);
+            setActiveSection('vehicles'); // Go back to vehicles tab
           }}
-          selectedPlan={selectedPlan}
-          selectedAddons={selectedAddons}
+          selectedPlan={null} // No plan selected yet - that comes after approval
+          selectedAddons={[]}
+          showPlanSelection={false} // Hide plan selection in form
         />
-      );
-    }
-
-    return null;
+      </div>
+    );
   };
 
   // === MAIN RENDER ===

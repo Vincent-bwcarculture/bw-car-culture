@@ -15,7 +15,8 @@ const UserCarListingForm = ({
   onCancel, 
   initialData = null,
   selectedPlan = null,
-  selectedAddons = []
+  selectedAddons = [],
+  showPlanSelection = false // NEW: Option to hide plan selection
 }) => {
   const [activeTab, setActiveTab] = useState('basic');
   const [loading, setLoading] = useState(false);
@@ -275,8 +276,8 @@ const UserCarListingForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!selectedPlan) {
+    // FIXED: Don't require plan for free submission flow
+    if (showPlanSelection && !selectedPlan) {
       showMessage('error', 'Please select a listing plan first');
       return;
     }
@@ -294,8 +295,8 @@ const UserCarListingForm = ({
       // Prepare submission data
       const submissionData = {
         ...formData,
-        selectedPlan,
-        selectedAddons,
+        selectedPlan: showPlanSelection ? selectedPlan : null,
+        selectedAddons: showPlanSelection ? selectedAddons : [],
         status: 'pending_review'
       };
       
@@ -433,6 +434,22 @@ const UserCarListingForm = ({
 
   // Render selected plan and addons summary
   const renderSelectionSummary = () => {
+    // FIXED: Only show plan selection summary if plan selection is enabled
+    if (!showPlanSelection) {
+      return (
+        <div className="form-selection-summary">
+          <h4>
+            <CheckCircle size={20} />
+            Free Submission for Review
+          </h4>
+          <p>
+            Your listing will be submitted for admin review at no cost. 
+            After approval, you'll be contacted about selecting a plan and payment.
+          </p>
+        </div>
+      );
+    }
+
     if (!selectedPlan && selectedAddons.length === 0) {
       return (
         <div className="form-selection-warning">
@@ -1179,7 +1196,7 @@ const UserCarListingForm = ({
           <button
             type="submit"
             className="form-submit-btn"
-            disabled={loading || !selectedPlan}
+            disabled={loading || (showPlanSelection && !selectedPlan)}
           >
             {loading ? (
               <>
@@ -1189,7 +1206,7 @@ const UserCarListingForm = ({
             ) : (
               <>
                 <CheckCircle size={16} />
-                Submit for Review
+                {showPlanSelection ? 'Submit for Review' : 'Submit for Free Review'}
               </>
             )}
           </button>
