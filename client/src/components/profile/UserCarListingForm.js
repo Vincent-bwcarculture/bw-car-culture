@@ -1,5 +1,5 @@
 // client/src/components/profile/UserCarListingForm.js
-// COMPLETE car listing form for users with all tabs and functionality + DEBUG INTEGRATION
+// ALIGNED WITH ADMIN PANEL - Uses same constants and structure as admin forms
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -9,6 +9,112 @@ import {
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import './UserCarListingForm.css';
+
+// ALIGNED: Import same constants as admin forms
+const SAFETY_FEATURES = [
+  'ABS (Anti-lock Braking System)',
+  'Airbags (Driver)',
+  'Airbags (Passenger)',
+  'Airbags (Side)',
+  'Airbags (Curtain)',
+  'Electronic Stability Control',
+  'Traction Control',
+  'Parking Sensors (Front)',
+  'Parking Sensors (Rear)',
+  'Reverse Camera',
+  'Blind Spot Monitoring',
+  'Lane Departure Warning',
+  'Adaptive Cruise Control',
+  'Emergency Braking',
+  'Hill Start Assist',
+  'Roll Stability Control',
+  'ISOFIX Child Seat Mounts'
+];
+
+const COMFORT_FEATURES = [
+  'Air Conditioning',
+  'Climate Control (Dual Zone)',
+  'Climate Control (Multi Zone)',
+  'Heated Seats (Front)',
+  'Heated Seats (Rear)',
+  'Cooled/Ventilated Seats',
+  'Power Seats (Driver)',
+  'Power Seats (Passenger)',
+  'Memory Seats',
+  'Lumbar Support',
+  'Power Windows',
+  'Power Steering',
+  'Cruise Control',
+  'Keyless Entry',
+  'Push Button Start',
+  'Remote Start',
+  'Auto-dimming Mirrors',
+  'Power Mirrors',
+  'Heated Mirrors'
+];
+
+const PERFORMANCE_FEATURES = [
+  'Turbo/Supercharged',
+  'Sport Mode',
+  'Eco Mode',
+  'All-Wheel Drive',
+  'Limited Slip Differential',
+  'Launch Control',
+  'Paddle Shifters',
+  'Sport Suspension',
+  'Adjustable Suspension',
+  'Performance Brakes',
+  'Sport Exhaust',
+  'Engine Start/Stop'
+];
+
+const ENTERTAINMENT_FEATURES = [
+  'Radio/AM/FM',
+  'CD Player',
+  'Bluetooth Connectivity',
+  'USB Ports',
+  'Aux Input',
+  'Wireless Charging',
+  'Apple CarPlay',
+  'Android Auto',
+  'Navigation System',
+  'Touchscreen Display',
+  'Premium Sound System',
+  'Satellite Radio',
+  'WiFi Hotspot',
+  'Voice Control',
+  'Rear Entertainment System'
+];
+
+// ALIGNED: Same constants as admin
+const CONDITION_OPTIONS = [
+  { value: 'new', label: 'New' },
+  { value: 'used', label: 'Used' },
+  { value: 'certified', label: 'Certified Pre-Owned' }
+];
+
+const BODY_STYLES = [
+  'Sedan', 'SUV', 'Hatchback', 'Coupe', 'Convertible', 
+  'Wagon', 'Pickup', 'Van', 'Crossover', 'Minivan', 'Other'
+];
+
+const TRANSMISSION_TYPES = [
+  'Manual', 'Automatic', 'CVT', 'Dual-Clutch', 'Semi-Automatic'
+];
+
+const FUEL_TYPES = [
+  'Petrol', 'Diesel', 'Electric', 'Hybrid', 'Plug-in Hybrid', 'Hydrogen', 'LPG', 'CNG'
+];
+
+const DRIVETRAIN_TYPES = [
+  'Front-Wheel Drive', 'Rear-Wheel Drive', 'All-Wheel Drive', '4-Wheel Drive'
+];
+
+const PRICE_TYPES = [
+  { value: 'fixed', label: 'Fixed Price' },
+  { value: 'negotiable', label: 'Negotiable' },
+  { value: 'auction', label: 'Best Offer' }
+];
 
 const UserCarListingForm = ({ 
   onSubmit, 
@@ -23,16 +129,17 @@ const UserCarListingForm = ({
   const [message, setMessage] = useState({ type: '', text: '' });
   const [uploadingImages, setUploadingImages] = useState(false);
 
-  // Form data state
+  // ALIGNED: Form data structure matches admin forms exactly
   const [formData, setFormData] = useState({
-    // Basic Information
+    // Basic Information - ALIGNED with admin
     title: '',
     description: '',
+    shortDescription: '', // ADDED: matches admin
     condition: 'used',
     bodyStyle: '',
-    category: 'car',
+    category: '', // ADDED: matches admin
     
-    // Specifications
+    // Specifications - ALIGNED with admin structure
     specifications: {
       make: '',
       model: '',
@@ -41,26 +148,33 @@ const UserCarListingForm = ({
       transmission: '',
       fuelType: '',
       engineSize: '',
+      power: '', // ADDED: matches admin
+      torque: '', // ADDED: matches admin
       drivetrain: '',
       exteriorColor: '',
       interiorColor: '',
-      doors: '',
-      seats: '',
       vin: ''
     },
     
-    // Pricing
-    pricing: {
-      price: '',
-      priceType: 'fixed',
-      currency: 'BWP',
-      negotiable: false,
-      tradeIn: false,
-      financing: false,
+    // Features - ALIGNED: Same categories as admin
+    safetyFeatures: [],
+    comfortFeatures: [],
+    performanceFeatures: [], // ADDED: matches admin
+    entertainmentFeatures: [], // ADDED: matches admin
+    features: [], // Additional custom features
+    
+    // Pricing - ALIGNED with admin structure
+    price: '',
+    priceType: 'fixed',
+    priceOptions: {
+      includesVAT: false,
+      showPriceAsPOA: false,
+      financeAvailable: false,
+      leaseAvailable: false,
       monthlyPayment: ''
     },
     
-    // Contact Information
+    // Contact Information - simplified for users
     contact: {
       sellerName: '',
       phone: '',
@@ -73,86 +187,45 @@ const UserCarListingForm = ({
       }
     },
     
-    // Features
-    safetyFeatures: [],
-    comfortFeatures: [],
-    exteriorFeatures: [],
-    interiorFeatures: [],
+    // Location - ALIGNED with admin
+    location: {
+      address: '',
+      city: '',
+      state: '',
+      country: 'Botswana',
+      postalCode: ''
+    },
     
     // Images
     images: [],
     
-    // Additional Info
-    hasServiceHistory: false,
-    serviceHistory: '',
-    hasModifications: false,
-    modificationDetails: '',
+    // Service History - ALIGNED with admin structure
+    serviceHistory: {
+      hasServiceHistory: false,
+      records: '',
+      lastServiceDate: '',
+      nextServiceDue: ''
+    },
+    
+    // Additional Information
+    reasonForSelling: '',
+    additionalNotes: '',
     warranty: false,
     warrantyDetails: '',
-    reasonForSelling: '',
-    additionalNotes: ''
+    modifications: false,
+    modificationDetails: '',
+    accidents: false,
+    accidentDetails: '',
+    keys: '2' // Number of keys
   });
 
-  // Static data
-  const CONDITION_OPTIONS = [
-    { value: 'new', label: 'New' },
-    { value: 'used', label: 'Used' },
-    { value: 'certified', label: 'Certified Pre-Owned' }
-  ];
-
-  const BODY_STYLE_OPTIONS = [
-    'Sedan', 'SUV', 'Hatchback', 'Coupe', 'Convertible', 
-    'Wagon', 'Pickup', 'Van', 'Crossover', 'Other'
-  ];
-
-  const TRANSMISSION_OPTIONS = [
-    'Manual', 'Automatic', 'CVT', 'Semi-Automatic'
-  ];
-
-  const FUEL_TYPE_OPTIONS = [
-    'Petrol', 'Diesel', 'Hybrid', 'Electric', 'LPG', 'CNG'
-  ];
-
-  const DRIVETRAIN_OPTIONS = [
-    'Front-Wheel Drive', 'Rear-Wheel Drive', 'All-Wheel Drive', '4WD'
-  ];
-
-  const PRICE_TYPE_OPTIONS = [
-    { value: 'fixed', label: 'Fixed Price' },
-    { value: 'negotiable', label: 'Negotiable' },
-    { value: 'auction', label: 'Auction' }
-  ];
-
-  // Feature options
-  const featureOptions = {
-    safety: [
-      'ABS', 'Airbags', 'Electronic Stability Control', 'Traction Control',
-      'Blind Spot Monitoring', 'Lane Departure Warning', 'Collision Warning',
-      'Backup Camera', 'Parking Sensors', 'Adaptive Cruise Control'
-    ],
-    comfort: [
-      'Air Conditioning', 'Climate Control', 'Heated Seats', 'Cooled Seats',
-      'Power Seats', 'Memory Seats', 'Sunroof', 'Moonroof', 'Remote Start',
-      'Keyless Entry', 'Push Button Start', 'Auto Windows'
-    ],
-    exterior: [
-      'Alloy Wheels', 'LED Headlights', 'Fog Lights', 'Roof Rails',
-      'Chrome Trim', 'Spoiler', 'Bull Bar', 'Tow Bar', 'Side Steps'
-    ],
-    interior: [
-      'Leather Seats', 'Fabric Seats', 'Navigation System', 'Bluetooth',
-      'USB Ports', 'Aux Input', 'CD Player', 'Premium Sound System',
-      'Touchscreen Display', 'Apple CarPlay', 'Android Auto', 'Wireless Charging'
-    ]
-  };
-
-  // Form tabs
+  // ALIGNED: Same tab structure as admin (simplified)
   const tabs = [
     { id: 'basic', label: 'Basic Info', icon: Car },
     { id: 'specs', label: 'Specifications', icon: Settings },
+    { id: 'features', label: 'Features', icon: Star },
     { id: 'pricing', label: 'Pricing', icon: DollarSign },
     { id: 'contact', label: 'Contact', icon: Phone },
-    { id: 'features', label: 'Features', icon: Star },
     { id: 'images', label: 'Photos', icon: Camera },
     { id: 'additional', label: 'Additional', icon: Info }
   ];
@@ -170,11 +243,10 @@ const UserCarListingForm = ({
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
-  // Handle form submission
+  // ALIGNED: Handle form submission with admin-compatible data structure
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Basic validation
     if (!selectedPlan) {
       showMessage('error', 'Please go back and select a listing plan first');
       return;
@@ -190,15 +262,24 @@ const UserCarListingForm = ({
     try {
       setLoading(true);
       
-      // Include selected plan and addons in submission
+      // ALIGNED: Structure data exactly like admin expects
       const submissionData = {
         ...formData,
         selectedPlan,
         selectedAddons,
-        status: 'pending_review' // Will be reviewed by admin first
+        status: 'pending_review', // Will be reviewed by admin first
+        // ADDED: Admin compatibility fields
+        featured: false,
+        dealer: '', // Will be assigned by admin if needed
+        // Copy contact location to main location for admin compatibility
+        location: {
+          ...formData.location,
+          city: formData.contact.location.city || formData.location.city,
+          address: formData.contact.location.address || formData.location.address
+        }
       };
       
-      console.log('Submitting form with:', submissionData);
+      console.log('Submitting aligned form data:', submissionData);
       await onSubmit(submissionData);
     } catch (error) {
       console.error('Form submission error:', error);
@@ -208,16 +289,27 @@ const UserCarListingForm = ({
     }
   };
 
-  // Form validation
+  // Form validation - ALIGNED with admin requirements
   const validateForm = () => {
     const errors = {};
     
-    if (!formData.title.trim()) errors.title = 'Title is required';
-    if (!formData.description.trim()) errors.description = 'Description is required';
+    // Basic validation
+    if (!formData.title.trim() || formData.title.length < 10) {
+      errors.title = 'Title must be at least 10 characters';
+    }
+    if (!formData.description.trim() || formData.description.length < 50) {
+      errors.description = 'Description must be at least 50 characters';
+    }
+    
+    // Specifications validation
     if (!formData.specifications.make.trim()) errors['specifications.make'] = 'Make is required';
     if (!formData.specifications.model.trim()) errors['specifications.model'] = 'Model is required';
     if (!formData.specifications.year) errors['specifications.year'] = 'Year is required';
-    if (!formData.pricing.price) errors['pricing.price'] = 'Price is required';
+    
+    // Pricing validation
+    if (!formData.price) errors.price = 'Price is required';
+    
+    // Contact validation
     if (!formData.contact.sellerName.trim()) errors['contact.sellerName'] = 'Seller name is required';
     if (!formData.contact.phone.trim()) errors['contact.phone'] = 'Phone number is required';
     if (!formData.contact.location.city.trim()) errors['contact.location.city'] = 'City is required';
@@ -225,7 +317,7 @@ const UserCarListingForm = ({
     return errors;
   };
 
-  // Handle input changes
+  // ALIGNED: Handle input changes with same logic as admin
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     
@@ -265,17 +357,40 @@ const UserCarListingForm = ({
     }
   };
 
-  // Handle feature selection
+  // ALIGNED: Feature toggle logic same as admin
   const handleFeatureToggle = (category, feature) => {
-    const categoryKey = category === 'safety' ? 'safetyFeatures' : 
-                       category === 'comfort' ? 'comfortFeatures' :
-                       category === 'exterior' ? 'exteriorFeatures' : 'interiorFeatures';
-    
+    setFormData(prev => {
+      const currentFeatures = Array.isArray(prev[category]) ? [...prev[category]] : [];
+      const updatedFeatures = currentFeatures.includes(feature)
+        ? currentFeatures.filter(f => f !== feature)
+        : [...currentFeatures, feature];
+
+      return {
+        ...prev,
+        [category]: updatedFeatures
+      };
+    });
+  };
+
+  // Add custom feature
+  const handleAddCustomFeature = (e) => {
+    if (e.key === 'Enter' && e.target.value.trim()) {
+      const newFeature = e.target.value.trim();
+      if (!formData.features.includes(newFeature)) {
+        setFormData(prev => ({
+          ...prev,
+          features: [...prev.features, newFeature]
+        }));
+      }
+      e.target.value = '';
+    }
+  };
+
+  // Remove custom feature
+  const removeCustomFeature = (index) => {
     setFormData(prev => ({
       ...prev,
-      [categoryKey]: prev[categoryKey].includes(feature)
-        ? prev[categoryKey].filter(f => f !== feature)
-        : [...prev[categoryKey], feature]
+      features: prev.features.filter((_, i) => i !== index)
     }));
   };
 
@@ -323,7 +438,6 @@ const UserCarListingForm = ({
 
   // FIXED: Render selected plan and addons summary with debug info
   const renderSelectionSummary = () => {
-    // Debug logging
     console.log('UserCarListingForm - selectedPlan:', selectedPlan);
     console.log('UserCarListingForm - selectedAddons:', selectedAddons);
     
@@ -389,21 +503,17 @@ const UserCarListingForm = ({
     );
   };
 
-  // Render feature selection
-  const renderFeatureSection = (category, title) => {
-    const categoryKey = category === 'safety' ? 'safetyFeatures' : 
-                       category === 'comfort' ? 'comfortFeatures' :
-                       category === 'exterior' ? 'exteriorFeatures' : 'interiorFeatures';
-    
+  // ALIGNED: Render feature section same as admin
+  const renderFeatureSection = (category, title, features) => {
     return (
       <div className="feature-category">
         <h5>{title}</h5>
-        <div className="feature-grid">
-          {featureOptions[category].map(feature => (
-            <label key={feature} className="feature-checkbox">
+        <div className="features-grid">
+          {features.map(feature => (
+            <label key={feature} className="checkbox-label">
               <input
                 type="checkbox"
-                checked={formData[categoryKey].includes(feature)}
+                checked={Array.isArray(formData[category]) && formData[category].includes(feature)}
                 onChange={() => handleFeatureToggle(category, feature)}
               />
               <span>{feature}</span>
@@ -464,7 +574,7 @@ const UserCarListingForm = ({
       {/* Form Content */}
       <form onSubmit={handleSubmit} className="listing-form">
         
-        {/* Basic Info Tab */}
+        {/* Basic Info Tab - ALIGNED */}
         {activeTab === 'basic' && (
           <div className="form-section active">
             <h4>Basic Information</h4>
@@ -482,24 +592,40 @@ const UserCarListingForm = ({
                   className={errors.title ? 'error' : ''}
                 />
                 {errors.title && <span className="error-message">{errors.title}</span>}
+                <small>Minimum 10 characters - be descriptive and specific</small>
               </div>
 
               <div className="form-group full-width">
-                <label htmlFor="description">Description*</label>
+                <label htmlFor="description">Detailed Description*</label>
                 <textarea
                   id="description"
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  placeholder="Describe your vehicle in detail..."
-                  rows="4"
+                  placeholder="Describe your vehicle in detail - condition, history, maintenance, features, etc."
+                  rows="6"
                   className={errors.description ? 'error' : ''}
                 />
                 {errors.description && <span className="error-message">{errors.description}</span>}
+                <small>Minimum 50 characters - {formData.description.length}/50+</small>
               </div>
 
               <div className="form-group">
-                <label htmlFor="condition">Condition</label>
+                <label htmlFor="shortDescription">Short Description</label>
+                <textarea
+                  id="shortDescription"
+                  name="shortDescription"
+                  value={formData.shortDescription}
+                  onChange={handleInputChange}
+                  placeholder="Brief summary for listing previews"
+                  rows="2"
+                  maxLength="150"
+                />
+                <small>Optional - appears in search results ({formData.shortDescription.length}/150)</small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="condition">Condition*</label>
                 <select
                   id="condition"
                   name="condition"
@@ -523,18 +649,30 @@ const UserCarListingForm = ({
                   onChange={handleInputChange}
                 >
                   <option value="">Select Body Style</option>
-                  {BODY_STYLE_OPTIONS.map(style => (
+                  {BODY_STYLES.map(style => (
                     <option key={style} value={style}>
                       {style}
                     </option>
                   ))}
                 </select>
               </div>
+
+              <div className="form-group">
+                <label htmlFor="category">Category</label>
+                <input
+                  type="text"
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Luxury, Sports Car, Family Car"
+                />
+              </div>
             </div>
           </div>
         )}
 
-        {/* Specifications Tab */}
+        {/* Specifications Tab - ALIGNED */}
         {activeTab === 'specs' && (
           <div className="form-section active">
             <h4>Vehicle Specifications</h4>
@@ -605,7 +743,7 @@ const UserCarListingForm = ({
                   onChange={handleInputChange}
                 >
                   <option value="">Select Transmission</option>
-                  {TRANSMISSION_OPTIONS.map(type => (
+                  {TRANSMISSION_TYPES.map(type => (
                     <option key={type} value={type}>
                       {type}
                     </option>
@@ -622,7 +760,7 @@ const UserCarListingForm = ({
                   onChange={handleInputChange}
                 >
                   <option value="">Select Fuel Type</option>
-                  {FUEL_TYPE_OPTIONS.map(type => (
+                  {FUEL_TYPES.map(type => (
                     <option key={type} value={type}>
                       {type}
                     </option>
@@ -638,7 +776,31 @@ const UserCarListingForm = ({
                   name="specifications.engineSize"
                   value={formData.specifications.engineSize}
                   onChange={handleInputChange}
-                  placeholder="e.g., 3.0"
+                  placeholder="e.g., 3.0L"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="power">Power (kW/HP)</label>
+                <input
+                  type="text"
+                  id="power"
+                  name="specifications.power"
+                  value={formData.specifications.power}
+                  onChange={handleInputChange}
+                  placeholder="e.g., 375kW / 503HP"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="torque">Torque (Nm)</label>
+                <input
+                  type="text"
+                  id="torque"
+                  name="specifications.torque"
+                  value={formData.specifications.torque}
+                  onChange={handleInputChange}
+                  placeholder="e.g., 600 Nm"
                 />
               </div>
 
@@ -651,7 +813,7 @@ const UserCarListingForm = ({
                   onChange={handleInputChange}
                 >
                   <option value="">Select Drivetrain</option>
-                  {DRIVETRAIN_OPTIONS.map(type => (
+                  {DRIVETRAIN_TYPES.map(type => (
                     <option key={type} value={type}>
                       {type}
                     </option>
@@ -683,38 +845,6 @@ const UserCarListingForm = ({
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="doors">Number of Doors</label>
-                <select
-                  id="doors"
-                  name="specifications.doors"
-                  value={formData.specifications.doors}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select</option>
-                  <option value="2">2 Doors</option>
-                  <option value="4">4 Doors</option>
-                  <option value="5">5 Doors</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="seats">Number of Seats</label>
-                <select
-                  id="seats"
-                  name="specifications.seats"
-                  value={formData.specifications.seats}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select</option>
-                  <option value="2">2 Seats</option>
-                  <option value="4">4 Seats</option>
-                  <option value="5">5 Seats</option>
-                  <option value="7">7 Seats</option>
-                  <option value="8">8+ Seats</option>
-                </select>
-              </div>
-
               <div className="form-group full-width">
                 <label htmlFor="vin">VIN (Vehicle Identification Number)</label>
                 <input
@@ -724,13 +854,56 @@ const UserCarListingForm = ({
                   value={formData.specifications.vin}
                   onChange={handleInputChange}
                   placeholder="17-character VIN"
+                  maxLength="17"
                 />
+                <small>Optional - helps with vehicle verification</small>
               </div>
             </div>
           </div>
         )}
 
-        {/* Pricing Tab */}
+        {/* Features Tab - ALIGNED with admin categories */}
+        {activeTab === 'features' && (
+          <div className="form-section active">
+            <h4>Vehicle Features</h4>
+            
+            <div className="features-container">
+              {renderFeatureSection('safetyFeatures', 'Safety Features', SAFETY_FEATURES)}
+              {renderFeatureSection('comfortFeatures', 'Comfort & Convenience', COMFORT_FEATURES)}
+              {renderFeatureSection('performanceFeatures', 'Performance Features', PERFORMANCE_FEATURES)}
+              {renderFeatureSection('entertainmentFeatures', 'Entertainment & Technology', ENTERTAINMENT_FEATURES)}
+              
+              {/* Custom Features */}
+              <div className="feature-category">
+                <h5>Additional Features</h5>
+                <div className="custom-features">
+                  <div className="feature-tags">
+                    {formData.features.map((feature, index) => (
+                      <span key={index} className="feature-tag">
+                        {feature}
+                        <button 
+                          type="button" 
+                          onClick={() => removeCustomFeature(index)}
+                          className="remove-tag"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Type a feature and press Enter"
+                    onKeyDown={handleAddCustomFeature}
+                    className="feature-input"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Pricing Tab - ALIGNED */}
         {activeTab === 'pricing' && (
           <div className="form-section active">
             <h4>Pricing Information</h4>
@@ -741,25 +914,25 @@ const UserCarListingForm = ({
                 <input
                   type="number"
                   id="price"
-                  name="pricing.price"
-                  value={formData.pricing.price}
+                  name="price"
+                  value={formData.price}
                   onChange={handleInputChange}
                   placeholder="0"
                   min="0"
-                  className={errors['pricing.price'] ? 'error' : ''}
+                  className={errors.price ? 'error' : ''}
                 />
-                {errors['pricing.price'] && <span className="error-message">{errors['pricing.price']}</span>}
+                {errors.price && <span className="error-message">{errors.price}</span>}
               </div>
 
               <div className="form-group">
                 <label htmlFor="priceType">Price Type</label>
                 <select
                   id="priceType"
-                  name="pricing.priceType"
-                  value={formData.pricing.priceType}
+                  name="priceType"
+                  value={formData.priceType}
                   onChange={handleInputChange}
                 >
-                  {PRICE_TYPE_OPTIONS.map(option => (
+                  {PRICE_TYPES.map(option => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -772,8 +945,8 @@ const UserCarListingForm = ({
                 <input
                   type="number"
                   id="monthlyPayment"
-                  name="pricing.monthlyPayment"
-                  value={formData.pricing.monthlyPayment}
+                  name="priceOptions.monthlyPayment"
+                  value={formData.priceOptions.monthlyPayment}
                   onChange={handleInputChange}
                   placeholder="Optional"
                   min="0"
@@ -786,31 +959,31 @@ const UserCarListingForm = ({
                   <label className="checkbox-label">
                     <input
                       type="checkbox"
-                      name="pricing.negotiable"
-                      checked={formData.pricing.negotiable}
+                      name="priceOptions.includesVAT"
+                      checked={formData.priceOptions.includesVAT}
                       onChange={handleInputChange}
                     />
-                    <span>Price is negotiable</span>
+                    <span>Price includes VAT</span>
                   </label>
 
                   <label className="checkbox-label">
                     <input
                       type="checkbox"
-                      name="pricing.tradeIn"
-                      checked={formData.pricing.tradeIn}
-                      onChange={handleInputChange}
-                    />
-                    <span>Accept trade-in</span>
-                  </label>
-
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      name="pricing.financing"
-                      checked={formData.pricing.financing}
+                      name="priceOptions.financeAvailable"
+                      checked={formData.priceOptions.financeAvailable}
                       onChange={handleInputChange}
                     />
                     <span>Financing available</span>
+                  </label>
+
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="priceOptions.leaseAvailable"
+                      checked={formData.priceOptions.leaseAvailable}
+                      onChange={handleInputChange}
+                    />
+                    <span>Leasing available</span>
                   </label>
                 </div>
               </div>
@@ -919,20 +1092,6 @@ const UserCarListingForm = ({
           </div>
         )}
 
-        {/* Features Tab */}
-        {activeTab === 'features' && (
-          <div className="form-section active">
-            <h4>Vehicle Features</h4>
-            
-            <div className="features-container">
-              {renderFeatureSection('safety', 'Safety Features')}
-              {renderFeatureSection('comfort', 'Comfort & Convenience')}
-              {renderFeatureSection('exterior', 'Exterior Features')}
-              {renderFeatureSection('interior', 'Interior Features')}
-            </div>
-          </div>
-        )}
-
         {/* Images Tab */}
         {activeTab === 'images' && (
           <div className="form-section active">
@@ -951,7 +1110,7 @@ const UserCarListingForm = ({
                 <label htmlFor="imageUpload" className="upload-label">
                   <Upload size={32} />
                   <span>Click to upload photos</span>
-                  <small>Select multiple files (JPG, PNG)</small>
+                  <small>Select multiple files (JPG, PNG, WebP) - Max 5MB each</small>
                 </label>
               </div>
 
@@ -979,43 +1138,44 @@ const UserCarListingForm = ({
               <div className="image-tips">
                 <h5>Photo Tips:</h5>
                 <ul>
-                  <li>Take photos in good lighting</li>
-                  <li>Include exterior from all angles</li>
+                  <li>Take photos in good lighting (natural light preferred)</li>
+                  <li>Include exterior from all angles (front, back, sides)</li>
                   <li>Show interior, dashboard, and seats</li>
                   <li>Include engine bay and wheels</li>
                   <li>Show any damage honestly</li>
-                  <li>Maximum 20 photos recommended</li>
+                  <li>10-20 photos recommended for best results</li>
                 </ul>
               </div>
             </div>
           </div>
         )}
 
-        {/* Additional Tab */}
+        {/* Additional Tab - ALIGNED */}
         {activeTab === 'additional' && (
           <div className="form-section active">
             <h4>Additional Information</h4>
             
             <div className="form-grid">
+              {/* Service History */}
               <div className="form-group full-width">
                 <label className="checkbox-label">
                   <input
                     type="checkbox"
-                    name="hasServiceHistory"
-                    checked={formData.hasServiceHistory}
+                    name="serviceHistory.hasServiceHistory"
+                    checked={formData.serviceHistory.hasServiceHistory}
                     onChange={handleInputChange}
                   />
                   <span>Vehicle has service history records</span>
                 </label>
               </div>
 
-              {formData.hasServiceHistory && (
+              {formData.serviceHistory.hasServiceHistory && (
                 <div className="form-group full-width">
-                  <label htmlFor="serviceHistory">Service History Details</label>
+                  <label htmlFor="serviceRecords">Service History Details</label>
                   <textarea
-                    id="serviceHistory"
-                    name="serviceHistory"
-                    value={formData.serviceHistory}
+                    id="serviceRecords"
+                    name="serviceHistory.records"
+                    value={formData.serviceHistory.records}
                     onChange={handleInputChange}
                     placeholder="Describe the service history, recent services, etc..."
                     rows="4"
@@ -1023,32 +1183,7 @@ const UserCarListingForm = ({
                 </div>
               )}
 
-              <div className="form-group full-width">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="hasModifications"
-                    checked={formData.hasModifications}
-                    onChange={handleInputChange}
-                  />
-                  <span>Vehicle has modifications or upgrades</span>
-                </label>
-              </div>
-
-              {formData.hasModifications && (
-                <div className="form-group full-width">
-                  <label htmlFor="modificationDetails">Modification Details</label>
-                  <textarea
-                    id="modificationDetails"
-                    name="modificationDetails"
-                    value={formData.modificationDetails}
-                    onChange={handleInputChange}
-                    placeholder="Describe any modifications or upgrades..."
-                    rows="3"
-                  />
-                </div>
-              )}
-
+              {/* Warranty */}
               <div className="form-group full-width">
                 <label className="checkbox-label">
                   <input
@@ -1074,6 +1209,74 @@ const UserCarListingForm = ({
                   />
                 </div>
               )}
+
+              {/* Modifications */}
+              <div className="form-group full-width">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="modifications"
+                    checked={formData.modifications}
+                    onChange={handleInputChange}
+                  />
+                  <span>Vehicle has modifications or upgrades</span>
+                </label>
+              </div>
+
+              {formData.modifications && (
+                <div className="form-group full-width">
+                  <label htmlFor="modificationDetails">Modification Details</label>
+                  <textarea
+                    id="modificationDetails"
+                    name="modificationDetails"
+                    value={formData.modificationDetails}
+                    onChange={handleInputChange}
+                    placeholder="Describe any modifications or upgrades..."
+                    rows="3"
+                  />
+                </div>
+              )}
+
+              {/* Accidents */}
+              <div className="form-group full-width">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="accidents"
+                    checked={formData.accidents}
+                    onChange={handleInputChange}
+                  />
+                  <span>Vehicle has been in accidents</span>
+                </label>
+              </div>
+
+              {formData.accidents && (
+                <div className="form-group full-width">
+                  <label htmlFor="accidentDetails">Accident Details</label>
+                  <textarea
+                    id="accidentDetails"
+                    name="accidentDetails"
+                    value={formData.accidentDetails}
+                    onChange={handleInputChange}
+                    placeholder="Describe any accidents and repairs..."
+                    rows="3"
+                  />
+                </div>
+              )}
+
+              <div className="form-group">
+                <label htmlFor="keys">Number of Keys</label>
+                <select
+                  id="keys"
+                  name="keys"
+                  value={formData.keys}
+                  onChange={handleInputChange}
+                >
+                  <option value="1">1 Key</option>
+                  <option value="2">2 Keys</option>
+                  <option value="3+">3+ Keys</option>
+                </select>
+              </div>
 
               <div className="form-group full-width">
                 <label htmlFor="reasonForSelling">Reason for Selling</label>
