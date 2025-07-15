@@ -593,65 +593,17 @@ const VehicleManagement = () => {
             </div>
           </div>
           
-          {/* SIMPLIFIED: Show plan selection inline instead of complex CarListingManager */}
-          <div className="inline-plan-selection">
-            <h4>Choose Your Plan (Optional)</h4>
-            <p>Browse our plans to see what you'll get after admin approval. You can also skip and choose later.</p>
-            
-            <div className="quick-plans-grid">
-              <div className={`quick-plan-card ${selectedPlan === 'basic' ? 'selected' : ''}`}
-                   onClick={() => setSelectedPlan('basic')}>
-                <h5>Basic Plan</h5>
-                <div className="plan-price">P100</div>
-                <ul>
-                  <li>30 days listing</li>
-                  <li>Basic visibility</li>
-                  <li>Email support</li>
-                </ul>
-              </div>
-              
-              <div className={`quick-plan-card ${selectedPlan === 'standard' ? 'selected' : ''}`}
-                   onClick={() => setSelectedPlan('standard')}>
-                <h5>Standard Plan</h5>
-                <div className="plan-price">P200</div>
-                <ul>
-                  <li>45 days listing</li>
-                  <li>Enhanced visibility</li>
-                  <li>Priority support</li>
-                </ul>
-              </div>
-              
-              <div className={`quick-plan-card ${selectedPlan === 'premium' ? 'selected' : ''}`}
-                   onClick={() => setSelectedPlan('premium')}>
-                <h5>Premium Plan</h5>
-                <div className="plan-price">P300</div>
-                <ul>
-                  <li>60 days listing</li>
-                  <li>Featured placement</li>
-                  <li>Premium support</li>
-                </ul>
-              </div>
-            </div>
-            
-            <div className="plan-actions">
-              <button 
-                className="btn-secondary"
-                onClick={() => {
-                  setSelectedPlan(null);
-                  setListingStep('form');
-                }}
-              >
-                Skip for Now
-              </button>
-              
-              <button 
-                className="btn-primary"
-                onClick={() => setListingStep('form')}
-              >
-                Continue to Listing Form
-              </button>
-            </div>
-          </div>
+          <CarListingManager
+            onPlanSelected={handlePlanSelection}
+            onAddonsSelected={handleAddonSelection}
+            onProceedToForm={() => setListingStep('form')}
+            selectedPlan={selectedPlan}
+            selectedAddons={selectedAddons}
+            mode="preview" // NEW: Preview mode - no payment required
+            showPaymentInfo={false} // Hide payment buttons
+            submitButtonText="Continue to Listing Form"
+            allowSkipPlan={true} // Allow proceeding without plan selection
+          />
         </div>
       );
     }
