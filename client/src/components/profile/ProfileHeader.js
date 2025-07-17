@@ -1,5 +1,5 @@
 // client/src/components/profile/ProfileHeader.js
-// Update the API calls to use the correct paths
+// FIXED VERSION - Updated API calls to use correct endpoints
 
 import React, { useState, useRef } from 'react';
 import { 
@@ -46,7 +46,12 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
     setTimeout(() => setUploadError(''), 5000);
   };
 
-  // Handle avatar upload - CORRECTED PATH
+  // Get API base URL - Use the correct backend API URL
+  const getApiUrl = () => {
+    return 'https://bw-car-culture-api.vercel.app';
+  };
+
+  // Handle avatar upload - FIXED API PATH
   const handleAvatarChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -73,8 +78,8 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
 
       console.log('Uploading avatar...', file.name);
 
-      // CORRECTED PATH: Remove /api prefix
-      const response = await fetch('/user/profile/avatar', {
+      // FIXED: Use the correct backend API URL and path
+      const response = await fetch(`${getApiUrl()}/user/profile/avatar`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -86,6 +91,8 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
 
       // Check if response is ok
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Avatar upload error response:', errorText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -125,7 +132,7 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
     }
   };
 
-  // Handle cover picture upload - CORRECTED PATH
+  // Handle cover picture upload - FIXED API PATH
   const handleCoverPictureChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -152,8 +159,8 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
 
       console.log('Uploading cover picture...', file.name);
 
-      // CORRECTED PATH: Remove /api prefix
-      const response = await fetch('/user/profile/cover-picture', {
+      // FIXED: Use the correct backend API URL and path
+      const response = await fetch(`${getApiUrl()}/user/profile/cover-picture`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -165,6 +172,8 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
 
       // Check if response is ok
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Cover picture upload error response:', errorText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -204,15 +213,15 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
     }
   };
 
-  // Handle cover picture deletion - CORRECTED PATH
+  // Handle cover picture deletion - FIXED API PATH
   const handleDeleteCoverPicture = async () => {
     if (!profileData.coverPicture?.url) return;
 
     setUploadingCover(true);
 
     try {
-      // CORRECTED PATH: Remove /api prefix
-      const response = await fetch('/user/profile/cover-picture', {
+      // FIXED: Use the correct backend API URL and path
+      const response = await fetch(`${getApiUrl()}/user/profile/cover-picture`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -297,6 +306,7 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
                 className="pheader-cover-upload-prompt"
                 onClick={handleCoverUploadClick}
                 disabled={uploadingCover}
+                type="button"
               >
                 {uploadingCover ? (
                   <Loader size={24} className="pheader-spin" />
@@ -349,77 +359,69 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
                 onClick={handleAvatarUploadClick}
                 disabled={uploadingAvatar}
                 title="Change profile picture"
+                type="button"
               >
                 {uploadingAvatar ? (
-                  <Loader size={20} className="pheader-spin" />
+                  <Loader size={16} className="pheader-spin" />
                 ) : (
-                  <Camera size={20} />
+                  <Camera size={16} />
                 )}
               </button>
             </div>
-            
-            {/* Hidden avatar input */}
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              disabled={uploadingAvatar}
-              style={{ display: 'none' }}
-            />
-            
-            {uploadError && (
-              <div className="pheader-upload-error">
-                <X size={16} />
-                {uploadError}
-              </div>
-            )}
           </div>
 
-          {/* User Details */}
-          <div className="pheader-user-details">
+          {/* Hidden avatar input */}
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            disabled={uploadingAvatar}
+            style={{ display: 'none' }}
+          />
+
+          {/* Upload Error Display */}
+          {uploadError && (
+            <div className="pheader-upload-error">
+              <X size={12} />
+              {uploadError}
+            </div>
+          )}
+
+          {/* User Name */}
+          <div className="pheader-user-name-section">
             <h1 className="pheader-user-name">
-              {profileData.name || 'User'}
-              {profileData.isVerified && (
-                <CheckCircle size={24} className="pheader-verified-badge" />
+              {profileData.name || 'Anonymous User'}
+              {(hasBusinessProfile || hasTransportProfile || hasDealerProfile) && (
+                <CheckCircle size={20} className="pheader-verified-icon" />
               )}
             </h1>
             
-            <div className="pheader-user-email">{profileData.email}</div>
-            
-            <button className="pheader-edit-profile-button">
-              <Edit2 size={16} />
-              Edit Profile
-            </button>
+            {profileData.profile?.bio && (
+              <p className="pheader-user-bio">{profileData.profile.bio}</p>
+            )}
           </div>
-        </div>
 
-        {/* Profile Meta Information */}
-        <div className="pheader-profile-meta">
-          {profileData.profile?.location && (
-            <div className="pheader-meta-item">
-              <MapPin size={16} />
-              <span>{profileData.profile.location}</span>
+          {/* User Stats */}
+          <div className="pheader-user-stats">
+            <div className="pheader-stat-item">
+              <User size={16} />
+              <span>Member since {formatJoinDate(profileData.createdAt)}</span>
             </div>
-          )}
-          {profileData.profile?.phone && (
-            <div className="pheader-meta-item">
-              <Phone size={16} />
-              <span>{profileData.profile.phone}</span>
-            </div>
-          )}
-          <div className="pheader-meta-item">
-            <Calendar size={16} />
-            <span>Joined {formatJoinDate(profileData.createdAt)}</span>
-          </div>
-          <div className="pheader-meta-item">
-            <User size={16} />
-            <span>
-              {profileData.role === 'admin' ? 'Site Administrator' : 
-               hasBusinessProfile ? 'Business Owner' :
-               hasTransportProfile ? 'Transport Provider' :
-               hasDealerProfile ? 'Dealer' : 'User'}
-            </span>
+            
+            {profileData.profile?.location && (
+              <div className="pheader-stat-item">
+                <MapPin size={16} />
+                <span>{profileData.profile.location}</span>
+              </div>
+            )}
+            
+            {profileData.profile?.phone && (
+              <div className="pheader-stat-item">
+                <Phone size={16} />
+                <span>{profileData.profile.phone}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
