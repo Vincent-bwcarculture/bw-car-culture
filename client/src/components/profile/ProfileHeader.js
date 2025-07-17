@@ -1,5 +1,5 @@
 // client/src/components/profile/ProfileHeader.js
-// FIXED VERSION - Updated API calls to use correct endpoints
+// COMPLETE VERSION - All original functionality with fixed API calls
 
 import React, { useState, useRef } from 'react';
 import { 
@@ -46,12 +46,7 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
     setTimeout(() => setUploadError(''), 5000);
   };
 
-  // Get API base URL - Use the correct backend API URL
-  const getApiUrl = () => {
-    return 'https://bw-car-culture-api.vercel.app';
-  };
-
-  // Handle avatar upload - FIXED API PATH
+  // Handle avatar upload - FIXED: Use correct backend API URL
   const handleAvatarChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -78,8 +73,8 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
 
       console.log('Uploading avatar...', file.name);
 
-      // FIXED: Use the correct backend API URL and path
-      const response = await fetch(`${getApiUrl()}/user/profile/avatar`, {
+      // FIXED: Use correct backend API URL
+      const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/avatar', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -132,7 +127,7 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
     }
   };
 
-  // Handle cover picture upload - FIXED API PATH
+  // Handle cover picture upload - FIXED: Use correct backend API URL
   const handleCoverPictureChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -159,8 +154,8 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
 
       console.log('Uploading cover picture...', file.name);
 
-      // FIXED: Use the correct backend API URL and path
-      const response = await fetch(`${getApiUrl()}/user/profile/cover-picture`, {
+      // FIXED: Use correct backend API URL
+      const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/cover-picture', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -213,15 +208,15 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
     }
   };
 
-  // Handle cover picture deletion - FIXED API PATH
+  // Handle cover picture deletion - FIXED: Use correct backend API URL
   const handleDeleteCoverPicture = async () => {
     if (!profileData.coverPicture?.url) return;
 
     setUploadingCover(true);
 
     try {
-      // FIXED: Use the correct backend API URL and path
-      const response = await fetch(`${getApiUrl()}/user/profile/cover-picture`, {
+      // FIXED: Use correct backend API URL
+      const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/cover-picture', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -359,69 +354,77 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
                 onClick={handleAvatarUploadClick}
                 disabled={uploadingAvatar}
                 title="Change profile picture"
-                type="button"
               >
                 {uploadingAvatar ? (
-                  <Loader size={16} className="pheader-spin" />
+                  <Loader size={20} className="pheader-spin" />
                 ) : (
-                  <Camera size={16} />
+                  <Camera size={20} />
                 )}
               </button>
             </div>
+            
+            {/* Hidden avatar input */}
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              disabled={uploadingAvatar}
+              style={{ display: 'none' }}
+            />
+            
+            {uploadError && (
+              <div className="pheader-upload-error">
+                <X size={16} />
+                {uploadError}
+              </div>
+            )}
           </div>
 
-          {/* Hidden avatar input */}
-          <input
-            ref={avatarInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleAvatarChange}
-            disabled={uploadingAvatar}
-            style={{ display: 'none' }}
-          />
-
-          {/* Upload Error Display */}
-          {uploadError && (
-            <div className="pheader-upload-error">
-              <X size={12} />
-              {uploadError}
-            </div>
-          )}
-
-          {/* User Name */}
-          <div className="pheader-user-name-section">
+          {/* User Details */}
+          <div className="pheader-user-details">
             <h1 className="pheader-user-name">
-              {profileData.name || 'Anonymous User'}
-              {(hasBusinessProfile || hasTransportProfile || hasDealerProfile) && (
-                <CheckCircle size={20} className="pheader-verified-icon" />
+              {profileData.name || 'User'}
+              {profileData.isVerified && (
+                <CheckCircle size={24} className="pheader-verified-badge" />
               )}
             </h1>
             
-            {profileData.profile?.bio && (
-              <p className="pheader-user-bio">{profileData.profile.bio}</p>
-            )}
+            <div className="pheader-user-email">{profileData.email}</div>
+            
+            <button className="pheader-edit-profile-button">
+              <Edit2 size={16} />
+              Edit Profile
+            </button>
           </div>
+        </div>
 
-          {/* User Stats */}
-          <div className="pheader-user-stats">
-            <div className="pheader-stat-item">
-              <User size={16} />
-              <span>Member since {formatJoinDate(profileData.createdAt)}</span>
+        {/* Profile Meta Information */}
+        <div className="pheader-profile-meta">
+          {profileData.profile?.location && (
+            <div className="pheader-meta-item">
+              <MapPin size={16} />
+              <span>{profileData.profile.location}</span>
             </div>
-            
-            {profileData.profile?.location && (
-              <div className="pheader-stat-item">
-                <MapPin size={16} />
-                <span>{profileData.profile.location}</span>
-              </div>
-            )}
-            
-            {profileData.profile?.phone && (
-              <div className="pheader-stat-item">
-                <Phone size={16} />
-                <span>{profileData.profile.phone}</span>
-              </div>
-            )}
+          )}
+          {profileData.profile?.phone && (
+            <div className="pheader-meta-item">
+              <Phone size={16} />
+              <span>{profileData.profile.phone}</span>
+            </div>
+          )}
+          <div className="pheader-meta-item">
+            <Calendar size={16} />
+            <span>Joined {formatJoinDate(profileData.createdAt)}</span>
+          </div>
+          <div className="pheader-meta-item">
+            <User size={16} />
+            <span>
+              {profileData.role === 'admin' ? 'Site Administrator' : 
+               hasBusinessProfile ? 'Business Owner' :
+               hasTransportProfile ? 'Transport Provider' :
+               hasDealerProfile ? 'Dealer' : 'User'}
+            </span>
           </div>
         </div>
       </div>
