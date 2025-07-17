@@ -503,28 +503,28 @@
   font-size: 0.8rem;
 }
 
-/* ===== OPTIMIZED CHECKBOX GROUPS - MOBILE-FIRST 2-COLUMN LAYOUT ===== */
+/* ===== OPTIMIZED CHECKBOX GROUPS - MOBILE-FIRST HORIZONTAL LAYOUT ===== */
 .checkbox-group {
   display: grid;
-  /* Mobile: 2 columns for optimal space usage - saves 50% vertical space */
+  /* Mobile: 2 columns for optimal space usage */
   grid-template-columns: repeat(2, 1fr);
-  gap: 6px 8px; /* tight vertical gap, comfortable horizontal gap */
+  gap: 8px 12px; /* vertical gap smaller, horizontal gap larger */
   margin-top: 8px;
 }
 
 .checkbox-label {
   display: flex;
   align-items: center;
-  gap: 6px; /* Reduced gap for mobile */
+  gap: 8px;
   cursor: pointer;
-  font-size: 0.8rem; /* Smaller text for mobile efficiency */
+  font-size: 0.85rem; /* Slightly smaller for mobile */
   color: var(--uprofile-text-primary);
-  padding: 5px 7px; /* Compact padding for mobile */
+  padding: 6px 8px; /* Reduced padding for mobile */
   border-radius: var(--uprofile-radius-md);
   transition: var(--uprofile-transition);
   background: var(--uprofile-bg-primary);
   border: 1px solid transparent;
-  min-height: 34px; /* Good touch target, compact size */
+  min-height: 36px; /* Better touch target */
 }
 
 .checkbox-label:hover {
@@ -543,8 +543,8 @@
 }
 
 .checkbox-label input[type="checkbox"] {
-  width: 16px; /* Optimal size for mobile */
-  height: 16px;
+  width: 18px; /* Good size for mobile */
+  height: 18px;
   accent-color: var(--uprofile-primary-accent);
   cursor: pointer;
   flex-shrink: 0; /* Prevent shrinking */
@@ -553,26 +553,25 @@
 .checkbox-label span {
   user-select: none;
   flex: 1;
-  line-height: 1.2;
+  line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 500;
 }
 
-/* ===== OPTIMIZED FEATURES SECTION - MOBILE-FIRST 2-COLUMN ===== */
+/* ===== OPTIMIZED FEATURES SECTION ===== */
 .features-container {
   display: grid;
   /* Mobile: Single column for feature categories */
   grid-template-columns: 1fr;
-  gap: 14px; /* Compact gap between categories */
+  gap: 16px; /* Reduced gap */
 }
 
 .feature-category {
   background: var(--uprofile-bg-secondary);
   border: 1px solid var(--uprofile-border-color);
   border-radius: var(--uprofile-radius-lg);
-  padding: 14px; /* Compact padding for mobile */
+  padding: 16px; /* Reduced padding */
   transition: var(--uprofile-transition);
   position: relative;
   overflow: hidden;
@@ -594,11 +593,11 @@
 }
 
 .feature-category h5 {
-  margin: 0 0 10px 0; /* Compact margin */
-  font-size: 0.95rem; /* Smaller for mobile */
+  margin: 0 0 12px 0; /* Reduced margin */
+  font-size: 1rem; /* Slightly smaller */
   font-weight: 600;
   color: var(--uprofile-text-primary);
-  padding-bottom: 6px;
+  padding-bottom: 6px; /* Reduced padding */
   border-bottom: 2px solid var(--uprofile-primary-accent);
   display: flex;
   align-items: center;
@@ -607,29 +606,19 @@
 
 .feature-category h5::before {
   content: attr(data-icon);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
-/* Features within each category - 2 columns on mobile for space efficiency */
 .feature-category .checkbox-group {
+  /* Mobile: 2 columns for features */
   grid-template-columns: repeat(2, 1fr);
-  gap: 5px 7px; /* Very compact spacing */
+  gap: 6px 8px; /* Very compact spacing */
 }
 
 .feature-category .checkbox-label {
   padding: 4px 6px; /* Very compact padding */
-  font-size: 0.75rem; /* Smaller text for features */
-  min-height: 30px; /* Compact but still touchable */
-}
-
-.feature-category .checkbox-label input[type="checkbox"] {
-  width: 14px; /* Smaller checkboxes for features */
-  height: 14px;
-}
-
-.feature-category .checkbox-label span {
-  font-size: 0.75rem;
-  line-height: 1.1;
+  font-size: 0.8rem; /* Smaller text for features */
+  min-height: 32px; /* Consistent height */
 }
 
 /* ===== COMPACT SOCIAL MEDIA GRID ===== */
@@ -883,52 +872,45 @@
 
 /* ===== RESPONSIVE BREAKPOINTS ===== */
 
-/* Small mobile phones (up to 360px) */
-@media (max-width: 360px) {
+/* Small mobile phones (up to 480px) */
+@media (max-width: 480px) {
   .user-car-listing-form {
-    padding: 12px;
-    margin: 0 4px;
+    padding: 16px;
+    margin: 0 8px;
   }
   
-  /* Keep 2 columns even on very small screens */
   .checkbox-group {
     grid-template-columns: repeat(2, 1fr);
     gap: 4px 6px;
   }
   
   .checkbox-label {
-    padding: 3px 5px;
-    font-size: 0.7rem;
-    min-height: 28px;
-  }
-  
-  .checkbox-label input[type="checkbox"] {
-    width: 14px;
-    height: 14px;
+    padding: 4px 6px;
+    font-size: 0.8rem;
+    min-height: 32px;
   }
   
   .checkbox-label span {
-    font-size: 0.65rem;
+    font-size: 0.75rem;
+  }
+  
+  .checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
   }
   
   .feature-category {
-    padding: 10px;
+    padding: 12px;
   }
   
   .feature-category h5 {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     margin-bottom: 8px;
   }
   
   .feature-category .checkbox-label {
-    padding: 2px 4px;
-    font-size: 0.65rem;
-    min-height: 26px;
-  }
-  
-  .feature-category .checkbox-label input[type="checkbox"] {
-    width: 12px;
-    height: 12px;
+    padding: 3px 4px;
+    min-height: 28px;
   }
   
   .form-tab-navigation {
@@ -938,17 +920,16 @@
   
   .form-tab-button {
     justify-content: center;
-    padding: 8px 12px;
-    font-size: 0.75rem;
+    padding: 10px 14px;
+    font-size: 0.8rem;
   }
   
   .auto-fill-prompt {
-    padding: 12px;
+    padding: 16px;
   }
   
   .auto-fill-actions {
     flex-direction: column;
-    gap: 8px;
   }
   
   .auto-fill-accept,
@@ -956,19 +937,15 @@
   .auto-fill-decline {
     flex: none;
     min-width: 100%;
-    padding: 10px 16px;
-    font-size: 0.8rem;
   }
   
   .completion-items {
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
   }
   
   .completion-item {
     justify-content: center;
-    padding: 4px 8px;
-    font-size: 0.75rem;
   }
   
   .auto-fill-preview {
@@ -979,31 +956,26 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
-    padding: 6px 0;
   }
   
   .auto-fill-item .field-value {
     align-self: stretch;
     text-align: center;
     max-width: none;
-    font-size: 0.8rem;
   }
   
   .social-grid {
     grid-template-columns: 1fr;
-    gap: 8px;
   }
   
   .form-actions {
     flex-direction: column;
-    gap: 8px;
   }
   
   .form-cancel-btn,
   .form-submit-btn {
     width: 100%;
-    padding: 12px 20px;
-    font-size: 0.9rem;
+    padding: 14px 24px;
   }
   
   .summary-items {
@@ -1011,89 +983,15 @@
   }
 }
 
-/* Standard mobile phones (361px to 480px) */
-@media (min-width: 361px) and (max-width: 480px) {
-  .user-car-listing-form {
-    padding: 14px;
-    margin: 0 6px;
-  }
-  
-  /* Maintain 2-column layout for features */
-  .checkbox-group {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 5px 7px;
-  }
-  
-  .checkbox-label {
-    padding: 4px 6px;
-    font-size: 0.75rem;
-    min-height: 30px;
-  }
-  
-  .checkbox-label input[type="checkbox"] {
-    width: 15px;
-    height: 15px;
-  }
-  
-  .checkbox-label span {
-    font-size: 0.7rem;
-  }
-  
-  .feature-category {
-    padding: 12px;
-  }
-  
-  .feature-category h5 {
-    font-size: 0.9rem;
-    margin-bottom: 8px;
-  }
-  
-  .feature-category .checkbox-label {
-    padding: 3px 5px;
-    font-size: 0.7rem;
-    min-height: 28px;
-  }
-  
-  .feature-category .checkbox-label input[type="checkbox"] {
-    width: 13px;
-    height: 13px;
-  }
-}
-
-/* Large mobile phones and small tablets (481px to 768px) */
 /* Large mobile phones and small tablets (481px to 768px) */
 @media (min-width: 481px) and (max-width: 768px) {
-  .user-car-listing-form {
-    padding: 16px;
-    margin: 0 8px;
-  }
-  
-  /* Keep 2 columns for features - optimal for mobile */
   .checkbox-group {
     grid-template-columns: repeat(2, 1fr);
-    gap: 6px 8px;
-  }
-  
-  .checkbox-label {
-    padding: 5px 7px;
-    font-size: 0.8rem;
-    min-height: 32px;
-  }
-  
-  .checkbox-label input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
+    gap: 6px 10px;
   }
   
   .feature-category .checkbox-group {
     grid-template-columns: repeat(2, 1fr);
-    gap: 5px 7px;
-  }
-  
-  .feature-category .checkbox-label {
-    padding: 4px 6px;
-    font-size: 0.75rem;
-    min-height: 30px;
   }
   
   .features-container {
