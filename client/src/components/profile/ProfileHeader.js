@@ -1,5 +1,5 @@
 // client/src/components/profile/ProfileHeader.js
-// Replace your existing ProfileHeader component with this fixed version
+// Update the API calls to use the correct paths
 
 import React, { useState, useRef } from 'react';
 import { 
@@ -46,7 +46,7 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
     setTimeout(() => setUploadError(''), 5000);
   };
 
-  // Handle avatar upload
+  // Handle avatar upload - CORRECTED PATH
   const handleAvatarChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -73,7 +73,8 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
 
       console.log('Uploading avatar...', file.name);
 
-      const response = await fetch('/api/user/profile/avatar', {
+      // CORRECTED PATH: Remove /api prefix
+      const response = await fetch('/user/profile/avatar', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -124,7 +125,7 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
     }
   };
 
-  // Handle cover picture upload
+  // Handle cover picture upload - CORRECTED PATH
   const handleCoverPictureChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -151,7 +152,8 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
 
       console.log('Uploading cover picture...', file.name);
 
-      const response = await fetch('/api/user/profile/cover-picture', {
+      // CORRECTED PATH: Remove /api prefix
+      const response = await fetch('/user/profile/cover-picture', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -202,14 +204,15 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
     }
   };
 
-  // Handle cover picture deletion
+  // Handle cover picture deletion - CORRECTED PATH
   const handleDeleteCoverPicture = async () => {
     if (!profileData.coverPicture?.url) return;
 
     setUploadingCover(true);
 
     try {
-      const response = await fetch('/api/user/profile/cover-picture', {
+      // CORRECTED PATH: Remove /api prefix
+      const response = await fetch('/user/profile/cover-picture', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
