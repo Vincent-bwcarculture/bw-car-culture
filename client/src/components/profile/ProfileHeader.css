@@ -501,3 +501,224 @@
   align-items: center;
   justify-content: center;
 }
+
+/* Add these styles to your existing ProfileHeader.css file */
+
+/* === SPINNER ANIMATION === */
+.pheader-spin {
+  animation: pheader-spin 1s linear infinite;
+}
+
+@keyframes pheader-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* === BUTTON STYLING FIXES === */
+.pheader-cover-upload-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 20px;
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  border-radius: var(--uprofile-border-radius);
+  background: rgba(255, 255, 255, 0.1);
+  transition: var(--uprofile-transition);
+  color: var(--uprofile-text-white);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  /* Remove default button styles */
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  outline: none;
+}
+
+.pheader-cover-upload-prompt:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.8);
+  transform: scale(1.05);
+}
+
+.pheader-cover-upload-prompt:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pheader-cover-upload-prompt:disabled:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: none;
+}
+
+.pheader-cover-upload-prompt span {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* === AVATAR EDIT OVERLAY FIXES === */
+.pheader-avatar-edit-overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: var(--uprofile-primary-accent);
+  border: 2px solid var(--uprofile-bg-primary);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--uprofile-transition);
+  box-shadow: var(--uprofile-shadow-sm);
+  /* Remove default button styles */
+  outline: none;
+  padding: 0;
+}
+
+.pheader-avatar-edit-overlay:hover {
+  background: var(--uprofile-primary-accent-dark);
+  transform: scale(1.1);
+}
+
+.pheader-avatar-edit-overlay:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pheader-avatar-edit-overlay:disabled:hover {
+  background: var(--uprofile-primary-accent);
+  transform: none;
+}
+
+.pheader-avatar-edit-overlay svg {
+  color: var(--uprofile-text-white);
+}
+
+/* === COVER ACTION BUTTONS === */
+.pheader-cover-action-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--uprofile-transition);
+  box-shadow: var(--uprofile-shadow-sm);
+  outline: none;
+  padding: 0;
+}
+
+.pheader-cover-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pheader-cover-upload-btn {
+  color: var(--uprofile-primary-accent);
+}
+
+.pheader-cover-upload-btn:hover:not(:disabled) {
+  background: var(--uprofile-primary-accent);
+  color: white;
+  transform: scale(1.1);
+}
+
+.pheader-cover-delete-btn {
+  color: var(--uprofile-error-red);
+}
+
+.pheader-cover-delete-btn:hover:not(:disabled) {
+  background: var(--uprofile-error-red);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* === UPLOAD ERROR ENHANCED === */
+.pheader-upload-error {
+  background: rgba(220, 53, 69, 0.1);
+  color: var(--uprofile-error-red);
+  padding: 8px 12px;
+  border-radius: var(--uprofile-border-radius);
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  animation: pheader-fadeIn 0.3s ease;
+}
+
+@keyframes pheader-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === MOBILE RESPONSIVE FIXES === */
+@media (max-width: 768px) {
+  .pheader-cover-action-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .pheader-avatar-edit-overlay {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .pheader-cover-upload-prompt {
+    padding: 15px;
+  }
+  
+  .pheader-cover-upload-prompt span {
+    font-size: 12px;
+  }
+}
+
+/* === ACCESSIBILITY IMPROVEMENTS === */
+.pheader-cover-upload-prompt:focus,
+.pheader-avatar-edit-overlay:focus,
+.pheader-cover-action-btn:focus {
+  outline: 2px solid var(--uprofile-primary-accent);
+  outline-offset: 2px;
+}
+
+/* === LOADING STATE FOR COVER SECTION === */
+.pheader-cover-section.loading {
+  position: relative;
+}
+
+.pheader-cover-section.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}

@@ -1,7 +1,7 @@
 // client/src/components/profile/ProfileHeader.js
-// Update your existing ProfileHeader component with this enhanced version
+// Replace your existing ProfileHeader component with this fixed version
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Camera, 
   Edit2, 
@@ -12,7 +12,8 @@ import {
   CheckCircle,
   X,
   Upload,
-  Trash2
+  Trash2,
+  Loader
 } from 'lucide-react';
 import './ProfileHeader.css';
 
@@ -20,6 +21,10 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  
+  // Create refs for file inputs
+  const avatarInputRef = useRef(null);
+  const coverInputRef = useRef(null);
 
   const getInitials = (name) => {
     if (!name) return 'U';
@@ -35,19 +40,27 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
     });
   };
 
+  // Clear error after 5 seconds
+  const showError = (message) => {
+    setUploadError(message);
+    setTimeout(() => setUploadError(''), 5000);
+  };
+
   // Handle avatar upload
   const handleAvatarChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
+    console.log('Avatar file selected:', file.name, file.size, file.type);
+
     // Validate file
     if (!file.type.startsWith('image/')) {
-      setUploadError('Please select an image file');
+      showError('Please select an image file');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) { // 5MB limit
-      setUploadError('Image size must be less than 5MB');
+      showError('Image size must be less than 5MB');
       return;
     }
 
@@ -58,6 +71,8 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
       const formData = new FormData();
       formData.append('avatar', file);
 
+      console.log('Uploading avatar...', file.name);
+
       const response = await fetch('/api/user/profile/avatar', {
         method: 'POST',
         headers: {
@@ -66,9 +81,26 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
         body: formData
       });
 
-      const result = await response.json();
+      console.log('Avatar upload response status:', response.status);
+
+      // Check if response is ok
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Try to parse JSON response
+      let result;
+      try {
+        const text = await response.text();
+        console.log('Avatar upload response text:', text);
+        result = JSON.parse(text);
+      } catch (parseError) {
+        console.error('Failed to parse avatar upload response:', parseError);
+        throw new Error('Invalid response from server');
+      }
 
       if (result.success) {
+        console.log('Avatar upload successful:', result.data);
         // Update profile data
         if (onProfileUpdate) {
           onProfileUpdate({
@@ -76,12 +108,17 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
             avatar: result.data.avatar
           });
         }
+        // Clear the file input
+        if (avatarInputRef.current) {
+          avatarInputRef.current.value = '';
+        }
       } else {
-        setUploadError(result.message || 'Failed to upload avatar');
+        console.error('Avatar upload failed:', result.message);
+        showError(result.message || 'Failed to upload avatar');
       }
     } catch (error) {
       console.error('Avatar upload error:', error);
-      setUploadError('Failed to upload avatar. Please try again.');
+      showError('Failed to upload avatar. Please try again.');
     } finally {
       setUploadingAvatar(false);
     }
@@ -92,14 +129,16 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
     const file = event.target.files[0];
     if (!file) return;
 
+    console.log('Cover picture file selected:', file.name, file.size, file.type);
+
     // Validate file
     if (!file.type.startsWith('image/')) {
-      setUploadError('Please select an image file');
+      showError('Please select an image file');
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) { // 10MB limit for cover pictures
-      setUploadError('Cover picture size must be less than 10MB');
+      showError('Cover picture size must be less than 10MB');
       return;
     }
 
@@ -110,6 +149,8 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
       const formData = new FormData();
       formData.append('coverPicture', file);
 
+      console.log('Uploading cover picture...', file.name);
+
       const response = await fetch('/api/user/profile/cover-picture', {
         method: 'POST',
         headers: {
@@ -118,9 +159,26 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
         body: formData
       });
 
-      const result = await response.json();
+      console.log('Cover picture upload response status:', response.status);
+
+      // Check if response is ok
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Try to parse JSON response
+      let result;
+      try {
+        const text = await response.text();
+        console.log('Cover picture upload response text:', text);
+        result = JSON.parse(text);
+      } catch (parseError) {
+        console.error('Failed to parse cover picture upload response:', parseError);
+        throw new Error('Invalid response from server');
+      }
 
       if (result.success) {
+        console.log('Cover picture upload successful:', result.data);
         // Update profile data
         if (onProfileUpdate) {
           onProfileUpdate({
@@ -128,12 +186,17 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
             coverPicture: result.data.coverPicture
           });
         }
+        // Clear the file input
+        if (coverInputRef.current) {
+          coverInputRef.current.value = '';
+        }
       } else {
-        setUploadError(result.message || 'Failed to upload cover picture');
+        console.error('Cover picture upload failed:', result.message);
+        showError(result.message || 'Failed to upload cover picture');
       }
     } catch (error) {
       console.error('Cover picture upload error:', error);
-      setUploadError('Failed to upload cover picture. Please try again.');
+      showError('Failed to upload cover picture. Please try again.');
     } finally {
       setUploadingCover(false);
     }
@@ -163,13 +226,29 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
           onProfileUpdate(updatedProfile);
         }
       } else {
-        setUploadError(result.message || 'Failed to delete cover picture');
+        showError(result.message || 'Failed to delete cover picture');
       }
     } catch (error) {
       console.error('Cover picture delete error:', error);
-      setUploadError('Failed to delete cover picture. Please try again.');
+      showError('Failed to delete cover picture. Please try again.');
     } finally {
       setUploadingCover(false);
+    }
+  };
+
+  // Handle clicking on cover upload area
+  const handleCoverUploadClick = () => {
+    console.log('Cover upload clicked');
+    if (coverInputRef.current) {
+      coverInputRef.current.click();
+    }
+  };
+
+  // Handle clicking on avatar upload area
+  const handleAvatarUploadClick = () => {
+    console.log('Avatar upload clicked');
+    if (avatarInputRef.current) {
+      avatarInputRef.current.click();
     }
   };
 
@@ -196,37 +275,42 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
                 disabled={uploadingCover}
                 title="Delete cover picture"
               >
-                <Trash2 size={16} />
+                {uploadingCover ? <Loader size={16} className="pheader-spin" /> : <Trash2 size={16} />}
               </button>
-              <label htmlFor="cover-upload" className="pheader-cover-action-btn pheader-cover-upload-btn">
-                {uploadingCover ? (
-                  <div className="pheader-upload-spinner"></div>
-                ) : (
-                  <Camera size={16} />
-                )}
-              </label>
+              <button 
+                className="pheader-cover-action-btn pheader-cover-upload-btn"
+                onClick={handleCoverUploadClick}
+                disabled={uploadingCover}
+                title="Change cover picture"
+              >
+                {uploadingCover ? <Loader size={16} className="pheader-spin" /> : <Camera size={16} />}
+              </button>
             </div>
           </div>
         ) : (
           <div className="pheader-cover-placeholder">
             <div className="pheader-cover-placeholder-content">
-              <label htmlFor="cover-upload" className="pheader-cover-upload-prompt">
+              <button 
+                className="pheader-cover-upload-prompt"
+                onClick={handleCoverUploadClick}
+                disabled={uploadingCover}
+              >
                 {uploadingCover ? (
-                  <div className="pheader-upload-spinner"></div>
+                  <Loader size={24} className="pheader-spin" />
                 ) : (
                   <>
                     <Upload size={24} />
                     <span>Add Cover Picture</span>
                   </>
                 )}
-              </label>
+              </button>
             </div>
           </div>
         )}
         
         {/* Hidden cover picture input */}
         <input
-          id="cover-upload"
+          ref={coverInputRef}
           type="file"
           accept="image/*"
           onChange={handleCoverPictureChange}
@@ -257,22 +341,29 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
               )}
               
               {/* Avatar Edit Overlay */}
-              <label htmlFor="avatar-upload" className="pheader-avatar-edit-overlay">
+              <button 
+                className="pheader-avatar-edit-overlay"
+                onClick={handleAvatarUploadClick}
+                disabled={uploadingAvatar}
+                title="Change profile picture"
+              >
                 {uploadingAvatar ? (
-                  <div className="pheader-upload-spinner"></div>
+                  <Loader size={20} className="pheader-spin" />
                 ) : (
                   <Camera size={20} />
                 )}
-                <input
-                  id="avatar-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  disabled={uploadingAvatar}
-                  style={{ display: 'none' }}
-                />
-              </label>
+              </button>
             </div>
+            
+            {/* Hidden avatar input */}
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              disabled={uploadingAvatar}
+              style={{ display: 'none' }}
+            />
             
             {uploadError && (
               <div className="pheader-upload-error">
