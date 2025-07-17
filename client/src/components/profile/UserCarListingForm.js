@@ -766,60 +766,60 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
   ];
 
   return (
-    <div className="user-car-listing-form">
+    <div className="ulisting-form-container">
       {/* Auto-fill loading indicator */}
       {autoFillLoading && (
-        <div className="auto-fill-loading">
-          <div className="spinner"></div>
+        <div className="ulisting-auto-fill-loading">
+          <div className="ulisting-spinner"></div>
           <span>Loading your profile data...</span>
         </div>
       )}
 
       {/* Auto-fill prompt */}
       {showAutoFillPrompt && autoFillData && (
-        <div className="auto-fill-prompt">
-          <div className="auto-fill-content">
+        <div className="ulisting-auto-fill-prompt">
+          <div className="ulisting-auto-fill-content">
             <h4>🚀 Speed up your listing!</h4>
             <p>We found information in your profile that can be used to fill this form:</p>
             
-            <div className="auto-fill-preview">
+            <div className="ulisting-auto-fill-preview">
               {autoFillData.sellerName && (
-                <div className="auto-fill-item">
-                  <span className="field-name">Name:</span>
-                  <span className="field-value">{autoFillData.sellerName}</span>
+                <div className="ulisting-auto-fill-item">
+                  <span className="ulisting-field-name">Name:</span>
+                  <span className="ulisting-field-value">{autoFillData.sellerName}</span>
                 </div>
               )}
               {autoFillData.contact?.phone && (
-                <div className="auto-fill-item">
-                  <span className="field-name">Phone:</span>
-                  <span className="field-value">{autoFillData.contact.phone}</span>
+                <div className="ulisting-auto-fill-item">
+                  <span className="ulisting-field-name">Phone:</span>
+                  <span className="ulisting-field-value">{autoFillData.contact.phone}</span>
                 </div>
               )}
               {autoFillData.contact?.location?.city && (
-                <div className="auto-fill-item">
-                  <span className="field-name">Location:</span>
-                  <span className="field-value">{autoFillData.contact.location.city}</span>
+                <div className="ulisting-auto-fill-item">
+                  <span className="ulisting-field-name">Location:</span>
+                  <span className="ulisting-field-value">{autoFillData.contact.location.city}</span>
                 </div>
               )}
               {autoFillData.sellerType && (
-                <div className="auto-fill-item">
-                  <span className="field-name">Seller Type:</span>
-                  <span className="field-value">{autoFillData.sellerType}</span>
+                <div className="ulisting-auto-fill-item">
+                  <span className="ulisting-field-name">Seller Type:</span>
+                  <span className="ulisting-field-value">{autoFillData.sellerType}</span>
                 </div>
               )}
             </div>
             
-            <div className="auto-fill-actions">
+            <div className="ulisting-auto-fill-actions">
               <button 
                 type="button"
-                className="auto-fill-accept"
+                className="ulisting-auto-fill-accept"
                 onClick={() => applyAutoFill()}
               >
                 Auto-fill form
               </button>
               <button 
                 type="button"
-                className="auto-fill-decline"
+                className="ulisting-auto-fill-decline"
                 onClick={() => setShowAutoFillPrompt(false)}
               >
                 No thanks
@@ -831,26 +831,26 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
 
       {/* Profile completion indicator */}
       {profileCompletion && !showAutoFillPrompt && (
-        <div className="profile-completion-status">
+        <div className="ulisting-profile-completion-status">
           <h5>Profile Completion</h5>
-          <div className="completion-items">
-            <span className={`completion-item ${profileCompletion.basicInfo ? 'complete' : 'incomplete'}`}>
+          <div className="ulisting-completion-items">
+            <span className={`ulisting-completion-item ${profileCompletion.basicInfo ? 'complete' : 'incomplete'}`}>
               {profileCompletion.basicInfo ? '✅' : '⭕'} Basic Info
             </span>
-            <span className={`completion-item ${profileCompletion.contactInfo ? 'complete' : 'incomplete'}`}>
+            <span className={`ulisting-completion-item ${profileCompletion.contactInfo ? 'complete' : 'incomplete'}`}>
               {profileCompletion.contactInfo ? '✅' : '⭕'} Contact
             </span>
-            <span className={`completion-item ${profileCompletion.locationInfo ? 'complete' : 'incomplete'}`}>
+            <span className={`ulisting-completion-item ${profileCompletion.locationInfo ? 'complete' : 'incomplete'}`}>
               {profileCompletion.locationInfo ? '✅' : '⭕'} Location
             </span>
-            <span className={`completion-item ${profileCompletion.profilePicture ? 'complete' : 'incomplete'}`}>
+            <span className={`ulisting-completion-item ${profileCompletion.profilePicture ? 'complete' : 'incomplete'}`}>
               {profileCompletion.profilePicture ? '✅' : '⭕'} Picture
             </span>
           </div>
           {autoFillData && (
             <button 
               type="button"
-              className="manual-auto-fill"
+              className="ulisting-manual-auto-fill"
               onClick={() => setShowAutoFillPrompt(true)}
             >
               Use Profile Data
@@ -860,25 +860,25 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
       )}
 
       {/* Form header */}
-      <div className="form-header">
+      <div className="ulisting-form-header">
         <h3>{isEdit ? 'Edit Car Listing' : 'Create New Car Listing'}</h3>
         <p>Fill in the details below to {isEdit ? 'update' : 'create'} your car listing</p>
       </div>
 
       {/* Message display */}
       {message && (
-        <div className={`form-message ${messageType}`}>
+        <div className={`ulisting-form-message ${messageType}`}>
           {message}
         </div>
       )}
 
       {/* Tab navigation */}
-      <div className="form-tab-navigation">
+      <div className="ulisting-form-tab-navigation">
         {tabs.map(tab => (
           <button
             key={tab.id}
             type="button"
-            className={`form-tab-button ${currentTab === tab.id ? 'active' : ''}`}
+            className={`ulisting-form-tab-button ${currentTab === tab.id ? 'active' : ''}`}
             onClick={() => setCurrentTab(tab.id)}
           >
             <span>{tab.icon}</span>
@@ -890,11 +890,11 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
       {/* Form content */}
       <form onSubmit={handleFormSubmit}>
         {/* Basic Info Tab */}
-        <div className={`form-section ${currentTab === 'basic' ? 'active' : ''}`}>
+        <div className={`ulisting-form-section ${currentTab === 'basic' ? 'active' : ''}`}>
           <h4>Basic Information</h4>
           
-          <div className="form-grid">
-            <div className="form-group full-width">
+          <div className="ulisting-form-grid">
+            <div className="ulisting-form-group full-width">
               <label htmlFor="title">Car Title *</label>
               <input
                 type="text"
@@ -905,10 +905,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 placeholder="e.g., 2020 Toyota Camry XLE - Low Mileage, Excellent Condition"
                 className={errors.title ? 'error' : ''}
               />
-              {errors.title && <span className="error-message">{errors.title}</span>}
+              {errors.title && <span className="ulisting-error-message">{errors.title}</span>}
             </div>
 
-            <div className="form-group full-width">
+            <div className="ulisting-form-group full-width">
               <label htmlFor="description">Description *</label>
               <textarea
                 id="description"
@@ -919,10 +919,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 rows="5"
                 className={errors.description ? 'error' : ''}
               />
-              {errors.description && <span className="error-message">{errors.description}</span>}
+              {errors.description && <span className="ulisting-error-message">{errors.description}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="category">Category *</label>
               <select
                 id="category"
@@ -936,10 +936,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                   <option key={cat.value} value={cat.value}>{cat.label}</option>
                 ))}
               </select>
-              {errors.category && <span className="error-message">{errors.category}</span>}
+              {errors.category && <span className="ulisting-error-message">{errors.category}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="condition">Condition *</label>
               <select
                 id="condition"
@@ -955,10 +955,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 <option value="damaged">Damaged</option>
                 <option value="salvage">Salvage</option>
               </select>
-              {errors.condition && <span className="error-message">{errors.condition}</span>}
+              {errors.condition && <span className="ulisting-error-message">{errors.condition}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="sellerType">Seller Type *</label>
               <select
                 id="sellerType"
@@ -974,11 +974,11 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
         </div>
 
         {/* Specifications Tab */}
-        <div className={`form-section ${currentTab === 'specs' ? 'active' : ''}`}>
+        <div className={`ulisting-form-section ${currentTab === 'specs' ? 'active' : ''}`}>
           <h4>Vehicle Specifications</h4>
           
-          <div className="form-grid">
-            <div className="form-group">
+          <div className="ulisting-form-grid">
+            <div className="ulisting-form-group">
               <label htmlFor="specifications.make">Make *</label>
               <input
                 type="text"
@@ -989,10 +989,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 placeholder="e.g., Toyota"
                 className={errors['specifications.make'] ? 'error' : ''}
               />
-              {errors['specifications.make'] && <span className="error-message">{errors['specifications.make']}</span>}
+              {errors['specifications.make'] && <span className="ulisting-error-message">{errors['specifications.make']}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="specifications.model">Model *</label>
               <input
                 type="text"
@@ -1003,10 +1003,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 placeholder="e.g., Camry"
                 className={errors['specifications.model'] ? 'error' : ''}
               />
-              {errors['specifications.model'] && <span className="error-message">{errors['specifications.model']}</span>}
+              {errors['specifications.model'] && <span className="ulisting-error-message">{errors['specifications.model']}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="specifications.year">Year *</label>
               <input
                 type="number"
@@ -1019,10 +1019,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 max="2025"
                 className={errors['specifications.year'] ? 'error' : ''}
               />
-              {errors['specifications.year'] && <span className="error-message">{errors['specifications.year']}</span>}
+              {errors['specifications.year'] && <span className="ulisting-error-message">{errors['specifications.year']}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="specifications.mileage">Mileage (km) *</label>
               <input
                 type="number"
@@ -1034,10 +1034,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 min="0"
                 className={errors['specifications.mileage'] ? 'error' : ''}
               />
-              {errors['specifications.mileage'] && <span className="error-message">{errors['specifications.mileage']}</span>}
+              {errors['specifications.mileage'] && <span className="ulisting-error-message">{errors['specifications.mileage']}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="specifications.transmission">Transmission *</label>
               <select
                 id="specifications.transmission"
@@ -1052,10 +1052,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 <option value="cvt">CVT</option>
                 <option value="semi-automatic">Semi-Automatic</option>
               </select>
-              {errors['specifications.transmission'] && <span className="error-message">{errors['specifications.transmission']}</span>}
+              {errors['specifications.transmission'] && <span className="ulisting-error-message">{errors['specifications.transmission']}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="specifications.fuelType">Fuel Type *</label>
               <select
                 id="specifications.fuelType"
@@ -1072,10 +1072,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 <option value="plug-in-hybrid">Plug-in Hybrid</option>
                 <option value="lpg">LPG</option>
               </select>
-              {errors['specifications.fuelType'] && <span className="error-message">{errors['specifications.fuelType']}</span>}
+              {errors['specifications.fuelType'] && <span className="ulisting-error-message">{errors['specifications.fuelType']}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="specifications.engine">Engine</label>
               <input
                 type="text"
@@ -1087,7 +1087,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="specifications.color">Color</label>
               <input
                 type="text"
@@ -1099,7 +1099,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="specifications.doors">Doors</label>
               <select
                 id="specifications.doors"
@@ -1115,7 +1115,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               </select>
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="specifications.seats">Seats</label>
               <select
                 id="specifications.seats"
@@ -1132,7 +1132,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               </select>
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="specifications.drivetrain">Drivetrain</label>
               <select
                 id="specifications.drivetrain"
@@ -1148,7 +1148,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               </select>
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="specifications.vin">VIN (optional)</label>
               <input
                 type="text"
@@ -1164,16 +1164,16 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
         </div>
 
         {/* Features Tab */}
-        <div className={`form-section ${currentTab === 'features' ? 'active' : ''}`}>
+        <div className={`ulisting-form-section ${currentTab === 'features' ? 'active' : ''}`}>
           <h4>Vehicle Features</h4>
           
-          <div className="features-container">
+          <div className="ulisting-features-container">
             {Object.keys(featureOptions).map(category => (
-              <div key={category} className="feature-category">
+              <div key={category} className="ulisting-feature-category">
                 <h5>{category.charAt(0).toUpperCase() + category.slice(1)} Features</h5>
-                <div className="checkbox-group">
+                <div className="ulisting-checkbox-group">
                   {featureOptions[category].map(feature => (
-                    <label key={feature} className="checkbox-label">
+                    <label key={feature} className="ulisting-checkbox-label">
                       <input
                         type="checkbox"
                         checked={formData.features[category].includes(feature)}
@@ -1189,14 +1189,14 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
         </div>
 
         {/* Contact Tab */}
-        <div className={`form-section ${currentTab === 'contact' ? 'active' : ''}`}>
+        <div className={`ulisting-form-section ${currentTab === 'contact' ? 'active' : ''}`}>
           <h4>Contact Information</h4>
           
-          <div className="form-grid">
+          <div className="ulisting-form-grid">
             {/* Private Seller Fields */}
             {formData.sellerType === 'private' && (
               <>
-                <div className="form-group">
+                <div className="ulisting-form-group">
                   <label htmlFor="privateSeller.firstName">First Name *</label>
                   <input
                     type="text"
@@ -1207,10 +1207,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                     placeholder="Your first name"
                     className={errors['privateSeller.firstName'] ? 'error' : ''}
                   />
-                  {errors['privateSeller.firstName'] && <span className="error-message">{errors['privateSeller.firstName']}</span>}
+                  {errors['privateSeller.firstName'] && <span className="ulisting-error-message">{errors['privateSeller.firstName']}</span>}
                 </div>
 
-                <div className="form-group">
+                <div className="ulisting-form-group">
                   <label htmlFor="privateSeller.lastName">Last Name *</label>
                   <input
                     type="text"
@@ -1221,10 +1221,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                     placeholder="Your last name"
                     className={errors['privateSeller.lastName'] ? 'error' : ''}
                   />
-                  {errors['privateSeller.lastName'] && <span className="error-message">{errors['privateSeller.lastName']}</span>}
+                  {errors['privateSeller.lastName'] && <span className="ulisting-error-message">{errors['privateSeller.lastName']}</span>}
                 </div>
 
-                <div className="form-group">
+                <div className="ulisting-form-group">
                   <label htmlFor="privateSeller.idNumber">ID Number</label>
                   <input
                     type="text"
@@ -1236,7 +1236,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                   />
                 </div>
 
-                <div className="form-group">
+                <div className="ulisting-form-group">
                   <label htmlFor="privateSeller.preferredContactMethod">Preferred Contact Method</label>
                   <select
                     id="privateSeller.preferredContactMethod"
@@ -1256,7 +1256,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
             {/* Business Fields */}
             {formData.sellerType === 'dealership' && (
               <>
-                <div className="form-group">
+                <div className="ulisting-form-group">
                   <label htmlFor="businessInfo.businessName">Business Name *</label>
                   <input
                     type="text"
@@ -1267,10 +1267,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                     placeholder="Your business name"
                     className={errors['businessInfo.businessName'] ? 'error' : ''}
                   />
-                  {errors['businessInfo.businessName'] && <span className="error-message">{errors['businessInfo.businessName']}</span>}
+                  {errors['businessInfo.businessName'] && <span className="ulisting-error-message">{errors['businessInfo.businessName']}</span>}
                 </div>
 
-                <div className="form-group">
+                <div className="ulisting-form-group">
                   <label htmlFor="businessInfo.businessType">Business Type *</label>
                   <select
                     id="businessInfo.businessType"
@@ -1286,10 +1286,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                     <option value="used">Used Car Dealer</option>
                     <option value="luxury">Luxury Car Dealer</option>
                   </select>
-                  {errors['businessInfo.businessType'] && <span className="error-message">{errors['businessInfo.businessType']}</span>}
+                  {errors['businessInfo.businessType'] && <span className="ulisting-error-message">{errors['businessInfo.businessType']}</span>}
                 </div>
 
-                <div className="form-group">
+                <div className="ulisting-form-group">
                   <label htmlFor="businessInfo.registrationNumber">Registration Number</label>
                   <input
                     type="text"
@@ -1301,7 +1301,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                   />
                 </div>
 
-                <div className="form-group">
+                <div className="ulisting-form-group">
                   <label htmlFor="businessInfo.vatNumber">VAT Number</label>
                   <input
                     type="text"
@@ -1316,7 +1316,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
             )}
 
             {/* Common Contact Fields */}
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="contact.sellerName">Display Name *</label>
               <input
                 type="text"
@@ -1327,10 +1327,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 placeholder="Name to display on listing"
                 className={errors['contact.sellerName'] ? 'error' : ''}
               />
-              {errors['contact.sellerName'] && <span className="error-message">{errors['contact.sellerName']}</span>}
+              {errors['contact.sellerName'] && <span className="ulisting-error-message">{errors['contact.sellerName']}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="contact.phone">Phone Number *</label>
               <input
                 type="tel"
@@ -1341,10 +1341,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 placeholder="e.g., +267 12345678"
                 className={errors['contact.phone'] ? 'error' : ''}
               />
-              {errors['contact.phone'] && <span className="error-message">{errors['contact.phone']}</span>}
+              {errors['contact.phone'] && <span className="ulisting-error-message">{errors['contact.phone']}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="contact.email">Email</label>
               <input
                 type="email"
@@ -1355,10 +1355,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 placeholder="your@email.com"
                 className={errors['contact.email'] ? 'error' : ''}
               />
-              {errors['contact.email'] && <span className="error-message">{errors['contact.email']}</span>}
+              {errors['contact.email'] && <span className="ulisting-error-message">{errors['contact.email']}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="contact.whatsapp">WhatsApp</label>
               <input
                 type="tel"
@@ -1370,7 +1370,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="contact.location.city">Contact City *</label>
               <input
                 type="text"
@@ -1381,10 +1381,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 placeholder="e.g., Gaborone"
                 className={errors['contact.location.city'] ? 'error' : ''}
               />
-              {errors['contact.location.city'] && <span className="error-message">{errors['contact.location.city']}</span>}
+              {errors['contact.location.city'] && <span className="ulisting-error-message">{errors['contact.location.city']}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="contact.location.state">Contact State/Region</label>
               <input
                 type="text"
@@ -1396,7 +1396,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group full-width">
+            <div className="ulisting-form-group full-width">
               <label htmlFor="contact.location.address">Contact Address</label>
               <input
                 type="text"
@@ -1408,7 +1408,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="location.city">Vehicle Location - City *</label>
               <input
                 type="text"
@@ -1419,10 +1419,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 placeholder="Where is the car located?"
                 className={errors['location.city'] ? 'error' : ''}
               />
-              {errors['location.city'] && <span className="error-message">{errors['location.city']}</span>}
+              {errors['location.city'] && <span className="ulisting-error-message">{errors['location.city']}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="location.state">Vehicle Location - State</label>
               <input
                 type="text"
@@ -1434,7 +1434,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group full-width">
+            <div className="ulisting-form-group full-width">
               <label htmlFor="location.address">Vehicle Location - Address</label>
               <input
                 type="text"
@@ -1447,11 +1447,11 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
             </div>
 
             {/* Social Media Links */}
-            <div className="form-group full-width">
+            <div className="ulisting-form-group full-width">
               <h5>Social Media (Optional)</h5>
-              <div className="social-grid">
+              <div className="ulisting-social-grid">
                 {Object.keys(formData.social).map(platform => (
-                  <div key={platform} className="form-group">
+                  <div key={platform} className="ulisting-form-group">
                     <label htmlFor={`social.${platform}`}>
                       {platform.charAt(0).toUpperCase() + platform.slice(1)}
                     </label>
@@ -1471,10 +1471,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
         </div>
 
         {/* Images Tab */}
-        <div className={`form-section ${currentTab === 'images' ? 'active' : ''}`}>
+        <div className={`ulisting-form-section ${currentTab === 'images' ? 'active' : ''}`}>
           <h4>Vehicle Images</h4>
           
-          <div className="form-group">
+          <div className="ulisting-form-group">
             <label htmlFor="images">Upload Images (Max 15 images, 8MB per image) *</label>
             <input
               type="file"
@@ -1485,24 +1485,24 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               onChange={handleImageUpload}
               className={errors.images ? 'error' : ''}
             />
-            {errors.images && <span className="error-message">{errors.images}</span>}
-            <p className="form-help">
+            {errors.images && <span className="ulisting-error-message">{errors.images}</span>}
+            <p className="ulisting-form-help">
               Tip: First image will be the main image. You can change this after uploading.
             </p>
           </div>
 
           {/* Image previews */}
           {imagePreviews.length > 0 && (
-            <div className="image-previews">
+            <div className="ulisting-image-previews">
               <h5>Uploaded Images ({imagePreviews.length}/15)</h5>
-              <div className="image-grid">
+              <div className="ulisting-image-grid">
                 {imagePreviews.map((preview, index) => (
-                  <div key={index} className={`image-preview ${primaryImageIndex === index ? 'primary' : ''}`}>
+                  <div key={index} className={`ulisting-image-preview ${primaryImageIndex === index ? 'primary' : ''}`}>
                     <img src={preview} alt={`Preview ${index + 1}`} />
-                    <div className="image-overlay">
+                    <div className="ulisting-image-overlay">
                       <button
                         type="button"
-                        className="primary-btn"
+                        className="ulisting-primary-btn"
                         onClick={() => handlePrimaryImageSelect(index)}
                         title="Set as primary image"
                       >
@@ -1510,14 +1510,14 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                       </button>
                       <button
                         type="button"
-                        className="remove-btn"
+                        className="ulisting-remove-btn"
                         onClick={() => removeImage(index)}
                         title="Remove image"
                       >
                         ✕
                       </button>
                     </div>
-                    <div className="image-info">
+                    <div className="ulisting-image-info">
                       <span>Image {index + 1}</span>
                       <span>{(imageFiles[index]?.size / 1024 / 1024).toFixed(1)}MB</span>
                     </div>
@@ -1529,11 +1529,11 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
         </div>
 
         {/* Pricing Tab */}
-        <div className={`form-section ${currentTab === 'pricing' ? 'active' : ''}`}>
+        <div className={`ulisting-form-section ${currentTab === 'pricing' ? 'active' : ''}`}>
           <h4>Pricing Information</h4>
           
-          <div className="form-grid">
-            <div className="form-group">
+          <div className="ulisting-form-grid">
+            <div className="ulisting-form-group">
               <label htmlFor="price">Price (BWP) *</label>
               <input
                 type="number"
@@ -1545,10 +1545,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 min="0"
                 className={errors.price ? 'error' : ''}
               />
-              {errors.price && <span className="error-message">{errors.price}</span>}
+              {errors.price && <span className="ulisting-error-message">{errors.price}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="priceOptions.originalPrice">Original Price (if on sale)</label>
               <input
                 type="number"
@@ -1560,10 +1560,10 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 min="0"
                 className={errors['priceOptions.originalPrice'] ? 'error' : ''}
               />
-              {errors['priceOptions.originalPrice'] && <span className="error-message">{errors['priceOptions.originalPrice']}</span>}
+              {errors['priceOptions.originalPrice'] && <span className="ulisting-error-message">{errors['priceOptions.originalPrice']}</span>}
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="priceOptions.dealerDiscount">Dealer Discount (%)</label>
               <input
                 type="number"
@@ -1577,7 +1577,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="priceOptions.priceValidUntil">Price Valid Until</label>
               <input
                 type="date"
@@ -1588,9 +1588,9 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group full-width">
-              <div className="checkbox-group">
-                <label className="checkbox-label">
+            <div className="ulisting-form-group full-width">
+              <div className="ulisting-checkbox-group">
+                <label className="ulisting-checkbox-label">
                   <input
                     type="checkbox"
                     name="priceOptions.negotiable"
@@ -1600,7 +1600,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                   <span>Price is negotiable</span>
                 </label>
 
-                <label className="checkbox-label">
+                <label className="ulisting-checkbox-label">
                   <input
                     type="checkbox"
                     name="priceOptions.exclusiveDeal"
@@ -1610,7 +1610,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                   <span>Exclusive deal</span>
                 </label>
 
-                <label className="checkbox-label">
+                <label className="ulisting-checkbox-label">
                   <input
                     type="checkbox"
                     name="additionalInfo.financing"
@@ -1620,7 +1620,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                   <span>Financing available</span>
                 </label>
 
-                <label className="checkbox-label">
+                <label className="ulisting-checkbox-label">
                   <input
                     type="checkbox"
                     name="additionalInfo.tradeIn"
@@ -1635,11 +1635,11 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
         </div>
 
         {/* Additional Information Tab */}
-        <div className={`form-section ${currentTab === 'additional' ? 'active' : ''}`}>
+        <div className={`ulisting-form-section ${currentTab === 'additional' ? 'active' : ''}`}>
           <h4>Additional Information</h4>
           
-          <div className="form-grid">
-            <div className="form-group full-width">
+          <div className="ulisting-form-grid">
+            <div className="ulisting-form-group full-width">
               <label htmlFor="additionalInfo.serviceHistory">Service History</label>
               <textarea
                 id="additionalInfo.serviceHistory"
@@ -1651,7 +1651,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group full-width">
+            <div className="ulisting-form-group full-width">
               <label htmlFor="additionalInfo.accidents">Accident History</label>
               <textarea
                 id="additionalInfo.accidents"
@@ -1663,7 +1663,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group full-width">
+            <div className="ulisting-form-group full-width">
               <label htmlFor="additionalInfo.modifications">Modifications</label>
               <textarea
                 id="additionalInfo.modifications"
@@ -1675,7 +1675,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="additionalInfo.warranty">Warranty Information</label>
               <input
                 type="text"
@@ -1687,7 +1687,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="additionalInfo.inspection">Inspection Status</label>
               <input
                 type="text"
@@ -1699,7 +1699,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group full-width">
+            <div className="ulisting-form-group full-width">
               <label htmlFor="additionalInfo.reasonForSelling">Reason for Selling</label>
               <textarea
                 id="additionalInfo.reasonForSelling"
@@ -1711,7 +1711,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group full-width">
+            <div className="ulisting-form-group full-width">
               <label htmlFor="availability.viewingTimes">Viewing Times</label>
               <textarea
                 id="availability.viewingTimes"
@@ -1723,7 +1723,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group">
+            <div className="ulisting-form-group">
               <label htmlFor="availability.availableFrom">Available From</label>
               <input
                 type="date"
@@ -1734,9 +1734,9 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
               />
             </div>
 
-            <div className="form-group full-width">
-              <div className="checkbox-group">
-                <label className="checkbox-label">
+            <div className="ulisting-form-group full-width">
+              <div className="ulisting-checkbox-group">
+                <label className="ulisting-checkbox-label">
                   <input
                     type="checkbox"
                     name="availability.deliveryAvailable"
@@ -1746,7 +1746,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                   <span>Delivery available</span>
                 </label>
 
-                <label className="checkbox-label">
+                <label className="ulisting-checkbox-label">
                   <input
                     type="checkbox"
                     name="additionalInfo.urgentSale"
@@ -1756,7 +1756,7 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                   <span>Urgent sale</span>
                 </label>
 
-                <label className="checkbox-label">
+                <label className="ulisting-checkbox-label">
                   <input
                     type="checkbox"
                     name="privateSeller.canShowContactInfo"
@@ -1771,16 +1771,16 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
         </div>
 
         {/* Submit section */}
-        <div className="form-submit-section">
-          <div className="submit-info">
+        <div className="ulisting-form-submit-section">
+          <div className="ulisting-submit-info">
             {autoFillData && (
-              <p className="auto-fill-info">
+              <p className="ulisting-auto-fill-info">
                 💡 Tip: Your profile information will be saved automatically for future listings
               </p>
             )}
-            <div className="form-summary">
+            <div className="ulisting-form-summary">
               <h5>Form Summary</h5>
-              <div className="summary-items">
+              <div className="ulisting-summary-items">
                 <span>✓ Basic Info: {formData.title ? 'Complete' : 'Missing'}</span>
                 <span>✓ Specifications: {formData.specifications.make && formData.specifications.model ? 'Complete' : 'Missing'}</span>
                 <span>✓ Contact: {formData.contact.sellerName && formData.contact.phone ? 'Complete' : 'Missing'}</span>
@@ -1790,14 +1790,14 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
             </div>
           </div>
           
-          <div className="form-actions">
-            <button type="button" className="form-cancel-btn" onClick={onCancel} disabled={isSubmitting}>
+          <div className="ulisting-form-actions">
+            <button type="button" className="ulisting-form-cancel-btn" onClick={onCancel} disabled={isSubmitting}>
               Cancel
             </button>
-            <button type="submit" className="form-submit-btn" disabled={loading || isSubmitting}>
+            <button type="submit" className="ulisting-form-submit-btn" disabled={loading || isSubmitting}>
               {loading ? (
                 <>
-                  <div className="loading-spinner"></div>
+                  <div className="ulisting-loading-spinner"></div>
                   {isEdit ? 'Updating...' : 'Creating...'}
                 </>
               ) : (

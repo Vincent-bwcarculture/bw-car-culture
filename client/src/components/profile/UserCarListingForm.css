@@ -1,4 +1,4 @@
-/* client/src/components/profile/UserCarListingForm.css - COMPLETE ENHANCED VERSION */
+/* client/src/components/profile/UserCarListingForm.css - UNIQUE CLASS NAMES VERSION */
 
 /* ===== CSS VARIABLES ===== */
 :root {
@@ -57,7 +57,7 @@
 }
 
 /* ===== MAIN CONTAINER ===== */
-.user-car-listing-form {
+.ulisting-form-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
@@ -69,7 +69,7 @@
 }
 
 /* ===== AUTO-FILL LOADING ===== */
-.auto-fill-loading {
+.ulisting-auto-fill-loading {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -81,7 +81,7 @@
   animation: slideInDown 0.3s ease;
 }
 
-.auto-fill-loading .spinner {
+.ulisting-auto-fill-loading .ulisting-spinner {
   width: 20px;
   height: 20px;
   border: 2px solid transparent;
@@ -90,13 +90,13 @@
   animation: spin 1s linear infinite;
 }
 
-.auto-fill-loading span {
+.ulisting-auto-fill-loading span {
   color: var(--uprofile-primary-accent);
   font-weight: 500;
 }
 
 /* ===== AUTO-FILL PROMPT ===== */
-.auto-fill-prompt {
+.ulisting-auto-fill-prompt {
   background: var(--uprofile-bg-secondary);
   border: 2px solid var(--uprofile-primary-accent);
   border-radius: var(--uprofile-radius-lg);
@@ -106,20 +106,20 @@
   box-shadow: var(--uprofile-shadow-lg);
 }
 
-.auto-fill-content h4 {
+.ulisting-auto-fill-content h4 {
   margin: 0 0 8px 0;
   color: var(--uprofile-text-primary);
   font-size: 1.2rem;
   font-weight: 700;
 }
 
-.auto-fill-content p {
+.ulisting-auto-fill-content p {
   margin: 0 0 20px 0;
   color: var(--uprofile-text-secondary);
   font-size: 0.95rem;
 }
 
-.auto-fill-preview {
+.ulisting-auto-fill-preview {
   background: var(--uprofile-bg-primary);
   border-radius: var(--uprofile-radius-md);
   padding: 16px;
@@ -130,7 +130,7 @@
   gap: 12px;
 }
 
-.auto-fill-item {
+.ulisting-auto-fill-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -138,17 +138,17 @@
   border-bottom: 1px solid var(--uprofile-border-color);
 }
 
-.auto-fill-item:last-child {
+.ulisting-auto-fill-item:last-child {
   border-bottom: none;
 }
 
-.auto-fill-item .field-name {
+.ulisting-auto-fill-item .ulisting-field-name {
   font-weight: 500;
   color: var(--uprofile-text-secondary);
   font-size: 0.85rem;
 }
 
-.auto-fill-item .field-value {
+.ulisting-auto-fill-item .ulisting-field-value {
   font-weight: 600;
   color: var(--uprofile-text-primary);
   font-size: 0.9rem;
@@ -159,15 +159,15 @@
   white-space: nowrap;
 }
 
-.auto-fill-actions {
+.ulisting-auto-fill-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.auto-fill-accept,
-.auto-fill-selective,
-.auto-fill-decline {
+.ulisting-auto-fill-accept,
+.ulisting-auto-fill-selective,
+.ulisting-auto-fill-decline {
   padding: 12px 20px;
   border: none;
   border-radius: var(--uprofile-radius-md);
@@ -179,42 +179,42 @@
   min-width: 120px;
 }
 
-.auto-fill-accept {
+.ulisting-auto-fill-accept {
   background: var(--uprofile-primary-accent);
   color: white;
   box-shadow: 0 4px 12px rgba(255, 51, 0, 0.3);
 }
 
-.auto-fill-accept:hover {
+.ulisting-auto-fill-accept:hover {
   background: var(--uprofile-primary-accent-dark);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(255, 51, 0, 0.4);
 }
 
-.auto-fill-selective {
+.ulisting-auto-fill-selective {
   background: var(--uprofile-bg-secondary);
   color: var(--uprofile-text-primary);
   border: 2px solid var(--uprofile-border-color);
 }
 
-.auto-fill-selective:hover {
+.ulisting-auto-fill-selective:hover {
   background: var(--uprofile-bg-tertiary);
   border-color: var(--uprofile-primary-accent);
 }
 
-.auto-fill-decline {
+.ulisting-auto-fill-decline {
   background: transparent;
   color: var(--uprofile-text-secondary);
   border: 2px solid transparent;
 }
 
-.auto-fill-decline:hover {
+.ulisting-auto-fill-decline:hover {
   color: var(--uprofile-text-primary);
   border-color: var(--uprofile-border-color);
 }
 
 /* ===== PROFILE COMPLETION STATUS ===== */
-.profile-completion-status {
+.ulisting-profile-completion-status {
   background: var(--uprofile-bg-secondary);
   border: 1px solid var(--uprofile-border-color);
   border-radius: var(--uprofile-radius-lg);
@@ -222,21 +222,21 @@
   margin-bottom: 24px;
 }
 
-.profile-completion-status h5 {
+.ulisting-profile-completion-status h5 {
   margin: 0 0 16px 0;
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--uprofile-text-primary);
 }
 
-.completion-items {
+.ulisting-completion-items {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
   margin-bottom: 16px;
 }
 
-.completion-item {
+.ulisting-completion-item {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -247,19 +247,19 @@
   transition: var(--uprofile-transition);
 }
 
-.completion-item.complete {
+.ulisting-completion-item.complete {
   background: rgba(34, 197, 94, 0.1);
   color: var(--uprofile-success-green);
   border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
-.completion-item.incomplete {
+.ulisting-completion-item.incomplete {
   background: rgba(245, 158, 11, 0.1);
   color: var(--uprofile-warning-orange);
   border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
-.manual-auto-fill {
+.ulisting-manual-auto-fill {
   background: transparent;
   color: var(--uprofile-primary-accent);
   border: 2px solid var(--uprofile-primary-accent);
@@ -271,35 +271,35 @@
   transition: var(--uprofile-transition);
 }
 
-.manual-auto-fill:hover {
+.ulisting-manual-auto-fill:hover {
   background: var(--uprofile-primary-accent);
   color: white;
   transform: translateY(-1px);
 }
 
 /* ===== FORM HEADER ===== */
-.form-header {
+.ulisting-form-header {
   text-align: center;
   margin-bottom: 32px;
   padding-bottom: 24px;
   border-bottom: 2px solid var(--uprofile-border-color);
 }
 
-.form-header h3 {
+.ulisting-form-header h3 {
   margin: 0 0 8px 0;
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--uprofile-text-primary);
 }
 
-.form-header p {
+.ulisting-form-header p {
   margin: 0;
   color: var(--uprofile-text-secondary);
   font-size: 1rem;
 }
 
 /* ===== MESSAGE DISPLAY ===== */
-.form-message {
+.ulisting-form-message {
   padding: 16px 20px;
   border-radius: var(--uprofile-radius-md);
   margin-bottom: 24px;
@@ -310,32 +310,32 @@
   gap: 8px;
 }
 
-.form-message.success {
+.ulisting-form-message.success {
   background: rgba(34, 197, 94, 0.1);
   color: var(--uprofile-success-green);
   border: 1px solid rgba(34, 197, 94, 0.2);
 }
 
-.form-message.error {
+.ulisting-form-message.error {
   background: rgba(239, 68, 68, 0.1);
   color: var(--uprofile-error-red);
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-.form-message.warning {
+.ulisting-form-message.warning {
   background: rgba(245, 158, 11, 0.1);
   color: var(--uprofile-warning-orange);
   border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
-.form-message.info {
+.ulisting-form-message.info {
   background: rgba(59, 130, 246, 0.1);
   color: var(--uprofile-info-blue);
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 /* ===== TAB NAVIGATION ===== */
-.form-tab-navigation {
+.ulisting-form-tab-navigation {
   display: flex;
   gap: 4px;
   margin-bottom: 32px;
@@ -346,7 +346,7 @@
   box-shadow: var(--uprofile-shadow-sm);
 }
 
-.form-tab-button {
+.ulisting-form-tab-button {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -363,32 +363,32 @@
   min-width: fit-content;
 }
 
-.form-tab-button:hover {
+.ulisting-form-tab-button:hover {
   background: rgba(255, 51, 0, 0.1);
   color: var(--uprofile-primary-accent);
 }
 
-.form-tab-button.active {
+.ulisting-form-tab-button.active {
   background: var(--uprofile-primary-accent);
   color: white;
   box-shadow: 0 4px 12px rgba(255, 51, 0, 0.3);
 }
 
-.form-tab-button span {
+.ulisting-form-tab-button span {
   display: block;
 }
 
 /* ===== FORM SECTIONS ===== */
-.form-section {
+.ulisting-form-section {
   display: none;
   animation: fadeIn 0.3s ease;
 }
 
-.form-section.active {
+.ulisting-form-section.active {
   display: block;
 }
 
-.form-section h4 {
+.ulisting-form-section h4 {
   margin: 0 0 24px 0;
   font-size: 1.4rem;
   font-weight: 700;
@@ -398,7 +398,7 @@
   display: inline-block;
 }
 
-.form-section h5 {
+.ulisting-form-section h5 {
   margin: 24px 0 16px 0;
   font-size: 1.2rem;
   font-weight: 600;
@@ -408,7 +408,7 @@
 }
 
 /* ===== OPTIMIZED FORM GRID - MOBILE-FIRST HORIZONTAL LAYOUT ===== */
-.form-grid {
+.ulisting-form-grid {
   display: grid;
   grid-template-columns: 1fr; /* Mobile: Single column */
   gap: 16px;
@@ -416,30 +416,30 @@
 }
 
 /* ===== FORM GROUPS ===== */
-.form-group {
+.ulisting-form-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.form-group.full-width {
+.ulisting-form-group.full-width {
   grid-column: 1 / -1;
 }
 
-.form-group.half-width {
+.ulisting-form-group.half-width {
   grid-column: span 1;
 }
 
-.form-group label {
+.ulisting-form-group label {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--uprofile-text-primary);
   margin-bottom: 4px;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.ulisting-form-group input,
+.ulisting-form-group select,
+.ulisting-form-group textarea {
   padding: 12px 16px;
   border: 2px solid var(--uprofile-border-color);
   border-radius: var(--uprofile-radius-md);
@@ -450,45 +450,45 @@
   font-family: inherit;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.ulisting-form-group input:focus,
+.ulisting-form-group select:focus,
+.ulisting-form-group textarea:focus {
   outline: none;
   border-color: var(--uprofile-primary-accent);
   box-shadow: 0 0 0 3px rgba(255, 51, 0, 0.1);
 }
 
-.form-group input.error,
-.form-group select.error,
-.form-group textarea.error {
+.ulisting-form-group input.error,
+.ulisting-form-group select.error,
+.ulisting-form-group textarea.error {
   border-color: var(--uprofile-error-red);
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
-.form-group input::placeholder,
-.form-group textarea::placeholder {
+.ulisting-form-group input::placeholder,
+.ulisting-form-group textarea::placeholder {
   color: var(--uprofile-text-muted);
   opacity: 0.7;
 }
 
-.form-group input:focus::placeholder,
-.form-group textarea:focus::placeholder {
+.ulisting-form-group input:focus::placeholder,
+.ulisting-form-group textarea:focus::placeholder {
   opacity: 0.5;
 }
 
-.form-group textarea {
+.ulisting-form-group textarea {
   resize: vertical;
   min-height: 100px;
 }
 
-.form-help {
+.ulisting-form-help {
   font-size: 0.85rem;
   color: var(--uprofile-text-muted);
   margin-top: 4px;
 }
 
 /* ===== ERROR MESSAGES ===== */
-.error-message {
+.ulisting-error-message {
   color: var(--uprofile-error-red);
   font-size: 0.85rem;
   font-weight: 500;
@@ -498,86 +498,87 @@
   gap: 4px;
 }
 
-.error-message::before {
+.ulisting-error-message::before {
   content: '⚠️';
   font-size: 0.8rem;
 }
 
-/* ===== OPTIMIZED CHECKBOX GROUPS - MOBILE-FIRST HORIZONTAL LAYOUT ===== */
-.checkbox-group {
+/* ===== OPTIMIZED CHECKBOX GROUPS - MOBILE-FIRST 2-COLUMN LAYOUT ===== */
+.ulisting-checkbox-group {
   display: grid;
-  /* Mobile: 2 columns for optimal space usage */
+  /* Mobile: 2 columns for optimal space usage - saves 50% vertical space */
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px 12px; /* vertical gap smaller, horizontal gap larger */
+  gap: 6px 8px; /* tight vertical gap, comfortable horizontal gap */
   margin-top: 8px;
 }
 
-.checkbox-label {
+.ulisting-checkbox-label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px; /* Reduced gap for mobile */
   cursor: pointer;
-  font-size: 0.85rem; /* Slightly smaller for mobile */
+  font-size: 0.8rem; /* Smaller text for mobile efficiency */
   color: var(--uprofile-text-primary);
-  padding: 6px 8px; /* Reduced padding for mobile */
+  padding: 5px 7px; /* Compact padding for mobile */
   border-radius: var(--uprofile-radius-md);
   transition: var(--uprofile-transition);
   background: var(--uprofile-bg-primary);
   border: 1px solid transparent;
-  min-height: 36px; /* Better touch target */
+  min-height: 34px; /* Good touch target, compact size */
 }
 
-.checkbox-label:hover {
+.ulisting-checkbox-label:hover {
   background: var(--uprofile-bg-secondary);
   border-color: var(--uprofile-border-color);
 }
 
-.checkbox-label.checked {
+.ulisting-checkbox-label.checked {
   background: rgba(255, 51, 0, 0.05);
   border-color: var(--uprofile-primary-accent);
   color: var(--uprofile-primary-accent);
 }
 
-.checkbox-label:active {
+.ulisting-checkbox-label:active {
   transform: scale(0.98);
 }
 
-.checkbox-label input[type="checkbox"] {
-  width: 18px; /* Good size for mobile */
-  height: 18px;
+.ulisting-checkbox-label input[type="checkbox"] {
+  width: 16px; /* Optimal size for mobile */
+  height: 16px;
   accent-color: var(--uprofile-primary-accent);
   cursor: pointer;
   flex-shrink: 0; /* Prevent shrinking */
 }
 
-.checkbox-label span {
+.ulisting-checkbox-label span {
   user-select: none;
   flex: 1;
-  line-height: 1.3;
+  line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 500;
 }
 
-/* ===== OPTIMIZED FEATURES SECTION ===== */
-.features-container {
+/* ===== OPTIMIZED FEATURES SECTION - MOBILE-FIRST 2-COLUMN ===== */
+.ulisting-features-container {
   display: grid;
   /* Mobile: Single column for feature categories */
   grid-template-columns: 1fr;
-  gap: 16px; /* Reduced gap */
+  gap: 14px; /* Compact gap between categories */
 }
 
-.feature-category {
+.ulisting-feature-category {
   background: var(--uprofile-bg-secondary);
   border: 1px solid var(--uprofile-border-color);
   border-radius: var(--uprofile-radius-lg);
-  padding: 16px; /* Reduced padding */
+  padding: 14px; /* Compact padding for mobile */
   transition: var(--uprofile-transition);
   position: relative;
   overflow: hidden;
 }
 
-.feature-category::before {
+.ulisting-feature-category::before {
   content: '';
   position: absolute;
   top: 0;
@@ -588,41 +589,51 @@
   opacity: 0.7;
 }
 
-.feature-category:hover {
+.ulisting-feature-category:hover {
   box-shadow: var(--uprofile-shadow-md);
 }
 
-.feature-category h5 {
-  margin: 0 0 12px 0; /* Reduced margin */
-  font-size: 1rem; /* Slightly smaller */
+.ulisting-feature-category h5 {
+  margin: 0 0 10px 0; /* Compact margin */
+  font-size: 0.95rem; /* Smaller for mobile */
   font-weight: 600;
   color: var(--uprofile-text-primary);
-  padding-bottom: 6px; /* Reduced padding */
+  padding-bottom: 6px;
   border-bottom: 2px solid var(--uprofile-primary-accent);
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.feature-category h5::before {
+.ulisting-feature-category h5::before {
   content: attr(data-icon);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
-.feature-category .checkbox-group {
-  /* Mobile: 2 columns for features */
+/* Features within each category - 2 columns on mobile for space efficiency */
+.ulisting-feature-category .ulisting-checkbox-group {
   grid-template-columns: repeat(2, 1fr);
-  gap: 6px 8px; /* Very compact spacing */
+  gap: 5px 7px; /* Very compact spacing */
 }
 
-.feature-category .checkbox-label {
+.ulisting-feature-category .ulisting-checkbox-label {
   padding: 4px 6px; /* Very compact padding */
-  font-size: 0.8rem; /* Smaller text for features */
-  min-height: 32px; /* Consistent height */
+  font-size: 0.75rem; /* Smaller text for features */
+  min-height: 30px; /* Compact but still touchable */
+}
+
+.ulisting-feature-category .ulisting-checkbox-label input[type="checkbox"] {
+  width: 14px; /* Smaller checkboxes for features */
+  height: 14px;
+}
+
+.ulisting-feature-category .ulisting-checkbox-label span {
+  font-size: 0.75rem;
+  line-height: 1.1;
 }
 
 /* ===== COMPACT SOCIAL MEDIA GRID ===== */
-.social-grid {
+.ulisting-social-grid {
   display: grid;
   /* Mobile: 2 columns */
   grid-template-columns: repeat(2, 1fr);
@@ -631,11 +642,11 @@
 }
 
 /* ===== IMAGE HANDLING ===== */
-.image-previews {
+.ulisting-image-previews {
   margin-top: 24px;
 }
 
-.image-previews h5 {
+.ulisting-image-previews h5 {
   margin: 0 0 16px 0;
   font-size: 1.1rem;
   font-weight: 600;
@@ -645,14 +656,14 @@
   gap: 8px;
 }
 
-.image-grid {
+.ulisting-image-grid {
   display: grid;
   /* Mobile: 2 columns for images */
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 
-.image-preview {
+.ulisting-image-preview {
   position: relative;
   border-radius: var(--uprofile-radius-lg);
   overflow: hidden;
@@ -661,23 +672,23 @@
   animation: fadeIn 0.3s ease;
 }
 
-.image-preview:hover {
+.ulisting-image-preview:hover {
   transform: translateY(-4px);
   box-shadow: var(--uprofile-shadow-lg);
 }
 
-.image-preview.primary {
+.ulisting-image-preview.primary {
   box-shadow: 0 0 0 3px var(--uprofile-primary-accent), 0 0 0 3px rgba(255, 51, 0, 0.3);
 }
 
-.image-preview img {
+.ulisting-image-preview img {
   width: 100%;
   height: 120px; /* Smaller height for mobile */
   object-fit: cover;
   display: block;
 }
 
-.image-overlay {
+.ulisting-image-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -692,11 +703,11 @@
   transition: var(--uprofile-transition);
 }
 
-.image-preview:hover .image-overlay {
+.ulisting-image-preview:hover .ulisting-image-overlay {
   opacity: 1;
 }
 
-.image-overlay button {
+.ulisting-image-overlay button {
   padding: 8px 12px;
   border: none;
   border-radius: var(--uprofile-radius-sm);
@@ -706,25 +717,25 @@
   transition: var(--uprofile-transition);
 }
 
-.primary-btn {
+.ulisting-primary-btn {
   background: var(--uprofile-primary-accent);
   color: white;
 }
 
-.primary-btn:hover {
+.ulisting-primary-btn:hover {
   background: var(--uprofile-primary-accent-dark);
 }
 
-.remove-btn {
+.ulisting-remove-btn {
   background: var(--uprofile-error-red);
   color: white;
 }
 
-.remove-btn:hover {
+.ulisting-remove-btn:hover {
   background: #dc2626;
 }
 
-.image-info {
+.ulisting-image-info {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -739,7 +750,7 @@
 }
 
 /* ===== FORM SUMMARY ===== */
-.form-summary {
+.ulisting-form-summary {
   background: var(--uprofile-bg-secondary);
   border: 1px solid var(--uprofile-border-color);
   border-radius: var(--uprofile-radius-lg);
@@ -747,20 +758,20 @@
   margin-bottom: 16px;
 }
 
-.form-summary h5 {
+.ulisting-form-summary h5 {
   margin: 0 0 12px 0;
   font-size: 1rem;
   font-weight: 600;
   color: var(--uprofile-text-primary);
 }
 
-.summary-items {
+.ulisting-summary-items {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 8px;
 }
 
-.summary-items span {
+.ulisting-summary-items span {
   font-size: 0.85rem;
   color: var(--uprofile-text-secondary);
   display: flex;
@@ -769,17 +780,17 @@
 }
 
 /* ===== SUBMIT SECTION ===== */
-.form-submit-section {
+.ulisting-form-submit-section {
   margin-top: 40px;
   padding-top: 24px;
   border-top: 2px solid var(--uprofile-border-color);
 }
 
-.submit-info {
+.ulisting-submit-info {
   margin-bottom: 24px;
 }
 
-.auto-fill-info {
+.ulisting-auto-fill-info {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -792,15 +803,15 @@
   margin-bottom: 16px;
 }
 
-.form-actions {
+.ulisting-form-actions {
   display: flex;
   gap: 16px;
   justify-content: flex-end;
   flex-wrap: wrap;
 }
 
-.form-cancel-btn,
-.form-submit-btn {
+.ulisting-form-cancel-btn,
+.ulisting-form-submit-btn {
   padding: 16px 32px;
   border: none;
   border-radius: var(--uprofile-radius-md);
@@ -815,37 +826,37 @@
   justify-content: center;
 }
 
-.form-cancel-btn {
+.ulisting-form-cancel-btn {
   background: var(--uprofile-bg-secondary);
   color: var(--uprofile-text-primary);
   border: 2px solid var(--uprofile-border-color);
 }
 
-.form-cancel-btn:hover {
+.ulisting-form-cancel-btn:hover {
   background: var(--uprofile-bg-tertiary);
   border-color: var(--uprofile-border-color-dark);
 }
 
-.form-submit-btn {
+.ulisting-form-submit-btn {
   background: var(--uprofile-primary-accent);
   color: white;
   box-shadow: 0 4px 12px rgba(255, 51, 0, 0.3);
 }
 
-.form-submit-btn:hover {
+.ulisting-form-submit-btn:hover {
   background: var(--uprofile-primary-accent-dark);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(255, 51, 0, 0.4);
 }
 
-.form-submit-btn:disabled,
-.form-cancel-btn:disabled {
+.ulisting-form-submit-btn:disabled,
+.ulisting-form-cancel-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
 }
 
-.loading-spinner {
+.ulisting-loading-spinner {
   width: 16px;
   height: 16px;
   border: 2px solid transparent;
@@ -872,174 +883,264 @@
 
 /* ===== RESPONSIVE BREAKPOINTS ===== */
 
-/* Small mobile phones (up to 480px) */
-@media (max-width: 480px) {
-  .user-car-listing-form {
-    padding: 16px;
-    margin: 0 8px;
+/* Small mobile phones (up to 360px) */
+@media (max-width: 360px) {
+  .ulisting-form-container {
+    padding: 12px;
+    margin: 0 4px;
   }
   
-  .checkbox-group {
+  /* Keep 2 columns even on very small screens */
+  .ulisting-checkbox-group {
     grid-template-columns: repeat(2, 1fr);
     gap: 4px 6px;
   }
   
-  .checkbox-label {
-    padding: 4px 6px;
-    font-size: 0.8rem;
-    min-height: 32px;
-  }
-  
-  .checkbox-label span {
-    font-size: 0.75rem;
-  }
-  
-  .checkbox-label input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-  }
-  
-  .feature-category {
-    padding: 12px;
-  }
-  
-  .feature-category h5 {
-    font-size: 0.9rem;
-    margin-bottom: 8px;
-  }
-  
-  .feature-category .checkbox-label {
-    padding: 3px 4px;
+  .ulisting-checkbox-label {
+    padding: 3px 5px;
+    font-size: 0.7rem;
     min-height: 28px;
   }
   
-  .form-tab-navigation {
+  .ulisting-checkbox-label input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .ulisting-checkbox-label span {
+    font-size: 0.65rem;
+  }
+  
+  .ulisting-feature-category {
+    padding: 10px;
+  }
+  
+  .ulisting-feature-category h5 {
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+  }
+  
+  .ulisting-feature-category .ulisting-checkbox-label {
+    padding: 2px 4px;
+    font-size: 0.65rem;
+    min-height: 26px;
+  }
+  
+  .ulisting-feature-category .ulisting-checkbox-label input[type="checkbox"] {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .ulisting-form-tab-navigation {
     flex-direction: column;
     gap: 2px;
   }
   
-  .form-tab-button {
+  .ulisting-form-tab-button {
     justify-content: center;
-    padding: 10px 14px;
-    font-size: 0.8rem;
+    padding: 8px 12px;
+    font-size: 0.75rem;
   }
   
-  .auto-fill-prompt {
-    padding: 16px;
+  .ulisting-auto-fill-prompt {
+    padding: 12px;
   }
   
-  .auto-fill-actions {
-    flex-direction: column;
-  }
-  
-  .auto-fill-accept,
-  .auto-fill-selective,
-  .auto-fill-decline {
-    flex: none;
-    min-width: 100%;
-  }
-  
-  .completion-items {
+  .ulisting-auto-fill-actions {
     flex-direction: column;
     gap: 8px;
   }
   
-  .completion-item {
-    justify-content: center;
+  .ulisting-auto-fill-accept,
+  .ulisting-auto-fill-selective,
+  .ulisting-auto-fill-decline {
+    flex: none;
+    min-width: 100%;
+    padding: 10px 16px;
+    font-size: 0.8rem;
   }
   
-  .auto-fill-preview {
+  .ulisting-completion-items {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .ulisting-completion-item {
+    justify-content: center;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+  
+  .ulisting-auto-fill-preview {
     grid-template-columns: 1fr;
   }
   
-  .auto-fill-item {
+  .ulisting-auto-fill-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
+    padding: 6px 0;
   }
   
-  .auto-fill-item .field-value {
+  .ulisting-auto-fill-item .ulisting-field-value {
     align-self: stretch;
     text-align: center;
     max-width: none;
+    font-size: 0.8rem;
   }
   
-  .social-grid {
+  .ulisting-social-grid {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
   
-  .form-actions {
+  .ulisting-form-actions {
     flex-direction: column;
+    gap: 8px;
   }
   
-  .form-cancel-btn,
-  .form-submit-btn {
+  .ulisting-form-cancel-btn,
+  .ulisting-form-submit-btn {
     width: 100%;
-    padding: 14px 24px;
+    padding: 12px 20px;
+    font-size: 0.9rem;
   }
   
-  .summary-items {
+  .ulisting-summary-items {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Standard mobile phones (361px to 480px) */
+@media (min-width: 361px) and (max-width: 480px) {
+  .ulisting-form-container {
+    padding: 14px;
+    margin: 0 6px;
+  }
+  
+  /* Maintain 2-column layout for features */
+  .ulisting-checkbox-group {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px 7px;
+  }
+  
+  .ulisting-checkbox-label {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    min-height: 30px;
+  }
+  
+  .ulisting-checkbox-label input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+  }
+  
+  .ulisting-checkbox-label span {
+    font-size: 0.7rem;
+  }
+  
+  .ulisting-feature-category {
+    padding: 12px;
+  }
+  
+  .ulisting-feature-category h5 {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+  
+  .ulisting-feature-category .ulisting-checkbox-label {
+    padding: 3px 5px;
+    font-size: 0.7rem;
+    min-height: 28px;
+  }
+  
+  .ulisting-feature-category .ulisting-checkbox-label input[type="checkbox"] {
+    width: 13px;
+    height: 13px;
   }
 }
 
 /* Large mobile phones and small tablets (481px to 768px) */
 @media (min-width: 481px) and (max-width: 768px) {
-  .checkbox-group {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px 10px;
+  .ulisting-form-container {
+    padding: 16px;
+    margin: 0 8px;
   }
   
-  .feature-category .checkbox-group {
+  /* Keep 2 columns for features - optimal for mobile */
+  .ulisting-checkbox-group {
     grid-template-columns: repeat(2, 1fr);
+    gap: 6px 8px;
   }
   
-  .features-container {
+  .ulisting-checkbox-label {
+    padding: 5px 7px;
+    font-size: 0.8rem;
+    min-height: 32px;
+  }
+  
+  .ulisting-checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .ulisting-feature-category .ulisting-checkbox-group {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px 7px;
+  }
+  
+  .ulisting-feature-category .ulisting-checkbox-label {
+    padding: 4px 6px;
+    font-size: 0.75rem;
+    min-height: 30px;
+  }
+  
+  .ulisting-features-container {
     grid-template-columns: 1fr;
   }
   
-  .social-grid {
+  .ulisting-social-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .image-grid {
+  .ulisting-image-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .form-grid {
+  .ulisting-form-grid {
     grid-template-columns: 1fr;
   }
 }
 
 /* Tablets (769px to 1023px) */
 @media (min-width: 769px) and (max-width: 1023px) {
-  .checkbox-group {
+  .ulisting-checkbox-group {
     grid-template-columns: repeat(3, 1fr);
     gap: 8px 12px;
   }
   
-  .feature-category .checkbox-group {
+  .ulisting-feature-category .ulisting-checkbox-group {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .features-container {
+  .ulisting-features-container {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
   
-  .social-grid {
+  .ulisting-social-grid {
     grid-template-columns: repeat(3, 1fr);
   }
   
-  .image-grid {
+  .ulisting-image-grid {
     grid-template-columns: repeat(3, 1fr);
   }
   
-  .image-preview img {
+  .ulisting-image-preview img {
     height: 140px;
   }
   
-  .form-grid {
+  .ulisting-form-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
@@ -1047,43 +1148,43 @@
 
 /* Desktop (1024px and up) */
 @media (min-width: 1024px) {
-  .user-car-listing-form {
+  .ulisting-form-container {
     padding: 32px;
   }
   
-  .checkbox-group {
+  .ulisting-checkbox-group {
     grid-template-columns: repeat(4, 1fr);
     gap: 10px 16px;
   }
   
-  .feature-category .checkbox-group {
+  .ulisting-feature-category .ulisting-checkbox-group {
     grid-template-columns: repeat(3, 1fr);
     gap: 8px 12px;
   }
   
-  .features-container {
+  .ulisting-features-container {
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
   }
   
-  .social-grid {
+  .ulisting-social-grid {
     grid-template-columns: repeat(4, 1fr);
   }
   
-  .image-grid {
+  .ulisting-image-grid {
     grid-template-columns: repeat(4, 1fr);
   }
   
-  .image-preview img {
+  .ulisting-image-preview img {
     height: 150px;
   }
   
-  .checkbox-label {
+  .ulisting-checkbox-label {
     padding: 8px 12px;
     font-size: 0.9rem;
   }
   
-  .form-grid {
+  .ulisting-form-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
@@ -1091,41 +1192,41 @@
 
 /* Large desktop (1200px and up) */
 @media (min-width: 1200px) {
-  .checkbox-group {
+  .ulisting-checkbox-group {
     grid-template-columns: repeat(5, 1fr);
   }
   
-  .feature-category .checkbox-group {
+  .ulisting-feature-category .ulisting-checkbox-group {
     grid-template-columns: repeat(3, 1fr);
   }
   
-  .form-grid {
+  .ulisting-form-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
 /* ===== ACCESSIBILITY IMPROVEMENTS ===== */
-.checkbox-label:focus-within {
+.ulisting-checkbox-label:focus-within {
   outline: 2px solid var(--uprofile-primary-accent);
   outline-offset: 2px;
 }
 
-.form-cancel-btn:focus,
-.form-submit-btn:focus,
-.form-tab-button:focus,
-.auto-fill-accept:focus,
-.auto-fill-selective:focus,
-.auto-fill-decline:focus {
+.ulisting-form-cancel-btn:focus,
+.ulisting-form-submit-btn:focus,
+.ulisting-form-tab-button:focus,
+.ulisting-auto-fill-accept:focus,
+.ulisting-auto-fill-selective:focus,
+.ulisting-auto-fill-decline:focus {
   outline: 3px solid var(--uprofile-primary-accent);
   outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .checkbox-label,
-  .feature-category,
-  .form-tab-button,
-  .image-preview,
-  .auto-fill-loading .spinner {
+  .ulisting-checkbox-label,
+  .ulisting-feature-category,
+  .ulisting-form-tab-button,
+  .ulisting-image-preview,
+  .ulisting-auto-fill-loading .ulisting-spinner {
     transition: none;
     animation: none;
   }
@@ -1133,45 +1234,45 @@
 
 /* ===== HIGH CONTRAST MODE ===== */
 @media (prefers-contrast: high) {
-  .feature-category,
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
+  .ulisting-feature-category,
+  .ulisting-form-group input,
+  .ulisting-form-group select,
+  .ulisting-form-group textarea {
     border: 2px solid var(--uprofile-text-primary);
   }
   
-  .checkbox-label {
+  .ulisting-checkbox-label {
     border: 1px solid var(--uprofile-text-secondary);
   }
   
-  .form-tab-button.active {
+  .ulisting-form-tab-button.active {
     border: 2px solid var(--uprofile-primary-accent);
   }
 }
 
 /* ===== PRINT STYLES ===== */
 @media print {
-  .user-car-listing-form {
+  .ulisting-form-container {
     box-shadow: none;
     background: white;
     color: black;
   }
   
-  .form-tab-navigation,
-  .form-actions {
+  .ulisting-form-tab-navigation,
+  .ulisting-form-actions {
     display: none;
   }
   
-  .form-section {
+  .ulisting-form-section {
     display: block !important;
   }
   
-  .checkbox-group {
+  .ulisting-checkbox-group {
     grid-template-columns: repeat(3, 1fr);
     gap: 4px;
   }
   
-  .features-container {
+  .ulisting-features-container {
     grid-template-columns: repeat(2, 1fr);
   }
 }
