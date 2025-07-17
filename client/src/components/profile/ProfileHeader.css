@@ -1,5 +1,5 @@
 /* client/src/components/profile/ProfileHeader.css */
-/* ENHANCED PROFILE HEADER WITH COVER PICTURE SUPPORT - MOBILE FIRST */
+/* FIXED VERSION - Improved button styling and mobile responsiveness */
 
 /* === CSS VARIABLES === */
 :root {
@@ -28,7 +28,7 @@
 .pheader-main-container {
   background: var(--uprofile-bg-primary);
   border-radius: var(--uprofile-border-radius);
-  margin: 10px; /* Reduced margin for mobile */
+  margin: 10px;
   overflow: hidden;
   box-shadow: var(--uprofile-shadow-md);
   border: 1px solid var(--uprofile-border-color);
@@ -39,7 +39,7 @@
 /* === COVER PICTURE SECTION === */
 .pheader-cover-section {
   position: relative;
-  height: 200px; /* Mobile height */
+  height: 200px;
   background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
   overflow: hidden;
 }
@@ -76,536 +76,7 @@
   opacity: 1;
 }
 
-.pheader-cover-action-btn {
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: var(--uprofile-transition);
-  box-shadow: var(--uprofile-shadow-sm);
-}
-
-.pheader-cover-upload-btn {
-  color: var(--uprofile-primary-accent);
-}
-
-.pheader-cover-upload-btn:hover {
-  background: var(--uprofile-primary-accent);
-  color: white;
-  transform: scale(1.1);
-}
-
-.pheader-cover-delete-btn {
-  color: var(--uprofile-error-red);
-}
-
-.pheader-cover-delete-btn:hover {
-  background: var(--uprofile-error-red);
-  color: white;
-  transform: scale(1.1);
-}
-
-.pheader-cover-placeholder {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.7;
-}
-
-.pheader-cover-placeholder-content {
-  text-align: center;
-  color: var(--uprofile-text-white);
-}
-
-.pheader-cover-upload-prompt {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  padding: 20px;
-  border: 2px dashed rgba(255, 255, 255, 0.5);
-  border-radius: var(--uprofile-border-radius);
-  background: rgba(255, 255, 255, 0.1);
-  transition: var(--uprofile-transition);
-}
-
-.pheader-cover-upload-prompt:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.8);
-  transform: scale(1.05);
-}
-
-.pheader-cover-upload-prompt span {
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* === BACKGROUND OVERLAY === */
-.pheader-background-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 200px; /* Match cover section height */
-  background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
-  opacity: 0.1;
-  transition: var(--uprofile-transition);
-  z-index: 1;
-}
-
-/* === CONTENT WRAPPER === */
-.pheader-content-wrapper {
-  position: relative;
-  z-index: 2;
-  padding: 20px 15px; /* Reduced padding for mobile */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 15px;
-  margin-top: -60px; /* Overlap with cover section */
-}
-
-/* === USER INFO SECTION === */
-.pheader-user-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  transition: var(--uprofile-transition);
-}
-
-/* === AVATAR SECTION === */
-.pheader-avatar-section {
-  position: relative;
-  margin-bottom: 10px;
-}
-
-.pheader-avatar-container {
-  position: relative;
-  display: inline-block;
-}
-
-.pheader-avatar-image,
-.pheader-avatar-placeholder {
-  width: 100px; /* Reduced for mobile */
-  height: 100px;
-  border-radius: 50%;
-  border: 4px solid var(--uprofile-bg-primary);
-  box-shadow: var(--uprofile-shadow-lg);
-  transition: var(--uprofile-transition);
-}
-
-.pheader-avatar-image {
-  object-fit: cover;
-}
-
-.pheader-avatar-placeholder {
-  background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem; /* Reduced for mobile */
-  font-weight: 700;
-  color: var(--uprofile-text-white);
-}
-
-.pheader-avatar-edit-overlay {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background: var(--uprofile-primary-accent);
-  border: 2px solid var(--uprofile-bg-primary);
-  border-radius: 50%;
-  width: 32px; /* Reduced for mobile */
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: var(--uprofile-transition);
-  box-shadow: var(--uprofile-shadow-sm);
-}
-
-.pheader-avatar-edit-overlay:hover {
-  background: var(--uprofile-primary-accent-dark);
-  transform: scale(1.1);
-}
-
-.pheader-avatar-edit-overlay svg {
-  color: var(--uprofile-text-white);
-}
-
-/* === UPLOAD SPINNER === */
-.pheader-upload-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid var(--uprofile-text-white);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* === UPLOAD ERROR === */
-.pheader-upload-error {
-  background: rgba(220, 53, 69, 0.1);
-  color: var(--uprofile-error-red);
-  padding: 8px 12px;
-  border-radius: var(--uprofile-border-radius);
-  font-size: 12px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-  border: 1px solid rgba(220, 53, 69, 0.3);
-}
-
-/* === USER DETAILS === */
-.pheader-user-details {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.pheader-user-name {
-  font-size: 1.5rem; /* Reduced for mobile */
-  font-weight: 700;
-  color: var(--uprofile-text-primary);
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
-}
-
-.pheader-verified-badge {
-  color: var(--uprofile-success-green);
-  flex-shrink: 0;
-}
-
-.pheader-user-email {
-  color: var(--uprofile-text-secondary);
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.pheader-edit-profile-button {
-  background: var(--uprofile-primary-accent);
-  color: var(--uprofile-text-white);
-  border: none;
-  border-radius: var(--uprofile-border-radius);
-  padding: 8px 16px; /* Reduced padding for mobile */
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--uprofile-transition);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.pheader-edit-profile-button:hover {
-  background: var(--uprofile-primary-accent-dark);
-  transform: translateY(-2px);
-}
-
-/* === PROFILE META === */
-.pheader-profile-meta {
-  display: flex;
-  flex-direction: column; /* Stack vertically on mobile */
-  gap: 8px;
-  width: 100%;
-  max-width: 400px;
-}
-
-.pheader-meta-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--uprofile-text-secondary);
-  font-size: 13px;
-  font-weight: 500;
-  justify-content: center; /* Center on mobile */
-}
-
-.pheader-meta-item svg {
-  color: var(--uprofile-primary-accent);
-  flex-shrink: 0;
-}
-
-/* === TABLET STYLES === */
-@media (min-width: 768px) {
-  .pheader-main-container {
-    margin: 20px;
-  }
-
-  .pheader-cover-section {
-    height: 250px;
-  }
-
-  .pheader-background-overlay {
-    height: 250px;
-  }
-
-  .pheader-content-wrapper {
-    padding: 30px 20px;
-    gap: 20px;
-    margin-top: -80px;
-  }
-
-  .pheader-avatar-image,
-  .pheader-avatar-placeholder {
-    width: 120px;
-    height: 120px;
-  }
-
-  .pheader-avatar-placeholder {
-    font-size: 2.5rem;
-  }
-
-  .pheader-avatar-edit-overlay {
-    width: 40px;
-    height: 40px;
-  }
-
-  .pheader-user-name {
-    font-size: 2rem;
-  }
-
-  .pheader-edit-profile-button {
-    padding: 10px 20px;
-  }
-
-  .pheader-profile-meta {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .pheader-meta-item {
-    justify-content: flex-start;
-  }
-}
-
-/* === DESKTOP STYLES === */
-@media (min-width: 1024px) {
-  .pheader-cover-section {
-    height: 300px;
-  }
-
-  .pheader-background-overlay {
-    height: 300px;
-  }
-
-  .pheader-content-wrapper {
-    flex-direction: row;
-    text-align: left;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-top: -100px;
-  }
-
-  .pheader-user-info {
-    flex-direction: row;
-    align-items: flex-end;
-    gap: 25px;
-  }
-
-  .pheader-user-details {
-    align-items: flex-start;
-  }
-
-  .pheader-user-name {
-    text-align: left;
-  }
-
-  .pheader-profile-meta {
-    justify-content: flex-end;
-    max-width: none;
-  }
-}
-
-/* === LARGE DESKTOP STYLES === */
-@media (min-width: 1200px) {
-  .pheader-cover-section {
-    height: 350px;
-  }
-
-  .pheader-background-overlay {
-    height: 350px;
-  }
-
-  .pheader-avatar-image,
-  .pheader-avatar-placeholder {
-    width: 140px;
-    height: 140px;
-  }
-
-  .pheader-avatar-placeholder {
-    font-size: 3rem;
-  }
-
-  .pheader-user-name {
-    font-size: 2.5rem;
-  }
-}
-
-/* === ACCESSIBILITY === */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* === FOCUS STATES === */
-.pheader-avatar-edit-overlay:focus,
-.pheader-cover-upload-prompt:focus,
-.pheader-cover-action-btn:focus,
-.pheader-edit-profile-button:focus {
-  outline: 2px solid var(--uprofile-primary-accent);
-  outline-offset: 2px;
-}
-
-/* === LOADING STATES === */
-.pheader-cover-image-container.loading::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Add these styles to your existing ProfileHeader.css file */
-
-/* === SPINNER ANIMATION === */
-.pheader-spin {
-  animation: pheader-spin 1s linear infinite;
-}
-
-@keyframes pheader-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* === BUTTON STYLING FIXES === */
-.pheader-cover-upload-prompt {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  padding: 20px;
-  border: 2px dashed rgba(255, 255, 255, 0.5);
-  border-radius: var(--uprofile-border-radius);
-  background: rgba(255, 255, 255, 0.1);
-  transition: var(--uprofile-transition);
-  color: var(--uprofile-text-white);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  /* Remove default button styles */
-  border: 2px dashed rgba(255, 255, 255, 0.5);
-  outline: none;
-}
-
-.pheader-cover-upload-prompt:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.8);
-  transform: scale(1.05);
-}
-
-.pheader-cover-upload-prompt:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.pheader-cover-upload-prompt:disabled:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: none;
-}
-
-.pheader-cover-upload-prompt span {
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* === AVATAR EDIT OVERLAY FIXES === */
-.pheader-avatar-edit-overlay {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  background: var(--uprofile-primary-accent);
-  border: 2px solid var(--uprofile-bg-primary);
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: var(--uprofile-transition);
-  box-shadow: var(--uprofile-shadow-sm);
-  /* Remove default button styles */
-  outline: none;
-  padding: 0;
-}
-
-.pheader-avatar-edit-overlay:hover {
-  background: var(--uprofile-primary-accent-dark);
-  transform: scale(1.1);
-}
-
-.pheader-avatar-edit-overlay:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.pheader-avatar-edit-overlay:disabled:hover {
-  background: var(--uprofile-primary-accent);
-  transform: none;
-}
-
-.pheader-avatar-edit-overlay svg {
-  color: var(--uprofile-text-white);
-}
-
-/* === COVER ACTION BUTTONS === */
+/* === COVER ACTION BUTTONS - FIXED === */
 .pheader-cover-action-btn {
   background: rgba(255, 255, 255, 0.9);
   border: none;
@@ -648,7 +119,335 @@
   transform: scale(1.1);
 }
 
-/* === UPLOAD ERROR ENHANCED === */
+/* === COVER PICTURE UPLOAD BUTTON - ALWAYS VISIBLE === */
+.pheader-cover-upload-button-container {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 10;
+}
+
+.pheader-cover-camera-btn {
+  background: var(--uprofile-primary-accent);
+  border: 2px solid var(--uprofile-bg-primary);
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--uprofile-transition);
+  box-shadow: var(--uprofile-shadow-md);
+  outline: none;
+  padding: 0;
+  font-family: inherit;
+  color: var(--uprofile-text-white);
+}
+
+.pheader-cover-camera-btn:hover:not(:disabled) {
+  background: var(--uprofile-primary-accent-dark);
+  transform: scale(1.1);
+  box-shadow: var(--uprofile-shadow-lg);
+}
+
+.pheader-cover-camera-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pheader-cover-camera-btn:disabled:hover {
+  background: var(--uprofile-primary-accent);
+  transform: none;
+  box-shadow: var(--uprofile-shadow-md);
+}
+
+.pheader-cover-camera-btn svg {
+  color: var(--uprofile-text-white);
+}
+
+/* === COVER PLACEHOLDER - FIXED === */
+.pheader-cover-placeholder {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+.pheader-cover-upload-button-container {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 10;
+}
+
+.pheader-cover-camera-btn {
+  background: var(--uprofile-primary-accent);
+  border: 2px solid var(--uprofile-bg-primary);
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--uprofile-transition);
+  box-shadow: var(--uprofile-shadow-md);
+  outline: none;
+  padding: 0;
+  font-family: inherit;
+  color: var(--uprofile-text-white);
+}
+
+.pheader-cover-camera-btn:hover:not(:disabled) {
+  background: var(--uprofile-primary-accent-dark);
+  transform: scale(1.1);
+  box-shadow: var(--uprofile-shadow-lg);
+}
+
+.pheader-cover-camera-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pheader-cover-camera-btn:disabled:hover {
+  background: var(--uprofile-primary-accent);
+  transform: none;
+  box-shadow: var(--uprofile-shadow-md);
+}
+
+.pheader-cover-camera-btn svg {
+  color: var(--uprofile-text-white);
+}
+.pheader-cover-placeholder {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+}
+
+.pheader-cover-placeholder-content {
+  text-align: center;
+  color: var(--uprofile-text-white);
+}
+
+.pheader-cover-upload-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 20px;
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  border-radius: var(--uprofile-border-radius);
+  background: rgba(255, 255, 255, 0.1);
+  transition: var(--uprofile-transition);
+  color: var(--uprofile-text-white);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  /* FIXED: Remove default button styles */
+  outline: none;
+  font-family: inherit;
+}
+
+.pheader-cover-upload-prompt:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.8);
+  transform: scale(1.05);
+}
+
+.pheader-cover-upload-prompt:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pheader-cover-upload-prompt:disabled:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: none;
+}
+
+.pheader-cover-upload-prompt span {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* === BACKGROUND OVERLAY === */
+.pheader-background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
+  opacity: 0.1;
+  transition: var(--uprofile-transition);
+  z-index: 1;
+}
+
+/* === CONTENT WRAPPER === */
+.pheader-content-wrapper {
+  position: relative;
+  z-index: 2;
+  padding: 20px 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 15px;
+  margin-top: -60px;
+}
+
+/* === USER INFO SECTION === */
+.pheader-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  transition: var(--uprofile-transition);
+}
+
+/* === AVATAR SECTION === */
+.pheader-avatar-section {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.pheader-avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+.pheader-avatar-image,
+.pheader-avatar-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 4px solid var(--uprofile-bg-primary);
+  box-shadow: var(--uprofile-shadow-lg);
+  transition: var(--uprofile-transition);
+}
+
+.pheader-avatar-image {
+  object-fit: cover;
+}
+
+.pheader-avatar-placeholder {
+  background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--uprofile-text-white);
+}
+
+/* === AVATAR EDIT OVERLAY - FIXED === */
+.pheader-avatar-edit-overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: var(--uprofile-primary-accent);
+  border: 2px solid var(--uprofile-bg-primary);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--uprofile-transition);
+  box-shadow: var(--uprofile-shadow-sm);
+  /* FIXED: Remove default button styles */
+  outline: none;
+  padding: 0;
+  font-family: inherit;
+}
+
+.pheader-avatar-edit-overlay:hover:not(:disabled) {
+  background: var(--uprofile-primary-accent-dark);
+  transform: scale(1.1);
+}
+
+.pheader-avatar-edit-overlay:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pheader-avatar-edit-overlay:disabled:hover {
+  background: var(--uprofile-primary-accent);
+  transform: none;
+}
+
+.pheader-avatar-edit-overlay svg {
+  color: var(--uprofile-text-white);
+}
+
+/* === USER NAME SECTION === */
+.pheader-user-name-section {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.pheader-user-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--uprofile-text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.pheader-verified-icon {
+  color: var(--uprofile-success-green);
+  flex-shrink: 0;
+}
+
+.pheader-user-bio {
+  font-size: 0.9rem;
+  color: var(--uprofile-text-secondary);
+  margin: 8px 0 0 0;
+  line-height: 1.4;
+}
+
+/* === USER STATS === */
+.pheader-user-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.pheader-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--uprofile-text-secondary);
+  font-size: 0.9rem;
+}
+
+.pheader-stat-item svg {
+  color: var(--uprofile-primary-accent);
+  flex-shrink: 0;
+}
+
+/* === UPLOAD ERROR - ENHANCED === */
 .pheader-upload-error {
   background: rgba(220, 53, 69, 0.1);
   color: var(--uprofile-error-red);
@@ -675,11 +474,35 @@
   }
 }
 
+/* === LOADING SPINNER === */
+.pheader-spin {
+  animation: pheader-spin 1s linear infinite;
+}
+
+@keyframes pheader-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* === MOBILE RESPONSIVE FIXES === */
 @media (max-width: 768px) {
+  .pheader-cover-section {
+    height: 150px;
+  }
+  
   .pheader-cover-action-btn {
     width: 40px;
     height: 40px;
+  }
+  
+  .pheader-cover-camera-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .pheader-cover-upload-button-container {
+    top: 10px;
+    right: 10px;
   }
   
   .pheader-avatar-edit-overlay {
@@ -694,17 +517,83 @@
   .pheader-cover-upload-prompt span {
     font-size: 12px;
   }
+  
+  .pheader-avatar-image,
+  .pheader-avatar-placeholder {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .pheader-avatar-placeholder {
+    font-size: 1.5rem;
+  }
+  
+  .pheader-user-name {
+    font-size: 1.5rem;
+  }
+  
+  .pheader-content-wrapper {
+    padding: 15px 10px;
+    margin-top: -40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pheader-cover-section {
+    height: 120px;
+  }
+  
+  .pheader-cover-upload-prompt {
+    padding: 10px;
+  }
+  
+  .pheader-cover-upload-prompt span {
+    font-size: 10px;
+  }
+  
+  .pheader-cover-camera-btn {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .pheader-cover-upload-button-container {
+    top: 8px;
+    right: 8px;
+  }
+  
+  .pheader-avatar-image,
+  .pheader-avatar-placeholder {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .pheader-avatar-placeholder {
+    font-size: 1.2rem;
+  }
+  
+  .pheader-user-name {
+    font-size: 1.3rem;
+  }
+  
+  .pheader-user-stats {
+    font-size: 0.8rem;
+  }
+  
+  .pheader-content-wrapper {
+    margin-top: -30px;
+  }
 }
 
 /* === ACCESSIBILITY IMPROVEMENTS === */
 .pheader-cover-upload-prompt:focus,
 .pheader-avatar-edit-overlay:focus,
-.pheader-cover-action-btn:focus {
+.pheader-cover-action-btn:focus,
+.pheader-cover-camera-btn:focus {
   outline: 2px solid var(--uprofile-primary-accent);
   outline-offset: 2px;
 }
 
-/* === LOADING STATE FOR COVER SECTION === */
+/* === LOADING STATE FOR SECTIONS === */
 .pheader-cover-section.loading {
   position: relative;
 }

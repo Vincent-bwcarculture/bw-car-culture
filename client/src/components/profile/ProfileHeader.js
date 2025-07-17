@@ -316,6 +316,22 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
           </div>
         )}
         
+        {/* ALWAYS VISIBLE Cover Picture Upload Button - Similar to Profile Picture */}
+        <div className="pheader-cover-upload-button-container">
+          <button 
+            className="pheader-cover-camera-btn"
+            onClick={handleCoverUploadClick}
+            disabled={uploadingCover}
+            title="Upload cover picture"
+          >
+            {uploadingCover ? (
+              <Loader size={16} className="pheader-spin" />
+            ) : (
+              <Camera size={16} />
+            )}
+          </button>
+        </div>
+        
         {/* Hidden cover picture input */}
         <input
           ref={coverInputRef}
