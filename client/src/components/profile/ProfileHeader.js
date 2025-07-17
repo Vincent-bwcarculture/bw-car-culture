@@ -1,87 +1,48 @@
 // client/src/components/profile/ProfileHeader.js
+// Update your existing ProfileHeader component with this enhanced version
+
 import React, { useState } from 'react';
 import { 
-  User, 
-  Calendar, 
+  Camera, 
+  Edit2, 
   MapPin, 
   Phone, 
-  Mail, 
-  Shield, 
-  Activity, 
-  BarChart3, 
-  Edit2, 
-  Camera,
+  Calendar, 
+  User, 
   CheckCircle,
-  Truck
+  X,
+  Upload,
+  Trash2
 } from 'lucide-react';
-import axios from '../../config/axios.js';
 import './ProfileHeader.css';
 
-const ProfileHeader = ({ 
-  profileData, 
-  setProfileData, 
-  updateProfile, 
-  onAdminAccess 
-}) => {
+const ProfileHeader = ({ profileData, onProfileUpdate }) => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadError, setUploadError] = useState('');
-
-  // Check user permissions - UPDATED LOGIC
-  const isAdmin = profileData?.role === 'admin'; // Site owners only
-  
-  // Business dashboard access based on having business services
-  const hasBusinessProfile = profileData?.businessProfile?.services?.some(s => s.isVerified) || 
-                            profileData?.businessProfile?.services?.length > 0;
-  
-  // Dealer dashboard access 
-  const hasDealerProfile = profileData?.dealership || 
-                          profileData?.businessProfile?.services?.some(s => s.serviceType === 'dealership');
-  
-  // Transport provider dashboard
-  const hasTransportProfile = profileData?.businessProfile?.services?.some(s => s.serviceType === 'public_transport');
-
-  // Calculate profile completeness
-  const calculateCompleteness = () => {
-    let score = 0;
-    let maxScore = 100;
-    
-    // Basic info (60 points)
-    if (profileData.name) score += 15;
-    if (profileData.email) score += 15;
-    if (profileData.avatar?.url) score += 15;
-    if (profileData.profile?.phone) score += 15;
-    
-    // Extended profile (40 points)
-    if (profileData.profile?.bio) score += 10;
-    if (profileData.profile?.location) score += 10;
-    if (profileData.profile?.dateOfBirth) score += 10;
-    if (profileData.businessProfile?.services?.length > 0) score += 10;
-    
-    return Math.round((score / maxScore) * 100);
-  };
-
-  const completeness = calculateCompleteness();
 
   const getInitials = (name) => {
     if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2);
   };
 
-  const formatJoinDate = (date) => {
-    if (!date) return 'Unknown';
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long'
+  const formatJoinDate = (dateString) => {
+    if (!dateString) return 'Recently';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long' 
     });
   };
 
+  // Handle avatar upload
   const handleAvatarChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     // Validate file
     if (!file.type.startsWith('image/')) {
-      setUploadError('Please select a valid image file');
+      setUploadError('Please select an image file');
       return;
     }
 
@@ -90,26 +51,34 @@ const ProfileHeader = ({
       return;
     }
 
-    setUploadingAvatar(true);
     setUploadError('');
+    setUploadingAvatar(true);
 
     try {
-      // Create FormData for upload
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await axios.post('/auth/avatar', formData, {
+      const response = await fetch('/api/user/profile/avatar', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
       });
-      
-      // Update profile data with new avatar
-      setProfileData(prev => ({
-        ...prev,
-        avatar: response.data.data?.avatar || response.data.avatar
-      }));
 
+      const result = await response.json();
+
+      if (result.success) {
+        // Update profile data
+        if (onProfileUpdate) {
+          onProfileUpdate({
+            ...profileData,
+            avatar: result.data.avatar
+          });
+        }
+      } else {
+        setUploadError(result.message || 'Failed to upload avatar');
+      }
     } catch (error) {
       console.error('Avatar upload error:', error);
       setUploadError('Failed to upload avatar. Please try again.');
@@ -118,12 +87,158 @@ const ProfileHeader = ({
     }
   };
 
+  // Handle cover picture upload
+  const handleCoverPictureChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
 
-  
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Please select an image file');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit for cover pictures
+      setUploadError('Cover picture size must be less than 10MB');
+      return;
+    }
+
+    setUploadError('');
+    setUploadingCover(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('coverPicture', file);
+
+      const response = await fetch('/api/user/profile/cover-picture', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update profile data
+        if (onProfileUpdate) {
+          onProfileUpdate({
+            ...profileData,
+            coverPicture: result.data.coverPicture
+          });
+        }
+      } else {
+        setUploadError(result.message || 'Failed to upload cover picture');
+      }
+    } catch (error) {
+      console.error('Cover picture upload error:', error);
+      setUploadError('Failed to upload cover picture. Please try again.');
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
+  // Handle cover picture deletion
+  const handleDeleteCoverPicture = async () => {
+    if (!profileData.coverPicture?.url) return;
+
+    setUploadingCover(true);
+
+    try {
+      const response = await fetch('/api/user/profile/cover-picture', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update profile data
+        if (onProfileUpdate) {
+          const updatedProfile = { ...profileData };
+          delete updatedProfile.coverPicture;
+          onProfileUpdate(updatedProfile);
+        }
+      } else {
+        setUploadError(result.message || 'Failed to delete cover picture');
+      }
+    } catch (error) {
+      console.error('Cover picture delete error:', error);
+      setUploadError('Failed to delete cover picture. Please try again.');
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
+  // Check if user has business, transport, or dealer profile
+  const hasBusinessProfile = profileData.businessProfile?.services?.length > 0;
+  const hasTransportProfile = profileData.transportProfile?.route;
+  const hasDealerProfile = profileData.dealerProfile?.businessName;
+
   return (
     <div className="pheader-main-container">
+      {/* Cover Picture Section */}
+      <div className="pheader-cover-section">
+        {profileData.coverPicture?.url ? (
+          <div className="pheader-cover-image-container">
+            <img 
+              src={profileData.coverPicture.url} 
+              alt="Cover" 
+              className="pheader-cover-image"
+            />
+            <div className="pheader-cover-overlay">
+              <button 
+                className="pheader-cover-action-btn pheader-cover-delete-btn"
+                onClick={handleDeleteCoverPicture}
+                disabled={uploadingCover}
+                title="Delete cover picture"
+              >
+                <Trash2 size={16} />
+              </button>
+              <label htmlFor="cover-upload" className="pheader-cover-action-btn pheader-cover-upload-btn">
+                {uploadingCover ? (
+                  <div className="pheader-upload-spinner"></div>
+                ) : (
+                  <Camera size={16} />
+                )}
+              </label>
+            </div>
+          </div>
+        ) : (
+          <div className="pheader-cover-placeholder">
+            <div className="pheader-cover-placeholder-content">
+              <label htmlFor="cover-upload" className="pheader-cover-upload-prompt">
+                {uploadingCover ? (
+                  <div className="pheader-upload-spinner"></div>
+                ) : (
+                  <>
+                    <Upload size={24} />
+                    <span>Add Cover Picture</span>
+                  </>
+                )}
+              </label>
+            </div>
+          </div>
+        )}
+        
+        {/* Hidden cover picture input */}
+        <input
+          id="cover-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleCoverPictureChange}
+          disabled={uploadingCover}
+          style={{ display: 'none' }}
+        />
+      </div>
+
+      {/* Background overlay */}
       <div className="pheader-background-overlay"></div>
-      
+
+      {/* Main content */}
       <div className="pheader-content-wrapper">
         <div className="pheader-user-info">
           {/* Avatar Section */}
@@ -161,6 +276,7 @@ const ProfileHeader = ({
             
             {uploadError && (
               <div className="pheader-upload-error">
+                <X size={16} />
                 {uploadError}
               </div>
             )}
@@ -208,76 +324,9 @@ const ProfileHeader = ({
               {profileData.role === 'admin' ? 'Site Administrator' : 
                hasBusinessProfile ? 'Business Owner' :
                hasTransportProfile ? 'Transport Provider' :
-               hasDealerProfile ? 'Dealer' : 'Personal User'}
+               hasDealerProfile ? 'Dealer' : 'User'}
             </span>
           </div>
-          {profileData.profile?.bio && (
-            <div className="pheader-meta-item pheader-bio">
-              <User size={16} />
-              <span>{profileData.profile.bio}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Quick Access Buttons - UPDATED LOGIC */}
-        <div className="pheader-quick-access-section">
-          {/* Admin Panel - Only for site administrators */}
-          {isAdmin && (
-            <button 
-              onClick={onAdminAccess} 
-              className="pheader-admin-panel-button"
-            >
-              <Shield size={16} />
-              Site Admin Panel
-            </button>
-          )}
-          
-          {/* Business Dashboard - For users with business profiles */}
-          {hasBusinessProfile && (
-            <button 
-              className="pheader-business-dashboard-button"
-              onClick={() => window.location.href = '/business/dashboard'}
-            >
-              <Activity size={16} />
-              Business Dashboard
-            </button>
-          )}
-
-          {/* Dealer Dashboard - For dealers */}
-          {hasDealerProfile && (
-            <button 
-              className="pheader-dealer-dashboard-button"
-              onClick={() => window.location.href = '/dealer/dashboard'}
-            >
-              <BarChart3 size={16} />
-              Dealer Dashboard
-            </button>
-          )}
-
-          {/* Transport Dashboard - For transport providers */}
-          {hasTransportProfile && (
-            <button 
-              className="pheader-transport-dashboard-button"
-              onClick={() => window.location.href = '/transport/dashboard'}
-            >
-              <Truck size={16} />
-              Transport Dashboard
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Profile Completion Bar */}
-      <div className="pheader-profile-completion">
-        <div className="pheader-completion-text">
-          <span>Profile Completion</span>
-          <span>{completeness}%</span>
-        </div>
-        <div className="pheader-completion-bar">
-          <div 
-            className="pheader-completion-fill" 
-            style={{ width: `${completeness}%` }}
-          ></div>
         </div>
       </div>
     </div>
