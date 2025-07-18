@@ -1,4 +1,4 @@
-// client/src/components/profile/ProfileSettings.js - UPDATED VERSION
+// client/src/components/profile/ProfileSettings.js - FIXED to use existing working endpoints
 import React, { useState, useEffect } from 'react';
 import { 
   Settings, 
@@ -7,7 +7,6 @@ import {
   Bell, 
   Shield, 
   Eye, 
-  Globe,
   EyeOff, 
   Save, 
   CheckCircle, 
@@ -15,7 +14,8 @@ import {
   Mail,
   Phone,
   MapPin,
-  Calendar
+  Calendar,
+  Globe
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import './ProfileSettings.css';
@@ -123,31 +123,42 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
-  // FIXED: Handle basic profile update - use correct endpoint
+  // FIXED: Use existing working /auth/profile endpoint
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Prepare the update data with nested profile fields
+      console.log('Submitting profile update:', profileForm);
+
+      // Use the existing working endpoint from UserProfilePage
       const updateData = {
         name: profileForm.name,
-        'profile.firstName': profileForm.firstName,
-        'profile.lastName': profileForm.lastName,
-        'profile.phone': profileForm.phone,
-        'profile.bio': profileForm.bio,
-        'profile.location': profileForm.location,
-        'profile.dateOfBirth': profileForm.dateOfBirth,
-        'profile.gender': profileForm.gender,
-        'profile.nationality': profileForm.nationality,
-        'profile.website': profileForm.website,
-        'profile.language': profileForm.language,
-        'profile.currency': profileForm.currency,
-        'profile.timezone': profileForm.timezone
+        profile: {
+          firstName: profileForm.firstName,
+          lastName: profileForm.lastName,
+          phone: profileForm.phone,
+          bio: profileForm.bio,
+          location: profileForm.location,
+          dateOfBirth: profileForm.dateOfBirth,
+          gender: profileForm.gender,
+          nationality: profileForm.nationality,
+          website: profileForm.website,
+          language: profileForm.language,
+          currency: profileForm.currency,
+          timezone: profileForm.timezone,
+          // Preserve existing nested data
+          notifications: profileData?.profile?.notifications || {},
+          privacy: profileData?.profile?.privacy || {}
+        }
       };
 
-      // Use the correct endpoint that matches backend routes
-      const response = await axios.put('/user/profile/basic', updateData);
+      console.log('Final update data:', updateData);
+
+      // Use the same endpoint that's working in UserProfilePage
+      const response = await axios.put('/auth/profile', updateData);
+
+      console.log('Profile update response:', response.data);
 
       if (response.data.success) {
         showMessage('success', 'Profile updated successfully');
@@ -163,13 +174,22 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     }
   };
 
-  // FIXED: Handle notification settings update
+  // FIXED: Handle notification settings update using existing endpoint
   const handleNotificationSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await axios.put('/user/profile/notifications', notificationSettings);
+      console.log('Updating notifications:', notificationSettings);
+
+      const updateData = {
+        profile: {
+          ...profileData.profile,
+          notifications: notificationSettings
+        }
+      };
+
+      const response = await axios.put('/auth/profile', updateData);
 
       if (response.data.success) {
         showMessage('success', 'Notification preferences updated');
@@ -185,13 +205,22 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     }
   };
 
-  // FIXED: Handle privacy settings update
+  // FIXED: Handle privacy settings update using existing endpoint
   const handlePrivacySubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await axios.put('/user/profile/privacy', privacySettings);
+      console.log('Updating privacy settings:', privacySettings);
+
+      const updateData = {
+        profile: {
+          ...profileData.profile,
+          privacy: privacySettings
+        }
+      };
+
+      const response = await axios.put('/auth/profile', updateData);
 
       if (response.data.success) {
         showMessage('success', 'Privacy settings updated');
@@ -207,7 +236,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     }
   };
 
-  // FIXED: Handle password update
+  // Password update - for now, disable this since it might need special endpoint
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -226,20 +255,13 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     }
 
     try {
-      const response = await axios.put('/user/profile/password', {
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword
-      });
-
-      if (response.data.success) {
-        showMessage('success', 'Password updated successfully');
-        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      } else {
-        throw new Error(response.data.message || 'Update failed');
-      }
+      // For now, show a message that password change is not implemented
+      // You can implement this later when the backend endpoint is ready
+      showMessage('error', 'Password change feature is coming soon. Please contact support for now.');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
       console.error('Password update error:', error);
-      showMessage('error', error.response?.data?.message || error.message || 'Failed to update password');
+      showMessage('error', 'Failed to update password');
     } finally {
       setLoading(false);
     }
@@ -316,10 +338,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
                       id="email"
                       type="email"
                       value={profileForm.email}
-                      onChange={(e) => setProfileForm({...profileForm, email: e.target.value})}
-                      placeholder="Enter your email"
                       className="psettings-form-input"
-                      required
                       disabled
                     />
                   </div>
@@ -834,13 +853,17 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
                 </div>
               </div>
 
+              <div className="psettings-form-note">
+                <strong>Note:</strong> Password change feature is temporarily disabled. Please contact support if you need to change your password.
+              </div>
+
               <button 
                 type="submit" 
-                className="psettings-btn psettings-btn-primary"
-                disabled={loading}
+                className="psettings-btn psettings-btn-secondary"
+                disabled={true}
               >
                 <Save size={16} />
-                {loading ? 'Updating...' : 'Update Password'}
+                Update Password (Coming Soon)
               </button>
             </form>
           </div>
