@@ -1,5 +1,5 @@
 // client/src/components/profile/ProfileHeader.js
-// FIXED VERSION - Updates AuthContext when profile picture changes
+// FIXED VERSION - Updates AuthContext when profile picture changes + Edit Profile Button Fix
 
 import React, { useState, useRef } from 'react';
 import { 
@@ -18,7 +18,11 @@ import {
 import { useAuth } from '../../context/AuthContext.js';
 import './ProfileHeader.css';
 
-const ProfileHeader = ({ profileData, onProfileUpdate }) => {
+const ProfileHeader = ({ 
+  profileData, 
+  onProfileUpdate,
+  onEditProfile // ADDED: New prop for edit profile functionality
+}) => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -48,6 +52,16 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
   const showError = (message) => {
     setUploadError(message);
     setTimeout(() => setUploadError(''), 5000);
+  };
+
+  // ADDED: Handle edit profile click
+  const handleEditProfileClick = () => {
+    console.log('Edit profile clicked');
+    if (onEditProfile) {
+      onEditProfile();
+    } else {
+      console.warn('onEditProfile prop not provided to ProfileHeader');
+    }
   };
 
   // Handle avatar upload - FIXED: Updates AuthContext
@@ -423,7 +437,12 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
             
             <div className="pheader-user-email">{profileData.email}</div>
             
-            <button className="pheader-edit-profile-button">
+            {/* FIXED: Added onClick handler to Edit Profile button */}
+            <button 
+              className="pheader-edit-profile-button"
+              onClick={handleEditProfileClick}
+              type="button"
+            >
               <Edit2 size={16} />
               Edit Profile
             </button>

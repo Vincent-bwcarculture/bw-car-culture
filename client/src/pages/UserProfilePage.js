@@ -331,9 +331,8 @@ const getAvailableTabs = () => {
       {/* Enhanced Profile Header Component */}
       <ProfileHeader 
         profileData={displayData}
-        setProfileData={setProfileData}
-        updateProfile={updateProfile}
-        onAdminAccess={handleAdminPanelAccess}
+        onProfileUpdate={setProfileData}
+        onEditProfile={() => setActiveTab('settings')} // ADDED: Edit profile handler
       />
 
       {/* Enhanced Profile Navigation Component */}
