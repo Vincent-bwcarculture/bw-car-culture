@@ -1,4 +1,6 @@
-// src/components/layout/Navigation/ResponsiveNavigation.js
+// client/src/components/layout/Navigation/ResponsiveNavigation.js
+// COMPLETE VERSION - All original functionality + profile picture fix
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -9,7 +11,7 @@ import { useAuth } from '../../../context/AuthContext.js';
 import EnhancedFABModal from './EnhancedFABModal.js';
 import './ResponsiveNavigation.css';
 
-// Updated navigation categories - News added for desktop, Profile kept for mobile
+// Complete navigation categories - News added for desktop, Profile kept for mobile
 const categories = [
   {
     id: 'home',
@@ -120,7 +122,6 @@ const ReviewFAB = () => {
 
 // Desktop User Menu Component
 const DesktopUserMenu = () => {
-  // FIXED: Use 'user' instead of 'currentUser' to match AuthContext
   const { isAuthenticated, user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const navigate = useNavigate();
@@ -182,8 +183,31 @@ const DesktopUserMenu = () => {
   );
 };
 
-// User Profile Link Component
+// FIXED: Enhanced User Profile Link Component with better avatar handling
 const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2);
+  };
+
+  const getUserName = (user) => {
+    if (user?.name) return user.name;
+    if (user?.email) return user.email.split('@')[0];
+    return 'User';
+  };
+
+  const getAvatarUrl = (user) => {
+    // Check different possible avatar structures
+    if (user?.avatar?.url) return user.avatar.url;
+    if (user?.avatar) return user.avatar;
+    if (user?.profilePicture?.url) return user.profilePicture.url;
+    if (user?.profilePicture) return user.profilePicture;
+    return null;
+  };
+
+  const avatarUrl = getAvatarUrl(user);
+  const userName = getUserName(user);
+
   return (
     <Link 
       to="/profile" 
@@ -192,16 +216,40 @@ const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
       onClick={onClick}
     >
       <div className="user-profile-avatar">
-        {user?.avatar?.url ? (
-          <img src={user.avatar.url} alt={user.name || 'User'} />
-        ) : (
+        {avatarUrl ? (
+          <img 
+            src={avatarUrl} 
+            alt={userName} 
+            onError={(e) => {
+              console.error('Profile image failed to load:', avatarUrl);
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        {!avatarUrl && (
           <UserCircle size={24} />
+        )}
+        {avatarUrl && (
+          <div style={{ 
+            display: 'none', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            width: '100%', 
+            height: '100%', 
+            backgroundColor: 'var(--nav-accent)', 
+            borderRadius: '50%', 
+            color: 'white', 
+            fontSize: '0.8rem', 
+            fontWeight: 'bold' 
+          }}>
+            {getInitials(userName)}
+          </div>
         )}
       </div>
       <div className="user-profile-info">
-        {/* FIXED: Better fallback for username display */}
         <span className="user-profile-name">
-          {user?.name || user?.email?.split('@')[0] || 'User'}
+          {userName}
         </span>
         <span className="user-profile-role">{user?.role || 'Member'}</span>
       </div>
@@ -241,6 +289,21 @@ const ResponsiveNavigation = () => {
   const navigate = useNavigate();
   const navRef = useRef();
 
+  // FIXED: Get user data from AuthContext with proper error handling
+  const { user, isAuthenticated, loading } = useAuth();
+
+  // Debug logging to help troubleshoot
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log('ResponsiveNavigation - User data:', {
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        hasAvatar: !!user.avatar?.url
+      });
+    }
+  }, [user, isAuthenticated]);
+
   // Build breadcrumb from current path
   useEffect(() => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -279,9 +342,9 @@ const ResponsiveNavigation = () => {
     const list = navRef.current?.querySelector('.category-list');
     if (list) {
       if (direction === 'left') {
-        const scrollAmount = window.innerWidth <= 480 ? -150 : -200;
+        const scrollAmount = window.innerWidth <= 480 ? 150 : 200;
         list.scrollBy({
-          left: scrollAmount,
+          left: -scrollAmount,
           behavior: 'smooth'
         });
       } else {
@@ -314,6 +377,11 @@ const ResponsiveNavigation = () => {
     }
     return path !== '/' && location.pathname.startsWith(path);
   };
+
+  // Don't render anything while auth is loading
+  if (loading) {
+    return null;
+  }
 
   return (
     <>
@@ -382,7 +450,7 @@ const ResponsiveNavigation = () => {
         ))}
       </nav>
 
-      {/* Enhanced Review FAB - Only show on mobile/tablet */}
+      {/* Enhanced Review FAB - Show on mobile/tablet */}
       <ReviewFAB />
     </>
   );

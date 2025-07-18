@@ -1,5 +1,5 @@
 // client/src/components/profile/ProfileHeader.js
-// COMPLETE VERSION - All original functionality with fixed API calls
+// FIXED VERSION - Updates AuthContext when profile picture changes
 
 import React, { useState, useRef } from 'react';
 import { 
@@ -15,12 +15,16 @@ import {
   Trash2,
   Loader
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext.js';
 import './ProfileHeader.css';
 
 const ProfileHeader = ({ profileData, onProfileUpdate }) => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  
+  // Get AuthContext to update user data
+  const { user, setUser } = useAuth();
   
   // Create refs for file inputs
   const avatarInputRef = useRef(null);
@@ -46,7 +50,7 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
     setTimeout(() => setUploadError(''), 5000);
   };
 
-  // Handle avatar upload - FIXED: Use correct backend API URL
+  // Handle avatar upload - FIXED: Updates AuthContext
   const handleAvatarChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -104,6 +108,7 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
 
       if (result.success) {
         console.log('Avatar upload successful:', result.data);
+        
         // Update profile data
         if (onProfileUpdate) {
           onProfileUpdate({
@@ -111,6 +116,16 @@ const ProfileHeader = ({ profileData, onProfileUpdate }) => {
             avatar: result.data.avatar
           });
         }
+        
+        // FIXED: Update AuthContext user data so navigation shows new avatar
+        if (user && setUser) {
+          setUser({
+            ...user,
+            avatar: result.data.avatar
+          });
+          console.log('AuthContext user updated with new avatar');
+        }
+        
         // Clear the file input
         if (avatarInputRef.current) {
           avatarInputRef.current.value = '';
