@@ -1,4 +1,4 @@
-// client/src/components/profile/ProfileSettings.js
+// client/src/components/profile/ProfileSettings.js - UPDATED VERSION
 import React, { useState, useEffect } from 'react';
 import { 
   Settings, 
@@ -32,7 +32,15 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     bio: profileData?.profile?.bio || '',
     location: profileData?.profile?.location || '',
     dateOfBirth: profileData?.profile?.dateOfBirth ? 
-      new Date(profileData.profile.dateOfBirth).toISOString().split('T')[0] : ''
+      new Date(profileData.profile.dateOfBirth).toISOString().split('T')[0] : '',
+    firstName: profileData?.profile?.firstName || '',
+    lastName: profileData?.profile?.lastName || '',
+    gender: profileData?.profile?.gender || '',
+    nationality: profileData?.profile?.nationality || '',
+    website: profileData?.profile?.website || '',
+    language: profileData?.profile?.language || 'en',
+    currency: profileData?.profile?.currency || 'USD',
+    timezone: profileData?.profile?.timezone || 'UTC'
   });
 
   // Notification settings
@@ -45,6 +53,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     newsUpdates: profileData?.profile?.notifications?.newsUpdates !== false
   });
 
+  // Privacy settings
   const [privacySettings, setPrivacySettings] = useState({
     profileVisibility: profileData?.profile?.privacy?.profileVisibility || 'public',
     showEmail: profileData?.profile?.privacy?.showEmail !== false,
@@ -54,33 +63,90 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     locationTracking: profileData?.profile?.privacy?.locationTracking !== false
   });
 
+  // Password form state
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
   });
 
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
+
+  // Update form state when profileData changes
+  useEffect(() => {
+    if (profileData) {
+      setProfileForm({
+        name: profileData.name || '',
+        email: profileData.email || '',
+        phone: profileData.profile?.phone || '',
+        bio: profileData.profile?.bio || '',
+        location: profileData.profile?.location || '',
+        dateOfBirth: profileData.profile?.dateOfBirth ? 
+          new Date(profileData.profile.dateOfBirth).toISOString().split('T')[0] : '',
+        firstName: profileData.profile?.firstName || '',
+        lastName: profileData.profile?.lastName || '',
+        gender: profileData.profile?.gender || '',
+        nationality: profileData.profile?.nationality || '',
+        website: profileData.profile?.website || '',
+        language: profileData.profile?.language || 'en',
+        currency: profileData.profile?.currency || 'USD',
+        timezone: profileData.profile?.timezone || 'UTC'
+      });
+
+      setNotificationSettings({
+        emailNotifications: profileData.profile?.notifications?.emailNotifications !== false,
+        pushNotifications: profileData.profile?.notifications?.pushNotifications !== false,
+        serviceUpdates: profileData.profile?.notifications?.serviceUpdates !== false,
+        marketingEmails: profileData.profile?.notifications?.marketingEmails !== false,
+        priceAlerts: profileData.profile?.notifications?.priceAlerts !== false,
+        newsUpdates: profileData.profile?.notifications?.newsUpdates !== false
+      });
+
+      setPrivacySettings({
+        profileVisibility: profileData.profile?.privacy?.profileVisibility || 'public',
+        showEmail: profileData.profile?.privacy?.showEmail !== false,
+        showPhone: profileData.profile?.privacy?.showPhone !== false,
+        allowMessages: profileData.profile?.privacy?.allowMessages !== false,
+        dataSharing: profileData.profile?.privacy?.dataSharing !== false,
+        locationTracking: profileData.profile?.privacy?.locationTracking !== false
+      });
+    }
+  }, [profileData]);
+
   const showMessage = (type, text) => {
     setMessage({ type, text });
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
+  // FIXED: Handle basic profile update - use correct endpoint
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await axios.put('/auth/profile', {
+      // Prepare the update data with nested profile fields
+      const updateData = {
         name: profileForm.name,
-        email: profileForm.email,
-        profile: {
-          ...profileData.profile,
-          phone: profileForm.phone,
-          bio: profileForm.bio,
-          location: profileForm.location,
-          dateOfBirth: profileForm.dateOfBirth
-        }
-      });
+        'profile.firstName': profileForm.firstName,
+        'profile.lastName': profileForm.lastName,
+        'profile.phone': profileForm.phone,
+        'profile.bio': profileForm.bio,
+        'profile.location': profileForm.location,
+        'profile.dateOfBirth': profileForm.dateOfBirth,
+        'profile.gender': profileForm.gender,
+        'profile.nationality': profileForm.nationality,
+        'profile.website': profileForm.website,
+        'profile.language': profileForm.language,
+        'profile.currency': profileForm.currency,
+        'profile.timezone': profileForm.timezone
+      };
+
+      // Use the correct endpoint that matches backend routes
+      const response = await axios.put('/user/profile/basic', updateData);
 
       if (response.data.success) {
         showMessage('success', 'Profile updated successfully');
@@ -96,17 +162,13 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     }
   };
 
+  // FIXED: Handle notification settings update
   const handleNotificationSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await axios.put('/auth/profile', {
-        profile: {
-          ...profileData.profile,
-          notifications: notificationSettings
-        }
-      });
+      const response = await axios.put('/user/profile/notifications', notificationSettings);
 
       if (response.data.success) {
         showMessage('success', 'Notification preferences updated');
@@ -122,17 +184,13 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     }
   };
 
+  // FIXED: Handle privacy settings update
   const handlePrivacySubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await axios.put('/auth/profile', {
-        profile: {
-          ...profileData.profile,
-          privacy: privacySettings
-        }
-      });
+      const response = await axios.put('/user/profile/privacy', privacySettings);
 
       if (response.data.success) {
         showMessage('success', 'Privacy settings updated');
@@ -148,76 +206,70 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     }
   };
 
+  // FIXED: Handle password update
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    
+    setLoading(true);
+
+    // Validate passwords
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       showMessage('error', 'New passwords do not match');
+      setLoading(false);
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      showMessage('error', 'Password must be at least 6 characters long');
+      showMessage('error', 'New password must be at least 6 characters');
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
-
     try {
-      const response = await axios.put('/auth/change-password', {
+      const response = await axios.put('/user/profile/password', {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword
       });
 
       if (response.data.success) {
-        showMessage('success', 'Password changed successfully');
+        showMessage('success', 'Password updated successfully');
         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
       } else {
-        throw new Error(response.data.message || 'Password change failed');
+        throw new Error(response.data.message || 'Update failed');
       }
     } catch (error) {
-      console.error('Password change error:', error);
-      showMessage('error', error.response?.data?.message || error.message || 'Failed to change password');
+      console.error('Password update error:', error);
+      showMessage('error', error.response?.data?.message || error.message || 'Failed to update password');
     } finally {
       setLoading(false);
     }
   };
 
   const sections = [
-    { id: 'profile', label: 'Personal Info', icon: User },
+    { id: 'profile', label: 'Profile', icon: User },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'privacy', label: 'Privacy', icon: Shield },
-    { id: 'security', label: 'Security', icon: Lock }
+    { id: 'password', label: 'Password', icon: Lock }
   ];
 
   return (
-    <div className="psettings-main-container">
-      {/* Header */}
-      <div className="psettings-header">
-        <h2 className="psettings-title">
-          <Settings size={24} />
-          Profile Settings
-        </h2>
-        {/* Theme is now fixed to dark mode, no controls needed */}
-      </div>
-
-      {/* Message Display */}
+    <div className="psettings-container">
+      {/* Success/Error Messages */}
       {message.text && (
         <div className={`psettings-message psettings-message-${message.type}`}>
-          {message.type === 'success' && <CheckCircle size={16} />}
-          {message.type === 'error' && <AlertCircle size={16} />}
+          {message.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
           {message.text}
         </div>
       )}
 
       {/* Settings Navigation */}
-      <div className="psettings-navigation">
+      <div className="psettings-nav">
         {sections.map(section => {
           const IconComponent = section.icon;
           return (
             <button
               key={section.id}
-              className={`psettings-nav-button ${activeSection === section.id ? 'psettings-nav-active' : ''}`}
+              className={`psettings-nav-item ${activeSection === section.id ? 
+                'psettings-nav-active' : ''}`}
               onClick={() => setActiveSection(section.id)}
             >
               <IconComponent size={18} />
@@ -240,7 +292,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
             <form onSubmit={handleProfileSubmit} className="psettings-form">
               <div className="psettings-form-row">
                 <div className="psettings-form-group">
-                  <label htmlFor="name">Full Name</label>
+                  <label htmlFor="name">Display Name</label>
                   <div className="psettings-input-group">
                     <User size={18} />
                     <input
@@ -248,7 +300,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
                       type="text"
                       value={profileForm.name}
                       onChange={(e) => setProfileForm({...profileForm, name: e.target.value})}
-                      placeholder="Enter your full name"
+                      placeholder="Enter your display name"
                       className="psettings-form-input"
                       required
                     />
@@ -267,6 +319,40 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
                       placeholder="Enter your email"
                       className="psettings-form-input"
                       required
+                      disabled
+                    />
+                  </div>
+                  <small className="psettings-form-note">Email cannot be changed</small>
+                </div>
+              </div>
+
+              <div className="psettings-form-row">
+                <div className="psettings-form-group">
+                  <label htmlFor="firstName">First Name</label>
+                  <div className="psettings-input-group">
+                    <User size={18} />
+                    <input
+                      id="firstName"
+                      type="text"
+                      value={profileForm.firstName}
+                      onChange={(e) => setProfileForm({...profileForm, firstName: e.target.value})}
+                      placeholder="Enter your first name"
+                      className="psettings-form-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="psettings-form-group">
+                  <label htmlFor="lastName">Last Name</label>
+                  <div className="psettings-input-group">
+                    <User size={18} />
+                    <input
+                      id="lastName"
+                      type="text"
+                      value={profileForm.lastName}
+                      onChange={(e) => setProfileForm({...profileForm, lastName: e.target.value})}
+                      placeholder="Enter your last name"
+                      className="psettings-form-input"
                     />
                   </div>
                 </div>
@@ -318,6 +404,25 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
                     />
                   </div>
                 </div>
+
+                <div className="psettings-form-group">
+                  <label htmlFor="gender">Gender</label>
+                  <div className="psettings-input-group">
+                    <User size={18} />
+                    <select
+                      id="gender"
+                      value={profileForm.gender}
+                      onChange={(e) => setProfileForm({...profileForm, gender: e.target.value})}
+                      className="psettings-form-select"
+                    >
+                      <option value="">Select gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                      <option value="prefer-not-to-say">Prefer not to say</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
               <div className="psettings-form-group">
@@ -329,7 +434,43 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
                   placeholder="Tell us about yourself..."
                   className="psettings-form-textarea"
                   rows="4"
+                  maxLength="500"
                 />
+                <small className="psettings-form-note">
+                  {profileForm.bio.length}/500 characters
+                </small>
+              </div>
+
+              <div className="psettings-form-row">
+                <div className="psettings-form-group">
+                  <label htmlFor="website">Website</label>
+                  <div className="psettings-input-group">
+                    <Globe size={18} />
+                    <input
+                      id="website"
+                      type="url"
+                      value={profileForm.website}
+                      onChange={(e) => setProfileForm({...profileForm, website: e.target.value})}
+                      placeholder="https://yourwebsite.com"
+                      className="psettings-form-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="psettings-form-group">
+                  <label htmlFor="nationality">Nationality</label>
+                  <div className="psettings-input-group">
+                    <MapPin size={18} />
+                    <input
+                      id="nationality"
+                      type="text"
+                      value={profileForm.nationality}
+                      onChange={(e) => setProfileForm({...profileForm, nationality: e.target.value})}
+                      placeholder="Enter your nationality"
+                      className="psettings-form-input"
+                    />
+                  </div>
+                </div>
               </div>
 
               <button 
@@ -338,7 +479,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
                 disabled={loading}
               >
                 <Save size={16} />
-                {loading ? 'Saving...' : 'Save Changes'}
+                {loading ? 'Updating...' : 'Update Profile'}
               </button>
             </form>
           </div>
@@ -349,117 +490,111 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
           <div className="psettings-section">
             <div className="psettings-section-header">
               <h3>Notification Preferences</h3>
-              <p>Choose how you want to be notified about updates and activities</p>
+              <p>Choose how you want to receive notifications</p>
             </div>
             
             <form onSubmit={handleNotificationSubmit} className="psettings-form">
-              <div className="psettings-toggle-grid">
+              <div className="psettings-toggle-group">
                 <div className="psettings-toggle-item">
                   <div className="psettings-toggle-content">
-                    <h4>Email Notifications</h4>
+                    <label htmlFor="emailNotifications">Email Notifications</label>
                     <p>Receive notifications via email</p>
                   </div>
-                  <label className="psettings-toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={notificationSettings.emailNotifications}
-                      onChange={(e) => setNotificationSettings({
-                        ...notificationSettings,
-                        emailNotifications: e.target.checked
-                      })}
-                    />
-                    <span className="psettings-toggle-slider"></span>
-                  </label>
+                  <input
+                    id="emailNotifications"
+                    type="checkbox"
+                    checked={notificationSettings.emailNotifications}
+                    onChange={(e) => setNotificationSettings({
+                      ...notificationSettings, 
+                      emailNotifications: e.target.checked
+                    })}
+                    className="psettings-toggle"
+                  />
                 </div>
 
                 <div className="psettings-toggle-item">
                   <div className="psettings-toggle-content">
-                    <h4>Push Notifications</h4>
-                    <p>Receive push notifications on your devices</p>
+                    <label htmlFor="pushNotifications">Push Notifications</label>
+                    <p>Receive push notifications in your browser</p>
                   </div>
-                  <label className="psettings-toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={notificationSettings.pushNotifications}
-                      onChange={(e) => setNotificationSettings({
-                        ...notificationSettings,
-                        pushNotifications: e.target.checked
-                      })}
-                    />
-                    <span className="psettings-toggle-slider"></span>
-                  </label>
+                  <input
+                    id="pushNotifications"
+                    type="checkbox"
+                    checked={notificationSettings.pushNotifications}
+                    onChange={(e) => setNotificationSettings({
+                      ...notificationSettings, 
+                      pushNotifications: e.target.checked
+                    })}
+                    className="psettings-toggle"
+                  />
                 </div>
 
                 <div className="psettings-toggle-item">
                   <div className="psettings-toggle-content">
-                    <h4>Service Updates</h4>
-                    <p>Get notified about service updates and changes</p>
+                    <label htmlFor="serviceUpdates">Service Updates</label>
+                    <p>Get notified about service updates and announcements</p>
                   </div>
-                  <label className="psettings-toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={notificationSettings.serviceUpdates}
-                      onChange={(e) => setNotificationSettings({
-                        ...notificationSettings,
-                        serviceUpdates: e.target.checked
-                      })}
-                    />
-                    <span className="psettings-toggle-slider"></span>
-                  </label>
+                  <input
+                    id="serviceUpdates"
+                    type="checkbox"
+                    checked={notificationSettings.serviceUpdates}
+                    onChange={(e) => setNotificationSettings({
+                      ...notificationSettings, 
+                      serviceUpdates: e.target.checked
+                    })}
+                    className="psettings-toggle"
+                  />
                 </div>
 
                 <div className="psettings-toggle-item">
                   <div className="psettings-toggle-content">
-                    <h4>Marketing Emails</h4>
-                    <p>Receive promotional emails and offers</p>
+                    <label htmlFor="priceAlerts">Price Alerts</label>
+                    <p>Get notified when prices change for items you're watching</p>
                   </div>
-                  <label className="psettings-toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={notificationSettings.marketingEmails}
-                      onChange={(e) => setNotificationSettings({
-                        ...notificationSettings,
-                        marketingEmails: e.target.checked
-                      })}
-                    />
-                    <span className="psettings-toggle-slider"></span>
-                  </label>
+                  <input
+                    id="priceAlerts"
+                    type="checkbox"
+                    checked={notificationSettings.priceAlerts}
+                    onChange={(e) => setNotificationSettings({
+                      ...notificationSettings, 
+                      priceAlerts: e.target.checked
+                    })}
+                    className="psettings-toggle"
+                  />
                 </div>
 
                 <div className="psettings-toggle-item">
                   <div className="psettings-toggle-content">
-                    <h4>Price Alerts</h4>
-                    <p>Get notified about price changes and deals</p>
+                    <label htmlFor="marketingEmails">Marketing Emails</label>
+                    <p>Receive promotional emails and special offers</p>
                   </div>
-                  <label className="psettings-toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={notificationSettings.priceAlerts}
-                      onChange={(e) => setNotificationSettings({
-                        ...notificationSettings,
-                        priceAlerts: e.target.checked
-                      })}
-                    />
-                    <span className="psettings-toggle-slider"></span>
-                  </label>
+                  <input
+                    id="marketingEmails"
+                    type="checkbox"
+                    checked={notificationSettings.marketingEmails}
+                    onChange={(e) => setNotificationSettings({
+                      ...notificationSettings, 
+                      marketingEmails: e.target.checked
+                    })}
+                    className="psettings-toggle"
+                  />
                 </div>
 
                 <div className="psettings-toggle-item">
                   <div className="psettings-toggle-content">
-                    <h4>News Updates</h4>
-                    <p>Receive updates about automotive news</p>
+                    <label htmlFor="newsUpdates">News Updates</label>
+                    <p>Stay updated with the latest news and articles</p>
                   </div>
-                  <label className="psettings-toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={notificationSettings.newsUpdates}
-                      onChange={(e) => setNotificationSettings({
-                        ...notificationSettings,
-                        newsUpdates: e.target.checked
-                      })}
-                    />
-                    <span className="psettings-toggle-slider"></span>
-                  </label>
+                  <input
+                    id="newsUpdates"
+                    type="checkbox"
+                    checked={notificationSettings.newsUpdates}
+                    onChange={(e) => setNotificationSettings({
+                      ...notificationSettings, 
+                      newsUpdates: e.target.checked
+                    })}
+                    className="psettings-toggle"
+                  />
                 </div>
               </div>
 
@@ -469,7 +604,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
                 disabled={loading}
               >
                 <Save size={16} />
-                {loading ? 'Saving...' : 'Save Preferences'}
+                {loading ? 'Updating...' : 'Update Notifications'}
               </button>
             </form>
           </div>
@@ -480,7 +615,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
           <div className="psettings-section">
             <div className="psettings-section-header">
               <h3>Privacy Settings</h3>
-              <p>Control your privacy and data sharing preferences</p>
+              <p>Control who can see your information</p>
             </div>
             
             <form onSubmit={handlePrivacySubmit} className="psettings-form">
@@ -490,106 +625,101 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
                   id="profileVisibility"
                   value={privacySettings.profileVisibility}
                   onChange={(e) => setPrivacySettings({
-                    ...privacySettings,
+                    ...privacySettings, 
                     profileVisibility: e.target.value
                   })}
                   className="psettings-form-select"
                 >
-                  <option value="public">Public - Visible to everyone</option>
-                  <option value="private">Private - Only visible to you</option>
-                  <option value="contacts">Contacts Only - Visible to your contacts</option>
+                  <option value="public">Public</option>
+                  <option value="private">Private</option>
+                  <option value="friends">Friends Only</option>
                 </select>
               </div>
 
-              <div className="psettings-toggle-grid">
+              <div className="psettings-toggle-group">
                 <div className="psettings-toggle-item">
                   <div className="psettings-toggle-content">
-                    <h4>Show Email Address</h4>
-                    <p>Display your email on your public profile</p>
+                    <label htmlFor="showEmail">Show Email Address</label>
+                    <p>Allow others to see your email address</p>
                   </div>
-                  <label className="psettings-toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={privacySettings.showEmail}
-                      onChange={(e) => setPrivacySettings({
-                        ...privacySettings,
-                        showEmail: e.target.checked
-                      })}
-                    />
-                    <span className="psettings-toggle-slider"></span>
-                  </label>
+                  <input
+                    id="showEmail"
+                    type="checkbox"
+                    checked={privacySettings.showEmail}
+                    onChange={(e) => setPrivacySettings({
+                      ...privacySettings, 
+                      showEmail: e.target.checked
+                    })}
+                    className="psettings-toggle"
+                  />
                 </div>
 
                 <div className="psettings-toggle-item">
                   <div className="psettings-toggle-content">
-                    <h4>Show Phone Number</h4>
-                    <p>Display your phone number on your public profile</p>
+                    <label htmlFor="showPhone">Show Phone Number</label>
+                    <p>Allow others to see your phone number</p>
                   </div>
-                  <label className="psettings-toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={privacySettings.showPhone}
-                      onChange={(e) => setPrivacySettings({
-                        ...privacySettings,
-                        showPhone: e.target.checked
-                      })}
-                    />
-                    <span className="psettings-toggle-slider"></span>
-                  </label>
+                  <input
+                    id="showPhone"
+                    type="checkbox"
+                    checked={privacySettings.showPhone}
+                    onChange={(e) => setPrivacySettings({
+                      ...privacySettings, 
+                      showPhone: e.target.checked
+                    })}
+                    className="psettings-toggle"
+                  />
                 </div>
 
                 <div className="psettings-toggle-item">
                   <div className="psettings-toggle-content">
-                    <h4>Allow Messages</h4>
-                    <p>Allow other users to send you messages</p>
+                    <label htmlFor="allowMessages">Allow Messages</label>
+                    <p>Allow others to send you messages</p>
                   </div>
-                  <label className="psettings-toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={privacySettings.allowMessages}
-                      onChange={(e) => setPrivacySettings({
-                        ...privacySettings,
-                        allowMessages: e.target.checked
-                      })}
-                    />
-                    <span className="psettings-toggle-slider"></span>
-                  </label>
+                  <input
+                    id="allowMessages"
+                    type="checkbox"
+                    checked={privacySettings.allowMessages}
+                    onChange={(e) => setPrivacySettings({
+                      ...privacySettings, 
+                      allowMessages: e.target.checked
+                    })}
+                    className="psettings-toggle"
+                  />
                 </div>
 
                 <div className="psettings-toggle-item">
                   <div className="psettings-toggle-content">
-                    <h4>Data Sharing</h4>
-                    <p>Allow sharing of anonymized data for service improvement</p>
+                    <label htmlFor="dataSharing">Data Sharing</label>
+                    <p>Allow sharing your data with third parties</p>
                   </div>
-                  <label className="psettings-toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={privacySettings.dataSharing}
-                      onChange={(e) => setPrivacySettings({
-                        ...privacySettings,
-                        dataSharing: e.target.checked
-                      })}
-                    />
-                    <span className="psettings-toggle-slider"></span>
-                  </label>
+                  <input
+                    id="dataSharing"
+                    type="checkbox"
+                    checked={privacySettings.dataSharing}
+                    onChange={(e) => setPrivacySettings({
+                      ...privacySettings, 
+                      dataSharing: e.target.checked
+                    })}
+                    className="psettings-toggle"
+                  />
                 </div>
 
                 <div className="psettings-toggle-item">
                   <div className="psettings-toggle-content">
-                    <h4>Location Tracking</h4>
-                    <p>Allow location tracking for location-based services</p>
+                    <label htmlFor="locationTracking">Location Tracking</label>
+                    <p>Allow location tracking for better service</p>
                   </div>
-                  <label className="psettings-toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={privacySettings.locationTracking}
-                      onChange={(e) => setPrivacySettings({
-                        ...privacySettings,
-                        locationTracking: e.target.checked
-                      })}
-                    />
-                    <span className="psettings-toggle-slider"></span>
-                  </label>
+                  <input
+                    id="locationTracking"
+                    type="checkbox"
+                    checked={privacySettings.locationTracking}
+                    onChange={(e) => setPrivacySettings({
+                      ...privacySettings, 
+                      locationTracking: e.target.checked
+                    })}
+                    className="psettings-toggle"
+                  />
                 </div>
               </div>
 
@@ -599,18 +729,18 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
                 disabled={loading}
               >
                 <Save size={16} />
-                {loading ? 'Saving...' : 'Save Privacy Settings'}
+                {loading ? 'Updating...' : 'Update Privacy Settings'}
               </button>
             </form>
           </div>
         )}
 
-        {/* Security Settings */}
-        {activeSection === 'security' && (
+        {/* Password Settings */}
+        {activeSection === 'password' && (
           <div className="psettings-section">
             <div className="psettings-section-header">
-              <h3>Security Settings</h3>
-              <p>Manage your account security and password</p>
+              <h3>Change Password</h3>
+              <p>Update your account password</p>
             </div>
             
             <form onSubmit={handlePasswordSubmit} className="psettings-form">
@@ -620,56 +750,86 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
                   <Lock size={18} />
                   <input
                     id="currentPassword"
-                    type="password"
+                    type={showPasswords.current ? "text" : "password"}
                     value={passwordData.currentPassword}
                     onChange={(e) => setPasswordData({
-                      ...passwordData,
+                      ...passwordData, 
                       currentPassword: e.target.value
                     })}
                     placeholder="Enter current password"
                     className="psettings-form-input"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswords({
+                      ...showPasswords, 
+                      current: !showPasswords.current
+                    })}
+                    className="psettings-password-toggle"
+                  >
+                    {showPasswords.current ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
 
-              <div className="psettings-form-row">
-                <div className="psettings-form-group">
-                  <label htmlFor="newPassword">New Password</label>
-                  <div className="psettings-input-group">
-                    <Lock size={18} />
-                    <input
-                      id="newPassword"
-                      type="password"
-                      value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({
-                        ...passwordData,
-                        newPassword: e.target.value
-                      })}
-                      placeholder="Enter new password"
-                      className="psettings-form-input"
-                      required
-                    />
-                  </div>
+              <div className="psettings-form-group">
+                <label htmlFor="newPassword">New Password</label>
+                <div className="psettings-input-group">
+                  <Lock size={18} />
+                  <input
+                    id="newPassword"
+                    type={showPasswords.new ? "text" : "password"}
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData({
+                      ...passwordData, 
+                      newPassword: e.target.value
+                    })}
+                    placeholder="Enter new password"
+                    className="psettings-form-input"
+                    required
+                    minLength="6"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswords({
+                      ...showPasswords, 
+                      new: !showPasswords.new
+                    })}
+                    className="psettings-password-toggle"
+                  >
+                    {showPasswords.new ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
+              </div>
 
-                <div className="psettings-form-group">
-                  <label htmlFor="confirmPassword">Confirm New Password</label>
-                  <div className="psettings-input-group">
-                    <Lock size={18} />
-                    <input
-                      id="confirmPassword"
-                      type="password"
-                      value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData({
-                        ...passwordData,
-                        confirmPassword: e.target.value
-                      })}
-                      placeholder="Confirm new password"
-                      className="psettings-form-input"
-                      required
-                    />
-                  </div>
+              <div className="psettings-form-group">
+                <label htmlFor="confirmPassword">Confirm New Password</label>
+                <div className="psettings-input-group">
+                  <Lock size={18} />
+                  <input
+                    id="confirmPassword"
+                    type={showPasswords.confirm ? "text" : "password"}
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData({
+                      ...passwordData, 
+                      confirmPassword: e.target.value
+                    })}
+                    placeholder="Confirm new password"
+                    className="psettings-form-input"
+                    required
+                    minLength="6"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswords({
+                      ...showPasswords, 
+                      confirm: !showPasswords.confirm
+                    })}
+                    className="psettings-password-toggle"
+                  >
+                    {showPasswords.confirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
 
@@ -678,8 +838,8 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
                 className="psettings-btn psettings-btn-primary"
                 disabled={loading}
               >
-                <Lock size={16} />
-                {loading ? 'Changing...' : 'Change Password'}
+                <Save size={16} />
+                {loading ? 'Updating...' : 'Update Password'}
               </button>
             </form>
           </div>
