@@ -1,6 +1,4 @@
-// client/src/components/layout/Navigation/ResponsiveNavigation.js
-// COMPLETE VERSION - All original functionality + profile picture fix
-
+// src/components/layout/Navigation/ResponsiveNavigation.js
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -11,7 +9,7 @@ import { useAuth } from '../../../context/AuthContext.js';
 import EnhancedFABModal from './EnhancedFABModal.js';
 import './ResponsiveNavigation.css';
 
-// Complete navigation categories - News added for desktop, Profile kept for mobile
+// Updated navigation categories - News added for desktop, Profile kept for mobile
 const categories = [
   {
     id: 'home',
@@ -122,6 +120,7 @@ const ReviewFAB = () => {
 
 // Desktop User Menu Component
 const DesktopUserMenu = () => {
+  // FIXED: Use 'user' instead of 'currentUser' to match AuthContext
   const { isAuthenticated, user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const navigate = useNavigate();
@@ -199,14 +198,27 @@ const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
   const getAvatarUrl = (user) => {
     // Check different possible avatar structures
     if (user?.avatar?.url) return user.avatar.url;
-    if (user?.avatar) return user.avatar;
+    if (user?.avatar && typeof user.avatar === 'string') return user.avatar;
     if (user?.profilePicture?.url) return user.profilePicture.url;
-    if (user?.profilePicture) return user.profilePicture;
+    if (user?.profilePicture && typeof user.profilePicture === 'string') return user.profilePicture;
     return null;
   };
 
   const avatarUrl = getAvatarUrl(user);
   const userName = getUserName(user);
+
+  // Debug logging to help troubleshoot
+  useEffect(() => {
+    if (user) {
+      console.log('UserProfileLink - User data:', {
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        avatarUrl: avatarUrl,
+        hasAvatar: !!avatarUrl
+      });
+    }
+  }, [user, avatarUrl]);
 
   return (
     <Link 
@@ -289,21 +301,6 @@ const ResponsiveNavigation = () => {
   const navigate = useNavigate();
   const navRef = useRef();
 
-  // FIXED: Get user data from AuthContext with proper error handling
-  const { user, isAuthenticated, loading } = useAuth();
-
-  // Debug logging to help troubleshoot
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      console.log('ResponsiveNavigation - User data:', {
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-        hasAvatar: !!user.avatar?.url
-      });
-    }
-  }, [user, isAuthenticated]);
-
   // Build breadcrumb from current path
   useEffect(() => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -342,9 +339,9 @@ const ResponsiveNavigation = () => {
     const list = navRef.current?.querySelector('.category-list');
     if (list) {
       if (direction === 'left') {
-        const scrollAmount = window.innerWidth <= 480 ? 150 : 200;
+        const scrollAmount = window.innerWidth <= 480 ? -150 : -200;
         list.scrollBy({
-          left: -scrollAmount,
+          left: scrollAmount,
           behavior: 'smooth'
         });
       } else {
@@ -377,11 +374,6 @@ const ResponsiveNavigation = () => {
     }
     return path !== '/' && location.pathname.startsWith(path);
   };
-
-  // Don't render anything while auth is loading
-  if (loading) {
-    return null;
-  }
 
   return (
     <>
@@ -450,7 +442,7 @@ const ResponsiveNavigation = () => {
         ))}
       </nav>
 
-      {/* Enhanced Review FAB - Show on mobile/tablet */}
+      {/* Enhanced Review FAB - Only show on mobile/tablet */}
       <ReviewFAB />
     </>
   );
