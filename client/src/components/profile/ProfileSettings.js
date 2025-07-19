@@ -1,4 +1,4 @@
-// client/src/components/profile/ProfileSettings.js - Complete Implementation
+// client/src/components/profile/ProfileSettings.js - Complete Fixed Implementation
 import React, { useState, useEffect } from 'react';
 import { 
   Settings, 
@@ -119,7 +119,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
-  // Handle Profile Updates - Uses existing /user/profile/basic endpoint
+  // FIXED: Handle Profile Updates - Uses production URL like working image uploads
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -127,8 +127,8 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     try {
       console.log('Profile update data:', profileForm);
 
-      // Use existing /user/profile/basic endpoint (PUT method)
-      const response = await fetch('/user/profile/basic', {
+      // FIXED: Use production URL like working image uploads
+      const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/basic', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -147,6 +147,14 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
           'profile.website': profileForm.website
         })
       });
+
+      console.log('Profile update response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Profile update error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result = await response.json();
 
@@ -177,13 +185,14 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     }
   };
 
-  // Handle Notification Updates - Uses existing /user/profile/notifications endpoint
+  // FIXED: Handle Notification Updates - Uses production URL like working image uploads
   const handleNotificationSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await fetch('/user/profile/notifications', {
+      // FIXED: Use production URL like working image uploads
+      const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/notifications', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -210,13 +219,14 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     }
   };
 
-  // Handle Privacy Updates - Uses existing /user/profile/privacy endpoint
+  // FIXED: Handle Privacy Updates - Uses production URL like working image uploads
   const handlePrivacySubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await fetch('/user/profile/privacy', {
+      // FIXED: Use production URL like working image uploads
+      const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/privacy', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -243,7 +253,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     }
   };
 
-  // Handle Password Updates - Uses existing /user/profile/password endpoint
+  // FIXED: Handle Password Updates - Uses production URL like working image uploads
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     
@@ -260,7 +270,8 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     setLoading(true);
 
     try {
-      const response = await fetch('/user/profile/password', {
+      // FIXED: Use production URL like working image uploads
+      const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/password', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
