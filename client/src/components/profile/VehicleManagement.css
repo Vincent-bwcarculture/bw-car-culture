@@ -624,6 +624,32 @@
   margin-top: 0.25rem;
 }
 
+/* ===== PRICING LOADING STATES ===== */
+.vm-pricing-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  color: var(--uprofile-text-muted, #94a3b8);
+  font-size: 0.875rem;
+}
+
+.vm-small-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--uprofile-border-color, rgba(255, 255, 255, 0.1));
+  border-top: 2px solid var(--uprofile-primary-accent, #ff3300);
+  border-radius: 50%;
+  animation: vm-spin 1s linear infinite;
+}
+
+.vm-pricing-error {
+  padding: 0.75rem;
+  color: var(--uprofile-error-red, #ef4444);
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
 /* ===== ENHANCED STATUS MESSAGES ===== */
 .vm-payment-preview {
   margin-top: 0.75rem;
