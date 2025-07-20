@@ -1,5 +1,5 @@
 /* client/src/Admin/components/AdminUserSubmissions.css */
-/* UPDATED VERSION - Added pricing section styles to your existing CSS */
+/* COMPLETE VERSION - Added pricing section styles + Professional Listing Assistance styling */
 
 .admin-submissions-container {
   max-width: 1200px;
@@ -32,7 +32,7 @@
 /* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
 }
@@ -77,6 +77,10 @@
 }
 .stat-icon.rejected { 
   background: linear-gradient(135deg, #ef4444, #f87171);
+}
+/* NEW: Assistance requests stat */
+.stat-icon.assistance { 
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
 }
 
 .stat-content {
@@ -272,12 +276,48 @@
   padding: 1.5rem;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  position: relative;
 }
 
 .submission-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   border-color: var(--uprofile-primary-accent, #ff3300);
+}
+
+/* NEW: Assistance Request Card Styling */
+.submission-card.assistance-request {
+  border-left: 4px solid #8b5cf6;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(255, 255, 255, 0.05) 100%);
+}
+
+.submission-card.assistance-request:hover {
+  border-left-color: #8b5cf6;
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+}
+
+/* NEW: Assistance Banner */
+.assistance-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  color: white;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  animation: assistancePulse 2s infinite;
+}
+
+@keyframes assistancePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.assistance-banner svg {
+  color: white;
 }
 
 .submission-header {
@@ -410,7 +450,39 @@
   flex-shrink: 0;
 }
 
-/* ===== NEW: Plan and Pricing Section ===== */
+/* NEW: Assistance Contact Row */
+.detail-row.assistance-contact {
+  background: rgba(139, 92, 246, 0.1);
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.detail-row.assistance-contact svg {
+  color: #8b5cf6;
+}
+
+.whatsapp-contact-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: #25d366;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: auto;
+  transition: all 0.3s ease;
+}
+
+.whatsapp-contact-btn:hover {
+  background: #1da851;
+  transform: scale(1.05);
+}
+
+/* Plan and Pricing Section */
 .plan-pricing-section {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--uprofile-border-color, rgba(255, 255, 255, 0.1));
@@ -539,6 +611,12 @@
   border-left: 3px solid var(--uprofile-primary-accent, #ff3300);
 }
 
+/* NEW: Assistance Addon Highlighting */
+.addon-item.assistance-addon {
+  border-left-color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
+}
+
 .addon-info {
   display: flex;
   align-items: center;
@@ -547,6 +625,10 @@
 
 .addon-info svg {
   color: var(--uprofile-primary-accent, #ff3300);
+}
+
+.assistance-addon .addon-info svg {
+  color: #8b5cf6;
 }
 
 .addon-name {
@@ -559,6 +641,28 @@
   color: var(--uprofile-primary-accent, #ff3300);
   font-size: 0.85rem;
   font-weight: 600;
+}
+
+.assistance-addon .addon-price {
+  color: #8b5cf6;
+}
+
+/* NEW: Assistance Badge */
+.assistance-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: #8b5cf6;
+  color: white;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.assistance-badge svg {
+  color: white;
 }
 
 /* Pricing Total */
@@ -603,8 +707,6 @@
   font-weight: 700;
 }
 
-/* ===== END NEW PRICING STYLES ===== */
-
 /* Admin Notes */
 .admin-notes {
   display: flex;
@@ -638,6 +740,7 @@
   gap: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--uprofile-border-color, rgba(255, 255, 255, 0.1));
+  flex-wrap: wrap;
 }
 
 .review-btn {
@@ -659,6 +762,27 @@
   background: #cc2900;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(255, 51, 0, 0.3);
+}
+
+/* NEW: Assistance Button */
+.assistance-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #8b5cf6;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.assistance-btn:hover {
+  background: #7c3aed;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
 .approved-info,
@@ -762,7 +886,30 @@
   font-size: 0.875rem;
 }
 
-/* NEW: Modal pricing summary */
+/* NEW: Modal Assistance Info */
+.assistance-info {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin: 0.75rem 0;
+}
+
+.assistance-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #a78bfa;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.assistance-alert svg {
+  color: #8b5cf6;
+}
+
+/* Modal pricing summary */
 .modal-pricing-summary {
   background: rgba(255, 255, 255, 0.03);
   border-radius: 6px;
@@ -913,7 +1060,7 @@
   }
   
   .stats-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
   
   .submissions-filters {
@@ -984,11 +1131,21 @@
   .radio-group {
     flex-direction: column;
   }
+
+  .assistance-banner {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .whatsapp-contact-btn {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+  }
 }
 
 @media (max-width: 480px) {
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
   
   .stat-card {
@@ -1002,5 +1159,11 @@
   
   .stat-number {
     font-size: 1.5rem;
+  }
+
+  .assistance-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.25rem;
   }
 }

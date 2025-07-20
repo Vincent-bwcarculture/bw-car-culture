@@ -1,5 +1,5 @@
 // client/src/Admin/components/AdminUserSubmissions.js
-// UPDATED VERSION - Adding tier/addon display to your working code
+// UPDATED VERSION - Adding tier/addon display + Professional Listing Assistance handling
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -7,7 +7,8 @@ import {
   DollarSign, Phone, MapPin, Calendar, Star,
   Search, Filter, RefreshCw, ExternalLink,
   MessageSquare, AlertCircle, Info, Image,
-  Award, Shield, TrendingUp, BarChart3, Camera
+  Award, Shield, TrendingUp, BarChart3, Camera,
+  MessageCircle, Bell, Headphones
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import './AdminUserSubmissions.css';
@@ -21,9 +22,15 @@ const AdminUserSubmissions = () => {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
+  const [stats, setStats] = useState({ 
+    total: 0, 
+    pending: 0, 
+    approved: 0, 
+    rejected: 0,
+    assistanceRequests: 0 // NEW: Track assistance requests
+  });
 
-  // NEW: Pricing data from endpoints (ADDED)
+  // Pricing data from endpoints
   const [pricingData, setPricingData] = useState({
     tiers: {},
     addons: {},
@@ -40,14 +47,14 @@ const AdminUserSubmissions = () => {
 
   useEffect(() => {
     fetchSubmissions();
-    fetchPricingData(); // NEW: Fetch pricing data (ADDED)
+    fetchPricingData();
   }, []);
 
   useEffect(() => {
     filterSubmissions();
   }, [submissions, searchQuery, statusFilter]);
 
-  // NEW: Fetch pricing data from endpoints (ADDED)
+  // Fetch pricing data from endpoints
   const fetchPricingData = async () => {
     try {
       setPricingData(prev => ({ ...prev, loading: true }));
@@ -108,12 +115,13 @@ const AdminUserSubmissions = () => {
         const submissionsData = response.data.data || response.data.submissions || [];
         setSubmissions(submissionsData);
         
-        // Calculate stats from actual data
+        // Calculate stats from actual data including assistance requests
         const calculatedStats = {
           total: submissionsData.length,
           pending: submissionsData.filter(sub => sub.status === 'pending_review').length,
           approved: submissionsData.filter(sub => sub.status === 'approved').length,
-          rejected: submissionsData.filter(sub => sub.status === 'rejected').length
+          rejected: submissionsData.filter(sub => sub.status === 'rejected').length,
+          assistanceRequests: submissionsData.filter(sub => hasListingAssistance(sub)).length
         };
         
         setStats(response.data.stats || calculatedStats);
@@ -139,7 +147,12 @@ const AdminUserSubmissions = () => {
 
     // Filter by status
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(sub => sub.status === statusFilter);
+      if (statusFilter === 'assistance_requests') {
+        // NEW: Filter for assistance requests
+        filtered = filtered.filter(sub => hasListingAssistance(sub));
+      } else {
+        filtered = filtered.filter(sub => sub.status === statusFilter);
+      }
     }
 
     // Filter by search query
@@ -150,12 +163,14 @@ const AdminUserSubmissions = () => {
         const userName = sub.userName || '';
         const make = sub.listingData?.specifications?.make || '';
         const model = sub.listingData?.specifications?.model || '';
+        const whatsapp = sub.listingData?.contact?.whatsapp || '';
         
         return (
           title.toLowerCase().includes(query) ||
           userName.toLowerCase().includes(query) ||
           make.toLowerCase().includes(query) ||
-          model.toLowerCase().includes(query)
+          model.toLowerCase().includes(query) ||
+          whatsapp.includes(query)
         );
       });
     }
@@ -163,12 +178,51 @@ const AdminUserSubmissions = () => {
     setFilteredSubmissions(filtered);
   };
 
+  // NEW: Check if submission has listing assistance request
+  const hasListingAssistance = (submission) => {
+    const selectedAddons = submission.listingData?.selectedAddons || [];
+    return selectedAddons.includes('management') || 
+           selectedAddons.includes('listing_assistance') ||
+           selectedAddons.includes('full_assistance');
+  };
+
+  // NEW: Get WhatsApp contact from submission
+  const getWhatsAppContact = (submission) => {
+    return submission.listingData?.contact?.whatsapp || 
+           submission.listingData?.contact?.phone || 
+           submission.bookingDetails?.whatsapp || '';
+  };
+
+  // NEW: Generate WhatsApp assistance link
+  const getAssistanceWhatsAppLink = (submission) => {
+    const whatsapp = getWhatsAppContact(submission);
+    if (!whatsapp) return null;
+
+    const vehicleInfo = `${submission.listingData?.specifications?.make || ''} ${submission.listingData?.specifications?.model || ''} ${submission.listingData?.specifications?.year || ''}`.trim();
+    
+    const message = encodeURIComponent(
+      `Hi ${submission.userName || 'there'}! 👋\n\n` +
+      `Thank you for requesting Professional Listing Assistance from BW Car Culture.\n\n` +
+      `I'm here to help you create an outstanding listing for your ${vehicleInfo || 'vehicle'}.\n\n` +
+      `Let's discuss:\n` +
+      `🚗 Vehicle details and specifications\n` +
+      `📸 Photography requirements\n` +
+      `✨ Listing optimization strategy\n` +
+      `📅 Timeline and next steps\n\n` +
+      `When would be a good time to connect? I'm excited to help you get the best results! 🚗✨\n\n` +
+      `Best regards,\nBW Car Culture Team`
+    );
+    
+    const cleanNumber = whatsapp.replace(/[^\d]/g, '');
+    return `https://wa.me/${cleanNumber}?text=${message}`;
+  };
+
   const handleReviewSubmission = (submission) => {
     setSelectedSubmission(submission);
     setReviewData({
       action: 'approve',
       adminNotes: '',
-      subscriptionTier: submission.listingData?.selectedPlan || 'basic' // NEW: Use selected plan (ADDED)
+      subscriptionTier: submission.listingData?.selectedPlan || 'basic'
     });
     setShowReviewModal(true);
   };
@@ -299,7 +353,7 @@ const AdminUserSubmissions = () => {
     return typeof firstImage === 'string' ? firstImage : firstImage?.url;
   };
 
-  // NEW: Helper functions for pricing display (ADDED)
+  // Helper functions for pricing display
   const getPlanInfo = (planId) => {
     if (!pricingData.loaded || !planId) {
       return { name: 'Plan Not Available', price: 0, duration: 0 };
@@ -340,7 +394,8 @@ const AdminUserSubmissions = () => {
       'boost': <TrendingUp size={14} />,
       'review': <Shield size={14} />,
       'analytics': <BarChart3 size={14} />,
-      'listing_assistance': <User size={14} />,
+      'listing_assistance': <Headphones size={14} />,
+      'management': <Headphones size={14} />,
       'full_assistance': <Award size={14} />,
       'premium_photos': <Camera size={14} />
     };
@@ -417,6 +472,17 @@ const AdminUserSubmissions = () => {
               <div className="stat-label">Rejected</div>
             </div>
           </div>
+
+          {/* NEW: Assistance Requests Stat */}
+          <div className="stat-card">
+            <div className="stat-icon assistance">
+              <Headphones size={24} />
+            </div>
+            <div className="stat-content">
+              <div className="stat-number">{stats.assistanceRequests}</div>
+              <div className="stat-label">Need Assistance</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -426,7 +492,7 @@ const AdminUserSubmissions = () => {
           <Search size={20} />
           <input
             type="text"
-            placeholder="Search by title, user, make, or model..."
+            placeholder="Search by title, user, make, model, or WhatsApp..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
@@ -445,6 +511,7 @@ const AdminUserSubmissions = () => {
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
             <option value="listing_created">Listing Created</option>
+            <option value="assistance_requests">🎧 Need Assistance</option>
           </select>
         </div>
 
@@ -486,13 +553,24 @@ const AdminUserSubmissions = () => {
           </div>
         ) : (
           filteredSubmissions.map(submission => {
-            // NEW: Calculate pricing info for this submission (ADDED)
+            // Calculate pricing info for this submission
             const planInfo = getPlanInfo(submission.listingData?.selectedPlan);
             const selectedAddons = submission.listingData?.selectedAddons || [];
             const totalCost = calculateTotalCost(submission.listingData?.selectedPlan, selectedAddons);
+            const needsAssistance = hasListingAssistance(submission);
+            const whatsappContact = getWhatsAppContact(submission);
             
             return (
-              <div key={submission._id} className="submission-card">
+              <div key={submission._id} className={`submission-card ${needsAssistance ? 'assistance-request' : ''}`}>
+                {/* NEW: Assistance Request Banner */}
+                {needsAssistance && (
+                  <div className="assistance-banner">
+                    <Headphones size={16} />
+                    <span>Professional Listing Assistance Requested</span>
+                    <Bell size={14} />
+                  </div>
+                )}
+
                 <div className="submission-header">
                   <div className="submission-info">
                     <h3>{submission.listingData?.title || 'Untitled Listing'}</h3>
@@ -559,10 +637,27 @@ const AdminUserSubmissions = () => {
                           <span>{submission.listingData.contact.phone}</span>
                         </div>
                       )}
+
+                      {/* NEW: WhatsApp Contact for Assistance */}
+                      {needsAssistance && whatsappContact && (
+                        <div className="detail-row assistance-contact">
+                          <MessageCircle size={16} />
+                          <span>WhatsApp: {whatsappContact}</span>
+                          <a
+                            href={getAssistanceWhatsAppLink(submission)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="whatsapp-contact-btn"
+                          >
+                            <ExternalLink size={12} />
+                            Contact
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
-                  {/* NEW: Plan and Pricing Section (ADDED) */}
+                  {/* Plan and Pricing Section */}
                   {(submission.listingData?.selectedPlan || selectedAddons.length > 0) && (
                     <div className="plan-pricing-section">
                       <h4>
@@ -610,11 +705,19 @@ const AdminUserSubmissions = () => {
                           <div className="addons-list">
                             {selectedAddons.map((addonId, index) => {
                               const addonInfo = getAddonInfo(addonId);
+                              const isAssistance = ['management', 'listing_assistance', 'full_assistance'].includes(addonId);
+                              
                               return (
-                                <div key={index} className="addon-item">
+                                <div key={index} className={`addon-item ${isAssistance ? 'assistance-addon' : ''}`}>
                                   <div className="addon-info">
                                     {getAddonIcon(addonId)}
                                     <span className="addon-name">{addonInfo.name}</span>
+                                    {isAssistance && (
+                                      <span className="assistance-badge">
+                                        <MessageCircle size={12} />
+                                        Assistance
+                                      </span>
+                                    )}
                                   </div>
                                   <span className="addon-price">+P{addonInfo.price}</span>
                                 </div>
@@ -670,6 +773,19 @@ const AdminUserSubmissions = () => {
                         Review Submission
                       </button>
                     )}
+
+                    {/* NEW: Priority assistance contact button */}
+                    {needsAssistance && whatsappContact && (
+                      <a
+                        href={getAssistanceWhatsAppLink(submission)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="assistance-btn"
+                      >
+                        <MessageCircle size={16} />
+                        Contact for Assistance
+                      </a>
+                    )}
                     
                     {submission.status === 'approved' && (
                       <div className="approved-info">
@@ -713,7 +829,20 @@ const AdminUserSubmissions = () => {
                 <p>Vehicle: {selectedSubmission.listingData?.specifications?.make} {selectedSubmission.listingData?.specifications?.model}</p>
                 <p>Price: {formatPrice(selectedSubmission.listingData?.pricing?.price)}</p>
                 
-                {/* NEW: Show selected plan and pricing in modal (ADDED) */}
+                {/* NEW: Show assistance request info in modal */}
+                {hasListingAssistance(selectedSubmission) && (
+                  <div className="assistance-info">
+                    <div className="assistance-alert">
+                      <Headphones size={16} />
+                      <span>User requested professional listing assistance</span>
+                    </div>
+                    {getWhatsAppContact(selectedSubmission) && (
+                      <p>WhatsApp Contact: {getWhatsAppContact(selectedSubmission)}</p>
+                    )}
+                  </div>
+                )}
+                
+                {/* Show selected plan and pricing in modal */}
                 {(selectedSubmission.listingData?.selectedPlan || selectedSubmission.listingData?.selectedAddons?.length > 0) && (
                   <div className="modal-pricing-summary">
                     <h4>Selected Plan & Pricing:</h4>
@@ -766,7 +895,7 @@ const AdminUserSubmissions = () => {
                   </div>
                 </div>
 
-                {/* NEW: Use actual pricing data in dropdown (UPDATED) */}
+                {/* Use actual pricing data in dropdown */}
                 {reviewData.action === 'approve' && pricingData.loaded && (
                   <div className="form-group">
                     <label>Recommended Subscription Tier</label>
