@@ -1,5 +1,5 @@
 /* client/src/components/profile/VehicleManagement.css */
-/* COMPLETE CSS WITH UNIQUE CLASSES AND IMPROVED STYLING */
+/* FIXED VERSION - MATCHES SITE THEME (RED/ORANGE) & FIXES TEXT VISIBILITY */
 
 /* ===== ROOT COMPONENT ===== */
 .vm-vehicle-management {
@@ -7,8 +7,8 @@
   margin: 0 auto;
   padding: 1rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  color: #1a202c;
-  background-color: #f7fafc;
+  color: #e2e8f0;
+  background-color: transparent;
   min-height: 100vh;
 }
 
@@ -24,25 +24,25 @@
   font-size: 0.875rem;
   font-weight: 500;
   position: relative;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .vm-message-success {
-  background-color: #f0fff4;
-  border-color: #38a169;
-  color: #2f855a;
+  background-color: #065f46;
+  border-color: #10b981;
+  color: #d1fae5;
 }
 
 .vm-message-error {
-  background-color: #fed7d7;
-  border-color: #e53e3e;
-  color: #c53030;
+  background-color: #7f1d1d;
+  border-color: #ef4444;
+  color: #fee2e2;
 }
 
 .vm-message-info {
-  background-color: #ebf8ff;
-  border-color: #3182ce;
-  color: #2c5282;
+  background-color: #1e3a8a;
+  border-color: #3b82f6;
+  color: #dbeafe;
 }
 
 .vm-message-content {
@@ -57,7 +57,7 @@
   border: none;
   cursor: pointer;
   color: inherit;
-  opacity: 0.7;
+  opacity: 0.8;
   transition: opacity 0.2s;
   padding: 0.25rem;
   border-radius: 4px;
@@ -65,7 +65,7 @@
 
 .vm-message-close:hover {
   opacity: 1;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* ===== NAVIGATION TABS ===== */
@@ -73,11 +73,11 @@
   display: flex;
   gap: 0.5rem;
   margin-bottom: 2rem;
-  border-bottom: 2px solid #e2e8f0;
-  background: white;
+  border-bottom: 2px solid #374151;
+  background: #1f2937;
   border-radius: 8px 8px 0 0;
   padding: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .vm-tab-button {
@@ -87,7 +87,7 @@
   padding: 0.75rem 1.25rem;
   border: none;
   background: transparent;
-  color: #64748b;
+  color: #9ca3af;
   font-size: 0.875rem;
   font-weight: 500;
   border-radius: 6px;
@@ -97,14 +97,14 @@
 }
 
 .vm-tab-button:hover {
-  background-color: #f1f5f9;
-  color: #475569;
+  background-color: #374151;
+  color: #d1d5db;
 }
 
 .vm-tab-button.vm-active {
-  background-color: #3b82f6;
+  background-color: #dc2626;
   color: white;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
 }
 
 .vm-tab-button.vm-active::after {
@@ -117,7 +117,7 @@
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid #3b82f6;
+  border-top: 6px solid #dc2626;
 }
 
 /* ===== SECTION HEADERS ===== */
@@ -129,13 +129,14 @@
   flex-wrap: wrap;
   gap: 1rem;
   padding: 1rem;
-  background: white;
+  background: #1f2937;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #374151;
 }
 
 .vm-section-header h3 {
-  color: #1a202c;
+  color: #f9fafb;
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
@@ -166,26 +167,26 @@
 }
 
 .vm-btn-primary {
-  background-color: #3b82f6;
+  background-color: #dc2626;
   color: white;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
 }
 
 .vm-btn-primary:hover:not(:disabled) {
-  background-color: #2563eb;
+  background-color: #b91c1c;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.4);
 }
 
 .vm-btn-secondary {
-  background-color: #e2e8f0;
-  color: #475569;
-  border: 1px solid #cbd5e1;
+  background-color: #374151;
+  color: #d1d5db;
+  border: 1px solid #4b5563;
 }
 
 .vm-btn-secondary:hover:not(:disabled) {
-  background-color: #cbd5e1;
-  color: #334155;
+  background-color: #4b5563;
+  color: #f3f4f6;
 }
 
 .vm-btn-danger {
@@ -207,21 +208,22 @@
 .vm-empty-state {
   text-align: center;
   padding: 3rem 2rem;
-  background: white;
+  background: #1f2937;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #374151;
 }
 
 .vm-loading-state {
-  color: #64748b;
+  color: #9ca3af;
 }
 
 .vm-empty-state {
-  color: #64748b;
+  color: #9ca3af;
 }
 
 .vm-empty-state h4 {
-  color: #1a202c;
+  color: #f9fafb;
   margin: 1rem 0 0.5rem 0;
   font-size: 1.25rem;
   font-weight: 600;
@@ -229,14 +231,14 @@
 
 .vm-empty-state p {
   margin-bottom: 1.5rem;
-  color: #64748b;
+  color: #9ca3af;
 }
 
 .vm-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid #e2e8f0;
-  border-top: 3px solid #3b82f6;
+  border: 3px solid #374151;
+  border-top: 3px solid #dc2626;
   border-radius: 50%;
   animation: vm-spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -263,13 +265,13 @@
   display: block;
   font-size: 1.75rem;
   font-weight: 700;
-  color: #3b82f6;
+  color: #f97316;
   line-height: 1;
 }
 
 .vm-stat-label {
   font-size: 0.75rem;
-  color: #64748b;
+  color: #9ca3af;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-top: 0.25rem;
@@ -283,17 +285,18 @@
 }
 
 .vm-vehicle-card {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: #1f2937;
+  border: 1px solid #374151;
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
 }
 
 .vm-vehicle-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transform: translateY(-2px);
+  border-color: #dc2626;
 }
 
 .vm-vehicle-header {
@@ -304,15 +307,15 @@
 }
 
 .vm-vehicle-header h4 {
-  color: #1a202c;
+  color: #f9fafb;
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
 }
 
 .vm-vehicle-year {
-  background-color: #e2e8f0;
-  color: #475569;
+  background-color: #374151;
+  color: #d1d5db;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -326,11 +329,11 @@
 .vm-vehicle-details p {
   margin: 0.25rem 0;
   font-size: 0.875rem;
-  color: #64748b;
+  color: #9ca3af;
 }
 
 .vm-vehicle-details strong {
-  color: #374151;
+  color: #d1d5db;
 }
 
 .vm-vehicle-actions {
@@ -347,17 +350,18 @@
 }
 
 .vm-submission-card {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: #1f2937;
+  border: 1px solid #374151;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
 }
 
 .vm-submission-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transform: translateY(-1px);
+  border-color: #dc2626;
 }
 
 .vm-submission-main {
@@ -374,7 +378,7 @@
   position: relative;
   border-radius: 6px;
   overflow: hidden;
-  background-color: #f1f5f9;
+  background-color: #374151;
 }
 
 .vm-car-image {
@@ -391,10 +395,10 @@
   justify-content: center;
   width: 100%;
   height: 100%;
-  color: #94a3b8;
+  color: #6b7280;
   font-size: 0.75rem;
-  background-color: #f1f5f9;
-  border: 2px dashed #cbd5e1;
+  background-color: #374151;
+  border: 2px dashed #4b5563;
   border-radius: 6px;
 }
 
@@ -416,7 +420,7 @@
 }
 
 .vm-submission-title {
-  color: #1a202c;
+  color: #f9fafb;
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
@@ -440,12 +444,44 @@
   border-color: var(--status-border);
 }
 
+.vm-status-badge[data-status="pending_review"] {
+  --status-color: #92400e;
+  --status-bg: #451a03;
+  --status-border: #d97706;
+}
+
+.vm-status-badge[data-status="approved"] {
+  --status-color: #065f46;
+  --status-bg: #022c22;
+  --status-border: #10b981;
+}
+
+.vm-status-badge[data-status="rejected"] {
+  --status-color: #991b1b;
+  --status-bg: #450a0a;
+  --status-border: #ef4444;
+}
+
+.vm-status-badge[data-status="listing_created"] {
+  --status-color: #1e40af;
+  --status-bg: #1e3a8a;
+  --status-border: #3b82f6;
+}
+
+.vm-status-badge[data-status="payment_pending"] {
+  --status-color: #6b21a8;
+  --status-bg: #581c87;
+  --status-border: #8b5cf6;
+}
+
 .vm-status-icon {
   font-size: 0.875rem;
 }
 
 .vm-status-text {
   white-space: nowrap;
+  color: var(--status-color);
+  font-weight: 600;
 }
 
 /* ===== SUBMISSION DETAILS ===== */
@@ -464,33 +500,33 @@
 }
 
 .vm-detail-label {
-  color: #64748b;
+  color: #9ca3af;
   font-weight: 500;
   margin-right: 0.5rem;
 }
 
 .vm-detail-value {
-  color: #374151;
+  color: #d1d5db;
   font-weight: 500;
   text-align: right;
   flex: 1;
 }
 
 .vm-detail-value.vm-price {
-  color: #059669;
+  color: #10b981;
   font-weight: 600;
 }
 
 .vm-detail-value.vm-date {
-  color: #64748b;
+  color: #9ca3af;
   font-size: 0.8125rem;
 }
 
 /* ===== STATUS MESSAGES ===== */
 .vm-submission-actions {
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #374151;
   padding: 1rem 1.5rem;
-  background-color: #fafbfc;
+  background-color: #111827;
 }
 
 .vm-status-message {
@@ -504,34 +540,28 @@
   border: 1px solid;
 }
 
-.vm-status-message-pending {
-  background-color: #fef3c7;
-  border-color: #f59e0b;
-  color: #92400e;
-}
-
 .vm-status-message.vm-status-pending {
-  background-color: #fef3c7;
-  border-color: #f59e0b;
-  color: #92400e;
+  background-color: #451a03;
+  border-color: #d97706;
+  color: #fbbf24;
 }
 
 .vm-status-message.vm-status-approved {
-  background-color: #d1fae5;
+  background-color: #022c22;
   border-color: #10b981;
-  color: #065f46;
+  color: #6ee7b7;
 }
 
 .vm-status-message.vm-status-rejected {
-  background-color: #fee2e2;
+  background-color: #450a0a;
   border-color: #ef4444;
-  color: #991b1b;
+  color: #fca5a5;
 }
 
 .vm-status-message.vm-status-live {
-  background-color: #dbeafe;
+  background-color: #1e3a8a;
   border-color: #3b82f6;
-  color: #1e40af;
+  color: #93c5fd;
 }
 
 .vm-message-content {
@@ -544,6 +574,7 @@
 
 .vm-message-content span {
   flex: 1;
+  color: inherit;
 }
 
 .vm-admin-notes {
@@ -553,15 +584,15 @@
 
 /* ===== FLOW INFO ===== */
 .vm-flow-info {
-  background: #f0f9ff;
-  border: 1px solid #7dd3fc;
+  background: #1e3a8a;
+  border: 1px solid #3b82f6;
   border-radius: 8px;
   padding: 1rem;
   margin-top: 1rem;
 }
 
 .vm-flow-description {
-  color: #0c4a6e;
+  color: #dbeafe;
   margin: 0 0 0.5rem 0;
   font-size: 0.875rem;
 }
@@ -570,7 +601,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #0369a1;
+  color: #93c5fd;
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -587,47 +618,48 @@
   border-radius: 6px;
   font-size: 0.875rem;
   font-weight: 500;
-  background-color: #f1f5f9;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
+  background-color: #374151;
+  color: #9ca3af;
+  border: 1px solid #4b5563;
 }
 
 .vm-step.vm-step-completed {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: #022c22;
+  color: #6ee7b7;
   border-color: #10b981;
 }
 
 .vm-step.vm-step-active {
-  background-color: #dbeafe;
-  color: #1e40af;
-  border-color: #3b82f6;
+  background-color: #7f1d1d;
+  color: #fca5a5;
+  border-color: #dc2626;
 }
 
 /* ===== SUBMISSION SUCCESS ===== */
 .vm-submission-success {
   text-align: center;
   padding: 3rem 2rem;
-  background: white;
+  background: #1f2937;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #374151;
 }
 
 .vm-submission-success h3 {
-  color: #1a202c;
+  color: #f9fafb;
   margin: 1rem 0 0.5rem 0;
   font-size: 1.5rem;
   font-weight: 600;
 }
 
 .vm-submission-success p {
-  color: #64748b;
+  color: #9ca3af;
   margin-bottom: 2rem;
 }
 
 .vm-next-steps {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #111827;
+  border: 1px solid #374151;
   border-radius: 8px;
   padding: 1.5rem;
   margin: 2rem 0;
@@ -635,7 +667,7 @@
 }
 
 .vm-next-steps h4 {
-  color: #1a202c;
+  color: #f9fafb;
   margin: 0 0 1rem 0;
   font-size: 1.125rem;
   font-weight: 600;
@@ -644,12 +676,13 @@
 .vm-next-steps ul {
   margin: 0;
   padding-left: 1rem;
-  color: #374151;
+  color: #d1d5db;
 }
 
 .vm-next-steps li {
   margin: 0.5rem 0;
   line-height: 1.5;
+  color: #d1d5db;
 }
 
 /* ===== MODAL STYLES ===== */
@@ -659,7 +692,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -668,9 +701,10 @@
 }
 
 .vm-modal {
-  background: white;
+  background: #1f2937;
+  border: 1px solid #374151;
   border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
@@ -682,11 +716,11 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #374151;
 }
 
 .vm-modal-header h3 {
-  color: #1a202c;
+  color: #f9fafb;
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
@@ -696,15 +730,15 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #64748b;
+  color: #9ca3af;
   padding: 0.25rem;
   border-radius: 4px;
   transition: all 0.2s ease;
 }
 
 .vm-close-btn:hover {
-  background-color: #f1f5f9;
-  color: #374151;
+  background-color: #374151;
+  color: #d1d5db;
 }
 
 .vm-modal-form {
@@ -729,7 +763,7 @@
 }
 
 .vm-form-group label {
-  color: #374151;
+  color: #d1d5db;
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -738,19 +772,20 @@
 .vm-form-group textarea,
 .vm-form-group select {
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid #4b5563;
   border-radius: 6px;
   font-size: 0.875rem;
   transition: border-color 0.2s;
-  background: white;
+  background: #374151;
+  color: #f3f4f6;
 }
 
 .vm-form-group input:focus,
 .vm-form-group textarea:focus,
 .vm-form-group select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .vm-form-group textarea {
@@ -763,7 +798,7 @@
   gap: 0.75rem;
   justify-content: flex-end;
   padding-top: 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #374151;
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
@@ -895,58 +930,6 @@
   }
 }
 
-/* ===== DARK MODE SUPPORT (Optional) ===== */
-@media (prefers-color-scheme: dark) {
-  .vm-vehicle-management {
-    background-color: #1a202c;
-    color: #e2e8f0;
-  }
-
-  .vm-section-header,
-  .vm-vehicle-card,
-  .vm-submission-card,
-  .vm-loading-state,
-  .vm-empty-state,
-  .vm-submission-success,
-  .vm-modal {
-    background-color: #2d3748;
-    border-color: #4a5568;
-  }
-
-  .vm-section-tabs {
-    background-color: #2d3748;
-    border-color: #4a5568;
-  }
-
-  .vm-tab-button {
-    color: #a0aec0;
-  }
-
-  .vm-tab-button:hover {
-    background-color: #4a5568;
-    color: #e2e8f0;
-  }
-
-  .vm-tab-button.vm-active {
-    background-color: #3b82f6;
-    color: white;
-  }
-
-  .vm-form-group input,
-  .vm-form-group textarea,
-  .vm-form-group select {
-    background-color: #2d3748;
-    border-color: #4a5568;
-    color: #e2e8f0;
-  }
-
-  .vm-btn-secondary {
-    background-color: #4a5568;
-    color: #e2e8f0;
-    border-color: #718096;
-  }
-}
-
 /* ===== PRINT STYLES ===== */
 @media print {
   .vm-section-tabs,
@@ -967,5 +950,6 @@
     break-inside: avoid;
     border: 1px solid #ccc;
     margin-bottom: 1rem;
+    background: white;
   }
 }
