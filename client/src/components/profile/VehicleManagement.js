@@ -485,7 +485,18 @@ const VehicleManagement = () => {
     </div>
   );
 
-  // IMPROVED: Better submissions layout with images and compact design
+  // Get plan pricing information
+  const getPlanPricing = (selectedPlan) => {
+    const planPricing = {
+      basic: { name: 'Basic Plan', price: 50, duration: 30 },
+      standard: { name: 'Standard Plan', price: 100, duration: 30 },
+      premium: { name: 'Premium Plan', price: 200, duration: 45 }
+    };
+    
+    return planPricing[selectedPlan] || { name: 'Plan Not Selected', price: 0, duration: 0 };
+  };
+
+  // IMPROVED: Enhanced submissions layout with plan details and payment info
   const renderSubmissions = () => (
     <div className="vm-submissions-section">
       <div className="vm-section-header">
@@ -531,6 +542,8 @@ const VehicleManagement = () => {
         <div className="vm-submissions-grid">
           {userSubmissions.map(submission => {
             const primaryImage = getPrimaryImage(submission);
+            const selectedPlan = submission.listingData?.selectedPlan;
+            const planDetails = getPlanPricing(selectedPlan);
             
             return (
               <div key={submission._id} className="vm-submission-card">
@@ -572,7 +585,7 @@ const VehicleManagement = () => {
                       </div>
                       
                       <div className="vm-detail-row">
-                        <span className="vm-detail-label">Price:</span>
+                        <span className="vm-detail-label">Car Price:</span>
                         <span className="vm-detail-value vm-price">
                           {submission.listingData?.pricing?.price 
                             ? `P${submission.listingData.pricing.price.toLocaleString()}`
@@ -595,15 +608,48 @@ const VehicleManagement = () => {
                         </span>
                       </div>
                     </div>
+
+                    {/* Plan Details Section */}
+                    {selectedPlan && (
+                      <div className="vm-plan-details">
+                        <div className="vm-plan-header">
+                          <h5>Selected Plan</h5>
+                        </div>
+                        <div className="vm-plan-info">
+                          <div className="vm-plan-name">
+                            <span className="vm-plan-badge">{planDetails.name}</span>
+                          </div>
+                          <div className="vm-plan-pricing">
+                            <div className="vm-pricing-row">
+                              <span className="vm-pricing-label">Listing Fee:</span>
+                              <span className="vm-pricing-value">P{planDetails.price.toLocaleString()}</span>
+                            </div>
+                            <div className="vm-pricing-row">
+                              <span className="vm-pricing-label">Duration:</span>
+                              <span className="vm-pricing-value">{planDetails.duration} days</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Status-specific actions */}
+                {/* Status-specific actions with payment guidance */}
                 <div className="vm-submission-actions">
                   {submission.status === 'pending_review' && (
                     <div className="vm-status-message vm-status-pending">
                       <Info size={14} />
-                      <span>Your listing is being reviewed by our team. We'll contact you within 24-48 hours.</span>
+                      <div className="vm-message-content">
+                        <div className="vm-status-text">
+                          <span>Your listing is being reviewed by our team. We'll contact you within 24-48 hours.</span>
+                          {selectedPlan && (
+                            <div className="vm-payment-preview">
+                              <strong>After Approval:</strong> You'll receive a payment request for P{planDetails.price.toLocaleString()} to activate your {planDetails.name.toLowerCase()}.
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   )}
                   
@@ -611,10 +657,23 @@ const VehicleManagement = () => {
                     <div className="vm-status-message vm-status-approved">
                       <CheckCircle size={14} />
                       <div className="vm-message-content">
-                        <span>Great! Your listing has been approved. Complete payment to make it live.</span>
+                        <div className="vm-approval-details">
+                          <span>🎉 Great! Your listing has been approved.</span>
+                          {selectedPlan && (
+                            <div className="vm-payment-info">
+                              <div className="vm-payment-amount">
+                                <strong>Amount Due: P{planDetails.price.toLocaleString()}</strong>
+                              </div>
+                              <div className="vm-payment-instructions">
+                                <Info size={12} />
+                                <span>Check your email for payment instructions. Complete payment to make your listing live.</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                         <button className="vm-btn vm-btn-primary vm-btn-small">
                           <DollarSign size={14} />
-                          Complete Payment
+                          Pay Now (P{planDetails.price.toLocaleString()})
                         </button>
                       </div>
                     </div>
@@ -647,7 +706,14 @@ const VehicleManagement = () => {
                     <div className="vm-status-message vm-status-live">
                       <Star size={14} />
                       <div className="vm-message-content">
-                        <span>Your listing is now live on our platform!</span>
+                        <div className="vm-live-details">
+                          <span>🚗 Your listing is now live on our platform!</span>
+                          {selectedPlan && (
+                            <div className="vm-live-info">
+                              <span>Plan: {planDetails.name} • Active for {planDetails.duration} days</span>
+                            </div>
+                          )}
+                        </div>
                         {submission.listingId && (
                           <button className="vm-btn vm-btn-secondary vm-btn-small">
                             <Eye size={14} />
