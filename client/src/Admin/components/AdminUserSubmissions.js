@@ -1,12 +1,13 @@
 // client/src/Admin/components/AdminUserSubmissions.js
-// FIXED VERSION - Complete admin panel for reviewing user car listing submissions
+// UPDATED VERSION - Adding tier/addon display to your working code
 
 import React, { useState, useEffect } from 'react';
 import { 
   Eye, CheckCircle, XCircle, Clock, User, Car, 
   DollarSign, Phone, MapPin, Calendar, Star,
   Search, Filter, RefreshCw, ExternalLink,
-  MessageSquare, AlertCircle, Info, Image
+  MessageSquare, AlertCircle, Info, Image,
+  Award, Shield, TrendingUp, BarChart3, Camera
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import './AdminUserSubmissions.css';
@@ -22,6 +23,14 @@ const AdminUserSubmissions = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
 
+  // NEW: Pricing data from endpoints (ADDED)
+  const [pricingData, setPricingData] = useState({
+    tiers: {},
+    addons: {},
+    loaded: false,
+    loading: false
+  });
+
   // Review form state
   const [reviewData, setReviewData] = useState({
     action: 'approve',
@@ -31,11 +40,48 @@ const AdminUserSubmissions = () => {
 
   useEffect(() => {
     fetchSubmissions();
+    fetchPricingData(); // NEW: Fetch pricing data (ADDED)
   }, []);
 
   useEffect(() => {
     filterSubmissions();
   }, [submissions, searchQuery, statusFilter]);
+
+  // NEW: Fetch pricing data from endpoints (ADDED)
+  const fetchPricingData = async () => {
+    try {
+      setPricingData(prev => ({ ...prev, loading: true }));
+      console.log('🔍 Fetching pricing data from endpoints...');
+      
+      const [tiersResponse, addonsResponse] = await Promise.all([
+        axios.get('/api/payments/available-tiers'),
+        axios.get('/api/addons/available')
+      ]);
+
+      if (tiersResponse.data.success && addonsResponse.data.success) {
+        const tiers = tiersResponse.data.data.tiers;
+        const addons = addonsResponse.data.data.addons;
+
+        setPricingData({
+          tiers,
+          addons,
+          loaded: true,
+          loading: false
+        });
+
+        console.log('💰 Pricing data loaded:', { tiers, addons });
+      } else {
+        throw new Error('Pricing endpoints returned unsuccessful response');
+      }
+    } catch (error) {
+      console.error('❌ Error fetching pricing data:', error);
+      setPricingData(prev => ({ 
+        ...prev, 
+        loaded: false, 
+        loading: false 
+      }));
+    }
+  };
 
   const fetchSubmissions = async () => {
     try {
@@ -48,7 +94,7 @@ const AdminUserSubmissions = () => {
       const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       console.log('🔑 Auth token present:', !!token);
       
-      // Use correct API path
+      // KEEPING YOUR WORKING API PATH
       const response = await axios.get('/api/admin/user-listings', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -122,7 +168,7 @@ const AdminUserSubmissions = () => {
     setReviewData({
       action: 'approve',
       adminNotes: '',
-      subscriptionTier: 'basic'
+      subscriptionTier: submission.listingData?.selectedPlan || 'basic' // NEW: Use selected plan (ADDED)
     });
     setShowReviewModal(true);
   };
@@ -142,6 +188,7 @@ const AdminUserSubmissions = () => {
       const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       console.log('🔑 Auth token for review:', !!token);
       
+      // KEEPING YOUR WORKING API PATH
       const response = await axios.put(
         `/api/admin/user-listings/${selectedSubmission._id}/review`,
         reviewData,
@@ -250,6 +297,76 @@ const AdminUserSubmissions = () => {
     // Return the first image URL
     const firstImage = imageArray[0];
     return typeof firstImage === 'string' ? firstImage : firstImage?.url;
+  };
+
+  // NEW: Helper functions for pricing display (ADDED)
+  const getPlanInfo = (planId) => {
+    if (!pricingData.loaded || !planId) {
+      return { name: 'Plan Not Available', price: 0, duration: 0 };
+    }
+    
+    const planData = pricingData.tiers[planId];
+    if (!planData) {
+      return { name: 'Unknown Plan', price: 0, duration: 0 };
+    }
+    
+    return {
+      name: planData.name,
+      price: planData.price,
+      duration: planData.duration
+    };
+  };
+
+  const getAddonInfo = (addonId) => {
+    if (!pricingData.loaded || !addonId) {
+      return { name: 'Addon Not Available', price: 0 };
+    }
+    
+    const addonData = pricingData.addons[addonId];
+    if (!addonData) {
+      return { name: 'Unknown Addon', price: 0 };
+    }
+    
+    return {
+      name: addonData.name,
+      price: addonData.price
+    };
+  };
+
+  const getAddonIcon = (addonId) => {
+    const iconMap = {
+      'featured': <Star size={14} />,
+      'photography': <Camera size={14} />,
+      'boost': <TrendingUp size={14} />,
+      'review': <Shield size={14} />,
+      'analytics': <BarChart3 size={14} />,
+      'listing_assistance': <User size={14} />,
+      'full_assistance': <Award size={14} />,
+      'premium_photos': <Camera size={14} />
+    };
+    return iconMap[addonId] || <Star size={14} />;
+  };
+
+  const calculateTotalCost = (selectedPlan, selectedAddons) => {
+    if (!pricingData.loaded) return 0;
+    
+    let total = 0;
+    
+    // Add plan cost
+    if (selectedPlan && pricingData.tiers[selectedPlan]) {
+      total += pricingData.tiers[selectedPlan].price;
+    }
+    
+    // Add addons cost
+    if (selectedAddons && Array.isArray(selectedAddons)) {
+      selectedAddons.forEach(addonId => {
+        if (pricingData.addons[addonId]) {
+          total += pricingData.addons[addonId].price;
+        }
+      });
+    }
+    
+    return total;
   };
 
   return (
@@ -368,117 +485,210 @@ const AdminUserSubmissions = () => {
             </p>
           </div>
         ) : (
-          filteredSubmissions.map(submission => (
-            <div key={submission._id} className="submission-card">
-              <div className="submission-header">
-                <div className="submission-info">
-                  <h3>{submission.listingData?.title || 'Untitled Listing'}</h3>
-                  <div className="submission-meta">
-                    <span className="user-info">
-                      <User size={14} />
-                      {submission.userName || 'Unknown User'}
-                    </span>
-                    <span className="date-info">
-                      <Calendar size={14} />
-                      {formatDate(submission.submittedAt)}
-                    </span>
+          filteredSubmissions.map(submission => {
+            // NEW: Calculate pricing info for this submission (ADDED)
+            const planInfo = getPlanInfo(submission.listingData?.selectedPlan);
+            const selectedAddons = submission.listingData?.selectedAddons || [];
+            const totalCost = calculateTotalCost(submission.listingData?.selectedPlan, selectedAddons);
+            
+            return (
+              <div key={submission._id} className="submission-card">
+                <div className="submission-header">
+                  <div className="submission-info">
+                    <h3>{submission.listingData?.title || 'Untitled Listing'}</h3>
+                    <div className="submission-meta">
+                      <span className="user-info">
+                        <User size={14} />
+                        {submission.userName || 'Unknown User'}
+                      </span>
+                      <span className="date-info">
+                        <Calendar size={14} />
+                        {formatDate(submission.submittedAt)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="submission-status">
+                    {getStatusBadge(submission.status)}
                   </div>
                 </div>
-                <div className="submission-status">
-                  {getStatusBadge(submission.status)}
-                </div>
-              </div>
-              
-              <div className="submission-content">
-                <div className="submission-details">
-                  {/* Vehicle Image */}
-                  <div className="vehicle-image">
-                    {getImageUrl(submission.listingData?.images) ? (
-                      <img 
-                        src={getImageUrl(submission.listingData.images)} 
-                        alt="Vehicle"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.nextSibling.style.display = 'flex';
-                        }}
-                      />
-                    ) : null}
-                    <div className="image-placeholder" style={{display: getImageUrl(submission.listingData?.images) ? 'none' : 'flex'}}>
-                      <Image size={24} />
-                      <span>No Image</span>
+                
+                <div className="submission-content">
+                  <div className="submission-details">
+                    {/* Vehicle Image */}
+                    <div className="vehicle-image">
+                      {getImageUrl(submission.listingData?.images) ? (
+                        <img 
+                          src={getImageUrl(submission.listingData.images)} 
+                          alt="Vehicle"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div className="image-placeholder" style={{display: getImageUrl(submission.listingData?.images) ? 'none' : 'flex'}}>
+                        <Image size={24} />
+                        <span>No Image</span>
+                      </div>
+                    </div>
+                    
+                    {/* Vehicle Details */}
+                    <div className="vehicle-details">
+                      <div className="detail-row">
+                        <Car size={16} />
+                        <span>
+                          {submission.listingData?.specifications?.make || 'Unknown'} {' '}
+                          {submission.listingData?.specifications?.model || 'Unknown'} {' '}
+                          ({submission.listingData?.specifications?.year || 'Unknown Year'})
+                        </span>
+                      </div>
+                      
+                      <div className="detail-row">
+                        <DollarSign size={16} />
+                        <span>{formatPrice(submission.listingData?.pricing?.price)}</span>
+                      </div>
+                      
+                      <div className="detail-row">
+                        <MapPin size={16} />
+                        <span>{submission.listingData?.location?.city || 'Location not specified'}</span>
+                      </div>
+                      
+                      {submission.listingData?.contact?.phone && (
+                        <div className="detail-row">
+                          <Phone size={16} />
+                          <span>{submission.listingData.contact.phone}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
-                  {/* Vehicle Details */}
-                  <div className="vehicle-details">
-                    <div className="detail-row">
-                      <Car size={16} />
-                      <span>
-                        {submission.listingData?.specifications?.make || 'Unknown'} {' '}
-                        {submission.listingData?.specifications?.model || 'Unknown'} {' '}
-                        ({submission.listingData?.specifications?.year || 'Unknown Year'})
-                      </span>
+                  {/* NEW: Plan and Pricing Section (ADDED) */}
+                  {(submission.listingData?.selectedPlan || selectedAddons.length > 0) && (
+                    <div className="plan-pricing-section">
+                      <h4>
+                        <Star size={16} />
+                        Selected Plan & Add-ons
+                      </h4>
+                      
+                      {/* Pricing Loading State */}
+                      {pricingData.loading && (
+                        <div className="pricing-loading">
+                          <RefreshCw size={14} className="spinning" />
+                          <span>Loading pricing data...</span>
+                        </div>
+                      )}
+                      
+                      {/* Pricing Not Available */}
+                      {!pricingData.loaded && !pricingData.loading && (
+                        <div className="pricing-unavailable">
+                          <AlertCircle size={14} />
+                          <span>Pricing data unavailable</span>
+                          <button onClick={fetchPricingData} className="retry-pricing-btn">
+                            Retry
+                          </button>
+                        </div>
+                      )}
+                      
+                      {/* Selected Plan */}
+                      {submission.listingData?.selectedPlan && pricingData.loaded && (
+                        <div className="selected-plan">
+                          <div className="plan-badge">
+                            <Award size={14} />
+                            <span className="plan-name">{planInfo.name}</span>
+                            <span className="plan-price">P{planInfo.price}</span>
+                          </div>
+                          <div className="plan-duration">
+                            {planInfo.duration} days active
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Selected Add-ons */}
+                      {selectedAddons.length > 0 && pricingData.loaded && (
+                        <div className="selected-addons">
+                          <div className="addons-label">Add-ons Selected:</div>
+                          <div className="addons-list">
+                            {selectedAddons.map((addonId, index) => {
+                              const addonInfo = getAddonInfo(addonId);
+                              return (
+                                <div key={index} className="addon-item">
+                                  <div className="addon-info">
+                                    {getAddonIcon(addonId)}
+                                    <span className="addon-name">{addonInfo.name}</span>
+                                  </div>
+                                  <span className="addon-price">+P{addonInfo.price}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Total Pricing */}
+                      {pricingData.loaded && totalCost > 0 && (
+                        <div className="pricing-total">
+                          <div className="total-breakdown">
+                            <div className="total-row">
+                              <span>Plan:</span>
+                              <span>P{planInfo.price}</span>
+                            </div>
+                            {selectedAddons.length > 0 && (
+                              <div className="total-row">
+                                <span>Add-ons:</span>
+                                <span>P{totalCost - planInfo.price}</span>
+                              </div>
+                            )}
+                            <div className="total-row final-total">
+                              <span>Total Amount:</span>
+                              <span>P{totalCost}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    
-                    <div className="detail-row">
-                      <DollarSign size={16} />
-                      <span>{formatPrice(submission.listingData?.pricing?.price)}</span>
+                  )}
+                  
+                  {/* Admin Notes (if any) */}
+                  {submission.adminNotes && (
+                    <div className="admin-notes">
+                      <MessageSquare size={16} />
+                      <div>
+                        <strong>Admin Notes:</strong>
+                        <p>{submission.adminNotes}</p>
+                      </div>
                     </div>
+                  )}
+                  
+                  {/* Actions */}
+                  <div className="submission-actions">
+                    {submission.status === 'pending_review' && (
+                      <button 
+                        className="review-btn"
+                        onClick={() => handleReviewSubmission(submission)}
+                      >
+                        <Eye size={16} />
+                        Review Submission
+                      </button>
+                    )}
                     
-                    <div className="detail-row">
-                      <MapPin size={16} />
-                      <span>{submission.listingData?.location?.city || 'Location not specified'}</span>
-                    </div>
+                    {submission.status === 'approved' && (
+                      <div className="approved-info">
+                        <CheckCircle size={16} />
+                        <span>Approved - Ready for payment</span>
+                      </div>
+                    )}
                     
-                    {submission.listingData?.contact?.phone && (
-                      <div className="detail-row">
-                        <Phone size={16} />
-                        <span>{submission.listingData.contact.phone}</span>
+                    {submission.status === 'rejected' && (
+                      <div className="rejected-info">
+                        <XCircle size={16} />
+                        <span>Rejected</span>
                       </div>
                     )}
                   </div>
                 </div>
-                
-                {/* Admin Notes (if any) */}
-                {submission.adminNotes && (
-                  <div className="admin-notes">
-                    <MessageSquare size={16} />
-                    <div>
-                      <strong>Admin Notes:</strong>
-                      <p>{submission.adminNotes}</p>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Actions */}
-                <div className="submission-actions">
-                  {submission.status === 'pending_review' && (
-                    <button 
-                      className="review-btn"
-                      onClick={() => handleReviewSubmission(submission)}
-                    >
-                      <Eye size={16} />
-                      Review Submission
-                    </button>
-                  )}
-                  
-                  {submission.status === 'approved' && (
-                    <div className="approved-info">
-                      <CheckCircle size={16} />
-                      <span>Approved - Ready for payment</span>
-                    </div>
-                  )}
-                  
-                  {submission.status === 'rejected' && (
-                    <div className="rejected-info">
-                      <XCircle size={16} />
-                      <span>Rejected</span>
-                    </div>
-                  )}
-                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
@@ -502,6 +712,29 @@ const AdminUserSubmissions = () => {
                 <p>By: {selectedSubmission.userName}</p>
                 <p>Vehicle: {selectedSubmission.listingData?.specifications?.make} {selectedSubmission.listingData?.specifications?.model}</p>
                 <p>Price: {formatPrice(selectedSubmission.listingData?.pricing?.price)}</p>
+                
+                {/* NEW: Show selected plan and pricing in modal (ADDED) */}
+                {(selectedSubmission.listingData?.selectedPlan || selectedSubmission.listingData?.selectedAddons?.length > 0) && (
+                  <div className="modal-pricing-summary">
+                    <h4>Selected Plan & Pricing:</h4>
+                    {pricingData.loaded ? (
+                      <>
+                        {selectedSubmission.listingData?.selectedPlan && (
+                          <p>Plan: {getPlanInfo(selectedSubmission.listingData.selectedPlan).name} 
+                             (P{getPlanInfo(selectedSubmission.listingData.selectedPlan).price})</p>
+                        )}
+                        {selectedSubmission.listingData?.selectedAddons?.length > 0 && (
+                          <p>Add-ons: {selectedSubmission.listingData.selectedAddons.length} selected 
+                             (+P{selectedSubmission.listingData.selectedAddons.reduce((total, addonId) => 
+                               total + getAddonInfo(addonId).price, 0)})</p>
+                        )}
+                        <p><strong>Total: P{calculateTotalCost(selectedSubmission.listingData?.selectedPlan, selectedSubmission.listingData?.selectedAddons)}</strong></p>
+                      </>
+                    ) : (
+                      <p>Loading pricing information...</p>
+                    )}
+                  </div>
+                )}
               </div>
               
               <div className="review-form">
@@ -533,16 +766,19 @@ const AdminUserSubmissions = () => {
                   </div>
                 </div>
 
-                {reviewData.action === 'approve' && (
+                {/* NEW: Use actual pricing data in dropdown (UPDATED) */}
+                {reviewData.action === 'approve' && pricingData.loaded && (
                   <div className="form-group">
                     <label>Recommended Subscription Tier</label>
                     <select
                       value={reviewData.subscriptionTier}
                       onChange={(e) => setReviewData({...reviewData, subscriptionTier: e.target.value})}
                     >
-                      <option value="basic">Basic (P50/month)</option>
-                      <option value="standard">Standard (P100/month)</option>
-                      <option value="premium">Premium (P200/month)</option>
+                      {Object.entries(pricingData.tiers).map(([tierId, tierData]) => (
+                        <option key={tierId} value={tierId}>
+                          {tierData.name} (P{tierData.price})
+                        </option>
+                      ))}
                     </select>
                   </div>
                 )}
