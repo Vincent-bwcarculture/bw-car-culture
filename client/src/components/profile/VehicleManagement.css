@@ -578,6 +578,52 @@
   font-weight: 600;
 }
 
+/* ===== ADDON PRICING STYLES ===== */
+.vm-addon-row {
+  font-size: 0.8125rem;
+  opacity: 0.9;
+}
+
+.vm-addon-row .vm-pricing-label {
+  color: var(--uprofile-text-secondary, #e2e8f0);
+  font-style: italic;
+}
+
+.vm-addon-separator {
+  border-top: 1px solid var(--uprofile-border-color, rgba(255, 255, 255, 0.1));
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.vm-total-row {
+  border-top: 2px solid var(--uprofile-primary-accent, #ff3300);
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+  font-weight: 700;
+}
+
+.vm-total-row .vm-pricing-label {
+  color: var(--uprofile-text-primary, #ffffff);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.vm-total-price {
+  color: var(--uprofile-primary-accent, #ff3300);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+/* ===== ENHANCED PAYMENT INFO ===== */
+.vm-payment-breakdown {
+  font-size: 0.8125rem;
+  color: var(--uprofile-text-muted, #94a3b8);
+  font-style: italic;
+  margin-top: 0.25rem;
+}
+
 /* ===== ENHANCED STATUS MESSAGES ===== */
 .vm-payment-preview {
   margin-top: 0.75rem;
@@ -1000,12 +1046,29 @@
     font-size: 0.8125rem;
   }
 
+  .vm-addon-row {
+    font-size: 0.75rem;
+  }
+
+  .vm-total-row {
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .vm-total-price {
+    font-size: 1rem;
+  }
+
   .vm-payment-info {
     padding: 0.5rem;
   }
 
   .vm-payment-amount {
     font-size: 0.9rem;
+  }
+
+  .vm-payment-breakdown {
+    font-size: 0.75rem;
   }
 
   .vm-payment-instructions {
@@ -1081,6 +1144,19 @@
     font-size: 0.75rem;
   }
 
+  .vm-addon-row {
+    font-size: 0.6875rem;
+  }
+
+  .vm-total-row {
+    padding-top: 0.375rem;
+    margin-top: 0.375rem;
+  }
+
+  .vm-total-price {
+    font-size: 0.9375rem;
+  }
+
   .vm-payment-preview,
   .vm-payment-info {
     padding: 0.5rem;
@@ -1089,6 +1165,10 @@
 
   .vm-payment-amount {
     font-size: 0.875rem;
+  }
+
+  .vm-payment-breakdown {
+    font-size: 0.6875rem;
   }
 }
 
