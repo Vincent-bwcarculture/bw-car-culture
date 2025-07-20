@@ -43,45 +43,18 @@ const AdminUserSubmissions = () => {
       setError('');
       
       console.log('🔍 Fetching admin user listings...');
-      console.log('📝 Current axios config:', {
-        baseURL: axios.defaults.baseURL,
-        headers: axios.defaults.headers
-      });
       
       // Check authentication token
       const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       console.log('🔑 Auth token present:', !!token);
-      console.log('🔑 Token preview:', token ? `${token.substring(0, 20)}...` : 'No token');
       
-      // Make API call with explicit headers and full URL path
-      let response;
-      try {
-        response = await axios.get('/api/admin/user-listings', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-      } catch (axiosError) {
-        console.log('❌ Axios call failed, trying fetch with full URL...');
-        
-        // Fallback to fetch with full URL
-        const fullUrl = 'https://bw-car-culture-api.vercel.app/api/admin/user-listings';
-        const fetchResponse = await fetch(fullUrl, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (!fetchResponse.ok) {
-          throw new Error(`HTTP error! status: ${fetchResponse.status}`);
+      // Use correct API path
+      const response = await axios.get('/api/admin/user-listings', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-        
-        const data = await fetchResponse.json();
-        response = { data };
-      }
+      });
       
       console.log('📊 API Response:', response.data);
       
@@ -169,39 +142,16 @@ const AdminUserSubmissions = () => {
       const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       console.log('🔑 Auth token for review:', !!token);
       
-      let response;
-      try {
-        response = await axios.put(
-          `/api/admin/user-listings/${selectedSubmission._id}/review`,
-          reviewData,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-      } catch (axiosError) {
-        console.log('❌ Axios review call failed, trying fetch with full URL...');
-        
-        // Fallback to fetch with full URL
-        const fullUrl = `https://bw-car-culture-api.vercel.app/api/admin/user-listings/${selectedSubmission._id}/review`;
-        const fetchResponse = await fetch(fullUrl, {
-          method: 'PUT',
+      const response = await axios.put(
+        `/api/admin/user-listings/${selectedSubmission._id}/review`,
+        reviewData,
+        {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(reviewData)
-        });
-        
-        if (!fetchResponse.ok) {
-          throw new Error(`HTTP error! status: ${fetchResponse.status}`);
+          }
         }
-        
-        const data = await fetchResponse.json();
-        response = { data };
-      }
+      );
 
       if (response.data.success) {
         // Update submission in local state
@@ -503,15 +453,13 @@ const AdminUserSubmissions = () => {
                 {/* Actions */}
                 <div className="submission-actions">
                   {submission.status === 'pending_review' && (
-                    <>
-                      <button 
-                        className="review-btn"
-                        onClick={() => handleReviewSubmission(submission)}
-                      >
-                        <Eye size={16} />
-                        Review Submission
-                      </button>
-                    </>
+                    <button 
+                      className="review-btn"
+                      onClick={() => handleReviewSubmission(submission)}
+                    >
+                      <Eye size={16} />
+                      Review Submission
+                    </button>
                   )}
                   
                   {submission.status === 'approved' && (
