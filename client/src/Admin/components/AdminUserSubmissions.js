@@ -1,12 +1,12 @@
 // client/src/Admin/components/AdminUserSubmissions.js
-// Component for admins to review user car listing submissions
+// FIXED VERSION - Complete admin panel for reviewing user car listing submissions
 
 import React, { useState, useEffect } from 'react';
 import { 
   Eye, CheckCircle, XCircle, Clock, User, Car, 
   DollarSign, Phone, MapPin, Calendar, Star,
   Search, Filter, RefreshCw, ExternalLink,
-  MessageSquare, AlertCircle
+  MessageSquare, AlertCircle, Info, Image
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import './AdminUserSubmissions.css';
@@ -40,14 +40,40 @@ const AdminUserSubmissions = () => {
   const fetchSubmissions = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/admin/user-listings');
+      setError('');
+      
+      console.log('🔍 Fetching admin user listings...');
+      
+      // Use full URL to ensure proper routing
+      const response = await axios.get('/admin/user-listings');
+      
+      console.log('📊 API Response:', response.data);
+      
       if (response.data.success) {
-        setSubmissions(response.data.data);
-        setStats(response.data.stats);
+        const submissionsData = response.data.data || response.data.submissions || [];
+        setSubmissions(submissionsData);
+        
+        // Calculate stats from actual data
+        const calculatedStats = {
+          total: submissionsData.length,
+          pending: submissionsData.filter(sub => sub.status === 'pending_review').length,
+          approved: submissionsData.filter(sub => sub.status === 'approved').length,
+          rejected: submissionsData.filter(sub => sub.status === 'rejected').length
+        };
+        
+        setStats(response.data.stats || calculatedStats);
+        console.log('📈 Stats calculated:', calculatedStats);
+      } else {
+        console.error('❌ API returned success: false');
+        setError(response.data.message || 'Failed to load submissions');
       }
     } catch (error) {
-      console.error('Error fetching submissions:', error);
-      setError('Failed to load submissions');
+      console.error('❌ Error fetching submissions:', error);
+      setError(
+        error.response?.data?.message || 
+        error.message || 
+        'Failed to load submissions. Please check your connection and try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -64,12 +90,19 @@ const AdminUserSubmissions = () => {
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(sub => 
-        sub.listingData.title.toLowerCase().includes(query) ||
-        sub.userName.toLowerCase().includes(query) ||
-        sub.listingData.specifications.make.toLowerCase().includes(query) ||
-        sub.listingData.specifications.model.toLowerCase().includes(query)
-      );
+      filtered = filtered.filter(sub => {
+        const title = sub.listingData?.title || '';
+        const userName = sub.userName || '';
+        const make = sub.listingData?.specifications?.make || '';
+        const model = sub.listingData?.specifications?.model || '';
+        
+        return (
+          title.toLowerCase().includes(query) ||
+          userName.toLowerCase().includes(query) ||
+          make.toLowerCase().includes(query) ||
+          model.toLowerCase().includes(query)
+        );
+      });
     }
 
     setFilteredSubmissions(filtered);
@@ -90,8 +123,14 @@ const AdminUserSubmissions = () => {
 
     try {
       setLoading(true);
+      
+      console.log('📝 Submitting review:', {
+        submissionId: selectedSubmission._id,
+        reviewData
+      });
+      
       const response = await axios.put(
-        `/api/admin/user-listings/${selectedSubmission._id}/review`,
+        `/admin/user-listings/${selectedSubmission._id}/review`,
         reviewData
       );
 
@@ -103,7 +142,8 @@ const AdminUserSubmissions = () => {
                 ...sub, 
                 status: reviewData.action === 'approve' ? 'approved' : 'rejected',
                 adminNotes: reviewData.adminNotes,
-                reviewedAt: new Date().toISOString()
+                reviewedAt: new Date().toISOString(),
+                reviewedBy: response.data.reviewedBy || 'Admin'
               }
             : sub
         ));
@@ -111,25 +151,36 @@ const AdminUserSubmissions = () => {
         setShowReviewModal(false);
         setSelectedSubmission(null);
         
-        // Refresh stats
+        // Refresh to get updated stats
         fetchSubmissions();
+        
+        console.log('✅ Review submitted successfully');
       }
     } catch (error) {
-      console.error('Error submitting review:', error);
-      setError('Failed to submit review');
+      console.error('❌ Error submitting review:', error);
+      setError(
+        error.response?.data?.message || 
+        'Failed to submit review. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (!dateString) return 'Date not available';
+    
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Invalid date';
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -167,13 +218,29 @@ const AdminUserSubmissions = () => {
     );
   };
 
+  const formatPrice = (price) => {
+    if (!price) return 'Price not set';
+    return `P${Number(price).toLocaleString()}`;
+  };
+
+  const getImageUrl = (imageArray) => {
+    if (!imageArray || !Array.isArray(imageArray) || imageArray.length === 0) {
+      return null;
+    }
+    
+    // Return the first image URL
+    const firstImage = imageArray[0];
+    return typeof firstImage === 'string' ? firstImage : firstImage?.url;
+  };
+
   return (
     <div className="admin-submissions-container">
+      {/* Header */}
       <div className="submissions-header">
-        <h1>User Car Listing Submissions</h1>
-        <p>Review and approve user-submitted car listings</p>
+        <h1>User Submissions Management</h1>
+        <p>Review and manage car listing submissions from users</p>
         
-        {/* Stats Cards */}
+        {/* Stats Grid */}
         <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-icon total">
@@ -275,18 +342,22 @@ const AdminUserSubmissions = () => {
           <div className="empty-state">
             <Car size={48} />
             <h3>No submissions found</h3>
-            <p>No user submissions match your current filters.</p>
+            <p>
+              {submissions.length === 0 
+                ? 'No user submissions have been received yet.' 
+                : 'No submissions match your current filters.'}
+            </p>
           </div>
         ) : (
           filteredSubmissions.map(submission => (
             <div key={submission._id} className="submission-card">
               <div className="submission-header">
                 <div className="submission-info">
-                  <h3>{submission.listingData.title}</h3>
+                  <h3>{submission.listingData?.title || 'Untitled Listing'}</h3>
                   <div className="submission-meta">
                     <span className="user-info">
                       <User size={14} />
-                      {submission.userName}
+                      {submission.userName || 'Unknown User'}
                     </span>
                     <span className="date-info">
                       <Calendar size={14} />
@@ -298,59 +369,96 @@ const AdminUserSubmissions = () => {
                   {getStatusBadge(submission.status)}
                 </div>
               </div>
-
+              
               <div className="submission-content">
-                <div className="car-details">
-                  <div className="car-basic">
-                    <Car size={16} />
-                    <span>{submission.listingData.specifications.year} {submission.listingData.specifications.make} {submission.listingData.specifications.model}</span>
+                <div className="submission-details">
+                  {/* Vehicle Image */}
+                  <div className="vehicle-image">
+                    {getImageUrl(submission.listingData?.images) ? (
+                      <img 
+                        src={getImageUrl(submission.listingData.images)} 
+                        alt="Vehicle"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className="image-placeholder" style={{display: getImageUrl(submission.listingData?.images) ? 'none' : 'flex'}}>
+                      <Image size={24} />
+                      <span>No Image</span>
+                    </div>
                   </div>
-                  <div className="car-price">
-                    <DollarSign size={16} />
-                    <span>P{Number(submission.listingData.pricing.price).toLocaleString()}</span>
-                  </div>
-                  <div className="car-location">
-                    <MapPin size={16} />
-                    <span>{submission.listingData.contact.location.city}</span>
-                  </div>
-                  <div className="car-contact">
-                    <Phone size={16} />
-                    <span>{submission.listingData.contact.phone}</span>
-                  </div>
-                </div>
-
-                {submission.listingData.images && submission.listingData.images.length > 0 && (
-                  <div className="car-images">
-                    <img 
-                      src={submission.listingData.images[0].url} 
-                      alt={submission.listingData.title}
-                      className="submission-thumbnail"
-                    />
-                    {submission.listingData.images.length > 1 && (
-                      <span className="image-count">
-                        +{submission.listingData.images.length - 1} more
+                  
+                  {/* Vehicle Details */}
+                  <div className="vehicle-details">
+                    <div className="detail-row">
+                      <Car size={16} />
+                      <span>
+                        {submission.listingData?.specifications?.make || 'Unknown'} {' '}
+                        {submission.listingData?.specifications?.model || 'Unknown'} {' '}
+                        ({submission.listingData?.specifications?.year || 'Unknown Year'})
                       </span>
+                    </div>
+                    
+                    <div className="detail-row">
+                      <DollarSign size={16} />
+                      <span>{formatPrice(submission.listingData?.pricing?.price)}</span>
+                    </div>
+                    
+                    <div className="detail-row">
+                      <MapPin size={16} />
+                      <span>{submission.listingData?.location?.city || 'Location not specified'}</span>
+                    </div>
+                    
+                    {submission.listingData?.contact?.phone && (
+                      <div className="detail-row">
+                        <Phone size={16} />
+                        <span>{submission.listingData.contact.phone}</span>
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
-
-              <div className="submission-actions">
-                <button 
-                  className="review-btn"
-                  onClick={() => handleReviewSubmission(submission)}
-                  disabled={submission.status !== 'pending_review'}
-                >
-                  <Eye size={16} />
-                  {submission.status === 'pending_review' ? 'Review' : 'View Details'}
-                </button>
+                </div>
                 
+                {/* Admin Notes (if any) */}
                 {submission.adminNotes && (
                   <div className="admin-notes">
-                    <MessageSquare size={14} />
-                    <span>Has admin notes</span>
+                    <MessageSquare size={16} />
+                    <div>
+                      <strong>Admin Notes:</strong>
+                      <p>{submission.adminNotes}</p>
+                    </div>
                   </div>
                 )}
+                
+                {/* Actions */}
+                <div className="submission-actions">
+                  {submission.status === 'pending_review' && (
+                    <>
+                      <button 
+                        className="review-btn"
+                        onClick={() => handleReviewSubmission(submission)}
+                      >
+                        <Eye size={16} />
+                        Review Submission
+                      </button>
+                    </>
+                  )}
+                  
+                  {submission.status === 'approved' && (
+                    <div className="approved-info">
+                      <CheckCircle size={16} />
+                      <span>Approved - Ready for payment</span>
+                    </div>
+                  )}
+                  
+                  {submission.status === 'rejected' && (
+                    <div className="rejected-info">
+                      <XCircle size={16} />
+                      <span>Rejected</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ))
@@ -360,51 +468,25 @@ const AdminUserSubmissions = () => {
       {/* Review Modal */}
       {showReviewModal && selectedSubmission && (
         <div className="modal-overlay">
-          <div className="review-modal">
+          <div className="modal-content">
             <div className="modal-header">
               <h2>Review Submission</h2>
               <button 
-                className="close-btn"
+                className="modal-close"
                 onClick={() => setShowReviewModal(false)}
               >
                 ×
               </button>
             </div>
-
-            <div className="modal-content">
-              <div className="submission-details">
-                <h3>{selectedSubmission.listingData.title}</h3>
-                <div className="details-grid">
-                  <div><strong>Submitted by:</strong> {selectedSubmission.userName}</div>
-                  <div><strong>Email:</strong> {selectedSubmission.userEmail}</div>
-                  <div><strong>Phone:</strong> {selectedSubmission.listingData.contact.phone}</div>
-                  <div><strong>Vehicle:</strong> {selectedSubmission.listingData.specifications.year} {selectedSubmission.listingData.specifications.make} {selectedSubmission.listingData.specifications.model}</div>
-                  <div><strong>Price:</strong> P{Number(selectedSubmission.listingData.pricing.price).toLocaleString()}</div>
-                  <div><strong>Location:</strong> {selectedSubmission.listingData.contact.location.city}</div>
-                </div>
-
-                <div className="description-section">
-                  <strong>Description:</strong>
-                  <p>{selectedSubmission.listingData.description}</p>
-                </div>
-
-                {selectedSubmission.listingData.images && (
-                  <div className="images-section">
-                    <strong>Images ({selectedSubmission.listingData.images.length}):</strong>
-                    <div className="images-grid">
-                      {selectedSubmission.listingData.images.slice(0, 4).map((image, index) => (
-                        <img 
-                          key={index}
-                          src={image.url} 
-                          alt={`${selectedSubmission.listingData.title} ${index + 1}`}
-                          className="review-image"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
+            
+            <div className="modal-body">
+              <div className="submission-summary">
+                <h3>{selectedSubmission.listingData?.title}</h3>
+                <p>By: {selectedSubmission.userName}</p>
+                <p>Vehicle: {selectedSubmission.listingData?.specifications?.make} {selectedSubmission.listingData?.specifications?.model}</p>
+                <p>Price: {formatPrice(selectedSubmission.listingData?.pricing?.price)}</p>
               </div>
-
+              
               <div className="review-form">
                 <div className="form-group">
                   <label>Decision</label>
@@ -453,7 +535,9 @@ const AdminUserSubmissions = () => {
                   <textarea
                     value={reviewData.adminNotes}
                     onChange={(e) => setReviewData({...reviewData, adminNotes: e.target.value})}
-                    placeholder="Add notes about your decision..."
+                    placeholder={reviewData.action === 'approve' 
+                      ? "Add any notes for the approval..." 
+                      : "Explain why this submission is being rejected..."}
                     rows={4}
                   />
                 </div>
