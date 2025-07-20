@@ -442,89 +442,125 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
     }
   }, [loadUserProfileData, isEdit, autoFillData]);
 
+const validatePricing = () => {
+  const errors = {};
+  
+  // Parse prices as numbers for comparison
+  const currentPrice = parseFloat(formData.price);
+  const originalPrice = formData.priceOptions?.originalPrice ? parseFloat(formData.priceOptions.originalPrice) : null;
+  const savingsAmount = formData.priceOptions?.savingsAmount ? parseFloat(formData.priceOptions.savingsAmount) : null;
+  
+  // Validate current price
+  if (!currentPrice || currentPrice <= 0) {
+    errors.price = 'Current price is required and must be greater than 0';
+  }
+  
+  // If showing savings, validate original price
+  if (formData.priceOptions?.showSavings) {
+    if (!originalPrice || originalPrice <= 0) {
+      errors['priceOptions.originalPrice'] = 'Original price is required when showing savings';
+    } else if (originalPrice <= currentPrice) {
+      // FIXED: Proper number comparison for large numbers
+      errors['priceOptions.originalPrice'] = `Original price (${originalPrice.toLocaleString()}) must be higher than current price (${currentPrice.toLocaleString()})`;
+    }
+    
+    // Validate savings amount if provided
+    if (savingsAmount) {
+      const calculatedSavings = originalPrice - currentPrice;
+      if (Math.abs(savingsAmount - calculatedSavings) > 0.01) { // Allow for small floating point differences
+        errors['priceOptions.savingsAmount'] = `Savings amount should be ${calculatedSavings.toLocaleString()}`;
+      }
+    }
+  }
+  
+  return errors;
+};
+  
   // Form validation - COMPLETE
-  const validateForm = () => {
-    const errors = {};
-    
-    // Basic validation
-    if (!formData.title.trim() || formData.title.length < 10) {
-      errors.title = 'Title must be at least 10 characters';
+ const validateForm = () => {
+  const errors = {};
+  
+  // Basic validation
+  if (!formData.title.trim() || formData.title.length < 10) {
+    errors.title = 'Title must be at least 10 characters long';
+  }
+  
+  if (!formData.description.trim() || formData.description.length < 20) {
+    errors.description = 'Description must be at least 20 characters long';
+  }
+  
+  // FIXED: Use the new pricing validation
+  const pricingErrors = validatePricing();
+  Object.assign(errors, pricingErrors);
+  
+  // Specifications validation
+  if (!formData.specifications.make.trim()) {
+    errors['specifications.make'] = 'Make is required';
+  }
+  
+  if (!formData.specifications.model.trim()) {
+    errors['specifications.model'] = 'Model is required';
+  }
+  
+  if (!formData.specifications.year || formData.specifications.year < 1900 || formData.specifications.year > new Date().getFullYear() + 2) {
+    errors['specifications.year'] = 'Valid year is required';
+  }
+  
+  // Contact validation
+  if (!formData.contact.sellerName.trim()) {
+    errors['contact.sellerName'] = 'Seller name is required';
+  }
+  
+  if (!formData.contact.phone.trim()) {
+    errors['contact.phone'] = 'Phone number is required';
+  }
+  
+  // Private seller validation
+  if (formData.sellerType === 'private') {
+    if (!formData.privateSeller.firstName.trim()) {
+      errors['privateSeller.firstName'] = 'First name is required for private sellers';
     }
-    if (!formData.description.trim() || formData.description.length < 50) {
-      errors.description = 'Description must be at least 50 characters';
+    if (!formData.privateSeller.lastName.trim()) {
+      errors['privateSeller.lastName'] = 'Last name is required for private sellers';
     }
-    if (!formData.category) {
-      errors.category = 'Category is required';
+  }
+  
+  // Business validation
+  if (formData.sellerType === 'dealership') {
+    if (!formData.businessInfo.businessName.trim()) {
+      errors['businessInfo.businessName'] = 'Business name is required for dealerships';
     }
-    if (!formData.condition) {
-      errors.condition = 'Condition is required';
+    if (!formData.businessInfo.businessType.trim()) {
+      errors['businessInfo.businessType'] = 'Business type is required for dealerships';
     }
-    
-    // Specifications validation
-    if (!formData.specifications.make.trim()) errors['specifications.make'] = 'Make is required';
-    if (!formData.specifications.model.trim()) errors['specifications.model'] = 'Model is required';
-    if (!formData.specifications.year) errors['specifications.year'] = 'Year is required';
-    if (!formData.specifications.mileage) errors['specifications.mileage'] = 'Mileage is required';
-    if (!formData.specifications.transmission) errors['specifications.transmission'] = 'Transmission is required';
-    if (!formData.specifications.fuelType) errors['specifications.fuelType'] = 'Fuel type is required';
-    
-    // Validate year range
-    const currentYear = new Date().getFullYear();
-    if (formData.specifications.year && (formData.specifications.year < 1900 || formData.specifications.year > currentYear + 1)) {
-      errors['specifications.year'] = `Year must be between 1900 and ${currentYear + 1}`;
-    }
-    
-    // Validate mileage
-    if (formData.specifications.mileage && formData.specifications.mileage < 0) {
-      errors['specifications.mileage'] = 'Mileage cannot be negative';
-    }
-    
-    // Pricing validation
-    if (!formData.price) {
-      errors.price = 'Price is required';
-    } else if (formData.price < 0) {
-      errors.price = 'Price cannot be negative';
-    }
-    
-    // Validate savings calculations
-    if (formData.priceOptions.originalPrice && formData.priceOptions.originalPrice <= formData.price) {
-      errors['priceOptions.originalPrice'] = 'Original price must be higher than current price';
-    }
-    
-    // Contact validation
-    if (!formData.contact.sellerName.trim()) errors['contact.sellerName'] = 'Seller name is required';
-    if (!formData.contact.phone.trim()) errors['contact.phone'] = 'Phone number is required';
-    if (!formData.contact.location.city.trim()) errors['contact.location.city'] = 'City is required';
-    
-    // Location validation
-    if (!formData.location.city.trim()) errors['location.city'] = 'Vehicle location city is required';
-    
-    // Seller type specific validation
-    if (formData.sellerType === 'private') {
-      if (!formData.privateSeller.firstName.trim()) errors['privateSeller.firstName'] = 'First name is required';
-      if (!formData.privateSeller.lastName.trim()) errors['privateSeller.lastName'] = 'Last name is required';
-    } else if (formData.sellerType === 'dealership') {
-      if (!formData.businessInfo.businessName.trim()) errors['businessInfo.businessName'] = 'Business name is required';
-      if (!formData.businessInfo.businessType.trim()) errors['businessInfo.businessType'] = 'Business type is required';
-    }
-    
-    // Images validation
-    if (!imageFiles.length && !formData.images.length) {
-      errors.images = 'At least one image is required';
-    }
-    
-    // Email validation if provided
-    if (formData.contact.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contact.email)) {
-      errors['contact.email'] = 'Please enter a valid email address';
-    }
-    
-    // Phone validation (basic)
-    if (formData.contact.phone && formData.contact.phone.length < 8) {
-      errors['contact.phone'] = 'Phone number is too short';
-    }
-    
-    return errors;
-  };
+  }
+  
+  return errors;
+};
+
+const handlePriceChange = (e) => {
+  const { name, value } = e.target;
+  
+  // Update the form data
+  handleInputChange(e);
+  
+  // Real-time validation for pricing fields
+  if (name === 'price' || name === 'priceOptions.originalPrice') {
+    setTimeout(() => {
+      const pricingErrors = validatePricing();
+      setErrors(prev => ({
+        ...prev,
+        ...pricingErrors,
+        // Clear pricing errors if validation passes
+        ...(Object.keys(pricingErrors).length === 0 && {
+          price: undefined,
+          'priceOptions.originalPrice': undefined,
+          'priceOptions.savingsAmount': undefined
+        })
+      }));
+    }, 100); // Small delay to ensure state is updated
+  }
+};
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -651,108 +687,125 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
   };
 
   // Handle form submission
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (isSubmitting) return;
-    
-    try {
-      setLoading(true);
-      setIsSubmitting(true);
-      
-      // Validate form
-      const validationErrors = validateForm();
-      if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
-        showMessage('error', 'Please fix the errors below');
-        
-        // Find first error tab and switch to it
-        const errorKeys = Object.keys(validationErrors);
-        const firstErrorKey = errorKeys[0];
-        
-        if (firstErrorKey.includes('specifications')) {
-          setCurrentTab('specs');
-        } else if (firstErrorKey.includes('features')) {
-          setCurrentTab('features');
-        } else if (firstErrorKey.includes('contact')) {
-          setCurrentTab('contact');
-        } else if (firstErrorKey.includes('price') || firstErrorKey.includes('priceOptions')) {
-          setCurrentTab('pricing');
-        } else if (firstErrorKey.includes('additional')) {
-          setCurrentTab('additional');
-        } else if (firstErrorKey === 'images') {
-          setCurrentTab('images');
-        } else {
-          setCurrentTab('basic');
-        }
-        
-        return;
-      }
-
-      // Clear errors
-      setErrors({});
-
-      // Calculate savings if original price is provided
-      if (formData.priceOptions.originalPrice && formData.priceOptions.originalPrice > formData.price) {
-        const savings = formData.priceOptions.originalPrice - formData.price;
-        const savingsPercent = ((savings / formData.priceOptions.originalPrice) * 100).toFixed(1);
-        
-        formData.priceOptions.savingsAmount = savings;
-        formData.priceOptions.savingsPercentage = savingsPercent;
-        formData.priceOptions.showSavings = true;
-      }
-
-      // Prepare submission data
-      const submissionData = {
-        ...formData,
-        // Ensure contact data is properly structured
-        contact: {
-          sellerName: formData.contact.sellerName,
-          phone: formData.contact.phone,
-          email: formData.contact.email,
-          whatsapp: formData.contact.whatsapp,
-          location: {
-            city: formData.contact.location.city,
-            state: formData.contact.location.state,
-            address: formData.contact.location.address,
-            country: formData.contact.location.country || 'Botswana'
-          }
-        },
-        // Ensure location data is properly structured
-        location: {
-          city: formData.location.city || formData.contact.location.city,
-          state: formData.location.state || formData.contact.location.state,
-          address: formData.location.address || formData.contact.location.address,
-          country: formData.location.country || 'Botswana'
-        },
-        // Include image files for upload
-        imageFiles: imageFiles,
-        primaryImageIndex: primaryImageIndex,
-        // Clean up empty feature arrays
-        features: Object.keys(formData.features).reduce((acc, key) => {
-          acc[key] = formData.features[key].filter(feature => feature && feature.trim());
-          return acc;
-        }, {})
-      };
-      
-      console.log('Submitting enhanced form data with auto-fill support:', submissionData);
-      
-      // Submit the form
-      await onSubmit(submissionData);
-      
-      // Save form data to profile for future use
-      await saveToProfile();
-      
-      showMessage('success', 'Listing created successfully!');
-      
-    } catch (error) {
-      console.error('Form submission error:', error);
-      showMessage('error', error.message || 'Failed to save listing');
-    } finally {
-      setLoading(false);
-      setIsSubmitting(false);
+ const handleFormSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (isSubmitting) return;
+  
+  setLoading(true);
+  setIsSubmitting(true);
+  
+  try {
+    // Validate form first
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      const firstError = Object.values(validationErrors)[0];
+      showMessage('error', firstError);
+      return;
     }
-  };
+
+    // FIXED: Transform data to match backend expectations
+    const submissionData = {
+      // Basic fields that the backend expects at root level
+      title: formData.title,
+      description: formData.description,
+      category: formData.category,
+      condition: formData.condition,
+      sellerType: formData.sellerType,
+      
+      // FIXED: Properly structure pricing object
+      pricing: {
+        price: parseFloat(formData.price) || 0,
+        originalPrice: formData.priceOptions?.originalPrice ? parseFloat(formData.priceOptions.originalPrice) : null,
+        negotiable: formData.priceOptions?.negotiable || false,
+        showSavings: formData.priceOptions?.showSavings || false,
+        savingsAmount: formData.priceOptions?.savingsAmount ? parseFloat(formData.priceOptions.savingsAmount) : null,
+        currency: 'BWP'
+      },
+      
+      // FIXED: Properly structure specifications object
+      specifications: {
+        make: formData.specifications.make,
+        model: formData.specifications.model,
+        year: parseInt(formData.specifications.year) || new Date().getFullYear(),
+        mileage: formData.specifications.mileage,
+        transmission: formData.specifications.transmission,
+        fuelType: formData.specifications.fuelType,
+        engine: formData.specifications.engine,
+        color: formData.specifications.color,
+        doors: formData.specifications.doors,
+        seats: formData.specifications.seats,
+        drivetrain: formData.specifications.drivetrain,
+        bodyType: formData.specifications.bodyType,
+        vin: formData.specifications.vin
+      },
+      
+      // FIXED: Properly structure contact object
+      contact: {
+        sellerName: formData.contact.sellerName,
+        phone: formData.contact.phone,
+        email: formData.contact.email,
+        whatsapp: formData.contact.whatsapp,
+        location: {
+          city: formData.contact.location.city,
+          state: formData.contact.location.state,
+          address: formData.contact.location.address,
+          country: formData.contact.location.country || 'Botswana'
+        }
+      },
+      
+      // Location (separate from contact location)
+      location: {
+        city: formData.location.city || formData.contact.location.city,
+        state: formData.location.state || formData.contact.location.state,
+        address: formData.location.address || formData.contact.location.address,
+        country: formData.location.country || 'Botswana'
+      },
+      
+      // Features
+      features: Object.keys(formData.features).reduce((acc, key) => {
+        acc[key] = formData.features[key].filter(feature => feature && feature.trim());
+        return acc;
+      }, {}),
+      
+      // Images
+      images: formData.images || [],
+      imageFiles: imageFiles,
+      primaryImageIndex: primaryImageIndex,
+      
+      // Additional seller information
+      privateSeller: formData.sellerType === 'private' ? formData.privateSeller : undefined,
+      businessInfo: formData.sellerType === 'dealership' ? formData.businessInfo : undefined,
+      
+      // Social media
+      social: formData.social,
+      
+      // Other fields
+      profilePicture: formData.profilePicture,
+      additionalInfo: formData.additionalInfo,
+      availability: formData.availability,
+      priceOptions: formData.priceOptions
+    };
+    
+    console.log('✅ Submitting properly structured data:', submissionData);
+    
+    // Submit the form
+    await onSubmit(submissionData);
+    
+    // Save form data to profile for future use
+    await saveToProfile();
+    
+    showMessage('success', 'Listing created successfully!');
+    
+  } catch (error) {
+    console.error('Form submission error:', error);
+    showMessage('error', error.message || 'Failed to save listing');
+  } finally {
+    setLoading(false);
+    setIsSubmitting(false);
+  }
+};
 
   // Tab configuration
   const tabs = [
@@ -1540,8 +1593,9 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 id="price"
                 name="price"
                 value={formData.price}
-                onChange={handleInputChange}
+                onChange={handlePriceChange}
                 placeholder="e.g., 150000"
+                step="0.01"
                 min="0"
                 className={errors.price ? 'error' : ''}
               />
@@ -1555,8 +1609,9 @@ const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = f
                 id="priceOptions.originalPrice"
                 name="priceOptions.originalPrice"
                 value={formData.priceOptions.originalPrice}
-                onChange={handleInputChange}
+                onChange={handlePriceChange}
                 placeholder="e.g., 180000"
+                step="0.01"
                 min="0"
                 className={errors['priceOptions.originalPrice'] ? 'error' : ''}
               />
