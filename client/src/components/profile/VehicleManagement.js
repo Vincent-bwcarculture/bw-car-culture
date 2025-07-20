@@ -75,24 +75,65 @@ const VehicleManagement = () => {
     }
   };
 
-  const fetchUserSubmissions = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('/api/user/submissions');
-      
-      if (response.data.success) {
-        setUserSubmissions(response.data.data.submissions || []);
-        setSubmissionStats(response.data.data.stats || submissionStats);
-      } else {
-        showMessage('error', 'Failed to load submissions');
+ const fetchUserSubmissions = async () => {
+  try {
+    setLoading(true);
+    
+    // FIXED: Use explicit full URL
+    const apiUrl = 'https://bw-car-culture-api.vercel.app/api/user/my-submissions';
+    
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
       }
-    } catch (error) {
-      console.error('Error fetching submissions:', error);
+    });
+    
+    const result = await response.json();
+    
+    if (response.ok && result.success) {
+      setUserSubmissions(result.data.submissions || []);
+      setSubmissionStats(result.data.stats || submissionStats);
+    } else {
+      console.error('Failed to load submissions:', result);
       showMessage('error', 'Failed to load submissions');
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error('Error fetching submissions:', error);
+    showMessage('error', 'Failed to load submissions');
+  } finally {
+    setLoading(false);
+  }
+};
+
+const debugAuthToken = () => {
+  const authToken = localStorage.getItem('authToken');
+  const token = localStorage.getItem('token');
+  
+  console.log('Auth Debug:', {
+    authToken: authToken ? `${authToken.substring(0, 20)}...` : 'null',
+    token: token ? `${token.substring(0, 20)}...` : 'null',
+    hasAuth: !!(authToken || token)
+  });
+  
+  return authToken || token;
+};
+
+useEffect(() => {
+  const authToken = localStorage.getItem('authToken');
+  const token = localStorage.getItem('token');
+  
+  console.log('🔑 Auth Debug:', {
+    authToken: authToken ? `Present: ${authToken.substring(0, 20)}...` : '❌ Missing',
+    token: token ? `Present: ${token.substring(0, 20)}...` : '❌ Missing',
+    hasAnyAuth: !!(authToken || token)
+  });
+  
+  if (!authToken && !token) {
+    console.error('🚨 No authentication token found! User may need to log in again.');
+  }
+}, []);
 
   useEffect(() => {
     if (activeSection === 'vehicles') {
@@ -126,12 +167,30 @@ const VehicleManagement = () => {
   };
 
   // Handle car listing form submission (FREE - for admin review)
-  const handleListingFormSubmit = async (listingData) => {
-    try {
-      setLoading(true);
-      
-      // Submit listing for FREE admin review
-      const response = await axios.post('/api/user/submit-listing', {
+const handleListingFormSubmit = async (listingData) => {
+  try {
+    setLoading(true);
+    
+    // FIXED: Use explicit full URL to ensure proper routing
+    const apiUrl = 'https://bw-car-culture-api.vercel.app/api/user/submit-listing';
+    
+    console.log('Submitting to:', apiUrl);
+    console.log('Listing data:', {
+      ...listingData,
+      selectedPlan,
+      selectedAddons,
+      status: 'pending_review',
+      submissionType: 'free_review'
+    });
+    
+    // Submit listing for FREE admin review - Use fetch instead of axios to avoid config issues
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({
         listingData: {
           ...listingData,
           selectedPlan,
@@ -139,32 +198,36 @@ const VehicleManagement = () => {
           status: 'pending_review',
           submissionType: 'free_review'
         }
-      });
+      })
+    });
 
-      if (response.data.success) {
-        setPendingListingData(response.data.data);
-        setListingStep('submitted');
-        showMessage('success', '🎉 Listing submitted for review! We\'ll contact you within 24-48 hours.');
-        
-        // Refresh submissions
-        fetchUserSubmissions();
-        
-        // Reset form state
-        setTimeout(() => {
-          setSelectedPlan(null);
-          setSelectedAddons([]);
-          setActiveSection('submissions');
-        }, 3000);
-      } else {
-        showMessage('error', response.data.message || 'Failed to submit listing');
-      }
-    } catch (error) {
-      console.error('Listing submission error:', error);
-      showMessage('error', 'Failed to submit listing for review');
-    } finally {
-      setLoading(false);
+    const result = await response.json();
+    
+    if (response.ok && result.success) {
+      setPendingListingData(result.data);
+      setListingStep('submitted');
+      showMessage('success', '🎉 Listing submitted for review! We\'ll contact you within 24-48 hours.');
+      
+      // Refresh submissions
+      fetchUserSubmissions();
+      
+      // Reset form state
+      setTimeout(() => {
+        setSelectedPlan(null);
+        setSelectedAddons([]);
+        setActiveSection('submissions');
+      }, 3000);
+    } else {
+      console.error('API Error Response:', result);
+      showMessage('error', result.message || 'Failed to submit listing');
     }
-  };
+  } catch (error) {
+    console.error('Listing submission error:', error);
+    showMessage('error', 'Failed to submit listing for review');
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Handle payment after admin approval (separate flow)
   const handlePaymentComplete = (paymentData) => {
