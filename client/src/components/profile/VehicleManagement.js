@@ -1,5 +1,5 @@
 // client/src/components/profile/VehicleManagement.js
-// FIXED VERSION - Correct flow: Plan Selection → Car Form → Admin Review → Payment → Live
+// COMPLETE VERSION WITH SUBMISSIONS STATUS DISPLAY FIXES
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -34,7 +34,8 @@ const VehicleManagement = () => {
     total: 0,
     pending: 0,
     approved: 0,
-    rejected: 0
+    rejected: 0,
+    listing_created: 0
   });
 
   // === FORM STATE ===
@@ -56,6 +57,90 @@ const VehicleManagement = () => {
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
+  // Debug auth token function
+  const debugAuthToken = () => {
+    const authToken = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
+    
+    console.log('Auth Debug:', {
+      authToken: authToken ? `${authToken.substring(0, 20)}...` : 'null',
+      token: token ? `${token.substring(0, 20)}...` : 'null',
+      hasAuth: !!(authToken || token)
+    });
+    
+    return authToken || token;
+  };
+
+  // Status badge function with proper styling
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      pending_review: {
+        icon: '⏳',
+        color: '#f59e0b',
+        bgColor: '#fef3c7',
+        label: 'Pending Review'
+      },
+      approved: {
+        icon: '✅',
+        color: '#10b981',
+        bgColor: '#d1fae5',
+        label: 'Approved - Ready for Payment'
+      },
+      rejected: {
+        icon: '❌',
+        color: '#ef4444',
+        bgColor: '#fee2e2',
+        label: 'Rejected'
+      },
+      listing_created: {
+        icon: '🚗',
+        color: '#3b82f6',
+        bgColor: '#dbeafe',
+        label: 'Live Listing'
+      },
+      payment_pending: {
+        icon: '💳',
+        color: '#8b5cf6',
+        bgColor: '#ede9fe',
+        label: 'Payment Required'
+      }
+    };
+
+    const config = statusConfig[status] || statusConfig.pending_review;
+
+    return (
+      <span 
+        className="status-badge"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.25rem',
+          padding: '0.25rem 0.75rem',
+          borderRadius: '9999px',
+          fontSize: '0.75rem',
+          fontWeight: '500',
+          color: config.color,
+          backgroundColor: config.bgColor,
+          border: `1px solid ${config.color}20`
+        }}
+      >
+        <span>{config.icon}</span>
+        {config.label}
+      </span>
+    );
+  };
+
+  // Format date function
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   // === DATA FETCHING FUNCTIONS ===
   const fetchUserVehicles = async () => {
     try {
@@ -75,65 +160,71 @@ const VehicleManagement = () => {
     }
   };
 
- const fetchUserSubmissions = async () => {
-  try {
-    setLoading(true);
-    
-    // FIXED: Use explicit full URL
-    const apiUrl = 'https://bw-car-culture-api.vercel.app/api/user/my-submissions';
-    
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
+  // FIXED: Updated fetchUserSubmissions function
+  const fetchUserSubmissions = async () => {
+    try {
+      setLoading(true);
+      
+      // FIXED: Use correct endpoint and fetch method
+      const apiUrl = 'https://bw-car-culture-api.vercel.app/api/user/my-submissions';
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
+        }
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        // FIXED: Handle the correct data structure
+        const submissions = result.data || [];
+        setUserSubmissions(submissions);
+        
+        // FIXED: Calculate stats from submissions data
+        const calculatedStats = {
+          total: submissions.length,
+          pending: submissions.filter(s => s.status === 'pending_review').length,
+          approved: submissions.filter(s => s.status === 'approved').length,
+          rejected: submissions.filter(s => s.status === 'rejected').length,
+          listing_created: submissions.filter(s => s.status === 'listing_created').length
+        };
+        
+        setSubmissionStats(calculatedStats);
+        
+        console.log('✅ Submissions loaded:', {
+          count: submissions.length,
+          stats: calculatedStats
+        });
+      } else {
+        console.error('Failed to load submissions:', result);
+        showMessage('error', result.message || 'Failed to load submissions');
       }
+    } catch (error) {
+      console.error('Error fetching submissions:', error);
+      showMessage('error', 'Failed to load submissions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Debug auth token on component mount
+  useEffect(() => {
+    const authToken = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
+    
+    console.log('🔑 Auth Debug:', {
+      authToken: authToken ? `Present: ${authToken.substring(0, 20)}...` : '❌ Missing',
+      token: token ? `Present: ${token.substring(0, 20)}...` : '❌ Missing',
+      hasAnyAuth: !!(authToken || token)
     });
     
-    const result = await response.json();
-    
-    if (response.ok && result.success) {
-      setUserSubmissions(result.data.submissions || []);
-      setSubmissionStats(result.data.stats || submissionStats);
-    } else {
-      console.error('Failed to load submissions:', result);
-      showMessage('error', 'Failed to load submissions');
+    if (!authToken && !token) {
+      console.error('🚨 No authentication token found! User may need to log in again.');
     }
-  } catch (error) {
-    console.error('Error fetching submissions:', error);
-    showMessage('error', 'Failed to load submissions');
-  } finally {
-    setLoading(false);
-  }
-};
-
-const debugAuthToken = () => {
-  const authToken = localStorage.getItem('authToken');
-  const token = localStorage.getItem('token');
-  
-  console.log('Auth Debug:', {
-    authToken: authToken ? `${authToken.substring(0, 20)}...` : 'null',
-    token: token ? `${token.substring(0, 20)}...` : 'null',
-    hasAuth: !!(authToken || token)
-  });
-  
-  return authToken || token;
-};
-
-useEffect(() => {
-  const authToken = localStorage.getItem('authToken');
-  const token = localStorage.getItem('token');
-  
-  console.log('🔑 Auth Debug:', {
-    authToken: authToken ? `Present: ${authToken.substring(0, 20)}...` : '❌ Missing',
-    token: token ? `Present: ${token.substring(0, 20)}...` : '❌ Missing',
-    hasAnyAuth: !!(authToken || token)
-  });
-  
-  if (!authToken && !token) {
-    console.error('🚨 No authentication token found! User may need to log in again.');
-  }
-}, []);
+  }, []);
 
   useEffect(() => {
     if (activeSection === 'vehicles') {
@@ -167,67 +258,67 @@ useEffect(() => {
   };
 
   // Handle car listing form submission (FREE - for admin review)
-const handleListingFormSubmit = async (listingData) => {
-  try {
-    setLoading(true);
-    
-    // FIXED: Use explicit full URL to ensure proper routing
-    const apiUrl = 'https://bw-car-culture-api.vercel.app/api/user/submit-listing';
-    
-    console.log('Submitting to:', apiUrl);
-    console.log('Listing data:', {
-      ...listingData,
-      selectedPlan,
-      selectedAddons,
-      status: 'pending_review',
-      submissionType: 'free_review'
-    });
-    
-    // Submit listing for FREE admin review - Use fetch instead of axios to avoid config issues
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({
-        listingData: {
-          ...listingData,
-          selectedPlan,
-          selectedAddons,
-          status: 'pending_review',
-          submissionType: 'free_review'
-        }
-      })
-    });
+  const handleListingFormSubmit = async (listingData) => {
+    try {
+      setLoading(true);
+      
+      // FIXED: Use explicit full URL to ensure proper routing
+      const apiUrl = 'https://bw-car-culture-api.vercel.app/api/user/submit-listing';
+      
+      console.log('Submitting to:', apiUrl);
+      console.log('Listing data:', {
+        ...listingData,
+        selectedPlan,
+        selectedAddons,
+        status: 'pending_review',
+        submissionType: 'free_review'
+      });
+      
+      // Submit listing for FREE admin review - Use fetch instead of axios to avoid config issues
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          listingData: {
+            ...listingData,
+            selectedPlan,
+            selectedAddons,
+            status: 'pending_review',
+            submissionType: 'free_review'
+          }
+        })
+      });
 
-    const result = await response.json();
-    
-    if (response.ok && result.success) {
-      setPendingListingData(result.data);
-      setListingStep('submitted');
-      showMessage('success', '🎉 Listing submitted for review! We\'ll contact you within 24-48 hours.');
+      const result = await response.json();
       
-      // Refresh submissions
-      fetchUserSubmissions();
-      
-      // Reset form state
-      setTimeout(() => {
-        setSelectedPlan(null);
-        setSelectedAddons([]);
-        setActiveSection('submissions');
-      }, 3000);
-    } else {
-      console.error('API Error Response:', result);
-      showMessage('error', result.message || 'Failed to submit listing');
+      if (response.ok && result.success) {
+        setPendingListingData(result.data);
+        setListingStep('submitted');
+        showMessage('success', '🎉 Listing submitted for review! We\'ll contact you within 24-48 hours.');
+        
+        // Refresh submissions
+        fetchUserSubmissions();
+        
+        // Reset form state
+        setTimeout(() => {
+          setSelectedPlan(null);
+          setSelectedAddons([]);
+          setActiveSection('submissions');
+        }, 3000);
+      } else {
+        console.error('API Error Response:', result);
+        showMessage('error', result.message || 'Failed to submit listing');
+      }
+    } catch (error) {
+      console.error('Listing submission error:', error);
+      showMessage('error', 'Failed to submit listing for review');
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Listing submission error:', error);
-    showMessage('error', 'Failed to submit listing for review');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // Handle payment after admin approval (separate flow)
   const handlePaymentComplete = (paymentData) => {
@@ -310,35 +401,6 @@ const handleListingFormSubmit = async (listingData) => {
     }
   };
 
-  // === RENDER HELPER FUNCTIONS ===
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      pending_review: { icon: Clock, color: '#f39c12', text: 'Under Review' },
-      approved: { icon: CheckCircle, color: '#27ae60', text: 'Approved - Ready for Payment' },
-      rejected: { icon: X, color: '#e74c3c', text: 'Needs Revision' },
-      active: { icon: CheckCircle, color: '#27ae60', text: 'Live' },
-      expired: { icon: AlertCircle, color: '#95a5a6', text: 'Expired' }
-    };
-
-    const config = statusConfig[status] || { icon: AlertCircle, color: '#95a5a6', text: status };
-    const IconComponent = config.icon;
-
-    return (
-      <span className="status-badge" style={{ color: config.color }}>
-        <IconComponent size={14} />
-        {config.text}
-      </span>
-    );
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
   // === RENDER SECTIONS ===
   const renderVehicles = () => (
     <div className="vehicles-section">
@@ -410,6 +472,7 @@ const handleListingFormSubmit = async (listingData) => {
     </div>
   );
 
+  // FIXED: Complete renderSubmissions function with proper status display
   const renderSubmissions = () => (
     <div className="submissions-section">
       <div className="section-header">
@@ -427,6 +490,10 @@ const handleListingFormSubmit = async (listingData) => {
             <span className="stat-number">{submissionStats.approved}</span>
             <span className="stat-label">Approved</span>
           </div>
+          <div className="stat">
+            <span className="stat-number">{submissionStats.rejected}</span>
+            <span className="stat-label">Rejected</span>
+          </div>
         </div>
       </div>
 
@@ -439,49 +506,103 @@ const handleListingFormSubmit = async (listingData) => {
         <div className="empty-state">
           <Upload size={48} />
           <h4>No submissions yet</h4>
-          <p>Start by creating your first car listing</p>
+          <p>Create your first car listing to see submissions here</p>
           <button 
             className="btn-primary"
-            onClick={() => {
-              setActiveSection('create-listing');
-              setListingStep('pricing');
-            }}
+            onClick={() => setActiveSection('create-listing')}
           >
             Create Your First Listing
           </button>
         </div>
       ) : (
-        <div className="submissions-list">
+        <div className="submissions-grid">
           {userSubmissions.map(submission => (
             <div key={submission._id} className="submission-card">
               <div className="submission-header">
-                <h4>{submission.listingData.title}</h4>
-                {getStatusBadge(submission.status)}
+                <div className="submission-info">
+                  <h4>{submission.listingData?.title || 'Untitled Listing'}</h4>
+                  <div className="submission-meta">
+                    <span className="submission-date">
+                      <Clock size={14} />
+                      Submitted {formatDate(submission.submittedAt)}
+                    </span>
+                    {submission.listingData?.specifications && (
+                      <span className="vehicle-info">
+                        {submission.listingData.specifications.year} {submission.listingData.specifications.make} {submission.listingData.specifications.model}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="submission-status">
+                  {getStatusBadge(submission.status)}
+                </div>
               </div>
               
               <div className="submission-details">
-                <p><strong>Price:</strong> P{submission.listingData.pricing?.price?.toLocaleString()}</p>
-                <p><strong>Vehicle:</strong> {submission.listingData.specifications?.make} {submission.listingData.specifications?.model} ({submission.listingData.specifications?.year})</p>
-                <p><strong>Submitted:</strong> {formatDate(submission.submittedAt)}</p>
-                {submission.adminReview && (
-                  <p><strong>Review Notes:</strong> {submission.adminReview.notes}</p>
+                {submission.listingData?.pricing?.price && (
+                  <div className="price-info">
+                    <DollarSign size={14} />
+                    <span>P{submission.listingData.pricing.price.toLocaleString()}</span>
+                  </div>
+                )}
+                
+                {submission.listingData?.contact?.location?.city && (
+                  <div className="location-info">
+                    <span>📍 {submission.listingData.contact.location.city}</span>
+                  </div>
                 )}
               </div>
-              
-              {submission.status === 'approved' && (
-                <div className="submission-actions">
-                  <button 
-                    className="btn-primary"
-                    onClick={() => {
-                      // Trigger payment flow for approved listing
-                      showMessage('info', 'Redirecting to payment...');
-                    }}
-                  >
-                    <DollarSign size={14} />
-                    Complete Payment
-                  </button>
-                </div>
-              )}
+
+              {/* Status-specific actions */}
+              <div className="submission-actions">
+                {submission.status === 'pending_review' && (
+                  <div className="status-message">
+                    <Info size={14} />
+                    <span>Your listing is being reviewed by our team. We'll contact you within 24-48 hours.</span>
+                  </div>
+                )}
+                
+                {submission.status === 'approved' && (
+                  <div className="status-message approved">
+                    <CheckCircle size={14} />
+                    <span>Great! Your listing has been approved. Complete payment to make it live.</span>
+                    <button className="btn-primary btn-small">
+                      Complete Payment
+                    </button>
+                  </div>
+                )}
+                
+                {submission.status === 'rejected' && (
+                  <div className="status-message rejected">
+                    <AlertCircle size={14} />
+                    <span>
+                      This listing was not approved. 
+                      {submission.adminNotes && ` Reason: ${submission.adminNotes}`}
+                    </span>
+                    <button 
+                      className="btn-secondary btn-small"
+                      onClick={() => {
+                        setActiveSection('create-listing');
+                        setListingStep('form');
+                      }}
+                    >
+                      Create New Listing
+                    </button>
+                  </div>
+                )}
+                
+                {submission.status === 'listing_created' && (
+                  <div className="status-message live">
+                    <Star size={14} />
+                    <span>Your listing is now live on our platform!</span>
+                    {submission.listingId && (
+                      <button className="btn-secondary btn-small">
+                        View Live Listing
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
