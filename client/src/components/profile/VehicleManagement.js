@@ -230,49 +230,36 @@ const VehicleManagement = () => {
 
   // === DATA FETCHING FUNCTIONS ===
   
-  // Load pricing data
+  // Load pricing data - EXACT COPY FROM ADMIN COMPONENT
   const loadPricingData = async () => {
     try {
-      console.log('🔍 Loading pricing data...');
+      console.log('🔍 Fetching pricing data from endpoints...');
       
-      // ✅ FIX: Use full production URLs like fetchUserSubmissions does
       const [tiersResponse, addonsResponse] = await Promise.all([
-        fetch('https://bw-car-culture-api.vercel.app/api/payments/available-tiers'),
-        fetch('https://bw-car-culture-api.vercel.app/api/addons/available')
+        axios.get('/api/payments/available-tiers'),
+        axios.get('/api/addons/available')
       ]);
 
-      const tiersData = await tiersResponse.json();
-      const addonsData = await addonsResponse.json();
+      if (tiersResponse.data.success && addonsResponse.data.success) {
+        const tiers = tiersResponse.data.data.tiers;
+        const addons = addonsResponse.data.data.addons;
 
-      console.log('📊 API Responses:', { 
-        tiers: tiersData, 
-        addons: addonsData 
-      });
+        setPricingData({
+          tiers,
+          addons,
+          loaded: true
+        });
 
-      const loadedTiers = tiersData.success ? tiersData.data.tiers : {};
-      const loadedAddons = addonsData.success ? addonsData.data.addons : {};
-
-      console.log('💰 Loaded pricing data:', { 
-        loadedTiers, 
-        loadedAddons,
-        tierKeys: Object.keys(loadedTiers),
-        addonKeys: Object.keys(loadedAddons)
-      });
-
-      setPricingData({
-        tiers: loadedTiers,
-        addons: loadedAddons,
-        loaded: true
-      });
-
-      console.log('💰 Pricing data loaded successfully');
+        console.log('💰 Pricing data loaded:', { tiers, addons });
+      } else {
+        throw new Error('Pricing endpoints returned unsuccessful response');
+      }
     } catch (error) {
-      console.error('❌ Error loading pricing data:', error);
-      setPricingData({
-        tiers: {},
-        addons: {},
-        loaded: true // Still set to true to prevent infinite loading
-      });
+      console.error('❌ Error fetching pricing data:', error);
+      setPricingData(prev => ({ 
+        ...prev, 
+        loaded: false
+      }));
     }
   };
 
