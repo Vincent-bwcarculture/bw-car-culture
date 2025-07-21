@@ -219,15 +219,6 @@ const VehicleManagement = () => {
     return total;
   };
 
-  // Helper function to get addon details for display
-  const getAddonDetails = (selectedAddons) => {
-    if (!Array.isArray(selectedAddons) || selectedAddons.length === 0) {
-      return [];
-    }
-    
-    return selectedAddons.map(addonId => getAddonInfo(addonId)).filter(addon => addon.price > 0);
-  };
-
   // === DATA FETCHING FUNCTIONS ===
   
   // Load pricing data
@@ -739,7 +730,7 @@ const VehicleManagement = () => {
                       </div>
                     </div>
 
-                    {/* Plan Details Section with FIXED Admin-Style Pricing */}
+                    {/* Plan Details Section with ADMIN'S EXACT LOGIC */}
                     {selectedPlan && (
                       <div className="vm-plan-details">
                         <div className="vm-plan-header">
@@ -757,19 +748,23 @@ const VehicleManagement = () => {
                               <span className="vm-plan-badge">{planInfo.name}</span>
                             </div>
                             
-                            {/* Selected Add-ons - Copy admin's exact approach */}
-                            {addonDetails.length > 0 && (
+                            {/* ✅ ADMIN'S EXACT ADDON LOGIC - Use selectedAddons directly */}
+                            {selectedAddons.length > 0 && pricingData.loaded && (
                               <div className="vm-selected-addons">
                                 <div className="vm-addons-label">Add-ons Selected:</div>
                                 <div className="vm-addons-list">
-                                  {addonDetails.map((addon, index) => (
-                                    <div key={index} className="vm-addon-item">
-                                      <div className="vm-addon-info">
-                                        <span className="vm-addon-name">{addon.name}</span>
+                                  {selectedAddons.map((addonId, index) => {
+                                    const addonInfo = getAddonInfo(addonId);
+                                    
+                                    return (
+                                      <div key={index} className="vm-addon-item">
+                                        <div className="vm-addon-info">
+                                          <span className="vm-addon-name">{addonInfo.name}</span>
+                                        </div>
+                                        <span className="vm-addon-price">+P{addonInfo.price.toLocaleString()}</span>
                                       </div>
-                                      <span className="vm-addon-price">+P{addon.price.toLocaleString()}</span>
-                                    </div>
-                                  ))}
+                                    );
+                                  })}
                                 </div>
                               </div>
                             )}
@@ -781,10 +776,10 @@ const VehicleManagement = () => {
                                 <span className="vm-pricing-value">P{planInfo.price.toLocaleString()}</span>
                               </div>
                               
-                              {addonDetails.length > 0 && (
+                              {selectedAddons.length > 0 && (
                                 <div className="vm-pricing-row">
                                   <span className="vm-pricing-label">Add-ons:</span>
-                                  <span className="vm-pricing-value">P{addonCost.toLocaleString()}</span>
+                                  <span className="vm-pricing-value">P{(totalCost - planInfo.price).toLocaleString()}</span>
                                 </div>
                               )}
                               
@@ -815,7 +810,7 @@ const VehicleManagement = () => {
                           <span>Your listing is being reviewed by our team. We'll contact you within 24-48 hours.</span>
                           <div className="vm-payment-preview">
                             <strong>After Approval:</strong> You'll receive a payment request for P{totalCost.toLocaleString()}
-                            {addonDetails.length > 0 ? ` (${planInfo.name} + ${addonDetails.length} addon${addonDetails.length > 1 ? 's' : ''})` : ` (${planInfo.name})`} 
+                            {selectedAddons.length > 0 ? ` (${planInfo.name} + ${selectedAddons.length} addon${selectedAddons.length > 1 ? 's' : ''})` : ` (${planInfo.name})`} 
                             to activate your listing.
                           </div>
                         </div>
@@ -832,9 +827,9 @@ const VehicleManagement = () => {
                           <div className="vm-payment-info">
                             <div className="vm-payment-amount">
                               <strong>Total Amount Due: P{totalCost.toLocaleString()}</strong>
-                              {addonDetails.length > 0 && (
+                              {selectedAddons.length > 0 && (
                                 <div className="vm-payment-breakdown">
-                                  Base plan (P{planInfo.price.toLocaleString()}) + Addons (P{addonCost.toLocaleString()})
+                                  Base plan (P{planInfo.price.toLocaleString()}) + Addons (P{(totalCost - planInfo.price).toLocaleString()})
                                 </div>
                               )}
                             </div>
@@ -882,7 +877,7 @@ const VehicleManagement = () => {
                         <div className="vm-live-details">
                           <span>🚗 Your listing is now live on our platform!</span>
                           <div className="vm-live-info">
-                            <span>Plan: {planInfo.name} {addonDetails.length > 0 ? `+ ${addonDetails.length} addon${addonDetails.length > 1 ? 's' : ''}` : ''} • Active for {planInfo.duration} days</span>
+                            <span>Plan: {planInfo.name} {selectedAddons.length > 0 ? `+ ${selectedAddons.length} addon${selectedAddons.length > 1 ? 's' : ''}` : ''} • Active for {planInfo.duration} days</span>
                           </div>
                         </div>
                         {submission.listingId && (
