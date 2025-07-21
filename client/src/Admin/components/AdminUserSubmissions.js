@@ -217,75 +217,154 @@ const AdminUserSubmissions = () => {
     return `https://wa.me/${cleanNumber}?text=${message}`;
   };
 
-  const handleReviewSubmission = (submission) => {
-    setSelectedSubmission(submission);
-    setReviewData({
-      action: 'approve',
-      adminNotes: '',
-      subscriptionTier: submission.listingData?.selectedPlan || 'basic'
+ const handleReviewSubmission = (submission) => {
+  console.log('Opening review modal for submission:', submission._id);
+  setSelectedSubmission(submission);
+  setReviewData({
+    action: 'approve',
+    adminNotes: '',
+    subscriptionTier: 'basic'
+  });
+  setShowReviewModal(true);
+  setError(''); // Clear any previous errors
+};
+
+// ADD THESE FUNCTIONS TO AdminUserSubmissions.js after fetchPricingData function
+
+const submitReview = async () => {
+  if (!selectedSubmission || !reviewData.action) {
+    setError('Please select an action (approve/reject)');
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setError('');
+    
+    console.log('🔄 Submitting review:', {
+      submissionId: selectedSubmission._id,
+      action: reviewData.action,
+      adminNotes: reviewData.adminNotes,
+      subscriptionTier: reviewData.subscriptionTier
     });
-    setShowReviewModal(true);
-  };
 
-  const submitReview = async () => {
-    if (!selectedSubmission) return;
+    // Get authentication token
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('Authentication token not found. Please log in again.');
+    }
 
-    try {
-      setLoading(true);
-      
-      console.log('📝 Submitting review:', {
-        submissionId: selectedSubmission._id,
-        reviewData
-      });
-      
-      // Check authentication token
-      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
-      console.log('🔑 Auth token for review:', !!token);
-      
-      // KEEPING YOUR WORKING API PATH
-      const response = await axios.put(
-        `/api/admin/user-listings/${selectedSubmission._id}/review`,
-        reviewData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+    // Prepare request data
+    const requestData = {
+      action: reviewData.action,
+      adminNotes: reviewData.adminNotes.trim(),
+      subscriptionTier: reviewData.action === 'approve' ? reviewData.subscriptionTier : null
+    };
+
+    console.log('📤 Sending review request:', requestData);
+
+    // Make the API call
+    // NOTE: axios will strip /api prefix, so /api/admin/... becomes /admin/... 
+    // which matches your backend admin block pattern
+    const response = await axios.put(
+      `/api/admin/user-listings/${selectedSubmission._id}/review`,
+      requestData,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      );
+      }
+    );
 
-      if (response.data.success) {
-        // Update submission in local state
-        setSubmissions(prev => prev.map(sub => 
+    console.log('📥 Review response:', response.data);
+
+    if (response.data.success) {
+      // Update local state
+      setSubmissions(prevSubmissions => 
+        prevSubmissions.map(sub => 
           sub._id === selectedSubmission._id 
             ? { 
                 ...sub, 
-                status: reviewData.action === 'approve' ? 'approved' : 'rejected',
-                adminNotes: reviewData.adminNotes,
-                reviewedAt: new Date().toISOString(),
-                reviewedBy: response.data.reviewedBy || 'Admin'
+                status: response.data.data.status,
+                adminReview: response.data.data.adminReview || {
+                  action: reviewData.action,
+                  adminNotes: reviewData.adminNotes,
+                  reviewedAt: new Date(),
+                  subscriptionTier: requestData.subscriptionTier
+                }
               }
             : sub
-        ));
-
-        setShowReviewModal(false);
-        setSelectedSubmission(null);
-        
-        // Refresh to get updated stats
-        fetchSubmissions();
-        
-        console.log('✅ Review submitted successfully');
-      }
-    } catch (error) {
-      console.error('❌ Error submitting review:', error);
-      setError(
-        error.response?.data?.message || 
-        'Failed to submit review. Please try again.'
+        )
       );
-    } finally {
-      setLoading(false);
+
+      // Update stats
+      setStats(prevStats => ({
+        ...prevStats,
+        pending: Math.max(0, prevStats.pending - 1),
+        [reviewData.action === 'approve' ? 'approved' : 'rejected']: 
+          prevStats[reviewData.action === 'approve' ? 'approved' : 'rejected'] + 1
+      }));
+
+      // Reset form and close modal
+      setReviewData({
+        action: 'approve',
+        adminNotes: '',
+        subscriptionTier: 'basic'
+      });
+      setSelectedSubmission(null);
+      setShowReviewModal(false);
+
+      console.log('✅ Review submitted successfully');
+      
+    } else {
+      throw new Error(response.data.message || 'Failed to submit review');
     }
-  };
+
+  } catch (error) {
+    console.error('❌ Error submitting review:', error);
+    
+    // Handle different types of errors
+    let errorMessage = 'Failed to submit review. Please try again.';
+    
+    if (error.response) {
+      // Server responded with error status
+      const status = error.response.status;
+      const serverMessage = error.response.data?.message;
+      
+      console.error('Response error details:', {
+        status,
+        data: error.response.data,
+        headers: error.response.headers
+      });
+      
+      if (status === 401) {
+        errorMessage = 'Authentication failed. Please log in again.';
+      } else if (status === 404) {
+        errorMessage = 'Submission not found. It may have been deleted.';
+      } else if (status === 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (serverMessage) {
+        errorMessage = serverMessage;
+      }
+    } else if (error.request) {
+      // Request was made but no response received
+      console.error('Network error details:', error.request);
+      errorMessage = 'Network error. Please check your connection.';
+    } else {
+      // Something else happened
+      console.error('Other error:', error.message);
+      errorMessage = error.message || 'An unexpected error occurred.';
+    }
+    
+    setError(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// ALSO ADD THIS HELPER FUNCTION to handle opening the review modal
+
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Date not available';
