@@ -219,6 +219,15 @@ const VehicleManagement = () => {
     return total;
   };
 
+  // Helper function to get addon details (needed to prevent build error)
+  const getAddonDetails = (selectedAddons) => {
+    if (!Array.isArray(selectedAddons) || selectedAddons.length === 0) {
+      return [];
+    }
+    
+    return selectedAddons.map(addonId => getAddonInfo(addonId)).filter(addon => addon.price > 0);
+  };
+
   // === DATA FETCHING FUNCTIONS ===
   
   // Load pricing data
@@ -403,7 +412,7 @@ const VehicleManagement = () => {
         const addonCost = totalCost - planInfo.price;
         
         // Get addon details by mapping selectedAddons directly
-        const selectedAddonDetails = selectedAddons.map(addonId => getAddonInfo(addonId)).filter(addon => addon.price > 0);
+        const selectedAddonDetails = getAddonDetails(selectedAddons);
         
         pricingDetails = {
           ...planInfo,
