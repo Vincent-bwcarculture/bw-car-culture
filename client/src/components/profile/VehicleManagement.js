@@ -1,5 +1,5 @@
 // client/src/components/profile/VehicleManagement.js
-// FIXED VERSION - CLEAN REACT CODE WITH PROPER PRICING
+// FIXED VERSION - CLEAN REACT CODE WITH PROPER PRICING (ADMIN APPROACH INTEGRATED)
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -161,75 +161,110 @@ const VehicleManagement = () => {
     return null;
   };
 
-  // Calculate pricing for a submission
-  const calculatePricing = (selectedPlan, selectedAddons = [], savedPricingData = null) => {
-    // If pricing data was saved with submission, use that
-    if (savedPricingData) {
-      return savedPricingData;
-    }
+  // ===== FIXED: ADMIN-STYLE PRICING FUNCTIONS =====
+  // Replace the old calculatePricing with these admin-style functions
 
-    // Use current pricing data
-    const { tiers, addons } = pricingData;
-    const basePlan = tiers[selectedPlan] || { name: 'Plan Not Selected', price: 0, duration: 0 };
+  const getPlanInfo = (planId) => {
+    if (!pricingData.loaded || !planId) {
+      return { name: 'Plan Not Available', price: 0, duration: 0 };
+    }
     
-    let addonCost = 0;
-    const selectedAddonDetails = [];
+    const planData = pricingData.tiers[planId];
+    if (!planData) {
+      return { name: 'Unknown Plan', price: 0, duration: 0 };
+    }
     
-    if (Array.isArray(selectedAddons)) {
+    return {
+      name: planData.name,
+      price: planData.price,
+      duration: planData.duration
+    };
+  };
+
+  const getAddonInfo = (addonId) => {
+    if (!pricingData.loaded || !addonId) {
+      return { name: 'Addon Not Available', price: 0 };
+    }
+    
+    const addonData = pricingData.addons[addonId];
+    if (!addonData) {
+      return { name: 'Unknown Addon', price: 0 };
+    }
+    
+    return {
+      name: addonData.name,
+      price: addonData.price
+    };
+  };
+
+  const calculateTotalCost = (selectedPlan, selectedAddons) => {
+    if (!pricingData.loaded) return 0;
+    
+    let total = 0;
+    
+    // Add plan cost
+    if (selectedPlan && pricingData.tiers[selectedPlan]) {
+      total += pricingData.tiers[selectedPlan].price;
+    }
+    
+    // Add addons cost
+    if (selectedAddons && Array.isArray(selectedAddons)) {
       selectedAddons.forEach(addonId => {
-        if (addons[addonId]) {
-          addonCost += addons[addonId].price;
-          selectedAddonDetails.push(addons[addonId]);
+        if (pricingData.addons[addonId]) {
+          total += pricingData.addons[addonId].price;
         }
       });
     }
     
-    return {
-      ...basePlan,
-      addonCost,
-      totalCost: basePlan.price + addonCost,
-      addons: selectedAddonDetails,
-      hasAddons: selectedAddonDetails.length > 0
-    };
+    return total;
+  };
+
+  // Helper function to get addon details for display
+  const getAddonDetails = (selectedAddons) => {
+    if (!Array.isArray(selectedAddons) || selectedAddons.length === 0) {
+      return [];
+    }
+    
+    return selectedAddons.map(addonId => getAddonInfo(addonId)).filter(addon => addon.price > 0);
   };
 
   // === DATA FETCHING FUNCTIONS ===
   
   // Load pricing data
- const loadPricingData = async () => {
-  try {
-    console.log('🔍 Loading pricing data...');
-    
-    // ✅ FIX: Use full production URLs like fetchUserSubmissions does
-    const [tiersResponse, addonsResponse] = await Promise.all([
-      fetch('https://bw-car-culture-api.vercel.app/api/payments/available-tiers'),
-      fetch('https://bw-car-culture-api.vercel.app/api/addons/available')
-    ]);
+  const loadPricingData = async () => {
+    try {
+      console.log('🔍 Loading pricing data...');
+      
+      // ✅ FIX: Use full production URLs like fetchUserSubmissions does
+      const [tiersResponse, addonsResponse] = await Promise.all([
+        fetch('https://bw-car-culture-api.vercel.app/api/payments/available-tiers'),
+        fetch('https://bw-car-culture-api.vercel.app/api/addons/available')
+      ]);
 
-    const tiersData = await tiersResponse.json();
-    const addonsData = await addonsResponse.json();
+      const tiersData = await tiersResponse.json();
+      const addonsData = await addonsResponse.json();
 
-    console.log('📊 API Responses:', { 
-      tiers: tiersData, 
-      addons: addonsData 
-    });
+      console.log('📊 API Responses:', { 
+        tiers: tiersData, 
+        addons: addonsData 
+      });
 
-    setPricingData({
-      tiers: tiersData.success ? tiersData.data.tiers : {},
-      addons: addonsData.success ? addonsData.data.addons : {},
-      loaded: true
-    });
+      setPricingData({
+        tiers: tiersData.success ? tiersData.data.tiers : {},
+        addons: addonsData.success ? addonsData.data.addons : {},
+        loaded: true
+      });
 
-    console.log('💰 Pricing data loaded successfully');
-  } catch (error) {
-    console.error('❌ Error loading pricing data:', error);
-    setPricingData({
-      tiers: {},
-      addons: {},
-      loaded: true // Still set to true to prevent infinite loading
-    });
-  }
-};
+      console.log('💰 Pricing data loaded successfully');
+    } catch (error) {
+      console.error('❌ Error loading pricing data:', error);
+      setPricingData({
+        tiers: {},
+        addons: {},
+        loaded: true // Still set to true to prevent infinite loading
+      });
+    }
+  };
 
   const fetchUserVehicles = async () => {
     try {
@@ -359,10 +394,21 @@ const VehicleManagement = () => {
       // FIXED: Use explicit full URL to ensure proper routing
       const apiUrl = 'https://bw-car-culture-api.vercel.app/api/user/submit-listing';
       
-      // Calculate actual pricing details to save with submission
+      // Calculate actual pricing details to save with submission using admin approach
       let pricingDetails = null;
       if (selectedPlan && pricingData.loaded) {
-        pricingDetails = calculatePricing(selectedPlan, selectedAddons);
+        const planInfo = getPlanInfo(selectedPlan);
+        const addonDetails = getAddonDetails(selectedAddons);
+        const totalCost = calculateTotalCost(selectedPlan, selectedAddons);
+        const addonCost = totalCost - planInfo.price;
+        
+        pricingDetails = {
+          ...planInfo,
+          addonCost,
+          totalCost,
+          addons: addonDetails,
+          hasAddons: addonDetails.length > 0
+        };
       }
       
       console.log('Submitting to:', apiUrl);
@@ -574,7 +620,7 @@ const VehicleManagement = () => {
     </div>
   );
 
-  // IMPROVED: Better submissions layout with real pricing
+  // IMPROVED: Better submissions layout with FIXED admin-style pricing
   const renderSubmissions = () => (
     <div className="vm-submissions-section">
       <div className="vm-section-header">
@@ -620,14 +666,14 @@ const VehicleManagement = () => {
         <div className="vm-submissions-grid">
           {userSubmissions.map(submission => {
             const primaryImage = getPrimaryImage(submission);
+            
+            // ✅ FIXED: Use admin's approach - always calculate fresh, never use saved data
             const selectedPlan = submission.listingData?.selectedPlan;
             const selectedAddons = submission.listingData?.selectedAddons || [];
-            const savedPricingData = submission.listingData?.pricingDetails;
-            
-            // Calculate pricing for this submission
-            const planDetails = pricingData.loaded 
-              ? calculatePricing(selectedPlan, selectedAddons, savedPricingData)
-              : null;
+            const planInfo = getPlanInfo(selectedPlan);
+            const totalCost = calculateTotalCost(selectedPlan, selectedAddons);
+            const addonDetails = getAddonDetails(selectedAddons);
+            const addonCost = totalCost - planInfo.price;
             
             return (
               <div key={submission._id} className="vm-submission-card">
@@ -693,7 +739,7 @@ const VehicleManagement = () => {
                       </div>
                     </div>
 
-                    {/* Plan Details Section with Real Pricing */}
+                    {/* Plan Details Section with FIXED Admin-Style Pricing */}
                     {selectedPlan && (
                       <div className="vm-plan-details">
                         <div className="vm-plan-header">
@@ -704,47 +750,54 @@ const VehicleManagement = () => {
                             <div className="vm-small-spinner"></div>
                             <span>Loading pricing...</span>
                           </div>
-                        ) : planDetails ? (
+                        ) : (
                           <div className="vm-plan-info">
+                            {/* Plan Info */}
                             <div className="vm-plan-name">
-                              <span className="vm-plan-badge">{planDetails.name}</span>
+                              <span className="vm-plan-badge">{planInfo.name}</span>
                             </div>
+                            
+                            {/* Selected Add-ons - Copy admin's exact approach */}
+                            {addonDetails.length > 0 && (
+                              <div className="vm-selected-addons">
+                                <div className="vm-addons-label">Add-ons Selected:</div>
+                                <div className="vm-addons-list">
+                                  {addonDetails.map((addon, index) => (
+                                    <div key={index} className="vm-addon-item">
+                                      <div className="vm-addon-info">
+                                        <span className="vm-addon-name">{addon.name}</span>
+                                      </div>
+                                      <span className="vm-addon-price">+P{addon.price.toLocaleString()}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Pricing breakdown */}
                             <div className="vm-plan-pricing">
                               <div className="vm-pricing-row">
                                 <span className="vm-pricing-label">Base Plan:</span>
-                                <span className="vm-pricing-value">P{planDetails.price.toLocaleString()}</span>
+                                <span className="vm-pricing-value">P{planInfo.price.toLocaleString()}</span>
                               </div>
                               
-                              {/* Show addons if any */}
-                              {planDetails.hasAddons && (
-                                <>
-                                  {planDetails.addons.map((addon, index) => (
-                                    <div key={index} className="vm-pricing-row vm-addon-row">
-                                      <span className="vm-pricing-label">+ {addon.name}:</span>
-                                      <span className="vm-pricing-value">P{addon.price.toLocaleString()}</span>
-                                    </div>
-                                  ))}
-                                  <div className="vm-pricing-row vm-addon-separator">
-                                    <span className="vm-pricing-label">Addons Subtotal:</span>
-                                    <span className="vm-pricing-value">P{planDetails.addonCost.toLocaleString()}</span>
-                                  </div>
-                                </>
+                              {addonDetails.length > 0 && (
+                                <div className="vm-pricing-row">
+                                  <span className="vm-pricing-label">Add-ons:</span>
+                                  <span className="vm-pricing-value">P{addonCost.toLocaleString()}</span>
+                                </div>
                               )}
                               
                               <div className="vm-pricing-row vm-total-row">
                                 <span className="vm-pricing-label">Total Amount:</span>
-                                <span className="vm-pricing-value vm-total-price">P{planDetails.totalCost.toLocaleString()}</span>
+                                <span className="vm-pricing-value vm-total-price">P{totalCost.toLocaleString()}</span>
                               </div>
                               
                               <div className="vm-pricing-row">
                                 <span className="vm-pricing-label">Duration:</span>
-                                <span className="vm-pricing-value">{planDetails.duration} days</span>
+                                <span className="vm-pricing-value">{planInfo.duration} days</span>
                               </div>
                             </div>
-                          </div>
-                        ) : (
-                          <div className="vm-pricing-error">
-                            <span>Unable to load pricing details</span>
                           </div>
                         )}
                       </div>
@@ -754,15 +807,15 @@ const VehicleManagement = () => {
 
                 {/* Status-specific actions with accurate payment amounts */}
                 <div className="vm-submission-actions">
-                  {submission.status === 'pending_review' && planDetails && (
+                  {submission.status === 'pending_review' && totalCost > 0 && (
                     <div className="vm-status-message vm-status-pending">
                       <Info size={14} />
                       <div className="vm-message-content">
                         <div className="vm-status-text">
                           <span>Your listing is being reviewed by our team. We'll contact you within 24-48 hours.</span>
                           <div className="vm-payment-preview">
-                            <strong>After Approval:</strong> You'll receive a payment request for P{planDetails.totalCost.toLocaleString()} 
-                            {planDetails.hasAddons ? ` (${planDetails.name} + ${planDetails.addons.length} addon${planDetails.addons.length > 1 ? 's' : ''})` : ` (${planDetails.name})`} 
+                            <strong>After Approval:</strong> You'll receive a payment request for P{totalCost.toLocaleString()}
+                            {addonDetails.length > 0 ? ` (${planInfo.name} + ${addonDetails.length} addon${addonDetails.length > 1 ? 's' : ''})` : ` (${planInfo.name})`} 
                             to activate your listing.
                           </div>
                         </div>
@@ -770,7 +823,7 @@ const VehicleManagement = () => {
                     </div>
                   )}
                   
-                  {submission.status === 'approved' && planDetails && (
+                  {submission.status === 'approved' && totalCost > 0 && (
                     <div className="vm-status-message vm-status-approved">
                       <CheckCircle size={14} />
                       <div className="vm-message-content">
@@ -778,10 +831,10 @@ const VehicleManagement = () => {
                           <span>🎉 Great! Your listing has been approved.</span>
                           <div className="vm-payment-info">
                             <div className="vm-payment-amount">
-                              <strong>Total Amount Due: P{planDetails.totalCost.toLocaleString()}</strong>
-                              {planDetails.hasAddons && (
+                              <strong>Total Amount Due: P{totalCost.toLocaleString()}</strong>
+                              {addonDetails.length > 0 && (
                                 <div className="vm-payment-breakdown">
-                                  Base plan (P{planDetails.price.toLocaleString()}) + Addons (P{planDetails.addonCost.toLocaleString()})
+                                  Base plan (P{planInfo.price.toLocaleString()}) + Addons (P{addonCost.toLocaleString()})
                                 </div>
                               )}
                             </div>
@@ -793,7 +846,7 @@ const VehicleManagement = () => {
                         </div>
                         <button className="vm-btn vm-btn-primary vm-btn-small">
                           <DollarSign size={14} />
-                          Pay Now (P{planDetails.totalCost.toLocaleString()})
+                          Pay Now (P{totalCost.toLocaleString()})
                         </button>
                       </div>
                     </div>
@@ -822,14 +875,14 @@ const VehicleManagement = () => {
                     </div>
                   )}
                   
-                  {submission.status === 'listing_created' && planDetails && (
+                  {submission.status === 'listing_created' && totalCost > 0 && (
                     <div className="vm-status-message vm-status-live">
                       <Star size={14} />
                       <div className="vm-message-content">
                         <div className="vm-live-details">
                           <span>🚗 Your listing is now live on our platform!</span>
                           <div className="vm-live-info">
-                            <span>Plan: {planDetails.name} {planDetails.hasAddons ? `+ ${planDetails.addons.length} addon${planDetails.addons.length > 1 ? 's' : ''}` : ''} • Active for {planDetails.duration} days</span>
+                            <span>Plan: {planInfo.name} {addonDetails.length > 0 ? `+ ${addonDetails.length} addon${addonDetails.length > 1 ? 's' : ''}` : ''} • Active for {planInfo.duration} days</span>
                           </div>
                         </div>
                         {submission.listingId && (
