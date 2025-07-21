@@ -389,16 +389,18 @@ const VehicleManagement = () => {
       let pricingDetails = null;
       if (selectedPlan && pricingData.loaded) {
         const planInfo = getPlanInfo(selectedPlan);
-        const addonDetails = getAddonDetails(selectedAddons);
         const totalCost = calculateTotalCost(selectedPlan, selectedAddons);
         const addonCost = totalCost - planInfo.price;
+        
+        // Get addon details by mapping selectedAddons directly
+        const selectedAddonDetails = selectedAddons.map(addonId => getAddonInfo(addonId)).filter(addon => addon.price > 0);
         
         pricingDetails = {
           ...planInfo,
           addonCost,
           totalCost,
-          addons: addonDetails,
-          hasAddons: addonDetails.length > 0
+          addons: selectedAddonDetails,
+          hasAddons: selectedAddonDetails.length > 0
         };
       }
       
@@ -1200,5 +1202,3 @@ const VehicleManagement = () => {
 };
 
 export default VehicleManagement;
-
-
