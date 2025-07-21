@@ -665,7 +665,7 @@ const VehicleManagement = () => {
             const selectedAddons = submission.listingData?.selectedAddons || [];
             const planInfo = getPlanInfo(selectedPlan);
             const totalCost = calculateTotalCost(selectedPlan, selectedAddons);
-            const addonDetails = getAddonDetails(selectedAddons);
+            const addonDetails = selectedAddons.map(addonId => getAddonInfo(addonId)).filter(addon => addon.price > 0);
             const addonCost = totalCost - planInfo.price;
             
             return (
@@ -755,18 +755,14 @@ const VehicleManagement = () => {
                               <div className="vm-selected-addons">
                                 <div className="vm-addons-label">Add-ons Selected:</div>
                                 <div className="vm-addons-list">
-                                  {selectedAddons.map((addonId, index) => {
-                                    const addonInfo = getAddonInfo(addonId);
-                                    
-                                    return (
-                                      <div key={index} className="vm-addon-item">
-                                        <div className="vm-addon-info">
-                                          <span className="vm-addon-name">{addonInfo.name}</span>
-                                        </div>
-                                        <span className="vm-addon-price">+P{addonInfo.price.toLocaleString()}</span>
+                                  {addonDetails.map((addon, index) => (
+                                    <div key={index} className="vm-addon-item">
+                                      <div className="vm-addon-info">
+                                        <span className="vm-addon-name">{addon.name}</span>
                                       </div>
-                                    );
-                                  })}
+                                      <span className="vm-addon-price">+P{addon.price.toLocaleString()}</span>
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
                             )}
