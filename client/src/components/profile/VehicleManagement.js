@@ -196,30 +196,40 @@ const VehicleManagement = () => {
   // === DATA FETCHING FUNCTIONS ===
   
   // Load pricing data
-  const loadPricingData = async () => {
-    try {
-      const [tiersResponse, addonsResponse] = await Promise.all([
-        fetch('/api/payments/available-tiers'),
-        fetch('/api/addons/available')
-      ]);
+ const loadPricingData = async () => {
+  try {
+    console.log('🔍 Loading pricing data...');
+    
+    // ✅ FIX: Use full production URLs like fetchUserSubmissions does
+    const [tiersResponse, addonsResponse] = await Promise.all([
+      fetch('https://bw-car-culture-api.vercel.app/api/payments/available-tiers'),
+      fetch('https://bw-car-culture-api.vercel.app/api/addons/available')
+    ]);
 
-      const tiersData = await tiersResponse.json();
-      const addonsData = await addonsResponse.json();
+    const tiersData = await tiersResponse.json();
+    const addonsData = await addonsResponse.json();
 
-      setPricingData({
-        tiers: tiersData.success ? tiersData.data.tiers : {},
-        addons: addonsData.success ? addonsData.data.addons : {},
-        loaded: true
-      });
-    } catch (error) {
-      console.error('Error loading pricing data:', error);
-      setPricingData({
-        tiers: {},
-        addons: {},
-        loaded: true
-      });
-    }
-  };
+    console.log('📊 API Responses:', { 
+      tiers: tiersData, 
+      addons: addonsData 
+    });
+
+    setPricingData({
+      tiers: tiersData.success ? tiersData.data.tiers : {},
+      addons: addonsData.success ? addonsData.data.addons : {},
+      loaded: true
+    });
+
+    console.log('💰 Pricing data loaded successfully');
+  } catch (error) {
+    console.error('❌ Error loading pricing data:', error);
+    setPricingData({
+      tiers: {},
+      addons: {},
+      loaded: true // Still set to true to prevent infinite loading
+    });
+  }
+};
 
   const fetchUserVehicles = async () => {
     try {
