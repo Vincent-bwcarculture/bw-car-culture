@@ -217,13 +217,13 @@ const AdminUserSubmissions = () => {
     return `https://wa.me/${cleanNumber}?text=${message}`;
   };
 
- const handleReviewSubmission = (submission) => {
+const handleReviewSubmission = (submission) => {
   console.log('Opening review modal for submission:', submission._id);
   setSelectedSubmission(submission);
   setReviewData({
     action: 'approve',
     adminNotes: '',
-    subscriptionTier: 'basic'
+    subscriptionTier: Object.keys(pricingData.tiers)[0] || 'basic' // Use first available tier
   });
   setShowReviewModal(true);
   setError(''); // Clear any previous errors
@@ -264,8 +264,6 @@ const submitReview = async () => {
     console.log('📤 Sending review request:', requestData);
 
     // Make the API call
-    // NOTE: axios will strip /api prefix, so /api/admin/... becomes /admin/... 
-    // which matches your backend admin block pattern
     const response = await axios.put(
       `/api/admin/user-listings/${selectedSubmission._id}/review`,
       requestData,
@@ -291,7 +289,8 @@ const submitReview = async () => {
                   action: reviewData.action,
                   adminNotes: reviewData.adminNotes,
                   reviewedAt: new Date(),
-                  subscriptionTier: requestData.subscriptionTier
+                  subscriptionTier: requestData.subscriptionTier,
+                  reviewedByName: response.data.reviewedBy
                 }
               }
             : sub
@@ -316,6 +315,8 @@ const submitReview = async () => {
       setShowReviewModal(false);
 
       console.log('✅ Review submitted successfully');
+      
+      // Optional: You can add a success toast notification here
       
     } else {
       throw new Error(response.data.message || 'Failed to submit review');
@@ -342,6 +343,8 @@ const submitReview = async () => {
         errorMessage = 'Authentication failed. Please log in again.';
       } else if (status === 404) {
         errorMessage = 'Submission not found. It may have been deleted.';
+      } else if (status === 400) {
+        errorMessage = serverMessage || 'Invalid request. Please check your input.';
       } else if (status === 500) {
         errorMessage = 'Server error. Please try again later.';
       } else if (serverMessage) {
