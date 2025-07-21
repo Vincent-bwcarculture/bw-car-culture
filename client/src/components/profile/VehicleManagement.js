@@ -240,9 +240,19 @@ const VehicleManagement = () => {
         addons: addonsData 
       });
 
+      const loadedTiers = tiersData.success ? tiersData.data.tiers : {};
+      const loadedAddons = addonsData.success ? addonsData.data.addons : {};
+
+      console.log('💰 Loaded pricing data:', { 
+        loadedTiers, 
+        loadedAddons,
+        tierKeys: Object.keys(loadedTiers),
+        addonKeys: Object.keys(loadedAddons)
+      });
+
       setPricingData({
-        tiers: tiersData.success ? tiersData.data.tiers : {},
-        addons: addonsData.success ? addonsData.data.addons : {},
+        tiers: loadedTiers,
+        addons: loadedAddons,
         loaded: true
       });
 
@@ -665,7 +675,7 @@ const VehicleManagement = () => {
             const selectedAddons = submission.listingData?.selectedAddons || [];
             const planInfo = getPlanInfo(selectedPlan);
             const totalCost = calculateTotalCost(selectedPlan, selectedAddons);
-            const addonDetails = selectedAddons.map(addonId => getAddonInfo(addonId)).filter(addon => addon.price > 0);
+            const addonDetails = getAddonDetails(selectedAddons);
             const addonCost = totalCost - planInfo.price;
             
             return (
@@ -755,14 +765,18 @@ const VehicleManagement = () => {
                               <div className="vm-selected-addons">
                                 <div className="vm-addons-label">Add-ons Selected:</div>
                                 <div className="vm-addons-list">
-                                  {addonDetails.map((addon, index) => (
-                                    <div key={index} className="vm-addon-item">
-                                      <div className="vm-addon-info">
-                                        <span className="vm-addon-name">{addon.name}</span>
+                                  {selectedAddons.map((addonId, index) => {
+                                    const addonInfo = getAddonInfo(addonId);
+                                    
+                                    return (
+                                      <div key={index} className="vm-addon-item">
+                                        <div className="vm-addon-info">
+                                          <span className="vm-addon-name">{addonInfo.name}</span>
+                                        </div>
+                                        <span className="vm-addon-price">+P{addonInfo.price.toLocaleString()}</span>
                                       </div>
-                                      <span className="vm-addon-price">+P{addon.price.toLocaleString()}</span>
-                                    </div>
-                                  ))}
+                                    );
+                                  })}
                                 </div>
                               </div>
                             )}
