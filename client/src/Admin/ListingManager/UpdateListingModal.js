@@ -635,134 +635,218 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (isSubmitting) return;
+  
+  setIsSubmitting(true);
+  setErrors({});
+
+  try {
+    console.log('=== SUBMIT UPDATE LISTING ===');
     
-    if (!validateForm()) {
-      dispatch(addNotification({
-        type: 'error',
-        message: 'Please fill in all required fields'
-      }));
+    // Validate required fields
+    const requiredFields = ['title', 'price', 'make', 'model', 'year'];
+    const newErrors = {};
+    
+    requiredFields.forEach(field => {
+      if (!formData[field] || formData[field].toString().trim() === '') {
+        newErrors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+      }
+    });
+    
+    // Validate images - ensure we have at least one image
+    const totalImages = (images?.length || 0) + (newImages?.length || 0);
+    if (totalImages === 0) {
+      newErrors.images = 'At least one image is required';
+    }
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      console.error('Validation errors:', newErrors);
       return;
     }
 
-    setIsSubmitting(true);
-    
-    try {
-      console.log(`Updating listing with ${newImages.length} new images`);
+    // Prepare the submission data with proper image handling
+    const submitData = {
+      // Basic listing data
+      title: formData.title?.trim(),
+      description: formData.description?.trim(),
+      price: parseFloat(formData.price),
       
-      // Prepare the form data
-      const submitData = {
-        title: formData.title || '',
-        description: formData.description || '',
-        shortDescription: formData.shortDescription || '',
-        category: formData.category || '',
-        condition: formData.condition || 'used',
-        status: formData.status || 'active',
-        dealerId: formData.dealer || '',
-        featured: Boolean(formData.featured),
-        
-        price: Number(formData.price) || 0,
-        priceType: formData.priceType || 'fixed',
-        priceOptions: {
-          includesVAT: Boolean(formData.priceOptions?.includesVAT),
-          showPriceAsPOA: Boolean(formData.priceOptions?.showPriceAsPOA),
-          financeAvailable: Boolean(formData.priceOptions?.financeAvailable),
-          leaseAvailable: Boolean(formData.priceOptions?.leaseAvailable),
-          monthlyPayment: formData.priceOptions?.monthlyPayment ? Number(formData.priceOptions.monthlyPayment) : null,
-          // Savings options
-          originalPrice: formData.priceOptions?.originalPrice ? Number(formData.priceOptions.originalPrice) : null,
-          savingsAmount: formData.priceOptions?.savingsAmount ? Number(formData.priceOptions.savingsAmount) : null,
-          savingsPercentage: formData.priceOptions?.savingsPercentage ? Number(formData.priceOptions.savingsPercentage) : null,
-          dealerDiscount: formData.priceOptions?.dealerDiscount ? Number(formData.priceOptions.dealerDiscount) : null,
-          showSavings: Boolean(formData.priceOptions?.showSavings),
-          savingsDescription: formData.priceOptions?.savingsDescription || null,
-          exclusiveDeal: Boolean(formData.priceOptions?.exclusiveDeal),
-          savingsValidUntil: formData.priceOptions?.savingsValidUntil ? new Date(formData.priceOptions.savingsValidUntil) : null
-        },
-        
-        safetyFeatures: Array.isArray(formData.safetyFeatures) ? formData.safetyFeatures : [],
-        comfortFeatures: Array.isArray(formData.comfortFeatures) ? formData.comfortFeatures : [],
-        performanceFeatures: Array.isArray(formData.performanceFeatures) ? formData.performanceFeatures : [],
-        entertainmentFeatures: Array.isArray(formData.entertainmentFeatures) ? formData.entertainmentFeatures : [],
-        features: Array.isArray(formData.features) ? formData.features : [],
-        
-        specifications: {
-          make: formData.specifications?.make || '',
-          model: formData.specifications?.model || '',
-          year: Number(formData.specifications?.year) || new Date().getFullYear(),
-          mileage: Number(formData.specifications?.mileage) || 0,
-          transmission: formData.specifications?.transmission || '',
-          fuelType: formData.specifications?.fuelType || '',
-          engineSize: formData.specifications?.engineSize || '',
-          power: formData.specifications?.power || '',
-          torque: formData.specifications?.torque || '',
-          drivetrain: formData.specifications?.drivetrain || '',
-          exteriorColor: formData.specifications?.exteriorColor || '',
-          interiorColor: formData.specifications?.interiorColor || '',
-          vin: formData.specifications?.vin || ''
-        },
-        
-        location: {
-          address: formData.location?.address || '',
-          city: formData.location?.city || '',
-          state: formData.location?.state || '',
-          country: formData.location?.country || '',
-          postalCode: formData.location?.postalCode || ''
-        },
-        
-        seo: {
-          metaTitle: formData.seo?.metaTitle || '',
-          metaDescription: formData.seo?.metaDescription || '',
-          keywords: Array.isArray(formData.seo?.keywords) ? formData.seo.keywords : []
-        },
-        
-        serviceHistory: formData.serviceHistory?.hasServiceHistory ? {
-          hasServiceHistory: true,
-          records: formData.serviceHistory.records || []
-        } : {
-          hasServiceHistory: false,
-          records: []
-        },
-        
-        // Add image handling for updates
-        existingImages: images.filter(img => !imagesToDelete.find(del => del.id === img.id)),
-        imagesToDelete: imagesToDelete,
-        newImages: newImages,
-        primaryImageIndex: primaryImageIndex
-      };
+      // Vehicle details
+      make: formData.make,
+      model: formData.model,
+      year: parseInt(formData.year),
+      mileage: formData.mileage ? parseInt(formData.mileage) : undefined,
+      transmission: formData.transmission,
+      fuelType: formData.fuelType,
+      bodyType: formData.bodyType,
+      condition: formData.condition,
+      
+      // Location data
+      location: formData.location || {},
+      
+      // Features and specifications
+      features: Array.isArray(formData.features) ? formData.features : [],
+      specifications: formData.specifications || {},
+      
+      // SEO data
+      seo: {
+        title: formData.seo?.title || formData.title,
+        description: formData.seo?.description || formData.description,
+        keywords: Array.isArray(formData.seo?.keywords) ? formData.seo.keywords : []
+      },
+      
+      // Service history
+      serviceHistory: formData.serviceHistory?.hasServiceHistory ? {
+        hasServiceHistory: true,
+        records: Array.isArray(formData.serviceHistory.records) ? formData.serviceHistory.records : []
+      } : {
+        hasServiceHistory: false,
+        records: []
+      },
+      
+      // Price options and savings
+      priceOptions: formData.priceOptions || {},
+      
+      // CRITICAL: Image handling - prepare clean image data
+      existingImages: images.filter(img => {
+        // Only include existing images that are not marked for deletion
+        return img.isExisting && !imagesToDelete.find(del => 
+          (del.id && del.id === img.id) || 
+          (del._id && del._id === img._id) ||
+          (del.key && del.key === img.key) ||
+          (del.url && del.url === img.url)
+        );
+      }).map(img => ({
+        _id: img._id || img.id,
+        url: img.url,
+        key: img.key,
+        thumbnail: img.thumbnail,
+        isPrimary: false // Will be set based on primaryImageIndex
+      })),
+      
+      // Images marked for deletion
+      imagesToDelete: imagesToDelete.map(img => ({
+        id: img.id || img._id,
+        key: img.key,
+        url: img.url
+      })),
+      
+      // New images to upload
+      newImages: newImages.filter(img => img.file instanceof File).map(img => img.file),
+      
+      // Primary image index (relative to final combined array)
+      primaryImageIndex: Math.max(0, primaryImageIndex || 0)
+    };
 
+    console.log('Submit data prepared:', {
+      title: submitData.title,
+      price: submitData.price,
+      existingImagesCount: submitData.existingImages.length,
+      imagesToDeleteCount: submitData.imagesToDelete.length,
+      newImagesCount: submitData.newImages.length,
+      primaryImageIndex: submitData.primaryImageIndex,
+      hasSavings: submitData.priceOptions?.showSavings
+    });
+
+    // Log savings information if present
+    if (submitData.priceOptions?.showSavings) {
       console.log('Submitting listing update with savings data:', {
-        hasSavings: submitData.priceOptions.showSavings,
         originalPrice: submitData.priceOptions.originalPrice,
         currentPrice: submitData.price,
         savingsAmount: submitData.priceOptions.savingsAmount,
         isExclusive: submitData.priceOptions.exclusiveDeal
       });
-      
-      // Call the onSubmit prop with the data
-      if (onSubmit) {
-        await onSubmit(submitData);
-      }
-      
-      dispatch(addNotification({
-        type: 'success',
-        message: submitData.priceOptions.showSavings ? 
-          `Listing updated with P${submitData.priceOptions.savingsAmount?.toLocaleString()} savings!` :
-          'Listing updated successfully'
-      }));
-      
-      onClose();
-    } catch (error) {
-      console.error('Error updating listing:', error);
-      dispatch(addNotification({
-        type: 'error',
-        message: error.message || 'Failed to update listing'
-      }));
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+    
+    // Call the onSubmit prop with the prepared data
+    if (onSubmit) {
+      await onSubmit(submitData);
+    } else {
+      throw new Error('No submit handler provided');
+    }
+    
+    // Show success message
+    const successMessage = submitData.priceOptions?.showSavings ? 
+      `Listing updated with P${submitData.priceOptions.savingsAmount?.toLocaleString()} savings!` :
+      'Listing updated successfully';
+      
+    dispatch(addNotification({
+      type: 'success',
+      message: successMessage
+    }));
+    
+    // Close modal on success
+    onClose();
+    
+  } catch (error) {
+    console.error('Error updating listing:', error);
+    
+    // Handle different types of errors
+    let errorMessage = 'Failed to update listing';
+    
+    if (error.response?.data?.message) {
+      errorMessage = error.response.data.message;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    // Show specific error messages for common issues
+    if (errorMessage.includes('validation')) {
+      errorMessage = 'Please check all required fields and try again';
+    } else if (errorMessage.includes('subscription')) {
+      errorMessage = 'Your subscription needs to be active to update listings';
+    } else if (errorMessage.includes('authorized')) {
+      errorMessage = 'You are not authorized to update this listing';
+    } else if (errorMessage.includes('S3') || errorMessage.includes('image')) {
+      errorMessage = 'Failed to process images. Please try again';
+    }
+    
+    dispatch(addNotification({
+      type: 'error',
+      message: errorMessage
+    }));
+    
+    // Set form errors if validation failed
+    if (error.response?.data?.errors) {
+      setErrors(error.response.data.errors);
+    }
+    
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+// Also add this helper function to validate image state
+const validateImageState = () => {
+  console.log('=== IMAGE STATE VALIDATION ===');
+  console.log('Existing images:', images?.length || 0);
+  console.log('New images:', newImages?.length || 0);
+  console.log('Images to delete:', imagesToDelete?.length || 0);
+  console.log('Primary image index:', primaryImageIndex);
+  
+  // Check for any issues
+  const issues = [];
+  
+  if ((images?.length || 0) + (newImages?.length || 0) === 0) {
+    issues.push('No images available');
+  }
+  
+  if (primaryImageIndex >= (images?.length || 0) + (newImages?.length || 0)) {
+    issues.push('Primary image index out of range');
+  }
+  
+  if (issues.length > 0) {
+    console.warn('Image state issues detected:', issues);
+  } else {
+    console.log('Image state is valid');
+  }
+  
+  return issues.length === 0;
+};
 
   // Get image URL helper
   const getImageUrl = (image) => {

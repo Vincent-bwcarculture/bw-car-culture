@@ -263,65 +263,235 @@ class ListingService {
   }
 
   // Update listing with S3 image handling
-  async updateListing(id, listingData, newImages = [], onProgress) {
-    try {
-      console.log(`Updating listing ${id}`);
+async updateListing(id, listingData, newImages = [], onProgress) {
+  try {
+    console.log(`Starting update for listing ${id}`);
+    console.log('Update data:', {
+      title: listingData.title,
+      existingImages: listingData.existingImages?.length || 0,
+      newImages: newImages?.length || 0,
+      imagesToDelete: listingData.imagesToDelete?.length || 0
+    });
+    
+    // Validate inputs
+    if (!id) {
+      throw new Error('Listing ID is required');
+    }
+    
+    if (!listingData) {
+      throw new Error('Listing data is required');
+    }
+    
+    // Clear any cached data for this listing
+    this.cache.delete(id);
+    
+    onProgress?.({ phase: 'preparing', progress: 10 });
+    
+    // Step 1: Upload new images if provided
+    let uploadedImages = [];
+    if (newImages && newImages.length > 0) {
+      console.log(`Uploading ${newImages.length} new images...`);
+      onProgress?.({ phase: 'uploading', progress: 20 });
       
-      let imageData = [];
+      // Extract actual File objects and validate
+      const validFiles = newImages
+        .map(img => img instanceof File ? img : img.file)
+        .filter(file => {
+          if (!(file instanceof File)) {
+            console.warn('Skipping invalid file object:', typeof file);
+            return false;
+          }
+          
+          // Validate file type
+          if (!file.type.startsWith('image/')) {
+            console.warn('Skipping non-image file:', file.name, file.type);
+            return false;
+          }
+          
+          // Validate file size (5MB limit)
+          if (file.size > 5 * 1024 * 1024) {
+            console.warn('Skipping oversized file:', file.name, file.size);
+            return false;
+          }
+          
+          return true;
+        });
       
-      // Upload new images to S3 if provided
-      if (newImages && newImages.length > 0) {
-        onProgress?.({ phase: 'uploading', progress: 0 });
-        
-        // Extract actual File objects
-        const fileObjects = newImages.map(img => {
-          return img instanceof File ? img : img.file;
-        }).filter(file => file instanceof File);
-        
-        const uploadResults = await imageService.uploadMultiple(
-          fileObjects,
-          'listings',
-          (progress) => onProgress?.({ phase: 'uploading', progress })
-        );
-        
-        imageData = uploadResults.map((result, index) => ({
-          url: result.url,
-          key: result.key,
-          thumbnail: result.thumbnail,
-          isPrimary: false
-        }));
+      if (validFiles.length === 0) {
+        console.warn('No valid files to upload');
+      } else {
+        try {
+          uploadedImages = await imageService.uploadMultiple(
+            validFiles,
+            'listings',
+            (progress) => onProgress?.({ 
+              phase: 'uploading', 
+              progress: 20 + (progress * 0.4) // 20% to 60%
+            })
+          );
+          
+          console.log(`Successfully uploaded ${uploadedImages.length} images`);
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError);
+          throw new Error('Failed to upload images: ' + uploadError.message);
+        }
       }
+    }
+    
+    onProgress?.({ phase: 'updating', progress: 70 });
+    
+    // Step 2: Prepare the request data
+    const requestData = {
+      // Core listing data
+      title: listingData.title,
+      description: listingData.description,
+      price: listingData.price,
+      make: listingData.make,
+      model: listingData.model,
+      year: listingData.year,
+      mileage: listingData.mileage,
+      transmission: listingData.transmission,
+      fuelType: listingData.fuelType,
+      bodyType: listingData.bodyType,
+      condition: listingData.condition,
+      location: listingData.location,
+      features: listingData.features,
+      specifications: listingData.specifications,
+      serviceHistory: listingData.serviceHistory,
+      seo: listingData.seo,
+      priceOptions: listingData.priceOptions,
       
-      onProgress?.({ phase: 'updating', progress: 0 });
-      
-      // Combine existing images with new ones
-      const existingImages = listingData.existingImages || [];
-      const allImages = [...existingImages, ...imageData];
-      
-      // Update listing
-      const formData = new FormData();
-      formData.append('listingData', JSON.stringify({
-        ...listingData,
-        images: allImages
+      // Image data
+      existingImages: listingData.existingImages || [],
+      imagesToDelete: listingData.imagesToDelete || [],
+      primaryImageIndex: listingData.primaryImageIndex || 0
+    };
+    
+    // Add uploaded image data if we have any
+    if (uploadedImages.length > 0) {
+      requestData.uploadedImages = uploadedImages.map((result, index) => ({
+        url: result.url,
+        key: result.key,
+        thumbnail: result.thumbnail,
+        size: result.size,
+        mimetype: result.mimetype,
+        isPrimary: false // Will be set based on primaryImageIndex
       }));
-      
-      const response = await this.axios.put(`${this.endpoint}/${id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+    }
+    
+    console.log('Prepared request data:', {
+      title: requestData.title,
+      existingImages: requestData.existingImages.length,
+      uploadedImages: requestData.uploadedImages?.length || 0,
+      imagesToDelete: requestData.imagesToDelete.length,
+      primaryIndex: requestData.primaryImageIndex
+    });
+    
+    // Step 3: Send update request to server
+    const response = await this.axios.put(`${this.endpoint}/${id}`, {
+      listingData: JSON.stringify(requestData)
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          const percentCompleted = Math.round(70 + (progressEvent.loaded * 30) / progressEvent.total);
           onProgress?.({ phase: 'updating', progress: percentCompleted });
         }
-      });
+      }
+    });
+    
+    // Step 4: Validate response
+    if (!response.data) {
+      throw new Error('No response data received from server');
+    }
+    
+    if (!response.data.success) {
+      const errorMessage = response.data.message || 'Server reported update failed';
+      console.error('Server error:', response.data);
+      throw new Error(errorMessage);
+    }
+    
+    console.log('Listing updated successfully:', response.data.data?._id);
+    onProgress?.({ phase: 'complete', progress: 100 });
+    
+    // Clear cache to force fresh data fetch
+    this.cache.clear();
+    
+    return response.data;
+    
+  } catch (error) {
+    console.error('Error updating listing:', error);
+    
+    // Handle different types of errors
+    if (error.response) {
+      // Server responded with error status
+      const serverError = error.response.data;
+      console.error('Server error response:', serverError);
       
-      this.cache.clear();
-      return response.data;
-    } catch (error) {
-      console.error(`Error updating listing ${id}:`, error);
-      throw error;
+      if (serverError.errors) {
+        // Validation errors
+        throw new Error(`Validation failed: ${Object.values(serverError.errors).join(', ')}`);
+      } else if (serverError.message) {
+        throw new Error(serverError.message);
+      } else {
+        throw new Error(`Server error: ${error.response.status}`);
+      }
+    } else if (error.request) {
+      // Network error
+      console.error('Network error:', error.request);
+      throw new Error('Network error: Unable to reach server');
+    } else {
+      // Other error
+      throw new Error(error.message || 'Unknown error occurred');
     }
   }
+}
+
+// Helper method to validate listing data before update
+validateUpdateData(listingData) {
+  const errors = {};
+  
+  // Required fields
+  const requiredFields = {
+    title: 'Title',
+    price: 'Price', 
+    make: 'Make',
+    model: 'Model',
+    year: 'Year'
+  };
+  
+  Object.entries(requiredFields).forEach(([field, label]) => {
+    if (!listingData[field] || listingData[field].toString().trim() === '') {
+      errors[field] = `${label} is required`;
+    }
+  });
+  
+  // Validate price
+  if (listingData.price && (isNaN(listingData.price) || parseFloat(listingData.price) <= 0)) {
+    errors.price = 'Price must be a valid positive number';
+  }
+  
+  // Validate year
+  if (listingData.year && (isNaN(listingData.year) || listingData.year < 1900 || listingData.year > new Date().getFullYear() + 1)) {
+    errors.year = 'Please enter a valid year';
+  }
+  
+  // Validate mileage
+  if (listingData.mileage && (isNaN(listingData.mileage) || listingData.mileage < 0)) {
+    errors.mileage = 'Mileage must be a valid positive number';
+  }
+  
+  // Check image requirements
+  const totalImages = (listingData.existingImages?.length || 0) + (listingData.newImages?.length || 0);
+  if (totalImages === 0) {
+    errors.images = 'At least one image is required';
+  }
+  
+  return errors;
+}
 
   // Delete listing
   async deleteListing(id) {
