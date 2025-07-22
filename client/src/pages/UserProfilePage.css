@@ -251,17 +251,25 @@ body {
     border-radius: var(--uprofile-border-radius-sm);
   }
   
+ /* Hide icons on mobile displays while keeping text */
+  .uprofile-nav-tab svg {
+    display: none;
+  }
+
   .uprofile-navigation-tabs {
     padding: 10px;
     gap: 3px;
   }
   
   .uprofile-nav-tab {
-    padding: 10px 16px;
+    gap: 0;
+    padding: 12px 16px;
     font-size: 13px;
   }
   
   .uprofile-nav-tab-label {
+    text-align: center;
+    width: 100%;
     font-size: 13px;
   }
   
@@ -351,6 +359,11 @@ body {
     border-radius: var(--uprofile-border-radius-sm);
   }
   
+  /* Ensure icons stay hidden on very small screens */
+  .uprofile-nav-tab svg {
+    display: none !important;
+  }
+
   .uprofile-navigation-tabs {
     padding: 8px;
     gap: 2px;
@@ -360,16 +373,14 @@ body {
     padding: 8px 12px;
     font-size: 12px;
     min-height: 40px;
+    gap: 0;
   }
   
   .uprofile-nav-tab-label {
     font-size: 12px;
+    line-height: 1.3;
   }
-  
-  /* Hide labels on very small screens, show only icons */
-  .uprofile-nav-tab-label {
-    display: none;
-  }
+
 }
 
 /* === DARK MODE ENHANCEMENTS === */
