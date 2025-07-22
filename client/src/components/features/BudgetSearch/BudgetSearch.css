@@ -1,4 +1,9 @@
-/* BudgetSearch.css - Enhanced Version with Gradient Fade Effect */
+/* =============================================================================
+   BUDGET SEARCH COMPONENT - COMPLETE CSS FILE WITH SPACE OPTIMIZATIONS
+   File: client/src/components/features/BudgetSearch/BudgetSearch.css
+   ============================================================================= */
+
+/* Main container */
 .budget-search-section {
   background: rgba(20, 20, 20, 0.95);
   border-radius: 12px;
@@ -24,8 +29,9 @@
   padding: 1.25rem;
 }
 
+/* OPTIMIZED: Section header spacing */
 .budget-section-header {
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem; /* Reduced from 1rem */
 }
 
 .budget-section-header h2 {
@@ -54,12 +60,13 @@
   line-height: 1.4;
 }
 
+/* OPTIMIZED: Calculator header spacing */
 .calculator-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.75rem;
+  margin-bottom: 0.8rem; /* Reduced from 1rem */
+  padding-bottom: 0.6rem; /* Reduced from 0.75rem */
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -94,40 +101,58 @@
   font-size: 0.75rem;
 }
 
+/* OPTIMIZED: Form spacing - Major space reduction */
 .budget-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 0.6rem; /* Reduced from 1rem (16px) to 0.6rem (9.6px) */
 }
 
+/* OPTIMIZED: Form group spacing */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.25rem; /* Reduced from 0.35rem to 0.25rem for tighter spacing */
 }
 
 .form-group-full {
   grid-column: 1 / -1;
 }
 
+/* OPTIMIZED: Label and info icon layout - Horizontal layout */
 .form-group label {
   color: #c9c9c9;
   font-size: 0.85rem;
   display: flex;
-  justify-content: space-between;
+  align-items: center; /* Align items vertically in center */
+  gap: 0.4rem; /* Small gap between label text and info icon */
+  margin-bottom: 0; /* Remove any default margin */
 }
 
+/* OPTIMIZED: Smaller, inline info icons */
 .info-icon {
   color: #888;
   cursor: help;
   position: relative;
+  font-size: 0.7rem; /* Reduced from default size to make smaller */
+  width: 14px; /* Fixed width for consistency */
+  height: 14px; /* Fixed height for consistency */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
+/* OPTIMIZED: Tooltip positioning for smaller icons */
 .info-icon:hover::after {
   content: attr(data-tooltip);
   position: absolute;
-  bottom: 100%;
-  right: 0;
+  bottom: 120%; /* Adjusted for smaller icon */
+  left: 50%;
+  transform: translateX(-50%);
   background: rgba(20, 20, 20, 0.95);
   color: #fff;
   padding: 0.5rem;
@@ -136,10 +161,14 @@
   width: 200px;
   font-size: 0.8rem;
   z-index: 10;
+  white-space: normal;
+  text-align: left;
 }
 
+/* OPTIMIZED: Input container */
 .input-container {
   position: relative;
+  margin-top: 0; /* Ensure no extra margin */
 }
 
 .input-container span {
@@ -202,14 +231,15 @@
   box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.2);
 }
 
+/* OPTIMIZED: Interest slider spacing */
 .interest-slider {
-  margin-top: 0.5rem;
+  margin-top: 0.3rem; /* Reduced from 0.5rem */
 }
 
 .interest-slider-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem; /* Reduced from 0.5rem */
 }
 
 .interest-slider-header label {
@@ -249,6 +279,7 @@
   color: #cc2900;
 }
 
+/* OPTIMIZED: Search button margin */
 .search-button {
   grid-column: 1 / -1;
   padding: 0.75rem;
@@ -260,7 +291,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: background 0.3s ease;
-  margin-top: 0.75rem;
+  margin-top: 0.5rem; /* Reduced from 0.75rem */
 }
 
 .search-button:hover:not(:disabled) {
@@ -283,82 +314,56 @@
   flex-direction: column;
 }
 
-.results-loading {
+.results-loading, .results-error {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100%;
-  min-height: 400px;
+  min-height: 350px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.results-error p {
+  color: #e74c3c;
+  margin-bottom: 1rem;
+}
+
+.retry-button {
+  background: #ff3300;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.3s ease;
+}
+
+.retry-button:hover {
+  background: #cc2900;
 }
 
 .loader {
   width: 40px;
   height: 40px;
-  border: 2px solid #ff3300;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-left: 4px solid #ff3300;
   border-radius: 50%;
-  display: inline-block;
-  position: relative;
-  box-sizing: border-box;
-  animation: rotation 1s linear infinite;
+  animation: spin 1s linear infinite;
 }
 
-.loader::after {
-  content: '';
-  box-sizing: border-box;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  border-bottom-color: #ff3300;
-}
-
-@keyframes rotation {
+@keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-}
-
-.results-error, .no-results {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  min-height: 400px;
-  padding: 1rem;
-  text-align: center;
-}
-
-.no-results-content {
-  max-width: 300px;
-}
-
-.results-error p, .no-results p {
-  color: #888;
-  margin-bottom: 1rem;
-}
-
-.retry-button, .view-marketplace-button {
-  background: #ff3300;
-  color: white;
-  border: none;
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.retry-button:hover, .view-marketplace-button:hover {
-  background: #cc2900;
 }
 
 .results-container {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 400px;
   padding: 1rem;
 }
 
@@ -367,51 +372,37 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+  z-index: 2;
   position: relative;
-  z-index: 2; /* Ensure it stays above the scroll content */
 }
 
 .results-header h3 {
-  font-size: 1.2rem;
   color: #ffffff;
+  font-size: 1.2rem;
   margin: 0;
-  position: relative;
-  padding-left: 0.7rem;
-}
-
-.results-header h3::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 70%;
-  background: #0051ff;
-  border-radius: 2px;
 }
 
 .scroll-controls {
   display: flex;
   gap: 0.5rem;
-  align-items: center;
-  min-width: 80px; /* Ensure enough space for buttons */
 }
 
 .scroll-button {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  width: 36px;
+  height: 36px;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid #2c2c2c;
-  color: white;
-  font-size: 1.2rem;
+  border-radius: 50%;
+  color: #ffffff;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: bold;
   transition: all 0.3s ease;
-  z-index: 2; /* Ensure buttons stay above scroll content */
+  z-index: 3;
+  position: relative;
 }
 
 .scroll-button:hover:not(:disabled) {
@@ -421,10 +412,10 @@
 
 .scroll-button:disabled,
 .scroll-button.disabled {
-  opacity: 0.5; /* Make disabled state more visible */
+  opacity: 0.5;
   cursor: not-allowed;
   background: rgba(255, 255, 255, 0.05);
-  pointer-events: auto; /* Ensure hover state is still detectable */
+  pointer-events: auto;
 }
 
 .results-scroll {
@@ -440,22 +431,21 @@
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
   position: relative;
-  z-index: 1; /* Below the header and buttons */
-  width: 316px; /* Fixed width to show one card (300px card + 16px gap) */
-  min-height: 400px; /* Ensure it takes full height */
+  z-index: 1;
+  width: 316px;
+  min-height: 400px;
 }
 
-/* Add gradient fade effect on the right side */
 .results-scroll::after {
   content: '';
   position: absolute;
   top: 0;
   right: 0;
-  width: 50px; /* Width of the gradient fade */
+  width: 50px;
   height: 100%;
   background: linear-gradient(to left, rgba(0, 0, 0, 0.8), transparent);
-  pointer-events: none; /* Ensure the gradient doesn't interfere with scrolling */
-  z-index: 1; /* Above the cards but below the buttons */
+  pointer-events: none;
+  z-index: 1;
 }
 
 .results-scroll::-webkit-scrollbar {
@@ -653,7 +643,6 @@
   width: 100%;
 }
 
-/* Stats disclaimer */
 .stats-disclaimer {
   text-align: center;
   margin-top: 0.5rem;
@@ -739,7 +728,6 @@
   white-space: nowrap;
 }
 
-/* Enhanced no results section */
 .no-results {
   text-align: center;
   padding: 2rem;
@@ -784,14 +772,15 @@
   }
 
   .results-scroll {
-    width: 296px; /* Adjusted for 280px card + 16px gap */
+    width: 296px;
   }
 
   .results-scroll::after {
-    width: 40px; /* Slightly narrower gradient on smaller screens */
+    width: 40px;
   }
 }
 
+/* OPTIMIZED: Mobile responsive adjustments */
 @media (max-width: 768px) {
   .budget-section-container {
     grid-template-columns: 1fr;
@@ -807,8 +796,20 @@
     min-height: 350px;
   }
   
+  /* OPTIMIZED: Mobile form spacing */
   .budget-form {
-    gap: 0.75rem;
+    gap: 0.5rem; /* Even tighter on mobile - reduced from 0.75rem */
+  }
+  
+  .form-group {
+    gap: 0.2rem; /* Tighter spacing on mobile */
+  }
+  
+  /* OPTIMIZED: Smaller mobile info icons */
+  .info-icon {
+    font-size: 0.65rem; /* Slightly smaller on mobile */
+    width: 12px;
+    height: 12px;
   }
   
   .vehicle-card-wrapper {
@@ -843,18 +844,19 @@
   }
 
   .results-scroll {
-    width: 276px; /* Adjusted for 260px card + 16px gap */
+    width: 276px;
   }
 
   .scroll-controls {
-    margin-top: 0.5rem; /* Ensure buttons have space below header on mobile */
+    margin-top: 0.5rem;
   }
 
   .results-scroll::after {
-    width: 30px; /* Narrower gradient on mobile */
+    width: 30px;
   }
 }
 
+/* OPTIMIZED: Small mobile adjustments */
 @media (max-width: 480px) {
   .budget-search-section {
     padding: 1rem;
@@ -865,14 +867,23 @@
     font-size: 1.4rem;
   }
   
+  /* OPTIMIZED: Single column layout with tight spacing */
   .budget-form {
     grid-template-columns: 1fr;
+    gap: 0.45rem; /* Maintain tight spacing in single column */
   }
   
+  /* OPTIMIZED: Mobile header adjustments */
   .calculator-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .budget-section-header {
+    margin-bottom: 0.6rem;
   }
   
   .buying-power-amount {
@@ -936,11 +947,11 @@
   }
 
   .results-scroll {
-    width: 256px; /* Adjusted for 240px card + 16px gap */
+    width: 256px;
   }
 
   .results-scroll::after {
-    width: 20px; /* Even narrower gradient on very small screens */
+    width: 20px;
   }
 }
 

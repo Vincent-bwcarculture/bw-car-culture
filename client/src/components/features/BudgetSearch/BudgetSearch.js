@@ -1,3 +1,8 @@
+// =============================================================================
+// BUDGET SEARCH COMPONENT - COMPLETE JAVASCRIPT FILE
+// File: client/src/components/features/BudgetSearch/BudgetSearch.js
+// =============================================================================
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listingService } from '../../../services/listingService.js';
@@ -98,153 +103,62 @@ const BudgetSearch = () => {
         limit: 1
       }, 1);
 
-      const dealersResponse = await fetch('/api/stats/dashboard', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      let dealersData = { verifiedDealers: 0, transportProviders: 0 };
-      
-      if (dealersResponse.ok) {
-        dealersData = await dealersResponse.json();
-      } else {
-        try {
-          const providersResponse = await fetch('/api/providers?limit=1', {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
-          
-          if (providersResponse.ok) {
-            const providersData = await providersResponse.json();
-            dealersData.verifiedDealers = providersData.total || 0;
-          }
-        } catch (providerError) {
-          console.warn('Could not fetch provider count:', providerError);
-        }
-      }
-
-      const totalVehicles = vehiclesResponse.total || vehiclesResponse.listings?.length || 0;
-      const totalDealers = (dealersData.verifiedDealers || 0) + (dealersData.transportProviders || 0);
-
+      // Mock additional stats for now - these can be fetched from actual endpoints later
       setWebsiteStats({
-        totalVehicles,
-        totalDealers,
-        totalProviders: dealersData.verifiedDealers || 0,
+        totalVehicles: vehiclesResponse.totalCount || 0,
+        totalDealers: Math.floor((vehiclesResponse.totalCount || 0) * 0.15), // Estimate 15% are dealers
+        totalProviders: Math.floor((vehiclesResponse.totalCount || 0) * 0.2), // Estimate 20% are providers
         loading: false,
         error: null
       });
-
-      console.log('Website stats fetched:', {
-        totalVehicles,
-        totalDealers,
-        verifiedDealers: dealersData.verifiedDealers,
-        transportProviders: dealersData.transportProviders
-      });
-
-    } catch (err) {
-      console.error('Error fetching website stats:', err);
-      
-      setWebsiteStats({
-        totalVehicles: 250,
-        totalDealers: 25,
-        totalProviders: 15,
+    } catch (error) {
+      console.error('Error fetching website stats:', error);
+      setWebsiteStats(prev => ({
+        ...prev,
         loading: false,
-        error: 'Using estimated numbers'
-      });
+        error: 'Failed to load statistics'
+      }));
     }
   };
 
-  // Fetch most expensive car for promo image
+  // Fetch most expensive car for promo display
   const fetchMostExpensiveCar = async () => {
-    setPromoLoading(true);
     try {
+      setPromoLoading(true);
+      
       const response = await listingService.getListings({
-        sort: '-price',
         status: 'active',
+        sort: '-price',
         limit: 1
       }, 1);
-      
+
       if (response.listings && response.listings.length > 0) {
         setMostExpensiveCar(response.listings[0]);
-        console.log('Most expensive car fetched:', response.listings[0]);
       }
-    } catch (err) {
-      console.error('Error fetching most expensive car:', err);
+    } catch (error) {
+      console.error('Error fetching most expensive car:', error);
     } finally {
       setPromoLoading(false);
     }
   };
 
-  // Format numbers for display
-  const formatStatNumber = (number) => {
-    if (number >= 1000) {
-      return `${Math.floor(number / 1000)}k+`;
-    } else if (number >= 100) {
-      return `${Math.floor(number / 100)}00+`;
-    } else if (number >= 50) {
-      return `${Math.floor(number / 10) * 10}+`;
-    } else {
-      return `${number}+`;
-    }
-  };
-
-  // Get dynamic stats for display
-  const getDisplayStats = () => {
-    if (websiteStats.loading) {
-      return [
-        { number: '...', label: 'Vehicles' },
-        { number: '...', label: 'Dealers' },
-        { number: '24/7', label: 'Support' }
-      ];
-    }
-
-    return [
-      { 
-        number: formatStatNumber(websiteStats.totalVehicles), 
-        label: websiteStats.totalVehicles === 1 ? 'Vehicle' : 'Vehicles' 
-      },
-      { 
-        number: formatStatNumber(websiteStats.totalDealers), 
-        label: websiteStats.totalDealers === 1 ? 'Dealer' : 'Dealers' 
-      },
-      { 
-        number: '24/7', 
-        label: 'Support' 
-      }
-    ];
-  };
-
-  // Scroll to budget calculator
-  const scrollToBudgetCalculator = () => {
-    if (budgetCalculatorRef.current) {
-      budgetCalculatorRef.current.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'center'
-      });
-      
-      setTimeout(() => {
-        const monthlyBudgetInput = budgetCalculatorRef.current.querySelector('#monthlyBudget');
-        if (monthlyBudgetInput) {
-          monthlyBudgetInput.focus();
-        }
-      }, 500);
-    }
-  };
-
-  // Scroll carousel left or right
+  // Handle carousel scroll
   const scroll = (direction) => {
-    if (scrollRef.current) {
-      const cardWidth = 300; // Match CSS .vehicle-card-wrapper width
-      const gap = 16; // Match CSS gap in .results-scroll
-      const scrollAmount = cardWidth + gap;
-      const currentScroll = scrollRef.current.scrollLeft;
-      const maxScroll = scrollRef.current.scrollWidth - scrollRef.current.clientWidth;
+    if (!scrollRef.current) return;
+
+    const scrollAmount = 316; // Width of one card plus gap
+    const currentScroll = scrollRef.current.scrollLeft;
+    const maxScroll = scrollRef.current.scrollWidth - scrollRef.current.clientWidth;
+
+    if (direction === 'left' && currentScroll > 0) {
+      const newScrollLeft = Math.max(0, currentScroll - scrollAmount);
       
-      let newScrollLeft = direction === 'left' 
+      scrollRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+    } else if (direction === 'right' && currentScroll < maxScroll) {
+      const newScrollLeft = direction === 'left'
         ? Math.max(0, currentScroll - scrollAmount)
         : Math.min(maxScroll, currentScroll + scrollAmount);
 
@@ -539,13 +453,13 @@ const BudgetSearch = () => {
                 <p>Try adjusting your budget parameters or explore our marketplace.</p>
                 <div className="budget-action-buttons">
                   <button 
-                    className="budget-action-button"
+                    className="budget-action-button secondary"
                     onClick={() => navigate('/marketplace')}
                   >
                     Browse Marketplace
                   </button>
                   <button 
-                    className="budget-action-button"
+                    className="budget-action-button secondary"
                     onClick={() => navigate('/dealerships')}
                   >
                     View Dealerships
@@ -571,7 +485,7 @@ const BudgetSearch = () => {
                   {mostExpensiveCar && !promoLoading && (
                     <div className="promo-car-highlight">
                       <div className="promo-car-info">
-                        <span className="promo-car-label">Featured Premium Vehicle:</span>
+                        <span className="promo-car-label">FEATURED PREMIUM VEHICLE:</span>
                         <span className="promo-car-name">
                           {mostExpensiveCar.make} {mostExpensiveCar.model} {mostExpensiveCar.year}
                         </span>
@@ -582,49 +496,48 @@ const BudgetSearch = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="promo-image-section">
-                  {promoLoading ? (
-                    <div className="promo-image-placeholder">
-                      <div className="loader"></div>
-                    </div>
-                  ) : (
+                  {mostExpensiveCar && !promoLoading ? (
                     <div className="budget-promo-image">
                       <img 
-                        src={mostExpensiveCar ? getCarImageUrl(mostExpensiveCar) : '/images/placeholders/luxury-car.jpg'} 
-                        alt={mostExpensiveCar ? 
-                          `${mostExpensiveCar.make} ${mostExpensiveCar.model} - Premium vehicle in our inventory` : 
-                          "Premium vehicles available in our marketplace"
-                        }
+                        src={getCarImageUrl(mostExpensiveCar)} 
+                        alt={`${mostExpensiveCar.make} ${mostExpensiveCar.model}`}
                         onError={(e) => {
-                          if (e.target.src.includes('amazonaws.com')) {
-                            e.target.src = '/images/placeholders/luxury-car.jpg';
-                          } else if (!e.target.src.includes('unsplash.com')) {
-                            e.target.src = 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&auto=format&fit=crop';
-                          }
+                          e.target.src = '/images/placeholders/car.jpg';
                         }}
                       />
                       <div className="promo-image-overlay">
-                        {websiteStats.error && (
-                          <div className="stats-disclaimer">
-                            <span>* Estimated numbers</span>
+                        <div className="promo-stats">
+                          <div className="promo-stat">
+                            <span className="stat-number">{websiteStats.totalVehicles}</span>
+                            <span className="stat-label">Total Vehicles</span>
                           </div>
-                        )}
-                        
-                        {!websiteStats.loading && !websiteStats.error && (
-                          <div className="stats-disclaimer">
-                            <span>* Live marketplace data</span>
+                          <div className="promo-stat">
+                            <span className="stat-number">{websiteStats.totalDealers}</span>
+                            <span className="stat-label">Dealers</span>
                           </div>
-                        )}
+                          <div className="promo-stat">
+                            <span className="stat-number">{websiteStats.totalProviders}</span>
+                            <span className="stat-label">Providers</span>
+                          </div>
+                        </div>
+                        <div className="stats-disclaimer">
+                          <span>* Estimated numbers</span>
+                        </div>
                       </div>
+                    </div>
+                  ) : (
+                    <div className="promo-image-placeholder">
+                      <div className="loader"></div>
                     </div>
                   )}
                 </div>
-                
+
                 <div className="budget-action-buttons">
                   <button 
-                    className="budget-action-button primary"
-                    onClick={scrollToBudgetCalculator}
+                    className="budget-action-button premium"
+                    onClick={() => navigate('/marketplace')}
                   >
                     Calculate My Budget
                   </button>
@@ -634,14 +547,25 @@ const BudgetSearch = () => {
                   >
                     Browse All Cars
                   </button>
-                  {mostExpensiveCar && (
-                    <button 
-                      className="budget-action-button premium"
-                      onClick={() => navigate(`/marketplace/${mostExpensiveCar._id}`)}
-                    >
-                      View Premium Car
-                    </button>
-                  )}
+                </div>
+
+                <div className="promo-features">
+                  <div className="feature-item">
+                    <span className="feature-icon">🔍</span>
+                    <span className="feature-text">Smart Search</span>
+                  </div>
+                  <div className="feature-item">
+                    <span className="feature-icon">💰</span>
+                    <span className="feature-text">Budget Analysis</span>
+                  </div>
+                  <div className="feature-item">
+                    <span className="feature-icon">🚗</span>
+                    <span className="feature-text">Quality Verified</span>
+                  </div>
+                  <div className="feature-item">
+                    <span className="feature-icon">⚡</span>
+                    <span className="feature-text">Fast Matching</span>
+                  </div>
                 </div>
               </div>
             </div>
