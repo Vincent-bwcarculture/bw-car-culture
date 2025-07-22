@@ -363,13 +363,13 @@ const BudgetSearch = () => {
             <span className="calculator-disclaimer">Based on {interestRate}% Interest</span>
           </div>
 
-          <form className="budget-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="monthlyBudget">
+          <form className="budget-search-form" onSubmit={handleSubmit}>
+            <div className="budget-search-form-group">
+              <label htmlFor="monthlyBudget" className="budget-search-label">
                 Monthly budget
-                <span className="info-icon" data-tooltip="How much can you afford to pay each month for your car loan.">ⓘ</span>
+                <span className="budget-search-info-icon" data-tooltip="How much can you afford to pay each month for your car loan.">ⓘ</span>
               </label>
-              <div className="input-container">
+              <div className="budget-search-input-container">
                 <span className="pula-prefix">P</span>
                 <input
                   type="number"
@@ -382,12 +382,12 @@ const BudgetSearch = () => {
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="deposit">
+            <div className="budget-search-form-group">
+              <label htmlFor="deposit" className="budget-search-label">
                 Deposit
-                <span className="info-icon" data-tooltip="The amount you can pay upfront to reduce your loan amount.">ⓘ</span>
+                <span className="budget-search-info-icon" data-tooltip="The amount you can pay upfront to reduce your loan amount.">ⓘ</span>
               </label>
-              <div className="input-container">
+              <div className="budget-search-input-container">
                 <span className="pula-prefix">P</span>
                 <input
                   type="number"
@@ -400,9 +400,9 @@ const BudgetSearch = () => {
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="termLength">Term Length</label>
-              <div className="select-container">
+            <div className="budget-search-form-group">
+              <label htmlFor="termLength" className="budget-search-label">Term Length</label>
+              <div className="budget-search-select-container">
                 <select
                   id="termLength"
                   value={termLength}
@@ -419,14 +419,14 @@ const BudgetSearch = () => {
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="tradeAmount">
+            <div className="budget-search-form-group">
+              <label htmlFor="tradeAmount" className="budget-search-label">
                 Trade Amount
-                <button className="value-car-button" type="button" onClick={() => navigate('/value-my-car')}>
+                <button className="budget-search-value-car-button" type="button" onClick={() => navigate('/value-my-car')}>
                   Value My Car
                 </button>
               </label>
-              <div className="input-container">
+              <div className="budget-search-input-container">
                 <span className="pula-prefix">P</span>
                 <input
                   type="number"
@@ -439,11 +439,11 @@ const BudgetSearch = () => {
               </div>
             </div>
 
-            <div className="form-group form-group-full">
-              <div className="interest-slider">
-                <div className="interest-slider-header">
-                  <label htmlFor="interestRate">Interest Rate</label>
-                  <span className="interest-slider-value">{interestRate}% (Good credit)</span>
+            <div className="budget-search-form-group budget-search-form-group-full">
+              <div className="budget-search-interest-slider">
+                <div className="budget-search-interest-slider-header">
+                  <label htmlFor="interestRate" className="budget-search-label">Interest Rate</label>
+                  <span className="budget-search-interest-slider-value">{interestRate}% (Good credit)</span>
                 </div>
                 <input
                   type="range"
@@ -460,7 +460,7 @@ const BudgetSearch = () => {
                     background: `linear-gradient(to right, #ff3300 0%, #ff3300 ${(interestRate - 6) * 100 / 14}%, rgba(255, 255, 255, 0.1) ${(interestRate - 6) * 100 / 14}%, rgba(255, 255, 255, 0.1) 100%)`
                   }}
                 />
-                <div className="interest-slider-labels">
+                <div className="budget-search-interest-slider-labels">
                   <span>6% (Excellent)</span>
                   <span>13% (Average)</span>
                   <span>20% (Poor)</span>
@@ -468,7 +468,7 @@ const BudgetSearch = () => {
               </div>
             </div>
 
-            <button type="submit" className="search-button" disabled={loading}>
+            <button type="submit" className="budget-search-submit-button" disabled={loading}>
               {loading ? 'Searching...' : 'See my matches'}
             </button>
           </form>

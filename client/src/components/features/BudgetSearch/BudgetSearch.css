@@ -1,4 +1,4 @@
-/* BudgetSearch.css - Enhanced Version with Aggressive Space Optimizations */
+/* BudgetSearch.css - Enhanced Version with Unique Class Names and Aggressive Space Optimizations */
 .budget-search-section {
   background: rgba(20, 20, 20, 0.95);
   border-radius: 12px;
@@ -96,78 +96,78 @@
   font-size: 0.75rem;
 }
 
-/* AGGRESSIVE: 60% form spacing reduction */
-.budget-form {
+/* AGGRESSIVE: 60% form spacing reduction with UNIQUE class name */
+.budget-search-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.4rem; /* AGGRESSIVE: Reduced from 1rem to 0.4rem (60% reduction) */
+  gap: 0.4rem !important; /* AGGRESSIVE: Reduced from 1rem to 0.4rem (60% reduction) with !important */
 }
 
-/* AGGRESSIVE: Very tight form group spacing */
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem; /* AGGRESSIVE: Reduced from 0.35rem to 0.15rem */
+/* AGGRESSIVE: Very tight form group spacing with UNIQUE class name */
+.budget-search-form-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.15rem !important; /* AGGRESSIVE: Reduced from 0.35rem to 0.15rem with !important */
 }
 
-.form-group-full {
+.budget-search-form-group-full {
   grid-column: 1 / -1;
 }
 
-/* AGGRESSIVE: Inline label layout with tiny icons */
-.form-group label {
-  color: #c9c9c9;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center; /* Inline alignment */
-  gap: 0.25rem; /* Small gap between text and icon */
-  margin-bottom: 0;
-  /* REMOVED: justify-content: space-between; */
+/* AGGRESSIVE: Inline label layout with tiny icons - UNIQUE class name */
+.budget-search-form-group .budget-search-label {
+  color: #c9c9c9 !important;
+  font-size: 0.85rem !important;
+  display: flex !important;
+  align-items: center !important; /* Inline alignment */
+  gap: 0.25rem !important; /* Small gap between text and icon */
+  margin-bottom: 0 !important;
+  justify-content: flex-start !important; /* Override any justify-content: space-between */
 }
 
-/* AGGRESSIVE: Much smaller, inline info icons */
-.info-icon {
-  color: #888;
-  cursor: help;
-  position: relative;
-  font-size: 0.6rem; /* MUCH SMALLER: Very small font */
-  width: 10px; /* TINY: Much smaller than before */
-  height: 10px; /* TINY: Much smaller than before */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08); /* More subtle background */
-  border: 1px solid rgba(255, 255, 255, 0.15); /* More subtle border */
-  flex-shrink: 0;
-  opacity: 0.7; /* Make them less prominent */
+/* AGGRESSIVE: Much smaller, inline info icons - UNIQUE class name */
+.budget-search-info-icon {
+  color: #888 !important;
+  cursor: help !important;
+  position: relative !important;
+  font-size: 0.6rem !important; /* MUCH SMALLER: Very small font */
+  width: 10px !important; /* TINY: Much smaller than before */
+  height: 10px !important; /* TINY: Much smaller than before */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.08) !important; /* More subtle background */
+  border: 1px solid rgba(255, 255, 255, 0.15) !important; /* More subtle border */
+  flex-shrink: 0 !important;
+  opacity: 0.7 !important; /* Make them less prominent */
 }
 
-/* AGGRESSIVE: Smaller tooltip for tiny icons */
-.info-icon:hover::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 150%; /* Position above smaller icon */
-  left: 50%; /* Center horizontally */
-  transform: translateX(-50%); /* Center transform */
-  background: rgba(20, 20, 20, 0.95);
-  color: #fff;
-  padding: 0.4rem; /* SMALLER padding */
-  border-radius: 4px;
-  border: 1px solid #2c2c2c;
-  width: 180px; /* SMALLER width */
-  font-size: 0.75rem; /* SMALLER text */
-  z-index: 10;
-  white-space: normal;
-  text-align: left;
+/* AGGRESSIVE: Smaller tooltip for tiny icons - UNIQUE class name */
+.budget-search-info-icon:hover::after {
+  content: attr(data-tooltip) !important;
+  position: absolute !important;
+  bottom: 150% !important; /* Position above smaller icon */
+  left: 50% !important; /* Center horizontally */
+  transform: translateX(-50%) !important; /* Center transform */
+  background: rgba(20, 20, 20, 0.95) !important;
+  color: #fff !important;
+  padding: 0.4rem !important; /* SMALLER padding */
+  border-radius: 4px !important;
+  border: 1px solid #2c2c2c !important;
+  width: 180px !important; /* SMALLER width */
+  font-size: 0.75rem !important; /* SMALLER text */
+  z-index: 10 !important;
+  white-space: normal !important;
+  text-align: left !important;
 }
 
-.input-container {
+.budget-search-input-container {
   position: relative;
   margin-top: 0; /* Ensure no extra margin */
 }
 
-.input-container span {
+.budget-search-input-container span {
   position: absolute;
   left: 0.8rem;
   top: 50%;
@@ -176,7 +176,7 @@
   font-size: 0.9rem;
 }
 
-.input-container input {
+.budget-search-input-container input {
   width: 100%;
   padding: 0.6rem 0.6rem 0.6rem 1.8rem;
   background: rgba(255, 255, 255, 0.05);
@@ -187,17 +187,17 @@
   transition: all 0.3s ease;
 }
 
-.input-container input:focus {
+.budget-search-input-container input:focus {
   outline: none;
   border-color: #ff3300;
   box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.2);
 }
 
-.select-container {
+.budget-search-select-container {
   position: relative;
 }
 
-.select-container select {
+.budget-search-select-container select {
   width: 100%;
   padding: 0.6rem 0.8rem;
   background: rgba(255, 255, 255, 0.05);
@@ -210,7 +210,7 @@
   cursor: pointer;
 }
 
-.select-container::after {
+.budget-search-select-container::after {
   content: '▼';
   position: absolute;
   right: 0.8rem;
@@ -221,46 +221,46 @@
   pointer-events: none;
 }
 
-.select-container select:focus {
+.budget-search-select-container select:focus {
   outline: none;
   border-color: #ff3300;
   box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.2);
 }
 
-/* AGGRESSIVE: Tighter interest slider spacing */
-.interest-slider {
-  margin-top: 0.2rem; /* AGGRESSIVE: Reduced from 0.5rem to 0.2rem */
+/* AGGRESSIVE: Tighter interest slider spacing - UNIQUE class name */
+.budget-search-interest-slider {
+  margin-top: 0.2rem !important; /* AGGRESSIVE: Reduced from 0.5rem to 0.2rem */
 }
 
-.interest-slider-header {
+.budget-search-interest-slider-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.3rem; /* AGGRESSIVE: Reduced from 0.5rem to 0.3rem */
+  margin-bottom: 0.3rem !important; /* AGGRESSIVE: Reduced from 0.5rem to 0.3rem */
 }
 
-.interest-slider-header label {
+.budget-search-interest-slider-header label {
   color: #c9c9c9;
   font-size: 0.85rem;
 }
 
-.interest-slider-value {
+.budget-search-interest-slider-value {
   color: #ff3300;
   font-weight: 600;
   font-size: 0.85rem;
 }
 
-.interest-slider-labels {
+.budget-search-interest-slider-labels {
   display: flex;
   justify-content: space-between;
   margin-top: 0.3rem;
 }
 
-.interest-slider-labels span {
+.budget-search-interest-slider-labels span {
   color: #888;
   font-size: 0.7rem;
 }
 
-.value-car-button {
+.budget-search-value-car-button {
   color: #ff3300;
   background: none;
   border: none;
@@ -271,32 +271,32 @@
   padding: 0.25rem 0;
 }
 
-.value-car-button:hover {
+.budget-search-value-car-button:hover {
   color: #cc2900;
 }
 
-/* AGGRESSIVE: Tighter search button margin */
-.search-button {
-  grid-column: 1 / -1;
-  padding: 0.75rem;
-  background: #ff3300;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  margin-top: 0.3rem; /* AGGRESSIVE: Reduced from 0.75rem to 0.3rem */
+/* AGGRESSIVE: Tighter search button margin - UNIQUE class name */
+.budget-search-submit-button {
+  grid-column: 1 / -1 !important;
+  padding: 0.75rem !important;
+  background: #ff3300 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: background 0.3s ease !important;
+  margin-top: 0.3rem !important; /* AGGRESSIVE: Reduced from 0.75rem to 0.3rem */
 }
 
-.search-button:hover:not(:disabled) {
-  background: #cc2900;
+.budget-search-submit-button:hover:not(:disabled) {
+  background: #cc2900 !important;
 }
 
-.search-button:disabled {
-  background: #666;
-  cursor: not-allowed;
+.budget-search-submit-button:disabled {
+  background: #666 !important;
+  cursor: not-allowed !important;
 }
 
 /* Right side - Results */
@@ -796,19 +796,19 @@
   }
   
   /* AGGRESSIVE: Even tighter mobile form spacing */
-  .budget-form {
-    gap: 0.3rem; /* EVEN TIGHTER on mobile */
+  .budget-search-form {
+    gap: 0.3rem !important; /* EVEN TIGHTER on mobile */
   }
   
-  .form-group {
-    gap: 0.1rem; /* MINIMAL mobile spacing */
+  .budget-search-form-group {
+    gap: 0.1rem !important; /* MINIMAL mobile spacing */
   }
   
   /* AGGRESSIVE: Much smaller mobile icons */
-  .info-icon {
-    font-size: 0.55rem; /* SMALLER on mobile */
-    width: 8px;
-    height: 8px;
+  .budget-search-info-icon {
+    font-size: 0.55rem !important; /* SMALLER on mobile */
+    width: 8px !important;
+    height: 8px !important;
   }
   
   .calculator-header {
@@ -820,8 +820,8 @@
     margin-bottom: 0.4rem;
   }
   
-  .search-button {
-    margin-top: 0.2rem;
+  .budget-search-submit-button {
+    margin-top: 0.2rem !important;
   }
   
   .vehicle-card-wrapper {
@@ -875,9 +875,9 @@
   }
   
   /* AGGRESSIVE: Single column with extremely tight spacing */
-  .budget-form {
-    grid-template-columns: 1fr;
-    gap: 0.25rem; /* EXTREMELY TIGHT in single column */
+  .budget-search-form {
+    grid-template-columns: 1fr !important;
+    gap: 0.25rem !important; /* EXTREMELY TIGHT in single column */
   }
   
   /* AGGRESSIVE: Mobile header adjustments */
