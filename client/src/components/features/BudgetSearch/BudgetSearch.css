@@ -1,4 +1,4 @@
-/* BudgetSearch.css - Enhanced Version with Space Optimizations */
+/* BudgetSearch.css - Enhanced Version with Aggressive Space Optimizations */
 .budget-search-section {
   background: rgba(20, 20, 20, 0.95);
   border-radius: 12px;
@@ -24,9 +24,9 @@
   padding: 1.25rem;
 }
 
-/* OPTIMIZED: Section header spacing */
+/* AGGRESSIVE: Much tighter section header spacing */
 .budget-section-header {
-  margin-bottom: 0.8rem; /* Reduced from 1rem */
+  margin-bottom: 0.6rem; /* Reduced from 1rem to 0.6rem */
 }
 
 .budget-section-header h2 {
@@ -55,13 +55,13 @@
   line-height: 1.4;
 }
 
-/* OPTIMIZED: Calculator header spacing */
+/* AGGRESSIVE: Much tighter calculator header spacing */
 .calculator-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.8rem; /* Reduced from 1rem */
-  padding-bottom: 0.6rem; /* Reduced from 0.75rem */
+  margin-bottom: 0.6rem; /* Reduced from 1rem to 0.6rem */
+  padding-bottom: 0.4rem; /* Reduced from 0.75rem to 0.4rem */
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -96,65 +96,67 @@
   font-size: 0.75rem;
 }
 
-/* OPTIMIZED: Form spacing - Major space reduction */
+/* AGGRESSIVE: 60% form spacing reduction */
 .budget-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.6rem; /* Reduced from 1rem (16px) to 0.6rem (9.6px) - 40% reduction */
+  gap: 0.4rem; /* AGGRESSIVE: Reduced from 1rem to 0.4rem (60% reduction) */
 }
 
-/* OPTIMIZED: Form group spacing */
+/* AGGRESSIVE: Very tight form group spacing */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem; /* Reduced from 0.35rem */
+  gap: 0.15rem; /* AGGRESSIVE: Reduced from 0.35rem to 0.15rem */
 }
 
 .form-group-full {
   grid-column: 1 / -1;
 }
 
-/* OPTIMIZED: Horizontal label layout with small inline icons */
+/* AGGRESSIVE: Inline label layout with tiny icons */
 .form-group label {
   color: #c9c9c9;
   font-size: 0.85rem;
   display: flex;
-  align-items: center; /* Vertically center items */
-  gap: 0.4rem; /* Small gap between text and icon */
-  /* Removed: justify-content: space-between; */
+  align-items: center; /* Inline alignment */
+  gap: 0.25rem; /* Small gap between text and icon */
+  margin-bottom: 0;
+  /* REMOVED: justify-content: space-between; */
 }
 
-/* OPTIMIZED: Small, professional inline info icons */
+/* AGGRESSIVE: Much smaller, inline info icons */
 .info-icon {
   color: #888;
   cursor: help;
   position: relative;
-  font-size: 0.7rem; /* Smaller font size */
-  width: 14px; /* Fixed small size */
-  height: 14px; /* Fixed small size */
+  font-size: 0.6rem; /* MUCH SMALLER: Very small font */
+  width: 10px; /* TINY: Much smaller than before */
+  height: 10px; /* TINY: Much smaller than before */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  flex-shrink: 0; /* Prevent shrinking */
+  background: rgba(255, 255, 255, 0.08); /* More subtle background */
+  border: 1px solid rgba(255, 255, 255, 0.15); /* More subtle border */
+  flex-shrink: 0;
+  opacity: 0.7; /* Make them less prominent */
 }
 
-/* OPTIMIZED: Tooltip positioning for smaller icons */
+/* AGGRESSIVE: Smaller tooltip for tiny icons */
 .info-icon:hover::after {
   content: attr(data-tooltip);
   position: absolute;
-  bottom: 120%; /* Positioned above smaller icon */
+  bottom: 150%; /* Position above smaller icon */
   left: 50%; /* Center horizontally */
   transform: translateX(-50%); /* Center transform */
   background: rgba(20, 20, 20, 0.95);
   color: #fff;
-  padding: 0.5rem;
+  padding: 0.4rem; /* SMALLER padding */
   border-radius: 4px;
   border: 1px solid #2c2c2c;
-  width: 200px;
-  font-size: 0.8rem;
+  width: 180px; /* SMALLER width */
+  font-size: 0.75rem; /* SMALLER text */
   z-index: 10;
   white-space: normal;
   text-align: left;
@@ -162,6 +164,7 @@
 
 .input-container {
   position: relative;
+  margin-top: 0; /* Ensure no extra margin */
 }
 
 .input-container span {
@@ -224,15 +227,15 @@
   box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.2);
 }
 
-/* OPTIMIZED: Interest slider spacing */
+/* AGGRESSIVE: Tighter interest slider spacing */
 .interest-slider {
-  margin-top: 0.3rem; /* Reduced from 0.5rem */
+  margin-top: 0.2rem; /* AGGRESSIVE: Reduced from 0.5rem to 0.2rem */
 }
 
 .interest-slider-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.4rem; /* Reduced from 0.5rem */
+  margin-bottom: 0.3rem; /* AGGRESSIVE: Reduced from 0.5rem to 0.3rem */
 }
 
 .interest-slider-header label {
@@ -272,7 +275,7 @@
   color: #cc2900;
 }
 
-/* OPTIMIZED: Search button margin */
+/* AGGRESSIVE: Tighter search button margin */
 .search-button {
   grid-column: 1 / -1;
   padding: 0.75rem;
@@ -284,7 +287,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: background 0.3s ease;
-  margin-top: 0.5rem; /* Reduced from 0.75rem */
+  margin-top: 0.3rem; /* AGGRESSIVE: Reduced from 0.75rem to 0.3rem */
 }
 
 .search-button:hover:not(:disabled) {
@@ -776,7 +779,7 @@
   }
 }
 
-/* OPTIMIZED: Mobile responsive adjustments */
+/* AGGRESSIVE: Mobile responsive adjustments */
 @media (max-width: 768px) {
   .budget-section-container {
     grid-template-columns: 1fr;
@@ -792,20 +795,33 @@
     min-height: 350px;
   }
   
-  /* OPTIMIZED: Mobile form spacing */
+  /* AGGRESSIVE: Even tighter mobile form spacing */
   .budget-form {
-    gap: 0.5rem; /* Even tighter on mobile */
+    gap: 0.3rem; /* EVEN TIGHTER on mobile */
   }
   
   .form-group {
-    gap: 0.2rem; /* Tighter mobile spacing */
+    gap: 0.1rem; /* MINIMAL mobile spacing */
   }
   
-  /* OPTIMIZED: Smaller mobile info icons */
+  /* AGGRESSIVE: Much smaller mobile icons */
   .info-icon {
-    font-size: 0.65rem; /* Smaller on mobile */
-    width: 12px;
-    height: 12px;
+    font-size: 0.55rem; /* SMALLER on mobile */
+    width: 8px;
+    height: 8px;
+  }
+  
+  .calculator-header {
+    margin-bottom: 0.4rem;
+    padding-bottom: 0.3rem;
+  }
+  
+  .budget-section-header {
+    margin-bottom: 0.4rem;
+  }
+  
+  .search-button {
+    margin-top: 0.2rem;
   }
   
   .vehicle-card-wrapper {
@@ -847,7 +863,7 @@
   }
 }
 
-/* OPTIMIZED: Small mobile adjustments */
+/* AGGRESSIVE: Small mobile adjustments */
 @media (max-width: 480px) {
   .budget-search-section {
     padding: 1rem;
@@ -858,23 +874,19 @@
     font-size: 1.4rem;
   }
   
-  /* OPTIMIZED: Single column with tight spacing */
+  /* AGGRESSIVE: Single column with extremely tight spacing */
   .budget-form {
     grid-template-columns: 1fr;
-    gap: 0.45rem; /* Tight spacing in single column */
+    gap: 0.25rem; /* EXTREMELY TIGHT in single column */
   }
   
-  /* OPTIMIZED: Mobile header adjustments */
+  /* AGGRESSIVE: Mobile header adjustments */
   .calculator-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
-    margin-bottom: 0.6rem;
-    padding-bottom: 0.5rem;
-  }
-  
-  .budget-section-header {
-    margin-bottom: 0.6rem;
+    gap: 0.3rem;
+    margin-bottom: 0.4rem;
+    padding-bottom: 0.3rem;
   }
   
   .buying-power-amount {
