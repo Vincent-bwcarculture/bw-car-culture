@@ -1,4 +1,4 @@
-/* BudgetSearch.css - Enhanced Version with Unique Class Names and Aggressive Space Optimizations */
+/* BudgetSearch.css - Enhanced Version with Balanced Spacing and Mobile Optimization */
 .budget-search-section {
   background: rgba(20, 20, 20, 0.95);
   border-radius: 12px;
@@ -24,9 +24,9 @@
   padding: 1.25rem;
 }
 
-/* AGGRESSIVE: Much tighter section header spacing */
+/* BALANCED: Better section header spacing */
 .budget-section-header {
-  margin-bottom: 0.6rem; /* Reduced from 1rem to 0.6rem */
+  margin-bottom: 0.8rem; /* 30% increase from 0.6rem */
 }
 
 .budget-section-header h2 {
@@ -55,13 +55,13 @@
   line-height: 1.4;
 }
 
-/* AGGRESSIVE: Much tighter calculator header spacing */
+/* BALANCED: Better calculator header spacing */
 .calculator-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.6rem; /* Reduced from 1rem to 0.6rem */
-  padding-bottom: 0.4rem; /* Reduced from 0.75rem to 0.4rem */
+  margin-bottom: 0.8rem; /* 30% increase from 0.6rem */
+  padding-bottom: 0.5rem; /* 30% increase from 0.4rem */
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -96,67 +96,67 @@
   font-size: 0.75rem;
 }
 
-/* AGGRESSIVE: 60% form spacing reduction with UNIQUE class name */
+/* TIGHT: Form spacing - keep tight for form elements */
 .budget-search-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.4rem !important; /* AGGRESSIVE: Reduced from 1rem to 0.4rem (60% reduction) with !important */
+  gap: 0.4rem !important; /* Keep tight form spacing */
 }
 
-/* AGGRESSIVE: Very tight form group spacing with UNIQUE class name */
+/* TIGHT: Form group spacing - keep tight */
 .budget-search-form-group {
   display: flex !important;
   flex-direction: column !important;
-  gap: 0.15rem !important; /* AGGRESSIVE: Reduced from 0.35rem to 0.15rem with !important */
+  gap: 0.15rem !important; /* Keep tight form group spacing */
 }
 
 .budget-search-form-group-full {
   grid-column: 1 / -1;
 }
 
-/* AGGRESSIVE: Inline label layout with tiny icons - UNIQUE class name */
+/* Inline label layout with tiny icons */
 .budget-search-form-group .budget-search-label {
   color: #c9c9c9 !important;
   font-size: 0.85rem !important;
   display: flex !important;
-  align-items: center !important; /* Inline alignment */
-  gap: 0.25rem !important; /* Small gap between text and icon */
+  align-items: center !important;
+  gap: 0.25rem !important;
   margin-bottom: 0 !important;
-  justify-content: flex-start !important; /* Override any justify-content: space-between */
+  justify-content: flex-start !important;
 }
 
-/* AGGRESSIVE: Much smaller, inline info icons - UNIQUE class name */
+/* Small, inline info icons */
 .budget-search-info-icon {
   color: #888 !important;
   cursor: help !important;
   position: relative !important;
-  font-size: 0.6rem !important; /* MUCH SMALLER: Very small font */
-  width: 10px !important; /* TINY: Much smaller than before */
-  height: 10px !important; /* TINY: Much smaller than before */
+  font-size: 0.6rem !important;
+  width: 10px !important;
+  height: 10px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   border-radius: 50% !important;
-  background: rgba(255, 255, 255, 0.08) !important; /* More subtle background */
-  border: 1px solid rgba(255, 255, 255, 0.15) !important; /* More subtle border */
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
   flex-shrink: 0 !important;
-  opacity: 0.7 !important; /* Make them less prominent */
+  opacity: 0.7 !important;
 }
 
-/* AGGRESSIVE: Smaller tooltip for tiny icons - UNIQUE class name */
+/* Tooltip for tiny icons */
 .budget-search-info-icon:hover::after {
   content: attr(data-tooltip) !important;
   position: absolute !important;
-  bottom: 150% !important; /* Position above smaller icon */
-  left: 50% !important; /* Center horizontally */
-  transform: translateX(-50%) !important; /* Center transform */
+  bottom: 150% !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
   background: rgba(20, 20, 20, 0.95) !important;
   color: #fff !important;
-  padding: 0.4rem !important; /* SMALLER padding */
+  padding: 0.4rem !important;
   border-radius: 4px !important;
   border: 1px solid #2c2c2c !important;
-  width: 180px !important; /* SMALLER width */
-  font-size: 0.75rem !important; /* SMALLER text */
+  width: 180px !important;
+  font-size: 0.75rem !important;
   z-index: 10 !important;
   white-space: normal !important;
   text-align: left !important;
@@ -164,7 +164,7 @@
 
 .budget-search-input-container {
   position: relative;
-  margin-top: 0; /* Ensure no extra margin */
+  margin-top: 0;
 }
 
 .budget-search-input-container span {
@@ -227,15 +227,15 @@
   box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.2);
 }
 
-/* AGGRESSIVE: Tighter interest slider spacing - UNIQUE class name */
+/* Interest slider spacing */
 .budget-search-interest-slider {
-  margin-top: 0.2rem !important; /* AGGRESSIVE: Reduced from 0.5rem to 0.2rem */
+  margin-top: 0.3rem !important; /* Increased from 0.2rem */
 }
 
 .budget-search-interest-slider-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.3rem !important; /* AGGRESSIVE: Reduced from 0.5rem to 0.3rem */
+  margin-bottom: 0.4rem !important; /* Increased from 0.3rem */
 }
 
 .budget-search-interest-slider-header label {
@@ -275,7 +275,7 @@
   color: #cc2900;
 }
 
-/* AGGRESSIVE: Tighter search button margin - UNIQUE class name */
+/* BALANCED: Better search button margin */
 .budget-search-submit-button {
   grid-column: 1 / -1 !important;
   padding: 0.75rem !important;
@@ -287,7 +287,7 @@
   font-weight: 500 !important;
   cursor: pointer !important;
   transition: background 0.3s ease !important;
-  margin-top: 0.3rem !important; /* AGGRESSIVE: Reduced from 0.75rem to 0.3rem */
+  margin-top: 0.4rem !important; /* 30% increase from 0.3rem */
 }
 
 .budget-search-submit-button:hover:not(:disabled) {
@@ -516,14 +516,14 @@
   border-color: #ff3300;
 }
 
-/* Budget promo section - Professional, minimal design */
+/* OPTIMIZED: Budget promo section - Reduced vertical spacing */
 .budget-promo {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
   min-height: 400px;
-  padding: 1.5rem;
+  padding: 1rem; /* REDUCED from 1.5rem to remove excess space */
 }
 
 .budget-promo-content {
@@ -532,7 +532,7 @@
   align-items: center;
   max-width: 100%;
   width: 100%;
-  gap: 1.5rem;
+  gap: 1rem; /* REDUCED from 1.5rem to save vertical space */
 }
 
 .promo-text-section {
@@ -543,7 +543,7 @@
 .budget-promo-content h3 {
   font-size: 2rem;
   color: #ffffff;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem; /* REDUCED from 0.5rem */
   background: linear-gradient(135deg, #ff3300, #ff6633);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -554,14 +554,14 @@
 .promo-tagline {
   font-size: 1.1rem;
   color: #ff9966;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem; /* REDUCED from 1rem */
   font-style: italic;
   font-weight: 500;
 }
 
 .promo-description {
   color: #c9c9c9;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem; /* REDUCED from 1.5rem */
   line-height: 1.6;
   font-size: 0.95rem;
 }
@@ -570,14 +570,14 @@
   background: rgba(255, 51, 0, 0.1);
   border: 1px solid rgba(255, 51, 0, 0.3);
   border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+  padding: 0.8rem; /* REDUCED from 1rem */
+  margin-bottom: 1rem; /* REDUCED from 1.5rem */
 }
 
 .promo-car-info {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem; /* REDUCED from 0.5rem */
   text-align: center;
 }
 
@@ -600,9 +600,11 @@
   font-weight: 700;
 }
 
+/* OPTIMIZED: Image section with reduced spacing above */
 .promo-image-section {
   order: 2;
   width: 100%;
+  margin-top: 0; /* REMOVE any extra margin above image */
 }
 
 .budget-promo-image {
@@ -613,6 +615,7 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
   aspect-ratio: 16/9;
+  margin: 0; /* ENSURE no extra margin around image */
 }
 
 .budget-promo-image img {
@@ -634,6 +637,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0; /* ENSURE no extra margin */
 }
 
 .promo-image-overlay {
@@ -642,7 +646,7 @@
   left: 0;
   right: 0;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  padding: 1.5rem;
+  padding: 1rem; /* REDUCED from 1.5rem */
 }
 
 .promo-stats {
@@ -670,18 +674,20 @@
   margin-top: 0.2rem;
 }
 
+/* OPTIMIZED: Action buttons with reduced spacing */
 .budget-action-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.8rem;
+  gap: 0.6rem; /* REDUCED from 0.8rem */
   justify-content: center;
   order: 3;
   width: 100%;
+  margin-top: 0.5rem; /* REDUCED spacing above buttons */
 }
 
 .stats-disclaimer {
   text-align: center;
-  margin-top: 0.5rem;
+  margin-top: 0.4rem; /* REDUCED from 0.5rem */
 }
 
 .stats-disclaimer span {
@@ -779,7 +785,7 @@
   }
 }
 
-/* AGGRESSIVE: Mobile responsive adjustments */
+/* OPTIMIZED: Mobile responsive adjustments with horizontal pairs */
 @media (max-width: 768px) {
   .budget-section-container {
     grid-template-columns: 1fr;
@@ -795,54 +801,67 @@
     min-height: 350px;
   }
   
-  /* AGGRESSIVE: Even tighter mobile form spacing */
+  /* Keep form in 2-column layout on mobile (as shown in red squares) */
   .budget-search-form {
-    gap: 0.3rem !important; /* EVEN TIGHTER on mobile */
+    gap: 0.3rem !important; /* Tight spacing but keep 2-column */
   }
   
   .budget-search-form-group {
-    gap: 0.1rem !important; /* MINIMAL mobile spacing */
+    gap: 0.1rem !important; /* Very tight within groups */
   }
   
-  /* AGGRESSIVE: Much smaller mobile icons */
+  /* Smaller mobile icons */
   .budget-search-info-icon {
-    font-size: 0.55rem !important; /* SMALLER on mobile */
+    font-size: 0.55rem !important;
     width: 8px !important;
     height: 8px !important;
   }
   
+  /* BALANCED: Better mobile section spacing */
   .calculator-header {
-    margin-bottom: 0.4rem;
-    padding-bottom: 0.3rem;
+    margin-bottom: 0.5rem; /* 30% increase from aggressive version */
+    padding-bottom: 0.4rem;
   }
   
   .budget-section-header {
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.5rem; /* 30% increase */
   }
   
   .budget-search-submit-button {
-    margin-top: 0.2rem !important;
+    margin-top: 0.3rem !important; /* Slightly more space */
   }
   
   .vehicle-card-wrapper {
     flex: 0 0 260px;
   }
   
+  /* OPTIMIZED: Mobile promo section with reduced spacing */
+  .budget-promo {
+    padding: 0.8rem; /* REDUCED mobile padding */
+  }
+  
   .budget-promo-content {
-    gap: 1rem;
+    gap: 0.8rem; /* REDUCED from 1rem */
   }
   
   .budget-promo-content h3 {
     font-size: 1.6rem;
+    margin-bottom: 0.3rem; /* REDUCED */
   }
   
   .promo-tagline {
     font-size: 1rem;
+    margin-bottom: 0.6rem; /* REDUCED */
+  }
+  
+  .promo-description {
+    margin-bottom: 0.8rem; /* REDUCED */
   }
   
   .budget-action-buttons {
     flex-direction: column;
     align-items: center;
+    gap: 0.5rem; /* REDUCED */
   }
   
   .budget-action-button {
@@ -863,7 +882,7 @@
   }
 }
 
-/* AGGRESSIVE: Small mobile adjustments */
+/* Mobile single column for very small screens */
 @media (max-width: 480px) {
   .budget-search-section {
     padding: 1rem;
@@ -874,19 +893,19 @@
     font-size: 1.4rem;
   }
   
-  /* AGGRESSIVE: Single column with extremely tight spacing */
+  /* KEEP 2-column layout until very small screens, then switch to single */
   .budget-search-form {
     grid-template-columns: 1fr !important;
-    gap: 0.25rem !important; /* EXTREMELY TIGHT in single column */
+    gap: 0.25rem !important; /* Very tight in single column */
   }
   
-  /* AGGRESSIVE: Mobile header adjustments */
+  /* BALANCED: Better mobile header adjustments */
   .calculator-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.3rem;
-    margin-bottom: 0.4rem;
-    padding-bottom: 0.3rem;
+    gap: 0.4rem; /* 30% increase */
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.4rem;
   }
   
   .buying-power-amount {
@@ -903,12 +922,27 @@
     flex: 0 0 240px;
   }
   
+  /* VERY TIGHT: Mobile promo for small screens */
+  .budget-promo {
+    padding: 0.6rem;
+  }
+  
+  .budget-promo-content {
+    gap: 0.6rem;
+  }
+  
   .budget-promo-content h3 {
     font-size: 1.4rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .promo-tagline {
+    margin-bottom: 0.5rem;
   }
   
   .promo-description {
     font-size: 0.9rem;
+    margin-bottom: 0.6rem;
   }
   
   .budget-action-button {
@@ -917,7 +951,8 @@
   }
   
   .promo-car-highlight {
-    padding: 0.8rem;
+    padding: 0.6rem; /* REDUCED */
+    margin-bottom: 0.6rem; /* REDUCED */
   }
   
   .promo-car-name {
