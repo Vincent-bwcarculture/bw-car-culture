@@ -16,7 +16,7 @@ import {
   Eye
 } from 'lucide-react';
 import './ProfileOverview.css';
-import RoleSelectionComponent from './RoleSelectionComponent'; // Import the new component
+import RoleSelectionComponent from './RoleSelectionComponent.js'; // Import the new component
 
 const ProfileOverview = ({ profileData, refreshProfile }) => {
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
