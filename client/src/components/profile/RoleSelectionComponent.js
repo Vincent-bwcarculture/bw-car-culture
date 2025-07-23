@@ -157,7 +157,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
   const fetchPendingRequests = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/user/role-requests', {
+      const response = await fetch('/user/role-requests', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -206,13 +206,8 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const formDataToSend = new FormData();
       
-      // Add basic request data
-      formDataToSend.append('requestType', selectedRole);
-      formDataToSend.append('reason', `Application for ${availableRoles[selectedRole].title} role`);
-      
-      // Add form fields as JSON
+      // Prepare request data as JSON (simplified for now)
       const requestData = {
         businessName: formData.businessName,
         businessType: formData.businessType,
@@ -237,22 +232,18 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         description: formData.description,
         specializations: formData.specializations
       };
-      
-      formDataToSend.append('requestData', JSON.stringify(requestData));
-      
-      // Add file uploads
-      Object.keys(formData).forEach(key => {
-        if (formData[key] instanceof File) {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
 
-      const response = await fetch('/api/role-requests', {
+      const response = await fetch('/role-requests', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
-        body: formDataToSend
+        body: JSON.stringify({
+          requestType: selectedRole,
+          reason: `Application for ${availableRoles[selectedRole].title} role`,
+          requestData: requestData
+        })
       });
 
       const result = await response.json();
@@ -260,7 +251,15 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
       if (response.ok) {
         alert('Role request submitted successfully! You will receive an email when it\'s reviewed.');
         setSelectedRole('');
-        setFormData({});
+        setFormData({
+          businessName: '', businessType: '', licenseNumber: '', taxId: '', 
+          registrationNumber: '', businessPhone: '', businessEmail: '', 
+          businessAddress: '', city: '', website: '', serviceType: '', 
+          dealershipType: '', transportRoutes: '', fleetSize: '', 
+          operatingAreas: '', employeeId: '', department: '', ministryName: '', 
+          position: '', experience: '', description: '', specializations: '',
+          businessLicense: null, taxCertificate: null, idDocument: null, proofOfAddress: null
+        });
         setIsExpanded(false);
         fetchPendingRequests();
         if (refreshProfile) refreshProfile();
@@ -319,7 +318,6 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
           <h4>Application for {role.title}</h4>
           <p>{role.description}</p>
           
-          {/* Improvement Notice */}
           <div className="role-improvement-notice">
             <AlertCircle size={16} />
             <span>Providing more information and documents significantly increases your approval chances!</span>
@@ -327,65 +325,61 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         </div>
 
         <div className="role-form-sections">
-          {/* Business Information Section */}
-          {(role.requiredFields.includes('businessName') || role.requiredFields.includes('businessType')) && (
-            <div className="role-form-section">
-              <h5>Business Information</h5>
-              <div className="role-form-grid">
-                {(role.id === 'dealership_admin' || role.id === 'transport_admin' || role.id === 'rental_admin') && (
-                  <div className="role-form-field">
-                    <label>Business Name</label>
-                    <input
-                      type="text"
-                      value={formData.businessName}
-                      onChange={(e) => handleInputChange('businessName', e.target.value)}
-                      placeholder="Enter your business name"
-                    />
-                  </div>
-                )}
-                
-                {(role.id === 'dealership_admin' || role.id === 'rental_admin') && (
-                  <div className="role-form-field">
-                    <label>Business Type</label>
-                    <select
-                      value={formData.businessType}
-                      onChange={(e) => handleInputChange('businessType', e.target.value)}
-                    >
-                      <option value="">Select business type</option>
-                      <option value="sole_proprietorship">Sole Proprietorship</option>
-                      <option value="partnership">Partnership</option>
-                      <option value="corporation">Corporation</option>
-                      <option value="llc">LLC</option>
-                    </select>
-                  </div>
-                )}
-                
-                {(role.id === 'dealership_admin' || role.id === 'taxi_driver') && (
-                  <div className="role-form-field">
-                    <label>License Number</label>
-                    <input
-                      type="text"
-                      value={formData.licenseNumber}
-                      onChange={(e) => handleInputChange('licenseNumber', e.target.value)}
-                      placeholder="Enter license number"
-                    />
-                  </div>
-                )}
-                
+          <div className="role-form-section">
+            <h5>Business Information</h5>
+            <div className="role-form-grid">
+              {(selectedRole === 'dealership_admin' || selectedRole === 'transport_admin' || selectedRole === 'rental_admin') && (
                 <div className="role-form-field">
-                  <label>Tax ID</label>
+                  <label>Business Name</label>
                   <input
                     type="text"
-                    value={formData.taxId}
-                    onChange={(e) => handleInputChange('taxId', e.target.value)}
-                    placeholder="Enter tax ID number"
+                    value={formData.businessName}
+                    onChange={(e) => handleInputChange('businessName', e.target.value)}
+                    placeholder="Enter your business name"
                   />
                 </div>
+              )}
+              
+              {(selectedRole === 'dealership_admin' || selectedRole === 'rental_admin') && (
+                <div className="role-form-field">
+                  <label>Business Type</label>
+                  <select
+                    value={formData.businessType}
+                    onChange={(e) => handleInputChange('businessType', e.target.value)}
+                  >
+                    <option value="">Select business type</option>
+                    <option value="sole_proprietorship">Sole Proprietorship</option>
+                    <option value="partnership">Partnership</option>
+                    <option value="corporation">Corporation</option>
+                    <option value="llc">LLC</option>
+                  </select>
+                </div>
+              )}
+              
+              {(selectedRole === 'dealership_admin' || selectedRole === 'taxi_driver') && (
+                <div className="role-form-field">
+                  <label>License Number</label>
+                  <input
+                    type="text"
+                    value={formData.licenseNumber}
+                    onChange={(e) => handleInputChange('licenseNumber', e.target.value)}
+                    placeholder="Enter license number"
+                  />
+                </div>
+              )}
+              
+              <div className="role-form-field">
+                <label>Tax ID</label>
+                <input
+                  type="text"
+                  value={formData.taxId}
+                  onChange={(e) => handleInputChange('taxId', e.target.value)}
+                  placeholder="Enter tax ID number"
+                />
               </div>
             </div>
-          )}
+          </div>
 
-          {/* Contact Information Section */}
           <div className="role-form-section">
             <h5>Contact Information</h5>
             <div className="role-form-grid">
@@ -409,7 +403,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                 />
               </div>
               
-              {(role.id === 'dealership_admin' || role.id === 'transport_admin' || role.id === 'rental_admin') && (
+              {(selectedRole === 'dealership_admin' || selectedRole === 'transport_admin' || selectedRole === 'rental_admin') && (
                 <div className="role-form-field role-form-field-full">
                   <label>Business Address</label>
                   <textarea
@@ -423,8 +417,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
             </div>
           </div>
 
-          {/* Role-specific fields */}
-          {role.id === 'transport_admin' && (
+          {selectedRole === 'transport_admin' && (
             <div className="role-form-section">
               <h5>Transportation Details</h5>
               <div className="role-form-grid">
@@ -465,7 +458,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
             </div>
           )}
 
-          {role.id === 'ministry_official' && (
+          {selectedRole === 'ministry_official' && (
             <div className="role-form-section">
               <h5>Government Details</h5>
               <div className="role-form-grid">
@@ -512,7 +505,6 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
             </div>
           )}
 
-          {/* Document Upload Section */}
           <div className="role-form-section">
             <h5>Supporting Documents (Optional)</h5>
             <p className="role-docs-note">Upload documents to improve your approval chances</p>
@@ -583,7 +575,6 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
             </div>
           </div>
 
-          {/* Additional Information */}
           <div className="role-form-section">
             <h5>Additional Information</h5>
             <div className="role-form-field">
