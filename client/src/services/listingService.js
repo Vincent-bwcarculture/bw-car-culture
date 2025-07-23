@@ -704,17 +704,22 @@ validateUpdateData(listingData) {
   }
 
   async updateListingStatus(id, status) {
-    try {
-      const response = await this.axios.patch(`${this.endpoint}/${id}/status`, { status }, {
-        headers: this.getHeaders()
-      });
-      this.cache.clear();
-      return response.data.data;
-    } catch (error) {
-      this.handleError(`Error updating status for listing ${id}:`, error);
-      throw error;
-    }
+  try {
+    console.log(`Updating listing ${id} status to: ${status}`);
+    
+    // FIXED: Match backend URL format - status in path, not body
+    const response = await this.axios.patch(`${this.endpoint}/${id}/status/${status}`, {}, {
+      headers: this.getHeaders()
+    });
+    
+    this.cache.clear();
+    console.log(`Successfully updated listing ${id} status to ${status}`);
+    return response.data.data;
+  } catch (error) {
+    this.handleError(`Error updating status for listing ${id}:`, error);
+    throw error;
   }
+}
 
   async toggleFeatured(id) {
     try {
