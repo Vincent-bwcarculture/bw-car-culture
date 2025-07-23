@@ -157,18 +157,33 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
   const fetchPendingRequests = async () => {
     try {
       const token = localStorage.getItem('token');
+      console.log('Fetching pending requests from /user/role-requests');
+      
       const response = await fetch('/user/role-requests', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       
+      console.log('Fetch response status:', response.status);
+      
       if (response.ok) {
-        const data = await response.json();
-        setPendingRequests(data.data || []);
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          console.log('Pending requests data:', data);
+          setPendingRequests(data.data || []);
+        } else {
+          console.error('Non-JSON response for pending requests');
+          setPendingRequests([]);
+        }
+      } else {
+        console.error('Failed to fetch pending requests:', response.status, response.statusText);
+        setPendingRequests([]);
       }
     } catch (error) {
       console.error('Error fetching pending requests:', error);
+      setPendingRequests([]);
     }
   };
 
@@ -233,6 +248,12 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         specializations: formData.specializations
       };
 
+      console.log('Submitting role request:', {
+        requestType: selectedRole,
+        reason: `Application for ${availableRoles[selectedRole].title} role`,
+        requestData: requestData
+      });
+
       const response = await fetch('/role-requests', {
         method: 'POST',
         headers: {
@@ -246,7 +267,28 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         })
       });
 
-      const result = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const textResponse = await response.text();
+        console.error('Non-JSON response:', textResponse);
+        alert(`Server error: Expected JSON response but got ${contentType}. Check browser console for details.`);
+        return;
+      }
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        console.error('JSON parsing error:', jsonError);
+        const textResponse = await response.text();
+        console.error('Raw response:', textResponse);
+        alert('Server error: Invalid JSON response. Check browser console for details.');
+        return;
+      }
       
       if (response.ok) {
         alert('Role request submitted successfully! You will receive an email when it\'s reviewed.');
@@ -264,11 +306,12 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         fetchPendingRequests();
         if (refreshProfile) refreshProfile();
       } else {
-        alert(result.message || 'Failed to submit role request');
+        console.error('Server error response:', result);
+        alert(result?.message || `Server error (${response.status}): ${response.statusText}`);
       }
     } catch (error) {
-      console.error('Error submitting role request:', error);
-      alert('Failed to submit role request. Please try again.');
+      console.error('Network/Request error:', error);
+      alert(`Network error: ${error.message}. Check your connection and try again.`);
     } finally {
       setLoading(false);
     }
