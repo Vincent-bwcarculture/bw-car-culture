@@ -65,8 +65,8 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         'Customer management dashboard',
         'Sales analytics and reports'
       ],
-      requiredFields: ['businessName', 'businessType', 'licenseNumber', 'businessPhone', 'businessAddress'],
-      requiredDocs: ['businessLicense', 'idDocument']
+      requiredFields: [],
+      requiredDocs: []
     },
     'transport_admin': {
       id: 'transport_admin',
@@ -81,8 +81,8 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         'Passenger analytics',
         'Schedule optimization tools'
       ],
-      requiredFields: ['businessName', 'serviceType', 'fleetSize', 'operatingAreas', 'businessPhone'],
-      requiredDocs: ['businessLicense', 'idDocument', 'taxCertificate']
+      requiredFields: [],
+      requiredDocs: []
     },
     'rental_admin': {
       id: 'rental_admin',
@@ -97,8 +97,8 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         'Customer tracking',
         'Revenue analytics'
       ],
-      requiredFields: ['businessName', 'businessType', 'fleetSize', 'businessPhone', 'businessAddress'],
-      requiredDocs: ['businessLicense', 'idDocument', 'taxCertificate']
+      requiredFields: [],
+      requiredDocs: []
     },
     'transport_coordinator': {
       id: 'transport_coordinator',
@@ -113,8 +113,8 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         'Driver communication',
         'Performance monitoring'
       ],
-      requiredFields: ['employeeId', 'department', 'position', 'businessPhone'],
-      requiredDocs: ['idDocument', 'proofOfAddress']
+      requiredFields: [],
+      requiredDocs: []
     },
     'taxi_driver': {
       id: 'taxi_driver',
@@ -129,8 +129,8 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         'Earnings management',
         'Customer ratings'
       ],
-      requiredFields: ['licenseNumber', 'businessPhone', 'operatingAreas'],
-      requiredDocs: ['idDocument', 'businessLicense']
+      requiredFields: [],
+      requiredDocs: []
     },
     'ministry_official': {
       id: 'ministry_official',
@@ -145,8 +145,8 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         'Industry analytics',
         'Compliance monitoring'
       ],
-      requiredFields: ['ministryName', 'department', 'position', 'employeeId'],
-      requiredDocs: ['idDocument', 'proofOfAddress']
+      requiredFields: [],
+      requiredDocs: []
     }
   };
 
@@ -192,24 +192,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     const role = availableRoles[selectedRole];
     if (!role) return { isValid: false, message: 'Invalid role selected' };
 
-    // Check required fields
-    const missingFields = role.requiredFields.filter(field => !formData[field]);
-    if (missingFields.length > 0) {
-      return { 
-        isValid: false, 
-        message: `Please fill in all required fields: ${missingFields.join(', ')}` 
-      };
-    }
-
-    // Check required documents
-    const missingDocs = role.requiredDocs.filter(doc => !formData[doc]);
-    if (missingDocs.length > 0) {
-      return { 
-        isValid: false, 
-        message: `Please upload all required documents: ${missingDocs.join(', ')}` 
-      };
-    }
-
+    // Basic validation - just check if role is selected
     return { isValid: true };
   };
 
@@ -303,11 +286,12 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
           const StatusIcon = request.status === 'pending' ? Clock : 
                            request.status === 'approved' ? CheckCircle : 
                            XCircle;
+          const RoleIcon = role?.icon; // Fix: Store the icon component in a variable
           
           return (
             <div key={index} className={`role-request-item role-request-${request.status}`}>
               <div className="role-request-info">
-                {role && <role.icon size={20} />}
+                {RoleIcon && <RoleIcon size={20} />} {/* Fix: Use the capitalized variable as a component */}
                 <div>
                   <strong>{role?.title || request.requestType}</strong>
                   <p>Submitted: {new Date(request.createdAt).toLocaleDateString()}</p>
@@ -334,6 +318,12 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         <div className="role-form-header">
           <h4>Application for {role.title}</h4>
           <p>{role.description}</p>
+          
+          {/* Improvement Notice */}
+          <div className="role-improvement-notice">
+            <AlertCircle size={16} />
+            <span>Providing more information and documents significantly increases your approval chances!</span>
+          </div>
         </div>
 
         <div className="role-form-sections">
@@ -342,9 +332,9 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
             <div className="role-form-section">
               <h5>Business Information</h5>
               <div className="role-form-grid">
-                {role.requiredFields.includes('businessName') && (
+                {(role.id === 'dealership_admin' || role.id === 'transport_admin' || role.id === 'rental_admin') && (
                   <div className="role-form-field">
-                    <label>Business Name *</label>
+                    <label>Business Name</label>
                     <input
                       type="text"
                       value={formData.businessName}
@@ -354,9 +344,9 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                   </div>
                 )}
                 
-                {role.requiredFields.includes('businessType') && (
+                {(role.id === 'dealership_admin' || role.id === 'rental_admin') && (
                   <div className="role-form-field">
-                    <label>Business Type *</label>
+                    <label>Business Type</label>
                     <select
                       value={formData.businessType}
                       onChange={(e) => handleInputChange('businessType', e.target.value)}
@@ -370,9 +360,9 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                   </div>
                 )}
                 
-                {role.requiredFields.includes('licenseNumber') && (
+                {(role.id === 'dealership_admin' || role.id === 'taxi_driver') && (
                   <div className="role-form-field">
-                    <label>License Number *</label>
+                    <label>License Number</label>
                     <input
                       type="text"
                       value={formData.licenseNumber}
@@ -399,17 +389,15 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
           <div className="role-form-section">
             <h5>Contact Information</h5>
             <div className="role-form-grid">
-              {role.requiredFields.includes('businessPhone') && (
-                <div className="role-form-field">
-                  <label>Business Phone *</label>
-                  <input
-                    type="tel"
-                    value={formData.businessPhone}
-                    onChange={(e) => handleInputChange('businessPhone', e.target.value)}
-                    placeholder="+267 XX XXX XXX"
-                  />
-                </div>
-              )}
+              <div className="role-form-field">
+                <label>Business Phone</label>
+                <input
+                  type="tel"
+                  value={formData.businessPhone}
+                  onChange={(e) => handleInputChange('businessPhone', e.target.value)}
+                  placeholder="+267 XX XXX XXX"
+                />
+              </div>
               
               <div className="role-form-field">
                 <label>Business Email</label>
@@ -421,9 +409,9 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                 />
               </div>
               
-              {role.requiredFields.includes('businessAddress') && (
+              {(role.id === 'dealership_admin' || role.id === 'transport_admin' || role.id === 'rental_admin') && (
                 <div className="role-form-field role-form-field-full">
-                  <label>Business Address *</label>
+                  <label>Business Address</label>
                   <textarea
                     value={formData.businessAddress}
                     onChange={(e) => handleInputChange('businessAddress', e.target.value)}
@@ -441,7 +429,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
               <h5>Transportation Details</h5>
               <div className="role-form-grid">
                 <div className="role-form-field">
-                  <label>Service Type *</label>
+                  <label>Service Type</label>
                   <select
                     value={formData.serviceType}
                     onChange={(e) => handleInputChange('serviceType', e.target.value)}
@@ -455,7 +443,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                 </div>
                 
                 <div className="role-form-field">
-                  <label>Fleet Size *</label>
+                  <label>Fleet Size</label>
                   <input
                     type="number"
                     value={formData.fleetSize}
@@ -465,7 +453,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                 </div>
                 
                 <div className="role-form-field role-form-field-full">
-                  <label>Operating Areas *</label>
+                  <label>Operating Areas</label>
                   <textarea
                     value={formData.operatingAreas}
                     onChange={(e) => handleInputChange('operatingAreas', e.target.value)}
@@ -482,7 +470,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
               <h5>Government Details</h5>
               <div className="role-form-grid">
                 <div className="role-form-field">
-                  <label>Ministry Name *</label>
+                  <label>Ministry Name</label>
                   <input
                     type="text"
                     value={formData.ministryName}
@@ -492,7 +480,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                 </div>
                 
                 <div className="role-form-field">
-                  <label>Department *</label>
+                  <label>Department</label>
                   <input
                     type="text"
                     value={formData.department}
@@ -502,7 +490,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                 </div>
                 
                 <div className="role-form-field">
-                  <label>Position *</label>
+                  <label>Position</label>
                   <input
                     type="text"
                     value={formData.position}
@@ -512,7 +500,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                 </div>
                 
                 <div className="role-form-field">
-                  <label>Employee ID *</label>
+                  <label>Employee ID</label>
                   <input
                     type="text"
                     value={formData.employeeId}
@@ -526,30 +514,72 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
 
           {/* Document Upload Section */}
           <div className="role-form-section">
-            <h5>Required Documents</h5>
+            <h5>Supporting Documents (Optional)</h5>
+            <p className="role-docs-note">Upload documents to improve your approval chances</p>
             <div className="role-form-docs">
-              {role.requiredDocs.map(doc => (
-                <div key={doc} className="role-form-doc-upload">
-                  <label>
-                    {doc === 'businessLicense' && 'Business License *'}
-                    {doc === 'taxCertificate' && 'Tax Certificate *'}
-                    {doc === 'idDocument' && 'ID Document *'}
-                    {doc === 'proofOfAddress' && 'Proof of Address *'}
+              <div className="role-form-doc-upload">
+                <label>Business License</label>
+                <div className="role-file-upload">
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileUpload('businessLicense', e.target.files[0])}
+                    id="file-businessLicense"
+                  />
+                  <label htmlFor="file-businessLicense" className="role-file-label">
+                    <Upload size={18} />
+                    {formData.businessLicense ? formData.businessLicense.name : 'Choose file'}
                   </label>
-                  <div className="role-file-upload">
-                    <input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleFileUpload(doc, e.target.files[0])}
-                      id={`file-${doc}`}
-                    />
-                    <label htmlFor={`file-${doc}`} className="role-file-label">
-                      <Upload size={18} />
-                      {formData[doc] ? formData[doc].name : 'Choose file'}
-                    </label>
-                  </div>
                 </div>
-              ))}
+              </div>
+              
+              <div className="role-form-doc-upload">
+                <label>Tax Certificate</label>
+                <div className="role-file-upload">
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileUpload('taxCertificate', e.target.files[0])}
+                    id="file-taxCertificate"
+                  />
+                  <label htmlFor="file-taxCertificate" className="role-file-label">
+                    <Upload size={18} />
+                    {formData.taxCertificate ? formData.taxCertificate.name : 'Choose file'}
+                  </label>
+                </div>
+              </div>
+              
+              <div className="role-form-doc-upload">
+                <label>ID Document</label>
+                <div className="role-file-upload">
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileUpload('idDocument', e.target.files[0])}
+                    id="file-idDocument"
+                  />
+                  <label htmlFor="file-idDocument" className="role-file-label">
+                    <Upload size={18} />
+                    {formData.idDocument ? formData.idDocument.name : 'Choose file'}
+                  </label>
+                </div>
+              </div>
+              
+              <div className="role-form-doc-upload">
+                <label>Proof of Address</label>
+                <div className="role-file-upload">
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileUpload('proofOfAddress', e.target.files[0])}
+                    id="file-proofOfAddress"
+                  />
+                  <label htmlFor="file-proofOfAddress" className="role-file-label">
+                    <Upload size={18} />
+                    {formData.proofOfAddress ? formData.proofOfAddress.name : 'Choose file'}
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -655,7 +685,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
             </div>
           )}
 
-          {renderRoleForm()}
+          {selectedRole && renderRoleForm()}
         </div>
       )}
     </div>

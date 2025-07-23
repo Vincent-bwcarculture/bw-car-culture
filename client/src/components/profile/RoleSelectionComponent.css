@@ -10,8 +10,8 @@
 }
 
 .role-selection-container:hover {
-  border-color: var(--uprofile-primary-accent, #3498db);
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
+  border-color: var(--uprofile-text-secondary, #5a6c7d);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Header Section */
@@ -41,7 +41,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--uprofile-primary-accent, #3498db);
+  background: var(--uprofile-text-secondary, #5a6c7d);
   color: white;
   border: none;
   border-radius: 8px;
@@ -53,7 +53,7 @@
 }
 
 .role-selection-toggle:hover {
-  background: var(--uprofile-primary-dark, #2980b9);
+  background: var(--uprofile-text-primary, #2c3e50);
   transform: translateY(-1px);
 }
 
@@ -272,6 +272,32 @@
   font-size: 14px;
 }
 
+/* Improvement Notice */
+.role-improvement-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--uprofile-bg-tertiary, #e9ecef);
+  border: 1px solid var(--uprofile-border-color, #e0e0e0);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--uprofile-text-secondary, #5a6c7d);
+}
+
+.role-improvement-notice svg {
+  color: var(--uprofile-warning-orange, #f39c12);
+}
+
+/* Document note */
+.role-docs-note {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  color: var(--uprofile-text-muted, #6c757d);
+  font-style: italic;
+}
+
 /* Form Sections */
 .role-form-sections {
   display: flex;
@@ -291,7 +317,7 @@
   color: var(--uprofile-text-primary, #2c3e50);
   font-size: 1.1rem;
   font-weight: 600;
-  border-bottom: 2px solid var(--uprofile-primary-accent, #3498db);
+  border-bottom: 2px solid var(--uprofile-text-secondary, #5a6c7d);
   padding-bottom: 8px;
 }
 
@@ -333,8 +359,8 @@
 .role-form-field select:focus,
 .role-form-field textarea:focus {
   outline: none;
-  border-color: var(--uprofile-primary-accent, #3498db);
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  border-color: var(--uprofile-text-secondary, #5a6c7d);
+  box-shadow: 0 0 0 3px rgba(90, 108, 125, 0.1);
 }
 
 .role-form-field textarea {
@@ -384,7 +410,7 @@
 }
 
 .role-file-label:hover {
-  border-color: var(--uprofile-primary-accent, #3498db);
+  border-color: var(--uprofile-text-secondary, #5a6c7d);
   background: var(--uprofile-bg-tertiary, #e9ecef);
 }
 
@@ -419,7 +445,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: var(--uprofile-primary-accent, #3498db);
+  background: var(--uprofile-text-secondary, #5a6c7d);
   color: white;
   border: none;
   border-radius: 8px;
@@ -429,7 +455,7 @@
 }
 
 .role-form-submit:hover {
-  background: var(--uprofile-primary-dark, #2980b9);
+  background: var(--uprofile-text-primary, #2c3e50);
   transform: translateY(-1px);
 }
 
