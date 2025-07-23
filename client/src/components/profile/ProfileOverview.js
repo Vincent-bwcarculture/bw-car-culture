@@ -16,6 +16,7 @@ import {
   Eye
 } from 'lucide-react';
 import './ProfileOverview.css';
+import RoleSelectionComponent from './RoleSelectionComponent'; // Import the new component
 
 const ProfileOverview = ({ profileData, refreshProfile }) => {
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
@@ -29,6 +30,31 @@ const ProfileOverview = ({ profileData, refreshProfile }) => {
     
     if (profileData.role === 'admin') {
       badges.push({ label: 'Administrator', icon: Settings, color: 'red' });
+    }
+    
+    // Add badges for new business roles
+    if (profileData.role === 'dealership_admin') {
+      badges.push({ label: 'Dealership Admin', icon: Car, color: 'blue' });
+    }
+    
+    if (profileData.role === 'transport_admin') {
+      badges.push({ label: 'Transport Admin', icon: Route, color: 'purple' });
+    }
+    
+    if (profileData.role === 'rental_admin') {
+      badges.push({ label: 'Rental Admin', icon: Car, color: 'orange' });
+    }
+    
+    if (profileData.role === 'transport_coordinator') {
+      badges.push({ label: 'Transport Coordinator', icon: MapPin, color: 'green' });
+    }
+    
+    if (profileData.role === 'taxi_driver') {
+      badges.push({ label: 'Taxi Driver', icon: Car, color: 'yellow' });
+    }
+    
+    if (profileData.role === 'ministry_official') {
+      badges.push({ label: 'Ministry Official', icon: Award, color: 'red' });
     }
     
     if (profileData.favorites?.length > 10) {
@@ -126,6 +152,24 @@ const ProfileOverview = ({ profileData, refreshProfile }) => {
     });
   };
 
+  // Enhanced account type display function
+  const getAccountTypeDisplay = (role) => {
+    const roleMap = {
+      'admin': 'Administrator',
+      'provider': 'Service Provider',
+      'dealer': 'Dealer',
+      'dealership_admin': 'Dealership Administrator',
+      'transport_admin': 'Public Transport Administrator',
+      'rental_admin': 'Car Rental Administrator',
+      'transport_coordinator': 'Public Transport Coordinator',
+      'taxi_driver': 'Professional Taxi Driver',
+      'ministry_official': 'Ministry Official',
+      'user': 'Personal User'
+    };
+    
+    return roleMap[role] || 'Personal User';
+  };
+
   const profileStrength = calculateProfileStrength();
   const strengthColor = getProfileStrengthColor(profileStrength);
   const badges = getBadges();
@@ -160,6 +204,12 @@ const ProfileOverview = ({ profileData, refreshProfile }) => {
           </div>
         </div>
       </div>
+
+      {/* ROLE SELECTION COMPONENT - NEW INTEGRATION */}
+      <RoleSelectionComponent 
+        profileData={profileData} 
+        refreshProfile={refreshProfile} 
+      />
 
       {/* Badges Section */}
       {badges.length > 0 && (
@@ -236,11 +286,7 @@ const ProfileOverview = ({ profileData, refreshProfile }) => {
               <User size={18} />
               <div className="poverview-info-content">
                 <strong>Account Type</strong>
-                <span>
-                  {profileData.role === 'admin' ? 'Administrator' : 
-                   profileData.role === 'provider' ? 'Service Provider' :
-                   profileData.role === 'dealer' ? 'Dealer' : 'Personal User'}
-                </span>
+                <span>{getAccountTypeDisplay(profileData.role)}</span>
               </div>
             </div>
             
