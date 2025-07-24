@@ -662,82 +662,105 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   if (!car) return null;
 
   return (
-    <div className={`vc-card ${compact ? 'compact' : ''}`} onClick={handleCardClick}>
+    <div 
+      className={`vc-card ${compact ? 'compact' : ''}`} 
+      onClick={handleCardClick}
+      data-status={car.status || 'active'}
+    >
       <div 
         className={`vc-image-container ${showNavigation ? 'show-navigation' : ''}`}
         onClick={handleImageContainerClick}
       >
-        <img 
-          src={getImageUrl()} 
-          alt={car.title || 'Vehicle'} 
-          className="vc-image"
-          loading="lazy"
-          onError={handleImageError}
-        />
-        
-        {/* Savings Badge */}
-        {calculateSavings && (
-          <div className={`vc-savings-badge ${calculateSavings.isExclusive ? 'vc-exclusive-badge' : ''}`}>
-            <div className="vc-savings-badge-amount">P{calculateSavings.amount.toLocaleString()}</div>
-            <div className="vc-savings-badge-label">SAVE</div>
-            <div className="vc-savings-tooltip">
-              <div className="vc-savings-tooltip-header">
-                💰 {calculateSavings.isExclusive ? 'Exclusive Deal!' : 'Great Savings!'}
+        <div className="vc-image-wrapper">
+          <img 
+            src={getImageUrl()} 
+            alt={car.title || 'Vehicle'} 
+            className="vc-image"
+            loading="lazy"
+            onError={handleImageError}
+          />
+          
+          {/* SOLD BADGE OVERLAY - NEW ADDITION */}
+          {car.status === 'sold' && (
+            <div className="vc-sold-overlay">
+              <div className="vc-sold-badge">
+                <span className="vc-sold-text">SOLD</span>
+                {car.sold?.date && (
+                  <span className="vc-sold-date">
+                    {new Date(car.sold.date).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}
+                  </span>
+                )}
               </div>
-              <div className="vc-savings-tooltip-row">
-                <span>Original Price:</span>
-                <span>P{calculateSavings.originalPrice.toLocaleString()}</span>
-              </div>
-              <div className="vc-savings-tooltip-row">
-                <span>Current Price:</span>
-                <span>P{car.price.toLocaleString()}</span>
-              </div>
-              <div className="vc-savings-tooltip-row">
-                <span>You Save:</span>
-                <span>P{calculateSavings.amount.toLocaleString()}</span>
-              </div>
-              {calculateSavings.description && (
-                <div className="vc-savings-tooltip-description">
-                  {calculateSavings.description}
-                </div>
-              )}
-              {calculateSavings.validUntil && formatValidUntil(calculateSavings.validUntil) && (
-                <div className="vc-savings-tooltip-description">
-                  Valid until: {formatValidUntil(calculateSavings.validUntil)}
-                </div>
-              )}
             </div>
-          </div>
-        )}
-        
-        {/* Image Navigation */}
-        {car.images && Array.isArray(car.images) && car.images.length > 1 && (
-          <div className="vc-image-navigation">
-            <button 
-              className="vc-image-nav prev" 
-              onClick={(e) => handleImageNavigation(e, 'prev')}
-              aria-label="Previous image"
-            >
-              ❮
-            </button>
-            <button 
-              className="vc-image-nav next" 
-              onClick={(e) => handleImageNavigation(e, 'next')}
-              aria-label="Next image"
-            >
-              ❯
-            </button>
-            <div className="vc-image-counter">
-              {activeImageIndex + 1}/{car.images.length}
+          )}
+          
+          {/* Savings Badge */}
+          {calculateSavings && car.status !== 'sold' && (
+            <div className={`vc-savings-badge ${calculateSavings.isExclusive ? 'vc-exclusive-badge' : ''}`}>
+              <div className="vc-savings-badge-amount">P{calculateSavings.amount.toLocaleString()}</div>
+              <div className="vc-savings-badge-label">SAVE</div>
+              <div className="vc-savings-tooltip">
+                <div className="vc-savings-tooltip-header">
+                  💰 {calculateSavings.isExclusive ? 'Exclusive Deal!' : 'Great Savings!'}
+                </div>
+                <div className="vc-savings-tooltip-row">
+                  <span>Original Price:</span>
+                  <span>P{calculateSavings.originalPrice.toLocaleString()}</span>
+                </div>
+                <div className="vc-savings-tooltip-row">
+                  <span>Current Price:</span>
+                  <span>P{car.price.toLocaleString()}</span>
+                </div>
+                <div className="vc-savings-tooltip-row">
+                  <span>You Save:</span>
+                  <span>P{calculateSavings.amount.toLocaleString()}</span>
+                </div>
+                {calculateSavings.description && (
+                  <div className="vc-savings-tooltip-description">
+                    {calculateSavings.description}
+                  </div>
+                )}
+                {calculateSavings.validUntil && formatValidUntil(calculateSavings.validUntil) && (
+                  <div className="vc-savings-tooltip-description">
+                    Valid until: {formatValidUntil(calculateSavings.validUntil)}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        )}
-        
-        {dealer?.verification?.isVerified && (
-          <div className="vc-verified-badge">
-            ✓ Verified
-          </div>
-        )}
+          )}
+          
+          {/* Image Navigation */}
+          {car.images && Array.isArray(car.images) && car.images.length > 1 && (
+            <div className="vc-image-navigation">
+              <button 
+                className="vc-image-nav prev" 
+                onClick={(e) => handleImageNavigation(e, 'prev')}
+                aria-label="Previous image"
+              >
+                ❮
+              </button>
+              <button 
+                className="vc-image-nav next" 
+                onClick={(e) => handleImageNavigation(e, 'next')}
+                aria-label="Next image"
+              >
+                ❯
+              </button>
+              <div className="vc-image-counter">
+                {activeImageIndex + 1}/{car.images.length}
+              </div>
+            </div>
+          )}
+          
+          {dealer?.verification?.isVerified && (
+            <div className="vc-verified-badge">
+              ✓ Verified
+            </div>
+          )}
+        </div>
       </div>
       
       <div className="vc-content">
@@ -755,18 +778,18 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             </div>
           </div>
           <div className="vc-price-container">
-            {calculateSavings && (
+            {calculateSavings && car.status !== 'sold' && (
               <div className="vc-original-price">P{calculateSavings.originalPrice.toLocaleString()}</div>
             )}
             <div className="vc-price">
               P{car.price?.toLocaleString() || '0'}
             </div>
-            {calculateSavings && (
+            {calculateSavings && car.status !== 'sold' && (
               <div className="vc-savings-highlight">
                 You Save: P {calculateSavings.amount.toLocaleString()}
               </div>
             )}
-            {car.priceOptions?.monthlyPayment && !car.priceOptions?.showPriceAsPOA && (
+            {car.priceOptions?.monthlyPayment && !car.priceOptions?.showPriceAsPOA && car.status !== 'sold' && (
               <div className="vc-monthly-payment">
                 <span className="vc-monthly-payment-value">P {car.priceOptions.monthlyPayment.toLocaleString()} p/m</span>
               </div>
@@ -939,8 +962,12 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               className="vc-reserve-btn"
               onClick={handleReserveClick}
               aria-label={dealer?.sellerType === 'private' ? 'Contact Seller' : 'Reserve Vehicle'}
+              disabled={car.status === 'sold'}
             >
-              {dealer?.sellerType === 'private' ? 'Contact' : 'Reserve'}
+              {car.status === 'sold' 
+                ? 'Sold' 
+                : (dealer?.sellerType === 'private' ? 'Contact' : 'Reserve')
+              }
             </button>
             <button className="vc-details-btn">
               View Details

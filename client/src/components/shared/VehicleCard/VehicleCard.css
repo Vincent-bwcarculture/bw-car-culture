@@ -1109,3 +1109,174 @@ EXPANDABLE AREAS FOR FUTURE VEHICLE TYPES:
     animation: none;
   }
 }
+
+/* Add these styles to your existing VehicleCard.css file */
+
+/* === SOLD BADGE OVERLAY STYLES === */
+.vc-sold-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.vc-sold-badge {
+  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 
+    0 8px 25px rgba(74, 144, 226, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  transform: scale(1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Premium shine effect */
+.vc-sold-badge::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: rotate(45deg);
+  animation: shine 2s infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+}
+
+.vc-sold-text {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1;
+}
+
+.vc-sold-date {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.9;
+  margin-top: 0.25rem;
+  letter-spacing: 1px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Hover effect for sold vehicles */
+.vc-card:hover .vc-sold-badge {
+  transform: scale(1.05);
+  box-shadow: 
+    0 12px 35px rgba(74, 144, 226, 0.5),
+    0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Ensure image wrapper is relative for overlay positioning */
+.vc-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Sold overlay should not interfere with clicks when not sold */
+.vc-sold-overlay {
+  pointer-events: none;
+}
+
+/* Reduce opacity of sold vehicle content to indicate unavailability */
+.vc-card[data-status="sold"] .vc-content {
+  opacity: 0.8;
+}
+
+.vc-card[data-status="sold"] .vc-price {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* Add subtle border to sold vehicle cards */
+.vc-card[data-status="sold"] {
+  border: 2px solid rgba(74, 144, 226, 0.3);
+  background: rgba(74, 144, 226, 0.02);
+}
+
+/* Disable reserve button for sold vehicles */
+.vc-card[data-status="sold"] .vc-reserve-btn {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.vc-card[data-status="sold"] .vc-reserve-btn:hover {
+  background-color: #6c757d;
+  transform: none;
+}
+
+/* Hide savings badge for sold vehicles (handled in JS but backup CSS) */
+.vc-card[data-status="sold"] .vc-savings-badge {
+  display: none;
+}
+
+/* Hide finance options for sold vehicles */
+.vc-card[data-status="sold"] .vc-monthly-payment,
+.vc-card[data-status="sold"] .vc-savings-highlight,
+.vc-card[data-status="sold"] .vc-original-price {
+  display: none;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .vc-sold-badge {
+    padding: 0.75rem 1.25rem;
+    border-radius: 10px;
+  }
+  
+  .vc-sold-text {
+    font-size: 1rem;
+    letter-spacing: 1.5px;
+  }
+  
+  .vc-sold-date {
+    font-size: 0.7rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 420px) {
+  .vc-sold-badge {
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+  }
+  
+  .vc-sold-text {
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+  }
+  
+  .vc-sold-date {
+    font-size: 0.65rem;
+  }
+}
