@@ -182,8 +182,11 @@ const DesktopUserMenu = () => {
   );
 };
 
-// FIXED: Enhanced User Profile Link Component with better avatar handling
+// ENHANCED: User Profile Link Component with improved avatar handling and fallback
 const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+
   const getInitials = (name) => {
     if (!name) return 'U';
     return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2);
@@ -196,29 +199,89 @@ const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
   };
 
   const getAvatarUrl = (user) => {
-    // Check different possible avatar structures
-    if (user?.avatar?.url) return user.avatar.url;
-    if (user?.avatar && typeof user.avatar === 'string') return user.avatar;
-    if (user?.profilePicture?.url) return user.profilePicture.url;
-    if (user?.profilePicture && typeof user.profilePicture === 'string') return user.profilePicture;
+    if (!user) {
+      console.log('👤 UserProfileLink: No user data provided');
+      return null;
+    }
+
+    console.log('👤 UserProfileLink: Checking avatar for user:', {
+      userId: user.id,
+      userName: user.name,
+      userEmail: user.email,
+      hasAvatar: !!user.avatar,
+      avatar: user.avatar,
+      avatarType: typeof user.avatar,
+      avatarUrl: user.avatar?.url,
+      hasProfilePicture: !!user.profilePicture,
+      profilePicture: user.profilePicture
+    });
+
+    // Primary check: avatar.url (main field in your system)
+    if (user.avatar && typeof user.avatar === 'object' && user.avatar.url) {
+      console.log('👤 ✅ Using avatar.url:', user.avatar.url);
+      return user.avatar.url;
+    }
+    
+    // Fallback: avatar as string
+    if (user.avatar && typeof user.avatar === 'string' && user.avatar.startsWith('http')) {
+      console.log('👤 ✅ Using avatar string:', user.avatar);
+      return user.avatar;
+    }
+    
+    // Additional fallback: profilePicture.url
+    if (user.profilePicture && typeof user.profilePicture === 'object' && user.profilePicture.url) {
+      console.log('👤 ✅ Using profilePicture.url:', user.profilePicture.url);
+      return user.profilePicture.url;
+    }
+    
+    // Additional fallback: profilePicture as string
+    if (user.profilePicture && typeof user.profilePicture === 'string' && user.profilePicture.startsWith('http')) {
+      console.log('👤 ✅ Using profilePicture string:', user.profilePicture);
+      return user.profilePicture;
+    }
+
+    console.log('👤 ⚠️ No valid avatar URL found, using fallback');
     return null;
   };
 
   const avatarUrl = getAvatarUrl(user);
   const userName = getUserName(user);
+  const userInitials = getInitials(userName);
 
-  // Debug logging to help troubleshoot
+  // Reset image states when user or avatarUrl changes
+  useEffect(() => {
+    if (avatarUrl) {
+      setImageError(false);
+      setImageLoading(true);
+    }
+  }, [user?.id, avatarUrl]);
+
+  // Enhanced error handling for avatar image
+  const handleImageError = (e) => {
+    console.error('👤 ❌ Profile image failed to load:', avatarUrl);
+    setImageError(true);
+    setImageLoading(false);
+  };
+
+  const handleImageLoad = () => {
+    console.log('👤 ✅ Profile image loaded successfully:', avatarUrl);
+    setImageError(false);
+    setImageLoading(false);
+  };
+
+  // Debug logging
   useEffect(() => {
     if (user) {
-      console.log('UserProfileLink - User data:', {
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-        avatarUrl: avatarUrl,
-        hasAvatar: !!avatarUrl
+      console.log('👤 UserProfileLink - Current state:', {
+        userName,
+        avatarUrl,
+        hasValidAvatarUrl: !!avatarUrl,
+        imageError,
+        imageLoading,
+        userInitials
       });
     }
-  }, [user, avatarUrl]);
+  }, [user, avatarUrl, imageError, imageLoading, userName, userInitials]);
 
   return (
     <Link 
@@ -228,34 +291,53 @@ const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
       onClick={onClick}
     >
       <div className="user-profile-avatar">
-        {avatarUrl ? (
-          <img 
-            src={avatarUrl} 
-            alt={userName} 
-            onError={(e) => {
-              console.error('Profile image failed to load:', avatarUrl);
-              e.target.style.display = 'none';
-              e.target.nextSibling.style.display = 'flex';
-            }}
-          />
-        ) : null}
-        {!avatarUrl && (
-          <UserCircle size={24} />
-        )}
-        {avatarUrl && (
+        {avatarUrl && !imageError ? (
+          <>
+            <img 
+              src={avatarUrl} 
+              alt={userName}
+              onError={handleImageError}
+              onLoad={handleImageLoad}
+              style={{ 
+                display: imageLoading ? 'none' : 'block',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                borderRadius: '50%'
+              }}
+            />
+            {imageLoading && (
+              <div style={{ 
+                display: 'flex',
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                width: '100%', 
+                height: '100%', 
+                backgroundColor: 'var(--nav-accent, #007bff)', 
+                borderRadius: '50%', 
+                color: 'white', 
+                fontSize: '0.8rem', 
+                fontWeight: 'bold' 
+              }}>
+                {userInitials}
+              </div>
+            )}
+          </>
+        ) : (
+          // Fallback: Show initials or UserCircle icon
           <div style={{ 
-            display: 'none', 
+            display: 'flex',
             alignItems: 'center', 
             justifyContent: 'center', 
             width: '100%', 
             height: '100%', 
-            backgroundColor: 'var(--nav-accent)', 
+            backgroundColor: 'var(--nav-accent, #007bff)', 
             borderRadius: '50%', 
             color: 'white', 
             fontSize: '0.8rem', 
             fontWeight: 'bold' 
           }}>
-            {getInitials(userName)}
+            {userName !== 'User' ? userInitials : <UserCircle size={24} />}
           </div>
         )}
       </div>
