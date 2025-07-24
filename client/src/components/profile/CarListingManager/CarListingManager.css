@@ -950,3 +950,465 @@
 [data-theme="dark"] .preview-mode-info svg {
   color: #90caf9;
 }
+
+/* Add these styles to your existing CarListingManager.css file */
+
+/* ============= FREE TIER PRICING STYLES ============= */
+
+/* Free tier pricing card */
+.pricing-tier.free-tier {
+  border: 2px solid #10b981;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  position: relative;
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.15);
+}
+
+.pricing-tier.free-tier:hover:not(.disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 12px 35px rgba(16, 185, 129, 0.2);
+}
+
+.pricing-tier.free-tier.selected {
+  border-color: #059669;
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  box-shadow: 0 12px 35px rgba(16, 185, 129, 0.25);
+}
+
+/* Disabled free tier when limit reached */
+.pricing-tier.free-tier.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: scale(1);
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-color: #9ca3af;
+}
+
+.pricing-tier.free-tier.disabled:hover {
+  transform: scale(1);
+  box-shadow: none;
+}
+
+/* Free tier badge with usage counter */
+.tier-badge.free-badge {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  white-space: nowrap;
+  animation: gentle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes gentle-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+/* Free tier price styling */
+.free-tier .tier-price {
+  color: #059669;
+  font-weight: 800;
+  text-shadow: 0 1px 3px rgba(16, 185, 129, 0.1);
+}
+
+.free-tier .tier-period {
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* Free tier features */
+.free-tier .tier-feature {
+  color: #047857;
+}
+
+.free-tier .tier-feature svg {
+  color: #10b981;
+}
+
+/* Usage info note */
+.tier-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 6px;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #047857;
+  font-weight: 500;
+}
+
+.tier-note svg {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+/* Disabled overlay for free tier */
+.tier-disabled-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  z-index: 2;
+}
+
+.disabled-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.disabled-message svg {
+  color: #f59e0b;
+}
+
+/* ============= FREE TIER PAYMENT STEP STYLES ============= */
+
+/* Free tier confirmation section */
+.free-tier-confirmation {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 20px;
+}
+
+.free-tier-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+  border-radius: 8px;
+  border-left: 4px solid #10b981;
+}
+
+.free-tier-info h4 {
+  margin: 0 0 8px 0;
+  color: #047857;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.free-tier-info p {
+  margin: 0;
+  color: #065f46;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+/* Action buttons for free tier */
+.confirmation-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-secondary {
+  padding: 12px 24px;
+  border: 2px solid #d1d5db;
+  background: white;
+  color: #6b7280;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.btn-secondary:hover {
+  border-color: #9ca3af;
+  color: #4b5563;
+}
+
+.btn-primary {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  font-size: 0.9rem;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #047857);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  background: #9ca3af;
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+
+/* Free cost display */
+.free-cost {
+  color: #10b981 !important;
+  font-weight: 700;
+  font-size: 1.2em;
+}
+
+.paid-cost {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* Payment step back button */
+.payment-step .back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.payment-step .back-btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* Payment header */
+.payment-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.payment-header h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* Payment summary updates */
+.payment-summary {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.selected-plan-summary h4 {
+  margin: 0 0 12px 0;
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.plan-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.plan-name {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.plan-price {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.plan-features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.plan-features-list li {
+  color: #4b5563;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+/* ============= RESPONSIVE DESIGN ============= */
+
+@media (max-width: 768px) {
+  .pricing-tier.free-tier {
+    transform: scale(1.01);
+  }
+  
+  .pricing-tier.free-tier:hover:not(.disabled) {
+    transform: scale(1.02);
+  }
+  
+  .tier-badge.free-badge {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+  
+  .free-tier-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .confirmation-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .btn-secondary,
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .payment-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .disabled-message {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .free-tier-confirmation {
+    padding: 16px;
+  }
+  
+  .free-tier-info {
+    padding: 16px;
+  }
+  
+  .tier-note {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+  
+  .payment-summary {
+    padding: 16px;
+  }
+  
+  .btn-secondary,
+  .btn-primary {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+  }
+}
+
+/* ============= DARK MODE SUPPORT ============= */
+
+[data-theme="dark"] .pricing-tier.free-tier {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+  border-color: #10b981;
+}
+
+[data-theme="dark"] .pricing-tier.free-tier.disabled {
+  background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+  border-color: #6b7280;
+}
+
+[data-theme="dark"] .free-tier-confirmation {
+  background: #1f2937;
+}
+
+[data-theme="dark"] .free-tier-info {
+  background: linear-gradient(135deg, #064e3b, #065f46);
+}
+
+[data-theme="dark"] .free-tier-info h4 {
+  color: #6ee7b7;
+}
+
+[data-theme="dark"] .free-tier-info p {
+  color: #a7f3d0;
+}
+
+[data-theme="dark"] .tier-note {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+}
+
+[data-theme="dark"] .payment-summary {
+  background: #1f2937;
+}
+
+[data-theme="dark"] .payment-header {
+  border-bottom-color: #374151;
+}
+
+[data-theme="dark"] .payment-header h3 {
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .plan-name {
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .btn-secondary {
+  background: #374151;
+  border-color: #4b5563;
+  color: #d1d5db;
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+  background: #4b5563;
+  border-color: #6b7280;
+}
+
+/* ============= ACCESSIBILITY IMPROVEMENTS ============= */
+
+@media (prefers-reduced-motion: reduce) {
+  .pricing-tier.free-tier:hover:not(.disabled) {
+    transform: scale(1.02);
+  }
+  
+  .btn-primary:hover:not(:disabled) {
+    transform: none;
+  }
+  
+  .tier-badge.free-badge {
+    animation: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .pricing-tier.free-tier {
+    border-width: 3px;
+  }
+  
+  .tier-badge.free-badge {
+    border: 2px solid #047857;
+  }
+  
+  .free-tier .tier-feature {
+    font-weight: 600;
+  }
+}

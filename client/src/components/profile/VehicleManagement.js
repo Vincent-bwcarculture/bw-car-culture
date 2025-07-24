@@ -1,5 +1,5 @@
 // client/src/components/profile/VehicleManagement.js
-// FIXED VERSION - CLEAN REACT CODE WITH PROPER PRICING (ADMIN APPROACH INTEGRATED)
+// COMPLETE VERSION WITH FREE TIER INTEGRATION
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -43,6 +43,15 @@ const VehicleManagement = () => {
     tiers: {},
     addons: {},
     loaded: false
+  });
+
+  // === FREE TIER STATE ===
+  const [hasFreeOption, setHasFreeOption] = useState(false);
+  const [freeListingStats, setFreeListingStats] = useState({
+    active: 0,
+    maxAllowed: 8,
+    remaining: 8,
+    canAddMore: true
   });
 
   // === FORM STATE ===
@@ -161,9 +170,7 @@ const VehicleManagement = () => {
     return null;
   };
 
-  // ===== FIXED: ADMIN-STYLE PRICING FUNCTIONS =====
-  // Replace the old calculatePricing with these admin-style functions
-
+  // ===== ADMIN-STYLE PRICING FUNCTIONS =====
   const getPlanInfo = (planId) => {
     if (!pricingData.loaded || !planId) {
       return { name: 'Plan Not Available', price: 0, duration: 0 };
@@ -202,7 +209,7 @@ const VehicleManagement = () => {
     
     let total = 0;
     
-    // Add plan cost
+    // Add plan cost (FREE tier has price: 0)
     if (selectedPlan && pricingData.tiers[selectedPlan]) {
       total += pricingData.tiers[selectedPlan].price;
     }
@@ -219,7 +226,7 @@ const VehicleManagement = () => {
     return total;
   };
 
-  // Helper function to get addon details (needed to prevent build error)
+  // Helper function to get addon details
   const getAddonDetails = (selectedAddons) => {
     if (!Array.isArray(selectedAddons) || selectedAddons.length === 0) {
       return [];
@@ -230,18 +237,18 @@ const VehicleManagement = () => {
 
   // === DATA FETCHING FUNCTIONS ===
   
-  // Load pricing data - EXACT COPY FROM ADMIN COMPONENT
+  // Load pricing data with FREE TIER support
   const loadPricingData = async () => {
     try {
       console.log('🔍 Fetching pricing data from endpoints...');
       
       const [tiersResponse, addonsResponse] = await Promise.all([
-        axios.get('/api/payments/available-tiers'),
-        axios.get('/api/addons/available')
+        axios.get('/payments/available-tiers'), // UPDATED: Remove /api prefix
+        axios.get('/addons/available') // UPDATED: Remove /api prefix
       ]);
 
       if (tiersResponse.data.success && addonsResponse.data.success) {
-        const tiers = tiersResponse.data.data.tiers;
+        const { tiers, hasFreeOption = false, freeListingStats = {} } = tiersResponse.data.data;
         const addons = addonsResponse.data.data.addons;
 
         setPricingData({
@@ -250,7 +257,18 @@ const VehicleManagement = () => {
           loaded: true
         });
 
-        console.log('💰 Pricing data loaded:', { tiers, addons });
+        // NEW: Set free tier data
+        setHasFreeOption(hasFreeOption);
+        if (freeListingStats && Object.keys(freeListingStats).length > 0) {
+          setFreeListingStats(freeListingStats);
+        }
+
+        console.log('💰 Pricing data loaded with free tier:', { 
+          tiers, 
+          addons, 
+          hasFreeOption,
+          freeStats: freeListingStats 
+        });
       } else {
         throw new Error('Pricing endpoints returned unsuccessful response');
       }
@@ -281,12 +299,10 @@ const VehicleManagement = () => {
     }
   };
 
-  // FIXED: Updated fetchUserSubmissions function
   const fetchUserSubmissions = async () => {
     try {
       setLoading(true);
       
-      // FIXED: Use correct endpoint and fetch method
       const apiUrl = 'https://bw-car-culture-api.vercel.app/api/user/my-submissions';
       
       const response = await fetch(apiUrl, {
@@ -300,11 +316,9 @@ const VehicleManagement = () => {
       const result = await response.json();
       
       if (response.ok && result.success) {
-        // FIXED: Handle the correct data structure
         const submissions = result.data || [];
         setUserSubmissions(submissions);
         
-        // FIXED: Calculate stats from submissions data
         const calculatedStats = {
           total: submissions.length,
           pending: submissions.filter(s => s.status === 'pending_review').length,
@@ -365,40 +379,47 @@ const VehicleManagement = () => {
   // Handle plan selection in preview mode
   const handlePlanSelection = (planId) => {
     setSelectedPlan(planId);
-    console.log('Plan selected:', planId); // Debug log
-    showMessage('success', 'Plan selected! Continue to fill out your car details.');
+    console.log('Plan selected:', planId);
+    
+    if (planId === 'free') {
+      showMessage('success', 'Free tier selected! No payment required after approval.');
+    } else {
+      showMessage('success', 'Plan selected! Continue to fill out your car details.');
+    }
   };
 
   // Handle addon selection in preview mode
   const handleAddonSelection = (addonIds) => {
     setSelectedAddons(addonIds);
-    console.log('Addons selected:', addonIds); // Debug log
+    console.log('Addons selected:', addonIds);
     showMessage('info', `${addonIds.length} add-on(s) selected.`);
   };
 
   // Proceed from plan selection to listing form
   const handleProceedToForm = () => {
-    console.log('Proceeding to form with:', { selectedPlan, selectedAddons }); // Debug log
+    console.log('Proceeding to form with:', { selectedPlan, selectedAddons });
     setListingStep('form');
-    showMessage('info', 'Now fill out your car details for admin review.');
+    
+    if (selectedPlan === 'free') {
+      showMessage('info', 'Fill out your car details for FREE admin review!');
+    } else {
+      showMessage('info', 'Now fill out your car details for admin review.');
+    }
   };
 
-  // Handle car listing form submission (FREE - for admin review)
+  // Handle car listing form submission
   const handleListingFormSubmit = async (listingData) => {
     try {
       setLoading(true);
       
-      // FIXED: Use explicit full URL to ensure proper routing
       const apiUrl = 'https://bw-car-culture-api.vercel.app/api/user/submit-listing';
       
-      // Calculate actual pricing details to save with submission using admin approach
+      // Calculate pricing details
       let pricingDetails = null;
       if (selectedPlan && pricingData.loaded) {
         const planInfo = getPlanInfo(selectedPlan);
         const totalCost = calculateTotalCost(selectedPlan, selectedAddons);
         const addonCost = totalCost - planInfo.price;
-        
-        // Get addon details by mapping selectedAddons directly
         const selectedAddonDetails = getAddonDetails(selectedAddons);
         
         pricingDetails = {
@@ -417,10 +438,10 @@ const VehicleManagement = () => {
         selectedAddons,
         pricingDetails,
         status: 'pending_review',
-        submissionType: 'free_review'
+        submissionType: selectedPlan === 'free' ? 'free_tier' : 'paid_tier'
       });
       
-      // Submit listing for FREE admin review - Use fetch instead of axios to avoid config issues
+      // Submit listing for admin review
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -432,9 +453,9 @@ const VehicleManagement = () => {
             ...listingData,
             selectedPlan,
             selectedAddons,
-            pricingDetails, // Save the actual pricing calculation
+            pricingDetails,
             status: 'pending_review',
-            submissionType: 'free_review'
+            submissionType: selectedPlan === 'free' ? 'free_tier' : 'paid_tier'
           }
         })
       });
@@ -444,7 +465,12 @@ const VehicleManagement = () => {
       if (response.ok && result.success) {
         setPendingListingData(result.data);
         setListingStep('submitted');
-        showMessage('success', '🎉 Listing submitted for review! We\'ll contact you within 24-48 hours.');
+        
+        if (selectedPlan === 'free') {
+          showMessage('success', '🎉 FREE listing submitted for review! No payment required - we\'ll contact you within 24-48 hours.');
+        } else {
+          showMessage('success', '🎉 Listing submitted for review! We\'ll contact you within 24-48 hours.');
+        }
         
         // Refresh submissions
         fetchUserSubmissions();
@@ -467,10 +493,162 @@ const VehicleManagement = () => {
     }
   };
 
-  // Handle payment after admin approval (separate flow)
+  // UPDATED: Handle payment completion with FREE TIER support
   const handlePaymentComplete = (paymentData) => {
-    showMessage('success', '🎉 Payment successful! Your listing is now live.');
-    fetchUserSubmissions(); // Refresh to show updated status
+    console.log('Payment completed:', paymentData);
+    
+    // NEW: Handle free tier completion
+    if (paymentData.tier === 'free') {
+      showMessage('success', 
+        '🎉 Free listing submitted successfully! Your car listing is now in the admin review queue. ' +
+        'You\'ll receive an email notification once it\'s approved and live on the platform.'
+      );
+      
+      // Reset to submissions view to show the new submission
+      setListingStep('pricing'); 
+      setActiveSection('submissions');
+      
+      // Refresh submissions to show the new one
+      fetchUserSubmissions();
+    } else {
+      // Handle paid tier completion (existing logic)
+      showMessage('success', 'Payment completed successfully! Your listing will be reviewed and activated.');
+      setListingStep('pricing');
+      setActiveSection('submissions');
+      fetchUserSubmissions();
+    }
+    
+    // Reset form state
+    setSelectedPlan(null);
+    setSelectedAddons([]);
+    setPendingListingData(null);
+  };
+
+  // === SUBMISSION STATUS RENDERING WITH FREE TIER SUPPORT ===
+  const renderSubmissionStatus = (submission) => {
+    const isFreeSubmission = submission.selectedTier === 'free' || 
+                           submission.paymentRequired === false ||
+                           submission.listingData?.selectedPlan === 'free';
+    
+    if (submission.status === 'pending_review') {
+      return (
+        <div className="vm-status-message vm-status-pending">
+          <Info size={14} />
+          <div className="vm-message-content">
+            <div className="vm-status-text">
+              {isFreeSubmission ? (
+                <>
+                  🆓 <strong>FREE listing</strong> under review
+                  <span className="vm-review-time"> • Est. 24-48 hours</span>
+                </>
+              ) : (
+                <>
+                  Your listing is being reviewed by our team. We'll contact you within 24-48 hours.
+                  <span className="vm-review-time"> • Est. 24-48 hours</span>
+                </>
+              )}
+            </div>
+            {isFreeSubmission && (
+              <div className="vm-free-status-note">
+                <CheckCircle size={12} color="#10b981" />
+                <span>No payment required - listing will go live once approved!</span>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    if (submission.status === 'approved') {
+      return (
+        <div className="vm-status-message vm-status-approved">
+          <CheckCircle size={14} />
+          <div className="vm-message-content">
+            <div className="vm-approval-details">
+              <span>
+                🎉 Great! Your listing has been approved.
+                {isFreeSubmission && <span className="vm-free-label"> (FREE TIER)</span>}
+              </span>
+              <div className="vm-next-steps">
+                {isFreeSubmission ? (
+                  <span>Your free listing will go live automatically! 🎉</span>
+                ) : (
+                  <div className="vm-payment-info">
+                    <div className="vm-payment-instructions">
+                      <Info size={12} />
+                      <span>Check your email for payment instructions. Complete payment to make your listing live.</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            {!isFreeSubmission && (
+              <button className="vm-btn vm-btn-primary vm-btn-small">
+                <DollarSign size={14} />
+                Complete Payment
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    if (submission.status === 'listing_created') {
+      return (
+        <div className="vm-status-message vm-status-live">
+          <Star size={14} />
+          <div className="vm-message-content">
+            <div className="vm-live-details">
+              <span>🚗 Your listing is now live on our platform!</span>
+              {isFreeSubmission && (
+                <div className="vm-free-live-info">
+                  <span className="vm-free-label">FREE TIER</span>
+                  <span>Active for 30 days • Basic visibility</span>
+                </div>
+              )}
+            </div>
+            {submission.listingId && (
+              <button className="vm-btn vm-btn-secondary vm-btn-small">
+                <Eye size={14} />
+                View Live Listing
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    if (submission.status === 'rejected') {
+      return (
+        <div className="vm-status-message vm-status-rejected">
+          <AlertCircle size={14} />
+          <div className="vm-message-content">
+            <span>
+              This listing was not approved.
+              {isFreeSubmission && <span className="vm-free-label"> (FREE TIER)</span>}
+              {submission.adminNotes && (
+                <span className="vm-admin-notes"> Reason: {submission.adminNotes}</span>
+              )}
+            </span>
+            <button 
+              className="vm-btn vm-btn-secondary vm-btn-small"
+              onClick={() => {
+                setActiveSection('create-listing');
+                setListingStep('form');
+                // Pre-select free tier if it was originally free
+                if (isFreeSubmission) {
+                  setSelectedPlan('free');
+                }
+              }}
+            >
+              {isFreeSubmission ? 'Create New Free Listing' : 'Create New Listing'}
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
+    return null;
   };
 
   // === VEHICLE MANAGEMENT FUNCTIONS ===
@@ -619,7 +797,7 @@ const VehicleManagement = () => {
     </div>
   );
 
-  // IMPROVED: Better submissions layout with FIXED admin-style pricing
+  // UPDATED: Submissions with FREE TIER support
   const renderSubmissions = () => (
     <div className="vm-submissions-section">
       <div className="vm-section-header">
@@ -666,13 +844,14 @@ const VehicleManagement = () => {
           {userSubmissions.map(submission => {
             const primaryImage = getPrimaryImage(submission);
             
-            // ✅ FIXED: Use admin's approach - always calculate fresh, never use saved data
+            // Calculate pricing with FREE TIER support
             const selectedPlan = submission.listingData?.selectedPlan;
             const selectedAddons = submission.listingData?.selectedAddons || [];
             const planInfo = getPlanInfo(selectedPlan);
             const totalCost = calculateTotalCost(selectedPlan, selectedAddons);
             const addonDetails = getAddonDetails(selectedAddons);
             const addonCost = totalCost - planInfo.price;
+            const isFreeSubmission = selectedPlan === 'free';
             
             return (
               <div key={submission._id} className="vm-submission-card">
@@ -701,6 +880,7 @@ const VehicleManagement = () => {
                     <div className="vm-submission-header">
                       <h4 className="vm-submission-title">
                         {submission.listingData?.title || 'Untitled Listing'}
+                        {isFreeSubmission && <span className="vm-free-label">FREE</span>}
                       </h4>
                       {getStatusBadge(submission.status)}
                     </div>
@@ -738,7 +918,7 @@ const VehicleManagement = () => {
                       </div>
                     </div>
 
-                    {/* Plan Details Section with ADMIN'S EXACT LOGIC */}
+                    {/* Plan Details Section with FREE TIER support */}
                     {selectedPlan && (
                       <div className="vm-plan-details">
                         <div className="vm-plan-header">
@@ -751,12 +931,15 @@ const VehicleManagement = () => {
                           </div>
                         ) : (
                           <div className="vm-plan-info">
-                            {/* Plan Info */}
+                            {/* Plan Info with FREE indication */}
                             <div className="vm-plan-name">
-                              <span className="vm-plan-badge">{planInfo.name}</span>
+                              <span className={`vm-plan-badge ${isFreeSubmission ? 'vm-free-plan' : ''}`}>
+                                {planInfo.name}
+                                {isFreeSubmission && ' (FREE)'}
+                              </span>
                             </div>
                             
-                            {/* ✅ ADMIN'S EXACT ADDON LOGIC - Use selectedAddons directly */}
+                            {/* Addons (only for non-free plans typically) */}
                             {selectedAddons.length > 0 && pricingData.loaded && (
                               <div className="vm-selected-addons">
                                 <div className="vm-addons-label">Add-ons Selected:</div>
@@ -781,7 +964,9 @@ const VehicleManagement = () => {
                             <div className="vm-plan-pricing">
                               <div className="vm-pricing-row">
                                 <span className="vm-pricing-label">Base Plan:</span>
-                                <span className="vm-pricing-value">P{planInfo.price.toLocaleString()}</span>
+                                <span className="vm-pricing-value">
+                                  {isFreeSubmission ? 'FREE' : `P${planInfo.price.toLocaleString()}`}
+                                </span>
                               </div>
                               
                               {selectedAddons.length > 0 && (
@@ -793,7 +978,9 @@ const VehicleManagement = () => {
                               
                               <div className="vm-pricing-row vm-total-row">
                                 <span className="vm-pricing-label">Total Amount:</span>
-                                <span className="vm-pricing-value vm-total-price">P{totalCost.toLocaleString()}</span>
+                                <span className={`vm-pricing-value vm-total-price ${isFreeSubmission ? 'vm-free-total' : ''}`}>
+                                  {isFreeSubmission ? 'FREE' : `P${totalCost.toLocaleString()}`}
+                                </span>
                               </div>
                               
                               <div className="vm-pricing-row">
@@ -808,95 +995,9 @@ const VehicleManagement = () => {
                   </div>
                 </div>
 
-                {/* Status-specific actions with accurate payment amounts */}
+                {/* Status-specific actions with FREE TIER support */}
                 <div className="vm-submission-actions">
-                  {submission.status === 'pending_review' && totalCost > 0 && (
-                    <div className="vm-status-message vm-status-pending">
-                      <Info size={14} />
-                      <div className="vm-message-content">
-                        <div className="vm-status-text">
-                          <span>Your listing is being reviewed by our team. We'll contact you within 24-48 hours.</span>
-                          <div className="vm-payment-preview">
-                            <strong>After Approval:</strong> You'll receive a payment request for P{totalCost.toLocaleString()}
-                            {selectedAddons.length > 0 ? ` (${planInfo.name} + ${selectedAddons.length} addon${selectedAddons.length > 1 ? 's' : ''})` : ` (${planInfo.name})`} 
-                            to activate your listing.
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {submission.status === 'approved' && totalCost > 0 && (
-                    <div className="vm-status-message vm-status-approved">
-                      <CheckCircle size={14} />
-                      <div className="vm-message-content">
-                        <div className="vm-approval-details">
-                          <span>🎉 Great! Your listing has been approved.</span>
-                          <div className="vm-payment-info">
-                            <div className="vm-payment-amount">
-                              <strong>Total Amount Due: P{totalCost.toLocaleString()}</strong>
-                              {selectedAddons.length > 0 && (
-                                <div className="vm-payment-breakdown">
-                                  Base plan (P{planInfo.price.toLocaleString()}) + Addons (P{(totalCost - planInfo.price).toLocaleString()})
-                                </div>
-                              )}
-                            </div>
-                            <div className="vm-payment-instructions">
-                              <Info size={12} />
-                              <span>Check your email for payment instructions. Complete payment to make your listing live.</span>
-                            </div>
-                          </div>
-                        </div>
-                        <button className="vm-btn vm-btn-primary vm-btn-small">
-                          <DollarSign size={14} />
-                          Pay Now (P{totalCost.toLocaleString()})
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {submission.status === 'rejected' && (
-                    <div className="vm-status-message vm-status-rejected">
-                      <AlertCircle size={14} />
-                      <div className="vm-message-content">
-                        <span>
-                          This listing was not approved.
-                          {submission.adminNotes && (
-                            <span className="vm-admin-notes"> Reason: {submission.adminNotes}</span>
-                          )}
-                        </span>
-                        <button 
-                          className="vm-btn vm-btn-secondary vm-btn-small"
-                          onClick={() => {
-                            setActiveSection('create-listing');
-                            setListingStep('form');
-                          }}
-                        >
-                          Create New Listing
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {submission.status === 'listing_created' && totalCost > 0 && (
-                    <div className="vm-status-message vm-status-live">
-                      <Star size={14} />
-                      <div className="vm-message-content">
-                        <div className="vm-live-details">
-                          <span>🚗 Your listing is now live on our platform!</span>
-                          <div className="vm-live-info">
-                            <span>Plan: {planInfo.name} {selectedAddons.length > 0 ? `+ ${selectedAddons.length} addon${selectedAddons.length > 1 ? 's' : ''}` : ''} • Active for {planInfo.duration} days</span>
-                          </div>
-                        </div>
-                        {submission.listingId && (
-                          <button className="vm-btn vm-btn-secondary vm-btn-small">
-                            <Eye size={14} />
-                            View Live Listing
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                  {renderSubmissionStatus(submission)}
                 </div>
               </div>
             );
@@ -906,6 +1007,7 @@ const VehicleManagement = () => {
     </div>
   );
 
+  // UPDATED: Create listing with FREE TIER support
   const renderCreateListing = () => {
     // Step 1: Plan Selection (Preview Mode)
     if (listingStep === 'pricing') {
@@ -915,11 +1017,11 @@ const VehicleManagement = () => {
             <h3>Create New Car Listing</h3>
             <div className="vm-flow-info">
               <p className="vm-flow-description">
-                📋 <strong>How it works:</strong> Select plan → Fill car details → FREE admin review → Pay after approval → Listing goes live
+                📋 <strong>How it works:</strong> Select plan → Fill car details → FREE admin review → Pay after approval (or FREE for free tier) → Listing goes live
               </p>
               <div className="vm-flow-highlight">
                 <Info size={16} />
-                <span>No payment required upfront! Pay only after admin approval.</span>
+                <span>🆓 FREE tier available! No payment required for basic listings.</span>
               </div>
             </div>
           </div>
@@ -930,10 +1032,10 @@ const VehicleManagement = () => {
             onAddonSelected={handleAddonSelection}
             selectedPlan={selectedPlan}
             selectedAddons={selectedAddons}
-            mode="preview" // PREVIEW MODE - no payment required
-            showPaymentInfo={false} // Hide payment buttons
+            mode="preview"
+            showPaymentInfo={false}
             submitButtonText="Continue to Listing Form"
-            allowSkipPlan={true} // Allow proceeding without plan selection
+            allowSkipPlan={true}
             onCancel={() => setActiveSection('vehicles')}
           />
         </div>
@@ -945,12 +1047,15 @@ const VehicleManagement = () => {
       return (
         <div className="vm-create-listing-section">
           <div className="vm-section-header">
-            <h3>Car Listing Details</h3>
+            <h3>
+              Car Listing Details 
+              {selectedPlan === 'free' && <span className="vm-free-badge-header">FREE TIER</span>}
+            </h3>
             <div className="vm-step-indicator">
               <span className="vm-step vm-step-completed">1. Plan Selected</span>
               <span className="vm-step vm-step-active">2. Car Details</span>
               <span className="vm-step">3. Admin Review</span>
-              <span className="vm-step">4. Payment</span>
+              <span className="vm-step">{selectedPlan === 'free' ? '4. Go Live' : '4. Payment'}</span>
             </div>
           </div>
           
@@ -970,15 +1075,24 @@ const VehicleManagement = () => {
         <div className="vm-create-listing-section">
           <div className="vm-submission-success">
             <CheckCircle size={64} color="#27ae60" />
-            <h3>Listing Submitted Successfully!</h3>
+            <h3>
+              Listing Submitted Successfully!
+              {selectedPlan === 'free' && <span className="vm-free-badge-large">FREE TIER</span>}
+            </h3>
             <p>Your car listing has been submitted for admin review.</p>
             <div className="vm-next-steps">
               <h4>What happens next?</h4>
               <ul>
                 <li>✅ Admin reviews your listing (FREE)</li>
                 <li>📧 You'll receive email notification within 24-48 hours</li>
-                <li>💳 Pay for your selected plan after approval</li>
-                <li>🚗 Your listing goes live immediately after payment</li>
+                {selectedPlan === 'free' ? (
+                  <li>🚗 Your FREE listing goes live immediately after approval</li>
+                ) : (
+                  <>
+                    <li>💳 Pay for your selected plan after approval</li>
+                    <li>🚗 Your listing goes live immediately after payment</li>
+                  </>
+                )}
               </ul>
             </div>
             <button 

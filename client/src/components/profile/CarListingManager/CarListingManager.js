@@ -1,12 +1,13 @@
 // client/src/components/profile/CarListingManager/CarListingManager.js
-// COMPLETE car listing manager with subscription and addon handling - FIXED VERSION
+// COMPLETE car listing manager with subscription, addon handling AND FREE TIER INTEGRATION
 
 import React, { useState, useEffect } from 'react';
 import { 
   DollarSign, Star, User, Award, Shield, 
   Check, X, AlertCircle, Info, CreditCard,
   Camera, TrendingUp, Video, Zap, Phone,
-  Calendar, Clock, MapPin, ExternalLink
+  Calendar, Clock, MapPin, ExternalLink,
+  CheckCircle, ArrowLeft
 } from 'lucide-react';
 import axios from '../../../config/axios.js';
 import AddonBookingModal from '../AddonBookingModal.js';
@@ -37,6 +38,15 @@ const CarListingManager = ({
   const [availableTiers, setAvailableTiers] = useState({});
   const [availableAddons, setAvailableAddons] = useState({});
   const [sellerType, setSellerType] = useState('private');
+  
+  // FREE TIER STATE - NEW
+  const [hasFreeOption, setHasFreeOption] = useState(false);
+  const [freeListingStats, setFreeListingStats] = useState({
+    active: 0,
+    maxAllowed: 8,
+    remaining: 8,
+    canAddMore: true
+  });
   
   // Selection state
   const [selectedPlan, setSelectedPlan] = useState(listingData?.selectedPlan || null);
@@ -69,10 +79,25 @@ const CarListingManager = ({
   // === API FUNCTIONS ===
   const fetchPricingData = async () => {
     try {
-      const response = await axios.get('/api/payments/available-tiers');
+      // UPDATED: Use endpoint without /api prefix to match your pattern
+      const response = await axios.get('/payments/available-tiers');
       if (response.data.success) {
-        setAvailableTiers(response.data.data.tiers);
-        setSellerType(response.data.data.sellerType);
+        const { tiers, sellerType: responseSellerType, hasFreeOption = false, freeListingStats = {} } = response.data.data;
+        
+        setAvailableTiers(tiers);
+        setSellerType(responseSellerType);
+        
+        // NEW: Set free tier options
+        setHasFreeOption(hasFreeOption);
+        if (freeListingStats && Object.keys(freeListingStats).length > 0) {
+          setFreeListingStats(freeListingStats);
+        }
+        
+        console.log('Pricing data loaded with free tier:', { 
+          tiersCount: Object.keys(tiers).length,
+          hasFreeOption,
+          freeStats: freeListingStats
+        });
       }
     } catch (error) {
       console.error('Error fetching pricing:', error);
@@ -82,7 +107,8 @@ const CarListingManager = ({
 
   const fetchAddonsData = async () => {
     try {
-      const response = await axios.get('/api/addons/available');
+      // UPDATED: Use endpoint without /api prefix to match your pattern
+      const response = await axios.get('/addons/available');
       if (response.data.success) {
         setAvailableAddons(response.data.data.addons);
       }
@@ -155,9 +181,15 @@ const CarListingManager = ({
   const handlePlanSelection = (planId) => {
     setSelectedPlan(planId);
     setPaymentType('subscription');
-    showMessage('success', `${availableTiers[planId]?.name} plan selected`);
     
-    // FIXED: Call parent callback to update parent state
+    const planName = availableTiers[planId]?.name || 'Unknown Plan';
+    if (planId === 'free') {
+      showMessage('success', `${planName} selected - No payment required!`);
+    } else {
+      showMessage('success', `${planName} plan selected`);
+    }
+    
+    // Call parent callback to update parent state
     if (onPlanSelected) {
       onPlanSelected(planId);
     }
@@ -167,6 +199,51 @@ const CarListingManager = ({
   const handleProceedToForm = () => {
     if (onProceedToForm) {
       onProceedToForm();
+    }
+  };
+
+  // NEW: FREE TIER SELECTION HANDLER
+  const handleFreeTierSelection = async () => {
+    if (!pendingListingId) {
+      setError('No pending listing found');
+      return;
+    }
+
+    if (!freeListingStats.canAddMore) {
+      setError(`You have reached the maximum of ${freeListingStats.maxAllowed} active free listings.`);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError('');
+
+      // UPDATED: Use endpoint without /api prefix
+      const response = await axios.post('/payments/process-free-listing', {
+        submissionId: pendingListingId
+      });
+
+      if (response.data.success) {
+        setCurrentStep('confirmation');
+        setMessage({
+          type: 'success',
+          text: 'Free listing selected! Your submission is in the admin review queue.'
+        });
+        
+        // Notify parent component
+        if (onPaymentComplete) {
+          onPaymentComplete({
+            tier: 'free',
+            paymentRequired: false,
+            status: 'pending_review'
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Free tier selection error:', error);
+      setError(error.response?.data?.message || 'Failed to select free tier');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -187,7 +264,7 @@ const CarListingManager = ({
       setSelectedAddons(newSelectedAddons);
       showMessage('info', `${addon.name} ${selectedAddons.includes(addonId) ? 'removed' : 'added'}`);
       
-      // FIXED: Call parent callback to update parent state
+      // Call parent callback to update parent state
       if (onAddonSelected) {
         onAddonSelected(newSelectedAddons);
       }
@@ -211,7 +288,7 @@ const CarListingManager = ({
         setShowAddonModal(false);
         showMessage('success', 'Booking confirmed! Proceeding to payment...');
         
-        // FIXED: Call parent callback to update parent state
+        // Call parent callback to update parent state
         if (onAddonSelected) {
           onAddonSelected(newSelectedAddons);
         }
@@ -307,7 +384,7 @@ const CarListingManager = ({
     }
   };
 
-  // FIXED: Handle combined payment (subscription + addons)
+  // Handle combined payment (subscription + addons)
   const initiateCombinedPayment = async () => {
     if (!selectedPlan && selectedAddons.length === 0) {
       setError('Please select at least a subscription plan or add-ons');
@@ -330,7 +407,6 @@ const CarListingManager = ({
       setError('Failed to process payment');
       setCurrentStep('pricing');
     } finally {
-      // FIXED: Added finally block to reset loading state
       setLoading(false);
     }
   };
@@ -363,55 +439,109 @@ const CarListingManager = ({
   // === RENDER FUNCTIONS ===
   const renderPricingTier = (tierId, tier) => {
     const isPopular = tierId === 'standard';
+    const isFree = tierId === 'free'; // NEW: Check for free tier
     const isSelected = selectedPlan === tierId;
+    const freeDisabled = isFree && !freeListingStats.canAddMore; // NEW: Disable when limit reached
 
     return (
       <div 
         key={tierId}
-        className={`pricing-tier ${isPopular ? 'popular' : ''} ${isSelected ? 'selected' : ''}`}
-        onClick={() => handlePlanSelection(tierId)}
+        className={`pricing-tier ${isPopular ? 'popular' : ''} ${isFree ? 'free-tier' : ''} ${isSelected ? 'selected' : ''} ${freeDisabled ? 'disabled' : ''}`}
+        onClick={() => !freeDisabled && handlePlanSelection(tierId)}
       >
         {isPopular && <div className="tier-badge">Most Popular</div>}
+        {/* NEW: Free tier badge */}
+        {isFree && (
+          <div className="tier-badge free-badge">
+            FREE ({freeListingStats.active}/{freeListingStats.maxAllowed})
+          </div>
+        )}
         
         <div className="tier-header">
-          <div className="tier-price">P{tier.price}</div>
-          <div className="tier-period">/{tier.duration} days</div>
+          <div className="tier-price">
+            {isFree ? 'FREE' : `P${tier.price}`} {/* NEW: Show FREE for free tier */}
+          </div>
+          <div className="tier-period">
+            {isFree ? (
+              freeListingStats.canAddMore 
+                ? `${freeListingStats.remaining} slots left` 
+                : 'Limit reached'
+            ) : `/${tier.duration} days`}
+          </div>
         </div>
         
         <div className="tier-name">{tier.name}</div>
         
         <div className="tier-features">
-          <div className="tier-feature">
-            <Check size={16} />
-            <span>Up to {tier.maxListings} car listing{tier.maxListings > 1 ? 's' : ''}</span>
-          </div>
-          <div className="tier-feature">
-            <Check size={16} />
-            <span>Social media promotion</span>
-          </div>
-          <div className="tier-feature">
-            <Check size={16} />
-            <span>Contact lead management</span>
-          </div>
-          {tierId !== 'basic' && (
-            <div className="tier-feature">
+          {/* NEW: Handle free tier features */}
+          {tier.features?.map((feature, index) => (
+            <div key={index} className="tier-feature">
               <Check size={16} />
-              <span>Premium placement</span>
+              <span>{feature}</span>
             </div>
-          )}
-          {tierId === 'premium' && (
+          ))}
+          
+          {/* OLD: Fallback for tiers without features array */}
+          {!tier.features && (
             <>
               <div className="tier-feature">
                 <Check size={16} />
-                <span>Featured listing badge</span>
+                <span>Up to {tier.maxListings} car listing{tier.maxListings > 1 ? 's' : ''}</span>
               </div>
               <div className="tier-feature">
                 <Check size={16} />
-                <span>Priority support</span>
+                <span>Social media promotion</span>
               </div>
+              <div className="tier-feature">
+                <Check size={16} />
+                <span>Contact lead management</span>
+              </div>
+              {tierId !== 'basic' && (
+                <div className="tier-feature">
+                  <Check size={16} />
+                  <span>Premium placement</span>
+                </div>
+              )}
+              {tierId === 'premium' && (
+                <>
+                  <div className="tier-feature">
+                    <Check size={16} />
+                    <span>Featured listing badge</span>
+                  </div>
+                  <div className="tier-feature">
+                    <Check size={16} />
+                    <span>Priority support</span>
+                  </div>
+                </>
+              )}
             </>
           )}
+          
+          {/* NEW: Free tier usage info */}
+          {isFree && freeListingStats.canAddMore && (
+            <div className="tier-note">
+              <Info size={14} />
+              <span>Can add {freeListingStats.remaining} more listing{freeListingStats.remaining !== 1 ? 's' : ''}</span>
+            </div>
+          )}
         </div>
+        
+        {isSelected && !freeDisabled && (
+          <div className="tier-selected-indicator">
+            <Check size={16} />
+            Selected
+          </div>
+        )}
+        
+        {/* NEW: Disabled overlay for free tier when limit reached */}
+        {freeDisabled && (
+          <div className="tier-disabled-overlay">
+            <div className="disabled-message">
+              <AlertCircle size={20} />
+              <span>Upgrade to add more listings</span>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -460,6 +590,120 @@ const CarListingManager = ({
             {isSelected && <Check size={14} />}
           </div>
         </div>
+      </div>
+    );
+  };
+
+  // NEW: Render payment step with free tier handling
+  const renderPaymentStep = () => {
+    const selectedTier = availableTiers[selectedPlan];
+    const isFreeSelected = selectedPlan === 'free';
+    const totalCost = calculateTotal();
+
+    return (
+      <div className="payment-step">
+        <div className="payment-header">
+          <button 
+            className="back-btn"
+            onClick={() => setCurrentStep('pricing')}
+          >
+            <ArrowLeft size={20} />
+            Back to Plans
+          </button>
+          <h3>{isFreeSelected ? 'Confirm Free Listing' : 'Payment Details'}</h3>
+        </div>
+
+        <div className="payment-summary">
+          <div className="selected-plan-summary">
+            <h4>Selected Plan</h4>
+            <div className="plan-details">
+              <div className="plan-info">
+                <span className="plan-name">{selectedTier?.name}</span>
+                <span className="plan-price">
+                  {isFreeSelected ? 'FREE' : `P${selectedTier?.price}`}
+                </span>
+              </div>
+              {selectedTier?.features && (
+                <ul className="plan-features-list">
+                  {selectedTier.features.map((feature, index) => (
+                    <li key={index}>✓ {feature}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          {selectedAddons.length > 0 && !isFreeSelected && (
+            <div className="selected-addons-summary">
+              <h4>Selected Add-ons</h4>
+              {selectedAddons.map(addonId => {
+                const addon = availableAddons[addonId];
+                return addon ? (
+                  <div key={addonId} className="addon-summary-item">
+                    <span>{addon.name}</span>
+                    <span>P{addon.price}</span>
+                  </div>
+                ) : null;
+              })}
+            </div>
+          )}
+
+          <div className="total-cost">
+            <div className="cost-breakdown">
+              <span>Total Cost:</span>
+              <span className={isFreeSelected ? 'free-cost' : 'paid-cost'}>
+                {isFreeSelected ? 'FREE' : `P${totalCost}`}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {isFreeSelected ? (
+          // NEW: Free tier confirmation
+          <div className="free-tier-confirmation">
+            <div className="free-tier-info">
+              <CheckCircle size={24} color="#10b981" />
+              <div>
+                <h4>No Payment Required</h4>
+                <p>Your listing will be submitted for admin review at no cost. 
+                   Once approved, it will be live for 30 days with basic features.</p>
+              </div>
+            </div>
+            
+            <div className="confirmation-actions">
+              <button 
+                className="btn-secondary"
+                onClick={() => setCurrentStep('pricing')}
+              >
+                Change Plan
+              </button>
+              <button 
+                className="btn-primary"
+                onClick={handleFreeTierSelection}
+                disabled={loading || !freeListingStats.canAddMore}
+              >
+                {loading ? 'Processing...' : 'Submit for Review'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          // Existing payment flow for paid tiers
+          <div className="payment-actions">
+            <button 
+              className="btn-secondary"
+              onClick={() => setCurrentStep('pricing')}
+            >
+              Change Plan
+            </button>
+            <button 
+              className="btn-primary"
+              onClick={initiateCombinedPayment}
+              disabled={loading || totalCost === 0}
+            >
+              {loading ? 'Processing...' : `Pay P${totalCost}`}
+            </button>
+          </div>
+        )}
       </div>
     );
   };
@@ -559,7 +803,7 @@ const CarListingManager = ({
                   <p>1. Select your plan and add-ons below</p>
                   <p>2. Fill out your car listing details</p>
                   <p>3. Admin reviews for FREE (24-48 hours)</p>
-                  <p>4. Pay only after approval</p>
+                  <p>4. Pay only after approval {hasFreeOption && '(or use FREE tier)'}</p>
                   <p>5. Your listing goes live!</p>
                 </div>
               </div>
@@ -571,7 +815,7 @@ const CarListingManager = ({
               {selectedPlan && (
                 <div className="summary-item">
                   <span>{availableTiers[selectedPlan]?.name} Plan</span>
-                  <span>P{availableTiers[selectedPlan]?.price}</span>
+                  <span>{selectedPlan === 'free' ? 'FREE' : `P${availableTiers[selectedPlan]?.price}`}</span>
                 </div>
               )}
               
@@ -585,8 +829,8 @@ const CarListingManager = ({
               <div className="summary-total">
                 <span>Total</span>
                 <span>{mode === 'preview' ? 
-                  `P${totalAmount} (Pay after admin approval)` : 
-                  `P${totalAmount}`}</span>
+                  (selectedPlan === 'free' ? 'FREE' : `P${totalAmount} (Pay after admin approval)`) : 
+                  (selectedPlan === 'free' ? 'FREE' : `P${totalAmount}`)}</span>
               </div>
             </div>
             
@@ -601,11 +845,12 @@ const CarListingManager = ({
               
               <button 
                 className="proceed-btn"
-                onClick={mode === 'preview' ? handleProceedToForm : initiateCombinedPayment}
+                onClick={mode === 'preview' ? handleProceedToForm : (selectedPlan === 'free' ? handleFreeTierSelection : initiateCombinedPayment)}
                 disabled={loading || (!allowSkipPlan && !selectedPlan && selectedAddons.length === 0)}
               >
                 {loading ? 'Processing...' : 
                  mode === 'preview' ? submitButtonText : 
+                 selectedPlan === 'free' ? 'Submit for Review' :
                  `Pay P${totalAmount}`}
               </button>
             </div>
@@ -613,8 +858,8 @@ const CarListingManager = ({
         </div>
       )}
 
-      {/* Payment Step - Only show in payment mode */}
-      {currentStep === 'payment' && mode === 'payment' && (
+      {/* Payment Step - Only show in payment mode and for paid plans */}
+      {currentStep === 'payment' && mode === 'payment' && selectedPlan !== 'free' && (
         <div className="payment-step">
           <div className="payment-loading">
             <div className="loading-spinner"></div>
@@ -624,18 +869,25 @@ const CarListingManager = ({
         </div>
       )}
 
+      {/* NEW: Payment Step for Free Tier or Combined */}
+      {currentStep === 'payment' && mode === 'payment' && (
+        renderPaymentStep()
+      )}
+
       {/* Confirmation Step - Only show in payment mode */}
       {currentStep === 'confirmation' && mode === 'payment' && (
         <div className="confirmation-step">
           <div className="confirmation-content">
             <div className="confirmation-icon">
-              <CreditCard size={48} />
+              {selectedPlan === 'free' ? <CheckCircle size={48} color="#10b981" /> : <CreditCard size={48} />}
             </div>
             
-            <h3>Payment Ready</h3>
-            <p>Your payment link has been generated. Click the button below to complete your payment securely.</p>
+            <h3>{selectedPlan === 'free' ? 'Free Listing Submitted' : 'Payment Ready'}</h3>
+            <p>{selectedPlan === 'free' ? 
+              'Your free listing has been submitted for admin review. You\'ll be notified once it\'s approved and live!' :
+              'Your payment link has been generated. Click the button below to complete your payment securely.'}</p>
             
-            {paymentInfo && (
+            {paymentInfo && selectedPlan !== 'free' && (
               <div className="payment-details">
                 <div className="payment-item">
                   <span>Amount:</span>
@@ -661,20 +913,24 @@ const CarListingManager = ({
                 Back to Selection
               </button>
               
-              <button 
-                className="pay-btn"
-                onClick={redirectToPayment}
-                disabled={loading || !paymentLink}
-              >
-                <ExternalLink size={16} />
-                Complete Payment
-              </button>
+              {selectedPlan !== 'free' && (
+                <button 
+                  className="pay-btn"
+                  onClick={redirectToPayment}
+                  disabled={loading || !paymentLink}
+                >
+                  <ExternalLink size={16} />
+                  Complete Payment
+                </button>
+              )}
             </div>
             
-            <div className="payment-info">
-              <Info size={16} />
-              <span>You will be redirected to our secure payment partner to complete the transaction</span>
-            </div>
+            {selectedPlan !== 'free' && (
+              <div className="payment-info">
+                <Info size={16} />
+                <span>You will be redirected to our secure payment partner to complete the transaction</span>
+              </div>
+            )}
           </div>
         </div>
       )}
