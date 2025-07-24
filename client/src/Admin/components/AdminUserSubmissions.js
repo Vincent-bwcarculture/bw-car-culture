@@ -1,5 +1,5 @@
 // client/src/Admin/components/AdminUserSubmissions.js
-// UPDATED VERSION - Adding tier/addon display + Professional Listing Assistance handling
+// UPDATED VERSION - Adding tier/addon display + Professional Listing Assistance handling + Updated Class Names
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -413,7 +413,7 @@ const submitReview = async () => {
     const IconComponent = config.icon;
 
     return (
-      <span className={`status-badge status-${config.color}`}>
+      <span className={`admin-submissions-status-badge status-${config.color}`}>
         <IconComponent size={14} />
         {config.label}
       </span>
@@ -509,84 +509,84 @@ const submitReview = async () => {
   return (
     <div className="admin-submissions-container">
       {/* Header */}
-      <div className="submissions-header">
+      <div className="admin-submissions-header">
         <h1>User Submissions Management</h1>
         <p>Review and manage car listing submissions from users</p>
         
         {/* Stats Grid */}
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-icon total">
+        <div className="admin-submissions-stats-grid">
+          <div className="admin-submissions-stat-card">
+            <div className="admin-submissions-stat-icon total">
               <Car size={24} />
             </div>
-            <div className="stat-content">
-              <div className="stat-number">{stats.total}</div>
-              <div className="stat-label">Total Submissions</div>
+            <div className="admin-submissions-stat-content">
+              <div className="admin-submissions-stat-number">{stats.total}</div>
+              <div className="admin-submissions-stat-label">Total Submissions</div>
             </div>
           </div>
           
-          <div className="stat-card">
-            <div className="stat-icon pending">
+          <div className="admin-submissions-stat-card">
+            <div className="admin-submissions-stat-icon pending">
               <Clock size={24} />
             </div>
-            <div className="stat-content">
-              <div className="stat-number">{stats.pending}</div>
-              <div className="stat-label">Pending Review</div>
+            <div className="admin-submissions-stat-content">
+              <div className="admin-submissions-stat-number">{stats.pending}</div>
+              <div className="admin-submissions-stat-label">Pending Review</div>
             </div>
           </div>
           
-          <div className="stat-card">
-            <div className="stat-icon approved">
+          <div className="admin-submissions-stat-card">
+            <div className="admin-submissions-stat-icon approved">
               <CheckCircle size={24} />
             </div>
-            <div className="stat-content">
-              <div className="stat-number">{stats.approved}</div>
-              <div className="stat-label">Approved</div>
+            <div className="admin-submissions-stat-content">
+              <div className="admin-submissions-stat-number">{stats.approved}</div>
+              <div className="admin-submissions-stat-label">Approved</div>
             </div>
           </div>
           
-          <div className="stat-card">
-            <div className="stat-icon rejected">
+          <div className="admin-submissions-stat-card">
+            <div className="admin-submissions-stat-icon rejected">
               <XCircle size={24} />
             </div>
-            <div className="stat-content">
-              <div className="stat-number">{stats.rejected}</div>
-              <div className="stat-label">Rejected</div>
+            <div className="admin-submissions-stat-content">
+              <div className="admin-submissions-stat-number">{stats.rejected}</div>
+              <div className="admin-submissions-stat-label">Rejected</div>
             </div>
           </div>
 
           {/* NEW: Assistance Requests Stat */}
-          <div className="stat-card">
-            <div className="stat-icon assistance">
+          <div className="admin-submissions-stat-card">
+            <div className="admin-submissions-stat-icon assistance">
               <Headphones size={24} />
             </div>
-            <div className="stat-content">
-              <div className="stat-number">{stats.assistanceRequests}</div>
-              <div className="stat-label">Need Assistance</div>
+            <div className="admin-submissions-stat-content">
+              <div className="admin-submissions-stat-number">{stats.assistanceRequests}</div>
+              <div className="admin-submissions-stat-label">Need Assistance</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters and Search */}
-      <div className="submissions-filters">
-        <div className="search-container">
+      <div className="admin-submissions-filters">
+        <div className="admin-submissions-search-container">
           <Search size={20} />
           <input
             type="text"
             placeholder="Search by title, user, make, model, or WhatsApp..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
+            className="admin-submissions-search-input"
           />
         </div>
 
-        <div className="filter-container">
+        <div className="admin-submissions-filter-container">
           <Filter size={20} />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="filter-select"
+            className="admin-submissions-filter-select"
           >
             <option value="all">All Status</option>
             <option value="pending_review">Pending Review</option>
@@ -599,7 +599,7 @@ const submitReview = async () => {
 
         <button 
           onClick={fetchSubmissions}
-          className="refresh-btn"
+          className="admin-submissions-refresh-btn"
           disabled={loading}
         >
           <RefreshCw size={16} />
@@ -609,7 +609,7 @@ const submitReview = async () => {
 
       {/* Error Message */}
       {error && (
-        <div className="error-message">
+        <div className="admin-submissions-error-message">
           <AlertCircle size={16} />
           {error}
           <button onClick={() => setError('')}>×</button>
@@ -617,14 +617,14 @@ const submitReview = async () => {
       )}
 
       {/* Submissions List */}
-      <div className="submissions-list">
+      <div className="admin-submissions-list">
         {loading ? (
-          <div className="loading-state">
+          <div className="admin-submissions-loading-state">
             <RefreshCw size={32} className="spinning" />
             <p>Loading submissions...</p>
           </div>
         ) : filteredSubmissions.length === 0 ? (
-          <div className="empty-state">
+          <div className="admin-submissions-empty-state">
             <Car size={48} />
             <h3>No submissions found</h3>
             <p>
@@ -643,39 +643,39 @@ const submitReview = async () => {
             const whatsappContact = getWhatsAppContact(submission);
             
             return (
-              <div key={submission._id} className={`submission-card ${needsAssistance ? 'assistance-request' : ''}`}>
+              <div key={submission._id} className={`admin-submissions-card ${needsAssistance ? 'assistance-request' : ''}`}>
                 {/* NEW: Assistance Request Banner */}
                 {needsAssistance && (
-                  <div className="assistance-banner">
+                  <div className="admin-submissions-assistance-banner">
                     <Headphones size={16} />
                     <span>Professional Listing Assistance Requested</span>
                     <Bell size={14} />
                   </div>
                 )}
 
-                <div className="submission-header">
-                  <div className="submission-info">
+                <div className="admin-submissions-submission-header">
+                  <div className="admin-submissions-submission-info">
                     <h3>{submission.listingData?.title || 'Untitled Listing'}</h3>
-                    <div className="submission-meta">
-                      <span className="user-info">
+                    <div className="admin-submissions-submission-meta">
+                      <span className="admin-submissions-user-info">
                         <User size={14} />
                         {submission.userName || 'Unknown User'}
                       </span>
-                      <span className="date-info">
+                      <span className="admin-submissions-date-info">
                         <Calendar size={14} />
                         {formatDate(submission.submittedAt)}
                       </span>
                     </div>
                   </div>
-                  <div className="submission-status">
+                  <div className="admin-submissions-submission-status">
                     {getStatusBadge(submission.status)}
                   </div>
                 </div>
                 
-                <div className="submission-content">
-                  <div className="submission-details">
+                <div className="admin-submissions-submission-content">
+                  <div className="admin-submissions-submission-details">
                     {/* Vehicle Image */}
-                    <div className="vehicle-image">
+                    <div className="admin-submissions-vehicle-image">
                       {getImageUrl(submission.listingData?.images) ? (
                         <img 
                           src={getImageUrl(submission.listingData.images)} 
@@ -686,15 +686,15 @@ const submitReview = async () => {
                           }}
                         />
                       ) : null}
-                      <div className="image-placeholder" style={{display: getImageUrl(submission.listingData?.images) ? 'none' : 'flex'}}>
+                      <div className="admin-submissions-image-placeholder" style={{display: getImageUrl(submission.listingData?.images) ? 'none' : 'flex'}}>
                         <Image size={24} />
                         <span>No Image</span>
                       </div>
                     </div>
                     
                     {/* Vehicle Details */}
-                    <div className="vehicle-details">
-                      <div className="detail-row">
+                    <div className="admin-submissions-vehicle-details">
+                      <div className="admin-submissions-detail-row">
                         <Car size={16} />
                         <span>
                           {submission.listingData?.specifications?.make || 'Unknown'} {' '}
@@ -703,18 +703,18 @@ const submitReview = async () => {
                         </span>
                       </div>
                       
-                      <div className="detail-row">
+                      <div className="admin-submissions-detail-row">
                         <DollarSign size={16} />
                         <span>{formatPrice(submission.listingData?.pricing?.price)}</span>
                       </div>
                       
-                      <div className="detail-row">
+                      <div className="admin-submissions-detail-row">
                         <MapPin size={16} />
                         <span>{submission.listingData?.location?.city || 'Location not specified'}</span>
                       </div>
                       
                       {submission.listingData?.contact?.phone && (
-                        <div className="detail-row">
+                        <div className="admin-submissions-detail-row">
                           <Phone size={16} />
                           <span>{submission.listingData.contact.phone}</span>
                         </div>
@@ -722,14 +722,14 @@ const submitReview = async () => {
 
                       {/* NEW: WhatsApp Contact for Assistance */}
                       {needsAssistance && whatsappContact && (
-                        <div className="detail-row assistance-contact">
+                        <div className="admin-submissions-detail-row assistance-contact">
                           <MessageCircle size={16} />
                           <span>WhatsApp: {whatsappContact}</span>
                           <a
                             href={getAssistanceWhatsAppLink(submission)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="whatsapp-contact-btn"
+                            className="admin-submissions-whatsapp-contact-btn"
                           >
                             <ExternalLink size={12} />
                             Contact
@@ -741,7 +741,7 @@ const submitReview = async () => {
                   
                   {/* Plan and Pricing Section */}
                   {(submission.listingData?.selectedPlan || selectedAddons.length > 0) && (
-                    <div className="plan-pricing-section">
+                    <div className="admin-submissions-plan-pricing-section">
                       <h4>
                         <Star size={16} />
                         Selected Plan & Add-ons
@@ -749,7 +749,7 @@ const submitReview = async () => {
                       
                       {/* Pricing Loading State */}
                       {pricingData.loading && (
-                        <div className="pricing-loading">
+                        <div className="admin-submissions-pricing-loading">
                           <RefreshCw size={14} className="spinning" />
                           <span>Loading pricing data...</span>
                         </div>
@@ -757,10 +757,10 @@ const submitReview = async () => {
                       
                       {/* Pricing Not Available */}
                       {!pricingData.loaded && !pricingData.loading && (
-                        <div className="pricing-unavailable">
+                        <div className="admin-submissions-pricing-unavailable">
                           <AlertCircle size={14} />
                           <span>Pricing data unavailable</span>
-                          <button onClick={fetchPricingData} className="retry-pricing-btn">
+                          <button onClick={fetchPricingData} className="admin-submissions-retry-pricing-btn">
                             Retry
                           </button>
                         </div>
@@ -768,13 +768,13 @@ const submitReview = async () => {
                       
                       {/* Selected Plan */}
                       {submission.listingData?.selectedPlan && pricingData.loaded && (
-                        <div className="selected-plan">
-                          <div className="plan-badge">
+                        <div className="admin-submissions-selected-plan">
+                          <div className="admin-submissions-plan-badge">
                             <Award size={14} />
-                            <span className="plan-name">{planInfo.name}</span>
-                            <span className="plan-price">P{planInfo.price}</span>
+                            <span className="admin-submissions-plan-name">{planInfo.name}</span>
+                            <span className="admin-submissions-plan-price">P{planInfo.price}</span>
                           </div>
-                          <div className="plan-duration">
+                          <div className="admin-submissions-plan-duration">
                             {planInfo.duration} days active
                           </div>
                         </div>
@@ -782,26 +782,26 @@ const submitReview = async () => {
                       
                       {/* Selected Add-ons */}
                       {selectedAddons.length > 0 && pricingData.loaded && (
-                        <div className="selected-addons">
-                          <div className="addons-label">Add-ons Selected:</div>
-                          <div className="addons-list">
+                        <div className="admin-submissions-selected-addons">
+                          <div className="admin-submissions-addons-label">Add-ons Selected:</div>
+                          <div className="admin-submissions-addons-list">
                             {selectedAddons.map((addonId, index) => {
                               const addonInfo = getAddonInfo(addonId);
                               const isAssistance = ['management', 'listing_assistance', 'full_assistance'].includes(addonId);
                               
                               return (
-                                <div key={index} className={`addon-item ${isAssistance ? 'assistance-addon' : ''}`}>
-                                  <div className="addon-info">
+                                <div key={index} className={`admin-submissions-addon-item ${isAssistance ? 'assistance-addon' : ''}`}>
+                                  <div className="admin-submissions-addon-info">
                                     {getAddonIcon(addonId)}
-                                    <span className="addon-name">{addonInfo.name}</span>
+                                    <span className="admin-submissions-addon-name">{addonInfo.name}</span>
                                     {isAssistance && (
-                                      <span className="assistance-badge">
+                                      <span className="admin-submissions-assistance-badge">
                                         <MessageCircle size={12} />
                                         Assistance
                                       </span>
                                     )}
                                   </div>
-                                  <span className="addon-price">+P{addonInfo.price}</span>
+                                  <span className="admin-submissions-addon-price">+P{addonInfo.price}</span>
                                 </div>
                               );
                             })}
@@ -811,19 +811,19 @@ const submitReview = async () => {
                       
                       {/* Total Pricing */}
                       {pricingData.loaded && totalCost > 0 && (
-                        <div className="pricing-total">
-                          <div className="total-breakdown">
-                            <div className="total-row">
+                        <div className="admin-submissions-pricing-total">
+                          <div className="admin-submissions-total-breakdown">
+                            <div className="admin-submissions-total-row">
                               <span>Plan:</span>
                               <span>P{planInfo.price}</span>
                             </div>
                             {selectedAddons.length > 0 && (
-                              <div className="total-row">
+                              <div className="admin-submissions-total-row">
                                 <span>Add-ons:</span>
                                 <span>P{totalCost - planInfo.price}</span>
                               </div>
                             )}
-                            <div className="total-row final-total">
+                            <div className="admin-submissions-total-row final-total">
                               <span>Total Amount:</span>
                               <span>P{totalCost}</span>
                             </div>
@@ -835,7 +835,7 @@ const submitReview = async () => {
                   
                   {/* Admin Notes (if any) */}
                   {submission.adminNotes && (
-                    <div className="admin-notes">
+                    <div className="admin-submissions-admin-notes">
                       <MessageSquare size={16} />
                       <div>
                         <strong>Admin Notes:</strong>
@@ -845,10 +845,10 @@ const submitReview = async () => {
                   )}
                   
                   {/* Actions */}
-                  <div className="submission-actions">
+                  <div className="admin-submissions-submission-actions">
                     {submission.status === 'pending_review' && (
                       <button 
-                        className="review-btn"
+                        className="admin-submissions-review-btn"
                         onClick={() => handleReviewSubmission(submission)}
                       >
                         <Eye size={16} />
@@ -862,7 +862,7 @@ const submitReview = async () => {
                         href={getAssistanceWhatsAppLink(submission)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="assistance-btn"
+                        className="admin-submissions-assistance-btn"
                       >
                         <MessageCircle size={16} />
                         Contact for Assistance
@@ -870,14 +870,14 @@ const submitReview = async () => {
                     )}
                     
                     {submission.status === 'approved' && (
-                      <div className="approved-info">
+                      <div className="admin-submissions-approved-info">
                         <CheckCircle size={16} />
                         <span>Approved - Ready for payment</span>
                       </div>
                     )}
                     
                     {submission.status === 'rejected' && (
-                      <div className="rejected-info">
+                      <div className="admin-submissions-rejected-info">
                         <XCircle size={16} />
                         <span>Rejected</span>
                       </div>
@@ -892,20 +892,20 @@ const submitReview = async () => {
 
       {/* Review Modal */}
       {showReviewModal && selectedSubmission && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
+        <div className="admin-submissions-modal-overlay">
+          <div className="admin-submissions-modal-content">
+            <div className="admin-submissions-modal-header">
               <h2>Review Submission</h2>
               <button 
-                className="modal-close"
+                className="admin-submissions-modal-close"
                 onClick={() => setShowReviewModal(false)}
               >
                 ×
               </button>
             </div>
             
-            <div className="modal-body">
-              <div className="submission-summary">
+            <div className="admin-submissions-modal-body">
+              <div className="admin-submissions-submission-summary">
                 <h3>{selectedSubmission.listingData?.title}</h3>
                 <p>By: {selectedSubmission.userName}</p>
                 <p>Vehicle: {selectedSubmission.listingData?.specifications?.make} {selectedSubmission.listingData?.specifications?.model}</p>
@@ -913,8 +913,8 @@ const submitReview = async () => {
                 
                 {/* NEW: Show assistance request info in modal */}
                 {hasListingAssistance(selectedSubmission) && (
-                  <div className="assistance-info">
-                    <div className="assistance-alert">
+                  <div className="admin-submissions-assistance-info">
+                    <div className="admin-submissions-assistance-alert">
                       <Headphones size={16} />
                       <span>User requested professional listing assistance</span>
                     </div>
@@ -926,7 +926,7 @@ const submitReview = async () => {
                 
                 {/* Show selected plan and pricing in modal */}
                 {(selectedSubmission.listingData?.selectedPlan || selectedSubmission.listingData?.selectedAddons?.length > 0) && (
-                  <div className="modal-pricing-summary">
+                  <div className="admin-submissions-modal-pricing-summary">
                     <h4>Selected Plan & Pricing:</h4>
                     {pricingData.loaded ? (
                       <>
@@ -948,11 +948,11 @@ const submitReview = async () => {
                 )}
               </div>
               
-              <div className="review-form">
-                <div className="form-group">
+              <div className="admin-submissions-review-form">
+                <div className="admin-submissions-form-group">
                   <label>Decision</label>
-                  <div className="radio-group">
-                    <label className="radio-option">
+                  <div className="admin-submissions-radio-group">
+                    <label className="admin-submissions-radio-option">
                       <input
                         type="radio"
                         name="action"
@@ -963,7 +963,7 @@ const submitReview = async () => {
                       <CheckCircle size={16} />
                       Approve
                     </label>
-                    <label className="radio-option">
+                    <label className="admin-submissions-radio-option">
                       <input
                         type="radio"
                         name="action"
@@ -979,7 +979,7 @@ const submitReview = async () => {
 
                 {/* Use actual pricing data in dropdown */}
                 {reviewData.action === 'approve' && pricingData.loaded && (
-                  <div className="form-group">
+                  <div className="admin-submissions-form-group">
                     <label>Recommended Subscription Tier</label>
                     <select
                       value={reviewData.subscriptionTier}
@@ -994,7 +994,7 @@ const submitReview = async () => {
                   </div>
                 )}
 
-                <div className="form-group">
+                <div className="admin-submissions-form-group">
                   <label>Admin Notes</label>
                   <textarea
                     value={reviewData.adminNotes}
@@ -1008,15 +1008,15 @@ const submitReview = async () => {
               </div>
             </div>
 
-            <div className="modal-actions">
+            <div className="admin-submissions-modal-actions">
               <button 
-                className="cancel-btn"
+                className="admin-submissions-cancel-btn"
                 onClick={() => setShowReviewModal(false)}
               >
                 Cancel
               </button>
               <button 
-                className="submit-review-btn"
+                className="admin-submissions-submit-review-btn"
                 onClick={submitReview}
                 disabled={loading}
               >
