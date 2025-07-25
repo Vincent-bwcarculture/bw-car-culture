@@ -623,40 +623,31 @@ const handlePriceChange = (e) => {
 
 
 const handleImageUpload = (e) => {
-  console.log('🖼️ handleImageUpload called with files:', e.target.files?.length); // ADD THIS LINE
-
   const files = Array.from(e.target.files);
   
-  // Validate file count
   if (files.length > 15) {
     showMessage('error', 'Maximum 15 images allowed');
     return;
   }
 
-  // Validate file sizes
-  const maxSize = 8 * 1024 * 1024; // 8MB for user uploads
-  const invalidFiles = files.filter(file => file.size > maxSize);
+  const maxSize = 8 * 1024 * 1024; // 8MB
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  
+  const invalidFiles = files.filter(file => 
+    file.size > maxSize || !validTypes.includes(file.type.toLowerCase())
+  );
   
   if (invalidFiles.length > 0) {
-    showMessage('error', `Some files are too large. Maximum size is 8MB per image.`);
+    showMessage('error', 'Some files are invalid. Use JPEG/PNG/WebP under 8MB each.');
     return;
   }
 
-  // Validate file types
-  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-  const invalidTypeFiles = files.filter(file => !validTypes.includes(file.type.toLowerCase()));
-  
-  if (invalidTypeFiles.length > 0) {
-    showMessage('error', 'Only JPEG, PNG, and WebP images are allowed');
-    return;
-  }
-
-  console.log(`📸 Selected ${files.length} valid images for upload`);
+  console.log(`📸 Selected ${files.length} valid images`);
   
   // Store files for upload
   setImageFiles(files);
   
-  // Create preview URLs
+  // Create previews
   const previews = files.map(file => ({
     file,
     preview: URL.createObjectURL(file),
@@ -666,7 +657,7 @@ const handleImageUpload = (e) => {
   
   setImagePreviews(previews);
   
-  // Clear any previous errors
+  // Clear errors
   if (errors.images) {
     setErrors(prev => {
       const newErrors = { ...prev };
@@ -675,7 +666,7 @@ const handleImageUpload = (e) => {
     });
   }
   
-  showMessage('success', `${files.length} images selected for upload`);
+  showMessage('success', `${files.length} images selected`);
 };
 
   // Handle primary image selection
@@ -728,166 +719,129 @@ const handleFormSubmit = async (e) => {
       return;
     }
 
-    console.log(`📤 Starting form submission with ${imageFiles?.length || 0} images`);
+    console.log(`📤 Starting submission with ${imageFiles?.length || 0} images`);
 
-    // ========================================
-    // STEP 1 - Upload images to S3 first
-    // ========================================
-    
-    let uploadedImageUrls = [];
+    // Step 1: Upload images if any
+    let uploadedImages = [];
     
     if (imageFiles && imageFiles.length > 0) {
-      try {
-        console.log(`📤 Uploading ${imageFiles.length} images to S3...`);
-        showMessage('info', `Uploading ${imageFiles.length} images...`);
-        
-        // FIXED: Use the correct method name
-       uploadedImageUrls = await imageService.uploadMultiple(
-  imageFiles,
-  'user-listings',
-  (progress) => {
-    console.log(`📤 Upload progress: ${progress}%`);
-  }
-);
-        
-        console.log(`📤 ✅ Successfully uploaded ${uploadedImageUrls.length} images to S3`);
-        console.log(`📤 First image URL:`, uploadedImageUrls[0]?.url);
-        
-        showMessage('success', `${uploadedImageUrls.length} images uploaded successfully!`);
-        
-      } catch (uploadError) {
-        console.error('📤 ❌ Image upload failed:', uploadError);
-        showMessage('error', `Image upload failed: ${uploadError.message}`);
-        return; // Stop submission if image upload fails
+      showMessage('info', `Uploading ${imageFiles.length} images...`);
+      
+      const formData = new FormData();
+      imageFiles.forEach((file, index) => {
+        formData.append(`image${index}`, file);
+      });
+      formData.append('folder', 'user-listings');
+
+      console.log('🔄 Uploading to /api/user/upload-images...');
+      
+      const uploadResponse = await fetch('/api/user/upload-images', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      });
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        throw new Error(`Image upload failed: ${errorText}`);
       }
+
+      const uploadResult = await uploadResponse.json();
+      
+      if (!uploadResult.success || !uploadResult.images) {
+        throw new Error(uploadResult.message || 'Image upload failed');
+      }
+
+      uploadedImages = uploadResult.images;
+      console.log(`✅ Images uploaded successfully:`, uploadedImages.length);
     }
 
-    // ========================================
-    // STEP 2 - Prepare submission data with S3 URLs
-    // ========================================
-
-    // Transform data to match backend expectations (all existing logic preserved)
-    const submissionData = {
-      // Basic fields that the backend expects at root level
+    // Step 2: Prepare listing data
+    const listingData = {
       title: formData.title,
       description: formData.description,
       category: formData.category,
       condition: formData.condition,
       sellerType: formData.sellerType,
       
-      // Properly structure pricing object
       pricing: {
         price: parseFloat(formData.price) || 0,
-        originalPrice: formData.priceOptions?.originalPrice ? parseFloat(formData.priceOptions.originalPrice) : null,
-        negotiable: formData.priceOptions?.negotiable || false,
-        showSavings: formData.priceOptions?.showSavings || false,
-        savingsAmount: formData.priceOptions?.savingsAmount ? parseFloat(formData.priceOptions.savingsAmount) : null
+        negotiable: formData.priceOptions?.negotiable || false
       },
       
-      // Vehicle specifications
       specifications: {
         make: formData.make,
         model: formData.model,
-        year: parseInt(formData.year) || null,
-        engineType: formData.engineType,
+        year: formData.year ? parseInt(formData.year) : null,
         transmission: formData.transmission,
         fuelType: formData.fuelType,
         mileage: formData.mileage ? parseInt(formData.mileage) : null,
         bodyType: formData.bodyType,
-        drivetrain: formData.drivetrain,
         exteriorColor: formData.exteriorColor,
-        interiorColor: formData.interiorColor,
-        numberOfSeats: formData.numberOfSeats ? parseInt(formData.numberOfSeats) : null,
-        numberOfDoors: formData.numberOfDoors ? parseInt(formData.numberOfDoors) : null,
-        engineSize: formData.engineSize,
-        numberOfCylinders: formData.numberOfCylinders ? parseInt(formData.numberOfCylinders) : null,
-        vin: formData.vin
+        interiorColor: formData.interiorColor
       },
       
-      // Features
-      features: {
-        keyFeatures: formData.keyFeatures || [],
-        safetyFeatures: formData.safetyFeatures || [],
-        comfortFeatures: formData.comfortFeatures || [],
-        entertainmentFeatures: formData.entertainmentFeatures || []
-      },
-      
-      // Contact information
       contact: {
         name: formData.contactName,
         phone: formData.contactPhone,
         email: formData.contactEmail,
-        whatsapp: formData.whatsappNumber,
-        preferredContact: formData.preferredContact || 'phone'
+        whatsapp: formData.whatsappNumber
       },
       
-      // Location
       location: {
         city: formData.location.city,
         state: formData.location.state,
         address: formData.location.address
       },
       
-      // Social media links
-      social: formData.social,
-      
-      // NEW: Add uploaded images with S3 URLs
-      images: uploadedImageUrls.map((image, index) => ({
-        url: image.url,
-        key: image.key,
-        thumbnail: image.thumbnail || image.url,
-        isPrimary: index === primaryImageIndex,
-        size: image.size,
-        mimetype: image.mimetype
+      // Add uploaded images
+      images: uploadedImages.map((img, index) => ({
+        url: img.url,
+        key: img.key,
+        isPrimary: index === primaryImageIndex
       })),
       
-      // Submission metadata
-      submissionType: 'free_tier', // or could be dynamic based on selection
-      status: 'pending_approval',
-      submittedAt: new Date().toISOString()
+      submittedAt: new Date().toISOString(),
+      status: 'pending_approval'
     };
 
-    console.log(`📤 Submitting listing data:`, {
-      title: submissionData.title,
-      imageCount: submissionData.images.length,
-      primaryImageIndex: primaryImageIndex
-    });
-
-    // ========================================
-    // STEP 3 - Submit to backend
-    // ========================================
+    // Step 3: Submit listing
+    console.log('🔄 Submitting listing to /api/user/submit-listing...');
     
-    showMessage('info', 'Submitting your listing...');
-    
-    const response = await fetch('/api/user/submit-listing', {
+    const submitResponse = await fetch('/api/user/submit-listing', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
-      body: JSON.stringify({ listingData: submissionData })
+      body: JSON.stringify({ listingData })
     });
 
-    const result = await response.json();
+    if (!submitResponse.ok) {
+      const errorText = await submitResponse.text();
+      throw new Error(`Listing submission failed: ${errorText}`);
+    }
 
+    const result = await submitResponse.json();
+    
     if (!result.success) {
       throw new Error(result.message || 'Submission failed');
     }
 
-    console.log(`📤 ✅ Listing submitted successfully:`, result);
-    
+    console.log('✅ Listing submitted successfully!');
     showMessage('success', 'Your listing has been submitted for approval!');
     
     // Reset form
     resetForm();
     
-    // Call the onSubmit prop if provided
     if (onSubmit) {
       onSubmit(result);
     }
 
   } catch (error) {
-    console.error('📤 ❌ Form submission failed:', error);
+    console.error('❌ Submission failed:', error);
     showMessage('error', `Submission failed: ${error.message}`);
   } finally {
     setLoading(false);
@@ -1720,39 +1674,48 @@ const resetForm = () => {
 
           {/* Image previews */}
           {imagePreviews.length > 0 && (
-            <div className="ulisting-image-previews">
-              <h5>Uploaded Images ({imagePreviews.length}/15)</h5>
-              <div className="ulisting-image-grid">
-                {imagePreviews.map((preview, index) => (
-                  <div key={index} className={`ulisting-image-preview ${primaryImageIndex === index ? 'primary' : ''}`}>
-                    <img src={preview} alt={`Preview ${index + 1}`} />
-                    <div className="ulisting-image-overlay">
-                      <button
-                        type="button"
-                        className="ulisting-primary-btn"
-                        onClick={() => handlePrimaryImageSelect(index)}
-                        title="Set as primary image"
-                      >
-                        {primaryImageIndex === index ? '⭐ Primary' : 'Set Primary'}
-                      </button>
-                      <button
-                        type="button"
-                        className="ulisting-remove-btn"
-                        onClick={() => removeImage(index)}
-                        title="Remove image"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <div className="ulisting-image-info">
-                      <span>Image {index + 1}</span>
-                      <span>{(imageFiles[index]?.size / 1024 / 1024).toFixed(1)}MB</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+  <div className="ulisting-image-previews">
+    <h5>Selected Images ({imagePreviews.length}/15)</h5>
+    <div className="ulisting-image-grid">
+      {imagePreviews.map((previewObj, index) => (
+        <div key={index} className={`ulisting-image-preview ${primaryImageIndex === index ? 'primary' : ''}`}>
+          {/* FIXED: Use previewObj.preview instead of just preview */}
+          <img 
+            src={previewObj.preview} 
+            alt={`Preview ${index + 1}`}
+            onError={(e) => {
+              console.error(`Error loading preview ${index}`);
+              e.target.src = '/images/placeholders/car.jpg';
+            }}
+          />
+          <div className="ulisting-image-overlay">
+            <button
+              type="button"
+              className="ulisting-primary-btn"
+              onClick={() => handlePrimaryImageSelect(index)}
+              title="Set as primary image"
+            >
+              {primaryImageIndex === index ? '⭐ Primary' : 'Set Primary'}
+            </button>
+            <button
+              type="button"
+              className="ulisting-remove-btn"
+              onClick={() => removeImage(index)}
+              title="Remove image"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="ulisting-image-info">
+            <span>Image {index + 1}</span>
+            {/* FIXED: Use previewObj.size instead of imageFiles[index]?.size */}
+            <span>{(previewObj.size / 1024 / 1024).toFixed(1)}MB</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
         </div>
 
         {/* Pricing Tab */}
