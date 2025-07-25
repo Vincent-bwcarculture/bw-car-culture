@@ -739,7 +739,7 @@ const handleFormSubmit = async (e) => {
 
         console.log('🔄 Uploading to /api/user/upload-images...');
         
-        const uploadResponse = await fetch('/api/user/upload-images', {
+        const uploadResponse = await fetch('/user/upload-images', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
