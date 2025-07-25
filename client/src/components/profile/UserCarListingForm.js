@@ -681,7 +681,7 @@ const handleImageUpload = (e) => {
     setPrimaryImageIndex(index);
   };
 
-  const setPrimaryImage = (index) => {
+const setPrimaryImage = (index) => {
   setPrimaryImageIndex(index);
   console.log(`📸 Set primary image to index ${index}`);
 };
@@ -879,9 +879,9 @@ const handleFormSubmit = async (e) => {
     // Reset form
     resetForm();
     
-    // Redirect or update UI as needed
-    if (onSubmissionSuccess) {
-      onSubmissionSuccess(result);
+    // Call the onSubmit prop if provided
+    if (onSubmit) {
+      onSubmit(result);
     }
 
   } catch (error) {
