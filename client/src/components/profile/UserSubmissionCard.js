@@ -55,22 +55,54 @@ const UserSubmissionCard = ({
   };
 
   // Handle viewing the live listing on the website
-  const handleViewListing = (submission) => {
-    console.log('🔍 Viewing listing:', submission);
-    
-    const listingId = submission.listingId || submission._id;
-    
-    if (!listingId) {
-      showMessage('error', 'Unable to find listing URL');
+ const handleViewListing = (submission) => {
+  console.log('🔍 === VIEW LISTING DEBUG START ===');
+  console.log('Full submission:', submission);
+  console.log('Submission ID:', submission._id);
+  console.log('Listing ID field:', submission.listingId);
+  console.log('Status:', submission.status);
+  console.log('Title:', submission.listingData?.title);
+  console.log('Admin Review:', submission.adminReview);
+  
+  // Check the specific status and determine the correct approach
+  let targetId = null;
+  let shouldProceed = false;
+  
+  switch (submission.status) {
+    case 'listing_created':
+      // This should be a live listing
+      targetId = submission.listingId || submission._id;
+      shouldProceed = true;
+      console.log('✅ Status: listing_created - proceeding with ID:', targetId);
+      break;
+      
+    case 'approved':
+      // This might be approved but not yet converted to listing
+      targetId = submission.listingId || submission._id;
+      shouldProceed = true;
+      console.log('⚠️ Status: approved - trying with ID:', targetId);
+      break;
+      
+    default:
+      console.log('❌ Status not suitable for viewing:', submission.status);
+      showMessage('error', `Cannot view listing with status: ${submission.status}`);
       return;
-    }
-    
-    const listingUrl = `/listing/${listingId}`;
-    console.log('📍 Navigating to:', listingUrl);
-    
-    navigate(listingUrl);
-    showMessage('success', 'Opening your listing...');
-  };
+  }
+  
+  if (!targetId) {
+    console.log('❌ No target ID found');
+    showMessage('error', 'Unable to find listing ID');
+    return;
+  }
+  
+  const listingUrl = `/listing/${targetId}`;
+  console.log('📍 Navigating to URL:', listingUrl);
+  console.log('🔍 === VIEW LISTING DEBUG END ===');
+  
+  // Navigate to the listing
+  navigate(listingUrl);
+  showMessage('success', 'Opening your listing...');
+};
 
   // Handle updating/editing the listing
   const handleUpdateListing = (submission) => {
