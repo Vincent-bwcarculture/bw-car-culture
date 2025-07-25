@@ -1,17 +1,22 @@
 // client/src/components/profile/VehicleManagement.js
-// COMPLETE VERSION WITH FREE TIER INTEGRATION
+// COMPLETE VERSION WITH FREE TIER INTEGRATION + SEPARATED USER SUBMISSION CARD
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // NEW: Added for navigation
 import { 
   Car, Plus, Edit, Trash2, Eye, AlertCircle, CheckCircle, 
-  Clock, X, Upload, DollarSign, Star, Settings, Phone, Info, Image
+  Clock, X, Upload, DollarSign, Star, Settings, Phone, Info, Image,
+  ExternalLink // NEW: Added for View Listing button
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import UserCarListingForm from './UserCarListingForm.js';
 import CarListingManager from './CarListingManager/CarListingManager.js';
+import UserSubmissionCard from './UserSubmissionCard.js'; // NEW: Import separated component
 import './VehicleManagement.css';
 
 const VehicleManagement = () => {
+  const navigate = useNavigate(); // NEW: Initialize navigation hook
+
   // === MAIN STATE VARIABLES ===
   const [activeSection, setActiveSection] = useState('vehicles');
   const [loading, setLoading] = useState(false);
@@ -157,90 +162,90 @@ const VehicleManagement = () => {
   };
 
   // Get primary image from submission
-const getPrimaryImage = (submission) => {
-  console.log('🖼️ Getting primary image for submission:', submission?.listingData?.title);
-  
-  if (!submission?.listingData?.images) {
-    console.log('❌ No images found in submission');
-    return null;
-  }
-  
-  const images = submission.listingData.images;
-  console.log('📸 Images data:', images);
-  
-  // Handle both array and non-array cases
-  const imageArray = Array.isArray(images) ? images : [images];
-  
-  if (imageArray.length === 0) {
-    console.log('❌ Empty images array');
-    return null;
-  }
-  
-  // Try to find primary image first
-  let primaryImage = imageArray.find(img => {
-    if (typeof img === 'object' && img !== null) {
-      return img.isPrimary === true;
+  const getPrimaryImage = (submission) => {
+    console.log('🖼️ Getting primary image for submission:', submission?.listingData?.title);
+    
+    if (!submission?.listingData?.images) {
+      console.log('❌ No images found in submission');
+      return null;
     }
-    return false;
-  });
-  
-  // If no primary image found, use the first image
-  if (!primaryImage) {
-    primaryImage = imageArray[0];
-    console.log('⚠️ No primary image found, using first image');
-  }
-  
-  console.log('🎯 Selected image:', primaryImage);
-  
-  // Extract URL from image object
-  if (typeof primaryImage === 'string') {
-    console.log('✅ Direct URL string:', primaryImage);
-    return primaryImage;
-  }
-  
-  if (typeof primaryImage === 'object' && primaryImage !== null) {
-    // Try different possible URL properties
-    const imageUrl = primaryImage.url || 
-                    primaryImage.thumbnail || 
-                    primaryImage.src || 
-                    primaryImage.imageUrl ||
-                    primaryImage.path ||
-                    primaryImage.location;
     
-    console.log('✅ Extracted URL:', imageUrl);
-    return imageUrl || null;
-  }
-  
-  console.log('❌ Could not extract URL from image data');
-  return null;
-};
-
-// ADDITIONAL DEBUG HELPER FUNCTION (optional - add this if you need more debugging)
-const debugSubmissionImages = (submission) => {
-  console.log('=== SUBMISSION IMAGE DEBUG ===');
-  console.log('Submission ID:', submission._id);
-  console.log('Title:', submission.listingData?.title);
-  console.log('Raw images:', submission.listingData?.images);
-  
-  if (submission.listingData?.images) {
-    const images = Array.isArray(submission.listingData.images) 
-      ? submission.listingData.images 
-      : [submission.listingData.images];
+    const images = submission.listingData.images;
+    console.log('📸 Images data:', images);
     
-    images.forEach((img, index) => {
-      console.log(`Image ${index}:`, {
-        type: typeof img,
-        isString: typeof img === 'string',
-        isObject: typeof img === 'object',
-        isPrimary: img?.isPrimary,
-        url: img?.url,
-        thumbnail: img?.thumbnail,
-        properties: typeof img === 'object' ? Object.keys(img) : 'N/A'
-      });
+    // Handle both array and non-array cases
+    const imageArray = Array.isArray(images) ? images : [images];
+    
+    if (imageArray.length === 0) {
+      console.log('❌ Empty images array');
+      return null;
+    }
+    
+    // Try to find primary image first
+    let primaryImage = imageArray.find(img => {
+      if (typeof img === 'object' && img !== null) {
+        return img.isPrimary === true;
+      }
+      return false;
     });
-  }
-  console.log('=== END DEBUG ===');
-};
+    
+    // If no primary image found, use the first image
+    if (!primaryImage) {
+      primaryImage = imageArray[0];
+      console.log('⚠️ No primary image found, using first image');
+    }
+    
+    console.log('🎯 Selected image:', primaryImage);
+    
+    // Extract URL from image object
+    if (typeof primaryImage === 'string') {
+      console.log('✅ Direct URL string:', primaryImage);
+      return primaryImage;
+    }
+    
+    if (typeof primaryImage === 'object' && primaryImage !== null) {
+      // Try different possible URL properties
+      const imageUrl = primaryImage.url || 
+                      primaryImage.thumbnail || 
+                      primaryImage.src || 
+                      primaryImage.imageUrl ||
+                      primaryImage.path ||
+                      primaryImage.location;
+      
+      console.log('✅ Extracted URL:', imageUrl);
+      return imageUrl || null;
+    }
+    
+    console.log('❌ Could not extract URL from image data');
+    return null;
+  };
+
+  // ADDITIONAL DEBUG HELPER FUNCTION (optional - add this if you need more debugging)
+  const debugSubmissionImages = (submission) => {
+    console.log('=== SUBMISSION IMAGE DEBUG ===');
+    console.log('Submission ID:', submission._id);
+    console.log('Title:', submission.listingData?.title);
+    console.log('Raw images:', submission.listingData?.images);
+    
+    if (submission.listingData?.images) {
+      const images = Array.isArray(submission.listingData.images) 
+        ? submission.listingData.images 
+        : [submission.listingData.images];
+      
+      images.forEach((img, index) => {
+        console.log(`Image ${index}:`, {
+          type: typeof img,
+          isString: typeof img === 'string',
+          isObject: typeof img === 'object',
+          isPrimary: img?.isPrimary,
+          url: img?.url,
+          thumbnail: img?.thumbnail,
+          properties: typeof img === 'object' ? Object.keys(img) : 'N/A'
+        });
+      });
+    }
+    console.log('=== END DEBUG ===');
+  };
 
   // ===== ADMIN-STYLE PRICING FUNCTIONS =====
   const getPlanInfo = (planId) => {
@@ -596,133 +601,6 @@ const debugSubmissionImages = (submission) => {
     setPendingListingData(null);
   };
 
-  // === SUBMISSION STATUS RENDERING WITH FREE TIER SUPPORT ===
-  const renderSubmissionStatus = (submission) => {
-    const isFreeSubmission = submission.selectedTier === 'free' || 
-                           submission.paymentRequired === false ||
-                           submission.listingData?.selectedPlan === 'free';
-    
-    if (submission.status === 'pending_review') {
-      return (
-        <div className="vm-status-message vm-status-pending">
-          <Info size={14} />
-          <div className="vm-message-content">
-            <div className="vm-status-text">
-              {isFreeSubmission ? (
-                <>
-                  🆓 <strong>FREE listing</strong> under review
-                  <span className="vm-review-time"> • Est. 24-48 hours</span>
-                </>
-              ) : (
-                <>
-                  Your listing is being reviewed by our team. We'll contact you within 24-48 hours.
-                  <span className="vm-review-time"> • Est. 24-48 hours</span>
-                </>
-              )}
-            </div>
-            {isFreeSubmission && (
-              <div className="vm-free-status-note">
-                <CheckCircle size={12} color="#10b981" />
-                <span>No payment required - listing will go live once approved!</span>
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
-    
-    if (submission.status === 'approved') {
-      return (
-        <div className="vm-status-message vm-status-approved">
-          <CheckCircle size={14} />
-          <div className="vm-message-content">
-            <div className="vm-approval-details">
-              <span>
-                🎉 Great! Your listing has been approved.
-                {isFreeSubmission && <span className="vm-free-label"> (FREE TIER)</span>}
-              </span>
-              <div className="vm-next-steps">
-                {isFreeSubmission ? (
-                  <span>Your free listing will go live automatically! 🎉</span>
-                ) : (
-                  <div className="vm-payment-info">
-                    <div className="vm-payment-instructions">
-                      <Info size={12} />
-                      <span>Check your email for payment instructions. Complete payment to make your listing live.</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            {!isFreeSubmission && (
-              <button className="vm-btn vm-btn-primary vm-btn-small">
-                <DollarSign size={14} />
-                Complete Payment
-              </button>
-            )}
-          </div>
-        </div>
-      );
-    }
-    
-    if (submission.status === 'listing_created') {
-      return (
-        <div className="vm-status-message vm-status-live">
-          <Star size={14} />
-          <div className="vm-message-content">
-            <div className="vm-live-details">
-              <span>🚗 Your listing is now live on our platform!</span>
-              {isFreeSubmission && (
-                <div className="vm-free-live-info">
-                  <span className="vm-free-label">FREE TIER</span>
-                  <span>Active for 30 days • Basic visibility</span>
-                </div>
-              )}
-            </div>
-            {submission.listingId && (
-              <button className="vm-btn vm-btn-secondary vm-btn-small">
-                <Eye size={14} />
-                View Live Listing
-              </button>
-            )}
-          </div>
-        </div>
-      );
-    }
-    
-    if (submission.status === 'rejected') {
-      return (
-        <div className="vm-status-message vm-status-rejected">
-          <AlertCircle size={14} />
-          <div className="vm-message-content">
-            <span>
-              This listing was not approved.
-              {isFreeSubmission && <span className="vm-free-label"> (FREE TIER)</span>}
-              {submission.adminNotes && (
-                <span className="vm-admin-notes"> Reason: {submission.adminNotes}</span>
-              )}
-            </span>
-            <button 
-              className="vm-btn vm-btn-secondary vm-btn-small"
-              onClick={() => {
-                setActiveSection('create-listing');
-                setListingStep('form');
-                // Pre-select free tier if it was originally free
-                if (isFreeSubmission) {
-                  setSelectedPlan('free');
-                }
-              }}
-            >
-              {isFreeSubmission ? 'Create New Free Listing' : 'Create New Listing'}
-            </button>
-          </div>
-        </div>
-      );
-    }
-    
-    return null;
-  };
-
   // === VEHICLE MANAGEMENT FUNCTIONS ===
   const handleVehicleSubmit = async (e) => {
     e.preventDefault();
@@ -869,7 +747,7 @@ const debugSubmissionImages = (submission) => {
     </div>
   );
 
-  // UPDATED: Submissions with FREE TIER support
+  // UPDATED: Submissions with separated UserSubmissionCard component
   const renderSubmissions = () => (
     <div className="vm-submissions-section">
       <div className="vm-section-header">
@@ -913,167 +791,24 @@ const debugSubmissionImages = (submission) => {
         </div>
       ) : (
         <div className="vm-submissions-grid">
-          {userSubmissions.map(submission => {
-            const primaryImage = getPrimaryImage(submission);
-            
-            // Calculate pricing with FREE TIER support
-            const selectedPlan = submission.listingData?.selectedPlan;
-            const selectedAddons = submission.listingData?.selectedAddons || [];
-            const planInfo = getPlanInfo(selectedPlan);
-            const totalCost = calculateTotalCost(selectedPlan, selectedAddons);
-            const addonDetails = getAddonDetails(selectedAddons);
-            const addonCost = totalCost - planInfo.price;
-            const isFreeSubmission = selectedPlan === 'free';
-            
-            return (
-              <div key={submission._id} className="vm-submission-card">
-                <div className="vm-submission-main">
-                  {/* Image Section */}
-                  <div className="vm-submission-image">
-                    {primaryImage ? (
-                      <img 
-                        src={primaryImage} 
-                        alt={submission.listingData?.title || 'Car listing'}
-                        className="vm-car-image"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.nextSibling.style.display = 'flex';
-                        }}
-                      />
-                    ) : null}
-                    <div className={`vm-image-placeholder ${primaryImage ? 'vm-hidden' : ''}`}>
-                      <Image size={24} />
-                      <span>No Image</span>
-                    </div>
-                  </div>
-
-                  {/* Content Section */}
-                  <div className="vm-submission-content">
-                    <div className="vm-submission-header">
-                      <h4 className="vm-submission-title">
-                        {submission.listingData?.title || 'Untitled Listing'}
-                        {isFreeSubmission && <span className="vm-free-label">FREE</span>}
-                      </h4>
-                      {getStatusBadge(submission.status)}
-                    </div>
-
-                    <div className="vm-submission-details">
-                      <div className="vm-detail-row">
-                        <span className="vm-detail-label">Vehicle:</span>
-                        <span className="vm-detail-value">
-                          {submission.listingData?.specifications?.year} {submission.listingData?.specifications?.make} {submission.listingData?.specifications?.model}
-                        </span>
-                      </div>
-                      
-                      <div className="vm-detail-row">
-                        <span className="vm-detail-label">Car Price:</span>
-                        <span className="vm-detail-value vm-price">
-                          {submission.listingData?.pricing?.price 
-                            ? `P${submission.listingData.pricing.price.toLocaleString()}`
-                            : 'Not specified'
-                          }
-                        </span>
-                      </div>
-
-                      <div className="vm-detail-row">
-                        <span className="vm-detail-label">Location:</span>
-                        <span className="vm-detail-value">
-                          📍 {submission.listingData?.contact?.location?.city || 'Not specified'}
-                        </span>
-                      </div>
-
-                      <div className="vm-detail-row">
-                        <span className="vm-detail-label">Submitted:</span>
-                        <span className="vm-detail-value vm-date">
-                          {formatDate(submission.submittedAt)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Plan Details Section with FREE TIER support */}
-                    {selectedPlan && (
-                      <div className="vm-plan-details">
-                        <div className="vm-plan-header">
-                          <h5>Selected Plan & Services</h5>
-                        </div>
-                        {!pricingData.loaded ? (
-                          <div className="vm-pricing-loading">
-                            <div className="vm-small-spinner"></div>
-                            <span>Loading pricing...</span>
-                          </div>
-                        ) : (
-                          <div className="vm-plan-info">
-                            {/* Plan Info with FREE indication */}
-                            <div className="vm-plan-name">
-                              <span className={`vm-plan-badge ${isFreeSubmission ? 'vm-free-plan' : ''}`}>
-                                {planInfo.name}
-                                {isFreeSubmission && ' (FREE)'}
-                              </span>
-                            </div>
-                            
-                            {/* Addons (only for non-free plans typically) */}
-                            {selectedAddons.length > 0 && pricingData.loaded && (
-                              <div className="vm-selected-addons">
-                                <div className="vm-addons-label">Add-ons Selected:</div>
-                                <div className="vm-addons-list">
-                                  {selectedAddons.map((addonId, index) => {
-                                    const addonInfo = getAddonInfo(addonId);
-                                    
-                                    return (
-                                      <div key={index} className="vm-addon-item">
-                                        <div className="vm-addon-info">
-                                          <span className="vm-addon-name">{addonInfo.name}</span>
-                                        </div>
-                                        <span className="vm-addon-price">+P{addonInfo.price.toLocaleString()}</span>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            )}
-                            
-                            {/* Pricing breakdown */}
-                            <div className="vm-plan-pricing">
-                              <div className="vm-pricing-row">
-                                <span className="vm-pricing-label">Base Plan:</span>
-                                <span className="vm-pricing-value">
-                                  {isFreeSubmission ? 'FREE' : `P${planInfo.price.toLocaleString()}`}
-                                </span>
-                              </div>
-                              
-                              {selectedAddons.length > 0 && (
-                                <div className="vm-pricing-row">
-                                  <span className="vm-pricing-label">Add-ons:</span>
-                                  <span className="vm-pricing-value">P{(totalCost - planInfo.price).toLocaleString()}</span>
-                                </div>
-                              )}
-                              
-                              <div className="vm-pricing-row vm-total-row">
-                                <span className="vm-pricing-label">Total Amount:</span>
-                                <span className={`vm-pricing-value vm-total-price ${isFreeSubmission ? 'vm-free-total' : ''}`}>
-                                  {isFreeSubmission ? 'FREE' : `P${totalCost.toLocaleString()}`}
-                                </span>
-                              </div>
-                              
-                              <div className="vm-pricing-row">
-                                <span className="vm-pricing-label">Duration:</span>
-                                <span className="vm-pricing-value">{planInfo.duration} days</span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Status-specific actions with FREE TIER support */}
-                <div className="vm-submission-actions">
-                  {renderSubmissionStatus(submission)}
-                </div>
-              </div>
-            );
-          })}
+          {userSubmissions.map(submission => (
+            <UserSubmissionCard
+              key={submission._id}
+              submission={submission}
+              getPlanInfo={getPlanInfo}
+              calculateTotalCost={calculateTotalCost}
+              getAddonDetails={getAddonDetails}
+              getAddonInfo={getAddonInfo}
+              formatDate={formatDate}
+              getStatusBadge={getStatusBadge}
+              getPrimaryImage={getPrimaryImage}
+              pricingData={pricingData}
+              showMessage={showMessage}
+              setActiveSection={setActiveSection}
+              setListingStep={setListingStep}
+              setSelectedPlan={setSelectedPlan}
+            />
+          ))}
         </div>
       )}
     </div>
