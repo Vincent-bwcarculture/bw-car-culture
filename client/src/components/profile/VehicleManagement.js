@@ -1,21 +1,22 @@
 // client/src/components/profile/VehicleManagement.js
-// COMPLETE VERSION WITH FREE TIER INTEGRATION + SEPARATED USER SUBMISSION CARD
+// COMPLETE VERSION WITH MY GARAGE INTEGRATION + SEPARATED COMPONENTS
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // NEW: Added for navigation
+import { useNavigate } from 'react-router-dom';
 import { 
   Car, Plus, Edit, Trash2, Eye, AlertCircle, CheckCircle, 
   Clock, X, Upload, DollarSign, Star, Settings, Phone, Info, Image,
-  ExternalLink // NEW: Added for View Listing button
+  ExternalLink, Garage, TrendingUp // NEW: Added Garage icon
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import UserCarListingForm from './UserCarListingForm.js';
 import CarListingManager from './CarListingManager/CarListingManager.js';
-import UserSubmissionCard from './UserSubmissionCard.js'; // NEW: Import separated component
+import UserSubmissionCard from './UserSubmissionCard.js';
+import MyGarageCard from './MyGarageCard.js'; // NEW: Import MyGarageCard
 import './VehicleManagement.css';
 
 const VehicleManagement = () => {
-  const navigate = useNavigate(); // NEW: Initialize navigation hook
+  const navigate = useNavigate();
 
   // === MAIN STATE VARIABLES ===
   const [activeSection, setActiveSection] = useState('vehicles');
@@ -28,7 +29,7 @@ const VehicleManagement = () => {
   const [editingVehicle, setEditingVehicle] = useState(null);
   
   // === LISTING STATE ===
-  const [listingStep, setListingStep] = useState('pricing'); // 'pricing' → 'form' → 'submitted'
+  const [listingStep, setListingStep] = useState('pricing');
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedAddons, setSelectedAddons] = useState([]);
   const [pendingListingData, setPendingListingData] = useState(null);
@@ -41,6 +42,21 @@ const VehicleManagement = () => {
     approved: 0,
     rejected: 0,
     listing_created: 0
+  });
+
+  // === NEW: MY GARAGE STATE ===
+  const [garageListings, setGarageListings] = useState([]);
+  const [garageStats, setGarageStats] = useState({
+    total: 0,
+    active: 0,
+    inactive: 0,
+    sold: 0,
+    featured: 0
+  });
+  const [garageAnalytics, setGarageAnalytics] = useState({
+    totalViews: 0,
+    totalInquiries: 0,
+    totalSaves: 0
   });
 
   // === PRICING STATE ===
@@ -220,33 +236,6 @@ const VehicleManagement = () => {
     return null;
   };
 
-  // ADDITIONAL DEBUG HELPER FUNCTION (optional - add this if you need more debugging)
-  const debugSubmissionImages = (submission) => {
-    console.log('=== SUBMISSION IMAGE DEBUG ===');
-    console.log('Submission ID:', submission._id);
-    console.log('Title:', submission.listingData?.title);
-    console.log('Raw images:', submission.listingData?.images);
-    
-    if (submission.listingData?.images) {
-      const images = Array.isArray(submission.listingData.images) 
-        ? submission.listingData.images 
-        : [submission.listingData.images];
-      
-      images.forEach((img, index) => {
-        console.log(`Image ${index}:`, {
-          type: typeof img,
-          isString: typeof img === 'string',
-          isObject: typeof img === 'object',
-          isPrimary: img?.isPrimary,
-          url: img?.url,
-          thumbnail: img?.thumbnail,
-          properties: typeof img === 'object' ? Object.keys(img) : 'N/A'
-        });
-      });
-    }
-    console.log('=== END DEBUG ===');
-  };
-
   // ===== ADMIN-STYLE PRICING FUNCTIONS =====
   const getPlanInfo = (planId) => {
     if (!pricingData.loaded || !planId) {
@@ -320,8 +309,8 @@ const VehicleManagement = () => {
       console.log('🔍 Fetching pricing data from endpoints...');
       
       const [tiersResponse, addonsResponse] = await Promise.all([
-        axios.get('/payments/available-tiers'), // UPDATED: Remove /api prefix
-        axios.get('/addons/available') // UPDATED: Remove /api prefix
+        axios.get('/payments/available-tiers'),
+        axios.get('/addons/available')
       ]);
 
       if (tiersResponse.data.success && addonsResponse.data.success) {
@@ -334,7 +323,6 @@ const VehicleManagement = () => {
           loaded: true
         });
 
-        // NEW: Set free tier data
         setHasFreeOption(hasFreeOption);
         if (freeListingStats && Object.keys(freeListingStats).length > 0) {
           setFreeListingStats(freeListingStats);
@@ -422,6 +410,113 @@ const VehicleManagement = () => {
     }
   };
 
+  // NEW: Fetch user's garage listings (actual live listings)
+  const fetchGarageListings = async () => {
+    try {
+      setLoading(true);
+      
+      const apiUrl = 'https://bw-car-culture-api.vercel.app/api/user/my-garage';
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
+        }
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        const listings = result.data || [];
+        setGarageListings(listings);
+        setGarageStats(result.stats || {});
+        setGarageAnalytics(result.analytics || {});
+        
+        console.log('✅ Garage listings loaded:', {
+          count: listings.length,
+          stats: result.stats,
+          analytics: result.analytics
+        });
+      } else {
+        console.error('Failed to load garage listings:', result);
+        showMessage('error', result.message || 'Failed to load garage listings');
+      }
+    } catch (error) {
+      console.error('Error fetching garage listings:', error);
+      showMessage('error', 'Failed to load garage listings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // NEW: Handle garage listing actions
+  const handleUpdateGarageListing = (listing) => {
+    console.log('✏️ Updating garage listing:', listing._id);
+    // Navigate to listing edit page
+    const editUrl = `/admin/listings/edit/${listing._id}`;
+    navigate(editUrl);
+    showMessage('info', 'Opening listing editor...');
+  };
+
+  const handleToggleListingStatus = async (listingId, newStatus) => {
+    try {
+      const apiUrl = `https://bw-car-culture-api.vercel.app/api/user/my-garage/${listingId}/status`;
+      
+      const response = await fetch(apiUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        showMessage('success', `Listing ${newStatus === 'active' ? 'activated' : 'paused'} successfully`);
+        // Refresh garage listings
+        fetchGarageListings();
+      } else {
+        showMessage('error', result.message || 'Failed to update listing status');
+      }
+    } catch (error) {
+      console.error('Error updating listing status:', error);
+      showMessage('error', 'Failed to update listing status');
+    }
+  };
+
+  const handleDeleteGarageListing = async (listingId) => {
+    if (!window.confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const apiUrl = `https://bw-car-culture-api.vercel.app/api/user/my-garage/${listingId}`;
+      
+      const response = await fetch(apiUrl, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
+        }
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        showMessage('success', 'Listing deleted successfully');
+        // Refresh garage listings
+        fetchGarageListings();
+      } else {
+        showMessage('error', result.message || 'Failed to delete listing');
+      }
+    } catch (error) {
+      console.error('Error deleting listing:', error);
+      showMessage('error', 'Failed to delete listing');
+    }
+  };
+
   // Debug auth token on component mount
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
@@ -448,10 +543,12 @@ const VehicleManagement = () => {
       fetchUserVehicles();
     } else if (activeSection === 'submissions') {
       fetchUserSubmissions();
+    } else if (activeSection === 'garage') { // NEW: Fetch garage listings
+      fetchGarageListings();
     }
   }, [activeSection]);
 
-  // === LISTING MANAGEMENT FUNCTIONS ===
+  // === LISTING MANAGEMENT FUNCTIONS (unchanged) ===
   
   // Handle plan selection in preview mode
   const handlePlanSelection = (planId) => {
@@ -601,7 +698,7 @@ const VehicleManagement = () => {
     setPendingListingData(null);
   };
 
-  // === VEHICLE MANAGEMENT FUNCTIONS ===
+  // === VEHICLE MANAGEMENT FUNCTIONS (unchanged) ===
   const handleVehicleSubmit = async (e) => {
     e.preventDefault();
     
@@ -747,7 +844,7 @@ const VehicleManagement = () => {
     </div>
   );
 
-  // UPDATED: Submissions with separated UserSubmissionCard component
+  // UPDATED: Submissions with separated UserSubmissionCard component (unchanged)
   const renderSubmissions = () => (
     <div className="vm-submissions-section">
       <div className="vm-section-header">
@@ -814,7 +911,67 @@ const VehicleManagement = () => {
     </div>
   );
 
-  // UPDATED: Create listing with FREE TIER support
+  // NEW: Render My Garage section
+  const renderMyGarage = () => (
+    <div className="vm-garage-section">
+      <div className="vm-section-header">
+        <h3>My Garage</h3>
+        <div className="vm-garage-stats">
+          <div className="vm-stat">
+            <span className="vm-stat-number">{garageStats.total || 0}</span>
+            <span className="vm-stat-label">Total</span>
+          </div>
+          <div className="vm-stat">
+            <span className="vm-stat-number">{garageStats.active || 0}</span>
+            <span className="vm-stat-label">Active</span>
+          </div>
+          <div className="vm-stat">
+            <span className="vm-stat-number">{garageStats.sold || 0}</span>
+            <span className="vm-stat-label">Sold</span>
+          </div>
+          <div className="vm-stat">
+            <span className="vm-stat-number">{garageAnalytics.totalViews || 0}</span>
+            <span className="vm-stat-label">Views</span>
+          </div>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="vm-loading-state">
+          <div className="vm-spinner"></div>
+          <p>Loading your garage...</p>
+        </div>
+      ) : garageListings.length === 0 ? (
+        <div className="vm-empty-state">
+          <Garage size={48} />
+          <h4>No live listings yet</h4>
+          <p>Your approved listings will appear here. Submit a listing to get started!</p>
+          <button 
+            className="vm-btn vm-btn-primary"
+            onClick={() => setActiveSection('create-listing')}
+          >
+            Create Your First Listing
+          </button>
+        </div>
+      ) : (
+        <div className="vm-garage-grid">
+          {garageListings.map(listing => (
+            <MyGarageCard
+              key={listing._id}
+              listing={listing}
+              formatDate={formatDate}
+              showMessage={showMessage}
+              onUpdateListing={handleUpdateGarageListing}
+              onToggleStatus={handleToggleListingStatus}
+              onDeleteListing={handleDeleteGarageListing}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  // UPDATED: Create listing with FREE TIER support (unchanged)
   const renderCreateListing = () => {
     // Step 1: Plan Selection (Preview Mode)
     if (listingStep === 'pricing') {
@@ -916,7 +1073,7 @@ const VehicleManagement = () => {
     return null;
   };
 
-  // === VEHICLE MODAL ===
+  // === VEHICLE MODAL (unchanged) ===
   const renderVehicleModal = () => {
     if (!showVehicleModal) return null;
 
@@ -1087,7 +1244,7 @@ const VehicleManagement = () => {
         </div>
       )}
 
-      {/* Navigation Tabs */}
+      {/* UPDATED: Navigation Tabs with My Garage */}
       <div className="vm-section-tabs">
         <button 
           className={`vm-tab-button ${activeSection === 'vehicles' ? 'vm-active' : ''}`}
@@ -1115,12 +1272,25 @@ const VehicleManagement = () => {
           <Upload size={16} />
           My Submissions
         </button>
+
+        {/* NEW: My Garage Tab */}
+        <button 
+          className={`vm-tab-button ${activeSection === 'garage' ? 'vm-active' : ''}`}
+          onClick={() => setActiveSection('garage')}
+        >
+          <Garage size={16} />
+          My Garage
+          {garageStats.active > 0 && (
+            <span className="vm-tab-badge">{garageStats.active}</span>
+          )}
+        </button>
       </div>
 
-      {/* Content Areas */}
+      {/* UPDATED: Content Areas with My Garage */}
       {activeSection === 'vehicles' && renderVehicles()}
       {activeSection === 'create-listing' && renderCreateListing()}
       {activeSection === 'submissions' && renderSubmissions()}
+      {activeSection === 'garage' && renderMyGarage()} {/* NEW */}
 
       {/* Vehicle Modal */}
       {renderVehicleModal()}
