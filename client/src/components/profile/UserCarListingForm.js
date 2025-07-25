@@ -742,13 +742,13 @@ const handleFormSubmit = async (e) => {
         showMessage('info', `Uploading ${imageFiles.length} images...`);
         
         // FIXED: Use the correct method name
-        uploadedImageUrls = await imageService.uploadForUserListing(
-          imageFiles,
-          (progress) => {
-            console.log(`📤 Upload progress: ${progress}%`);
-            // You can update a progress bar here if you have one
-          }
-        );
+       uploadedImageUrls = await imageService.uploadMultiple(
+  imageFiles,
+  'user-listings',
+  (progress) => {
+    console.log(`📤 Upload progress: ${progress}%`);
+  }
+);
         
         console.log(`📤 ✅ Successfully uploaded ${uploadedImageUrls.length} images to S3`);
         console.log(`📤 First image URL:`, uploadedImageUrls[0]?.url);
