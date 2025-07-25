@@ -721,93 +721,187 @@ const handleFormSubmit = async (e) => {
 
     console.log(`📤 Starting submission with ${imageFiles?.length || 0} images`);
 
-    // Step 1: Upload images if any
+    // ========================================
+    // STEP 1: Upload images if any
+    // ========================================
     let uploadedImages = [];
     
     if (imageFiles && imageFiles.length > 0) {
       showMessage('info', `Uploading ${imageFiles.length} images...`);
       
-      const formData = new FormData();
-      imageFiles.forEach((file, index) => {
-        formData.append(`image${index}`, file);
-      });
-      formData.append('folder', 'user-listings');
+      try {
+        const formData = new FormData();
+        imageFiles.forEach((file, index) => {
+          formData.append(`image${index}`, file);
+          console.log(`📎 Added file ${index}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+        });
+        formData.append('folder', 'user-listings');
 
-      console.log('🔄 Uploading to /api/user/upload-images...');
-      
-      const uploadResponse = await fetch('/api/user/upload-images', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData
-      });
+        console.log('🔄 Uploading to /api/user/upload-images...');
+        
+        const uploadResponse = await fetch('/api/user/upload-images', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: formData
+        });
 
-      if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        throw new Error(`Image upload failed: ${errorText}`);
+        console.log(`📤 Upload response status: ${uploadResponse.status}`);
+
+        if (!uploadResponse.ok) {
+          const errorText = await uploadResponse.text();
+          console.error('📤 Upload failed response:', errorText);
+          throw new Error(`Image upload failed: ${uploadResponse.status} - ${errorText}`);
+        }
+
+        const uploadResult = await uploadResponse.json();
+        console.log('📤 Upload result:', uploadResult);
+        
+        if (!uploadResult.success || !uploadResult.images) {
+          throw new Error(uploadResult.message || 'Image upload failed - no images returned');
+        }
+
+        uploadedImages = uploadResult.images;
+        console.log(`✅ Images uploaded successfully: ${uploadedImages.length} images`);
+        showMessage('success', `${uploadedImages.length} images uploaded successfully!`);
+        
+      } catch (uploadError) {
+        console.error('📤 ❌ Image upload failed:', uploadError);
+        showMessage('error', `Image upload failed: ${uploadError.message}`);
+        return; // Stop submission if image upload fails
       }
-
-      const uploadResult = await uploadResponse.json();
-      
-      if (!uploadResult.success || !uploadResult.images) {
-        throw new Error(uploadResult.message || 'Image upload failed');
-      }
-
-      uploadedImages = uploadResult.images;
-      console.log(`✅ Images uploaded successfully:`, uploadedImages.length);
     }
 
-    // Step 2: Prepare listing data
+    // ========================================
+    // STEP 2: Prepare complete listing data
+    // ========================================
     const listingData = {
+      // Basic Information
       title: formData.title,
       description: formData.description,
       category: formData.category,
       condition: formData.condition,
       sellerType: formData.sellerType,
       
+      // Pricing Information
       pricing: {
         price: parseFloat(formData.price) || 0,
-        negotiable: formData.priceOptions?.negotiable || false
+        originalPrice: formData.priceOptions?.originalPrice ? 
+          parseFloat(formData.priceOptions.originalPrice) : null,
+        negotiable: formData.priceOptions?.negotiable || false,
+        showSavings: formData.priceOptions?.showSavings || false,
+        savingsAmount: formData.priceOptions?.savingsAmount ? 
+          parseFloat(formData.priceOptions.savingsAmount) : null
       },
       
+      // Vehicle Specifications
       specifications: {
         make: formData.make,
         model: formData.model,
         year: formData.year ? parseInt(formData.year) : null,
+        engineType: formData.engineType,
         transmission: formData.transmission,
         fuelType: formData.fuelType,
         mileage: formData.mileage ? parseInt(formData.mileage) : null,
         bodyType: formData.bodyType,
+        drivetrain: formData.drivetrain,
         exteriorColor: formData.exteriorColor,
-        interiorColor: formData.interiorColor
+        interiorColor: formData.interiorColor,
+        numberOfSeats: formData.numberOfSeats ? parseInt(formData.numberOfSeats) : null,
+        numberOfDoors: formData.numberOfDoors ? parseInt(formData.numberOfDoors) : null,
+        engineSize: formData.engineSize,
+        numberOfCylinders: formData.numberOfCylinders ? parseInt(formData.numberOfCylinders) : null,
+        vin: formData.vin
       },
       
+      // Features
+      features: {
+        keyFeatures: formData.keyFeatures || [],
+        safetyFeatures: formData.safetyFeatures || [],
+        comfortFeatures: formData.comfortFeatures || [],
+        entertainmentFeatures: formData.entertainmentFeatures || []
+      },
+      
+      // Contact Information
       contact: {
         name: formData.contactName,
         phone: formData.contactPhone,
         email: formData.contactEmail,
-        whatsapp: formData.whatsappNumber
+        whatsapp: formData.whatsappNumber,
+        preferredContact: formData.preferredContact || 'phone'
       },
       
+      // Location
       location: {
         city: formData.location.city,
         state: formData.location.state,
         address: formData.location.address
       },
       
-      // Add uploaded images
+      // Social Media (if provided)
+      social: formData.social || {},
+      
+      // Private Seller Info (if applicable)
+      privateSeller: formData.sellerType === 'private' ? {
+        firstName: formData.privateSeller?.firstName,
+        lastName: formData.privateSeller?.lastName,
+        idNumber: formData.privateSeller?.idNumber,
+        preferredContactMethod: formData.privateSeller?.preferredContactMethod
+      } : null,
+      
+      // Business Info (if applicable)
+      businessInfo: formData.sellerType === 'dealership' ? {
+        businessName: formData.businessInfo?.businessName,
+        businessType: formData.businessInfo?.businessType,
+        registrationNumber: formData.businessInfo?.registrationNumber,
+        vatNumber: formData.businessInfo?.vatNumber
+      } : null,
+      
+      // Additional Information
+      additionalInfo: {
+        serviceHistory: formData.additionalInfo?.serviceHistory,
+        accidents: formData.additionalInfo?.accidents,
+        modifications: formData.additionalInfo?.modifications,
+        warranty: formData.additionalInfo?.warranty,
+        inspection: formData.additionalInfo?.inspection,
+        reasonForSelling: formData.additionalInfo?.reasonForSelling
+      },
+      
+      // Availability
+      availability: {
+        viewingTimes: formData.availability?.viewingTimes,
+        availableFrom: formData.availability?.availableFrom,
+        urgentSale: formData.availability?.urgentSale || false
+      },
+      
+      // Uploaded Images with metadata
       images: uploadedImages.map((img, index) => ({
         url: img.url,
         key: img.key,
-        isPrimary: index === primaryImageIndex
+        thumbnail: img.thumbnail || img.url,
+        isPrimary: index === primaryImageIndex,
+        size: img.size,
+        mimetype: img.mimetype
       })),
       
-      submittedAt: new Date().toISOString(),
-      status: 'pending_approval'
+      // Submission Metadata
+      submissionType: 'free_tier', // or could be dynamic based on selection
+      status: 'pending_approval',
+      submittedAt: new Date().toISOString()
     };
 
-    // Step 3: Submit listing
+    console.log(`📋 Prepared listing data:`, {
+      title: listingData.title,
+      imageCount: listingData.images.length,
+      price: listingData.pricing.price,
+      primaryImageIndex: primaryImageIndex
+    });
+
+    // ========================================
+    // STEP 3: Submit listing to backend
+    // ========================================
+    showMessage('info', 'Submitting your listing...');
     console.log('🔄 Submitting listing to /api/user/submit-listing...');
     
     const submitResponse = await fetch('/api/user/submit-listing', {
@@ -819,29 +913,34 @@ const handleFormSubmit = async (e) => {
       body: JSON.stringify({ listingData })
     });
 
+    console.log(`📋 Submission response status: ${submitResponse.status}`);
+
     if (!submitResponse.ok) {
       const errorText = await submitResponse.text();
-      throw new Error(`Listing submission failed: ${errorText}`);
+      console.error('📋 Submission failed response:', errorText);
+      throw new Error(`Listing submission failed: ${submitResponse.status} - ${errorText}`);
     }
 
     const result = await submitResponse.json();
+    console.log('📋 Submission result:', result);
     
     if (!result.success) {
       throw new Error(result.message || 'Submission failed');
     }
 
     console.log('✅ Listing submitted successfully!');
-    showMessage('success', 'Your listing has been submitted for approval!');
+    showMessage('success', 'Your listing has been submitted for approval! You will be notified once it\'s reviewed.');
     
-    // Reset form
+    // Reset form to clean state
     resetForm();
     
+    // Call parent callback if provided
     if (onSubmit) {
       onSubmit(result);
     }
 
   } catch (error) {
-    console.error('❌ Submission failed:', error);
+    console.error('❌ Form submission failed:', error);
     showMessage('error', `Submission failed: ${error.message}`);
   } finally {
     setLoading(false);
