@@ -777,126 +777,191 @@ const handleFormSubmit = async (e) => {
     // STEP 2: Prepare complete listing data
     // ========================================
     const listingData = {
-      // Basic Information
-      title: formData.title,
-      description: formData.description,
-      category: formData.category,
-      condition: formData.condition,
-      sellerType: formData.sellerType,
-      
-      // Pricing Information
-      pricing: {
-        price: parseFloat(formData.price) || 0,
-        originalPrice: formData.priceOptions?.originalPrice ? 
-          parseFloat(formData.priceOptions.originalPrice) : null,
-        negotiable: formData.priceOptions?.negotiable || false,
-        showSavings: formData.priceOptions?.showSavings || false,
-        savingsAmount: formData.priceOptions?.savingsAmount ? 
-          parseFloat(formData.priceOptions.savingsAmount) : null
-      },
-      
-      // Vehicle Specifications
-      specifications: {
-        make: formData.make,
-        model: formData.model,
-        year: formData.year ? parseInt(formData.year) : null,
-        engineType: formData.engineType,
-        transmission: formData.transmission,
-        fuelType: formData.fuelType,
-        mileage: formData.mileage ? parseInt(formData.mileage) : null,
-        bodyType: formData.bodyType,
-        drivetrain: formData.drivetrain,
-        exteriorColor: formData.exteriorColor,
-        interiorColor: formData.interiorColor,
-        numberOfSeats: formData.numberOfSeats ? parseInt(formData.numberOfSeats) : null,
-        numberOfDoors: formData.numberOfDoors ? parseInt(formData.numberOfDoors) : null,
-        engineSize: formData.engineSize,
-        numberOfCylinders: formData.numberOfCylinders ? parseInt(formData.numberOfCylinders) : null,
-        vin: formData.vin
-      },
-      
-      // Features
-      features: {
-        keyFeatures: formData.keyFeatures || [],
-        safetyFeatures: formData.safetyFeatures || [],
-        comfortFeatures: formData.comfortFeatures || [],
-        entertainmentFeatures: formData.entertainmentFeatures || []
-      },
-      
-      // Contact Information
-      contact: {
-        name: formData.contactName,
-        phone: formData.contactPhone,
-        email: formData.contactEmail,
-        whatsapp: formData.whatsappNumber,
-        preferredContact: formData.preferredContact || 'phone'
-      },
-      
-      // Location
-      location: {
-        city: formData.location.city,
-        state: formData.location.state,
-        address: formData.location.address
-      },
-      
-      // Social Media (if provided)
-      social: formData.social || {},
-      
-      // Private Seller Info (if applicable)
-      privateSeller: formData.sellerType === 'private' ? {
-        firstName: formData.privateSeller?.firstName,
-        lastName: formData.privateSeller?.lastName,
-        idNumber: formData.privateSeller?.idNumber,
-        preferredContactMethod: formData.privateSeller?.preferredContactMethod
-      } : null,
-      
-      // Business Info (if applicable)
-      businessInfo: formData.sellerType === 'dealership' ? {
-        businessName: formData.businessInfo?.businessName,
-        businessType: formData.businessInfo?.businessType,
-        registrationNumber: formData.businessInfo?.registrationNumber,
-        vatNumber: formData.businessInfo?.vatNumber
-      } : null,
-      
-      // Additional Information
-      additionalInfo: {
-        serviceHistory: formData.additionalInfo?.serviceHistory,
-        accidents: formData.additionalInfo?.accidents,
-        modifications: formData.additionalInfo?.modifications,
-        warranty: formData.additionalInfo?.warranty,
-        inspection: formData.additionalInfo?.inspection,
-        reasonForSelling: formData.additionalInfo?.reasonForSelling
-      },
-      
-      // Availability
-      availability: {
-        viewingTimes: formData.availability?.viewingTimes,
-        availableFrom: formData.availability?.availableFrom,
-        urgentSale: formData.availability?.urgentSale || false
-      },
-      
-      // Uploaded Images with metadata
-      images: uploadedImages.map((img, index) => ({
-        url: img.url,
-        key: img.key,
-        thumbnail: img.thumbnail || img.url,
-        isPrimary: index === primaryImageIndex,
-        size: img.size,
-        mimetype: img.mimetype
-      })),
-      
-      // Submission Metadata
-      submissionType: 'free_tier', // or could be dynamic based on selection
-      status: 'pending_approval',
-      submittedAt: new Date().toISOString()
-    };
+  // Basic Information
+  title: formData.title || '',
+  description: formData.description || '',
+  category: formData.category || 'sedan',
+  condition: formData.condition || 'used',
+  sellerType: formData.sellerType || 'private',
+  
+  // Pricing Information - FIXED: Check both locations
+  pricing: {
+    price: parseFloat(formData.price) || 0,
+    originalPrice: formData.priceOptions?.originalPrice ? 
+      parseFloat(formData.priceOptions.originalPrice) : null,
+    negotiable: formData.priceOptions?.negotiable || false,
+    showSavings: formData.priceOptions?.showSavings || false,
+    savingsAmount: formData.priceOptions?.savingsAmount ? 
+      parseFloat(formData.priceOptions.savingsAmount) : null
+  },
+  
+  // Vehicle Specifications - FIXED: Map from individual fields to nested structure
+  specifications: {
+    make: formData.make || formData.specifications?.make || '',
+    model: formData.model || formData.specifications?.model || '',
+    year: formData.year ? parseInt(formData.year) : (formData.specifications?.year ? parseInt(formData.specifications.year) : null),
+    engineType: formData.engineType || formData.specifications?.engineType || '',
+    transmission: formData.transmission || formData.specifications?.transmission || '',
+    fuelType: formData.fuelType || formData.specifications?.fuelType || '',
+    mileage: formData.mileage ? parseInt(formData.mileage) : (formData.specifications?.mileage ? parseInt(formData.specifications.mileage) : null),
+    bodyType: formData.bodyType || formData.specifications?.bodyType || '',
+    drivetrain: formData.drivetrain || formData.specifications?.drivetrain || '',
+    exteriorColor: formData.exteriorColor || formData.specifications?.exteriorColor || '',
+    interiorColor: formData.interiorColor || formData.specifications?.interiorColor || '',
+    numberOfSeats: formData.numberOfSeats ? parseInt(formData.numberOfSeats) : (formData.specifications?.numberOfSeats ? parseInt(formData.specifications.numberOfSeats) : null),
+    numberOfDoors: formData.numberOfDoors ? parseInt(formData.numberOfDoors) : (formData.specifications?.numberOfDoors ? parseInt(formData.specifications.numberOfDoors) : null),
+    engineSize: formData.engineSize || formData.specifications?.engineSize || '',
+    numberOfCylinders: formData.numberOfCylinders ? parseInt(formData.numberOfCylinders) : (formData.specifications?.numberOfCylinders ? parseInt(formData.specifications.numberOfCylinders) : null)
+  },
+  
+  // Contact Information - FIXED: Ensure proper mapping and fallbacks
+  contact: {
+    sellerName: formData.contact?.sellerName || 
+      (formData.privateSeller?.firstName && formData.privateSeller?.lastName 
+        ? `${formData.privateSeller.firstName} ${formData.privateSeller.lastName}`.trim()
+        : formData.businessInfo?.businessName || ''),
+    phone: formData.contact?.phone || '',
+    email: formData.contact?.email || '', 
+    whatsapp: formData.contact?.whatsapp || formData.contact?.phone || '',
+    preferredContactMethod: formData.privateSeller?.preferredContactMethod || formData.contact?.preferredContactMethod || 'phone',
+    location: {
+      city: formData.contact?.location?.city || formData.location?.city || '',
+      state: formData.contact?.location?.state || formData.location?.state || '',
+      address: formData.contact?.location?.address || formData.location?.address || '',
+      country: 'Botswana'
+    }
+  },
+  
+  // Location Information (separate from contact location)
+  location: {
+    city: formData.location?.city || formData.contact?.location?.city || '',
+    state: formData.location?.state || formData.contact?.location?.state || '',
+    address: formData.location?.address || formData.contact?.location?.address || '',
+    country: 'Botswana'
+  },
+  
+  // Features - FIXED: Ensure proper array structure
+  features: {
+    safetyFeatures: Array.isArray(formData.features?.safetyFeatures) ? formData.features.safetyFeatures : [],
+    comfortFeatures: Array.isArray(formData.features?.comfortFeatures) ? formData.features.comfortFeatures : [],
+    entertainmentFeatures: Array.isArray(formData.features?.entertainmentFeatures) ? formData.features.entertainmentFeatures : [],
+    exteriorFeatures: Array.isArray(formData.features?.exteriorFeatures) ? formData.features.exteriorFeatures : []
+  },
+  
+  // Social Media
+  social: {
+    facebook: formData.social?.facebook || '',
+    instagram: formData.social?.instagram || '',
+    twitter: formData.social?.twitter || '',
+    linkedin: formData.social?.linkedin || '',
+    youtube: formData.social?.youtube || ''
+  },
+  
+  // Private Seller Info (if applicable)
+  privateSeller: formData.sellerType === 'private' ? {
+    firstName: formData.privateSeller?.firstName || '',
+    lastName: formData.privateSeller?.lastName || '',
+    idNumber: formData.privateSeller?.idNumber || '',
+    preferredContactMethod: formData.privateSeller?.preferredContactMethod || 'phone'
+  } : null,
+  
+  // Business Info (if applicable)
+  businessInfo: formData.sellerType === 'dealership' ? {
+    businessName: formData.businessInfo?.businessName || '',
+    businessType: formData.businessInfo?.businessType || '',
+    registrationNumber: formData.businessInfo?.registrationNumber || '',
+    vatNumber: formData.businessInfo?.vatNumber || ''
+  } : null,
+  
+  // Additional Information
+  additionalInfo: {
+    serviceHistory: formData.additionalInfo?.serviceHistory || '',
+    accidents: formData.additionalInfo?.accidents || '',
+    modifications: formData.additionalInfo?.modifications || '',
+    warranty: formData.additionalInfo?.warranty || '',
+    inspection: formData.additionalInfo?.inspection || '',
+    reasonForSelling: formData.additionalInfo?.reasonForSelling || ''
+  },
+  
+  // Availability
+  availability: {
+    viewingTimes: formData.availability?.viewingTimes || '',
+    availableFrom: formData.availability?.availableFrom || '',
+    urgentSale: formData.availability?.urgentSale || false
+  },
+  
+  // Uploaded Images with metadata
+  images: uploadedImages.map((img, index) => ({
+    url: img.url,
+    key: img.key,
+    thumbnail: img.thumbnail || img.url,
+    isPrimary: index === primaryImageIndex,
+    size: img.size,
+    mimetype: img.mimetype
+  })),
+  
+  // Submission Metadata
+  submissionType: 'free_tier',
+  status: 'pending_approval',
+  submittedAt: new Date().toISOString()
+};
 
-    console.log(`📋 Prepared listing data:`, {
-      title: listingData.title,
-      imageCount: listingData.images.length,
-      price: listingData.pricing.price,
-      primaryImageIndex: primaryImageIndex
-    });
+   // ========================================
+// DEBUG: Log the complete data structure
+// ========================================
+console.log('🔍 DEBUGGING FORM DATA STRUCTURE:');
+console.log('📋 Raw formData:', {
+  title: formData.title,
+  sellerType: formData.sellerType,
+  contact: formData.contact,
+  specifications: formData.specifications,
+  pricing: { price: formData.price },
+  privateSeller: formData.privateSeller,
+  businessInfo: formData.businessInfo
+});
+
+console.log('📋 Prepared listingData structure:', {
+  title: listingData.title,
+  hasContact: !!listingData.contact,
+  contactFields: listingData.contact ? Object.keys(listingData.contact) : 'NO CONTACT',
+  contactSellerName: listingData.contact?.sellerName,
+  contactPhone: listingData.contact?.phone,
+  hasSpecifications: !!listingData.specifications,
+  specFields: listingData.specifications ? Object.keys(listingData.specifications) : 'NO SPECS',
+  specMake: listingData.specifications?.make,
+  specModel: listingData.specifications?.model,
+  hasPricing: !!listingData.pricing,
+  pricingPrice: listingData.pricing?.price,
+  imageCount: listingData.images?.length || 0
+});
+
+// Check for common issues
+const debugIssues = [];
+if (!listingData.title || listingData.title.trim() === '') {
+  debugIssues.push('❌ Title is empty');
+}
+if (!listingData.contact?.sellerName || listingData.contact.sellerName.trim() === '') {
+  debugIssues.push('❌ contact.sellerName is empty');
+}
+if (!listingData.contact?.phone || listingData.contact.phone.trim() === '') {
+  debugIssues.push('❌ contact.phone is empty');
+}
+if (!listingData.specifications?.make || listingData.specifications.make.trim() === '') {
+  debugIssues.push('❌ specifications.make is empty');
+}
+if (!listingData.specifications?.model || listingData.specifications.model.trim() === '') {
+  debugIssues.push('❌ specifications.model is empty');
+}
+if (!listingData.pricing?.price || listingData.pricing.price <= 0) {
+  debugIssues.push('❌ pricing.price is empty or invalid');
+}
+
+if (debugIssues.length > 0) {
+  console.log('🚨 VALIDATION ISSUES FOUND:');
+  debugIssues.forEach(issue => console.log(issue));
+} else {
+  console.log('✅ All required fields appear to be populated');
+}
 
     // ========================================
     // STEP 3: Submit listing to backend
