@@ -904,7 +904,7 @@ const handleFormSubmit = async (e) => {
     showMessage('info', 'Submitting your listing...');
     console.log('🔄 Submitting listing to /api/user/submit-listing...');
     
-    const submitResponse = await fetch('/api/user/submit-listing', {
+    const submitResponse = await fetch('https://bw-car-culture-api.vercel.app/api/user/submit-listing', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
