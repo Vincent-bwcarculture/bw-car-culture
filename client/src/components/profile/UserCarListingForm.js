@@ -1,6 +1,7 @@
 // client/src/components/profile/UserCarListingForm.js - COMPLETE FULL VERSION
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { imageService } from '../../services/imageService';
 import './UserCarListingForm.css';
 
 const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = false }) => {
@@ -687,7 +688,7 @@ const handlePriceChange = (e) => {
   };
 
   // Handle form submission
- const handleFormSubmit = async (e) => {
+const handleFormSubmit = async (e) => {
   e.preventDefault();
   
   if (isSubmitting) return;
@@ -705,7 +706,43 @@ const handlePriceChange = (e) => {
       return;
     }
 
-    // FIXED: Transform data to match backend expectations
+    // ========================================
+    // NEW: STEP 1 - Upload images to S3 first
+    // ========================================
+    
+    let uploadedImageUrls = [];
+    
+    if (imageFiles && imageFiles.length > 0) {
+      try {
+        console.log(`📤 Uploading ${imageFiles.length} images to S3...`);
+        showMessage('info', `Uploading ${imageFiles.length} images...`);
+        
+        // Upload images and get S3 URLs back
+        uploadedImageUrls = await imageService.uploadForUserListing(
+          imageFiles,
+          (progress) => {
+            console.log(`📤 Upload progress: ${progress}%`);
+            // You can update a progress bar here if you have one
+          }
+        );
+        
+        console.log(`📤 ✅ Successfully uploaded ${uploadedImageUrls.length} images to S3`);
+        console.log(`📤 First image URL:`, uploadedImageUrls[0]?.url);
+        
+        showMessage('success', `${uploadedImageUrls.length} images uploaded successfully!`);
+        
+      } catch (uploadError) {
+        console.error('📤 ❌ Image upload failed:', uploadError);
+        showMessage('error', `Image upload failed: ${uploadError.message}`);
+        return; // Stop submission if image upload fails
+      }
+    }
+
+    // ========================================
+    // STEP 2 - Prepare submission data with S3 URLs
+    // ========================================
+
+    // PRESERVED: Transform data to match backend expectations (all existing logic)
     const submissionData = {
       // Basic fields that the backend expects at root level
       title: formData.title,
@@ -714,7 +751,7 @@ const handlePriceChange = (e) => {
       condition: formData.condition,
       sellerType: formData.sellerType,
       
-      // FIXED: Properly structure pricing object
+      // PRESERVED: Properly structure pricing object
       pricing: {
         price: parseFloat(formData.price) || 0,
         originalPrice: formData.priceOptions?.originalPrice ? parseFloat(formData.priceOptions.originalPrice) : null,
@@ -724,7 +761,7 @@ const handlePriceChange = (e) => {
         currency: 'BWP'
       },
       
-      // FIXED: Properly structure specifications object
+      // PRESERVED: Properly structure specifications object
       specifications: {
         make: formData.specifications.make,
         model: formData.specifications.model,
@@ -741,7 +778,7 @@ const handlePriceChange = (e) => {
         vin: formData.specifications.vin
       },
       
-      // FIXED: Properly structure contact object
+      // PRESERVED: Properly structure contact object
       contact: {
         sellerName: formData.contact.sellerName,
         phone: formData.contact.phone,
@@ -769,8 +806,10 @@ const handlePriceChange = (e) => {
         return acc;
       }, {}),
       
-      // Images
-      images: formData.images || [],
+      // ENHANCED: Use S3 URLs from upload step
+      images: uploadedImageUrls, // ← This now contains S3 URLs with proper structure
+      
+      // Keep these for any UI that might need them
       imageFiles: imageFiles,
       primaryImageIndex: primaryImageIndex,
       
@@ -785,22 +824,42 @@ const handlePriceChange = (e) => {
       profilePicture: formData.profilePicture,
       additionalInfo: formData.additionalInfo,
       availability: formData.availability,
-      priceOptions: formData.priceOptions
+      priceOptions: formData.priceOptions,
+      
+      // NEW: Add tier/plan information
+      selectedPlan: formData.selectedPlan || 'free'
     };
     
-    console.log('✅ Submitting properly structured data:', submissionData);
+    console.log('✅ Submitting data with uploaded images:', {
+      title: submissionData.title,
+      imageCount: submissionData.images.length,
+      firstImageUrl: submissionData.images[0]?.url?.substring(0, 60) + '...',
+      selectedPlan: submissionData.selectedPlan
+    });
+
+    // ========================================
+    // STEP 3 - Submit listing with S3 URLs
+    // ========================================
     
-    // Submit the form
+    console.log('📝 Submitting listing to backend...');
+    showMessage('info', 'Submitting listing for review...');
+    
+    // Submit the form with S3 URLs
     await onSubmit(submissionData);
     
     // Save form data to profile for future use
     await saveToProfile();
     
-    showMessage('success', 'Listing created successfully!');
+    showMessage('success', 'Listing submitted successfully for admin review!');
+    
+    // Clear form
+    setImageFiles([]);
+    setImagePreviews([]);
+    setPrimaryImageIndex(0);
     
   } catch (error) {
-    console.error('Form submission error:', error);
-    showMessage('error', error.message || 'Failed to save listing');
+    console.error('❌ Form submission error:', error);
+    showMessage('error', error.message || 'Failed to submit listing');
   } finally {
     setLoading(false);
     setIsSubmitting(false);
@@ -809,11 +868,11 @@ const handlePriceChange = (e) => {
 
   // Tab configuration
   const tabs = [
-    { id: 'basic', label: 'Basic Info', icon: '📝' },
+    { id: 'basic', label: 'Basic Info', icon: '' },
     { id: 'specs', label: 'Specifications', icon: '⚙️' },
-    { id: 'features', label: 'Features', icon: '✨' },
-    { id: 'contact', label: 'Contact', icon: '📞' },
-    { id: 'images', label: 'Images', icon: '📸' },
+    { id: 'features', label: 'Features', icon: '' },
+    { id: 'contact', label: 'Contact', icon: '' },
+    { id: 'images', label: 'Images', icon: '' },
     { id: 'pricing', label: 'Pricing', icon: '💰' },
     { id: 'additional', label: 'Additional', icon: '📋' }
   ];
