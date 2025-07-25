@@ -622,70 +622,90 @@ const handlePriceChange = (e) => {
   };
 
   // Handle image upload
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    
-    // Validate file count
-    if (files.length > 15) {
-      showMessage('error', 'Maximum 15 images allowed');
-      return;
-    }
-    
-    // Validate file sizes
-    const maxSize = 8 * 1024 * 1024; // 8MB per file
-    const oversizedFiles = files.filter(file => file.size > maxSize);
-    
-    if (oversizedFiles.length > 0) {
-      showMessage('error', `Some files are too large. Maximum size per file is 8MB.`);
-      return;
-    }
-    
-    // Validate file types
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    const invalidFiles = files.filter(file => !allowedTypes.includes(file.type));
-    
-    if (invalidFiles.length > 0) {
-      showMessage('error', 'Only JPEG, PNG, and WebP images are allowed');
-      return;
-    }
-    
-    setImageFiles(files);
-    
-    // Generate previews
-    const previews = files.map(file => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.readAsDataURL(file);
-      });
+const handleImageUpload = (e) => {
+  const files = Array.from(e.target.files);
+  
+  // Validate file count
+  if (files.length > 15) {
+    showMessage('error', 'Maximum 15 images allowed');
+    return;
+  }
+
+  // Validate file sizes
+  const maxSize = 8 * 1024 * 1024; // 8MB for user uploads
+  const invalidFiles = files.filter(file => file.size > maxSize);
+  
+  if (invalidFiles.length > 0) {
+    showMessage('error', `Some files are too large. Maximum size is 8MB per image.`);
+    return;
+  }
+
+  // Validate file types
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  const invalidTypeFiles = files.filter(file => !validTypes.includes(file.type.toLowerCase()));
+  
+  if (invalidTypeFiles.length > 0) {
+    showMessage('error', 'Only JPEG, PNG, and WebP images are allowed');
+    return;
+  }
+
+  console.log(`📸 Selected ${files.length} valid images for upload`);
+  
+  // Store files for upload
+  setImageFiles(files);
+  
+  // Create preview URLs
+  const previews = files.map(file => ({
+    file,
+    preview: URL.createObjectURL(file),
+    name: file.name,
+    size: file.size
+  }));
+  
+  setImagePreviews(previews);
+  
+  // Clear any previous errors
+  if (errors.images) {
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.images;
+      return newErrors;
     });
-    
-    Promise.all(previews).then(setImagePreviews);
-    
-    // Clear image error
-    if (errors.images) {
-      setErrors(prev => ({ ...prev, images: '' }));
-    }
-  };
+  }
+  
+  showMessage('success', `${files.length} images selected for upload`);
+};
 
   // Handle primary image selection
   const handlePrimaryImageSelect = (index) => {
     setPrimaryImageIndex(index);
   };
 
+  const setPrimaryImage = (index) => {
+  setPrimaryImageIndex(index);
+  console.log(`📸 Set primary image to index ${index}`);
+};
+
   // Remove image
-  const removeImage = (index) => {
-    const newFiles = imageFiles.filter((_, i) => i !== index);
-    const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    
-    setImageFiles(newFiles);
-    setImagePreviews(newPreviews);
-    
-    // Adjust primary image index if needed
-    if (primaryImageIndex >= newFiles.length) {
-      setPrimaryImageIndex(0);
-    }
-  };
+const removeImage = (index) => {
+  const newFiles = imageFiles.filter((_, i) => i !== index);
+  const newPreviews = imagePreviews.filter((_, i) => i !== index);
+  
+  setImageFiles(newFiles);
+  setImagePreviews(newPreviews);
+  
+  // Revoke the URL to prevent memory leaks
+  if (imagePreviews[index]) {
+    URL.revokeObjectURL(imagePreviews[index].preview);
+  }
+  
+  // Update primary image index if needed
+  if (primaryImageIndex >= newFiles.length) {
+    setPrimaryImageIndex(0);
+  }
+  
+  console.log(`📸 Removed image at index ${index}, ${newFiles.length} images remaining`);
+};
 
   // Handle form submission
 const handleFormSubmit = async (e) => {
@@ -706,8 +726,10 @@ const handleFormSubmit = async (e) => {
       return;
     }
 
+    console.log(`📤 Starting form submission with ${imageFiles?.length || 0} images`);
+
     // ========================================
-    // NEW: STEP 1 - Upload images to S3 first
+    // STEP 1 - Upload images to S3 first
     // ========================================
     
     let uploadedImageUrls = [];
@@ -717,7 +739,7 @@ const handleFormSubmit = async (e) => {
         console.log(`📤 Uploading ${imageFiles.length} images to S3...`);
         showMessage('info', `Uploading ${imageFiles.length} images...`);
         
-        // Upload images and get S3 URLs back
+        // FIXED: Use the correct method name
         uploadedImageUrls = await imageService.uploadForUserListing(
           imageFiles,
           (progress) => {
@@ -742,7 +764,7 @@ const handleFormSubmit = async (e) => {
     // STEP 2 - Prepare submission data with S3 URLs
     // ========================================
 
-    // PRESERVED: Transform data to match backend expectations (all existing logic)
+    // Transform data to match backend expectations (all existing logic preserved)
     const submissionData = {
       // Basic fields that the backend expects at root level
       title: formData.title,
@@ -751,119 +773,210 @@ const handleFormSubmit = async (e) => {
       condition: formData.condition,
       sellerType: formData.sellerType,
       
-      // PRESERVED: Properly structure pricing object
+      // Properly structure pricing object
       pricing: {
         price: parseFloat(formData.price) || 0,
         originalPrice: formData.priceOptions?.originalPrice ? parseFloat(formData.priceOptions.originalPrice) : null,
         negotiable: formData.priceOptions?.negotiable || false,
         showSavings: formData.priceOptions?.showSavings || false,
-        savingsAmount: formData.priceOptions?.savingsAmount ? parseFloat(formData.priceOptions.savingsAmount) : null,
-        currency: 'BWP'
+        savingsAmount: formData.priceOptions?.savingsAmount ? parseFloat(formData.priceOptions.savingsAmount) : null
       },
       
-      // PRESERVED: Properly structure specifications object
+      // Vehicle specifications
       specifications: {
-        make: formData.specifications.make,
-        model: formData.specifications.model,
-        year: parseInt(formData.specifications.year) || new Date().getFullYear(),
-        mileage: formData.specifications.mileage,
-        transmission: formData.specifications.transmission,
-        fuelType: formData.specifications.fuelType,
-        engine: formData.specifications.engine,
-        color: formData.specifications.color,
-        doors: formData.specifications.doors,
-        seats: formData.specifications.seats,
-        drivetrain: formData.specifications.drivetrain,
-        bodyType: formData.specifications.bodyType,
-        vin: formData.specifications.vin
-      },
-      
-      // PRESERVED: Properly structure contact object
-      contact: {
-        sellerName: formData.contact.sellerName,
-        phone: formData.contact.phone,
-        email: formData.contact.email,
-        whatsapp: formData.contact.whatsapp,
-        location: {
-          city: formData.contact.location.city,
-          state: formData.contact.location.state,
-          address: formData.contact.location.address,
-          country: formData.contact.location.country || 'Botswana'
-        }
-      },
-      
-      // Location (separate from contact location)
-      location: {
-        city: formData.location.city || formData.contact.location.city,
-        state: formData.location.state || formData.contact.location.state,
-        address: formData.location.address || formData.contact.location.address,
-        country: formData.location.country || 'Botswana'
+        make: formData.make,
+        model: formData.model,
+        year: parseInt(formData.year) || null,
+        engineType: formData.engineType,
+        transmission: formData.transmission,
+        fuelType: formData.fuelType,
+        mileage: formData.mileage ? parseInt(formData.mileage) : null,
+        bodyType: formData.bodyType,
+        drivetrain: formData.drivetrain,
+        exteriorColor: formData.exteriorColor,
+        interiorColor: formData.interiorColor,
+        numberOfSeats: formData.numberOfSeats ? parseInt(formData.numberOfSeats) : null,
+        numberOfDoors: formData.numberOfDoors ? parseInt(formData.numberOfDoors) : null,
+        engineSize: formData.engineSize,
+        numberOfCylinders: formData.numberOfCylinders ? parseInt(formData.numberOfCylinders) : null,
+        vin: formData.vin
       },
       
       // Features
-      features: Object.keys(formData.features).reduce((acc, key) => {
-        acc[key] = formData.features[key].filter(feature => feature && feature.trim());
-        return acc;
-      }, {}),
+      features: {
+        keyFeatures: formData.keyFeatures || [],
+        safetyFeatures: formData.safetyFeatures || [],
+        comfortFeatures: formData.comfortFeatures || [],
+        entertainmentFeatures: formData.entertainmentFeatures || []
+      },
       
-      // ENHANCED: Use S3 URLs from upload step
-      images: uploadedImageUrls, // ← This now contains S3 URLs with proper structure
+      // Contact information
+      contact: {
+        name: formData.contactName,
+        phone: formData.contactPhone,
+        email: formData.contactEmail,
+        whatsapp: formData.whatsappNumber,
+        preferredContact: formData.preferredContact || 'phone'
+      },
       
-      // Keep these for any UI that might need them
-      imageFiles: imageFiles,
-      primaryImageIndex: primaryImageIndex,
+      // Location
+      location: {
+        city: formData.location.city,
+        state: formData.location.state,
+        address: formData.location.address
+      },
       
-      // Additional seller information
-      privateSeller: formData.sellerType === 'private' ? formData.privateSeller : undefined,
-      businessInfo: formData.sellerType === 'dealership' ? formData.businessInfo : undefined,
-      
-      // Social media
+      // Social media links
       social: formData.social,
       
-      // Other fields
-      profilePicture: formData.profilePicture,
-      additionalInfo: formData.additionalInfo,
-      availability: formData.availability,
-      priceOptions: formData.priceOptions,
+      // NEW: Add uploaded images with S3 URLs
+      images: uploadedImageUrls.map((image, index) => ({
+        url: image.url,
+        key: image.key,
+        thumbnail: image.thumbnail || image.url,
+        isPrimary: index === primaryImageIndex,
+        size: image.size,
+        mimetype: image.mimetype
+      })),
       
-      // NEW: Add tier/plan information
-      selectedPlan: formData.selectedPlan || 'free'
+      // Submission metadata
+      submissionType: 'free_tier', // or could be dynamic based on selection
+      status: 'pending_approval',
+      submittedAt: new Date().toISOString()
     };
-    
-    console.log('✅ Submitting data with uploaded images:', {
+
+    console.log(`📤 Submitting listing data:`, {
       title: submissionData.title,
       imageCount: submissionData.images.length,
-      firstImageUrl: submissionData.images[0]?.url?.substring(0, 60) + '...',
-      selectedPlan: submissionData.selectedPlan
+      primaryImageIndex: primaryImageIndex
     });
 
     // ========================================
-    // STEP 3 - Submit listing with S3 URLs
+    // STEP 3 - Submit to backend
     // ========================================
     
-    console.log('📝 Submitting listing to backend...');
-    showMessage('info', 'Submitting listing for review...');
+    showMessage('info', 'Submitting your listing...');
     
-    // Submit the form with S3 URLs
-    await onSubmit(submissionData);
+    const response = await fetch('/api/user/submit-listing', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(submissionData)
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.message || 'Submission failed');
+    }
+
+    console.log(`📤 ✅ Listing submitted successfully:`, result);
     
-    // Save form data to profile for future use
-    await saveToProfile();
+    showMessage('success', 'Your listing has been submitted for approval!');
     
-    showMessage('success', 'Listing submitted successfully for admin review!');
+    // Reset form
+    resetForm();
     
-    // Clear form
-    setImageFiles([]);
-    setImagePreviews([]);
-    setPrimaryImageIndex(0);
-    
+    // Redirect or update UI as needed
+    if (onSubmissionSuccess) {
+      onSubmissionSuccess(result);
+    }
+
   } catch (error) {
-    console.error('❌ Form submission error:', error);
-    showMessage('error', error.message || 'Failed to submit listing');
+    console.error('📤 ❌ Form submission failed:', error);
+    showMessage('error', `Submission failed: ${error.message}`);
   } finally {
     setLoading(false);
     setIsSubmitting(false);
   }
+};
+
+// Reset form to initial state
+const resetForm = () => {
+  // Clear image files and previews
+  if (imagePreviews.length > 0) {
+    imagePreviews.forEach(preview => {
+      URL.revokeObjectURL(preview.preview);
+    });
+  }
+  
+  setImageFiles([]);
+  setImagePreviews([]);
+  setPrimaryImageIndex(0);
+  
+  // Reset form data to initial state
+  setFormData({
+    // Basic Information
+    title: '',
+    description: '',
+    category: '',
+    condition: '',
+    sellerType: 'private',
+    
+    // Pricing
+    price: '',
+    priceOptions: {
+      originalPrice: '',
+      negotiable: false,
+      showSavings: false,
+      savingsAmount: ''
+    },
+    
+    // Vehicle Specifications
+    make: '',
+    model: '',
+    year: '',
+    engineType: '',
+    transmission: '',
+    fuelType: '',
+    mileage: '',
+    bodyType: '',
+    drivetrain: '',
+    exteriorColor: '',
+    interiorColor: '',
+    numberOfSeats: '',
+    numberOfDoors: '',
+    engineSize: '',
+    numberOfCylinders: '',
+    vin: '',
+    
+    // Features
+    keyFeatures: [],
+    safetyFeatures: [],
+    comfortFeatures: [],
+    entertainmentFeatures: [],
+    
+    // Contact Information
+    contactName: '',
+    contactPhone: '',
+    contactEmail: '',
+    whatsappNumber: '',
+    preferredContact: 'phone',
+    
+    // Location
+    location: {
+      city: '',
+      state: '',
+      address: ''
+    },
+    
+    // Social Media
+    social: {
+      facebook: '',
+      instagram: '',
+      twitter: '',
+      linkedin: '',
+      tiktok: '',
+      youtube: ''
+    }
+  });
+  
+  // Clear errors
+  setErrors({});
+  
+  console.log(`🔄 Form reset to initial state`);
 };
 
   // Tab configuration
