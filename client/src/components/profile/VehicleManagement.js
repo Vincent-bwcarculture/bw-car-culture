@@ -157,18 +157,90 @@ const VehicleManagement = () => {
   };
 
   // Get primary image from submission
-  const getPrimaryImage = (submission) => {
-    if (!submission?.listingData?.images) return null;
-    
-    const images = submission.listingData.images;
-    if (Array.isArray(images) && images.length > 0) {
-      // Return first image or primary image if specified
-      const primaryIndex = submission.listingData.primaryImageIndex || 0;
-      return images[primaryIndex] || images[0];
-    }
-    
+const getPrimaryImage = (submission) => {
+  console.log('🖼️ Getting primary image for submission:', submission?.listingData?.title);
+  
+  if (!submission?.listingData?.images) {
+    console.log('❌ No images found in submission');
     return null;
-  };
+  }
+  
+  const images = submission.listingData.images;
+  console.log('📸 Images data:', images);
+  
+  // Handle both array and non-array cases
+  const imageArray = Array.isArray(images) ? images : [images];
+  
+  if (imageArray.length === 0) {
+    console.log('❌ Empty images array');
+    return null;
+  }
+  
+  // Try to find primary image first
+  let primaryImage = imageArray.find(img => {
+    if (typeof img === 'object' && img !== null) {
+      return img.isPrimary === true;
+    }
+    return false;
+  });
+  
+  // If no primary image found, use the first image
+  if (!primaryImage) {
+    primaryImage = imageArray[0];
+    console.log('⚠️ No primary image found, using first image');
+  }
+  
+  console.log('🎯 Selected image:', primaryImage);
+  
+  // Extract URL from image object
+  if (typeof primaryImage === 'string') {
+    console.log('✅ Direct URL string:', primaryImage);
+    return primaryImage;
+  }
+  
+  if (typeof primaryImage === 'object' && primaryImage !== null) {
+    // Try different possible URL properties
+    const imageUrl = primaryImage.url || 
+                    primaryImage.thumbnail || 
+                    primaryImage.src || 
+                    primaryImage.imageUrl ||
+                    primaryImage.path ||
+                    primaryImage.location;
+    
+    console.log('✅ Extracted URL:', imageUrl);
+    return imageUrl || null;
+  }
+  
+  console.log('❌ Could not extract URL from image data');
+  return null;
+};
+
+// ADDITIONAL DEBUG HELPER FUNCTION (optional - add this if you need more debugging)
+const debugSubmissionImages = (submission) => {
+  console.log('=== SUBMISSION IMAGE DEBUG ===');
+  console.log('Submission ID:', submission._id);
+  console.log('Title:', submission.listingData?.title);
+  console.log('Raw images:', submission.listingData?.images);
+  
+  if (submission.listingData?.images) {
+    const images = Array.isArray(submission.listingData.images) 
+      ? submission.listingData.images 
+      : [submission.listingData.images];
+    
+    images.forEach((img, index) => {
+      console.log(`Image ${index}:`, {
+        type: typeof img,
+        isString: typeof img === 'string',
+        isObject: typeof img === 'object',
+        isPrimary: img?.isPrimary,
+        url: img?.url,
+        thumbnail: img?.thumbnail,
+        properties: typeof img === 'object' ? Object.keys(img) : 'N/A'
+      });
+    });
+  }
+  console.log('=== END DEBUG ===');
+};
 
   // ===== ADMIN-STYLE PRICING FUNCTIONS =====
   const getPlanInfo = (planId) => {
