@@ -1,7 +1,7 @@
 // client/src/components/profile/UserCarListingForm.js - COMPLETE FULL VERSION
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { imageService } from '../../services/imageService';
+import { imageService } from '../../services/imageService.js';
 import './UserCarListingForm.css';
 
 const UserCarListingForm = ({ onSubmit, onCancel, initialData = null, isEdit = false }) => {
