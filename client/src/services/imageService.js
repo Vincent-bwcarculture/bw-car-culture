@@ -345,4 +345,8 @@ class ImageService {
   }
 }
 
-export default new ImageService();
+// Create and export as named export to match existing imports
+export const imageService = new ImageService();
+
+// Also export as default for backward compatibility
+export default imageService;
