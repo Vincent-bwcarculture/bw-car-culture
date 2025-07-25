@@ -621,8 +621,10 @@ const handlePriceChange = (e) => {
     });
   };
 
-  // Handle image upload
+
 const handleImageUpload = (e) => {
+  console.log('🖼️ handleImageUpload called with files:', e.target.files?.length); // ADD THIS LINE
+
   const files = Array.from(e.target.files);
   
   // Validate file count
@@ -863,7 +865,7 @@ const handleFormSubmit = async (e) => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
-      body: JSON.stringify(submissionData)
+      body: JSON.stringify({ listingData: submissionData })
     });
 
     const result = await response.json();
