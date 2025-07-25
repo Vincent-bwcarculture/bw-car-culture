@@ -4,9 +4,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Car, Plus, Edit, Trash2, Eye, AlertCircle, CheckCircle, 
+ Car, Plus, Edit, Trash2, Eye, AlertCircle, CheckCircle, 
   Clock, X, Upload, DollarSign, Star, Settings, Phone, Info, Image,
-  ExternalLink, Garage, TrendingUp // NEW: Added Garage icon
+  ExternalLink, TrendingUp, Building2 
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import UserCarListingForm from './UserCarListingForm.js';
@@ -943,7 +943,7 @@ const VehicleManagement = () => {
         </div>
       ) : garageListings.length === 0 ? (
         <div className="vm-empty-state">
-          <Garage size={48} />
+          <Building2 size={48} />
           <h4>No live listings yet</h4>
           <p>Your approved listings will appear here. Submit a listing to get started!</p>
           <button 
@@ -1278,7 +1278,7 @@ const VehicleManagement = () => {
           className={`vm-tab-button ${activeSection === 'garage' ? 'vm-active' : ''}`}
           onClick={() => setActiveSection('garage')}
         >
-          <Garage size={16} />
+          <Building2 size={16} />
           My Garage
           {garageStats.active > 0 && (
             <span className="vm-tab-badge">{garageStats.active}</span>
