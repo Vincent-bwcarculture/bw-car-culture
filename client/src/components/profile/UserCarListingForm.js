@@ -770,7 +770,7 @@ const UserCarListingForm = ({
   };
 
   // Enhanced image upload handler
- const handleImageUpload = (e) => {
+const handleImageUpload = (e) => {
   const files = Array.from(e.target.files);
   
   if (files.length > 15) {
@@ -790,25 +790,26 @@ const UserCarListingForm = ({
     return;
   }
 
-  console.log(`📸 Selected ${files.length} images in order:`, files.map(f => f.name));
+  console.log(`📸 Selected ${files.length} images in order:`, files.map((f, i) => `${i}: ${f.name}`));
   
-  // FIXED: Keep files in exact selection order
-  setImageFiles(files);
+  // FIXED: Keep files in exact selection order - no async operations
+  setImageFiles(files); // Store files directly as they were selected
   
-  // FIXED: Create previews in same order, first image is always primary
-  const previews = files.map((file, index) => ({
-    file,
-    preview: URL.createObjectURL(file),
-    name: file.name,
-    size: file.size,
-    isPrimary: index === 0, // First selected image is always primary
-    index: index
-  }));
+  // FIXED: Create previews synchronously to maintain order
+  const previews = files.map((file, index) => {
+    console.log(`📁 Processing preview ${index}: ${file.name}`);
+    return {
+      file,
+      preview: URL.createObjectURL(file),
+      name: file.name,
+      size: file.size,
+      isPrimary: index === 0, // First selected image is always primary
+      originalIndex: index // Track original position
+    };
+  });
   
   setImagePreviews(previews);
-  
-  // FIXED: Primary image is always index 0 (first selected)
-  setPrimaryImageIndex(0);
+  setPrimaryImageIndex(0); // First image is always primary
   
   // Clear errors
   if (errors.images) {
@@ -819,7 +820,8 @@ const UserCarListingForm = ({
     });
   }
   
-  showMessage('success', `${files.length} images selected. First image will be the main image.`);
+  console.log(`✅ ${files.length} images processed in order. Primary: ${previews[0]?.name}`);
+  showMessage('success', `${files.length} images selected in order. First image is primary.`);
 };
 
   // Handle primary image selection
@@ -837,448 +839,493 @@ const UserCarListingForm = ({
 };
 
   // Remove image
-  const removeImage = (index) => {
-    const newFiles = imageFiles.filter((_, i) => i !== index);
-    const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    
-    setImageFiles(newFiles);
-    setImagePreviews(newPreviews);
-    
-    // Revoke the URL to prevent memory leaks
-    if (imagePreviews[index]) {
-      URL.revokeObjectURL(imagePreviews[index].preview);
-    }
-    
-    // Update primary image index if needed
-    if (primaryImageIndex >= newFiles.length) {
-      setPrimaryImageIndex(0);
-    }
-    
-    console.log(`📸 Removed image at index ${index}, ${newFiles.length} images remaining`);
-  };
+const removeImage = (index) => {
+  console.log(`🗑️ Removing image at index ${index}`);
+  
+  // Revoke the URL to prevent memory leaks BEFORE removing
+  if (imagePreviews[index]) {
+    URL.revokeObjectURL(imagePreviews[index].preview);
+    console.log(`🔗 Revoked URL for: ${imagePreviews[index].name}`);
+  }
+  
+  // Remove from both arrays maintaining order
+  const newFiles = imageFiles.filter((_, i) => i !== index);
+  const newPreviews = imagePreviews.filter((_, i) => i !== index);
+  
+  setImageFiles(newFiles);
+  setImagePreviews(newPreviews);
+  
+  // Update primary image index if needed
+  if (primaryImageIndex >= newFiles.length && newFiles.length > 0) {
+    setPrimaryImageIndex(0);
+    console.log(`🔄 Reset primary image to index 0`);
+  } else if (primaryImageIndex === index && newFiles.length > 0) {
+    setPrimaryImageIndex(0);
+    console.log(`🔄 Primary image was removed, set to index 0`);
+  }
+  
+  console.log(`✅ Image removed. ${newFiles.length} images remaining`);
+  
+  if (newFiles.length === 0) {
+    showMessage('info', 'All images removed');
+  }
+};
 
   // ===== ENHANCED FORM SUBMISSION WITH DYNAMIC TIER SUPPORT =====
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (isSubmitting) return;
-    
-    setLoading(true);
-    setIsSubmitting(true);
-    
-    try {
-      // Validate form first
-      const validationErrors = validateForm();
-      if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
-        const firstError = Object.values(validationErrors)[0];
-        showMessage('error', firstError);
-        return;
-      }
+const handleFormSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (isSubmitting) return;
+  
+  setLoading(true);
+  setIsSubmitting(true);
+  
+  try {
+    // Validate form first
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      const firstError = Object.values(validationErrors)[0];
+      showMessage('error', firstError);
+      return;
+    }
 
-      console.log(`📤 Starting submission with ${imageFiles?.length || 0} images`);
+    console.log(`📤 Starting submission with ${imageFiles?.length || 0} images`);
 
-      // ========================================
-      // STEP 1: Upload images if any
-      // ========================================
-      let uploadedImages = [];
+    // ========================================
+    // STEP 1: Upload images if any - SINGLE UPLOAD LOGIC
+    // ========================================
+    let uploadedImages = [];
+    
+    if (imageFiles && imageFiles.length > 0) {
+      showMessage('info', `Uploading ${imageFiles.length} images in order...`);
       
-      if (imageFiles && imageFiles.length > 0) {
-        showMessage('info', `Uploading ${imageFiles.length} images...`);
+      try {
+        const formDataUpload = new FormData();
         
-        try {
-          const formDataUpload = new FormData();
-          imageFiles.forEach((file, index) => {
-            formDataUpload.append(`image${index}`, file);
-            console.log(`📎 Added file ${index}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
-          });
-          formDataUpload.append('folder', 'user-listings');
-
-          console.log('🔄 Uploading to /api/user/upload-images...');
+        // Handle both file structures - check if imageFiles contains file objects or direct File objects
+        imageFiles.forEach((fileItem, index) => {
+          let actualFile;
+          let fileName;
           
-          const uploadResponse = await fetch('https://bw-car-culture-api.vercel.app/api/user/upload-images', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: formDataUpload
-          });
-
-          console.log(`📤 Upload response status: ${uploadResponse.status}`);
-
-          if (!uploadResponse.ok) {
-            const errorText = await uploadResponse.text();
-            console.error('📤 Upload failed response:', errorText);
-            throw new Error(`Image upload failed: ${uploadResponse.status} - ${errorText}`);
+          if (fileItem instanceof File) {
+            // Direct File object
+            actualFile = fileItem;
+            fileName = fileItem.name;
+          } else if (fileItem.file instanceof File) {
+            // File object wrapper (new structure)
+            actualFile = fileItem.file;
+            fileName = fileItem.name || fileItem.file.name;
+          } else {
+            console.error(`Invalid file at index ${index}:`, fileItem);
+            return;
           }
-
-          const uploadResult = await uploadResponse.json();
-          console.log('📤 Upload result:', uploadResult);
           
-          if (!uploadResult.success || !uploadResult.images) {
-            throw new Error(uploadResult.message || 'Image upload failed - no images returned');
-          }
+          formDataUpload.append(`image${index}`, actualFile);
+          console.log(`📎 Added file ${index}: ${fileName} (${(actualFile.size / 1024 / 1024).toFixed(2)}MB)`);
+        });
+        
+        formDataUpload.append('folder', 'user-listings');
 
-          uploadedImages = uploadResult.images;
-          console.log(`✅ Images uploaded successfully: ${uploadedImages.length} images`);
-          showMessage('success', `${uploadedImages.length} images uploaded successfully!`);
-          
-        } catch (uploadError) {
-          console.error('📤 ❌ Image upload failed:', uploadError);
-          showMessage('error', `Image upload failed: ${uploadError.message}`);
-          return; // Stop submission if image upload fails
+        console.log('🔄 Uploading to /api/user/upload-images...');
+        
+        const uploadResponse = await fetch('https://bw-car-culture-api.vercel.app/api/user/upload-images', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: formDataUpload
+        });
+
+        console.log(`📤 Upload response status: ${uploadResponse.status}`);
+
+        if (!uploadResponse.ok) {
+          const errorText = await uploadResponse.text();
+          console.error('📤 Upload failed response:', errorText);
+          throw new Error(`Image upload failed: ${uploadResponse.status} - ${errorText}`);
         }
+
+        const uploadResult = await uploadResponse.json();
+        console.log('📤 Upload result:', uploadResult);
+        
+        if (!uploadResult.success || !uploadResult.images) {
+          throw new Error(uploadResult.message || 'Image upload failed - no images returned');
+        }
+
+        uploadedImages = uploadResult.images.map((img, index) => ({
+          url: img.url,
+          key: img.key,
+          thumbnail: img.thumbnail || img.url,
+          isPrimary: index === primaryImageIndex,
+          originalIndex: index,
+          uploadOrder: index
+        }));
+        
+        console.log(`✅ Images uploaded successfully: ${uploadedImages.length} images in correct order`);
+        console.log(`🏆 Primary image: ${uploadedImages[primaryImageIndex]?.url}`);
+        showMessage('success', `${uploadedImages.length} images uploaded successfully!`);
+        
+      } catch (uploadError) {
+        console.error('📤 ❌ Image upload failed:', uploadError);
+        showMessage('error', `Image upload failed: ${uploadError.message}`);
+        return; // Stop submission if image upload fails
       }
+    }
 
-      // ========================================
-      // STEP 2: Calculate dynamic pricing details
-      // ========================================
-      const calculatedPricingDetails = calculatePricingDetails(selectedPlan, selectedAddons, pricingData);
-      const dynamicSubmissionType = getSubmissionType(selectedPlan);
-      const isFreeTier = !selectedPlan || selectedPlan === 'free';
+    // ========================================
+    // STEP 2: Calculate dynamic pricing details
+    // ========================================
+    const calculatedPricingDetails = calculatePricingDetails(selectedPlan, selectedAddons, pricingData);
+    const dynamicSubmissionType = getSubmissionType(selectedPlan);
+    const isFreeTier = !selectedPlan || selectedPlan === 'free';
 
-      console.log('🔍 DYNAMIC TIER SUPPORT:', {
-        selectedPlan: selectedPlan,
-        selectedAddons: selectedAddons,
-        pricingDetails: calculatedPricingDetails,
-        submissionType: dynamicSubmissionType,
-        isFreeTier: isFreeTier,
-        totalCost: calculatedPricingDetails.totalCost,
-        planName: calculatedPricingDetails.name
-      });
+    console.log('🔍 DYNAMIC TIER SUPPORT:', {
+      selectedPlan: selectedPlan,
+      selectedAddons: selectedAddons,
+      pricingDetails: calculatedPricingDetails,
+      submissionType: dynamicSubmissionType,
+      isFreeTier: isFreeTier,
+      totalCost: calculatedPricingDetails.totalCost,
+      planName: calculatedPricingDetails.name
+    });
 
-      // ========================================
-      // STEP 3: Prepare complete listing data with ALL fields
-      // ========================================
-      const listingData = {
-        // Basic Information
+    // ========================================
+    // STEP 3: Prepare complete listing data with ALL fields
+    // ========================================
+    const listingData = {
+      // Basic Information
+      title: formData.title || '',
+      description: formData.description || '',
+      category: formData.category || 'sedan',
+      condition: formData.condition || 'used',
+      sellerType: formData.sellerType || 'private',
+      
+      // Enhanced Pricing Information - FIXED: Check multiple locations
+      pricing: {
+        price: parseFloat(formData.price) || 0,
+        originalPrice: formData.priceOptions?.originalPrice ? 
+          parseFloat(formData.priceOptions.originalPrice) : null,
+        negotiable: formData.priceOptions?.negotiable || false,
+        showSavings: formData.priceOptions?.showSavings || false,
+        savingsAmount: formData.priceOptions?.savingsAmount ? 
+          parseFloat(formData.priceOptions.savingsAmount) : null,
+        currency: "BWP"
+      },
+      
+      // Enhanced Vehicle Specifications - Map from both individual and nested fields
+      specifications: {
+        make: formData.make || formData.specifications?.make || '',
+        model: formData.model || formData.specifications?.model || '',
+        year: formData.year ? parseInt(formData.year) : (formData.specifications?.year ? parseInt(formData.specifications.year) : null),
+        engineType: formData.engineType || formData.specifications?.engineType || formData.specifications?.engine || '',
+        transmission: formData.transmission || formData.specifications?.transmission || '',
+        fuelType: formData.fuelType || formData.specifications?.fuelType || '',
+        mileage: formData.mileage ? parseInt(formData.mileage) : (formData.specifications?.mileage ? parseInt(formData.specifications.mileage) : null),
+        bodyType: formData.bodyType || formData.specifications?.bodyType || '',
+        drivetrain: formData.drivetrain || formData.specifications?.drivetrain || '',
+        exteriorColor: formData.exteriorColor || formData.specifications?.exteriorColor || formData.specifications?.color || '',
+        interiorColor: formData.interiorColor || formData.specifications?.interiorColor || '',
+        numberOfSeats: formData.numberOfSeats ? parseInt(formData.numberOfSeats) : (formData.specifications?.numberOfSeats ? parseInt(formData.specifications.numberOfSeats) : (formData.specifications?.seats ? parseInt(formData.specifications.seats) : null)),
+        numberOfDoors: formData.numberOfDoors ? parseInt(formData.numberOfDoors) : (formData.specifications?.numberOfDoors ? parseInt(formData.specifications.numberOfDoors) : (formData.specifications?.doors ? parseInt(formData.specifications.doors) : null)),
+        engineSize: formData.engineSize || formData.specifications?.engineSize || '',
+        numberOfCylinders: formData.numberOfCylinders ? parseInt(formData.numberOfCylinders) : (formData.specifications?.numberOfCylinders ? parseInt(formData.specifications.numberOfCylinders) : null)
+      },
+      
+      // Enhanced Contact Information - Multiple fallback sources
+      contact: {
+        sellerName: formData.contact?.sellerName || 
+          (formData.privateSeller?.firstName && formData.privateSeller?.lastName 
+            ? `${formData.privateSeller.firstName} ${formData.privateSeller.lastName}`.trim()
+            : formData.businessInfo?.businessName || ''),
+        phone: formData.contact?.phone || '',
+        email: formData.contact?.email || '', 
+        whatsapp: formData.contact?.whatsapp || formData.contact?.phone || '',
+        preferredContactMethod: formData.privateSeller?.preferredContactMethod || formData.contact?.preferredContactMethod || 'both',
+        location: {
+          city: formData.contact?.location?.city || formData.location?.city || '',
+          state: formData.contact?.location?.state || formData.location?.state || '',
+          address: formData.contact?.location?.address || formData.location?.address || '',
+          country: 'Botswana'
+        }
+      },
+      
+      // Location Information (separate from contact location)
+      location: {
+        city: formData.location?.city || formData.contact?.location?.city || '',
+        state: formData.location?.state || formData.contact?.location?.state || '',
+        address: formData.location?.address || formData.contact?.location?.address || '',
+        country: 'Botswana'
+      },
+      
+      // Enhanced Features - Support multiple feature categories
+      features: {
+        safetyFeatures: Array.isArray(formData.features?.safetyFeatures) ? formData.features.safetyFeatures : [],
+        comfortFeatures: Array.isArray(formData.features?.comfortFeatures) ? formData.features.comfortFeatures : [],
+        entertainmentFeatures: Array.isArray(formData.features?.entertainmentFeatures) ? formData.features.entertainmentFeatures : [],
+        exteriorFeatures: Array.isArray(formData.features?.exteriorFeatures) ? formData.features.exteriorFeatures : [],
+        comfort: Array.isArray(formData.features?.comfort) ? formData.features.comfort : [],
+        safety: Array.isArray(formData.features?.safety) ? formData.features.safety : [],
+        technology: Array.isArray(formData.features?.technology) ? formData.features.technology : [],
+        performance: Array.isArray(formData.features?.performance) ? formData.features.performance : [],
+        exterior: Array.isArray(formData.features?.exterior) ? formData.features.exterior : [],
+        interior: Array.isArray(formData.features?.interior) ? formData.features.interior : []
+      },
+      
+      // Social Media
+      social: {
+        facebook: formData.social?.facebook || '',
+        instagram: formData.social?.instagram || '',
+        twitter: formData.social?.twitter || '',
+        linkedin: formData.social?.linkedin || '',
+        youtube: formData.social?.youtube || '',
+        tiktok: formData.social?.tiktok || ''
+      },
+      
+      // Private Seller Info (if applicable)
+      privateSeller: formData.sellerType === 'private' ? {
+        firstName: formData.privateSeller?.firstName || '',
+        lastName: formData.privateSeller?.lastName || '',
+        idNumber: formData.privateSeller?.idNumber || '',
+        preferredContactMethod: formData.privateSeller?.preferredContactMethod || 'both',
+        canShowContactInfo: formData.privateSeller?.canShowContactInfo !== false
+      } : null,
+      
+      // Business Info (if applicable)
+      businessInfo: formData.sellerType === 'dealership' ? {
+        businessName: formData.businessInfo?.businessName || '',
+        businessType: formData.businessInfo?.businessType || '',
+        registrationNumber: formData.businessInfo?.registrationNumber || '',
+        vatNumber: formData.businessInfo?.vatNumber || ''
+      } : null,
+      
+      // Enhanced Additional Information
+      additionalInfo: {
+        serviceHistory: formData.additionalInfo?.serviceHistory || '',
+        accidents: formData.additionalInfo?.accidents || '',
+        modifications: formData.additionalInfo?.modifications || '',
+        warranty: formData.additionalInfo?.warranty || '',
+        inspection: formData.additionalInfo?.inspection || '',
+        financing: formData.additionalInfo?.financing || false,
+        tradeIn: formData.additionalInfo?.tradeIn || false,
+        urgentSale: formData.additionalInfo?.urgentSale || false,
+        reasonForSelling: formData.additionalInfo?.reasonForSelling || '',
+        previousOwners: formData.additionalInfo?.previousOwners || '',
+        registrationStatus: formData.additionalInfo?.registrationStatus || 'current',
+        insuranceStatus: formData.additionalInfo?.insuranceStatus || 'current'
+      },
+      
+      // Enhanced Availability
+      availability: {
+        availableFrom: formData.availability?.availableFrom || '',
+        viewingTimes: formData.availability?.viewingTimes || '',
+        testDrivePolicy: formData.availability?.testDrivePolicy || 'allowed',
+        deliveryAvailable: formData.availability?.deliveryAvailable || false,
+        pickupLocation: formData.availability?.pickupLocation || '',
+        showroomAddress: formData.availability?.showroomAddress || '',
+        appointmentRequired: formData.availability?.appointmentRequired || false,
+        urgentSale: formData.availability?.urgentSale || false
+      },
+      
+      // Enhanced Price Options
+      priceOptions: {
+        negotiable: formData.priceOptions?.negotiable || false,
+        showSavings: formData.priceOptions?.showSavings || false,
+        originalPrice: formData.priceOptions?.originalPrice || '',
+        savingsAmount: formData.priceOptions?.savingsAmount || '',
+        savingsPercentage: formData.priceOptions?.savingsPercentage || '',
+        dealerDiscount: formData.priceOptions?.dealerDiscount || '',
+        exclusiveDeal: formData.priceOptions?.exclusiveDeal || false,
+        priceValidUntil: formData.priceOptions?.priceValidUntil || '',
+        paymentMethods: formData.priceOptions?.paymentMethods || ['cash'],
+        financeAvailable: formData.priceOptions?.financeAvailable || false,
+        leaseAvailable: formData.priceOptions?.leaseAvailable || false
+      },
+      
+      // Images with enhanced metadata
+      images: uploadedImages || [],
+      
+      // Enhanced image metadata
+      imageFiles: imageFiles?.map((fileItem, index) => {
+        if (fileItem instanceof File) {
+          return {
+            name: fileItem.name,
+            size: fileItem.size,
+            type: fileItem.type,
+            isPrimary: index === primaryImageIndex
+          };
+        } else if (fileItem.file instanceof File) {
+          return {
+            name: fileItem.name || fileItem.file.name,
+            size: fileItem.size || fileItem.file.size,
+            type: fileItem.file.type,
+            isPrimary: index === primaryImageIndex
+          };
+        }
+        return null;
+      }).filter(Boolean) || [],
+      primaryImageIndex: primaryImageIndex || 0,
+      
+      // Profile picture
+      profilePicture: formData.profilePicture || '',
+      
+      // ===== 🎯 DYNAMIC PLAN DATA (CRITICAL FOR ADMIN INTERFACE) =====
+      selectedPlan: selectedPlan || 'free',
+      selectedAddons: selectedAddons || [],
+      pricingDetails: calculatedPricingDetails,
+      
+      // ===== 🎯 DYNAMIC SUBMISSION METADATA =====
+      status: "pending_review",
+      submissionType: dynamicSubmissionType,
+      submissionSource: "user_form",
+      
+      // ===== 🎯 ORIGINAL SUBMISSION DATA (FOR ADMIN INTERFACE) =====
+      originalSubmissionData: {
         title: formData.title || '',
         description: formData.description || '',
         category: formData.category || 'sedan',
         condition: formData.condition || 'used',
         sellerType: formData.sellerType || 'private',
-        
-        // Enhanced Pricing Information - FIXED: Check multiple locations
         pricing: {
           price: parseFloat(formData.price) || 0,
-          originalPrice: formData.priceOptions?.originalPrice ? 
-            parseFloat(formData.priceOptions.originalPrice) : null,
-          negotiable: formData.priceOptions?.negotiable || false,
-          showSavings: formData.priceOptions?.showSavings || false,
-          savingsAmount: formData.priceOptions?.savingsAmount ? 
-            parseFloat(formData.priceOptions.savingsAmount) : null,
           currency: "BWP"
         },
-        
-        // Enhanced Vehicle Specifications - Map from both individual and nested fields
         specifications: {
           make: formData.make || formData.specifications?.make || '',
           model: formData.model || formData.specifications?.model || '',
-          year: formData.year ? parseInt(formData.year) : (formData.specifications?.year ? parseInt(formData.specifications.year) : null),
-          engineType: formData.engineType || formData.specifications?.engineType || formData.specifications?.engine || '',
-          transmission: formData.transmission || formData.specifications?.transmission || '',
-          fuelType: formData.fuelType || formData.specifications?.fuelType || '',
-          mileage: formData.mileage ? parseInt(formData.mileage) : (formData.specifications?.mileage ? parseInt(formData.specifications.mileage) : null),
-          bodyType: formData.bodyType || formData.specifications?.bodyType || '',
-          drivetrain: formData.drivetrain || formData.specifications?.drivetrain || '',
-          exteriorColor: formData.exteriorColor || formData.specifications?.exteriorColor || formData.specifications?.color || '',
-          interiorColor: formData.interiorColor || formData.specifications?.interiorColor || '',
-          numberOfSeats: formData.numberOfSeats ? parseInt(formData.numberOfSeats) : (formData.specifications?.numberOfSeats ? parseInt(formData.specifications.numberOfSeats) : (formData.specifications?.seats ? parseInt(formData.specifications.seats) : null)),
-          numberOfDoors: formData.numberOfDoors ? parseInt(formData.numberOfDoors) : (formData.specifications?.numberOfDoors ? parseInt(formData.specifications.numberOfDoors) : (formData.specifications?.doors ? parseInt(formData.specifications.doors) : null)),
-          engineSize: formData.engineSize || formData.specifications?.engineSize || '',
-          numberOfCylinders: formData.numberOfCylinders ? parseInt(formData.numberOfCylinders) : (formData.specifications?.numberOfCylinders ? parseInt(formData.specifications.numberOfCylinders) : null)
+          year: formData.year ? parseInt(formData.year) : (formData.specifications?.year ? parseInt(formData.specifications.year) : null)
         },
-        
-        // Enhanced Contact Information - Multiple fallback sources
         contact: {
-          sellerName: formData.contact?.sellerName || 
-            (formData.privateSeller?.firstName && formData.privateSeller?.lastName 
-              ? `${formData.privateSeller.firstName} ${formData.privateSeller.lastName}`.trim()
-              : formData.businessInfo?.businessName || ''),
+          sellerName: formData.contact?.sellerName || '',
           phone: formData.contact?.phone || '',
-          email: formData.contact?.email || '', 
-          whatsapp: formData.contact?.whatsapp || formData.contact?.phone || '',
-          preferredContactMethod: formData.privateSeller?.preferredContactMethod || formData.contact?.preferredContactMethod || 'both',
-          location: {
-            city: formData.contact?.location?.city || formData.location?.city || '',
-            state: formData.contact?.location?.state || formData.location?.state || '',
-            address: formData.contact?.location?.address || formData.location?.address || '',
-            country: 'Botswana'
-          }
+          email: formData.contact?.email || ''
         },
-        
-        // Location Information (separate from contact location)
-        location: {
-          city: formData.location?.city || formData.contact?.location?.city || '',
-          state: formData.location?.state || formData.contact?.location?.state || '',
-          address: formData.location?.address || formData.contact?.location?.address || '',
-          country: 'Botswana'
-        },
-        
-        // Enhanced Features - Support multiple feature categories
-        features: {
-          safetyFeatures: Array.isArray(formData.features?.safetyFeatures) ? formData.features.safetyFeatures : [],
-          comfortFeatures: Array.isArray(formData.features?.comfortFeatures) ? formData.features.comfortFeatures : [],
-          entertainmentFeatures: Array.isArray(formData.features?.entertainmentFeatures) ? formData.features.entertainmentFeatures : [],
-          exteriorFeatures: Array.isArray(formData.features?.exteriorFeatures) ? formData.features.exteriorFeatures : [],
-          comfort: Array.isArray(formData.features?.comfort) ? formData.features.comfort : [],
-          safety: Array.isArray(formData.features?.safety) ? formData.features.safety : [],
-          technology: Array.isArray(formData.features?.technology) ? formData.features.technology : [],
-          performance: Array.isArray(formData.features?.performance) ? formData.features.performance : [],
-          exterior: Array.isArray(formData.features?.exterior) ? formData.features.exterior : [],
-          interior: Array.isArray(formData.features?.interior) ? formData.features.interior : []
-        },
-        
-        // Social Media
-        social: {
-          facebook: formData.social?.facebook || '',
-          instagram: formData.social?.instagram || '',
-          twitter: formData.social?.twitter || '',
-          linkedin: formData.social?.linkedin || '',
-          youtube: formData.social?.youtube || '',
-          tiktok: formData.social?.tiktok || ''
-        },
-        
-        // Private Seller Info (if applicable)
-        privateSeller: formData.sellerType === 'private' ? {
-          firstName: formData.privateSeller?.firstName || '',
-          lastName: formData.privateSeller?.lastName || '',
-          idNumber: formData.privateSeller?.idNumber || '',
-          preferredContactMethod: formData.privateSeller?.preferredContactMethod || 'both',
-          canShowContactInfo: formData.privateSeller?.canShowContactInfo !== false
-        } : null,
-        
-        // Business Info (if applicable)
-        businessInfo: formData.sellerType === 'dealership' ? {
-          businessName: formData.businessInfo?.businessName || '',
-          businessType: formData.businessInfo?.businessType || '',
-          registrationNumber: formData.businessInfo?.registrationNumber || '',
-          vatNumber: formData.businessInfo?.vatNumber || ''
-        } : null,
-        
-        // Enhanced Additional Information
-        additionalInfo: {
-          serviceHistory: formData.additionalInfo?.serviceHistory || '',
-          accidents: formData.additionalInfo?.accidents || '',
-          modifications: formData.additionalInfo?.modifications || '',
-          warranty: formData.additionalInfo?.warranty || '',
-          inspection: formData.additionalInfo?.inspection || '',
-          financing: formData.additionalInfo?.financing || false,
-          tradeIn: formData.additionalInfo?.tradeIn || false,
-          urgentSale: formData.additionalInfo?.urgentSale || false,
-          reasonForSelling: formData.additionalInfo?.reasonForSelling || '',
-          previousOwners: formData.additionalInfo?.previousOwners || '',
-          registrationStatus: formData.additionalInfo?.registrationStatus || 'current',
-          insuranceStatus: formData.additionalInfo?.insuranceStatus || 'current'
-        },
-        
-        // Enhanced Availability
-        availability: {
-          availableFrom: formData.availability?.availableFrom || '',
-          viewingTimes: formData.availability?.viewingTimes || '',
-          testDrivePolicy: formData.availability?.testDrivePolicy || 'allowed',
-          deliveryAvailable: formData.availability?.deliveryAvailable || false,
-          pickupLocation: formData.availability?.pickupLocation || '',
-          showroomAddress: formData.availability?.showroomAddress || '',
-          appointmentRequired: formData.availability?.appointmentRequired || false,
-          urgentSale: formData.availability?.urgentSale || false
-        },
-        
-        // Enhanced Price Options
-        priceOptions: {
-          negotiable: formData.priceOptions?.negotiable || false,
-          showSavings: formData.priceOptions?.showSavings || false,
-          originalPrice: formData.priceOptions?.originalPrice || '',
-          savingsAmount: formData.priceOptions?.savingsAmount || '',
-          savingsPercentage: formData.priceOptions?.savingsPercentage || '',
-          dealerDiscount: formData.priceOptions?.dealerDiscount || '',
-          exclusiveDeal: formData.priceOptions?.exclusiveDeal || false,
-          priceValidUntil: formData.priceOptions?.priceValidUntil || '',
-          paymentMethods: formData.priceOptions?.paymentMethods || ['cash'],
-          financeAvailable: formData.priceOptions?.financeAvailable || false,
-          leaseAvailable: formData.priceOptions?.leaseAvailable || false
-        },
-        
-        // Images with enhanced metadata
-        images: uploadedImages?.map((img, index) => ({
-          url: img.url,
-          key: img.key,
-          thumbnail: img.thumbnail || img.url,
-          isPrimary: index === primaryImageIndex,
-          size: img.size,
-          mimetype: img.mimetype
-        })) || [],
-        
-        // Enhanced image metadata
-        imageFiles: imageFiles?.map((file, index) => ({
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          isPrimary: index === primaryImageIndex
-        })) || [],
-        primaryImageIndex: primaryImageIndex || 0,
-        
-        // Profile picture
-        profilePicture: formData.profilePicture || '',
-        
-        // ===== 🎯 DYNAMIC PLAN DATA (CRITICAL FOR ADMIN INTERFACE) =====
-        selectedPlan: selectedPlan || 'free',           // ← Dynamic: free, basic, premium, etc.
-        selectedAddons: selectedAddons || [],           // ← Dynamic: array of selected addons
-        pricingDetails: calculatedPricingDetails,       // ← Dynamic: calculated based on actual plan
-        
-        // ===== 🎯 DYNAMIC SUBMISSION METADATA =====
+        selectedPlan: selectedPlan || 'free',
+        selectedAddons: selectedAddons || [],
+        pricingDetails: calculatedPricingDetails,
         status: "pending_review",
-        submissionType: dynamicSubmissionType,          // ← Dynamic: free_review or paid_review
-        submissionSource: "user_form",
-        
-        // ===== 🎯 ORIGINAL SUBMISSION DATA (FOR ADMIN INTERFACE) =====
-        originalSubmissionData: {
-          title: formData.title || '',
-          description: formData.description || '',
-          category: formData.category || 'sedan',
-          condition: formData.condition || 'used',
-          sellerType: formData.sellerType || 'private',
-          pricing: {
-            price: parseFloat(formData.price) || 0,
-            currency: "BWP"
-          },
-          specifications: {
-            make: formData.make || formData.specifications?.make || '',
-            model: formData.model || formData.specifications?.model || '',
-            year: formData.year ? parseInt(formData.year) : (formData.specifications?.year ? parseInt(formData.specifications.year) : null)
-          },
-          contact: {
-            sellerName: formData.contact?.sellerName || '',
-            phone: formData.contact?.phone || '',
-            email: formData.contact?.email || ''
-          },
-          selectedPlan: selectedPlan || 'free',
-          selectedAddons: selectedAddons || [],
-          pricingDetails: calculatedPricingDetails,
-          status: "pending_review",
-          submissionType: dynamicSubmissionType,
-          submittedAt: new Date().toISOString()
-        }
-      };
+        submissionType: dynamicSubmissionType,
+        submittedAt: new Date().toISOString()
+      }
+    };
 
-      // ========================================
-      // DEBUG: Log the complete data structure
-      // ========================================
-      console.log('🔍 DEBUGGING COMPLETE FORM DATA STRUCTURE:');
-      console.log('📋 Dynamic tier support:', {
-        selectedPlan: listingData.selectedPlan,
-        selectedAddons: listingData.selectedAddons,
-        pricingDetails: listingData.pricingDetails,
-        submissionType: listingData.submissionType,
-        isFreeTier: isFreeTier
-      });
+    // ========================================
+    // DEBUG: Log the complete data structure
+    // ========================================
+    console.log('🔍 DEBUGGING COMPLETE FORM DATA STRUCTURE:');
+    console.log('📋 Dynamic tier support:', {
+      selectedPlan: listingData.selectedPlan,
+      selectedAddons: listingData.selectedAddons,
+      pricingDetails: listingData.pricingDetails,
+      submissionType: listingData.submissionType,
+      isFreeTier: isFreeTier
+    });
 
-      console.log('📋 Prepared listingData structure:', {
-        title: listingData.title,
-        hasContact: !!listingData.contact,
-        contactSellerName: listingData.contact?.sellerName,
-        contactPhone: listingData.contact?.phone,
-        hasSpecifications: !!listingData.specifications,
-        specMake: listingData.specifications?.make,
-        specModel: listingData.specifications?.model,
-        hasPricing: !!listingData.pricing,
-        pricingPrice: listingData.pricing?.price,
-        imageCount: listingData.images?.length || 0,
-        hasOriginalSubmissionData: !!listingData.originalSubmissionData
-      });
+    console.log('📋 Prepared listingData structure:', {
+      title: listingData.title,
+      hasContact: !!listingData.contact,
+      contactSellerName: listingData.contact?.sellerName,
+      contactPhone: listingData.contact?.phone,
+      hasSpecifications: !!listingData.specifications,
+      specMake: listingData.specifications?.make,
+      specModel: listingData.specifications?.model,
+      hasPricing: !!listingData.pricing,
+      pricingPrice: listingData.pricing?.price,
+      imageCount: listingData.images?.length || 0,
+      hasOriginalSubmissionData: !!listingData.originalSubmissionData
+    });
 
-      // Check for common issues
-      const debugIssues = [];
-      if (!listingData.title || listingData.title.trim() === '') {
-        debugIssues.push('❌ Title is empty');
-      }
-      if (!listingData.contact?.sellerName || listingData.contact.sellerName.trim() === '') {
-        debugIssues.push('❌ contact.sellerName is empty');
-      }
-      if (!listingData.contact?.phone || listingData.contact.phone.trim() === '') {
-        debugIssues.push('❌ contact.phone is empty');
-      }
-      if (!listingData.specifications?.make || listingData.specifications.make.trim() === '') {
-        debugIssues.push('❌ specifications.make is empty');
-      }
-      if (!listingData.specifications?.model || listingData.specifications.model.trim() === '') {
-        debugIssues.push('❌ specifications.model is empty');
-      }
-      if (!listingData.pricing?.price || listingData.pricing.price <= 0) {
-        debugIssues.push('❌ pricing.price is empty or invalid');
-      }
-      if (!listingData.selectedPlan) {
-        debugIssues.push('❌ selectedPlan is missing');
-      }
-      if (!listingData.pricingDetails) {
-        debugIssues.push('❌ pricingDetails is missing');
-      }
-
-      if (debugIssues.length > 0) {
-        console.log('🚨 VALIDATION ISSUES FOUND:');
-        debugIssues.forEach(issue => console.log(issue));
-      } else {
-        console.log('✅ All required fields appear to be populated');
-      }
-
-      // ========================================
-      // STEP 4: Submit listing to backend
-      // ========================================
-      showMessage('info', 'Submitting your listing...');
-      console.log('🔄 Submitting listing to /api/user/submit-listing...');
-      
-      const submitResponse = await fetch('https://bw-car-culture-api.vercel.app/api/user/submit-listing', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ listingData })
-      });
-
-      console.log(`📋 Submission response status: ${submitResponse.status}`);
-
-      if (!submitResponse.ok) {
-        const errorText = await submitResponse.text();
-        console.error('📋 Submission failed response:', errorText);
-        throw new Error(`Listing submission failed: ${submitResponse.status} - ${errorText}`);
-      }
-
-      const result = await submitResponse.json();
-      console.log('📋 Submission result:', result);
-      
-      if (!result.success) {
-        throw new Error(result.message || 'Submission failed');
-      }
-
-      console.log('✅ Listing submitted successfully!');
-      
-      // Show success message based on tier
-      if (isFreeTier) {
-        showMessage('success', '🎉 FREE listing submitted for review! No payment required - we\'ll contact you within 24-48 hours.');
-      } else {
-        showMessage('success', `🎉 ${calculatedPricingDetails.name} submitted for review! Total cost: P${calculatedPricingDetails.totalCost.toLocaleString()}`);
-      }
-      
-      // Save to profile for future listings
-      await saveToProfile();
-      
-      // Reset form to clean state
-      resetForm();
-      
-      // Call parent callback if provided
-      if (onSubmit) {
-        onSubmit(result);
-      }
-
-    } catch (error) {
-      console.error('❌ Form submission failed:', error);
-      showMessage('error', `Submission failed: ${error.message}`);
-    } finally {
-      setLoading(false);
-      setIsSubmitting(false);
+    // Check for common issues
+    const debugIssues = [];
+    if (!listingData.title || listingData.title.trim() === '') {
+      debugIssues.push('❌ Title is empty');
     }
-  };
+    if (!listingData.contact?.sellerName || listingData.contact.sellerName.trim() === '') {
+      debugIssues.push('❌ contact.sellerName is empty');
+    }
+    if (!listingData.contact?.phone || listingData.contact.phone.trim() === '') {
+      debugIssues.push('❌ contact.phone is empty');
+    }
+    if (!listingData.specifications?.make || listingData.specifications.make.trim() === '') {
+      debugIssues.push('❌ specifications.make is empty');
+    }
+    if (!listingData.specifications?.model || listingData.specifications.model.trim() === '') {
+      debugIssues.push('❌ specifications.model is empty');
+    }
+    if (!listingData.pricing?.price || listingData.pricing.price <= 0) {
+      debugIssues.push('❌ pricing.price is empty or invalid');
+    }
+    if (!listingData.selectedPlan) {
+      debugIssues.push('❌ selectedPlan is missing');
+    }
+    if (!listingData.pricingDetails) {
+      debugIssues.push('❌ pricingDetails is missing');
+    }
+
+    if (debugIssues.length > 0) {
+      console.log('🚨 VALIDATION ISSUES FOUND:');
+      debugIssues.forEach(issue => console.log(issue));
+    } else {
+      console.log('✅ All required fields appear to be populated');
+    }
+
+    // ========================================
+    // STEP 4: Submit listing to backend
+    // ========================================
+    showMessage('info', 'Submitting your listing...');
+    console.log('🔄 Submitting listing to /api/user/submit-listing...');
+    
+    const submitResponse = await fetch('https://bw-car-culture-api.vercel.app/api/user/submit-listing', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({ listingData })
+    });
+
+    console.log(`📋 Submission response status: ${submitResponse.status}`);
+
+    if (!submitResponse.ok) {
+      const errorText = await submitResponse.text();
+      console.error('📋 Submission failed response:', errorText);
+      throw new Error(`Listing submission failed: ${submitResponse.status} - ${errorText}`);
+    }
+
+    const result = await submitResponse.json();
+    console.log('📋 Submission result:', result);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Submission failed');
+    }
+
+    console.log('✅ Listing submitted successfully!');
+    
+    // Show success message based on tier
+    if (isFreeTier) {
+      showMessage('success', '🎉 FREE listing submitted for review! No payment required - we\'ll contact you within 24-48 hours.');
+    } else {
+      showMessage('success', `🎉 ${calculatedPricingDetails.name} submitted for review! Total cost: P${calculatedPricingDetails.totalCost.toLocaleString()}`);
+    }
+    
+    // Save to profile for future listings
+    await saveToProfile();
+    
+    // Reset form to clean state
+    resetForm();
+    
+    // Call parent callback if provided
+    if (onSubmit) {
+      onSubmit(result);
+    }
+
+  } catch (error) {
+    console.error('❌ Form submission failed:', error);
+    showMessage('error', `Submission failed: ${error.message}`);
+  } finally {
+    setLoading(false);
+    setIsSubmitting(false);
+  }
+};
 
   // Reset form to initial state  
   const resetForm = () => {
@@ -2017,16 +2064,15 @@ const UserCarListingForm = ({
 </div>
 
           {/* Image previews */}
-         {imagePreviews.length > 0 && (
+  {imagePreviews.length > 0 && (
   <div className="ulisting-image-previews">
     <h5>Selected Images ({imagePreviews.length}/15) - In selection order</h5>
     <div className="ulisting-image-grid">
       {imagePreviews.map((previewObj, index) => (
         <div 
-          key={`img_${previewObj.name}_${index}`} // ← ONLY CHANGE THIS LINE
+          key={`img_${previewObj.name}_${previewObj.size}_${index}`}
           className={`ulisting-image-preview ${index === 0 ? 'primary' : ''}`}
         >
-          {/* Rest of your existing code stays exactly the same */}
           <img 
             src={previewObj.preview} 
             alt={`Preview ${index + 1}`}
