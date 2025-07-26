@@ -536,3 +536,455 @@
   --status-bg: rgba(124, 58, 237, 0.1);
   --status-border: rgba(124, 58, 237, 0.2);
 }
+
+/* Add these enhanced styles to your UserSubmissionCard.css */
+
+/* ===== ENHANCED PRIMARY ACTIONS SECTION ===== */
+.usc-primary-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.usc-secondary-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+/* ===== ENHANCED BUTTON STYLES ===== */
+.usc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  white-space: nowrap;
+}
+
+.usc-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.usc-btn-small {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  min-height: 32px;
+}
+
+/* Button Type Variations */
+.usc-btn-primary {
+  background: linear-gradient(135deg, #ff6b35, #e55a2b);
+  color: white;
+}
+
+.usc-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e55a2b, #cc4925);
+  transform: translateY(-1px);
+}
+
+.usc-btn-secondary {
+  background: var(--bg-tertiary, #3a3a3a);
+  color: var(--text-primary, #ffffff);
+  border: 1px solid var(--border-color, #333);
+}
+
+.usc-btn-secondary:hover:not(:disabled) {
+  background: var(--bg-quaternary, #4a4a4a);
+  transform: translateY(-1px);
+}
+
+.usc-btn-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+
+.usc-btn-warning:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-1px);
+}
+
+.usc-btn-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.usc-btn-success:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+}
+
+/* ===== STATUS INDICATORS ===== */
+.usc-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  background: var(--bg-tertiary, #3a3a3a);
+  color: var(--text-secondary, #b3b3b3);
+  border: 1px solid var(--border-color, #333);
+}
+
+.usc-status-indicator.usc-status-error {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #dc2626;
+  color: #f87171;
+}
+
+.usc-status-indicator.usc-status-success {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: #16a34a;
+  color: #4ade80;
+}
+
+.usc-status-indicator.usc-status-live {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #2563eb;
+  color: #60a5fa;
+}
+
+/* ===== EDIT HISTORY SECTION ===== */
+.usc-edit-history {
+  margin-top: 1rem;
+  padding: 0.875rem;
+  background: var(--bg-tertiary, #3a3a3a);
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #333);
+}
+
+.usc-edit-header {
+  margin-bottom: 0.5rem;
+}
+
+.usc-edit-header h5 {
+  margin: 0;
+  color: var(--text-primary, #ffffff);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.usc-edit-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.usc-edit-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.usc-edit-date {
+  color: var(--text-secondary, #b3b3b3);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.usc-edit-note {
+  color: var(--text-tertiary, #888);
+  font-size: 0.75rem;
+  font-style: italic;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--border-color, #333);
+}
+
+.usc-review-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--accent-color, #ff6b35);
+  font-size: 0.75rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* ===== ADMIN REVIEW SECTION ===== */
+.usc-admin-review {
+  margin-top: 1rem;
+  padding: 0.875rem;
+  background: var(--bg-tertiary, #3a3a3a);
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #333);
+}
+
+.usc-admin-header {
+  margin-bottom: 0.5rem;
+}
+
+.usc-admin-header h5 {
+  margin: 0;
+  color: var(--text-primary, #ffffff);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.usc-admin-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.usc-admin-notes {
+  margin: 0;
+  color: var(--text-secondary, #b3b3b3);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.usc-review-date {
+  color: var(--text-tertiary, #888);
+  font-size: 0.75rem;
+}
+
+/* ===== ENHANCED FREE TIER STYLES ===== */
+.usc-free-label {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.usc-free-plan {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: white !important;
+}
+
+.usc-free-total {
+  color: #10b981 !important;
+  font-weight: 700;
+}
+
+/* ===== LOADING STATES ===== */
+.usc-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.usc-btn:disabled:hover {
+  transform: none !important;
+  background: inherit;
+}
+
+/* ===== TOOLTIPS FOR BUTTONS ===== */
+.usc-btn[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-primary, #1a1a1a);
+  color: var(--text-primary, #ffffff);
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color, #333);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 0.25rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== RESPONSIVE DESIGN FOR ACTIONS ===== */
+@media (max-width: 768px) {
+  .usc-submission-actions {
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .usc-primary-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .usc-btn {
+    justify-content: center;
+    min-height: 40px;
+  }
+
+  .usc-secondary-actions {
+    margin-top: 0.75rem;
+  }
+
+  .usc-status-indicator {
+    font-size: 0.75rem;
+    padding: 0.3125rem 0.625rem;
+  }
+
+  .usc-edit-history,
+  .usc-admin-review {
+    padding: 0.75rem;
+  }
+
+  .usc-edit-item {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .usc-review-indicator {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .usc-submission-actions {
+    padding: 0.625rem;
+  }
+
+  .usc-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .usc-btn-small {
+    padding: 0.4375rem 0.625rem;
+    font-size: 0.75rem;
+    min-height: 36px;
+  }
+
+  .usc-status-indicator {
+    font-size: 0.6875rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .usc-edit-history,
+  .usc-admin-review {
+    padding: 0.625rem;
+    margin-top: 0.75rem;
+  }
+
+  .usc-edit-note {
+    padding-left: 0.5rem;
+  }
+
+  .usc-free-label {
+    font-size: 0.625rem;
+    padding: 0.09375rem 0.3125rem;
+  }
+}
+
+/* ===== ENHANCED PLAN DETAILS ===== */
+.usc-plan-details {
+  margin-top: 1rem;
+  border-top: 1px solid var(--border-color, #333);
+  padding-top: 1rem;
+}
+
+.usc-plan-header h5 {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary, #ffffff);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* ===== IMPROVED SUBMISSION LAYOUT ===== */
+.usc-submission-card {
+  background: var(--bg-secondary, #2a2a2a);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.usc-submission-card:hover {
+  border-color: var(--accent-color, #ff6b35);
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.1);
+}
+
+.usc-submission-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.usc-submission-content {
+  padding: 1.25rem;
+  flex: 1;
+}
+
+.usc-submission-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color, #333);
+}
+
+/* ===== ENHANCED STATUS MESSAGES ===== */
+.usc-submission-status {
+  background: var(--bg-tertiary, #3a3a3a);
+  border-top: 1px solid var(--border-color, #333);
+  padding: 1rem;
+}
+
+.usc-status-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.usc-message-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+.usc-btn:focus {
+  outline: 2px solid var(--accent-color, #ff6b35);
+  outline-offset: 2px;
+}
+
+.usc-btn:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ===== DARK THEME ENHANCEMENTS ===== */
+@media (prefers-color-scheme: dark) {
+  .usc-submission-card {
+    background: #1a1a1a;
+    border-color: #333;
+  }
+
+  .usc-btn-secondary {
+    background: #333;
+    border-color: #444;
+  }
+
+  .usc-btn-secondary:hover:not(:disabled) {
+    background: #444;
+  }
+
+  .usc-edit-history,
+  .usc-admin-review {
+    background: #333;
+    border-color: #444;
+  }
+
+  .usc-status-indicator {
+    background: #333;
+    border-color: #444;
+  }
+}
