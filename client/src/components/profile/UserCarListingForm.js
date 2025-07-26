@@ -2023,9 +2023,10 @@ const UserCarListingForm = ({
     <div className="ulisting-image-grid">
       {imagePreviews.map((previewObj, index) => (
         <div 
-          key={index} 
+          key={`img_${previewObj.name}_${index}`} // ← ONLY CHANGE THIS LINE
           className={`ulisting-image-preview ${index === 0 ? 'primary' : ''}`}
         >
+          {/* Rest of your existing code stays exactly the same */}
           <img 
             src={previewObj.preview} 
             alt={`Preview ${index + 1}`}
@@ -2035,7 +2036,6 @@ const UserCarListingForm = ({
             }}
           />
           <div className="ulisting-image-overlay">
-            {/* Optional: Keep primary selection button */}
             <button
               type="button"
               className="ulisting-primary-btn"
