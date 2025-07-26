@@ -770,58 +770,71 @@ const UserCarListingForm = ({
   };
 
   // Enhanced image upload handler
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    
-    if (files.length > 15) {
-      showMessage('error', 'Maximum 15 images allowed');
-      return;
-    }
+ const handleImageUpload = (e) => {
+  const files = Array.from(e.target.files);
+  
+  if (files.length > 15) {
+    showMessage('error', 'Maximum 15 images allowed');
+    return;
+  }
 
-    const maxSize = 8 * 1024 * 1024; // 8MB
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    
-    const invalidFiles = files.filter(file => 
-      file.size > maxSize || !validTypes.includes(file.type.toLowerCase())
-    );
-    
-    if (invalidFiles.length > 0) {
-      showMessage('error', 'Some files are invalid. Use JPEG/PNG/WebP under 8MB each.');
-      return;
-    }
+  const maxSize = 8 * 1024 * 1024; // 8MB
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  
+  const invalidFiles = files.filter(file => 
+    file.size > maxSize || !validTypes.includes(file.type.toLowerCase())
+  );
+  
+  if (invalidFiles.length > 0) {
+    showMessage('error', 'Some files are invalid. Use JPEG/PNG/WebP under 8MB each.');
+    return;
+  }
 
-    console.log(`📸 Selected ${files.length} valid images`);
-    
-    // Store files for upload
-    setImageFiles(files);
-    
-    // Create previews
-    const previews = files.map(file => ({
-      file,
-      preview: URL.createObjectURL(file),
-      name: file.name,
-      size: file.size
-    }));
-    
-    setImagePreviews(previews);
-    
-    // Clear errors
-    if (errors.images) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.images;
-        return newErrors;
-      });
-    }
-    
-    showMessage('success', `${files.length} images selected`);
-  };
+  console.log(`📸 Selected ${files.length} images in order:`, files.map(f => f.name));
+  
+  // FIXED: Keep files in exact selection order
+  setImageFiles(files);
+  
+  // FIXED: Create previews in same order, first image is always primary
+  const previews = files.map((file, index) => ({
+    file,
+    preview: URL.createObjectURL(file),
+    name: file.name,
+    size: file.size,
+    isPrimary: index === 0, // First selected image is always primary
+    index: index
+  }));
+  
+  setImagePreviews(previews);
+  
+  // FIXED: Primary image is always index 0 (first selected)
+  setPrimaryImageIndex(0);
+  
+  // Clear errors
+  if (errors.images) {
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.images;
+      return newErrors;
+    });
+  }
+  
+  showMessage('success', `${files.length} images selected. First image will be the main image.`);
+};
 
   // Handle primary image selection
-  const handlePrimaryImageSelect = (index) => {
-    setPrimaryImageIndex(index);
-    console.log(`📸 Set primary image to index ${index}`);
-  };
+ const handlePrimaryImageSelect = (index) => {
+  setPrimaryImageIndex(index);
+  
+  // Update previews to reflect new primary
+  setImagePreviews(prev => prev.map((preview, i) => ({
+    ...preview,
+    isPrimary: i === index
+  })));
+  
+  console.log(`📸 Primary image changed to index ${index}: ${imagePreviews[index]?.name}`);
+  showMessage('success', `Primary image updated to: ${imagePreviews[index]?.name}`);
+};
 
   // Remove image
   const removeImage = (index) => {
@@ -1986,64 +1999,72 @@ const UserCarListingForm = ({
           <h4>Vehicle Images</h4>
           
           <div className="ulisting-form-group">
-            <label htmlFor="images">Upload Images (Max 15 images, 8MB per image) *</label>
-            <input
-              type="file"
-              id="images"
-              name="images"
-              multiple
-              accept="image/*"
-              onChange={handleImageUpload}
-              className={errors.images ? 'error' : ''}
-            />
-            {errors.images && <span className="ulisting-error-message">{errors.images}</span>}
-            <p className="ulisting-form-help">
-              Tip: First image will be the main image. You can change this after uploading.
-            </p>
-          </div>
+  <label htmlFor="images">Upload Images (Max 15 images, 8MB per image) *</label>
+  <input
+    type="file"
+    id="images"
+    name="images"
+    multiple
+    accept="image/*"
+    onChange={handleImageUpload}
+    className={errors.images ? 'error' : ''}
+  />
+  {errors.images && <span className="ulisting-error-message">{errors.images}</span>}
+  <p className="ulisting-form-help">
+    <strong>Tip:</strong> Images will appear in the order you select them. 
+    The first image you select will be the main image.
+  </p>
+</div>
 
           {/* Image previews */}
-          {imagePreviews.length > 0 && (
-            <div className="ulisting-image-previews">
-              <h5>Selected Images ({imagePreviews.length}/15)</h5>
-              <div className="ulisting-image-grid">
-                {imagePreviews.map((previewObj, index) => (
-                  <div key={index} className={`ulisting-image-preview ${primaryImageIndex === index ? 'primary' : ''}`}>
-                    <img 
-                      src={previewObj.preview} 
-                      alt={`Preview ${index + 1}`}
-                      onError={(e) => {
-                        console.error(`Error loading preview ${index}`);
-                        e.target.src = '/images/placeholders/car.jpg';
-                      }}
-                    />
-                    <div className="ulisting-image-overlay">
-                      <button
-                        type="button"
-                        className="ulisting-primary-btn"
-                        onClick={() => handlePrimaryImageSelect(index)}
-                        title="Set as primary image"
-                      >
-                        {primaryImageIndex === index ? '⭐ Primary' : 'Set Primary'}
-                      </button>
-                      <button
-                        type="button"
-                        className="ulisting-remove-btn"
-                        onClick={() => removeImage(index)}
-                        title="Remove image"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <div className="ulisting-image-info">
-                      <span>Image {index + 1}</span>
-                      <span>{(previewObj.size / 1024 / 1024).toFixed(1)}MB</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+         {imagePreviews.length > 0 && (
+  <div className="ulisting-image-previews">
+    <h5>Selected Images ({imagePreviews.length}/15) - In selection order</h5>
+    <div className="ulisting-image-grid">
+      {imagePreviews.map((previewObj, index) => (
+        <div 
+          key={index} 
+          className={`ulisting-image-preview ${index === 0 ? 'primary' : ''}`}
+        >
+          <img 
+            src={previewObj.preview} 
+            alt={`Preview ${index + 1}`}
+            onError={(e) => {
+              console.error(`Error loading preview ${index}`);
+              e.target.src = '/images/placeholders/car.jpg';
+            }}
+          />
+          <div className="ulisting-image-overlay">
+            {/* Optional: Keep primary selection button */}
+            <button
+              type="button"
+              className="ulisting-primary-btn"
+              onClick={() => handlePrimaryImageSelect(index)}
+              title="Set as primary image"
+            >
+              {index === 0 ? '⭐ Main Image' : 
+               primaryImageIndex === index ? '⭐ Primary' : 'Set Primary'}
+            </button>
+            <button
+              type="button"
+              className="ulisting-remove-btn"
+              onClick={() => removeImage(index)}
+              title="Remove image"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="ulisting-image-info">
+            <span>
+              {index === 0 ? '🏆 Main' : `#${index + 1}`} • 
+              {(previewObj.size / 1024 / 1024).toFixed(1)}MB
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
         </div>
 
         {/* Pricing Tab - COMPLETE */}

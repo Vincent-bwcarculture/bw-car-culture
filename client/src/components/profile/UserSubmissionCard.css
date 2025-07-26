@@ -1,44 +1,94 @@
 /* client/src/components/profile/UserSubmissionCard.css */
-/* Styles for the separated UserSubmissionCard component */
+/* Enhanced Modern Card Design for UserSubmissionCard */
 
-/* ===== SUBMISSION CARD ===== */
+:root {
+  --usc-bg-primary: #1a1a1a;
+  --usc-bg-secondary: #2a2a2a;
+  --usc-bg-tertiary: #3a3a3a;
+  --usc-bg-quaternary: #4a4a4a;
+  --usc-text-primary: #ffffff;
+  --usc-text-secondary: #b3b3b3;
+  --usc-text-tertiary: #888888;
+  --usc-border-color: #333333;
+  --usc-accent-color: #ff6b35;
+  --usc-accent-hover: #e55a2b;
+  --usc-success-color: #10b981;
+  --usc-warning-color: #f59e0b;
+  --usc-error-color: #ef4444;
+  --usc-info-color: #3b82f6;
+  --usc-border-radius: 12px;
+  --usc-border-radius-sm: 8px;
+  --usc-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --usc-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --usc-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+  --usc-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== MAIN SUBMISSION CARD ===== */
 .usc-submission-card {
-  background: var(--uprofile-bg-primary, rgba(18, 18, 18, 0.95));
-  border: 1px solid var(--uprofile-border-color, rgba(255, 255, 255, 0.1));
-  border-radius: var(--uprofile-border-radius, 12px);
+  background: var(--usc-bg-secondary);
+  border: 1px solid var(--usc-border-color);
+  border-radius: var(--usc-border-radius);
+  box-shadow: var(--usc-shadow);
+  transition: var(--usc-transition);
   overflow: hidden;
-  box-shadow: var(--uprofile-shadow-lg, 0 8px 25px rgba(0, 0, 0, 0.5));
-  transition: var(--uprofile-transition, all 0.3s ease);
+  position: relative;
+  margin-bottom: 1.5rem;
 }
 
 .usc-submission-card:hover {
-  box-shadow: var(--uprofile-shadow-hover, 0 6px 20px rgba(0, 0, 0, 0.4));
-  transform: translateY(-1px);
-  border-color: var(--uprofile-primary-accent, #ff3300);
+  border-color: var(--usc-accent-color);
+  box-shadow: var(--usc-shadow-hover);
+  transform: translateY(-2px);
 }
 
+.usc-submission-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--usc-accent-color), var(--usc-success-color));
+  opacity: 0;
+  transition: var(--usc-transition);
+}
+
+.usc-submission-card:hover::before {
+  opacity: 1;
+}
+
+/* ===== MAIN LAYOUT ===== */
 .usc-submission-main {
-  display: flex;
-  padding: 1.5rem;
-  gap: 1rem;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  padding: 0;
+  align-items: start;
 }
 
+/* ===== IMAGE SECTION ===== */
 .usc-submission-image {
-  flex-shrink: 0;
-  width: 120px;
-  height: 90px;
   position: relative;
-  border-radius: 6px;
+  width: 100%;
+  height: 200px;
+  border-radius: 0;
   overflow: hidden;
-  background-color: var(--uprofile-bg-tertiary, rgba(35, 35, 35, 0.85));
+  background: linear-gradient(135deg, var(--usc-bg-tertiary), var(--usc-bg-quaternary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .usc-car-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 6px;
+  transition: var(--usc-transition);
+}
+
+.usc-submission-card:hover .usc-car-image {
+  transform: scale(1.05);
 }
 
 .usc-image-placeholder {
@@ -48,56 +98,131 @@
   justify-content: center;
   width: 100%;
   height: 100%;
-  color: var(--uprofile-text-light, #64748b);
-  font-size: 0.75rem;
-  background-color: var(--uprofile-bg-tertiary, rgba(35, 35, 35, 0.85));
-  border: 2px dashed var(--uprofile-border-color, rgba(255, 255, 255, 0.1));
-  border-radius: 6px;
+  color: var(--usc-text-tertiary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: linear-gradient(135deg, var(--usc-bg-tertiary), var(--usc-bg-quaternary));
+  border: 2px dashed var(--usc-border-color);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.usc-image-placeholder svg {
+  margin-bottom: 0.5rem;
+  opacity: 0.6;
 }
 
 .usc-image-placeholder.usc-hidden {
   display: none;
 }
 
+/* ===== CONTENT SECTION ===== */
 .usc-submission-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
   flex: 1;
-  min-width: 0;
 }
 
+/* ===== HEADER SECTION ===== */
 .usc-submission-header {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
+  justify-content: space-between;
   gap: 1rem;
+  margin-bottom: 0;
 }
 
 .usc-submission-title {
-  color: var(--uprofile-text-primary, #ffffff);
+  color: var(--usc-text-primary);
   margin: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   line-height: 1.3;
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .usc-free-label {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, var(--usc-success-color), #059669);
   color: white;
-  font-size: 0.625rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--usc-border-radius-sm);
+  font-size: 0.6875rem;
   font-weight: 700;
-  padding: 0.125rem 0.375rem;
-  border-radius: 8px;
-  margin-left: 0.5rem;
-  animation: pulse 2s infinite;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: glow 2s ease-in-out infinite alternate;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
 }
 
-/* ===== SUBMISSION DETAILS ===== */
+@keyframes glow {
+  from { box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2); }
+  to { box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4), 0 0 12px rgba(16, 185, 129, 0.2); }
+}
+
+/* ===== STATUS BADGES ===== */
+.vm-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: 1px solid;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--status-color);
+  background-color: var(--status-bg);
+  border-color: var(--status-border);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.vm-status-badge[data-status="pending_review"] {
+  --status-color: #d97706;
+  --status-bg: rgba(245, 158, 11, 0.1);
+  --status-border: rgba(245, 158, 11, 0.3);
+}
+
+.vm-status-badge[data-status="approved"] {
+  --status-color: #059669;
+  --status-bg: rgba(16, 185, 129, 0.1);
+  --status-border: rgba(16, 185, 129, 0.3);
+}
+
+.vm-status-badge[data-status="rejected"] {
+  --status-color: #dc2626;
+  --status-bg: rgba(239, 68, 68, 0.1);
+  --status-border: rgba(239, 68, 68, 0.3);
+}
+
+.vm-status-badge[data-status="listing_created"] {
+  --status-color: #2563eb;
+  --status-bg: rgba(59, 130, 246, 0.1);
+  --status-border: rgba(59, 130, 246, 0.3);
+}
+
+.vm-status-badge[data-status="payment_pending"] {
+  --status-color: #7c3aed;
+  --status-bg: rgba(124, 58, 237, 0.1);
+  --status-border: rgba(124, 58, 237, 0.3);
+}
+
+/* ===== DETAILS SECTION ===== */
 .usc-submission-details {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+  background: var(--usc-bg-tertiary);
+  padding: 1rem;
+  border-radius: var(--usc-border-radius-sm);
+  border: 1px solid var(--usc-border-color);
 }
 
 .usc-detail-row {
@@ -105,258 +230,470 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.875rem;
+  padding: 0.375rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.usc-detail-row:last-child {
+  border-bottom: none;
 }
 
 .usc-detail-label {
-  color: var(--uprofile-text-secondary, #c9c9c9);
+  color: var(--usc-text-secondary);
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.usc-detail-label::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: var(--usc-accent-color);
+  border-radius: 50%;
 }
 
 .usc-detail-value {
-  color: var(--uprofile-text-primary, #ffffff);
+  color: var(--usc-text-primary);
   font-weight: 600;
   text-align: right;
 }
 
 .usc-detail-value.usc-price {
-  color: var(--uprofile-success-green, #10b981);
-  font-size: 1rem;
+  color: var(--usc-success-color);
+  font-size: 1.125rem;
   font-weight: 700;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
 }
 
-/* ===== ACTION BUTTONS ===== */
+/* ===== ACTION BUTTONS SECTION ===== */
 .usc-submission-actions {
   display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--usc-bg-tertiary);
+  border-top: 1px solid var(--usc-border-color);
+  margin: 0;
+}
+
+.usc-primary-actions {
+  display: flex;
   gap: 0.75rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--uprofile-border-color, rgba(255, 255, 255, 0.1));
   flex-wrap: wrap;
+}
+
+.usc-secondary-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== ENHANCED BUTTON STYLES ===== */
+.usc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: var(--usc-border-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--usc-transition);
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-height: 44px;
+}
+
+.usc-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: var(--usc-transition);
+}
+
+.usc-btn:hover::before {
+  left: 100%;
+}
+
+.usc-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.usc-btn:disabled::before {
+  display: none;
 }
 
 .usc-btn-small {
   padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border-radius: var(--uprofile-border-radius-sm, 6px);
-  border: none;
-  cursor: pointer;
-  transition: var(--uprofile-transition, all 0.3s ease);
+  font-size: 0.8125rem;
+  min-height: 38px;
+}
+
+/* Button Variants */
+.usc-btn-primary {
+  background: linear-gradient(135deg, var(--usc-accent-color), var(--usc-accent-hover));
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+}
+
+.usc-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--usc-accent-hover), #cc4925);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+}
+
+.usc-btn-secondary {
+  background: var(--usc-bg-quaternary);
+  color: var(--usc-text-primary);
+  border: 1px solid var(--usc-border-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.usc-btn-secondary:hover:not(:disabled) {
+  background: var(--usc-bg-tertiary);
+  border-color: var(--usc-accent-color);
+  color: var(--usc-accent-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.1);
+}
+
+.usc-btn-warning {
+  background: linear-gradient(135deg, var(--usc-warning-color), #d97706);
+  color: white;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+}
+
+.usc-btn-warning:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+}
+
+.usc-btn-success {
+  background: linear-gradient(135deg, var(--usc-success-color), #059669);
+  color: white;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+}
+
+.usc-btn-success:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
+/* ===== STATUS INDICATORS ===== */
+.usc-status-indicator {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  text-decoration: none;
-  white-space: nowrap;
-  min-height: 36px;
+  padding: 0.5rem 1rem;
+  border-radius: var(--usc-border-radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  background: var(--usc-bg-quaternary);
+  color: var(--usc-text-secondary);
+  border: 1px solid var(--usc-border-color);
 }
 
-/* Primary button - View Listing */
-.usc-btn-primary.usc-btn-small {
-  background: var(--uprofile-primary-accent, #ff3300);
-  color: white;
-  box-shadow: 0 2px 4px rgba(255, 51, 0, 0.2);
+.usc-status-indicator.usc-status-error {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--usc-error-color);
+  color: #f87171;
 }
 
-.usc-btn-primary.usc-btn-small:hover:not(:disabled) {
-  background: var(--uprofile-primary-accent-dark, #e62e00);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(255, 51, 0, 0.3);
+.usc-status-indicator.usc-status-success {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--usc-success-color);
+  color: #4ade80;
 }
 
-/* Secondary button - Update Listing */
-.usc-btn-secondary.usc-btn-small {
-  background: var(--uprofile-bg-tertiary, rgba(255, 255, 255, 0.1));
-  color: var(--uprofile-text-primary, #ffffff);
-  border: 1px solid var(--uprofile-border-color, rgba(255, 255, 255, 0.2));
+.usc-status-indicator.usc-status-live {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--usc-info-color);
+  color: #60a5fa;
 }
 
-.usc-btn-secondary.usc-btn-small:hover:not(:disabled) {
-  background: var(--uprofile-bg-secondary, rgba(255, 255, 255, 0.15));
-  border-color: var(--uprofile-primary-accent, #ff3300);
-  color: var(--uprofile-primary-accent, #ff3300);
-  transform: translateY(-1px);
-}
-
-/* Warning button - Resubmit */
-.usc-btn-warning.usc-btn-small {
-  background: var(--uprofile-warning-orange, #f59e0b);
-  color: white;
-  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
-}
-
-.usc-btn-warning.usc-btn-small:hover:not(:disabled) {
-  background: #d97706;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
-}
-
-/* Disabled state */
-.usc-btn-small:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.usc-btn-small:disabled:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-/* ===== PLAN DETAILS ===== */
+/* ===== PLAN DETAILS SECTION ===== */
 .usc-plan-details {
+  background: var(--usc-bg-tertiary);
+  border: 1px solid var(--usc-border-color);
+  border-radius: var(--usc-border-radius-sm);
+  padding: 1.25rem;
   margin-top: 1rem;
-  padding: 1rem;
-  background: var(--uprofile-bg-secondary, rgba(255, 255, 255, 0.05));
-  border-radius: var(--uprofile-border-radius-sm, 8px);
-  border: 1px solid var(--uprofile-border-color, rgba(255, 255, 255, 0.1));
 }
 
 .usc-plan-header h5 {
-  color: var(--uprofile-text-primary, #ffffff);
   margin: 0 0 1rem 0;
-  font-size: 0.9rem;
-  font-weight: 600;
+  color: var(--usc-text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--usc-accent-color);
+  padding-bottom: 0.5rem;
 }
 
 .usc-plan-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: var(--uprofile-primary-accent, #ff3300);
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--usc-accent-color);
   color: white;
+  box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
 }
 
 .usc-plan-badge.usc-free-plan {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, var(--usc-success-color), #059669);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
 }
 
 .usc-selected-addons {
-  margin: 0.75rem 0;
+  margin: 1rem 0;
 }
 
 .usc-addons-label {
-  color: var(--uprofile-text-secondary, #c9c9c9);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
+  color: var(--usc-text-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .usc-addons-list {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: 0.5rem;
 }
 
 .usc-addon-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem;
-  background: var(--uprofile-bg-tertiary, rgba(255, 255, 255, 0.05));
-  border-radius: 6px;
-  font-size: 0.8125rem;
+  padding: 0.75rem;
+  background: var(--usc-bg-quaternary);
+  border-radius: var(--usc-border-radius-sm);
+  border: 1px solid var(--usc-border-color);
+  font-size: 0.875rem;
+  transition: var(--usc-transition);
+}
+
+.usc-addon-item:hover {
+  border-color: var(--usc-accent-color);
+  background: var(--usc-bg-tertiary);
 }
 
 .usc-addon-name {
-  color: var(--uprofile-text-primary, #ffffff);
-  font-weight: 500;
+  color: var(--usc-text-primary);
+  font-weight: 600;
 }
 
 .usc-addon-price {
-  color: var(--uprofile-success-green, #10b981);
-  font-weight: 600;
+  color: var(--usc-success-color);
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
 }
 
 .usc-plan-pricing {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
 .usc-pricing-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.usc-pricing-row:last-child {
+  border-bottom: none;
 }
 
 .usc-pricing-row.usc-total-row {
-  padding-top: 0.5rem;
+  padding-top: 1rem;
   margin-top: 0.5rem;
-  border-top: 1px solid var(--uprofile-border-color, rgba(255, 255, 255, 0.1));
+  border-top: 2px solid var(--usc-accent-color);
+  border-bottom: none;
 }
 
 .usc-pricing-label {
-  color: var(--uprofile-text-secondary, #c9c9c9);
+  color: var(--usc-text-secondary);
   font-weight: 500;
 }
 
 .usc-pricing-value {
-  color: var(--uprofile-text-primary, #ffffff);
-  font-weight: 600;
-}
-
-.usc-pricing-value.usc-total-price {
-  font-size: 1rem;
+  color: var(--usc-text-primary);
   font-weight: 700;
 }
 
-.usc-pricing-value.usc-free-total {
-  color: var(--uprofile-success-green, #10b981);
+.usc-pricing-value.usc-total-price {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--usc-success-color);
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
 }
 
-.usc-pricing-loading {
+.usc-pricing-value.usc-free-total {
+  color: var(--usc-success-color);
+  font-weight: 900;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+/* ===== EDIT HISTORY & ADMIN REVIEW SECTIONS ===== */
+.usc-edit-history,
+.usc-admin-review {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--usc-bg-quaternary);
+  border-radius: var(--usc-border-radius-sm);
+  border: 1px solid var(--usc-border-color);
+}
+
+.usc-edit-header,
+.usc-admin-header {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--usc-border-color);
+}
+
+.usc-edit-header h5,
+.usc-admin-header h5 {
+  margin: 0;
+  color: var(--usc-text-primary);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.usc-edit-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.usc-edit-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.usc-edit-date {
+  color: var(--usc-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.usc-edit-note {
+  color: var(--usc-text-tertiary);
+  font-size: 0.75rem;
+  font-style: italic;
+  padding-left: 1rem;
+  border-left: 3px solid var(--usc-accent-color);
+  margin-top: 0.25rem;
+}
+
+.usc-review-indicator {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--uprofile-text-secondary, #c9c9c9);
-  font-size: 0.8125rem;
+  gap: 0.375rem;
+  color: var(--usc-accent-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.usc-small-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--uprofile-border-color, rgba(255, 255, 255, 0.1));
-  border-top: 2px solid var(--uprofile-primary-accent, #ff3300);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+.usc-admin-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.usc-admin-notes {
+  margin: 0;
+  color: var(--usc-text-primary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  padding: 0.75rem;
+  background: var(--usc-bg-tertiary);
+  border-radius: var(--usc-border-radius-sm);
+  border-left: 4px solid var(--usc-warning-color);
+}
+
+.usc-review-date {
+  color: var(--usc-text-tertiary);
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 /* ===== STATUS MESSAGES ===== */
 .usc-submission-status {
-  border-top: 1px solid var(--uprofile-border-color, rgba(255, 255, 255, 0.1));
+  background: var(--usc-bg-tertiary);
+  border-top: 1px solid var(--usc-border-color);
+  padding: 1.25rem;
 }
 
 .usc-status-message {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  font-size: 0.875rem;
+  gap: 1rem;
+  margin: 0;
 }
 
 .usc-status-pending {
   background: rgba(245, 158, 11, 0.1);
-  border-left: 4px solid #f59e0b;
+  border-left: 4px solid var(--usc-warning-color);
+  border-radius: var(--usc-border-radius-sm);
+  padding: 1rem;
 }
 
 .usc-status-approved {
   background: rgba(16, 185, 129, 0.1);
-  border-left: 4px solid #10b981;
+  border-left: 4px solid var(--usc-success-color);
+  border-radius: var(--usc-border-radius-sm);
+  padding: 1rem;
 }
 
 .usc-status-live {
   background: rgba(59, 130, 246, 0.1);
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--usc-info-color);
+  border-radius: var(--usc-border-radius-sm);
+  padding: 1rem;
 }
 
 .usc-status-rejected {
   background: rgba(239, 68, 68, 0.1);
-  border-left: 4px solid #ef4444;
+  border-left: 4px solid var(--usc-error-color);
+  border-radius: var(--usc-border-radius-sm);
+  padding: 1rem;
 }
 
 .usc-message-content {
@@ -367,50 +704,63 @@
 }
 
 .usc-status-text {
-  color: var(--uprofile-text-primary, #ffffff);
-  font-weight: 500;
+  color: var(--usc-text-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
 }
 
 .usc-review-time {
-  color: var(--uprofile-text-secondary, #c9c9c9);
+  color: var(--usc-text-secondary);
   font-weight: 400;
+  font-size: 0.8125rem;
 }
 
 .usc-free-status-note {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  color: var(--uprofile-success-green, #10b981);
+  gap: 0.5rem;
+  color: var(--usc-success-color);
   font-size: 0.8125rem;
-  font-weight: 500;
-}
-
-.usc-admin-notes {
-  font-style: italic;
-  color: var(--uprofile-text-secondary, #c9c9c9);
+  font-weight: 600;
+  margin-top: 0.5rem;
 }
 
 .usc-payment-instructions {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  color: var(--uprofile-text-secondary, #c9c9c9);
+  gap: 0.5rem;
+  color: var(--usc-text-secondary);
   font-size: 0.8125rem;
+  margin-top: 0.5rem;
 }
 
 .usc-free-live-info {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
   font-size: 0.8125rem;
-  color: var(--uprofile-text-secondary, #c9c9c9);
+  color: var(--usc-text-secondary);
 }
 
-/* ===== ANIMATIONS ===== */
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+/* ===== LOADING STATES ===== */
+.usc-pricing-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--usc-text-secondary);
+  font-size: 0.875rem;
+  padding: 1rem;
+  justify-content: center;
+}
+
+.usc-small-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--usc-border-color);
+  border-top: 2px solid var(--usc-accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -419,22 +769,51 @@
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1200px) {
+  .usc-submission-main {
+    grid-template-columns: 240px 1fr;
+    gap: 1.25rem;
+  }
+  
+  .usc-submission-image {
+    height: 180px;
+  }
+}
+
+@media (max-width: 968px) {
+  .usc-submission-main {
+    grid-template-columns: 200px 1fr;
+    gap: 1rem;
+  }
+  
+  .usc-submission-image {
+    height: 150px;
+  }
+  
+  .usc-submission-title {
+    font-size: 1.125rem;
+  }
+}
+
 @media (max-width: 768px) {
   .usc-submission-main {
-    flex-direction: column;
-    gap: 1rem;
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 
   .usc-submission-image {
-    width: 100%;
-    height: 200px;
-    align-self: center;
+    height: 240px;
+    border-radius: 0;
+  }
+
+  .usc-submission-content {
+    padding: 1.25rem;
   }
 
   .usc-submission-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.75rem;
+    gap: 1rem;
   }
 
   .usc-submission-details {
@@ -444,400 +823,43 @@
   .usc-detail-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.25rem;
+    gap: 0.375rem;
+    padding: 0.5rem 0;
   }
 
   .usc-detail-value {
     text-align: left;
   }
 
-  .usc-submission-actions {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .usc-btn-small {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .usc-plan-details {
-    margin-top: 0.75rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .usc-submission-main {
-    padding: 1rem;
-  }
-
-  .usc-submission-actions {
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-  }
-
-  .usc-btn-small {
-    padding: 0.45rem 0.75rem;
-    font-size: 0.8125rem;
-    min-height: 32px;
-  }
-
-  .usc-plan-details {
-    padding: 0.75rem;
-  }
-
-  .usc-status-message {
-    padding: 0.75rem 1rem;
-  }
-}
-
-/* ===== STATUS BADGES (from parent component) ===== */
-.vm-status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid;
-  flex-shrink: 0;
-  color: var(--status-color);
-  background-color: var(--status-bg);
-  border-color: var(--status-border);
-}
-
-.vm-status-badge[data-status="pending_review"] {
-  --status-color: var(--uprofile-warning-orange, #f59e0b);
-  --status-bg: rgba(245, 158, 11, 0.1);
-  --status-border: rgba(245, 158, 11, 0.2);
-}
-
-.vm-status-badge[data-status="approved"] {
-  --status-color: var(--uprofile-success-green, #10b981);
-  --status-bg: rgba(16, 185, 129, 0.1);
-  --status-border: rgba(16, 185, 129, 0.2);
-}
-
-.vm-status-badge[data-status="rejected"] {
-  --status-color: var(--uprofile-error-red, #ef4444);
-  --status-bg: rgba(239, 68, 68, 0.1);
-  --status-border: rgba(239, 68, 68, 0.2);
-}
-
-.vm-status-badge[data-status="listing_created"] {
-  --status-color: var(--uprofile-info-blue, #3b82f6);
-  --status-bg: rgba(59, 130, 246, 0.1);
-  --status-border: rgba(59, 130, 246, 0.2);
-}
-
-.vm-status-badge[data-status="payment_pending"] {
-  --status-color: #7c3aed;
-  --status-bg: rgba(124, 58, 237, 0.1);
-  --status-border: rgba(124, 58, 237, 0.2);
-}
-
-/* Add these enhanced styles to your UserSubmissionCard.css */
-
-/* ===== ENHANCED PRIMARY ACTIONS SECTION ===== */
-.usc-primary-actions {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.75rem;
-}
-
-.usc-secondary-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 0.5rem;
-}
-
-/* ===== ENHANCED BUTTON STYLES ===== */
-.usc-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.875rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  white-space: nowrap;
-}
-
-.usc-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-.usc-btn-small {
-  padding: 0.375rem 0.75rem;
-  font-size: 0.8125rem;
-  min-height: 32px;
-}
-
-/* Button Type Variations */
-.usc-btn-primary {
-  background: linear-gradient(135deg, #ff6b35, #e55a2b);
-  color: white;
-}
-
-.usc-btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #e55a2b, #cc4925);
-  transform: translateY(-1px);
-}
-
-.usc-btn-secondary {
-  background: var(--bg-tertiary, #3a3a3a);
-  color: var(--text-primary, #ffffff);
-  border: 1px solid var(--border-color, #333);
-}
-
-.usc-btn-secondary:hover:not(:disabled) {
-  background: var(--bg-quaternary, #4a4a4a);
-  transform: translateY(-1px);
-}
-
-.usc-btn-warning {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: white;
-}
-
-.usc-btn-warning:hover:not(:disabled) {
-  background: linear-gradient(135deg, #d97706, #b45309);
-  transform: translateY(-1px);
-}
-
-.usc-btn-success {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-}
-
-.usc-btn-success:hover:not(:disabled) {
-  background: linear-gradient(135deg, #059669, #047857);
-  transform: translateY(-1px);
-}
-
-/* ===== STATUS INDICATORS ===== */
-.usc-status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  background: var(--bg-tertiary, #3a3a3a);
-  color: var(--text-secondary, #b3b3b3);
-  border: 1px solid var(--border-color, #333);
-}
-
-.usc-status-indicator.usc-status-error {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: #dc2626;
-  color: #f87171;
-}
-
-.usc-status-indicator.usc-status-success {
-  background: rgba(34, 197, 94, 0.1);
-  border-color: #16a34a;
-  color: #4ade80;
-}
-
-.usc-status-indicator.usc-status-live {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: #2563eb;
-  color: #60a5fa;
-}
-
-/* ===== EDIT HISTORY SECTION ===== */
-.usc-edit-history {
-  margin-top: 1rem;
-  padding: 0.875rem;
-  background: var(--bg-tertiary, #3a3a3a);
-  border-radius: 6px;
-  border: 1px solid var(--border-color, #333);
-}
-
-.usc-edit-header {
-  margin-bottom: 0.5rem;
-}
-
-.usc-edit-header h5 {
-  margin: 0;
-  color: var(--text-primary, #ffffff);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.usc-edit-item {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.usc-edit-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.usc-edit-date {
-  color: var(--text-secondary, #b3b3b3);
-  font-size: 0.8125rem;
-  font-weight: 500;
-}
-
-.usc-edit-note {
-  color: var(--text-tertiary, #888);
-  font-size: 0.75rem;
-  font-style: italic;
-  padding-left: 0.75rem;
-  border-left: 2px solid var(--border-color, #333);
-}
-
-.usc-review-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: var(--accent-color, #ff6b35);
-  font-size: 0.75rem;
-  font-weight: 500;
-  flex-shrink: 0;
-}
-
-/* ===== ADMIN REVIEW SECTION ===== */
-.usc-admin-review {
-  margin-top: 1rem;
-  padding: 0.875rem;
-  background: var(--bg-tertiary, #3a3a3a);
-  border-radius: 6px;
-  border: 1px solid var(--border-color, #333);
-}
-
-.usc-admin-header {
-  margin-bottom: 0.5rem;
-}
-
-.usc-admin-header h5 {
-  margin: 0;
-  color: var(--text-primary, #ffffff);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.usc-admin-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.usc-admin-notes {
-  margin: 0;
-  color: var(--text-secondary, #b3b3b3);
-  font-size: 0.8125rem;
-  line-height: 1.4;
-}
-
-.usc-review-date {
-  color: var(--text-tertiary, #888);
-  font-size: 0.75rem;
-}
-
-/* ===== ENHANCED FREE TIER STYLES ===== */
-.usc-free-label {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-  padding: 0.125rem 0.375rem;
-  border-radius: 4px;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  margin-left: 0.5rem;
-}
-
-.usc-free-plan {
-  background: linear-gradient(135deg, #10b981, #059669) !important;
-  color: white !important;
-}
-
-.usc-free-total {
-  color: #10b981 !important;
-  font-weight: 700;
-}
-
-/* ===== LOADING STATES ===== */
-.usc-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.usc-btn:disabled:hover {
-  transform: none !important;
-  background: inherit;
-}
-
-/* ===== TOOLTIPS FOR BUTTONS ===== */
-.usc-btn[title]:hover::after {
-  content: attr(title);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--bg-primary, #1a1a1a);
-  color: var(--text-primary, #ffffff);
-  padding: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid var(--border-color, #333);
-  font-size: 0.75rem;
-  white-space: nowrap;
-  z-index: 1000;
-  margin-bottom: 0.25rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* ===== RESPONSIVE DESIGN FOR ACTIONS ===== */
-@media (max-width: 768px) {
-  .usc-submission-actions {
-    padding: 0.75rem;
-    gap: 0.5rem;
-  }
-
   .usc-primary-actions {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   .usc-btn {
+    width: 100%;
     justify-content: center;
-    min-height: 40px;
+    min-height: 48px;
   }
 
-  .usc-secondary-actions {
+  .usc-submission-actions {
+    padding: 1rem;
+  }
+
+  .usc-plan-details {
     margin-top: 0.75rem;
-  }
-
-  .usc-status-indicator {
-    font-size: 0.75rem;
-    padding: 0.3125rem 0.625rem;
+    padding: 1rem;
   }
 
   .usc-edit-history,
   .usc-admin-review {
-    padding: 0.75rem;
+    padding: 1rem;
+    margin-top: 0.75rem;
   }
 
   .usc-edit-item {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   .usc-review-indicator {
@@ -846,145 +868,111 @@
 }
 
 @media (max-width: 480px) {
-  .usc-submission-actions {
-    padding: 0.625rem;
+  .usc-submission-content {
+    padding: 1rem;
+  }
+
+  .usc-submission-image {
+    height: 200px;
+  }
+
+  .usc-submission-title {
+    font-size: 1rem;
   }
 
   .usc-btn {
-    padding: 0.5rem 0.75rem;
+    padding: 0.625rem 1rem;
     font-size: 0.8125rem;
+    min-height: 44px;
   }
 
   .usc-btn-small {
-    padding: 0.4375rem 0.625rem;
+    padding: 0.5rem 0.875rem;
     font-size: 0.75rem;
-    min-height: 36px;
+    min-height: 40px;
+  }
+
+  .usc-submission-actions {
+    padding: 0.875rem;
   }
 
   .usc-status-indicator {
-    font-size: 0.6875rem;
-    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
   }
 
+  .usc-plan-details,
   .usc-edit-history,
   .usc-admin-review {
-    padding: 0.625rem;
-    margin-top: 0.75rem;
-  }
-
-  .usc-edit-note {
-    padding-left: 0.5rem;
+    padding: 0.875rem;
   }
 
   .usc-free-label {
     font-size: 0.625rem;
-    padding: 0.09375rem 0.3125rem;
+    padding: 0.1875rem 0.375rem;
   }
-}
 
-/* ===== ENHANCED PLAN DETAILS ===== */
-.usc-plan-details {
-  margin-top: 1rem;
-  border-top: 1px solid var(--border-color, #333);
-  padding-top: 1rem;
-}
-
-.usc-plan-header h5 {
-  margin: 0 0 0.75rem 0;
-  color: var(--text-primary, #ffffff);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-/* ===== IMPROVED SUBMISSION LAYOUT ===== */
-.usc-submission-card {
-  background: var(--bg-secondary, #2a2a2a);
-  border: 1px solid var(--border-color, #333);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.usc-submission-card:hover {
-  border-color: var(--accent-color, #ff6b35);
-  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.1);
-}
-
-.usc-submission-main {
-  display: flex;
-  flex-direction: column;
-}
-
-.usc-submission-content {
-  padding: 1.25rem;
-  flex: 1;
-}
-
-.usc-submission-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-color, #333);
-}
-
-/* ===== ENHANCED STATUS MESSAGES ===== */
-.usc-submission-status {
-  background: var(--bg-tertiary, #3a3a3a);
-  border-top: 1px solid var(--border-color, #333);
-  padding: 1rem;
-}
-
-.usc-status-message {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  margin: 0;
-}
-
-.usc-message-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  .usc-submission-status {
+    padding: 1rem;
+  }
 }
 
 /* ===== ACCESSIBILITY IMPROVEMENTS ===== */
 .usc-btn:focus {
-  outline: 2px solid var(--accent-color, #ff6b35);
+  outline: 2px solid var(--usc-accent-color);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
 }
 
 .usc-btn:focus:not(:focus-visible) {
   outline: none;
+  box-shadow: inherit;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .usc-submission-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #333;
+  }
+
+  .usc-submission-actions,
+  .usc-btn {
+    display: none;
+  }
+
+  .usc-submission-main {
+    grid-template-columns: 1fr;
+  }
+
+  .usc-submission-image {
+    height: 200px;
+  }
 }
 
 /* ===== DARK THEME ENHANCEMENTS ===== */
 @media (prefers-color-scheme: dark) {
+  :root {
+    --usc-bg-primary: #0a0a0a;
+    --usc-bg-secondary: #1a1a1a;
+    --usc-bg-tertiary: #2a2a2a;
+    --usc-bg-quaternary: #3a3a3a;
+  }
+}
+
+/* ===== HIGH CONTRAST MODE ===== */
+@media (prefers-contrast: high) {
   .usc-submission-card {
-    background: #1a1a1a;
-    border-color: #333;
+    border-width: 2px;
   }
 
-  .usc-btn-secondary {
-    background: #333;
-    border-color: #444;
+  .usc-btn {
+    border: 2px solid currentColor;
   }
 
-  .usc-btn-secondary:hover:not(:disabled) {
-    background: #444;
-  }
-
-  .usc-edit-history,
-  .usc-admin-review {
-    background: #333;
-    border-color: #444;
-  }
-
-  .usc-status-indicator {
-    background: #333;
-    border-color: #444;
+  .usc-detail-label::before {
+    width: 6px;
+    height: 6px;
   }
 }
