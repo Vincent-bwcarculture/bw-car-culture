@@ -893,38 +893,19 @@ const handleFormSubmit = async (e) => {
     console.log(`📤 Starting submission with ${imageFiles?.length || 0} images`);
 
     // ========================================
-    // STEP 1: Upload images if any - SINGLE UPLOAD LOGIC
+    // STEP 1: Upload images if any - WITH PRIMARY IMAGE REORDERING
     // ========================================
     let uploadedImages = [];
     
     if (imageFiles && imageFiles.length > 0) {
-      showMessage('info', `Uploading ${imageFiles.length} images in order...`);
+      showMessage('info', `Uploading ${imageFiles.length} images...`);
       
       try {
         const formDataUpload = new FormData();
-        
-        // Handle both file structures - check if imageFiles contains file objects or direct File objects
-        imageFiles.forEach((fileItem, index) => {
-          let actualFile;
-          let fileName;
-          
-          if (fileItem instanceof File) {
-            // Direct File object
-            actualFile = fileItem;
-            fileName = fileItem.name;
-          } else if (fileItem.file instanceof File) {
-            // File object wrapper (new structure)
-            actualFile = fileItem.file;
-            fileName = fileItem.name || fileItem.file.name;
-          } else {
-            console.error(`Invalid file at index ${index}:`, fileItem);
-            return;
-          }
-          
-          formDataUpload.append(`image${index}`, actualFile);
-          console.log(`📎 Added file ${index}: ${fileName} (${(actualFile.size / 1024 / 1024).toFixed(2)}MB)`);
+        imageFiles.forEach((file, index) => {
+          formDataUpload.append(`image${index}`, file);
+          console.log(`📎 Added file ${index}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
         });
-        
         formDataUpload.append('folder', 'user-listings');
 
         console.log('🔄 Uploading to /api/user/upload-images...');
@@ -952,17 +933,35 @@ const handleFormSubmit = async (e) => {
           throw new Error(uploadResult.message || 'Image upload failed - no images returned');
         }
 
-        uploadedImages = uploadResult.images.map((img, index) => ({
-          url: img.url,
-          key: img.key,
-          thumbnail: img.thumbnail || img.url,
-          isPrimary: index === primaryImageIndex,
-          originalIndex: index,
-          uploadOrder: index
-        }));
+        // FIXED: Reorder images so primary image comes first
+        const reorderedImages = [];
         
-        console.log(`✅ Images uploaded successfully: ${uploadedImages.length} images in correct order`);
-        console.log(`🏆 Primary image: ${uploadedImages[primaryImageIndex]?.url}`);
+        // Add primary image first (this becomes the main/thumbnail image)
+        if (uploadResult.images[primaryImageIndex]) {
+          reorderedImages.push({
+            ...uploadResult.images[primaryImageIndex],
+            isPrimary: true,
+            displayOrder: 0,
+            originalIndex: primaryImageIndex
+          });
+          console.log(`🏆 Primary image (now main): ${uploadResult.images[primaryImageIndex].url}`);
+        }
+        
+        // Add all other images in their original order (except the primary one)
+        uploadResult.images.forEach((img, index) => {
+          if (index !== primaryImageIndex) {
+            reorderedImages.push({
+              ...img,
+              isPrimary: false,
+              displayOrder: reorderedImages.length,
+              originalIndex: index
+            });
+          }
+        });
+
+        uploadedImages = reorderedImages;
+        console.log(`✅ Images uploaded successfully: ${uploadedImages.length} images`);
+        console.log(`📋 Image order: Primary first, then others in original order`);
         showMessage('success', `${uploadedImages.length} images uploaded successfully!`);
         
       } catch (uploadError) {
@@ -1141,29 +1140,18 @@ const handleFormSubmit = async (e) => {
         leaseAvailable: formData.priceOptions?.leaseAvailable || false
       },
       
-      // Images with enhanced metadata
+      // Images with enhanced metadata - REORDERED with primary first
       images: uploadedImages || [],
       
       // Enhanced image metadata
-      imageFiles: imageFiles?.map((fileItem, index) => {
-        if (fileItem instanceof File) {
-          return {
-            name: fileItem.name,
-            size: fileItem.size,
-            type: fileItem.type,
-            isPrimary: index === primaryImageIndex
-          };
-        } else if (fileItem.file instanceof File) {
-          return {
-            name: fileItem.name || fileItem.file.name,
-            size: fileItem.size || fileItem.file.size,
-            type: fileItem.file.type,
-            isPrimary: index === primaryImageIndex
-          };
-        }
-        return null;
-      }).filter(Boolean) || [],
-      primaryImageIndex: primaryImageIndex || 0,
+      imageFiles: imageFiles?.map((file, index) => ({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        isPrimary: index === primaryImageIndex
+      })) || [],
+      primaryImageIndex: 0, // Always 0 since we reordered images
+      originalPrimaryImageIndex: primaryImageIndex, // Track original selection
       
       // Profile picture
       profilePicture: formData.profilePicture || '',
@@ -2064,14 +2052,14 @@ const handleFormSubmit = async (e) => {
 </div>
 
           {/* Image previews */}
-  {imagePreviews.length > 0 && (
+{imagePreviews.length > 0 && (
   <div className="ulisting-image-previews">
     <h5>Selected Images ({imagePreviews.length}/15) - In selection order</h5>
     <div className="ulisting-image-grid">
       {imagePreviews.map((previewObj, index) => (
         <div 
-          key={`img_${previewObj.name}_${previewObj.size}_${index}`}
-          className={`ulisting-image-preview ${index === 0 ? 'primary' : ''}`}
+          key={previewObj.name + "_" + index}
+          className={`ulisting-image-preview ${primaryImageIndex === index ? 'primary' : ''}`}
         >
           <img 
             src={previewObj.preview} 
@@ -2088,8 +2076,7 @@ const handleFormSubmit = async (e) => {
               onClick={() => handlePrimaryImageSelect(index)}
               title="Set as primary image"
             >
-              {index === 0 ? '⭐ Main Image' : 
-               primaryImageIndex === index ? '⭐ Primary' : 'Set Primary'}
+              {primaryImageIndex === index ? '⭐ Primary' : 'Set Primary'}
             </button>
             <button
               type="button"
@@ -2102,7 +2089,7 @@ const handleFormSubmit = async (e) => {
           </div>
           <div className="ulisting-image-info">
             <span>
-              {index === 0 ? '🏆 Main' : `#${index + 1}`} • 
+              {primaryImageIndex === index ? '🏆 Primary (Main)' : `#${index + 1}`} • 
               {(previewObj.size / 1024 / 1024).toFixed(1)}MB
             </span>
           </div>
