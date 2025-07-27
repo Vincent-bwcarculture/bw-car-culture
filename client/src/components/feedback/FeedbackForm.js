@@ -58,82 +58,74 @@ const FeedbackForm = ({ onClose, showWhatsAppOption = true }) => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
   
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Simple validation
-    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      setError('Please fill out all required fields');
-      return;
-    }
-    
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-    
-    setLoading(true);
-    setError('');
-    
-    try {
-      // Create FormData for file upload
-      const submitData = new FormData();
-      
-      // Add form fields
-      Object.keys(formData).forEach(key => {
-        if (key === 'pageContext') {
-          submitData.append(key, JSON.stringify(formData[key]));
-        } else {
-          submitData.append(key, formData[key]);
-        }
-      });
-      
-      // Add attachments
-      attachments.forEach(file => {
-        submitData.append('attachments', file);
-      });
-      
-      const response = await http.post('/api/feedback', submitData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      
-      if (response.data.success) {
-        setSuccess(true);
-        // Reset form
-        setFormData({
-          name: '',
-          email: '',
-          feedbackType: 'general',
-          message: '',
-          rating: 5,
-          pageContext: {
-            url: window.location.href,
-            page: window.location.pathname,
-            section: 'feedback'
-          }
-        });
-        setAttachments([]);
-        
-        // Auto-close after 3 seconds if onClose is provided
-        if (onClose) {
-          setTimeout(() => {
-            onClose();
-          }, 3000);
-        }
-      } else {
-        setError(response.data.message || 'Failed to submit feedback');
-      }
-    } catch (err) {
-      console.error('Error submitting feedback:', err);
-      setError(err.response?.data?.message || 'An error occurred while submitting feedback');
-    } finally {
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  // Simple validation
+  if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+    setError('Please fill out all required fields');
+    return;
+  }
+  
+  // Email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(formData.email)) {
+    setError('Please enter a valid email address');
+    return;
+  }
+  
+  setLoading(true);
+  setError('');
+  
+  try {
+    // TEMPORARY: Send as JSON instead of FormData (until we implement proper multipart parsing)
+    if (attachments.length > 0) {
+      // If there are attachments, show a message for now
+      setError('File attachments are temporarily disabled. Please submit without files.');
       setLoading(false);
+      return;
     }
-  };
+    
+    // Send form data as JSON
+    const response = await http.post('/api/feedback', formData, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.data.success) {
+      setSuccess(true);
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        feedbackType: 'general',
+        message: '',
+        rating: 5,
+        pageContext: {
+          url: window.location.href,
+          page: window.location.pathname,
+          section: 'feedback'
+        }
+      });
+      setAttachments([]);
+      
+      // Auto-close after 3 seconds if onClose is provided
+      if (onClose) {
+        setTimeout(() => {
+          onClose();
+        }, 3000);
+      }
+    } else {
+      setError(response.data.message || 'Failed to submit feedback');
+    }
+  } catch (err) {
+    console.error('Error submitting feedback:', err);
+    setError(err.response?.data?.message || 'An error occurred while submitting feedback');
+  } finally {
+    setLoading(false);
+  }
+};
 
   // WhatsApp sharing functionality
   const handleWhatsAppShare = () => {
@@ -261,7 +253,7 @@ Thank you!`;
               onChange={handleChange}
             >
               <option value="general">General Feedback</option>
-              <option value="bug">Bug Report</option>
+              <option value="bug">Bug/Issue Report</option>
               <option value="feature">Feature Request</option>
               <option value="content">Content Feedback</option>
               <option value="design">Design Feedback</option>
