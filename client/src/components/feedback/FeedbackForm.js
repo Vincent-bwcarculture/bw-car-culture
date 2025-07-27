@@ -1,4 +1,6 @@
-// src/components/feedback/FeedbackForm.js
+// Enhanced FeedbackForm.js with WhatsApp integration
+// Replace your existing FeedbackForm.js with this version
+
 import React, { useState, useRef } from 'react';
 import { http } from '../../config/axios.js';
 import './FeedbackForm.css';
@@ -17,12 +19,11 @@ const FeedbackForm = ({ onClose, showWhatsAppOption = true }) => {
     }
   });
   
-  const [attachments, setAttachments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
-  const fileInputRef = useRef(null);
+  const [submissionMethod, setSubmissionMethod] = useState('form'); // 'form' or 'whatsapp'
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,123 +33,106 @@ const FeedbackForm = ({ onClose, showWhatsAppOption = true }) => {
     }));
   };
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    const validFiles = files.filter(file => {
-      const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf', 'text/plain'];
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      
-      if (!validTypes.includes(file.type)) {
-        setError(`File type ${file.type} is not supported. Please use images, PDFs, or text files.`);
-        return false;
-      }
-      
-      if (file.size > maxSize) {
-        setError(`File ${file.name} is too large. Maximum size is 5MB.`);
-        return false;
-      }
-      
-      return true;
-    });
+  // Regular form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     
-    setAttachments(prev => [...prev, ...validFiles].slice(0, 3)); // Max 3 files
-  };
-
-  const removeAttachment = (index) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
-  };
-  
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  // Simple validation
-  if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-    setError('Please fill out all required fields');
-    return;
-  }
-  
-  // Email validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(formData.email)) {
-    setError('Please enter a valid email address');
-    return;
-  }
-  
-  setLoading(true);
-  setError('');
-  
-  try {
-    // TEMPORARY: Send as JSON instead of FormData (until we implement proper multipart parsing)
-    if (attachments.length > 0) {
-      // If there are attachments, show a message for now
-      setError('File attachments are temporarily disabled. Please submit without files.');
-      setLoading(false);
+    // Simple validation
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      setError('Please fill out all required fields');
       return;
     }
     
-    // Send form data as JSON
-    const response = await http.post('/api/feedback', formData, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
     
-    if (response.data.success) {
-      setSuccess(true);
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        feedbackType: 'general',
-        message: '',
-        rating: 5,
-        pageContext: {
-          url: window.location.href,
-          page: window.location.pathname,
-          section: 'feedback'
+    setLoading(true);
+    setError('');
+    
+    try {
+      // Send form data as JSON
+      const response = await http.post('/api/feedback', formData, {
+        headers: {
+          'Content-Type': 'application/json'
         }
       });
-      setAttachments([]);
       
-      // Auto-close after 3 seconds if onClose is provided
-      if (onClose) {
-        setTimeout(() => {
-          onClose();
-        }, 3000);
+      if (response.data.success) {
+        setSuccess(true);
+        setSubmissionMethod('form');
+        
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          feedbackType: 'general',
+          message: '',
+          rating: 5,
+          pageContext: {
+            url: window.location.href,
+            page: window.location.pathname,
+            section: 'feedback'
+          }
+        });
+        
+        // Auto-close after 3 seconds if onClose is provided
+        if (onClose) {
+          setTimeout(() => {
+            onClose();
+          }, 3000);
+        }
+      } else {
+        setError(response.data.message || 'Failed to submit feedback');
       }
-    } else {
-      setError(response.data.message || 'Failed to submit feedback');
+    } catch (err) {
+      console.error('Error submitting feedback:', err);
+      setError(err.response?.data?.message || 'An error occurred while submitting feedback');
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error('Error submitting feedback:', err);
-    setError(err.response?.data?.message || 'An error occurred while submitting feedback');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // WhatsApp sharing functionality
   const handleWhatsAppShare = () => {
+    // Validate required fields first
+    if (!formData.name.trim() || !formData.message.trim()) {
+      setError('Please fill out your name and feedback message before sharing via WhatsApp');
+      return;
+    }
+    
     setShowWhatsAppModal(true);
   };
 
   const sendWhatsAppFeedback = () => {
     const phoneNumber = '+26774122453'; // Your business WhatsApp number
-    const message = `Hi! I'd like to share feedback about your website:
+    
+    // Create formatted message
+    const whatsappMessage = `🔸 *Feedback from ${formData.name}*
 
-*Name:* ${formData.name || 'Not provided'}
-*Email:* ${formData.email || 'Not provided'}
-*Feedback Type:* ${formData.feedbackType}
-*Rating:* ${formData.rating}/5 stars
-*Message:* 
-${formData.message || 'No message provided'}
+📧 *Email:* ${formData.email || 'Not provided'}
+📋 *Type:* ${formData.feedbackType}
+⭐ *Rating:* ${formData.rating}/5 stars
+📝 *Message:*
+${formData.message}
 
-*Page:* ${window.location.href}
+🌐 *From Page:* ${window.location.href}
+📅 *Date:* ${new Date().toLocaleDateString()}
 
-Thank you!`;
+Thank you! 🙏`;
 
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    // Create WhatsApp URL
+    const whatsappUrl = `https://wa.me/${phoneNumber.replace('+', '')}?text=${encodeURIComponent(whatsappMessage)}`;
+    
+    // Open WhatsApp
     window.open(whatsappUrl, '_blank');
+    
+    // Set success state
+    setSuccess(true);
+    setSubmissionMethod('whatsapp');
     setShowWhatsAppModal(false);
     
     // Reset form after WhatsApp sharing
@@ -164,32 +148,38 @@ Thank you!`;
         section: 'feedback'
       }
     });
-    setAttachments([]);
     
     if (onClose) {
       setTimeout(() => {
         onClose();
-      }, 1000);
+      }, 2000);
     }
   };
 
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  // Reset to form view
+  const resetToForm = () => {
+    setSuccess(false);
+    setError('');
+    setShowWhatsAppModal(false);
   };
-  
+
   return (
     <div className="feedback-form-container">
       {success ? (
         <div className="feedback-success-message">
           <div className="success-icon">✅</div>
           <h2>Thank You for Your Feedback!</h2>
-          <p>We appreciate you taking the time to share your thoughts with us. Your feedback helps us improve our services.</p>
+          {submissionMethod === 'whatsapp' ? (
+            <div>
+              <p>Your feedback has been shared via WhatsApp. We'll get back to you soon!</p>
+              <p className="whatsapp-note">💬 Check your WhatsApp to complete sending the message.</p>
+            </div>
+          ) : (
+            <p>We appreciate you taking the time to share your thoughts with us. Your feedback helps us improve our services.</p>
+          )}
+          
           <div className="success-actions">
-            <button onClick={() => setSuccess(false)} className="submit-new-feedback-btn">
+            <button onClick={resetToForm} className="submit-new-feedback-btn">
               Submit Another Feedback
             </button>
             {onClose && (
@@ -197,6 +187,36 @@ Thank you!`;
                 Close
               </button>
             )}
+          </div>
+        </div>
+      ) : showWhatsAppModal ? (
+        <div className="whatsapp-modal">
+          <div className="modal-content">
+            <h3>Share via WhatsApp</h3>
+            <div className="whatsapp-preview">
+              <p><strong>Your feedback will be sent to:</strong></p>
+              <p className="whatsapp-number">📱 +26774122453</p>
+              
+              <div className="message-preview">
+                <h4>Message Preview:</h4>
+                <div className="preview-content">
+                  <p>🔸 <strong>Feedback from {formData.name}</strong></p>
+                  <p>📧 Email: {formData.email || 'Not provided'}</p>
+                  <p>📋 Type: {formData.feedbackType}</p>
+                  <p>⭐ Rating: {formData.rating}/5 stars</p>
+                  <p>📝 Message: {formData.message}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="whatsapp-actions">
+              <button onClick={sendWhatsAppFeedback} className="whatsapp-send-btn">
+                📱 Open WhatsApp
+              </button>
+              <button onClick={() => setShowWhatsAppModal(false)} className="cancel-btn">
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       ) : (
@@ -253,39 +273,35 @@ Thank you!`;
               onChange={handleChange}
             >
               <option value="general">General Feedback</option>
-              <option value="bug">Bug/Issue Report</option>
+              <option value="bug">Bug Report</option>
               <option value="feature">Feature Request</option>
               <option value="content">Content Feedback</option>
               <option value="design">Design Feedback</option>
-              <option value="other">Other</option>
+              <option value="performance">Performance Issue</option>
+              <option value="suggestion">Suggestion</option>
             </select>
           </div>
           
-          <div className="form-group rating-group">
-            <label>How would you rate your experience?</label>
+          <div className="form-group">
+            <label htmlFor="rating">How would you rate your experience?</label>
             <div className="rating-container">
               {[1, 2, 3, 4, 5].map((star) => (
-                <div key={star} className="rating-option">
-                  <input
-                    type="radio"
-                    id={`star${star}`}
-                    name="rating"
-                    value={star}
-                    checked={Number(formData.rating) === star}
-                    onChange={handleChange}
-                  />
-                  <label htmlFor={`star${star}`} className="star-label">
-                    ⭐
-                  </label>
-                </div>
+                <button
+                  key={star}
+                  type="button"
+                  className={`star ${formData.rating >= star ? 'active' : ''}`}
+                  onClick={() => setFormData(prev => ({ ...prev, rating: star }))}
+                >
+                  ⭐
+                </button>
               ))}
-            </div>
-            <div className="rating-text">
-              {formData.rating === 1 && "Very Poor"}
-              {formData.rating === 2 && "Poor"}
-              {formData.rating === 3 && "Average"}
-              {formData.rating === 4 && "Good"}
-              {formData.rating === 5 && "Excellent"}
+              <span className="rating-text">
+                {formData.rating === 1 && 'Poor'}
+                {formData.rating === 2 && 'Fair'}
+                {formData.rating === 3 && 'Good'}
+                {formData.rating === 4 && 'Very Good'}
+                {formData.rating === 5 && 'Excellent'}
+              </span>
             </div>
           </div>
           
@@ -296,132 +312,39 @@ Thank you!`;
               name="message"
               value={formData.message}
               onChange={handleChange}
-              rows="5"
               required
-              placeholder="Please share your detailed feedback, suggestions, or any issues you've encountered..."
-            ></textarea>
+              rows="4"
+              placeholder="Please share your thoughts, suggestions, or any issues you've experienced..."
+            />
           </div>
-
-          {/* File Attachments */}
-          {/* <div className="form-group">
-            <label>Attachments (Optional)</label>
-            <div className="file-upload-section">
-              <button
-                type="button"
-                className="file-upload-btn"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={attachments.length >= 3}
-              >
-                📎 Add Files (Max 3, 5MB each)
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/*,.pdf,.txt"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-              />
-              <p className="file-help-text">
-                Supported: Images (JPG, PNG, WebP), PDF, Text files
-              </p>
-            </div>
-
-            {attachments.length > 0 && (
-              <div className="attachments-list">
-                {attachments.map((file, index) => (
-                  <div key={index} className="attachment-item">
-                    <div className="attachment-info">
-                      <span className="attachment-name">{file.name}</span>
-                      <span className="attachment-size">{formatFileSize(file.size)}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className="remove-attachment"
-                      onClick={() => removeAttachment(index)}
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div> */}
           
           <div className="form-actions">
-            <button 
-              type="submit" 
-              className="submit-feedback-btn"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <span className="loading-spinner"></span>
-                  Submitting...
-                </>
-              ) : (
-                'Submit Feedback'
-              )}
-            </button>
-
-            {/* {showWhatsAppOption && (
+            <div className="action-buttons">
               <button 
-                type="button" 
-                className="whatsapp-feedback-btn"
-                onClick={handleWhatsAppShare}
+                type="submit" 
+                className="submit-btn"
                 disabled={loading}
               >
-                💬 Share via WhatsApp
+                {loading ? 'Submitting...' : 'Submit Feedback'}
               </button>
-            )} */}
+              
+              {showWhatsAppOption && (
+                <button
+                  type="button"
+                  className="whatsapp-btn"
+                  onClick={handleWhatsAppShare}
+                  disabled={loading}
+                >
+                  📱 Share via WhatsApp
+                </button>
+              )}
+            </div>
+            
+            <p className="form-note">
+              Choose your preferred way to share feedback: submit directly through our form or share via WhatsApp for instant communication.
+            </p>
           </div>
         </form>
-      )}
-
-      {/* WhatsApp Modal */}
-      {showWhatsAppModal && (
-        <div className="modal-overlay">
-          <div className="modal-container whatsapp-modal">
-            <div className="modal-header">
-              <h3>Share Feedback via WhatsApp</h3>
-              <button 
-                className="modal-close"
-                onClick={() => setShowWhatsAppModal(false)}
-              >
-                ×
-              </button>
-            </div>
-            <div className="modal-content">
-              <p>Your feedback will be sent to our WhatsApp business account. This allows for faster, more personal communication.</p>
-              
-              <div className="whatsapp-preview">
-                <h4>Preview of your message:</h4>
-                <div className="message-preview">
-                  <strong>Name:</strong> {formData.name || 'Not provided'}<br/>
-                  <strong>Email:</strong> {formData.email || 'Not provided'}<br/>
-                  <strong>Type:</strong> {formData.feedbackType}<br/>
-                  <strong>Rating:</strong> {formData.rating}/5 stars<br/>
-                  <strong>Message:</strong> {formData.message || 'No message provided'}
-                </div>
-              </div>
-              
-              <div className="whatsapp-actions">
-                <button 
-                  className="btn-cancel"
-                  onClick={() => setShowWhatsAppModal(false)}
-                >
-                  Cancel
-                </button>
-                <button 
-                  className="btn-whatsapp"
-                  onClick={sendWhatsAppFeedback}
-                >
-                  📱 Open WhatsApp
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );
