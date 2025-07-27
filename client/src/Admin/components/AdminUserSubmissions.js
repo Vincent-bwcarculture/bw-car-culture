@@ -8,9 +8,10 @@ import {
   Search, Filter, RefreshCw, ExternalLink,
   MessageSquare, AlertCircle, Info, Image,
   Award, Shield, TrendingUp, BarChart3, Camera,
-  MessageCircle, Bell, Headphones
+  MessageCircle, Bell, Headphones, CreditCard, CheckCircle, Clock, FileText 
 } from 'lucide-react';
 import axios from '../../config/axios.js';
+import AdminManualPaymentApproval from './AdminManualPaymentApproval.js';
 import './AdminUserSubmissions.css';
 
 const AdminUserSubmissions = () => {
@@ -44,6 +45,108 @@ const AdminUserSubmissions = () => {
     adminNotes: '',
     subscriptionTier: 'basic'
   });
+
+const [showPaymentApproval, setShowPaymentApproval] = useState(false);
+const [selectedPaymentSubmission, setSelectedPaymentSubmission] = useState(null);
+
+// ADD this new function to handle payment approval:
+const openPaymentApproval = (submission) => {
+  console.log('Opening payment approval for:', submission);
+  setSelectedPaymentSubmission(submission);
+  setShowPaymentApproval(true);
+};
+
+// ADD this new function to handle successful payment approval:
+const handlePaymentApproved = (approvalData) => {
+  console.log('Payment approved:', approvalData);
+  
+  // Update the submission in the list
+  setSubmissions(prevSubmissions =>
+    prevSubmissions.map(sub =>
+      sub._id === selectedPaymentSubmission._id
+        ? { 
+            ...sub, 
+            status: 'approved_paid',
+            adminReview: {
+              ...sub.adminReview,
+              manualPaymentApproval: true,
+              paymentVerifiedAt: new Date()
+            },
+            paymentProof: { 
+              ...sub.paymentProof, 
+              status: 'approved',
+              approvedAt: new Date(),
+              approvedBy: approvalData.adminApproval?.approvedBy
+            }
+          }
+        : sub
+    )
+  );
+
+  // Update stats
+  setStats(prevStats => ({
+    ...prevStats,
+    approved: prevStats.approved + 1,
+    pending: Math.max(0, prevStats.pending - 1)
+  }));
+
+  // Close modal
+  setShowPaymentApproval(false);
+  setSelectedPaymentSubmission(null);
+  
+  // Show success message
+  showMessage('success', 'Payment approved successfully! Listing has been activated.');
+};
+
+// ADD this helper function to check if submission needs payment approval:
+const needsPaymentApproval = (submission) => {
+  return (
+    submission.status === 'approved' && 
+    submission.adminReview?.subscriptionTier !== 'free' && 
+    (!submission.paymentProof?.status || submission.paymentProof?.status === 'pending_admin_review')
+  );
+};
+
+// ADD this helper function to get payment status display:
+const getPaymentStatusDisplay = (submission) => {
+  if (submission.adminReview?.subscriptionTier === 'free') {
+    return (
+      <div className="admin-submissions-payment-status free">
+        <CheckCircle size={14} />
+        <span>Free Tier - No Payment Required</span>
+      </div>
+    );
+  }
+  
+  if (submission.paymentProof?.status === 'approved') {
+    return (
+      <div className="admin-submissions-payment-status approved">
+        <CheckCircle size={14} />
+        <span>Payment Approved</span>
+      </div>
+    );
+  }
+  
+  if (submission.paymentProof?.submitted) {
+    return (
+      <div className="admin-submissions-payment-status pending">
+        <Clock size={14} />
+        <span>Payment Proof Submitted - Needs Review</span>
+      </div>
+    );
+  }
+  
+  if (submission.status === 'approved' && submission.adminReview?.subscriptionTier !== 'free') {
+    return (
+      <div className="admin-submissions-payment-status awaiting">
+        <FileText size={14} />
+        <span>Awaiting Payment from User</span>
+      </div>
+    );
+  }
+  
+  return null;
+};
 
   useEffect(() => {
     fetchSubmissions();

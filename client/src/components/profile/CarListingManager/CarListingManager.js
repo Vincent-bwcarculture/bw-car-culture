@@ -1,5 +1,5 @@
 // client/src/components/profile/CarListingManager/CarListingManager.js
-// COMPLETE car listing manager with subscription, addon handling AND FREE TIER INTEGRATION
+// COMPLETE car listing manager with subscription, addon handling, FREE TIER AND MANUAL PAYMENT INTEGRATION
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import axios from '../../../config/axios.js';
 import AddonBookingModal from '../AddonBookingModal.js';
+import ManualPaymentModal from '../ManualPaymentModal/ManualPaymentModal.js'; // NEW: Manual payment modal
 import './CarListingManager.css';
 
 const CarListingManager = ({ 
@@ -39,7 +40,7 @@ const CarListingManager = ({
   const [availableAddons, setAvailableAddons] = useState({});
   const [sellerType, setSellerType] = useState('private');
   
-  // FREE TIER STATE - NEW
+  // FREE TIER STATE
   const [hasFreeOption, setHasFreeOption] = useState(false);
   const [freeListingStats, setFreeListingStats] = useState({
     active: 0,
@@ -61,6 +62,10 @@ const CarListingManager = ({
   // Payment state
   const [paymentLink, setPaymentLink] = useState('');
   const [paymentInfo, setPaymentInfo] = useState(null);
+
+  // NEW: Manual Payment Modal State
+  const [showManualPaymentModal, setShowManualPaymentModal] = useState(false);
+  const [manualPaymentInfo, setManualPaymentInfo] = useState(null);
 
   // Load component data
   useEffect(() => {
@@ -87,7 +92,7 @@ const CarListingManager = ({
         setAvailableTiers(tiers);
         setSellerType(responseSellerType);
         
-        // NEW: Set free tier options
+        // Set free tier options
         setHasFreeOption(hasFreeOption);
         if (freeListingStats && Object.keys(freeListingStats).length > 0) {
           setFreeListingStats(freeListingStats);
@@ -195,14 +200,14 @@ const CarListingManager = ({
     }
   };
 
-  // NEW: Handle proceeding to listing form (preview mode)
+  // Handle proceeding to listing form (preview mode)
   const handleProceedToForm = () => {
     if (onProceedToForm) {
       onProceedToForm();
     }
   };
 
-  // NEW: FREE TIER SELECTION HANDLER
+  // FREE TIER SELECTION HANDLER
   const handleFreeTierSelection = async () => {
     if (!pendingListingId) {
       setError('No pending listing found');
@@ -311,6 +316,7 @@ const CarListingManager = ({
   };
 
   // === PAYMENT FUNCTIONS ===
+  // UPDATED: Now shows manual payment modal instead of Flutterwave
   const initiateSubscriptionPayment = async () => {
     if (!selectedPlan) {
       setError('Please select a subscription plan');
@@ -321,25 +327,37 @@ const CarListingManager = ({
       setLoading(true);
       setCurrentStep('payment');
 
-      const response = await axios.post('/api/payments/initiate', {
+      // Get tier pricing
+      const tierPricing = {
+        basic: { name: 'Basic Plan', price: 50, duration: 30 },
+        standard: { name: 'Standard Plan', price: 100, duration: 30 },
+        premium: { name: 'Premium Plan', price: 200, duration: 45 }
+      };
+
+      const tierDetails = tierPricing[selectedPlan];
+      if (!tierDetails) {
+        throw new Error('Invalid subscription tier');
+      }
+
+      // Create manual payment info
+      const paymentInfo = {
         listingId: pendingListingId || listingData?._id,
         subscriptionTier: selectedPlan,
-        paymentType: 'subscription',
-        sellerType,
-        callbackUrl: window.location.href
-      });
+        amount: tierDetails.price,
+        duration: tierDetails.duration,
+        planName: tierDetails.name,
+        transactionRef: `manual_${Date.now()}`,
+        sellerType
+      };
 
-      if (response.data.success) {
-        setPaymentInfo(response.data.data);
-        setPaymentLink(response.data.data.paymentLink);
-        setCurrentStep('confirmation');
-        showMessage('success', 'Payment link generated successfully');
-      } else {
-        setError(response.data.message || 'Failed to initiate payment');
-        setCurrentStep('pricing');
-      }
+      setManualPaymentInfo(paymentInfo);
+      setShowManualPaymentModal(true);
+      setCurrentStep('confirmation');
+
+      showMessage('info', 'Payment gateway integration under development. Please use manual payment methods below.');
+
     } catch (error) {
-      console.error('Subscription payment initiation error:', error);
+      console.error('Payment initiation error:', error);
       setError('Failed to start payment process');
       setCurrentStep('pricing');
     } finally {
@@ -347,6 +365,7 @@ const CarListingManager = ({
     }
   };
 
+  // UPDATED: Manual payment for addons
   const initiateAddonPayment = async (addonIds, bookingId = null) => {
     if (!addonIds || addonIds.length === 0) {
       setError('Please select at least one add-on');
@@ -357,24 +376,38 @@ const CarListingManager = ({
       setLoading(true);
       setCurrentStep('payment');
 
-      const response = await axios.post('/api/payments/initiate', {
-        listingId: pendingListingId || listingData?._id,
-        addons: addonIds,
-        bookingId,
-        paymentType: 'addon',
-        sellerType,
-        callbackUrl: window.location.href
+      // Calculate addon total
+      let totalAmount = 0;
+      const addonDetails = [];
+
+      addonIds.forEach(addonId => {
+        const addon = availableAddons[addonId];
+        if (addon) {
+          totalAmount += addon.price;
+          addonDetails.push(addon);
+        }
       });
 
-      if (response.data.success) {
-        setPaymentInfo(response.data.data);
-        setPaymentLink(response.data.data.paymentLink);
-        setCurrentStep('confirmation');
-        showMessage('success', 'Payment link generated successfully');
-      } else {
-        setError(response.data.message || 'Failed to initiate payment');
-        setCurrentStep('pricing');
-      }
+      // Create manual payment info for addons
+      const paymentInfo = {
+        listingId: pendingListingId || listingData?._id,
+        subscriptionTier: 'addon',
+        amount: totalAmount,
+        duration: 30,
+        planName: `Add-ons: ${addonDetails.map(a => a.name).join(', ')}`,
+        transactionRef: `manual_addon_${Date.now()}`,
+        sellerType,
+        paymentType: 'addon',
+        addons: addonIds,
+        bookingId
+      };
+
+      setManualPaymentInfo(paymentInfo);
+      setShowManualPaymentModal(true);
+      setCurrentStep('confirmation');
+
+      showMessage('info', 'Payment gateway integration under development. Please use manual payment methods below.');
+
     } catch (error) {
       console.error('Add-on payment initiation error:', error);
       setError('Failed to start payment process');
@@ -411,6 +444,38 @@ const CarListingManager = ({
     }
   };
 
+  // NEW: Handle manual payment modal close
+  const handleCloseManualPayment = () => {
+    setShowManualPaymentModal(false);
+    setManualPaymentInfo(null);
+    setCurrentStep('pricing');
+  };
+
+  // NEW: Handle payment proof submission
+  const handlePaymentProofSubmitted = (paymentData) => {
+    setShowManualPaymentModal(false);
+    setManualPaymentInfo(null);
+    
+    showMessage('success', 
+      'Proof of payment submitted successfully! ' +
+      'Your listing will be activated once our admin team verifies your payment (usually within 24 hours).'
+    );
+    
+    // Call parent callback
+    if (onPaymentComplete) {
+      onPaymentComplete({
+        ...paymentData,
+        status: 'proof_submitted',
+        message: 'Payment proof submitted for review'
+      });
+    }
+    
+    // Reset the flow
+    setCurrentStep('pricing');
+    setSelectedPlan(null);
+    setSelectedAddons([]);
+  };
+
   const redirectToPayment = () => {
     if (paymentLink) {
       window.open(paymentLink, '_blank');
@@ -439,9 +504,9 @@ const CarListingManager = ({
   // === RENDER FUNCTIONS ===
   const renderPricingTier = (tierId, tier) => {
     const isPopular = tierId === 'standard';
-    const isFree = tierId === 'free'; // NEW: Check for free tier
+    const isFree = tierId === 'free';
     const isSelected = selectedPlan === tierId;
-    const freeDisabled = isFree && !freeListingStats.canAddMore; // NEW: Disable when limit reached
+    const freeDisabled = isFree && !freeListingStats.canAddMore;
 
     return (
       <div 
@@ -450,7 +515,6 @@ const CarListingManager = ({
         onClick={() => !freeDisabled && handlePlanSelection(tierId)}
       >
         {isPopular && <div className="tier-badge">Most Popular</div>}
-        {/* NEW: Free tier badge */}
         {isFree && (
           <div className="tier-badge free-badge">
             FREE ({freeListingStats.active}/{freeListingStats.maxAllowed})
@@ -459,7 +523,7 @@ const CarListingManager = ({
         
         <div className="tier-header">
           <div className="tier-price">
-            {isFree ? 'FREE' : `P${tier.price}`} {/* NEW: Show FREE for free tier */}
+            {isFree ? 'FREE' : `P${tier.price}`}
           </div>
           <div className="tier-period">
             {isFree ? (
@@ -473,7 +537,6 @@ const CarListingManager = ({
         <div className="tier-name">{tier.name}</div>
         
         <div className="tier-features">
-          {/* NEW: Handle free tier features */}
           {tier.features?.map((feature, index) => (
             <div key={index} className="tier-feature">
               <Check size={16} />
@@ -481,7 +544,6 @@ const CarListingManager = ({
             </div>
           ))}
           
-          {/* OLD: Fallback for tiers without features array */}
           {!tier.features && (
             <>
               <div className="tier-feature">
@@ -517,7 +579,6 @@ const CarListingManager = ({
             </>
           )}
           
-          {/* NEW: Free tier usage info */}
           {isFree && freeListingStats.canAddMore && (
             <div className="tier-note">
               <Info size={14} />
@@ -533,7 +594,6 @@ const CarListingManager = ({
           </div>
         )}
         
-        {/* NEW: Disabled overlay for free tier when limit reached */}
         {freeDisabled && (
           <div className="tier-disabled-overlay">
             <div className="disabled-message">
@@ -594,7 +654,7 @@ const CarListingManager = ({
     );
   };
 
-  // NEW: Render payment step with free tier handling
+  // Render payment step with free tier handling
   const renderPaymentStep = () => {
     const selectedTier = availableTiers[selectedPlan];
     const isFreeSelected = selectedPlan === 'free';
@@ -659,7 +719,6 @@ const CarListingManager = ({
         </div>
 
         {isFreeSelected ? (
-          // NEW: Free tier confirmation
           <div className="free-tier-confirmation">
             <div className="free-tier-info">
               <CheckCircle size={24} color="#10b981" />
@@ -687,7 +746,6 @@ const CarListingManager = ({
             </div>
           </div>
         ) : (
-          // Existing payment flow for paid tiers
           <div className="payment-actions">
             <button 
               className="btn-secondary"
@@ -864,12 +922,12 @@ const CarListingManager = ({
           <div className="payment-loading">
             <div className="loading-spinner"></div>
             <h3>Setting up your payment...</h3>
-            <p>Please wait while we prepare your payment link</p>
+            <p>Please wait while we prepare your payment options</p>
           </div>
         </div>
       )}
 
-      {/* NEW: Payment Step for Free Tier or Combined */}
+      {/* Payment Step for Free Tier or Combined */}
       {currentStep === 'payment' && mode === 'payment' && (
         renderPaymentStep()
       )}
@@ -885,21 +943,21 @@ const CarListingManager = ({
             <h3>{selectedPlan === 'free' ? 'Free Listing Submitted' : 'Payment Ready'}</h3>
             <p>{selectedPlan === 'free' ? 
               'Your free listing has been submitted for admin review. You\'ll be notified once it\'s approved and live!' :
-              'Your payment link has been generated. Click the button below to complete your payment securely.'}</p>
+              'Ready to proceed with manual payment. Use the options below to complete your payment.'}</p>
             
-            {paymentInfo && selectedPlan !== 'free' && (
+            {manualPaymentInfo && selectedPlan !== 'free' && (
               <div className="payment-details">
                 <div className="payment-item">
                   <span>Amount:</span>
-                  <span>P{paymentInfo.amount}</span>
+                  <span>P{manualPaymentInfo.amount}</span>
                 </div>
                 <div className="payment-item">
-                  <span>Payment Type:</span>
-                  <span>{paymentInfo.paymentType}</span>
+                  <span>Plan:</span>
+                  <span>{manualPaymentInfo.planName}</span>
                 </div>
                 <div className="payment-item">
-                  <span>Description:</span>
-                  <span>{paymentInfo.description}</span>
+                  <span>Duration:</span>
+                  <span>{manualPaymentInfo.duration} Days</span>
                 </div>
               </div>
             )}
@@ -913,14 +971,14 @@ const CarListingManager = ({
                 Back to Selection
               </button>
               
-              {selectedPlan !== 'free' && (
+              {selectedPlan !== 'free' && manualPaymentInfo && (
                 <button 
                   className="pay-btn"
-                  onClick={redirectToPayment}
-                  disabled={loading || !paymentLink}
+                  onClick={() => setShowManualPaymentModal(true)}
+                  disabled={loading}
                 >
-                  <ExternalLink size={16} />
-                  Complete Payment
+                  <CreditCard size={16} />
+                  Proceed with Payment
                 </button>
               )}
             </div>
@@ -928,7 +986,7 @@ const CarListingManager = ({
             {selectedPlan !== 'free' && (
               <div className="payment-info">
                 <Info size={16} />
-                <span>You will be redirected to our secure payment partner to complete the transaction</span>
+                <span>Secure payment integration under development. Manual payment options available.</span>
               </div>
             )}
           </div>
@@ -942,6 +1000,14 @@ const CarListingManager = ({
         addon={currentAddon}
         onBookingConfirm={handleAddonBookingConfirm}
         loading={loading}
+      />
+
+      {/* NEW: Manual Payment Modal */}
+      <ManualPaymentModal
+        isOpen={showManualPaymentModal}
+        onClose={handleCloseManualPayment}
+        paymentInfo={manualPaymentInfo}
+        onPaymentProofSubmitted={handlePaymentProofSubmitted}
       />
     </div>
   );
