@@ -1,5 +1,5 @@
 // client/src/Admin/components/AdminUserSubmissions.js
-// UPDATED VERSION - Adding tier/addon display + Professional Listing Assistance handling + Updated Class Names
+// COMPLETE VERSION - With Manual Payment Integration + Tier/Addon Display + Professional Listing Assistance
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -8,10 +8,10 @@ import {
   Search, Filter, RefreshCw, ExternalLink,
   MessageSquare, AlertCircle, Info, Image,
   Award, Shield, TrendingUp, BarChart3, Camera,
-  MessageCircle, Bell, Headphones, CreditCard, CheckCircle, Clock, FileText 
+  MessageCircle, Bell, Headphones, CreditCard, FileText 
 } from 'lucide-react';
 import axios from '../../config/axios.js';
-import AdminManualPaymentApproval from './AdminManualPaymentApproval.js';
+import AdminManualPaymentApproval from './AdminManualPaymentApproval.js'; // Manual payment approval component
 import './AdminUserSubmissions.css';
 
 const AdminUserSubmissions = () => {
@@ -28,7 +28,7 @@ const AdminUserSubmissions = () => {
     pending: 0, 
     approved: 0, 
     rejected: 0,
-    assistanceRequests: 0 // NEW: Track assistance requests
+    assistanceRequests: 0
   });
 
   // Pricing data from endpoints
@@ -46,107 +46,117 @@ const AdminUserSubmissions = () => {
     subscriptionTier: 'basic'
   });
 
-const [showPaymentApproval, setShowPaymentApproval] = useState(false);
-const [selectedPaymentSubmission, setSelectedPaymentSubmission] = useState(null);
+  // NEW: Manual Payment Approval State
+  const [showPaymentApproval, setShowPaymentApproval] = useState(false);
+  const [selectedPaymentSubmission, setSelectedPaymentSubmission] = useState(null);
 
-// ADD this new function to handle payment approval:
-const openPaymentApproval = (submission) => {
-  console.log('Opening payment approval for:', submission);
-  setSelectedPaymentSubmission(submission);
-  setShowPaymentApproval(true);
-};
+  // NEW: Message display state
+  const [message, setMessage] = useState({ type: '', text: '' });
 
-// ADD this new function to handle successful payment approval:
-const handlePaymentApproved = (approvalData) => {
-  console.log('Payment approved:', approvalData);
-  
-  // Update the submission in the list
-  setSubmissions(prevSubmissions =>
-    prevSubmissions.map(sub =>
-      sub._id === selectedPaymentSubmission._id
-        ? { 
-            ...sub, 
-            status: 'approved_paid',
-            adminReview: {
-              ...sub.adminReview,
-              manualPaymentApproval: true,
-              paymentVerifiedAt: new Date()
-            },
-            paymentProof: { 
-              ...sub.paymentProof, 
-              status: 'approved',
-              approvedAt: new Date(),
-              approvedBy: approvalData.adminApproval?.approvedBy
+  // NEW: Show message helper
+  const showMessage = (type, text) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+  };
+
+  // NEW: Handle payment approval modal
+  const openPaymentApproval = (submission) => {
+    console.log('Opening payment approval for:', submission);
+    setSelectedPaymentSubmission(submission);
+    setShowPaymentApproval(true);
+  };
+
+  // NEW: Handle successful payment approval
+  const handlePaymentApproved = (approvalData) => {
+    console.log('Payment approved:', approvalData);
+    
+    // Update the submission in the list
+    setSubmissions(prevSubmissions =>
+      prevSubmissions.map(sub =>
+        sub._id === selectedPaymentSubmission._id
+          ? { 
+              ...sub, 
+              status: 'approved_paid',
+              adminReview: {
+                ...sub.adminReview,
+                manualPaymentApproval: true,
+                paymentVerifiedAt: new Date()
+              },
+              paymentProof: { 
+                ...sub.paymentProof, 
+                status: 'approved',
+                approvedAt: new Date(),
+                approvedBy: approvalData.adminApproval?.approvedBy
+              }
             }
-          }
-        : sub
-    )
-  );
-
-  // Update stats
-  setStats(prevStats => ({
-    ...prevStats,
-    approved: prevStats.approved + 1,
-    pending: Math.max(0, prevStats.pending - 1)
-  }));
-
-  // Close modal
-  setShowPaymentApproval(false);
-  setSelectedPaymentSubmission(null);
-  
-  // Show success message
-  showMessage('success', 'Payment approved successfully! Listing has been activated.');
-};
-
-// ADD this helper function to check if submission needs payment approval:
-const needsPaymentApproval = (submission) => {
-  return (
-    submission.status === 'approved' && 
-    submission.adminReview?.subscriptionTier !== 'free' && 
-    (!submission.paymentProof?.status || submission.paymentProof?.status === 'pending_admin_review')
-  );
-};
-
-// ADD this helper function to get payment status display:
-const getPaymentStatusDisplay = (submission) => {
-  if (submission.adminReview?.subscriptionTier === 'free') {
-    return (
-      <div className="admin-submissions-payment-status free">
-        <CheckCircle size={14} />
-        <span>Free Tier - No Payment Required</span>
-      </div>
+          : sub
+      )
     );
-  }
-  
-  if (submission.paymentProof?.status === 'approved') {
+
+    // Update stats
+    setStats(prevStats => ({
+      ...prevStats,
+      approved: prevStats.approved + 1,
+      pending: Math.max(0, prevStats.pending - 1)
+    }));
+
+    // Close modal
+    setShowPaymentApproval(false);
+    setSelectedPaymentSubmission(null);
+    
+    // Show success message
+    showMessage('success', 'Payment approved successfully! Listing has been activated.');
+  };
+
+  // NEW: Check if submission needs payment approval
+  const needsPaymentApproval = (submission) => {
     return (
-      <div className="admin-submissions-payment-status approved">
-        <CheckCircle size={14} />
-        <span>Payment Approved</span>
-      </div>
+      submission.status === 'approved' && 
+      submission.adminReview?.subscriptionTier !== 'free' && 
+      (!submission.paymentProof?.status || submission.paymentProof?.status === 'pending_admin_review')
     );
-  }
-  
-  if (submission.paymentProof?.submitted) {
-    return (
-      <div className="admin-submissions-payment-status pending">
-        <Clock size={14} />
-        <span>Payment Proof Submitted - Needs Review</span>
-      </div>
-    );
-  }
-  
-  if (submission.status === 'approved' && submission.adminReview?.subscriptionTier !== 'free') {
-    return (
-      <div className="admin-submissions-payment-status awaiting">
-        <FileText size={14} />
-        <span>Awaiting Payment from User</span>
-      </div>
-    );
-  }
-  
-  return null;
-};
+  };
+
+  // NEW: Get payment status display
+  const getPaymentStatusDisplay = (submission) => {
+    if (submission.adminReview?.subscriptionTier === 'free') {
+      return (
+        <div className="admin-submissions-payment-status free">
+          <CheckCircle size={14} />
+          <span>Free Tier - No Payment Required</span>
+        </div>
+      );
+    }
+    
+    if (submission.paymentProof?.status === 'approved') {
+      return (
+        <div className="admin-submissions-payment-status approved">
+          <CheckCircle size={14} />
+          <span>Payment Approved</span>
+        </div>
+      );
+    }
+    
+    if (submission.paymentProof?.submitted) {
+      return (
+        <div className="admin-submissions-payment-status pending">
+          <Clock size={14} />
+          <span>Payment Proof Submitted - Needs Review</span>
+        </div>
+      );
+    }
+    
+    if (submission.status === 'approved' && submission.adminReview?.subscriptionTier !== 'free') {
+      return (
+        <div className="admin-submissions-payment-status awaiting">
+          <FileText size={14} />
+          <span>Awaiting Payment from User</span>
+        </div>
+      );
+    }
+    
+    return null;
+  };
 
   useEffect(() => {
     fetchSubmissions();
@@ -251,7 +261,7 @@ const getPaymentStatusDisplay = (submission) => {
     // Filter by status
     if (statusFilter !== 'all') {
       if (statusFilter === 'assistance_requests') {
-        // NEW: Filter for assistance requests
+        // Filter for assistance requests
         filtered = filtered.filter(sub => hasListingAssistance(sub));
       } else {
         filtered = filtered.filter(sub => sub.status === statusFilter);
@@ -281,7 +291,7 @@ const getPaymentStatusDisplay = (submission) => {
     setFilteredSubmissions(filtered);
   };
 
-  // NEW: Check if submission has listing assistance request
+  // Check if submission has listing assistance request
   const hasListingAssistance = (submission) => {
     const selectedAddons = submission.listingData?.selectedAddons || [];
     return selectedAddons.includes('management') || 
@@ -289,14 +299,14 @@ const getPaymentStatusDisplay = (submission) => {
            selectedAddons.includes('full_assistance');
   };
 
-  // NEW: Get WhatsApp contact from submission
+  // Get WhatsApp contact from submission
   const getWhatsAppContact = (submission) => {
     return submission.listingData?.contact?.whatsapp || 
            submission.listingData?.contact?.phone || 
            submission.bookingDetails?.whatsapp || '';
   };
 
-  // NEW: Generate WhatsApp assistance link
+  // Generate WhatsApp assistance link
   const getAssistanceWhatsAppLink = (submission) => {
     const whatsapp = getWhatsAppContact(submission);
     if (!whatsapp) return null;
@@ -320,157 +330,151 @@ const getPaymentStatusDisplay = (submission) => {
     return `https://wa.me/${cleanNumber}?text=${message}`;
   };
 
-const handleReviewSubmission = (submission) => {
-  console.log('Opening review modal for submission:', submission._id);
-  setSelectedSubmission(submission);
-  setReviewData({
-    action: 'approve',
-    adminNotes: '',
-    subscriptionTier: Object.keys(pricingData.tiers)[0] || 'basic' // Use first available tier
-  });
-  setShowReviewModal(true);
-  setError(''); // Clear any previous errors
-};
-
-// ADD THESE FUNCTIONS TO AdminUserSubmissions.js after fetchPricingData function
-
-const submitReview = async () => {
-  if (!selectedSubmission || !reviewData.action) {
-    setError('Please select an action (approve/reject)');
-    return;
-  }
-
-  try {
-    setLoading(true);
-    setError('');
-    
-    console.log('🔄 Submitting review:', {
-      submissionId: selectedSubmission._id,
-      action: reviewData.action,
-      adminNotes: reviewData.adminNotes,
-      subscriptionTier: reviewData.subscriptionTier
+  const handleReviewSubmission = (submission) => {
+    console.log('Opening review modal for submission:', submission._id);
+    setSelectedSubmission(submission);
+    setReviewData({
+      action: 'approve',
+      adminNotes: '',
+      subscriptionTier: Object.keys(pricingData.tiers)[0] || 'basic' // Use first available tier
     });
+    setShowReviewModal(true);
+    setError(''); // Clear any previous errors
+  };
 
-    // Get authentication token
-    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error('Authentication token not found. Please log in again.');
+  const submitReview = async () => {
+    if (!selectedSubmission || !reviewData.action) {
+      setError('Please select an action (approve/reject)');
+      return;
     }
 
-    // Prepare request data
-    const requestData = {
-      action: reviewData.action,
-      adminNotes: reviewData.adminNotes.trim(),
-      subscriptionTier: reviewData.action === 'approve' ? reviewData.subscriptionTier : null
-    };
+    try {
+      setLoading(true);
+      setError('');
+      
+      console.log('🔄 Submitting review:', {
+        submissionId: selectedSubmission._id,
+        action: reviewData.action,
+        adminNotes: reviewData.adminNotes,
+        subscriptionTier: reviewData.subscriptionTier
+      });
 
-    console.log('📤 Sending review request:', requestData);
-
-    // Make the API call
-    const response = await axios.put(
-      `/api/admin/user-listings/${selectedSubmission._id}/review`,
-      requestData,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      // Get authentication token
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in again.');
       }
-    );
 
-    console.log('📥 Review response:', response.data);
+      // Prepare request data
+      const requestData = {
+        action: reviewData.action,
+        adminNotes: reviewData.adminNotes.trim(),
+        subscriptionTier: reviewData.action === 'approve' ? reviewData.subscriptionTier : null
+      };
 
-    if (response.data.success) {
-      // Update local state
-      setSubmissions(prevSubmissions => 
-        prevSubmissions.map(sub => 
-          sub._id === selectedSubmission._id 
-            ? { 
-                ...sub, 
-                status: response.data.data.status,
-                adminReview: response.data.data.adminReview || {
-                  action: reviewData.action,
-                  adminNotes: reviewData.adminNotes,
-                  reviewedAt: new Date(),
-                  subscriptionTier: requestData.subscriptionTier,
-                  reviewedByName: response.data.reviewedBy
-                }
-              }
-            : sub
-        )
+      console.log('📤 Sending review request:', requestData);
+
+      // Make the API call
+      const response = await axios.put(
+        `/api/admin/user-listings/${selectedSubmission._id}/review`,
+        requestData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
       );
 
-      // Update stats
-      setStats(prevStats => ({
-        ...prevStats,
-        pending: Math.max(0, prevStats.pending - 1),
-        [reviewData.action === 'approve' ? 'approved' : 'rejected']: 
-          prevStats[reviewData.action === 'approve' ? 'approved' : 'rejected'] + 1
-      }));
+      console.log('📥 Review response:', response.data);
 
-      // Reset form and close modal
-      setReviewData({
-        action: 'approve',
-        adminNotes: '',
-        subscriptionTier: 'basic'
-      });
-      setSelectedSubmission(null);
-      setShowReviewModal(false);
+      if (response.data.success) {
+        // Update local state
+        setSubmissions(prevSubmissions => 
+          prevSubmissions.map(sub => 
+            sub._id === selectedSubmission._id 
+              ? { 
+                  ...sub, 
+                  status: response.data.data.status,
+                  adminReview: response.data.data.adminReview || {
+                    action: reviewData.action,
+                    adminNotes: reviewData.adminNotes,
+                    reviewedAt: new Date(),
+                    subscriptionTier: requestData.subscriptionTier,
+                    reviewedByName: response.data.reviewedBy
+                  }
+                }
+              : sub
+          )
+        );
 
-      console.log('✅ Review submitted successfully');
-      
-      // Optional: You can add a success toast notification here
-      
-    } else {
-      throw new Error(response.data.message || 'Failed to submit review');
-    }
+        // Update stats
+        setStats(prevStats => ({
+          ...prevStats,
+          pending: Math.max(0, prevStats.pending - 1),
+          [reviewData.action === 'approve' ? 'approved' : 'rejected']: 
+            prevStats[reviewData.action === 'approve' ? 'approved' : 'rejected'] + 1
+        }));
 
-  } catch (error) {
-    console.error('❌ Error submitting review:', error);
-    
-    // Handle different types of errors
-    let errorMessage = 'Failed to submit review. Please try again.';
-    
-    if (error.response) {
-      // Server responded with error status
-      const status = error.response.status;
-      const serverMessage = error.response.data?.message;
-      
-      console.error('Response error details:', {
-        status,
-        data: error.response.data,
-        headers: error.response.headers
-      });
-      
-      if (status === 401) {
-        errorMessage = 'Authentication failed. Please log in again.';
-      } else if (status === 404) {
-        errorMessage = 'Submission not found. It may have been deleted.';
-      } else if (status === 400) {
-        errorMessage = serverMessage || 'Invalid request. Please check your input.';
-      } else if (status === 500) {
-        errorMessage = 'Server error. Please try again later.';
-      } else if (serverMessage) {
-        errorMessage = serverMessage;
+        // Reset form and close modal
+        setReviewData({
+          action: 'approve',
+          adminNotes: '',
+          subscriptionTier: 'basic'
+        });
+        setSelectedSubmission(null);
+        setShowReviewModal(false);
+
+        console.log('✅ Review submitted successfully');
+        showMessage('success', `Submission ${reviewData.action}d successfully!`);
+        
+      } else {
+        throw new Error(response.data.message || 'Failed to submit review');
       }
-    } else if (error.request) {
-      // Request was made but no response received
-      console.error('Network error details:', error.request);
-      errorMessage = 'Network error. Please check your connection.';
-    } else {
-      // Something else happened
-      console.error('Other error:', error.message);
-      errorMessage = error.message || 'An unexpected error occurred.';
+
+    } catch (error) {
+      console.error('❌ Error submitting review:', error);
+      
+      // Handle different types of errors
+      let errorMessage = 'Failed to submit review. Please try again.';
+      
+      if (error.response) {
+        // Server responded with error status
+        const status = error.response.status;
+        const serverMessage = error.response.data?.message;
+        
+        console.error('Response error details:', {
+          status,
+          data: error.response.data,
+          headers: error.response.headers
+        });
+        
+        if (status === 401) {
+          errorMessage = 'Authentication failed. Please log in again.';
+        } else if (status === 404) {
+          errorMessage = 'Submission not found. It may have been deleted.';
+        } else if (status === 400) {
+          errorMessage = serverMessage || 'Invalid request. Please check your input.';
+        } else if (status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else if (serverMessage) {
+          errorMessage = serverMessage;
+        }
+      } else if (error.request) {
+        // Request was made but no response received
+        console.error('Network error details:', error.request);
+        errorMessage = 'Network error. Please check your connection.';
+      } else {
+        // Something else happened
+        console.error('Other error:', error.message);
+        errorMessage = error.message || 'An unexpected error occurred.';
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
-    
-    setError(errorMessage);
-  } finally {
-    setLoading(false);
-  }
-};
-
-// ALSO ADD THIS HELPER FUNCTION to handle opening the review modal
-
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Date not available';
@@ -509,6 +513,11 @@ const submitReview = async () => {
         icon: Car, 
         color: 'blue', 
         label: 'Listing Created' 
+      },
+      approved_paid: { 
+        icon: CheckCircle, 
+        color: 'green', 
+        label: 'Approved & Paid' 
       }
     };
 
@@ -611,6 +620,24 @@ const submitReview = async () => {
 
   return (
     <div className="admin-submissions-container">
+      {/* NEW: Message Display */}
+      {message.text && (
+        <div className={`admin-submissions-message ${message.type}`}>
+          <div className="admin-submissions-message-content">
+            {message.type === 'success' && <CheckCircle size={16} />}
+            {message.type === 'error' && <AlertCircle size={16} />}
+            {message.type === 'info' && <Info size={16} />}
+            <span>{message.text}</span>
+          </div>
+          <button 
+            className="admin-submissions-message-close"
+            onClick={() => setMessage({ type: '', text: '' })}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="admin-submissions-header">
         <h1>User Submissions Management</h1>
@@ -658,7 +685,6 @@ const submitReview = async () => {
             </div>
           </div>
 
-          {/* NEW: Assistance Requests Stat */}
           <div className="admin-submissions-stat-card">
             <div className="admin-submissions-stat-icon assistance">
               <Headphones size={24} />
@@ -747,7 +773,7 @@ const submitReview = async () => {
             
             return (
               <div key={submission._id} className={`admin-submissions-card ${needsAssistance ? 'assistance-request' : ''}`}>
-                {/* NEW: Assistance Request Banner */}
+                {/* Assistance Request Banner */}
                 {needsAssistance && (
                   <div className="admin-submissions-assistance-banner">
                     <Headphones size={16} />
@@ -823,7 +849,7 @@ const submitReview = async () => {
                         </div>
                       )}
 
-                      {/* NEW: WhatsApp Contact for Assistance */}
+                      {/* WhatsApp Contact for Assistance */}
                       {needsAssistance && whatsappContact && (
                         <div className="admin-submissions-detail-row assistance-contact">
                           <MessageCircle size={16} />
@@ -947,6 +973,25 @@ const submitReview = async () => {
                     </div>
                   )}
                   
+                  {/* NEW: Payment Status and Manual Approval */}
+                  {getPaymentStatusDisplay(submission) && (
+                    <div className="admin-submissions-payment-section">
+                      {getPaymentStatusDisplay(submission)}
+                      
+                      {/* Manual Payment Approval Button */}
+                      {needsPaymentApproval(submission) && (
+                        <button
+                          className="admin-submissions-manual-payment-btn"
+                          onClick={() => openPaymentApproval(submission)}
+                          title="Manually approve payment for this listing"
+                        >
+                          <CreditCard size={16} />
+                          Approve Payment
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  
                   {/* Actions */}
                   <div className="admin-submissions-submission-actions">
                     {submission.status === 'pending_review' && (
@@ -959,7 +1004,7 @@ const submitReview = async () => {
                       </button>
                     )}
 
-                    {/* NEW: Priority assistance contact button */}
+                    {/* Priority assistance contact button */}
                     {needsAssistance && whatsappContact && (
                       <a
                         href={getAssistanceWhatsAppLink(submission)}
@@ -1014,7 +1059,7 @@ const submitReview = async () => {
                 <p>Vehicle: {selectedSubmission.listingData?.specifications?.make} {selectedSubmission.listingData?.specifications?.model}</p>
                 <p>Price: {formatPrice(selectedSubmission.listingData?.pricing?.price)}</p>
                 
-                {/* NEW: Show assistance request info in modal */}
+                {/* Show assistance request info in modal */}
                 {hasListingAssistance(selectedSubmission) && (
                   <div className="admin-submissions-assistance-info">
                     <div className="admin-submissions-assistance-alert">
@@ -1127,6 +1172,17 @@ const submitReview = async () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* NEW: Manual Payment Approval Modal */}
+      {showPaymentApproval && selectedPaymentSubmission && (
+        <div className="admin-modal-overlay">
+          <AdminManualPaymentApproval
+            submission={selectedPaymentSubmission}
+            onPaymentApproved={handlePaymentApproved}
+            onClose={() => setShowPaymentApproval(false)}
+          />
         </div>
       )}
     </div>
