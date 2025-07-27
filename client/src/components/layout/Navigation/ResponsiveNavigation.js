@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, ShoppingBag, Store, Settings, User, LogIn, LogOut, 
-  UserCircle, Star, QrCode, Hash, X, UserPlus, Newspaper
+  UserCircle, Star, QrCode, Hash, X, UserPlus, Newspaper, MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
 import EnhancedFABModal from './EnhancedFABModal.js';
@@ -49,6 +49,83 @@ const categories = [
     icon: <User size={20} />
   }
 ];
+
+// NEW: Breadcrumb Feedback Button Component
+const BreadcrumbFeedbackButton = ({ onFeedbackClick }) => {
+  const [showNotification, setShowNotification] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  // Check if user has interacted with feedback before
+  useEffect(() => {
+    const hasInteractedBefore = localStorage.getItem('feedback_interacted');
+    setHasInteracted(!!hasInteractedBefore);
+
+    // Show notification after some time if user hasn't interacted before
+    if (!hasInteractedBefore) {
+      const timer = setTimeout(() => {
+        setShowNotification(true);
+      }, 30000); // Show after 30 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  // Randomly show notification for returning users (occasionally)
+  useEffect(() => {
+    if (hasInteracted) {
+      const shouldShowNotification = Math.random() < 0.1; // 10% chance
+      if (shouldShowNotification) {
+        const timer = setTimeout(() => {
+          setShowNotification(true);
+        }, 60000); // Show after 1 minute for returning users
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [hasInteracted]);
+
+  const handleFeedbackClick = () => {
+    setShowNotification(false);
+    setHasInteracted(true);
+    localStorage.setItem('feedback_interacted', 'true');
+    onFeedbackClick();
+  };
+
+  const dismissNotification = (e) => {
+    e.stopPropagation();
+    setShowNotification(false);
+  };
+
+  return (
+    <div className="breadcrumb-feedback-container">
+      <button 
+        className="breadcrumb-feedback-button"
+        onClick={handleFeedbackClick}
+        aria-label="Give feedback about the website"
+      >
+        <MessageCircle size={16} />
+        <span className="feedback-text">Feedback</span>
+        
+        {/* Notification bubble */}
+        {showNotification && (
+          <div className="feedback-notification">
+            <div className="feedback-notification-content">
+              <span>Share your thoughts!</span>
+              <button 
+                className="notification-dismiss"
+                onClick={dismissNotification}
+                aria-label="Dismiss notification"
+              >
+                <X size={12} />
+              </button>
+            </div>
+            <div className="feedback-notification-arrow"></div>
+          </div>
+        )}
+      </button>
+    </div>
+  );
+};
 
 // Enhanced Review FAB Component 
 const ReviewFAB = () => {
@@ -351,37 +428,44 @@ const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
   );
 };
 
-// Breadcrumb component
-const Breadcrumb = ({ paths }) => (
+// Breadcrumb component - UPDATED to include feedback button
+const Breadcrumb = ({ paths, onFeedbackClick }) => (
   <nav className="breadcrumb-container" aria-label="Breadcrumb">
-    <ol className="breadcrumb-list">
-      <li className="breadcrumb-item">
-        <Link to="/">Home</Link>
-      </li>
-      {paths.map((path, index) => (
-        <React.Fragment key={index}>
-          <span className="breadcrumb-separator" aria-hidden="true">›</span>
-          <li className="breadcrumb-item" aria-current={index === paths.length - 1 ? "page" : undefined}>
-            {path.url ? (
-              <Link to={path.url}>{path.label}</Link>
-            ) : (
-              <span>{path.label}</span>
-            )}
-          </li>
-        </React.Fragment>
-      ))}
-    </ol>
+    <div className="breadcrumb-content">
+      <ol className="breadcrumb-list">
+        <li className="breadcrumb-item">
+          <Link to="/">Home</Link>
+        </li>
+        {paths.map((path, index) => (
+          <React.Fragment key={index}>
+            <span className="breadcrumb-separator" aria-hidden="true">›</span>
+            <li className="breadcrumb-item" aria-current={index === paths.length - 1 ? "page" : undefined}>
+              {path.url ? (
+                <Link to={path.url}>{path.label}</Link>
+              ) : (
+                <span>{path.label}</span>
+              )}
+            </li>
+          </React.Fragment>
+        ))}
+      </ol>
+      
+      {/* NEW: Feedback button in breadcrumb */}
+      <BreadcrumbFeedbackButton onFeedbackClick={onFeedbackClick} />
+    </div>
   </nav>
 );
 
-// Main ResponsiveNavigation component
+// Main ResponsiveNavigation component - UPDATED to handle feedback modal
 const ResponsiveNavigation = () => {
   const [activePath, setActivePath] = useState([]);
   const [showScrollButtons, setShowScrollButtons] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false); // NEW: Feedback modal state
   const location = useLocation();
   const navigate = useNavigate();
   const navRef = useRef();
+  const { isAuthenticated } = useAuth();
 
   // Build breadcrumb from current path
   useEffect(() => {
@@ -449,6 +533,27 @@ const ResponsiveNavigation = () => {
     }, 300);
   };
 
+  // NEW: Handle feedback button click
+  const handleFeedbackClick = () => {
+    if (!isAuthenticated) {
+      navigate('/login', { 
+        state: { 
+          from: window.location.pathname,
+          message: 'Please login to leave feedback'
+        }
+      });
+    } else {
+      setShowFeedbackModal(true);
+    }
+  };
+
+  // NEW: Handle feedback form submission
+  const handleFeedbackSubmit = (feedbackData) => {
+    console.log('Feedback submitted from breadcrumb:', feedbackData);
+    setShowFeedbackModal(false);
+    // Here you would typically send the feedback to your backend
+  };
+
   // Check if a category is active
   const isActive = (path) => {
     if (path === '/' && location.pathname === '/') {
@@ -461,8 +566,8 @@ const ResponsiveNavigation = () => {
     <>
       {/* Top Navigation */}
       <nav className="navigation-container" ref={navRef}>
-        {/* Breadcrumb always visible */}
-        <Breadcrumb paths={activePath} />
+        {/* Breadcrumb with feedback button */}
+        <Breadcrumb paths={activePath} onFeedbackClick={handleFeedbackClick} />
         
         {/* Desktop Category Navigation with User Menu */}
         <div className="category-nav desktop-only">
@@ -526,6 +631,14 @@ const ResponsiveNavigation = () => {
 
       {/* Enhanced Review FAB - Only show on mobile/tablet */}
       <ReviewFAB />
+
+      {/* NEW: Feedback Modal for breadcrumb button */}
+      <EnhancedFABModal
+        showModal={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        isAuthenticated={isAuthenticated}
+        onReviewSubmit={handleFeedbackSubmit}
+      />
     </>
   );
 };
