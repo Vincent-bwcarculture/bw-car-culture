@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   AlertCircle, Info, Phone, Building, Smartphone, 
   MessageSquare, Upload, X, Check, Copy, ExternalLink,
-  CreditCard, FileText, Camera, Send
+  CreditCard, FileText, CheckCircle, Camera, Send
 } from 'lucide-react';
 import axios from '../../../config/axios.js';
 import './ManualPaymentModal.css';
