@@ -101,7 +101,7 @@ const BreadcrumbFeedbackButton = ({ onFeedbackClick }) => {
       <button 
         className="breadcrumb-feedback-button"
         onClick={handleFeedbackClick}
-        aria-label="Give feedback about the website"
+        aria-label="Go to feedback page"
       >
         <MessageCircle size={16} />
         <span className="feedback-text">Feedback</span>
@@ -461,11 +461,9 @@ const ResponsiveNavigation = () => {
   const [activePath, setActivePath] = useState([]);
   const [showScrollButtons, setShowScrollButtons] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [showFeedbackModal, setShowFeedbackModal] = useState(false); // NEW: Feedback modal state
   const location = useLocation();
   const navigate = useNavigate();
   const navRef = useRef();
-  const { isAuthenticated } = useAuth();
 
   // Build breadcrumb from current path
   useEffect(() => {
@@ -533,25 +531,9 @@ const ResponsiveNavigation = () => {
     }, 300);
   };
 
-  // NEW: Handle feedback button click
+  // NEW: Handle feedback button click - Navigate to feedback page
   const handleFeedbackClick = () => {
-    if (!isAuthenticated) {
-      navigate('/login', { 
-        state: { 
-          from: window.location.pathname,
-          message: 'Please login to leave feedback'
-        }
-      });
-    } else {
-      setShowFeedbackModal(true);
-    }
-  };
-
-  // NEW: Handle feedback form submission
-  const handleFeedbackSubmit = (feedbackData) => {
-    console.log('Feedback submitted from breadcrumb:', feedbackData);
-    setShowFeedbackModal(false);
-    // Here you would typically send the feedback to your backend
+    navigate('/feedback');
   };
 
   // Check if a category is active
@@ -631,14 +613,6 @@ const ResponsiveNavigation = () => {
 
       {/* Enhanced Review FAB - Only show on mobile/tablet */}
       <ReviewFAB />
-
-      {/* NEW: Feedback Modal for breadcrumb button */}
-      <EnhancedFABModal
-        showModal={showFeedbackModal}
-        onClose={() => setShowFeedbackModal(false)}
-        isAuthenticated={isAuthenticated}
-        onReviewSubmit={handleFeedbackSubmit}
-      />
     </>
   );
 };
