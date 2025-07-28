@@ -78,6 +78,8 @@ import RequestManager from './Admin/RequestManager/RequestManager.js';
 import ServiceProviderRequest from './Admin/auth/ServiceProviderRequest.js';
 import MinistryRequest from './Admin/auth/MinistryRequest.js';
 
+import AdminPaymentDashboard from './Admin/components/AdminPaymentDashboard.js';
+
 // Pages
 import ServicesPage from './components/pages/ServicesPage/ServicesPage.js';
 import DealershipsPage from './components/pages/DealershipsPage/DealershipsPage.js';
