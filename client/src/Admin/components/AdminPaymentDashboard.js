@@ -1,5 +1,5 @@
 // client/src/Admin/components/AdminPaymentDashboard.js
-// Enhanced Admin Dashboard for Manual Payment Management
+// Complete Enhanced Admin Dashboard for Manual Payment Management
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -57,6 +57,8 @@ const AdminPaymentDashboard = () => {
       setLoading(true);
       setError('');
 
+      console.log('🔍 Fetching payment data with filters:', filters);
+
       const params = new URLSearchParams({
         page: pagination.currentPage,
         limit: pagination.limit,
@@ -66,26 +68,48 @@ const AdminPaymentDashboard = () => {
         search: filters.searchQuery
       });
 
+      // CORRECTED: Remove /api prefix to match admin endpoint pattern
       const [paymentsResponse, pendingResponse] = await Promise.all([
-        axios.get(`/api/admin/payments/list?${params}`),
-        axios.get('/api/admin/payments/pending-manual')
+        axios.get(`/admin/payments/list?${params}`),     // ✅ No /api prefix
+        axios.get('/admin/payments/pending-manual')      // ✅ No /api prefix
       ]);
 
+      console.log('📊 Payments Response:', paymentsResponse.data);
+      console.log('⏳ Pending Response:', pendingResponse.data);
+
       if (paymentsResponse.data.success) {
-        setPayments(paymentsResponse.data.data);
-        setPagination(prev => ({
-          ...prev,
-          totalPages: paymentsResponse.data.pagination?.totalPages || 1,
-          total: paymentsResponse.data.pagination?.total || 0
-        }));
+        setPayments(paymentsResponse.data.data || []);
+        if (paymentsResponse.data.pagination) {
+          setPagination(prev => ({
+            ...prev,
+            totalPages: paymentsResponse.data.pagination.totalPages || 1,
+            total: paymentsResponse.data.pagination.total || 0
+          }));
+        }
       }
 
       if (pendingResponse.data.success) {
-        setPendingSubmissions(pendingResponse.data.data.pendingSubmissions);
+        const pendingData = pendingResponse.data.data;
+        
+        // ENHANCED: Combine both pendingPayments and pendingSubmissions
+        const allPendingItems = [
+          ...(pendingData.pendingPayments || []),
+          ...(pendingData.pendingSubmissions || [])
+        ];
+        
+        setPendingSubmissions(allPendingItems);
+        
+        console.log('🎯 Debug - Pending items found:', {
+          pendingPayments: pendingData.pendingPayments?.length || 0,
+          pendingSubmissions: pendingData.pendingSubmissions?.length || 0,
+          totalPending: allPendingItems.length
+        });
       }
 
+      console.log('✅ Payment data fetched successfully');
+
     } catch (error) {
-      console.error('Error fetching payment data:', error);
+      console.error('❌ Error fetching payment data:', error);
       setError(error.response?.data?.message || 'Failed to fetch payment data');
     } finally {
       setLoading(false);
@@ -94,21 +118,32 @@ const AdminPaymentDashboard = () => {
 
   const fetchPaymentStats = async () => {
     try {
-      const response = await axios.get('/api/admin/payments/stats');
+      console.log('📈 Fetching payment statistics...');
+      
+      // CORRECTED: Remove /api prefix
+      const response = await axios.get('/admin/payments/stats');  // ✅ No /api prefix
+      
+      console.log('📊 Stats Response:', response.data);
+      
       if (response.data.success) {
         setStats(response.data.data);
+        console.log('✅ Payment stats updated');
       }
+      
     } catch (error) {
-      console.error('Error fetching payment stats:', error);
+      console.error('❌ Error fetching payment stats:', error);
+      // Don't show error for stats, it's not critical
     }
   };
 
   const handleApprovePayment = (submission) => {
+    console.log('🔧 Opening approval modal for:', submission);
     setSelectedPayment(submission);
     setShowApprovalModal(true);
   };
 
   const handlePaymentApproved = (approvalData) => {
+    console.log('✅ Payment approved, refreshing data...');
     // Refresh data after approval
     fetchPaymentData();
     fetchPaymentStats();
@@ -117,8 +152,34 @@ const AdminPaymentDashboard = () => {
   };
 
   const handleFilterChange = (key, value) => {
+    console.log(`🔍 Filter changed: ${key} = ${value}`);
     setFilters(prev => ({ ...prev, [key]: value }));
     setPagination(prev => ({ ...prev, currentPage: 1 }));
+  };
+
+  // ENHANCED: Function for viewing proof of payment
+  const handleViewProof = async (paymentId) => {
+    try {
+      console.log('🔍 Viewing proof for payment:', paymentId);
+      
+      // Try to get proof from the payment data first
+      const payment = payments.find(p => p._id === paymentId);
+      if (payment?.proofOfPayment?.file?.url) {
+        window.open(payment.proofOfPayment.file.url, '_blank');
+        return;
+      }
+      
+      // If not found in local data, fetch from API
+      const response = await axios.get(`/admin/payments/proof/${paymentId}`);
+      if (response.data.success && response.data.data.file?.url) {
+        window.open(response.data.data.file.url, '_blank');
+      } else {
+        alert('No proof of payment file found');
+      }
+    } catch (error) {
+      console.error('Error viewing proof:', error);
+      alert('Error accessing proof of payment');
+    }
   };
 
   const formatDate = (dateString) => {
@@ -136,11 +197,14 @@ const AdminPaymentDashboard = () => {
     return `P${Number(amount || 0).toLocaleString()}`;
   };
 
+  // ENHANCED: Updated status badge with new statuses
   const getStatusBadge = (status) => {
     const statusConfig = {
       'pending': { icon: Clock, color: 'orange', text: 'Pending' },
+      'pending_review': { icon: Clock, color: 'orange', text: 'Pending Review' },  // ADDED
       'proof_submitted': { icon: FileText, color: 'blue', text: 'Proof Submitted' },
       'completed': { icon: CheckCircle, color: 'green', text: 'Completed' },
+      'approved': { icon: CheckCircle, color: 'green', text: 'Approved' },          // ADDED
       'failed': { icon: XCircle, color: 'red', text: 'Failed' },
       'cancelled': { icon: XCircle, color: 'gray', text: 'Cancelled' }
     };
@@ -167,7 +231,11 @@ const AdminPaymentDashboard = () => {
         <div className="dashboard-actions">
           <button 
             className="refresh-btn"
-            onClick={() => fetchPaymentData()}
+            onClick={() => {
+              console.log('🔄 Manual refresh triggered');
+              fetchPaymentData();
+              fetchPaymentStats();
+            }}
             disabled={loading}
           >
             <RefreshCw size={16} className={loading ? 'spinning' : ''} />
@@ -175,6 +243,26 @@ const AdminPaymentDashboard = () => {
           </button>
         </div>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="error-message">
+          <AlertCircle size={16} />
+          <div>
+            <strong>Error:</strong> {error}
+            <br />
+            <button 
+              onClick={() => {
+                setError('');
+                fetchPaymentData();
+              }}
+              style={{ marginTop: '0.5rem', padding: '0.25rem 0.5rem', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', color: 'white', cursor: 'pointer' }}
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Statistics Cards */}
       <div className="payment-stats-grid">
@@ -185,6 +273,7 @@ const AdminPaymentDashboard = () => {
           <div className="stat-content">
             <h3>{formatCurrency(stats.totalRevenue)}</h3>
             <p>Total Revenue</p>
+            <small>This month</small>
           </div>
         </div>
 
@@ -195,6 +284,7 @@ const AdminPaymentDashboard = () => {
           <div className="stat-content">
             <h3>{stats.pendingReview}</h3>
             <p>Pending Review</p>
+            <small>Requires action</small>
           </div>
         </div>
 
@@ -205,21 +295,23 @@ const AdminPaymentDashboard = () => {
           <div className="stat-content">
             <h3>{stats.approvedToday}</h3>
             <p>Approved Today</p>
+            <small>Manual approvals</small>
           </div>
         </div>
 
         <div className="stat-card">
           <div className="stat-icon total">
-            <CreditCard size={24} />
+            <BarChart3 size={24} />
           </div>
           <div className="stat-content">
             <h3>{stats.totalPayments}</h3>
             <p>Total Payments</p>
+            <small>{stats.conversionRate}% success rate</small>
           </div>
         </div>
       </div>
 
-      {/* Filters and Search */}
+      {/* ENHANCED: Filters and Search */}
       <div className="payment-filters">
         <div className="filter-group">
           <label>Status:</label>
@@ -229,8 +321,10 @@ const AdminPaymentDashboard = () => {
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
+            <option value="pending_review">Pending Review</option>  {/* ADDED */}
             <option value="proof_submitted">Proof Submitted</option>
             <option value="completed">Completed</option>
+            <option value="approved">Approved</option>            {/* ADDED */}
             <option value="failed">Failed</option>
           </select>
         </div>
@@ -254,140 +348,158 @@ const AdminPaymentDashboard = () => {
             value={filters.dateRange}
             onChange={(e) => handleFilterChange('dateRange', e.target.value)}
           >
-            <option value="today">Today</option>
+            <option value="all">All Time</option>
+            <option value="1day">Last 24 Hours</option>
             <option value="7days">Last 7 Days</option>
             <option value="30days">Last 30 Days</option>
-            <option value="90days">Last 90 Days</option>
-            <option value="all">All Time</option>
           </select>
         </div>
 
         <div className="filter-group search-group">
           <label>Search:</label>
-          <div className="search-input">
-            <Search size={16} />
-            <input
-              type="text"
-              placeholder="Search by user email, transaction ref..."
-              value={filters.searchQuery}
-              onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Search by user email, transaction ref..."
+            value={filters.searchQuery}
+            onChange={(e) => handleFilterChange('searchQuery', e.target.value)}
+            className="search-input"
+          />
         </div>
       </div>
 
-      {/* Pending Approvals Section */}
+      {/* ENHANCED: Pending Approvals Section */}
       {pendingSubmissions.length > 0 && (
         <div className="pending-approvals-section">
-          <div className="section-header">
-            <h2>
-              <AlertCircle size={20} />
-              Pending Manual Approvals ({pendingSubmissions.length})
-            </h2>
-          </div>
-          
+          <h2>
+            <AlertCircle size={20} />
+            Pending Manual Payment Approvals ({pendingSubmissions.length})
+          </h2>
           <div className="pending-approvals-grid">
-            {pendingSubmissions.map((submission) => (
-              <div key={submission._id} className="pending-approval-card">
-                <div className="approval-card-header">
-                  <div className="user-info">
-                    <h4>{submission.listingData?.title || 'Unknown Vehicle'}</h4>
-                    <p>{submission.userEmail}</p>
-                  </div>
-                  <div className="amount-badge">
-                    {formatCurrency(50)} {/* Default basic price */}
-                  </div>
-                </div>
-                
-                <div className="approval-card-body">
-                  <div className="submission-details">
-                    <span>Tier: {submission.adminReview?.subscriptionTier?.toUpperCase() || 'BASIC'}</span>
-                    <span>Submitted: {formatDate(submission.submittedAt)}</span>
-                  </div>
-                  
-                  {submission.paymentProof?.submitted && (
-                    <div className="proof-indicator">
-                      <FileText size={14} />
-                      Proof submitted
+            {pendingSubmissions.map((submission, index) => {
+              // ENHANCED: Handle both payment objects and submission objects
+              const isPayment = submission.transactionRef || submission.paymentMethod;
+              const displayData = isPayment ? {
+                id: submission._id,
+                userEmail: submission.userEmail || 'Unknown User',
+                submittedAt: submission.createdAt,
+                amount: submission.amount,
+                tier: submission.subscriptionTier,
+                status: submission.status,
+                hasProof: submission.proofOfPayment?.file?.url,
+                type: 'payment'
+              } : {
+                id: submission._id,
+                userEmail: submission.userEmail || submission.submitterEmail || 'Unknown User',
+                submittedAt: submission.submittedAt,
+                amount: submission.adminReview?.totalCost,
+                tier: submission.adminReview?.subscriptionTier,
+                status: submission.status,
+                hasProof: submission.proofOfPayment?.file?.url,
+                listingData: submission.listingData,
+                type: 'submission'
+              };
+
+              return (
+                <div key={displayData.id || index} className="pending-approval-card">
+                  <div className="approval-card-header">
+                    <div className="user-info">
+                      <h4>{displayData.userEmail}</h4>
+                      <p>Submitted: {formatDate(displayData.submittedAt)}</p>
+                      <small>Type: {displayData.type} | Status: {displayData.status}</small>
                     </div>
-                  )}
+                    <div className="amount-badge">
+                      {formatCurrency(displayData.amount || 50)}
+                    </div>
+                  </div>
+
+                  <div className="approval-card-body">
+                    <div className="submission-details">
+                      <span><strong>Tier:</strong> {(displayData.tier || 'basic').toUpperCase()}</span>
+                      {displayData.listingData && (
+                        <span><strong>Listing:</strong> {displayData.listingData.make} {displayData.listingData.model}</span>
+                      )}
+                      {submission.adminReview?.adminNotes && (
+                        <span><strong>Notes:</strong> {submission.adminReview.adminNotes}</span>
+                      )}
+                    </div>
+                    
+                    {displayData.hasProof && (
+                      <div className="proof-indicator">
+                        <FileText size={14} />
+                        Payment proof submitted
+                        <button 
+                          className="view-proof-btn"
+                          onClick={() => handleViewProof(displayData.id)}
+                          title="View Proof of Payment"
+                        >
+                          <Eye size={12} />
+                          View Proof
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="approval-card-actions">
+                    <button
+                      className="approve-payment-btn"
+                      onClick={() => handleApprovePayment(submission)}
+                    >
+                      <CreditCard size={16} />
+                      Approve Payment
+                    </button>
+                  </div>
                 </div>
-                
-                <div className="approval-card-actions">
-                  <button 
-                    className="approve-payment-btn"
-                    onClick={() => handleApprovePayment(submission)}
-                  >
-                    <CheckCircle size={16} />
-                    Review & Approve
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Payments Table */}
+      {/* ENHANCED: Payments Table */}
       <div className="payments-table-section">
-        <div className="section-header">
+        <div className="table-header">
           <h2>Payment History</h2>
-          <div className="table-info">
-            Showing {Math.min(pagination.limit, payments.length)} of {pagination.total} payments
-          </div>
+          <p>Showing {payments.length} of {pagination.total} payments</p>
         </div>
-
-        {error && (
-          <div className="error-message">
-            <AlertCircle size={16} />
-            {error}
-          </div>
-        )}
 
         <div className="payments-table-container">
           <table className="payments-table">
             <thead>
               <tr>
-                <th>Transaction</th>
-                <th>User</th>
-                <th>Amount</th>
-                <th>Tier</th>
-                <th>Status</th>
-                <th>Method</th>
-                <th>Date</th>
-                <th>Actions</th>
+                <th>TRANSACTION</th>
+                <th>USER</th>
+                <th>AMOUNT</th>
+                <th>TIER</th>
+                <th>STATUS</th>
+                <th>METHOD</th>
+                <th>DATE</th>
+                <th>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan="8" className="loading-row">
+                <tr className="loading-row">
+                  <td colSpan="8">
                     <RefreshCw size={20} className="spinning" />
                     Loading payments...
                   </td>
                 </tr>
               ) : payments.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="empty-row">
-                    No payments found for the selected filters
+                <tr className="empty-row">
+                  <td colSpan="8">
+                    {error ? 'Error loading payments - please retry' : 'No payments found for the selected filters'}
                   </td>
                 </tr>
               ) : (
-                payments.map((payment) => (
-                  <tr key={payment._id}>
+                payments.map((payment, index) => (
+                  <tr key={payment._id || index}>
                     <td>
-                      <div className="transaction-cell">
-                        <span className="transaction-ref">{payment.transactionRef}</span>
-                        {payment.proofOfPayment?.submitted && (
-                          <span className="proof-indicator">
-                            <FileText size={12} />
-                          </span>
-                        )}
-                      </div>
+                      <span className="transaction-ref">{payment.transactionRef || 'N/A'}</span>
                     </td>
                     <td>
                       <div className="user-cell">
                         <span className="user-email">{payment.userEmail || 'N/A'}</span>
+                        {payment.userName && <small>{payment.userName}</small>}
                       </div>
                     </td>
                     <td>
@@ -395,12 +507,12 @@ const AdminPaymentDashboard = () => {
                     </td>
                     <td>
                       <span className={`tier-badge tier-${payment.subscriptionTier}`}>
-                        {payment.subscriptionTier?.toUpperCase()}
+                        {(payment.subscriptionTier || 'Basic').toUpperCase()}
                       </span>
                     </td>
                     <td>{getStatusBadge(payment.status)}</td>
                     <td>
-                      <span className="method-badge">{payment.paymentMethod}</span>
+                      <span className="method-badge">{payment.paymentMethod || 'Manual'}</span>
                     </td>
                     <td>
                       <span className="date-cell">{formatDate(payment.createdAt)}</span>
@@ -408,17 +520,17 @@ const AdminPaymentDashboard = () => {
                     <td>
                       <div className="action-buttons">
                         <button 
-                          className="view-btn"
-                          onClick={() => {/* Handle view payment details */}}
-                          title="View details"
+                          className="view-btn" 
+                          title="View Details"
+                          onClick={() => console.log('View payment:', payment)}
                         >
                           <Eye size={14} />
                         </button>
-                        {payment.proofOfPayment?.file && (
+                        {(payment.proofOfPayment?.file?.url || payment.proofOfPayment) && (
                           <button 
-                            className="download-btn"
-                            onClick={() => {/* Handle download proof */}}
-                            title="Download proof"
+                            className="download-btn" 
+                            title="View Proof of Payment"
+                            onClick={() => handleViewProof(payment._id)}
                           >
                             <Download size={14} />
                           </button>
@@ -464,7 +576,10 @@ const AdminPaymentDashboard = () => {
           <AdminManualPaymentApproval
             submission={selectedPayment}
             onPaymentApproved={handlePaymentApproved}
-            onClose={() => setShowApprovalModal(false)}
+            onClose={() => {
+              setShowApprovalModal(false);
+              setSelectedPayment(null);
+            }}
           />
         </div>
       )}
