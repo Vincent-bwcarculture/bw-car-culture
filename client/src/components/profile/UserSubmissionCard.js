@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from '../../../config/axios.js';
+import axios from '../../config/axios.js';
 import { 
   Image, 
   ExternalLink, 
