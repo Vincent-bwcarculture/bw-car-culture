@@ -1,5 +1,5 @@
 // client/src/components/profile/UserSubmissionCard.js
-// Complete submission card component with editing functionality and PAYMENT MODAL INTEGRATION
+// Complete submission card component with ENHANCED PAYMENT STATUS TRACKING
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,12 @@ import {
   Eye, 
   DollarSign,
   Copy,
-  Clock
+  Clock,
+  FileText,
+  XCircle,
+  TrendingUp,
+  Shield,
+  Zap
 } from 'lucide-react';
 import ManualPaymentModal from './ManualPaymentModal/ManualPaymentModal.js';
 import './UserSubmissionCard.css';
@@ -58,6 +63,42 @@ const UserSubmissionCard = ({
   const isFreeSubmission = selectedPlan === 'free';
   const primaryImage = getPrimaryImage(submission);
 
+  // NEW: Payment Status Helper Functions
+  const getPaymentStatus = (submission) => {
+    // Check payment proof status
+    if (submission.paymentProof) {
+      return {
+        proofSubmitted: submission.paymentProof.submitted || false,
+        proofStatus: submission.paymentProof.status || 'pending',
+        proofSubmittedAt: submission.paymentProof.submittedAt,
+        proofApprovedAt: submission.paymentProof.approvedAt,
+        proofRejectedAt: submission.paymentProof.rejectedAt,
+        adminNotes: submission.paymentProof.adminNotes
+      };
+    }
+    
+    // Fallback: check if there's a payment record
+    if (submission.payment) {
+      return {
+        proofSubmitted: submission.payment.status === 'proof_submitted',
+        proofStatus: submission.payment.status,
+        proofSubmittedAt: submission.payment.proofOfPayment?.submittedAt,
+        proofApprovedAt: submission.payment.completedAt,
+        adminNotes: submission.payment.adminApproval?.adminNotes
+      };
+    }
+    
+    return {
+      proofSubmitted: false,
+      proofStatus: 'none',
+      proofSubmittedAt: null,
+      proofApprovedAt: null,
+      adminNotes: null
+    };
+  };
+
+  const paymentStatus = getPaymentStatus(submission);
+
   // Check if listing is viewable (active/live)
   const isListingLive = (status) => {
     return ['listing_created', 'approved'].includes(status);
@@ -66,6 +107,28 @@ const UserSubmissionCard = ({
   // Check if listing can be updated (legacy - keeping for compatibility)
   const canUpdateListing = (status) => {
     return ['listing_created', 'approved', 'pending_review'].includes(status);
+  };
+
+  // NEW: Enhanced payment status check
+  const needsPayment = (submission) => {
+    if (isFreeSubmission) return false;
+    
+    return submission.status === 'approved' && 
+           !paymentStatus.proofSubmitted && 
+           paymentStatus.proofStatus !== 'approved';
+  };
+
+  const isAwaitingPaymentApproval = (submission) => {
+    return paymentStatus.proofSubmitted && 
+           paymentStatus.proofStatus === 'pending_admin_review';
+  };
+
+  const isPaymentApproved = (submission) => {
+    return paymentStatus.proofStatus === 'approved';
+  };
+
+  const isPaymentRejected = (submission) => {
+    return paymentStatus.proofStatus === 'rejected';
   };
 
   // NEW: Handle Complete Payment button click
@@ -192,12 +255,13 @@ const UserSubmissionCard = ({
   const canView = isListingLive(submission.status);
   const canUpdate = canUpdateListing(submission.status); // Legacy compatibility
 
-  // === SUBMISSION STATUS RENDERING WITH FREE TIER SUPPORT ===
+  // === ENHANCED SUBMISSION STATUS RENDERING WITH PAYMENT TRACKING ===
   const renderSubmissionStatus = (submission) => {
     const isFreeSubmission = submission.selectedTier === 'free' || 
                            submission.paymentRequired === false ||
                            submission.listingData?.selectedPlan === 'free';
     
+    // PENDING REVIEW STATUS
     if (submission.status === 'pending_review') {
       return (
         <div className="usc-status-message usc-status-pending">
@@ -227,30 +291,96 @@ const UserSubmissionCard = ({
       );
     }
     
+    // APPROVED STATUS WITH PAYMENT TRACKING
     if (submission.status === 'approved') {
-      return (
-        <div className="usc-status-message usc-status-approved">
-          <CheckCircle size={14} />
-          <div className="usc-message-content">
-            <div className="usc-approval-details">
-              <span>
-                🎉 Great! Your listing has been approved.
-                {isFreeSubmission && <span className="usc-free-label"> (FREE TIER)</span>}
-              </span>
-              <div className="usc-next-steps">
-                {isFreeSubmission ? (
-                  <span>Your free listing will go live automatically! 🎉</span>
-                ) : (
+      // Payment Rejected
+      if (isPaymentRejected(submission)) {
+        return (
+          <div className="usc-status-message usc-status-payment-rejected">
+            <XCircle size={14} />
+            <div className="usc-message-content">
+              <div className="usc-payment-rejected-info">
+                <span>❌ Payment proof was not accepted</span>
+                {paymentStatus.adminNotes && (
+                  <div className="usc-rejection-reason">
+                    <strong>Reason:</strong> {paymentStatus.adminNotes}
+                  </div>
+                )}
+                <div className="usc-rejected-at">
+                  Rejected: {formatDate(paymentStatus.proofRejectedAt)}
+                </div>
+              </div>
+              <button 
+                className="usc-btn usc-btn-warning usc-btn-small"
+                onClick={handleCompletePayment}
+              >
+                <Upload size={14} />
+                Resubmit Payment
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // Payment Approved - Waiting for listing to go live
+      if (isPaymentApproved(submission)) {
+        return (
+          <div className="usc-status-message usc-status-payment-approved">
+            <CheckCircle size={14} />
+            <div className="usc-message-content">
+              <div className="usc-payment-approved-info">
+                <span>💳 Payment confirmed! Your listing will go live shortly.</span>
+                <div className="usc-approved-at">
+                  Payment approved: {formatDate(paymentStatus.proofApprovedAt)}
+                </div>
+                <div className="usc-going-live-note">
+                  <Zap size={12} />
+                  <span>Listing activation in progress...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // Awaiting Payment Approval
+      if (isAwaitingPaymentApproval(submission)) {
+        return (
+          <div className="usc-status-message usc-status-awaiting-payment">
+            <Clock size={14} />
+            <div className="usc-message-content">
+              <div className="usc-awaiting-payment-info">
+                <span>📄 Payment proof submitted - under review</span>
+                <div className="usc-submitted-at">
+                  Submitted: {formatDate(paymentStatus.proofSubmittedAt)}
+                </div>
+                <div className="usc-review-timeline">
+                  <Shield size={12} />
+                  <span>Admin review usually takes 24 hours</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // Need to Submit Payment
+      if (needsPayment(submission)) {
+        return (
+          <div className="usc-status-message usc-status-approved">
+            <CheckCircle size={14} />
+            <div className="usc-message-content">
+              <div className="usc-approval-details">
+                <span>🎉 Great! Your listing has been approved.</span>
+                <div className="usc-next-steps">
                   <div className="usc-payment-info">
                     <div className="usc-payment-instructions">
                       <Info size={12} />
-                      <span>Check your email for payment instructions. Complete payment to make your listing live.</span>
+                      <span>Complete payment to make your listing live.</span>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
-            </div>
-            {!isFreeSubmission && (
               <button 
                 className="usc-btn usc-btn-primary usc-btn-small"
                 onClick={handleCompletePayment}
@@ -258,12 +388,33 @@ const UserSubmissionCard = ({
                 <DollarSign size={14} />
                 Complete Payment
               </button>
-            )}
+            </div>
           </div>
-        </div>
-      );
+        );
+      }
+
+      // Free Listing - Will go live automatically
+      if (isFreeSubmission) {
+        return (
+          <div className="usc-status-message usc-status-approved">
+            <CheckCircle size={14} />
+            <div className="usc-message-content">
+              <div className="usc-approval-details">
+                <span>
+                  🎉 Great! Your listing has been approved.
+                  <span className="usc-free-label"> (FREE TIER)</span>
+                </span>
+                <div className="usc-next-steps">
+                  <span>Your free listing will go live automatically! 🎉</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
     }
     
+    // LISTING LIVE STATUS
     if (submission.status === 'listing_created') {
       return (
         <div className="usc-status-message usc-status-live">
@@ -271,18 +422,28 @@ const UserSubmissionCard = ({
           <div className="usc-message-content">
             <div className="usc-live-details">
               <span>🚗 Your listing is now live on our platform!</span>
-              {isFreeSubmission && (
+              {isFreeSubmission ? (
                 <div className="usc-free-live-info">
                   <span className="usc-free-label">FREE TIER</span>
                   <span>Active for 30 days • Basic visibility</span>
                 </div>
+              ) : (
+                <div className="usc-paid-live-info">
+                  <span className="usc-paid-label">{selectedPlan?.toUpperCase()} TIER</span>
+                  <span>Active for {planInfo.duration} days • Enhanced visibility</span>
+                </div>
               )}
+              <div className="usc-live-actions">
+                <TrendingUp size={12} />
+                <span>Buyers can now see and contact you about this car</span>
+              </div>
             </div>
           </div>
         </div>
       );
     }
     
+    // REJECTED STATUS
     if (submission.status === 'rejected') {
       return (
         <div className="usc-status-message usc-status-rejected">
@@ -359,6 +520,24 @@ const UserSubmissionCard = ({
                 {formatDate(submission.submittedAt)}
               </span>
             </div>
+
+            {/* NEW: Payment Status Row */}
+            {!isFreeSubmission && submission.status === 'approved' && (
+              <div className="usc-detail-row">
+                <span className="usc-detail-label">Payment:</span>
+                <span className={`usc-detail-value usc-payment-status ${
+                  isPaymentApproved(submission) ? 'usc-payment-approved' :
+                  isAwaitingPaymentApproval(submission) ? 'usc-payment-pending' :
+                  isPaymentRejected(submission) ? 'usc-payment-rejected' :
+                  'usc-payment-needed'
+                }`}>
+                  {isPaymentApproved(submission) ? '✅ Confirmed' :
+                   isAwaitingPaymentApproval(submission) ? '⏳ Under Review' :
+                   isPaymentRejected(submission) ? '❌ Rejected' :
+                   '💳 Required'}
+                </span>
+              </div>
+            )}
 
             {/* NEW: Show edit history if available */}
             {submission.editHistory && submission.editHistory.length > 0 && (
@@ -464,7 +643,13 @@ const UserSubmissionCard = ({
               {submission.status === 'approved' && (
                 <div className="usc-status-indicator usc-status-success">
                   <CheckCircle size={12} />
-                  <span>{isFreeSubmission ? 'Going live soon' : 'Payment required'}</span>
+                  <span>
+                    {isFreeSubmission ? 'Going live soon' : 
+                     isPaymentApproved(submission) ? 'Going live soon' :
+                     isAwaitingPaymentApproval(submission) ? 'Payment under review' :
+                     isPaymentRejected(submission) ? 'Payment rejected' :
+                     'Payment required'}
+                  </span>
                 </div>
               )}
 
@@ -552,6 +737,69 @@ const UserSubmissionCard = ({
             </div>
           )}
 
+          {/* NEW: Payment Timeline for Non-Free Submissions */}
+          {!isFreeSubmission && submission.status === 'approved' && (
+            <div className="usc-payment-timeline">
+              <div className="usc-timeline-header">
+                <h5>Payment Progress</h5>
+              </div>
+              <div className="usc-timeline-steps">
+                <div className={`usc-timeline-step ${true ? 'usc-completed' : ''}`}>
+                  <div className="usc-step-indicator">✅</div>
+                  <div className="usc-step-content">
+                    <span className="usc-step-title">Listing Approved</span>
+                    <span className="usc-step-date">{formatDate(submission.adminReview?.reviewedAt)}</span>
+                  </div>
+                </div>
+                
+                <div className={`usc-timeline-step ${paymentStatus.proofSubmitted ? 'usc-completed' : 'usc-current'}`}>
+                  <div className="usc-step-indicator">
+                    {paymentStatus.proofSubmitted ? '✅' : '💳'}
+                  </div>
+                  <div className="usc-step-content">
+                    <span className="usc-step-title">
+                      {paymentStatus.proofSubmitted ? 'Payment Submitted' : 'Submit Payment'}
+                    </span>
+                    {paymentStatus.proofSubmittedAt && (
+                      <span className="usc-step-date">{formatDate(paymentStatus.proofSubmittedAt)}</span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className={`usc-timeline-step ${isPaymentApproved(submission) ? 'usc-completed' : ''}`}>
+                  <div className="usc-step-indicator">
+                    {isPaymentApproved(submission) ? '✅' : 
+                     isPaymentRejected(submission) ? '❌' : '⏳'}
+                  </div>
+                  <div className="usc-step-content">
+                    <span className="usc-step-title">
+                      {isPaymentApproved(submission) ? 'Payment Approved' :
+                       isPaymentRejected(submission) ? 'Payment Rejected' :
+                       'Payment Review'}
+                    </span>
+                    {paymentStatus.proofApprovedAt && (
+                      <span className="usc-step-date">{formatDate(paymentStatus.proofApprovedAt)}</span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className={`usc-timeline-step ${submission.status === 'listing_created' ? 'usc-completed' : ''}`}>
+                  <div className="usc-step-indicator">
+                    {submission.status === 'listing_created' ? '🚗' : '⏳'}
+                  </div>
+                  <div className="usc-step-content">
+                    <span className="usc-step-title">
+                      {submission.status === 'listing_created' ? 'Listing Live' : 'Going Live'}
+                    </span>
+                    {submission.status === 'listing_created' && submission.listingCreatedAt && (
+                      <span className="usc-step-date">{formatDate(submission.listingCreatedAt)}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* NEW: Edit History Section */}
           {submission.editHistory && submission.editHistory.length > 0 && (
             <div className="usc-edit-history">
@@ -596,7 +844,7 @@ const UserSubmissionCard = ({
         </div>
       </div>
 
-      {/* Status-specific actions with FREE TIER support */}
+      {/* Status-specific actions with ENHANCED PAYMENT TRACKING */}
       <div className="usc-submission-status">
         {renderSubmissionStatus(submission)}
       </div>
