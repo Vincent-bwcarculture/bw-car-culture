@@ -1,7 +1,7 @@
 // client/src/components/profile/UserSubmissionCard.js
-// Complete submission card component with editing functionality
+// Complete submission card component with editing functionality and PAYMENT MODAL INTEGRATION
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Image, 
@@ -17,6 +17,7 @@ import {
   Copy,
   Clock
 } from 'lucide-react';
+import ManualPaymentModal from '../ManualPaymentModal/ManualPaymentModal.js';
 import './UserSubmissionCard.css';
 
 const UserSubmissionCard = ({ 
@@ -43,6 +44,10 @@ const UserSubmissionCard = ({
 }) => {
   const navigate = useNavigate();
 
+  // NEW: Payment Modal State
+  const [showManualPaymentModal, setShowManualPaymentModal] = useState(false);
+  const [manualPaymentInfo, setManualPaymentInfo] = useState(null);
+
   // Calculate pricing with FREE TIER support
   const selectedPlan = submission.listingData?.selectedPlan;
   const selectedAddons = submission.listingData?.selectedAddons || [];
@@ -61,6 +66,48 @@ const UserSubmissionCard = ({
   // Check if listing can be updated (legacy - keeping for compatibility)
   const canUpdateListing = (status) => {
     return ['listing_created', 'approved', 'pending_review'].includes(status);
+  };
+
+  // NEW: Handle Complete Payment button click
+  const handleCompletePayment = () => {
+    console.log('🔥 COMPLETE PAYMENT CLICKED from UserSubmissionCard');
+    console.log('Submission:', submission);
+    console.log('Total Cost:', totalCost);
+    console.log('Plan Info:', planInfo);
+    
+    // Create payment info from submission data
+    const paymentInfo = {
+      listingId: submission._id,
+      subscriptionTier: submission.listingData?.selectedPlan || 'basic',
+      amount: totalCost,
+      duration: planInfo.duration || 30,
+      planName: planInfo.name || 'Subscription Plan',
+      transactionRef: `manual_submission_${Date.now()}`,
+      sellerType: 'private',
+      addons: submission.listingData?.selectedAddons || []
+    };
+
+    console.log('💰 Created payment info for modal:', paymentInfo);
+    
+    setManualPaymentInfo(paymentInfo);
+    setShowManualPaymentModal(true);
+  };
+
+  // NEW: Handle payment proof submission
+  const handlePaymentProofSubmitted = (paymentData) => {
+    setShowManualPaymentModal(false);
+    setManualPaymentInfo(null);
+    
+    showMessage('success', 
+      'Proof of payment submitted successfully! ' +
+      'Your listing will be activated once our admin team verifies your payment (usually within 24 hours).'
+    );
+  };
+
+  // NEW: Handle manual payment modal close
+  const handleCloseManualPayment = () => {
+    setShowManualPaymentModal(false);
+    setManualPaymentInfo(null);
   };
 
   // Handle viewing the live listing on the website
@@ -204,7 +251,10 @@ const UserSubmissionCard = ({
               </div>
             </div>
             {!isFreeSubmission && (
-              <button className="usc-btn usc-btn-primary usc-btn-small">
+              <button 
+                className="usc-btn usc-btn-primary usc-btn-small"
+                onClick={handleCompletePayment}
+              >
                 <DollarSign size={14} />
                 Complete Payment
               </button>
@@ -550,6 +600,14 @@ const UserSubmissionCard = ({
       <div className="usc-submission-status">
         {renderSubmissionStatus(submission)}
       </div>
+
+      {/* NEW: Manual Payment Modal */}
+      <ManualPaymentModal
+        isOpen={showManualPaymentModal}
+        onClose={handleCloseManualPayment}
+        paymentInfo={manualPaymentInfo}
+        onPaymentProofSubmitted={handlePaymentProofSubmitted}
+      />
     </div>
   );
 };
