@@ -1,5 +1,5 @@
 // client/src/Admin/components/AdminManualPaymentApproval.js
-// FIXED - Admin Manual Payment Approval Component
+// FIXED - Handle both Payment Objects and Submission Objects
 
 import React, { useState } from 'react';
 import { 
@@ -21,6 +21,44 @@ const AdminManualPaymentApproval = ({
   const [showProofModal, setShowProofModal] = useState(false);
   const [approvalConfirm, setApprovalConfirm] = useState(false);
 
+  // ENHANCED: Detect if this is a payment object or submission object
+  const isPaymentObject = submission.transactionRef || submission.paymentMethod;
+  
+  console.log('🔍 Object type detection:', {
+    isPaymentObject,
+    hasTransactionRef: !!submission.transactionRef,
+    hasPaymentMethod: !!submission.paymentMethod,
+    hasListingData: !!submission.listingData,
+    hasAdminReview: !!submission.adminReview
+  });
+
+  // ENHANCED: Extract data based on object type
+  const extractedData = isPaymentObject ? {
+    // For Payment Objects
+    submissionId: submission._id, // Use payment ID as submission ID for API
+    listingId: submission.listing, // Payment objects have listing field
+    subscriptionTier: submission.subscriptionTier || 'basic',
+    userEmail: submission.userEmail || 'Unknown User',
+    submittedAt: submission.createdAt,
+    amount: submission.amount,
+    currency: submission.currency || 'BWP',
+    status: submission.status,
+    proofOfPayment: submission.proofOfPayment,
+    transactionRef: submission.transactionRef
+  } : {
+    // For Submission Objects
+    submissionId: submission._id,
+    listingId: submission.listingData?._id || submission.listingId || submission._id,
+    subscriptionTier: submission.adminReview?.subscriptionTier || 'basic',
+    userEmail: submission.userEmail || submission.submitterEmail || 'Unknown User',
+    submittedAt: submission.submittedAt,
+    amount: submission.adminReview?.totalCost,
+    currency: 'BWP',
+    status: submission.status,
+    proofOfPayment: submission.proofOfPayment,
+    listingData: submission.listingData
+  };
+
   const handleApprovePayment = async () => {
     if (!approvalConfirm) {
       setError('Please confirm that payment has been verified');
@@ -31,34 +69,32 @@ const AdminManualPaymentApproval = ({
       setLoading(true);
       setError('');
 
-      // FIXED: Extract listingId from submission data
-      const listingId = submission.listingData?._id || submission.listingId || submission._id;
-      const subscriptionTier = submission.adminReview?.subscriptionTier || 'basic';
+      console.log('🔧 Preparing payment approval with extracted data:', extractedData);
+
+      // Validate required fields
+      if (!extractedData.submissionId) {
+        throw new Error('Missing submission/payment ID');
+      }
       
-      console.log('🔧 Preparing payment approval with:', {
-        submissionId: submission._id,
+      if (!extractedData.listingId) {
+        throw new Error('Missing listing ID - check object structure');
+      }
+
+      // Convert ObjectId to string if needed
+      const listingId = extractedData.listingId.toString ? extractedData.listingId.toString() : extractedData.listingId;
+      const submissionId = extractedData.submissionId.toString ? extractedData.submissionId.toString() : extractedData.submissionId;
+
+      const requestPayload = {
+        submissionId: submissionId,
         listingId: listingId,
-        subscriptionTier: subscriptionTier,
-        adminNotes: paymentNotes
-      });
-
-      // Validate required fields before sending
-      if (!submission._id) {
-        throw new Error('Missing submission ID');
-      }
-      
-      if (!listingId) {
-        throw new Error('Missing listing ID - check submission data structure');
-      }
-
-      // CORRECTED: Remove /api prefix and include all required fields
-      const response = await axios.post(`/admin/payments/approve-manual`, {
-        submissionId: submission._id,
-        listingId: listingId,                    // ✅ NOW INCLUDED
-        subscriptionTier: subscriptionTier,
+        subscriptionTier: extractedData.subscriptionTier,
         adminNotes: paymentNotes,
         manualVerification: true
-      });
+      };
+
+      console.log('📤 Sending API request:', requestPayload);
+
+      const response = await axios.post(`/admin/payments/approve-manual`, requestPayload);
 
       console.log('✅ Payment approval response:', response.data);
 
@@ -74,7 +110,6 @@ const AdminManualPaymentApproval = ({
     } catch (error) {
       console.error('❌ Error approving payment:', error);
       
-      // Enhanced error handling
       let errorMessage = 'Failed to approve payment';
       
       if (error.response?.data?.message) {
@@ -114,8 +149,7 @@ const AdminManualPaymentApproval = ({
     return tierPricing[tier] || tierPricing.basic;
   };
 
-  const currentTier = submission.adminReview?.subscriptionTier || 'basic';
-  const tierDetails = getTierDetails(currentTier);
+  const tierDetails = getTierDetails(extractedData.subscriptionTier);
 
   return (
     <div className="manual-payment-approval-modal">
@@ -133,91 +167,104 @@ const AdminManualPaymentApproval = ({
       </div>
 
       <div className="modal-content">
-        {/* DEBUG INFO - Show what data we have */}
-        <div className="debug-section" style={{ 
-          background: 'rgba(156, 163, 175, 0.1)', 
-          padding: '1rem', 
-          borderRadius: '8px', 
-          marginBottom: '1rem',
-          fontSize: '0.875rem',
-          fontFamily: 'monospace'
-        }}>
-          <h4 style={{ color: '#9ca3af', margin: '0 0 0.5rem 0' }}>Debug Info:</h4>
-          <div style={{ color: '#c9c9c9' }}>
-            <div>Submission ID: {submission._id}</div>
-            <div>Listing ID: {submission.listingData?._id || submission.listingId || 'MISSING ⚠️'}</div>
-            <div>Subscription Tier: {currentTier}</div>
-            <div>User Email: {submission.userEmail || submission.submitterEmail || 'N/A'}</div>
+        {/* ENHANCED DEBUG INFO */}
+        <div className="debug-section">
+          <h4>Debug Info:</h4>
+          <div>
+            <div>Object Type: {isPaymentObject ? 'Payment Object' : 'Submission Object'}</div>
+            <div>Submission/Payment ID: {extractedData.submissionId}</div>
+            <div>Listing ID: {extractedData.listingId || 'MISSING ⚠️'}</div>
+            <div>Subscription Tier: {extractedData.subscriptionTier}</div>
+            <div>User Email: {extractedData.userEmail}</div>
+            <div>Amount: {formatCurrency(extractedData.amount)}</div>
+            <div>Status: {extractedData.status}</div>
+            {isPaymentObject && <div>Transaction Ref: {extractedData.transactionRef}</div>}
           </div>
         </div>
 
-        {/* Submission Details */}
+        {/* ENHANCED SUBMISSION/PAYMENT DETAILS */}
         <div className="submission-info">
-          <h3>Submission Details</h3>
+          <h3>{isPaymentObject ? 'Payment Details' : 'Submission Details'}</h3>
           <div className="info-grid">
             <div className="info-item">
               <User size={16} />
               <div>
                 <label>User</label>
-                <span>{submission.userEmail || submission.submitterEmail || 'Unknown User'}</span>
+                <span>{extractedData.userEmail}</span>
               </div>
             </div>
             
             <div className="info-item">
               <Calendar size={16} />
               <div>
-                <label>Submitted</label>
-                <span>{formatDate(submission.submittedAt)}</span>
+                <label>{isPaymentObject ? 'Created' : 'Submitted'}</label>
+                <span>{formatDate(extractedData.submittedAt)}</span>
               </div>
             </div>
             
             <div className="info-item">
               <DollarSign size={16} />
               <div>
-                <label>Subscription Tier</label>
-                <span>{tierDetails.name} - {formatCurrency(tierDetails.price)}</span>
+                <label>Subscription Plan</label>
+                <span>{tierDetails.name} - {formatCurrency(extractedData.amount || tierDetails.price)}</span>
               </div>
             </div>
+
+            {isPaymentObject && extractedData.transactionRef && (
+              <div className="info-item">
+                <FileText size={16} />
+                <div>
+                  <label>Transaction Reference</label>
+                  <span style={{fontFamily: 'monospace', fontSize: '0.8rem'}}>{extractedData.transactionRef}</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Listing Information */}
-        {submission.listingData && (
+        {/* LISTING INFORMATION - Only show if we have listing data */}
+        {extractedData.listingData && (
           <div className="listing-info">
             <h3>Listing Information</h3>
             <div className="listing-details">
-              <div><strong>Vehicle:</strong> {submission.listingData.make} {submission.listingData.model}</div>
-              <div><strong>Year:</strong> {submission.listingData.year}</div>
-              {submission.listingData.price && (
-                <div><strong>Asking Price:</strong> {formatCurrency(submission.listingData.price)}</div>
+              <div><strong>Vehicle:</strong> {extractedData.listingData.make} {extractedData.listingData.model}</div>
+              <div><strong>Year:</strong> {extractedData.listingData.year}</div>
+              {extractedData.listingData.price && (
+                <div><strong>Asking Price:</strong> {formatCurrency(extractedData.listingData.price)}</div>
               )}
             </div>
           </div>
         )}
 
-        {/* Payment Proof */}
-        {submission.proofOfPayment && (
+        {/* ENHANCED PAYMENT PROOF */}
+        {extractedData.proofOfPayment && (
           <div className="proof-section">
             <h3>Proof of Payment</h3>
             <div className="proof-info">
-              <FileText size={16} />
-              <span>Payment proof has been submitted</span>
+              <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                <FileText size={16} />
+                <span>Payment proof has been submitted</span>
+              </div>
               <div className="proof-actions">
-                <button 
-                  className="view-proof-btn"
-                  onClick={() => setShowProofModal(true)}
-                >
-                  <Eye size={16} />
-                  View
-                </button>
-                <a 
-                  href={submission.proofOfPayment.url}
-                  download
-                  className="download-proof-btn"
-                >
-                  <Download size={16} />
-                  Download
-                </a>
+                {extractedData.proofOfPayment.file?.url && (
+                  <>
+                    <button 
+                      className="view-proof-btn"
+                      onClick={() => window.open(extractedData.proofOfPayment.file.url, '_blank')}
+                    >
+                      <Eye size={16} />
+                      View
+                    </button>
+                    <a 
+                      href={extractedData.proofOfPayment.file.url}
+                      download
+                      className="download-proof-btn"
+                    >
+                      <Download size={16} />
+                      Download
+                    </a>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -258,7 +305,7 @@ const AdminManualPaymentApproval = ({
             <div>
               <strong>Error:</strong> {error}
               <br />
-              <small>Please check the debug info above and ensure all required fields are present.</small>
+              <small>Check the debug info above for data structure details.</small>
             </div>
           </div>
         )}
@@ -268,7 +315,7 @@ const AdminManualPaymentApproval = ({
           <AlertCircle size={20} />
           <div>
             <h4>Important</h4>
-            <p>Approving this payment will immediately activate the listing with the {tierDetails.name}. Make sure payment has been verified before proceeding.</p>
+            <p>Approving this payment will immediately activate the listing with the {tierDetails.name}. The listing will be valid for {tierDetails.duration} days.</p>
           </div>
         </div>
       </div>
@@ -284,7 +331,7 @@ const AdminManualPaymentApproval = ({
         <button 
           className="approve-payment-btn"
           onClick={handleApprovePayment}
-          disabled={loading || !approvalConfirm}
+          disabled={loading || !approvalConfirm || !extractedData.listingId}
         >
           {loading ? (
             <>
@@ -294,7 +341,7 @@ const AdminManualPaymentApproval = ({
           ) : (
             <>
               <CheckCircle size={16} />
-              Approve Payment
+              Approve Payment ({formatCurrency(extractedData.amount || tierDetails.price)})
             </>
           )}
         </button>
