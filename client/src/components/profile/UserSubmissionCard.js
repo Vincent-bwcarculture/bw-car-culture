@@ -1,8 +1,9 @@
 // client/src/components/profile/UserSubmissionCard.js
 // Complete submission card component with ENHANCED PAYMENT STATUS TRACKING
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from '../../../config/axios.js';
 import { 
   Image, 
   ExternalLink, 
@@ -52,6 +53,39 @@ const UserSubmissionCard = ({
   // NEW: Payment Modal State
   const [showManualPaymentModal, setShowManualPaymentModal] = useState(false);
   const [manualPaymentInfo, setManualPaymentInfo] = useState(null);
+  const [externalPaymentStatus, setExternalPaymentStatus] = useState(null);
+
+  // NEW: Function to fetch payment status from API if missing from submission
+  const fetchPaymentStatusFromAPI = useCallback(async (listingId) => {
+    try {
+      console.log('🔍 DEBUG: Fetching payment status from API for:', listingId);
+      const response = await axios.get(`/api/payments/status/${listingId}`);
+      if (response.data.success) {
+        console.log('🔍 DEBUG: External payment status:', response.data.data);
+        setExternalPaymentStatus(response.data.data);
+        return response.data.data;
+      }
+    } catch (error) {
+      console.error('Error fetching payment status:', error);
+    }
+    return null;
+  }, []);
+
+  // NEW: Effect to check external payment status for approved submissions
+  useEffect(() => {
+    const checkExternalPaymentStatus = async () => {
+      if (submission.status === 'approved' && 
+          submission.adminReview?.subscriptionTier && 
+          submission.adminReview.subscriptionTier !== 'free' &&
+          !submission.paymentProof?.submitted &&
+          !submission.payment) {
+        console.log('🔍 DEBUG: Checking external payment status for approved submission');
+        await fetchPaymentStatusFromAPI(submission._id);
+      }
+    };
+    
+    checkExternalPaymentStatus();
+  }, [submission._id, submission.status, submission.paymentProof?.submitted, submission.payment, fetchPaymentStatusFromAPI]);
 
   // Calculate pricing with FREE TIER support
   const selectedPlan = submission.listingData?.selectedPlan;
@@ -63,12 +97,18 @@ const UserSubmissionCard = ({
   const isFreeSubmission = selectedPlan === 'free';
   const primaryImage = getPrimaryImage(submission);
 
-  // NEW: Payment Status Helper Functions
+  // NEW: Enhanced Payment Status Helper Functions with Debugging
   const getPaymentStatus = (submission) => {
-    // Check payment proof status
+    console.log('🔍 DEBUG: Getting payment status for submission:', submission._id);
+    console.log('🔍 DEBUG: Submission paymentProof:', submission.paymentProof);
+    console.log('🔍 DEBUG: Submission payment:', submission.payment);
+    console.log('🔍 DEBUG: Submission status:', submission.status);
+    
+    // Method 1: Check submission.paymentProof (most common structure)
     if (submission.paymentProof) {
+      console.log('🔍 DEBUG: Using paymentProof data');
       return {
-        proofSubmitted: submission.paymentProof.submitted || false,
+        proofSubmitted: submission.paymentProof.submitted === true,
         proofStatus: submission.paymentProof.status || 'pending',
         proofSubmittedAt: submission.paymentProof.submittedAt,
         proofApprovedAt: submission.paymentProof.approvedAt,
@@ -77,17 +117,47 @@ const UserSubmissionCard = ({
       };
     }
     
-    // Fallback: check if there's a payment record
+    // Method 2: Check if there's a payment record attached
     if (submission.payment) {
+      console.log('🔍 DEBUG: Using payment data');
+      const isProofSubmitted = submission.payment.status === 'proof_submitted' || 
+                               submission.payment.proofOfPayment?.submitted === true;
       return {
-        proofSubmitted: submission.payment.status === 'proof_submitted',
-        proofStatus: submission.payment.status,
-        proofSubmittedAt: submission.payment.proofOfPayment?.submittedAt,
-        proofApprovedAt: submission.payment.completedAt,
-        adminNotes: submission.payment.adminApproval?.adminNotes
+        proofSubmitted: isProofSubmitted,
+        proofStatus: submission.payment.status === 'proof_submitted' ? 'pending_admin_review' : submission.payment.status,
+        proofSubmittedAt: submission.payment.proofOfPayment?.submittedAt || submission.payment.createdAt,
+        proofApprovedAt: submission.payment.completedAt || submission.payment.adminApproval?.approvedAt,
+        proofRejectedAt: submission.payment.rejectedAt,
+        adminNotes: submission.payment.adminApproval?.adminNotes || submission.payment.rejectionReason
       };
     }
     
+    // Method 3: Check if listing is already live (payment was approved)
+    if (submission.status === 'listing_created' || submission.status === 'approved_paid') {
+      console.log('🔍 DEBUG: Listing is live, payment approved');
+      return {
+        proofSubmitted: true,
+        proofStatus: 'approved',
+        proofSubmittedAt: null,
+        proofApprovedAt: submission.listingCreatedAt || submission.adminReview?.paymentVerifiedAt,
+        adminNotes: 'Payment approved - listing is live'
+      };
+    }
+    
+    // Method 4: For approved submissions that need payment, note that we should fetch external data
+    if (submission.status === 'approved' && submission.adminReview?.subscriptionTier && submission.adminReview.subscriptionTier !== 'free') {
+      console.log('🔍 DEBUG: Approved submission needs payment check');
+      // Payment status will be fetched via useEffect
+      return {
+        proofSubmitted: false,
+        proofStatus: 'required',
+        proofSubmittedAt: null,
+        proofApprovedAt: null,
+        adminNotes: null
+      };
+    }
+    
+    console.log('🔍 DEBUG: No payment status found, defaulting to none');
     return {
       proofSubmitted: false,
       proofStatus: 'none',
@@ -97,7 +167,23 @@ const UserSubmissionCard = ({
     };
   };
 
-  const paymentStatus = getPaymentStatus(submission);
+  // Use external payment status if available
+  const basePaymentStatus = getPaymentStatus(submission);
+  const paymentStatus = externalPaymentStatus && externalPaymentStatus.proofSubmitted 
+    ? {
+        proofSubmitted: true,
+        proofStatus: externalPaymentStatus.paymentStatus === 'completed' ? 'approved' : 'pending_admin_review',
+        proofSubmittedAt: externalPaymentStatus.proofSubmittedAt,
+        proofApprovedAt: externalPaymentStatus.proofApprovedAt,
+        adminNotes: null
+      }
+    : basePaymentStatus;
+
+  // DEBUG: Log final payment status
+  console.log('🔍 DEBUG: Final payment status for', submission.listingData?.title, ':', paymentStatus);
+  console.log('🔍 DEBUG: proofSubmitted:', paymentStatus.proofSubmitted);
+  console.log('🔍 DEBUG: proofStatus:', paymentStatus.proofStatus);
+
 
   // Check if listing is viewable (active/live)
   const isListingLive = (status) => {
@@ -109,26 +195,46 @@ const UserSubmissionCard = ({
     return ['listing_created', 'approved', 'pending_review'].includes(status);
   };
 
-  // NEW: Enhanced payment status check
+  // NEW: Enhanced payment status check functions
   const needsPayment = (submission) => {
     if (isFreeSubmission) return false;
     
+    console.log('🔍 DEBUG: needsPayment check:', {
+      status: submission.status,
+      proofSubmitted: finalPaymentStatus.proofSubmitted,
+      proofStatus: finalPaymentStatus.proofStatus
+    });
+    
     return submission.status === 'approved' && 
-           !paymentStatus.proofSubmitted && 
-           paymentStatus.proofStatus !== 'approved';
+           !finalPaymentStatus.proofSubmitted && 
+           finalPaymentStatus.proofStatus !== 'approved' &&
+           finalPaymentStatus.proofStatus !== 'free';
   };
 
   const isAwaitingPaymentApproval = (submission) => {
-    return paymentStatus.proofSubmitted && 
-           paymentStatus.proofStatus === 'pending_admin_review';
+    const result = finalPaymentStatus.proofSubmitted && 
+           (finalPaymentStatus.proofStatus === 'pending_admin_review' || 
+            finalPaymentStatus.proofStatus === 'pending' ||
+            finalPaymentStatus.proofStatus === 'proof_submitted');
+    
+    console.log('🔍 DEBUG: isAwaitingPaymentApproval:', result, finalPaymentStatus);
+    return result;
   };
 
   const isPaymentApproved = (submission) => {
-    return paymentStatus.proofStatus === 'approved';
+    const result = finalPaymentStatus.proofStatus === 'approved' || 
+                   finalPaymentStatus.proofStatus === 'completed';
+    
+    console.log('🔍 DEBUG: isPaymentApproved:', result, finalPaymentStatus);
+    return result;
   };
 
   const isPaymentRejected = (submission) => {
-    return paymentStatus.proofStatus === 'rejected';
+    const result = finalPaymentStatus.proofStatus === 'rejected' || 
+                   finalPaymentStatus.proofStatus === 'failed';
+    
+    console.log('🔍 DEBUG: isPaymentRejected:', result, finalPaymentStatus);
+    return result;
   };
 
   // NEW: Handle Complete Payment button click
@@ -293,7 +399,7 @@ const UserSubmissionCard = ({
     
     // APPROVED STATUS WITH PAYMENT TRACKING
     if (submission.status === 'approved') {
-      // Payment Rejected
+                    // Payment Rejected
       if (isPaymentRejected(submission)) {
         return (
           <div className="usc-status-message usc-status-payment-rejected">
@@ -301,13 +407,13 @@ const UserSubmissionCard = ({
             <div className="usc-message-content">
               <div className="usc-payment-rejected-info">
                 <span>❌ Payment proof was not accepted</span>
-                {paymentStatus.adminNotes && (
+                {finalPaymentStatus.adminNotes && (
                   <div className="usc-rejection-reason">
-                    <strong>Reason:</strong> {paymentStatus.adminNotes}
+                    <strong>Reason:</strong> {finalPaymentStatus.adminNotes}
                   </div>
                 )}
                 <div className="usc-rejected-at">
-                  Rejected: {formatDate(paymentStatus.proofRejectedAt)}
+                  Rejected: {formatDate(finalPaymentStatus.proofRejectedAt)}
                 </div>
               </div>
               <button 
@@ -331,7 +437,7 @@ const UserSubmissionCard = ({
               <div className="usc-payment-approved-info">
                 <span>💳 Payment confirmed! Your listing will go live shortly.</span>
                 <div className="usc-approved-at">
-                  Payment approved: {formatDate(paymentStatus.proofApprovedAt)}
+                  Payment approved: {formatDate(finalPaymentStatus.proofApprovedAt)}
                 </div>
                 <div className="usc-going-live-note">
                   <Zap size={12} />
@@ -352,7 +458,7 @@ const UserSubmissionCard = ({
               <div className="usc-awaiting-payment-info">
                 <span>📄 Payment proof submitted - under review</span>
                 <div className="usc-submitted-at">
-                  Submitted: {formatDate(paymentStatus.proofSubmittedAt)}
+                  Submitted: {formatDate(finalPaymentStatus.proofSubmittedAt)}
                 </div>
                 <div className="usc-review-timeline">
                   <Shield size={12} />
@@ -752,16 +858,16 @@ const UserSubmissionCard = ({
                   </div>
                 </div>
                 
-                <div className={`usc-timeline-step ${paymentStatus.proofSubmitted ? 'usc-completed' : 'usc-current'}`}>
+                <div className={`usc-timeline-step ${finalPaymentStatus.proofSubmitted ? 'usc-completed' : 'usc-current'}`}>
                   <div className="usc-step-indicator">
-                    {paymentStatus.proofSubmitted ? '✅' : '💳'}
+                    {finalPaymentStatus.proofSubmitted ? '✅' : '💳'}
                   </div>
                   <div className="usc-step-content">
                     <span className="usc-step-title">
-                      {paymentStatus.proofSubmitted ? 'Payment Submitted' : 'Submit Payment'}
+                      {finalPaymentStatus.proofSubmitted ? 'Payment Submitted' : 'Submit Payment'}
                     </span>
-                    {paymentStatus.proofSubmittedAt && (
-                      <span className="usc-step-date">{formatDate(paymentStatus.proofSubmittedAt)}</span>
+                    {finalPaymentStatus.proofSubmittedAt && (
+                      <span className="usc-step-date">{formatDate(finalPaymentStatus.proofSubmittedAt)}</span>
                     )}
                   </div>
                 </div>
@@ -777,8 +883,8 @@ const UserSubmissionCard = ({
                        isPaymentRejected(submission) ? 'Payment Rejected' :
                        'Payment Review'}
                     </span>
-                    {paymentStatus.proofApprovedAt && (
-                      <span className="usc-step-date">{formatDate(paymentStatus.proofApprovedAt)}</span>
+                    {finalPaymentStatus.proofApprovedAt && (
+                      <span className="usc-step-date">{formatDate(finalPaymentStatus.proofApprovedAt)}</span>
                     )}
                   </div>
                 </div>
