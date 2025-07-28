@@ -1,5 +1,6 @@
 // client/src/components/profile/CarListingManager/CarListingManager.js
 // COMPLETE car listing manager with subscription, addon handling, FREE TIER AND MANUAL PAYMENT INTEGRATION
+// WITH DEBUGGING FEATURES FOR PAYMENT MODAL ISSUES
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -417,28 +418,56 @@ const CarListingManager = ({
     }
   };
 
-  // Handle combined payment (subscription + addons)
+  // UPDATED: Handle combined payment with debug features and direct approach
   const initiateCombinedPayment = async () => {
+    console.log('🚀 initiateCombinedPayment called');
+    console.log('selectedPlan:', selectedPlan);
+    console.log('selectedAddons:', selectedAddons);
+    
     if (!selectedPlan && selectedAddons.length === 0) {
       setError('Please select at least a subscription plan or add-ons');
       return;
     }
 
+    // Skip the loading/async stuff and go straight to manual payment
+    setLoading(true);
+    
     try {
-      setLoading(true);
-      setCurrentStep('payment');
+      // Calculate total cost
+      const totalCost = calculateTotal();
+      
+      // Create payment info immediately
+      const tierPricing = {
+        basic: { name: 'Basic Plan', price: 50, duration: 30 },
+        standard: { name: 'Standard Plan', price: 100, duration: 30 },
+        premium: { name: 'Premium Plan', price: 200, duration: 45 }
+      };
 
-      // For now, we'll handle subscription and addons separately
-      // First subscription, then addons
-      if (selectedPlan) {
-        await initiateSubscriptionPayment();
-      } else if (selectedAddons.length > 0) {
-        await initiateAddonPayment(selectedAddons);
-      }
+      const tierDetails = selectedPlan ? tierPricing[selectedPlan] : null;
+      
+      const paymentInfo = {
+        listingId: pendingListingId || listingData?._id || 'temp-listing',
+        subscriptionTier: selectedPlan || 'addon',
+        amount: totalCost,
+        duration: tierDetails?.duration || 30,
+        planName: tierDetails?.name || `Add-ons (${selectedAddons.length})`,
+        transactionRef: `manual_${Date.now()}`,
+        sellerType,
+        addons: selectedAddons
+      };
+
+      console.log('💰 Created payment info:', paymentInfo);
+      
+      // Set payment info and show modal immediately
+      setManualPaymentInfo(paymentInfo);
+      setShowManualPaymentModal(true);
+      setCurrentStep('confirmation');
+      
+      console.log('✅ Modal should be open now');
+      
     } catch (error) {
-      console.error('Combined payment error:', error);
-      setError('Failed to process payment');
-      setCurrentStep('pricing');
+      console.error('❌ Payment initiation error:', error);
+      setError('Failed to start payment process: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -773,6 +802,58 @@ const CarListingManager = ({
   // === MAIN RENDER ===
   return (
     <div className="car-listing-manager">
+      {/* TEMPORARY: Test Payment Modal Button - REMOVE AFTER TESTING */}
+      <div style={{
+        background: '#ff6b6b',
+        padding: '15px',
+        margin: '10px 0',
+        borderRadius: '8px',
+        border: '2px solid #ff5252'
+      }}>
+        <h4 style={{color: 'white', margin: '0 0 10px 0'}}>🧪 DEBUG TEST AREA</h4>
+        <button 
+          onClick={() => {
+            console.log('🧪 TEST BUTTON CLICKED');
+            
+            // Create test payment info
+            const testPaymentInfo = {
+              listingId: 'test-123',
+              subscriptionTier: 'basic',
+              amount: 50,
+              duration: 30,
+              planName: 'Basic Plan (TEST)',
+              transactionRef: `test_${Date.now()}`,
+              sellerType: 'private'
+            };
+            
+            console.log('🧪 Setting test payment info:', testPaymentInfo);
+            setManualPaymentInfo(testPaymentInfo);
+            
+            console.log('🧪 Opening modal...');
+            setShowManualPaymentModal(true);
+            
+            // Check modal state after a moment
+            setTimeout(() => {
+              console.log('🧪 Modal should be open. Check if you see it!');
+            }, 500);
+          }}
+          style={{
+            background: '#4CAF50',
+            color: 'white',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }}
+        >
+          🧪 TEST OPEN PAYMENT MODAL
+        </button>
+        <p style={{color: 'white', fontSize: '12px', margin: '5px 0 0 0'}}>
+          ↑ Click this to test if the payment modal opens at all
+        </p>
+      </div>
+
       {/* Message Display */}
       {message.text && (
         <div className={`manager-message ${message.type}`}>
@@ -971,10 +1052,57 @@ const CarListingManager = ({
                 Back to Selection
               </button>
               
-              {selectedPlan !== 'free' && manualPaymentInfo && (
+              {selectedPlan !== 'free' && (
                 <button 
                   className="pay-btn"
-                  onClick={() => setShowManualPaymentModal(true)}
+                  onClick={() => {
+                    console.log('🔥 PAYMENT BUTTON CLICKED!');
+                    console.log('selectedPlan:', selectedPlan);
+                    console.log('manualPaymentInfo:', manualPaymentInfo);
+                    console.log('showManualPaymentModal (before):', showManualPaymentModal);
+                    
+                    // If manualPaymentInfo doesn't exist, create it
+                    if (!manualPaymentInfo) {
+                      console.log('⚠️ No manualPaymentInfo found, creating it...');
+                      
+                      // Get tier pricing (same as in initiateSubscriptionPayment)
+                      const tierPricing = {
+                        basic: { name: 'Basic Plan', price: 50, duration: 30 },
+                        standard: { name: 'Standard Plan', price: 100, duration: 30 },
+                        premium: { name: 'Premium Plan', price: 200, duration: 45 }
+                      };
+
+                      const tierDetails = tierPricing[selectedPlan];
+                      
+                      if (tierDetails) {
+                        const newPaymentInfo = {
+                          listingId: pendingListingId || listingData?._id,
+                          subscriptionTier: selectedPlan,
+                          amount: tierDetails.price,
+                          duration: tierDetails.duration,
+                          planName: tierDetails.name,
+                          transactionRef: `manual_${Date.now()}`,
+                          sellerType
+                        };
+                        
+                        console.log('✅ Created new payment info:', newPaymentInfo);
+                        setManualPaymentInfo(newPaymentInfo);
+                      } else {
+                        console.error('❌ No tier details found for:', selectedPlan);
+                        alert(`Error: No pricing found for ${selectedPlan} plan`);
+                        return;
+                      }
+                    }
+                    
+                    // Force open the modal
+                    console.log('🚀 Opening manual payment modal...');
+                    setShowManualPaymentModal(true);
+                    
+                    // Debug: Check if modal state changed
+                    setTimeout(() => {
+                      console.log('showManualPaymentModal (after):', true);
+                    }, 100);
+                  }}
                   disabled={loading}
                 >
                   <CreditCard size={16} />
@@ -1002,7 +1130,14 @@ const CarListingManager = ({
         loading={loading}
       />
 
-      {/* NEW: Manual Payment Modal */}
+      {/* DEBUG: Payment Modal State */}
+      {console.log('🔍 MODAL RENDER DEBUG:', {
+        showManualPaymentModal,
+        manualPaymentInfo,
+        hasPaymentInfo: !!manualPaymentInfo
+      })}
+
+      {/* Manual Payment Modal */}
       <ManualPaymentModal
         isOpen={showManualPaymentModal}
         onClose={handleCloseManualPayment}
