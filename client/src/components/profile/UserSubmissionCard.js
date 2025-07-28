@@ -17,7 +17,7 @@ import {
   Copy,
   Clock
 } from 'lucide-react';
-import ManualPaymentModal from '../ManualPaymentModal/ManualPaymentModal.js';
+import ManualPaymentModal from './ManualPaymentModal/ManualPaymentModal.js';
 import './UserSubmissionCard.css';
 
 const UserSubmissionCard = ({ 
