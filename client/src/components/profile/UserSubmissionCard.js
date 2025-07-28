@@ -71,9 +71,21 @@ const UserSubmissionCard = ({
       console.log('🔍 DEBUG: Fetching payment status from API for:', listingId);
       const response = await axios.get(`/api/payments/status/${listingId}`);
       if (response.data.success) {
-        console.log('🔍 DEBUG: External payment status:', response.data.data);
-        setExternalPaymentStatus(response.data.data);
-        return response.data.data;
+        console.log('🔍 DEBUG: External payment status response:', response.data.data);
+        const apiStatus = response.data.data;
+        
+        // Convert API response to our internal format
+        const externalStatus = {
+          proofSubmitted: apiStatus.proofSubmitted || false,
+          paymentStatus: apiStatus.paymentStatus || 'none',
+          proofSubmittedAt: apiStatus.proofSubmittedAt,
+          proofApprovedAt: apiStatus.proofApprovedAt,
+          hasPayment: apiStatus.hasPayment || false
+        };
+        
+        console.log('🔍 DEBUG: Processed external status:', externalStatus);
+        setExternalPaymentStatus(externalStatus);
+        return externalStatus;
       }
     } catch (error) {
       console.error('Error fetching payment status:', error);
@@ -84,18 +96,32 @@ const UserSubmissionCard = ({
   // Effect to check external payment status for approved submissions
   useEffect(() => {
     const checkExternalPaymentStatus = async () => {
-      if (submission.status === 'approved' && 
-          submission.adminReview?.subscriptionTier && 
-          submission.adminReview.subscriptionTier !== 'free' &&
-          !submission.paymentProof?.submitted &&
-          !submission.payment) {
-        console.log('🔍 DEBUG: Checking external payment status for approved submission');
+      // Always check for payment status if submission is approved (regardless of free/paid)
+      if (submission.status === 'approved') {
+        console.log('🔍 DEBUG: Submission is approved, checking external payment status');
+        console.log('🔍 DEBUG: Submission ID:', submission._id);
+        console.log('🔍 DEBUG: Current paymentProof:', submission.paymentProof);
+        console.log('🔍 DEBUG: Current payment:', submission.payment);
         await fetchPaymentStatusFromAPI(submission._id);
       }
     };
     
     checkExternalPaymentStatus();
-  }, [submission._id, submission.status, submission.paymentProof?.submitted, submission.payment, fetchPaymentStatusFromAPI]);
+  }, [submission._id, submission.status, fetchPaymentStatusFromAPI]);
+
+  // Additional effect to fetch payment status when component mounts
+  useEffect(() => {
+    console.log('🔍 DEBUG: Component mounted for submission:', submission._id);
+    console.log('🔍 DEBUG: Initial submission status:', submission.status);
+    
+    // For testing - always try to fetch payment status for approved submissions
+    if (submission.status === 'approved') {
+      setTimeout(() => {
+        console.log('🔍 DEBUG: Delayed payment status check');
+        fetchPaymentStatusFromAPI(submission._id);
+      }, 1000);
+    }
+  }, [submission._id, submission.status, fetchPaymentStatusFromAPI]);
 
   // Payment Status Helper Functions
   const getPaymentStatus = (submission) => {
@@ -172,7 +198,9 @@ const UserSubmissionCard = ({
   const paymentStatus = externalPaymentStatus && externalPaymentStatus.proofSubmitted 
     ? {
         proofSubmitted: true,
-        proofStatus: externalPaymentStatus.paymentStatus === 'completed' ? 'approved' : 'pending_admin_review',
+        proofStatus: externalPaymentStatus.paymentStatus === 'completed' ? 'approved' : 
+                     externalPaymentStatus.paymentStatus === 'proof_submitted' ? 'pending_admin_review' :
+                     'pending_admin_review',
         proofSubmittedAt: externalPaymentStatus.proofSubmittedAt,
         proofApprovedAt: externalPaymentStatus.proofApprovedAt,
         adminNotes: null
@@ -181,6 +209,8 @@ const UserSubmissionCard = ({
 
   // DEBUG: Log final payment status
   console.log('🔍 DEBUG: Final payment status for', submission.listingData?.title, ':', paymentStatus);
+  console.log('🔍 DEBUG: basePaymentStatus:', basePaymentStatus);
+  console.log('🔍 DEBUG: externalPaymentStatus:', externalPaymentStatus);
   console.log('🔍 DEBUG: proofSubmitted:', paymentStatus.proofSubmitted);
   console.log('🔍 DEBUG: proofStatus:', paymentStatus.proofStatus);
 
@@ -214,9 +244,15 @@ const UserSubmissionCard = ({
     const result = paymentStatus.proofSubmitted && 
            (paymentStatus.proofStatus === 'pending_admin_review' || 
             paymentStatus.proofStatus === 'pending' ||
-            paymentStatus.proofStatus === 'proof_submitted');
+            paymentStatus.proofStatus === 'proof_submitted' ||
+            (externalPaymentStatus && externalPaymentStatus.paymentStatus === 'proof_submitted'));
     
-    console.log('🔍 DEBUG: isAwaitingPaymentApproval:', result, paymentStatus);
+    console.log('🔍 DEBUG: isAwaitingPaymentApproval check:', {
+      proofSubmitted: paymentStatus.proofSubmitted,
+      proofStatus: paymentStatus.proofStatus,
+      externalStatus: externalPaymentStatus?.paymentStatus,
+      result: result
+    });
     return result;
   };
 
