@@ -26,8 +26,20 @@ const AdminSidebar = ({ collapsed }) => {
     roles: ['admin'],
     badge: 'new' // Optional badge for new feedback
   },
+     {
+      title: 'Payments', // NEW PAYMENTS SECTION
+      icon: '💳',
+      path: '/admin/payments',
+      roles: ['admin'],
+      submenu: [
+        { title: 'Payment Dashboard', path: '/admin/payments' },
+        { title: 'Manual Approvals', path: '/admin/payments/manual' },
+        { title: 'Payment History', path: '/admin/payments/history' }
+      ]
+    },
     {
       path: '/admin/listings', // NEW
+      title: 'Listings',
       label: 'Listings',
       icon: '🚗'
     },

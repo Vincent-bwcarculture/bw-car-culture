@@ -177,3 +177,76 @@
       transform: translateX(0);
   }
 }
+
+/* Badge styles for new features */
+.nav-badge {
+  background: #ff3300;
+  color: white;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 10px;
+  margin-left: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Ensure proper spacing in nav items with badges */
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #c9c9c9;
+  text-decoration: none;
+  position: relative;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.nav-item.active {
+  background: #ff3300;
+  color: white;
+}
+
+/* Enhanced mobile responsiveness for badges */
+@media (max-width: 768px) {
+  .nav-badge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.3rem;
+  }
+}
+
+/* Payment section specific styling */
+.nav-item .nav-icon {
+  font-size: 1.2rem;
+  width: 20px;
+  text-align: center;
+}
+
+/* Ensure payments menu item stands out */
+.nav-item[data-payment] {
+  border-left: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.nav-item[data-payment]:hover {
+  border-left-color: #ff3300;
+}
+
+.nav-item[data-payment].active {
+  border-left-color: #ffffff;
+}

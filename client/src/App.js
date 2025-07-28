@@ -588,6 +588,31 @@ const AppRoutes = () => {
   } 
 />
 
+  {/* PAYMENT MANAGEMENT ROUTES - NEW */}
+        <Route path="/admin/payments" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <AdminLayout>
+              <AdminPaymentDashboard />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/payments/manual" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <AdminLayout>
+              <AdminPaymentDashboard />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/payments/history" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <AdminLayout>
+              <AdminPaymentDashboard />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
         <Route path="/admin/auctions" element={
           <ProtectedRoute requiredRoles={['admin']}>
             <AdminLayout>
