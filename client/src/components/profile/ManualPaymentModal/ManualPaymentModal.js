@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   AlertCircle, Info, Phone, Building, Smartphone, 
   MessageSquare, Upload, X, Check, Copy, ExternalLink,
-  CreditCard, FileText, CheckCircle, Camera, Send
+  CreditCard, FileText, CheckCircle, Camera, Send, Clock
 } from 'lucide-react';
 import axios from '../../../config/axios.js';
 import './ManualPaymentModal.css';
@@ -163,16 +163,19 @@ const ManualPaymentModal = ({
     return `https://wa.me/${paymentDetails.whatsapp.replace(/\s+/g, '')}?text=${encodeURIComponent(message)}`;
   };
 
-  // Updated success state with correct domain
+  // ENHANCED SUCCESS VIEW
   if (submitted) {
     return (
       <div className="manual-payment-modal-overlay">
         <div className="manual-payment-modal-content">
           <div className="manual-payment-modal-header">
-            <div className="manual-payment-success-icon">
-              <Check size={24} />
+            <div className="manual-payment-header-info">
+              <CheckCircle size={24} className="success-icon" />
+              <div>
+                <h2>Proof Submitted Successfully!</h2>
+                <p>Your payment proof has been uploaded securely</p>
+              </div>
             </div>
-            <h2>Proof of Payment Submitted</h2>
             <button 
               className="manual-payment-modal-close"
               onClick={onClose}
@@ -182,42 +185,66 @@ const ManualPaymentModal = ({
           </div>
 
           <div className="manual-payment-modal-body">
-            <div className="manual-payment-success-message">
-              <CheckCircle size={48} className="success-icon" />
-              <h3>Thank you!</h3>
-              <p>Your proof of payment has been uploaded to our secure servers and submitted successfully. Our admin team will review and approve your payment within 24 hours.</p>
-              
-              <div className="manual-payment-next-steps">
-                <h4>What happens next?</h4>
-                <ul>
-                  <li>Admin team reviews your proof of payment</li>
-                  <li>Payment is verified and approved</li>
-                  <li>Your listing is activated automatically</li>
-                  <li>You'll receive a confirmation notification</li>
-                </ul>
+            <div className="success-content">
+              <div className="success-animation">
+                <CheckCircle size={48} className="success-checkmark" />
               </div>
-
-              <div className="manual-payment-contact-info">
-                <p>Questions? Contact us on WhatsApp: 
+              
+              <div className="success-details">
+                <h3>What happens next?</h3>
+                <div className="success-steps">
+                  <div className="success-step">
+                    <div className="step-number">1</div>
+                    <div className="step-content">
+                      <h4>Admin Review</h4>
+                      <p>Our team will verify your payment proof</p>
+                    </div>
+                  </div>
+                  
+                  <div className="success-step">
+                    <div className="step-number">2</div>
+                    <div className="step-content">
+                      <h4>Listing Activation</h4>
+                      <p>Your listing will go live once approved</p>
+                    </div>
+                  </div>
+                  
+                  <div className="success-step">
+                    <div className="step-number">3</div>
+                    <div className="step-content">
+                      <h4>Notification</h4>
+                      <p>You'll be notified when your listing is published</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="success-timeline">
+                  <Clock size={16} />
+                  <span>Processing usually takes 24 hours or less</span>
+                </div>
+                
+                <div className="success-contact">
+                  <p>Questions? Contact us on WhatsApp:</p>
                   <a 
                     href={`https://wa.me/${paymentDetails.whatsapp.replace(/\s+/g, '')}`}
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="whatsapp-link"
+                    className="whatsapp-contact-link"
                   >
+                    <MessageSquare size={16} />
                     {paymentDetails.whatsapp}
                   </a>
-                </p>
+                </div>
               </div>
             </div>
           </div>
 
           <div className="manual-payment-modal-actions">
             <button 
-              className="manual-payment-close-btn"
+              className="manual-payment-continue-btn"
               onClick={onClose}
             >
-              Close
+              Continue
             </button>
           </div>
         </div>
@@ -225,6 +252,7 @@ const ManualPaymentModal = ({
     );
   }
 
+  // MAIN PAYMENT FLOW
   return (
     <div className="manual-payment-modal-overlay">
       <div className="manual-payment-modal-content">
@@ -264,7 +292,7 @@ const ManualPaymentModal = ({
             </div>
           </div>
 
-          {/* Payment Instructions - Same as before */}
+          {/* Payment Instructions */}
           <div className="manual-payment-instructions">
             <h3>Use below means for payment:</h3>
             

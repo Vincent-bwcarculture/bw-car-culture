@@ -1,41 +1,53 @@
-/* client/src/components/profile/ManualPaymentModal/ManualPaymentModal.css */
-/* Manual Payment Modal - Mobile-First Responsive Design */
+/* ManualPaymentModal.css - Complete version with enhanced success view */
 
+/* =================== MODAL OVERLAY & BASE =================== */
 .manual-payment-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
-  padding: 1rem;
   backdrop-filter: blur(4px);
+  padding: 1rem;
 }
 
 .manual-payment-modal-content {
-  background: #1a1a1a;
+  background: white;
   border-radius: 12px;
-  width: 100%;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
   max-width: 600px;
+  width: 100%;
   max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  position: relative;
+  animation: modalSlideIn 0.3s ease-out;
 }
 
-/* HEADER */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =================== MODAL HEADER =================== */
 .manual-payment-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  flex-shrink: 0;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fafafa;
+  border-radius: 12px 12px 0 0;
 }
 
 .manual-payment-header-info {
@@ -45,60 +57,65 @@
   flex: 1;
 }
 
-.development-icon {
-  color: #ff9500;
-  flex-shrink: 0;
-}
-
 .manual-payment-header-info h2 {
   margin: 0;
-  color: #ffffff;
+  color: #1f2937;
   font-size: 1.25rem;
   font-weight: 600;
 }
 
 .manual-payment-header-info p {
   margin: 0.25rem 0 0 0;
-  color: #c9c9c9;
+  color: #6b7280;
   font-size: 0.875rem;
+}
+
+.development-icon {
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+
+.success-icon {
+  color: #22c55e;
+  flex-shrink: 0;
 }
 
 .manual-payment-modal-close {
   background: none;
   border: none;
-  color: #c9c9c9;
+  color: #6b7280;
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 6px;
   transition: all 0.2s ease;
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .manual-payment-modal-close:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background: #f3f4f6;
+  color: #374151;
 }
 
-/* BODY */
+/* =================== MODAL BODY =================== */
 .manual-payment-modal-body {
   padding: 1.5rem;
-  overflow-y: auto;
-  flex: 1;
 }
 
-/* Payment Summary */
+/* =================== PAYMENT SUMMARY =================== */
 .manual-payment-summary {
-  background: rgba(255, 255, 255, 0.05);
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 1.25rem;
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .manual-payment-summary h3 {
   margin: 0 0 1rem 0;
-  color: #ffffff;
-  font-size: 1rem;
+  color: #1e293b;
+  font-size: 1.125rem;
   font-weight: 600;
 }
 
@@ -115,210 +132,194 @@
 }
 
 .payment-detail-row span:first-child {
-  color: #c9c9c9;
+  color: #64748b;
   font-size: 0.875rem;
 }
 
 .tier-badge {
-  background: #ff3300;
+  background: #3b82f6;
   color: white;
   padding: 0.25rem 0.75rem;
-  border-radius: 4px;
+  border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
 }
 
 .amount {
-  color: #4ade80;
-  font-weight: 600;
-  font-size: 1.1rem;
+  color: #059669;
+  font-weight: 700;
+  font-size: 1.125rem;
 }
 
-/* Payment Instructions */
+/* =================== PAYMENT INSTRUCTIONS =================== */
 .manual-payment-instructions {
   margin-bottom: 1.5rem;
 }
 
 .manual-payment-instructions h3 {
-  margin: 0 0 1rem 0;
-  color: #ffffff;
-  font-size: 1rem;
+  margin: 0 0 1.25rem 0;
+  color: #1e293b;
+  font-size: 1.125rem;
   font-weight: 600;
 }
 
 .payment-method {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 1rem;
   margin-bottom: 1rem;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.payment-method:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1);
 }
 
 .payment-method-header {
+  background: #f1f5f9;
+  padding: 0.875rem 1.25rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.payment-method-header svg {
-  color: #ff3300;
-  flex-shrink: 0;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .payment-method-header h4 {
   margin: 0;
-  color: #ffffff;
-  font-size: 0.9rem;
+  color: #334155;
+  font-size: 1rem;
   font-weight: 600;
 }
 
 .payment-method-details {
-  padding-left: 2.75rem;
+  padding: 1.25rem;
 }
 
 .payment-detail {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
 }
 
 .payment-detail span:first-child {
-  color: #c9c9c9;
+  color: #64748b;
   font-size: 0.875rem;
+  min-width: 100px;
 }
 
 .copyable-field {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 0.75rem;
+  flex: 1;
 }
 
 .copyable-field .value {
-  color: #ffffff;
-  font-weight: 500;
-  font-family: 'Courier New', monospace;
+  font-family: 'Monaco', 'Consolas', monospace;
+  background: #f8fafc;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+  color: #1e293b;
   flex: 1;
-  font-size: 0.9rem;
+  min-width: 0;
 }
 
 .copy-btn {
-  background: none;
+  background: #3b82f6;
+  color: white;
   border: none;
-  color: #c9c9c9;
+  padding: 0.5rem;
+  border-radius: 6px;
   cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 4px;
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 36px;
+  height: 36px;
 }
 
 .copy-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background: #2563eb;
+  transform: translateY(-1px);
 }
 
-/* Proof Submission */
+.copy-btn:active {
+  transform: translateY(0);
+}
+
+/* =================== PROOF UPLOAD SECTION =================== */
 .manual-payment-proof-section {
   margin-bottom: 1.5rem;
 }
 
 .manual-payment-proof-section h3 {
   margin: 0 0 0.5rem 0;
-  color: #ffffff;
-  font-size: 1rem;
+  color: #1e293b;
+  font-size: 1.125rem;
   font-weight: 600;
 }
 
 .manual-payment-proof-section > p {
-  margin: 0 0 1rem 0;
-  color: #c9c9c9;
+  margin: 0 0 1.25rem 0;
+  color: #64748b;
   font-size: 0.875rem;
 }
 
-.proof-upload-section,
-.whatsapp-submission {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.proof-upload-section h4,
-.whatsapp-submission h4 {
+.proof-upload-section h4 {
   margin: 0 0 0.75rem 0;
-  color: #ffffff;
-  font-size: 0.9rem;
+  color: #374151;
+  font-size: 1rem;
   font-weight: 600;
 }
 
-.whatsapp-submission p {
-  margin: 0 0 1rem 0;
-  color: #c9c9c9;
-  font-size: 0.875rem;
-}
-
-/* File Upload */
 .file-upload-area {
-  position: relative;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.2s ease;
   margin-bottom: 1rem;
 }
 
+.file-upload-area:hover {
+  border-color: #3b82f6;
+  background: #f8fafc;
+}
+
 .file-input {
-  position: absolute;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
+  display: none;
 }
 
 .file-upload-label {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  padding: 2rem 1rem;
-  border: 2px dashed rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  gap: 0.75rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: center;
-}
-
-.file-upload-label:hover {
-  border-color: #ff3300;
-  background: rgba(255, 51, 0, 0.05);
-}
-
-.file-upload-label svg {
-  color: #c9c9c9;
+  color: #374151;
 }
 
 .file-upload-label span {
-  color: #ffffff;
   font-weight: 500;
-  font-size: 0.9rem;
 }
 
 .file-upload-label small {
-  color: #c9c9c9;
+  color: #6b7280;
   font-size: 0.75rem;
 }
 
-/* File Preview */
 .file-preview {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   padding: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 1rem;
 }
 
 .file-info {
@@ -328,255 +329,354 @@
   margin-bottom: 0.75rem;
 }
 
-.file-info svg {
-  color: #4ade80;
-  flex-shrink: 0;
-}
-
 .file-info span {
-  color: #ffffff;
-  font-size: 0.875rem;
   flex: 1;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .remove-file-btn {
-  background: none;
+  background: #ef4444;
+  color: white;
   border: none;
-  color: #ef4444;
-  cursor: pointer;
   padding: 0.25rem;
   border-radius: 4px;
+  cursor: pointer;
   transition: all 0.2s ease;
-}
-
-.remove-file-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
-}
-
-.image-preview {
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.image-preview img {
-  width: 100%;
-  height: auto;
-  max-height: 200px;
-  object-fit: contain;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-/* WhatsApp Button */
-.whatsapp-btn {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: #25d366;
-  color: white;
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-  width: 100%;
   justify-content: center;
 }
 
-.whatsapp-btn:hover {
-  background: #128c7e;
-  transform: translateY(-1px);
+.remove-file-btn:hover {
+  background: #dc2626;
 }
 
-/* Error Message */
+.image-preview {
+  text-align: center;
+}
+
+.image-preview img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.upload-progress {
+  margin-bottom: 1rem;
+}
+
+.progress-bar {
+  background: #e5e7eb;
+  border-radius: 8px;
+  height: 8px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #3b82f6, #22c55e);
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 8px;
+}
+
+.progress-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+  text-align: center;
+  display: block;
+}
+
 .error-message {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #ef4444;
-  font-size: 0.875rem;
-  padding: 0.75rem;
-  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
   border-radius: 6px;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 0.75rem;
+  font-size: 0.875rem;
   margin-top: 0.75rem;
 }
 
-/* Important Note */
-.manual-payment-note {
-  display: flex;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+/* =================== WHATSAPP SUBMISSION =================== */
+.whatsapp-submission {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
   border-radius: 8px;
-  margin-bottom: 1rem;
+  padding: 1.25rem;
+  margin-top: 1.5rem;
 }
 
-.manual-payment-note svg {
-  color: #3b82f6;
-  flex-shrink: 0;
-  margin-top: 0.125rem;
+.whatsapp-submission h4 {
+  margin: 0 0 0.5rem 0;
+  color: #166534;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.whatsapp-submission p {
+  margin: 0 0 1rem 0;
+  color: #15803d;
+  font-size: 0.875rem;
+}
+
+.whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #16a34a;
+  color: white;
+  text-decoration: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.whatsapp-btn:hover {
+  background: #15803d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+/* =================== IMPORTANT NOTE =================== */
+.manual-payment-note {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 1.25rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
 }
 
 .manual-payment-note h4 {
   margin: 0 0 0.5rem 0;
-  color: #ffffff;
-  font-size: 0.875rem;
+  color: #1e40af;
+  font-size: 1rem;
   font-weight: 600;
 }
 
 .manual-payment-note p {
   margin: 0;
-  color: #c9c9c9;
+  color: #1d4ed8;
   font-size: 0.875rem;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
-/* ACTIONS */
+/* =================== MODAL ACTIONS =================== */
 .manual-payment-modal-actions {
   display: flex;
   gap: 1rem;
-  padding: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  flex-shrink: 0;
   justify-content: flex-end;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #fafafa;
+  border-radius: 0 0 12px 12px;
 }
 
-.manual-payment-cancel-btn,
-.manual-payment-close-btn {
+.manual-payment-cancel-btn {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
   padding: 0.75rem 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  background: transparent;
-  color: #c9c9c9;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-weight: 500;
-  font-size: 0.875rem;
 }
 
-.manual-payment-cancel-btn:hover,
-.manual-payment-close-btn:hover {
-  border-color: #ffffff;
-  background: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
+.manual-payment-cancel-btn:hover:not(:disabled) {
+  background: #e5e7eb;
+  border-color: #9ca3af;
 }
 
 .manual-payment-submit-btn {
-  padding: 0.75rem 1.5rem;
-  background: #ff3300;
+  background: #3b82f6;
   color: white;
   border: none;
+  padding: 0.75rem 1.5rem;
   border-radius: 8px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-weight: 500;
-  font-size: 0.875rem;
-  min-width: 120px;
+  min-width: 140px;
 }
 
 .manual-payment-submit-btn:hover:not(:disabled) {
-  background: #cc2900;
+  background: #2563eb;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.manual-payment-submit-btn:disabled {
+.manual-payment-submit-btn:disabled,
+.manual-payment-cancel-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
+  transform: none !important;
 }
 
-/* SUCCESS STATE */
-.manual-payment-success-icon {
-  background: #4ade80;
+/* =================== SUCCESS VIEW STYLES =================== */
+.success-content {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.success-animation {
+  margin-bottom: 2rem;
+}
+
+.success-checkmark {
+  color: #22c55e;
+  animation: successPulse 1.5s ease-in-out;
+}
+
+@keyframes successPulse {
+  0% { 
+    transform: scale(0.8); 
+    opacity: 0.5; 
+  }
+  50% { 
+    transform: scale(1.1); 
+    opacity: 1; 
+  }
+  100% { 
+    transform: scale(1); 
+    opacity: 1; 
+  }
+}
+
+.success-details h3 {
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.success-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.success-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 3px solid #22c55e;
+  transition: all 0.2s ease;
+}
+
+.success-step:hover {
+  background: #f1f5f9;
+  transform: translateX(4px);
+}
+
+.step-number {
+  background: #22c55e;
   color: white;
-  width: 48px;
-  height: 48px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
-.manual-payment-success-message {
-  text-align: center;
-}
-
-.success-icon {
-  color: #4ade80;
-  margin-bottom: 1rem;
-}
-
-.manual-payment-success-message h3 {
-  margin: 0 0 0.75rem 0;
-  color: #ffffff;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.manual-payment-success-message > p {
-  margin: 0 0 2rem 0;
-  color: #c9c9c9;
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.manual-payment-next-steps {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  text-align: left;
-}
-
-.manual-payment-next-steps h4 {
-  margin: 0 0 1rem 0;
-  color: #ffffff;
+.step-content h4 {
+  margin: 0 0 0.25rem 0;
+  color: #1f2937;
   font-size: 1rem;
   font-weight: 600;
 }
 
-.manual-payment-next-steps ul {
+.step-content p {
   margin: 0;
-  padding-left: 1.5rem;
-  color: #c9c9c9;
-}
-
-.manual-payment-next-steps li {
-  margin-bottom: 0.5rem;
+  color: #6b7280;
   font-size: 0.875rem;
   line-height: 1.4;
 }
 
-.manual-payment-contact-info {
+.success-timeline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #eff6ff;
+  border-radius: 8px;
+  color: #1d4ed8;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
 }
 
-.manual-payment-contact-info p {
-  margin: 0;
-  color: #c9c9c9;
+.success-contact {
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.success-contact p {
+  margin: 0 0 0.5rem 0;
+  color: #6b7280;
   font-size: 0.875rem;
 }
 
-.whatsapp-link {
-  color: #25d366;
+.whatsapp-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #16a34a;
   text-decoration: none;
   font-weight: 500;
-  margin-left: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #16a34a;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
 }
 
-.whatsapp-link:hover {
-  text-decoration: underline;
+.whatsapp-contact-link:hover {
+  background: #16a34a;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
 }
 
-/* MOBILE RESPONSIVENESS */
+.manual-payment-continue-btn {
+  background: #22c55e;
+  color: white;
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+  font-size: 0.9rem;
+}
+
+.manual-payment-continue-btn:hover {
+  background: #16a34a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+/* =================== MOBILE RESPONSIVE =================== */
 @media (max-width: 768px) {
   .manual-payment-modal-overlay {
     padding: 0.5rem;
@@ -590,95 +690,156 @@
     padding: 1rem;
   }
 
-  .manual-payment-header-info h2 {
-    font-size: 1.125rem;
-  }
-
   .manual-payment-modal-body {
     padding: 1rem;
   }
 
-  .payment-method-details {
-    padding-left: 0;
-    margin-top: 0.75rem;
-  }
-
   .manual-payment-modal-actions {
     padding: 1rem;
-    flex-direction: column-reverse;
-  }
-
-  .manual-payment-cancel-btn,
-  .manual-payment-close-btn,
-  .manual-payment-submit-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .file-upload-label {
-    padding: 1.5rem 1rem;
-  }
-
-  .copyable-field {
     flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-
-  .copyable-field .value {
-    text-align: center;
-    padding: 0.5rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-  }
-
-  .copy-btn {
-    align-self: stretch;
-    justify-content: center;
-    padding: 0.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .manual-payment-modal-overlay {
-    padding: 0;
-    align-items: stretch;
-  }
-
-  .manual-payment-modal-content {
-    max-height: 100vh;
-    border-radius: 0;
-    height: 100%;
-  }
-
-  .manual-payment-header-info {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
   }
 
   .payment-detail-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.25rem;
+    gap: 0.5rem;
+  }
+
+  .copyable-field {
+    width: 100%;
+  }
+
+  .file-upload-area {
+    padding: 1.5rem 1rem;
+  }
+
+  .success-content {
+    padding: 1.5rem 0.5rem;
+  }
+  
+  .success-steps {
+    text-align: center;
+  }
+  
+  .success-step {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .step-number {
+    align-self: center;
+  }
+
+  .whatsapp-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 
-/* CUSTOM SCROLLBAR */
-.manual-payment-modal-body::-webkit-scrollbar {
-  width: 6px;
+@media (max-width: 480px) {
+  .manual-payment-modal-overlay {
+    padding: 0.25rem;
+  }
+
+  .manual-payment-modal-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .manual-payment-header-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .file-upload-label {
+    gap: 0.5rem;
+  }
+
+  .file-upload-label span {
+    font-size: 0.875rem;
+  }
+
+  .copyable-field .value {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .success-checkmark {
+    width: 40px;
+    height: 40px;
+  }
 }
 
-.manual-payment-modal-body::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 3px;
-}
+/* =================== DARK MODE SUPPORT =================== */
+@media (prefers-color-scheme: dark) {
+  .manual-payment-modal-content {
+    background: #1f2937;
+    color: #f9fafb;
+  }
 
-.manual-payment-modal-body::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
-}
+  .manual-payment-modal-header {
+    background: #111827;
+    border-bottom-color: #374151;
+  }
 
-.manual-payment-modal-body::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  .manual-payment-modal-actions {
+    background: #111827;
+    border-top-color: #374151;
+  }
+
+  .manual-payment-summary {
+    background: #111827;
+    border-color: #374151;
+  }
+
+  .payment-method {
+    border-color: #374151;
+    background: #111827;
+  }
+
+  .payment-method-header {
+    background: #1f2937;
+    border-bottom-color: #374151;
+  }
+
+  .copyable-field .value {
+    background: #111827;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+
+  .file-upload-area {
+    border-color: #4b5563;
+    background: #111827;
+  }
+
+  .file-upload-area:hover {
+    border-color: #3b82f6;
+    background: #1f2937;
+  }
+
+  .file-preview {
+    background: #111827;
+    border-color: #374151;
+  }
+
+  .success-step {
+    background: #111827;
+    border-left-color: #22c55e;
+  }
+
+  .success-step:hover {
+    background: #1f2937;
+  }
+
+  .success-timeline {
+    background: #1e40af;
+    color: #dbeafe;
+  }
+
+  .success-contact {
+    border-top-color: #374151;
+  }
 }
