@@ -1,0 +1,464 @@
+/* client/src/Admin/components/AdminManualPaymentApproval.css */
+/* Manual Payment Approval Modal Styles */
+
+.manual-payment-approval-modal {
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  color: #ffffff;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* ===== MODAL HEADER ===== */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.modal-title h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.modal-title p {
+  margin: 0.25rem 0 0 0;
+  color: #c9c9c9;
+  font-size: 0.875rem;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: #c9c9c9;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* ===== MODAL CONTENT ===== */
+.modal-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ===== DEBUG SECTION ===== */
+.debug-section {
+  background: rgba(156, 163, 175, 0.1);
+  border: 1px solid rgba(156, 163, 175, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+}
+
+.debug-section h4 {
+  color: #9ca3af;
+  margin: 0 0 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.debug-section div {
+  color: #c9c9c9;
+  line-height: 1.4;
+}
+
+/* ===== INFO SECTIONS ===== */
+.submission-info h3,
+.listing-info h3,
+.proof-section h3 {
+  margin: 0 0 1rem 0;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.info-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.info-item svg {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.info-item label {
+  display: block;
+  color: #c9c9c9;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.info-item span {
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* ===== LISTING INFO ===== */
+.listing-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.listing-details div {
+  color: #c9c9c9;
+  font-size: 0.875rem;
+}
+
+.listing-details strong {
+  color: #ffffff;
+}
+
+/* ===== PROOF SECTION ===== */
+.proof-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+  color: #3b82f6;
+}
+
+.proof-info svg {
+  flex-shrink: 0;
+}
+
+.proof-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.view-proof-btn,
+.download-proof-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.view-proof-btn:hover,
+.download-proof-btn:hover {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: #3b82f6;
+}
+
+/* ===== ADMIN NOTES ===== */
+.admin-notes-section h4 {
+  margin: 0 0 0.5rem 0;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.admin-notes-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.875rem;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.admin-notes-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.admin-notes-textarea::placeholder {
+  color: #888;
+}
+
+/* ===== CONFIRMATION SECTION ===== */
+.payment-confirmation-section {
+  padding: 1rem;
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  border-radius: 8px;
+}
+
+.confirmation-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  color: #ffffff;
+  font-size: 0.875rem;
+}
+
+.confirmation-checkbox input {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(74, 222, 128, 0.5);
+  border-radius: 4px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.confirmation-checkbox input:checked + .checkbox-custom {
+  background: #4ade80;
+  border-color: #4ade80;
+}
+
+.confirmation-checkbox input:checked + .checkbox-custom::after {
+  content: '✓';
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* ===== ERROR MESSAGE ===== */
+.error-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  color: #ef4444;
+}
+
+.error-message svg {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.error-message strong {
+  font-weight: 600;
+}
+
+.error-message small {
+  opacity: 0.8;
+  font-size: 0.8rem;
+}
+
+/* ===== APPROVAL NOTICE ===== */
+.approval-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 8px;
+  color: #f59e0b;
+}
+
+.approval-notice svg {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.approval-notice h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.approval-notice p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* ===== MODAL ACTIONS ===== */
+.manual-payment-approval-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cancel-approval-btn,
+.approve-payment-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.cancel-approval-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #c9c9c9;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cancel-approval-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.approve-payment-btn {
+  background: #4ade80;
+  color: white;
+}
+
+.approve-payment-btn:hover:not(:disabled) {
+  background: #22c55e;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+}
+
+.approve-payment-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.cancel-approval-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== SPINNER ===== */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 640px) {
+  .manual-payment-approval-modal {
+    width: 95vw;
+    max-height: 95vh;
+  }
+  
+  .modal-header,
+  .modal-content,
+  .manual-payment-approval-actions {
+    padding: 1rem;
+  }
+  
+  .manual-payment-approval-actions {
+    flex-direction: column;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .proof-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .proof-actions {
+    align-self: stretch;
+  }
+  
+  .view-proof-btn,
+  .download-proof-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+.modal-close-btn:focus,
+.view-proof-btn:focus,
+.download-proof-btn:focus,
+.admin-notes-textarea:focus,
+.confirmation-checkbox:focus-within,
+.cancel-approval-btn:focus,
+.approve-payment-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ===== SCROLLBAR ===== */
+.manual-payment-approval-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.manual-payment-approval-modal::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.manual-payment-approval-modal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.manual-payment-approval-modal::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
