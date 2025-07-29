@@ -1,6 +1,6 @@
 // client/src/components/profile/CarListingManager/CarListingManager.js
 // COMPLETE car listing manager with subscription, addon handling, FREE TIER AND MANUAL PAYMENT INTEGRATION
-// WITH DEBUGGING FEATURES FOR PAYMENT MODAL ISSUES
+// PRODUCTION VERSION - DEBUG FEATURES REMOVED
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -802,58 +802,6 @@ const CarListingManager = ({
   // === MAIN RENDER ===
   return (
     <div className="car-listing-manager">
-      {/* TEMPORARY: Test Payment Modal Button - REMOVE AFTER TESTING */}
-      <div style={{
-        background: '#ff6b6b',
-        padding: '15px',
-        margin: '10px 0',
-        borderRadius: '8px',
-        border: '2px solid #ff5252'
-      }}>
-        <h4 style={{color: 'white', margin: '0 0 10px 0'}}>🧪 DEBUG TEST AREA</h4>
-        <button 
-          onClick={() => {
-            console.log('🧪 TEST BUTTON CLICKED');
-            
-            // Create test payment info
-            const testPaymentInfo = {
-              listingId: 'test-123',
-              subscriptionTier: 'basic',
-              amount: 50,
-              duration: 30,
-              planName: 'Basic Plan (TEST)',
-              transactionRef: `test_${Date.now()}`,
-              sellerType: 'private'
-            };
-            
-            console.log('🧪 Setting test payment info:', testPaymentInfo);
-            setManualPaymentInfo(testPaymentInfo);
-            
-            console.log('🧪 Opening modal...');
-            setShowManualPaymentModal(true);
-            
-            // Check modal state after a moment
-            setTimeout(() => {
-              console.log('🧪 Modal should be open. Check if you see it!');
-            }, 500);
-          }}
-          style={{
-            background: '#4CAF50',
-            color: 'white',
-            padding: '10px 20px',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontWeight: 'bold'
-          }}
-        >
-          🧪 TEST OPEN PAYMENT MODAL
-        </button>
-        <p style={{color: 'white', fontSize: '12px', margin: '5px 0 0 0'}}>
-          ↑ Click this to test if the payment modal opens at all
-        </p>
-      </div>
-
       {/* Message Display */}
       {message.text && (
         <div className={`manager-message ${message.type}`}>
@@ -1129,13 +1077,6 @@ const CarListingManager = ({
         onBookingConfirm={handleAddonBookingConfirm}
         loading={loading}
       />
-
-      {/* DEBUG: Payment Modal State */}
-      {console.log('🔍 MODAL RENDER DEBUG:', {
-        showManualPaymentModal,
-        manualPaymentInfo,
-        hasPaymentInfo: !!manualPaymentInfo
-      })}
 
       {/* Manual Payment Modal */}
       <ManualPaymentModal
