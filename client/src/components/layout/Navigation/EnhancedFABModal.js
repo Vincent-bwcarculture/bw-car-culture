@@ -167,7 +167,7 @@ const EnhancedFABModal = ({
     </div>
   );
 
-  if (!showModal) return null;
+ return null;
 
   return (
     <div className="efab-modal-overlay" onClick={handleOverlayClick}>

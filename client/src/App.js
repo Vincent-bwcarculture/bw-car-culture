@@ -427,10 +427,10 @@ const HomeContent = () => {
       <VideoSection />
       <HomeRentalsSection />
       <NewsProvider>
-        <div className="cover-container">
+        {/* <div className="cover-container">
           <FeaturedNews />
           <CarNewsSection />
-        </div>
+        </div> */}
       </NewsProvider>
 
       <div className="bottom-section">
