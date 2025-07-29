@@ -1,5 +1,5 @@
 // client/src/components/profile/UserSubmissionCard.js
-// Complete submission card component with ENHANCED PAYMENT STATUS TRACKING
+// Complete submission card component with ENHANCED PAYMENT STATUS TRACKING + REAL-TIME UPDATES
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -21,7 +21,8 @@ import {
   XCircle,
   TrendingUp,
   Shield,
-  Zap
+  Zap,
+  RefreshCw
 } from 'lucide-react';
 import ManualPaymentModal from './ManualPaymentModal/ManualPaymentModal.js';
 import './UserSubmissionCard.css';
@@ -46,7 +47,9 @@ const UserSubmissionCard = ({
   canEditSubmission,
   canCloneSubmission,
   getEditButtonInfo,
-  editLoading = false
+  editLoading = false,
+  // ENHANCED: Real-time functionality
+  onRefreshSubmissions
 }) => {
   const navigate = useNavigate();
 
@@ -55,15 +58,130 @@ const UserSubmissionCard = ({
   const [manualPaymentInfo, setManualPaymentInfo] = useState(null);
   const [externalPaymentStatus, setExternalPaymentStatus] = useState(null);
 
+  // ENHANCED: Real-time status tracking
+  const [currentSubmissionStatus, setCurrentSubmissionStatus] = useState(submission);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastStatusCheck, setLastStatusCheck] = useState(null);
+
   // Calculate pricing with FREE TIER support
-  const selectedPlan = submission.listingData?.selectedPlan;
-  const selectedAddons = submission.listingData?.selectedAddons || [];
+  const selectedPlan = currentSubmissionStatus.listingData?.selectedPlan;
+  const selectedAddons = currentSubmissionStatus.listingData?.selectedAddons || [];
   const planInfo = getPlanInfo(selectedPlan);
   const totalCost = calculateTotalCost(selectedPlan, selectedAddons);
   const addonDetails = getAddonDetails(selectedAddons);
   const addonCost = totalCost - planInfo.price;
   const isFreeSubmission = selectedPlan === 'free';
-  const primaryImage = getPrimaryImage(submission);
+  const primaryImage = getPrimaryImage(currentSubmissionStatus);
+
+  // ENHANCED: Fetch real-time submission status
+  const fetchSubmissionStatus = useCallback(async (silent = false) => {
+    if (!silent) setIsRefreshing(true);
+    
+    try {
+      console.log('🔄 Fetching real-time submission status for:', currentSubmissionStatus._id);
+      
+      const response = await axios.get(`/api/user/submission-status/${currentSubmissionStatus._id}`);
+      
+      if (response.data.success) {
+        const statusData = response.data.data;
+        console.log('✅ Updated submission status:', statusData);
+        
+        // Update the submission status based on API response
+        const updatedSubmission = {
+          ...currentSubmissionStatus,
+          status: statusData.currentStatus === 'live' ? 'approved_paid_active' : 
+                  statusData.currentStatus === 'payment_review' ? 'approved' :
+                  statusData.currentStatus === 'payment_required' ? 'approved' :
+                  statusData.currentStatus === 'approved_free' ? 'approved' :
+                  currentSubmissionStatus.status,
+          
+          // Update payment info if available
+          paymentProof: statusData.payment ? {
+            submitted: statusData.payment.proofSubmitted,
+            status: statusData.payment.status === 'completed' ? 'approved' : 
+                   statusData.payment.status === 'proof_submitted' ? 'pending' : 'none',
+            approvedAt: statusData.payment.completedAt,
+            adminNotes: 'Payment approved - listing is live'
+          } : currentSubmissionStatus.paymentProof,
+          
+          // Update listing info if live
+          isLive: statusData.isLive,
+          listingCreatedAt: statusData.isLive ? new Date().toISOString() : currentSubmissionStatus.listingCreatedAt,
+          
+          // Update admin review with real-time info
+          adminReview: {
+            ...currentSubmissionStatus.adminReview,
+            subscriptionTier: statusData.pricing?.subscriptionTier || currentSubmissionStatus.adminReview?.subscriptionTier,
+            totalCost: statusData.pricing?.totalAmount || currentSubmissionStatus.adminReview?.totalCost,
+            appliedAddons: statusData.pricing?.addons || currentSubmissionStatus.adminReview?.appliedAddons,
+            isFeatured: statusData.listing?.isFeatured || false,
+            listingActivatedAt: statusData.isLive ? new Date().toISOString() : null,
+            paymentVerifiedAt: statusData.payment?.completedAt || null
+          }
+        };
+        
+        setCurrentSubmissionStatus(updatedSubmission);
+        setLastStatusCheck(new Date());
+        
+        // Show success message if status changed to live
+        if (statusData.isLive && !currentSubmissionStatus.isLive && !silent) {
+          showMessage('success', '🎉 Your listing is now live!');
+          
+          // Trigger parent refresh if available
+          if (onRefreshSubmissions) {
+            setTimeout(() => onRefreshSubmissions(), 1000);
+          }
+        }
+        
+        return statusData;
+      }
+    } catch (error) {
+      console.error('❌ Error fetching submission status:', error);
+      if (!silent) {
+        showMessage('error', 'Failed to check status. Please try again.');
+      }
+    } finally {
+      if (!silent) setIsRefreshing(false);
+    }
+    return null;
+  }, [currentSubmissionStatus._id, currentSubmissionStatus.isLive, showMessage, onRefreshSubmissions]);
+
+  // Auto-refresh for approved submissions awaiting payment verification
+  useEffect(() => {
+    let intervalId = null;
+    
+    // Set up auto-refresh for submissions that might be getting approved
+    const shouldAutoRefresh = (
+      currentSubmissionStatus.status === 'approved' || 
+      currentSubmissionStatus.status === 'pending_review' ||
+      (currentSubmissionStatus.status === 'approved' && 
+       currentSubmissionStatus.paymentProof?.status === 'pending')
+    );
+    
+    if (shouldAutoRefresh) {
+      console.log('🔄 Setting up auto-refresh for submission:', currentSubmissionStatus._id);
+      
+      // Check immediately after 2 seconds
+      setTimeout(() => fetchSubmissionStatus(true), 2000);
+      
+      // Then check every 30 seconds
+      intervalId = setInterval(() => {
+        fetchSubmissionStatus(true);
+      }, 30000);
+    }
+    
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+        console.log('🛑 Stopped auto-refresh for submission:', currentSubmissionStatus._id);
+      }
+    };
+  }, [currentSubmissionStatus.status, currentSubmissionStatus._id, fetchSubmissionStatus]);
+
+  // Update local state when prop changes
+  useEffect(() => {
+    setCurrentSubmissionStatus(submission);
+  }, [submission]);
 
   // Function to fetch payment status from API if missing from submission
   const fetchPaymentStatusFromAPI = useCallback(async (listingId) => {
@@ -97,31 +215,31 @@ const UserSubmissionCard = ({
   useEffect(() => {
     const checkExternalPaymentStatus = async () => {
       // Always check for payment status if submission is approved (regardless of free/paid)
-      if (submission.status === 'approved') {
+      if (currentSubmissionStatus.status === 'approved') {
         console.log('🔍 DEBUG: Submission is approved, checking external payment status');
-        console.log('🔍 DEBUG: Submission ID:', submission._id);
-        console.log('🔍 DEBUG: Current paymentProof:', submission.paymentProof);
-        console.log('🔍 DEBUG: Current payment:', submission.payment);
-        await fetchPaymentStatusFromAPI(submission._id);
+        console.log('🔍 DEBUG: Submission ID:', currentSubmissionStatus._id);
+        console.log('🔍 DEBUG: Current paymentProof:', currentSubmissionStatus.paymentProof);
+        console.log('🔍 DEBUG: Current payment:', currentSubmissionStatus.payment);
+        await fetchPaymentStatusFromAPI(currentSubmissionStatus._id);
       }
     };
     
     checkExternalPaymentStatus();
-  }, [submission._id, submission.status, fetchPaymentStatusFromAPI]);
+  }, [currentSubmissionStatus._id, currentSubmissionStatus.status, fetchPaymentStatusFromAPI]);
 
   // Additional effect to fetch payment status when component mounts
   useEffect(() => {
-    console.log('🔍 DEBUG: Component mounted for submission:', submission._id);
-    console.log('🔍 DEBUG: Initial submission status:', submission.status);
+    console.log('🔍 DEBUG: Component mounted for submission:', currentSubmissionStatus._id);
+    console.log('🔍 DEBUG: Initial submission status:', currentSubmissionStatus.status);
     
     // For testing - always try to fetch payment status for approved submissions
-    if (submission.status === 'approved') {
+    if (currentSubmissionStatus.status === 'approved') {
       setTimeout(() => {
         console.log('🔍 DEBUG: Delayed payment status check');
-        fetchPaymentStatusFromAPI(submission._id);
+        fetchPaymentStatusFromAPI(currentSubmissionStatus._id);
       }, 1000);
     }
-  }, [submission._id, submission.status, fetchPaymentStatusFromAPI]);
+  }, [currentSubmissionStatus._id, currentSubmissionStatus.status, fetchPaymentStatusFromAPI]);
 
   // Payment Status Helper Functions
   const getPaymentStatus = (submission) => {
@@ -159,7 +277,10 @@ const UserSubmissionCard = ({
     }
     
     // Method 3: Check if listing is already live (payment was approved)
-    if (submission.status === 'listing_created' || submission.status === 'approved_paid') {
+    if (submission.status === 'listing_created' || 
+        submission.status === 'approved_paid' || 
+        submission.status === 'approved_paid_active' || 
+        submission.isLive) {
       console.log('🔍 DEBUG: Listing is live, payment approved');
       return {
         proofSubmitted: true,
@@ -194,7 +315,7 @@ const UserSubmissionCard = ({
   };
 
   // Get payment status (combining base status with external status if available)
-  const basePaymentStatus = getPaymentStatus(submission);
+  const basePaymentStatus = getPaymentStatus(currentSubmissionStatus);
   const paymentStatus = externalPaymentStatus && externalPaymentStatus.proofSubmitted 
     ? {
         proofSubmitted: true,
@@ -208,7 +329,7 @@ const UserSubmissionCard = ({
     : basePaymentStatus;
 
   // DEBUG: Log final payment status
-  console.log('🔍 DEBUG: Final payment status for', submission.listingData?.title, ':', paymentStatus);
+  console.log('🔍 DEBUG: Final payment status for', currentSubmissionStatus.listingData?.title, ':', paymentStatus);
   console.log('🔍 DEBUG: basePaymentStatus:', basePaymentStatus);
   console.log('🔍 DEBUG: externalPaymentStatus:', externalPaymentStatus);
   console.log('🔍 DEBUG: proofSubmitted:', paymentStatus.proofSubmitted);
@@ -216,7 +337,7 @@ const UserSubmissionCard = ({
 
   // Check if listing is viewable (active/live)
   const isListingLive = (status) => {
-    return ['listing_created', 'approved'].includes(status);
+    return ['listing_created', 'approved'].includes(status) || currentSubmissionStatus.isLive;
   };
 
   // Check if listing can be updated (legacy - keeping for compatibility)
@@ -258,7 +379,9 @@ const UserSubmissionCard = ({
 
   const isPaymentApproved = (submission) => {
     const result = paymentStatus.proofStatus === 'approved' || 
-                   paymentStatus.proofStatus === 'completed';
+                   paymentStatus.proofStatus === 'completed' ||
+                   submission.isLive ||
+                   (submission.status === 'approved_paid_active');
     
     console.log('🔍 DEBUG: isPaymentApproved:', result, paymentStatus);
     return result;
@@ -272,23 +395,28 @@ const UserSubmissionCard = ({
     return result;
   };
 
+  // ENHANCED: Handle manual refresh
+  const handleManualRefresh = () => {
+    fetchSubmissionStatus(false);
+  };
+
   // Handle Complete Payment button click
   const handleCompletePayment = () => {
     console.log('🔥 COMPLETE PAYMENT CLICKED from UserSubmissionCard');
-    console.log('Submission:', submission);
+    console.log('Submission:', currentSubmissionStatus);
     console.log('Total Cost:', totalCost);
     console.log('Plan Info:', planInfo);
     
     // Create payment info from submission data
     const paymentInfo = {
-      listingId: submission._id,
-      subscriptionTier: submission.listingData?.selectedPlan || 'basic',
+      listingId: currentSubmissionStatus._id,
+      subscriptionTier: currentSubmissionStatus.listingData?.selectedPlan || 'basic',
       amount: totalCost,
       duration: planInfo.duration || 30,
       planName: planInfo.name || 'Subscription Plan',
       transactionRef: `manual_submission_${Date.now()}`,
       sellerType: 'private',
-      addons: submission.listingData?.selectedAddons || []
+      addons: currentSubmissionStatus.listingData?.selectedAddons || []
     };
 
     console.log('💰 Created payment info for modal:', paymentInfo);
@@ -297,7 +425,7 @@ const UserSubmissionCard = ({
     setShowManualPaymentModal(true);
   };
 
-  // Handle payment proof submission
+  // ENHANCED: Handle payment proof submission with refresh
   const handlePaymentProofSubmitted = (paymentData) => {
     setShowManualPaymentModal(false);
     setManualPaymentInfo(null);
@@ -306,6 +434,9 @@ const UserSubmissionCard = ({
       'Proof of payment submitted successfully! ' +
       'Your listing will be activated once our admin team verifies your payment (usually within 24 hours).'
     );
+    
+    // Refresh status immediately and set up monitoring
+    setTimeout(() => fetchSubmissionStatus(), 1000);
   };
 
   // Handle manual payment modal close
@@ -321,6 +452,7 @@ const UserSubmissionCard = ({
     console.log('Submission ID:', submission._id);
     console.log('Listing ID field:', submission.listingId);
     console.log('Status:', submission.status);
+    console.log('Is Live:', submission.isLive);
     console.log('Title:', submission.listingData?.title);
     console.log('Admin Review:', submission.adminReview);
     
@@ -330,6 +462,7 @@ const UserSubmissionCard = ({
     
     switch (submission.status) {
       case 'listing_created':
+      case 'approved_paid_active':
         // This should be a live listing
         targetId = submission.listingId || submission._id;
         shouldProceed = true;
@@ -338,9 +471,15 @@ const UserSubmissionCard = ({
         
       case 'approved':
         // This might be approved but not yet converted to listing
-        targetId = submission.listingId || submission._id;
-        shouldProceed = true;
-        console.log('⚠️ Status: approved - trying with ID:', targetId);
+        if (submission.isLive || isPaymentApproved(submission)) {
+          targetId = submission.listingId || submission._id;
+          shouldProceed = true;
+          console.log('✅ Status: approved and live - proceeding with ID:', targetId);
+        } else {
+          console.log('❌ Status: approved but not live yet');
+          showMessage('info', 'Your listing is approved but not live yet. Please complete payment.');
+          return;
+        }
         break;
         
       default:
@@ -367,13 +506,13 @@ const UserSubmissionCard = ({
   // Handle edit button click
   const handleEditClick = () => {
     if (editLoading) return;
-    onEditSubmission(submission);
+    onEditSubmission(currentSubmissionStatus);
   };
 
   // Handle clone button click
   const handleCloneClick = () => {
     if (editLoading) return;
-    onCloneSubmission(submission);
+    onCloneSubmission(currentSubmissionStatus);
   };
 
   // Handle resubmission for rejected listings (legacy - keeping for compatibility)
@@ -388,19 +527,57 @@ const UserSubmissionCard = ({
   };
 
   // Get edit button configuration
-  const editButtonInfo = getEditButtonInfo ? getEditButtonInfo(submission) : null;
-  const canEdit = canEditSubmission ? canEditSubmission(submission) : false;
-  const canClone = canCloneSubmission ? canCloneSubmission(submission) : false;
+  const editButtonInfo = getEditButtonInfo ? getEditButtonInfo(currentSubmissionStatus) : null;
+  const canEdit = canEditSubmission ? canEditSubmission(currentSubmissionStatus) : false;
+  const canClone = canCloneSubmission ? canCloneSubmission(currentSubmissionStatus) : false;
 
   // Check if actions are available
-  const canView = isListingLive(submission.status);
-  const canUpdate = canUpdateListing(submission.status); // Legacy compatibility
+  const canView = isListingLive(currentSubmissionStatus.status);
+  const canUpdate = canUpdateListing(currentSubmissionStatus.status); // Legacy compatibility
 
-  // ENHANCED SUBMISSION STATUS RENDERING WITH PAYMENT TRACKING
+  // ENHANCED SUBMISSION STATUS RENDERING WITH REAL-TIME UPDATES
   const renderSubmissionStatus = (submission) => {
-    const isFreeSubmission = submission.selectedTier === 'free' || 
-                           submission.paymentRequired === false ||
-                           submission.listingData?.selectedPlan === 'free';
+    const isFreeSubmission = submission.listingData?.selectedPlan === 'free';
+    
+    // LIVE STATUS - Listing is active
+    if (submission.status === 'approved_paid_active' || submission.isLive || isPaymentApproved(submission)) {
+      const isFeatured = submission.adminReview?.isFeatured || 
+                        (selectedAddons && selectedAddons.includes('featured'));
+      
+      return (
+        <div className="usc-status-message usc-status-live">
+          <CheckCircle size={14} />
+          <div className="usc-message-content">
+            <div className="usc-live-info">
+              <span>🚗 Your listing is <strong>LIVE</strong>!</span>
+              {isFeatured && (
+                <span className="usc-featured-badge">
+                  <Star size={12} />
+                  Featured
+                </span>
+              )}
+              <div className="usc-live-details">
+                <span>Activated: {formatDate(submission.adminReview?.listingActivatedAt || submission.listingCreatedAt)}</span>
+                {submission.adminReview?.subscriptionTier && (
+                  <span className="usc-tier-badge">
+                    {submission.adminReview.subscriptionTier.toUpperCase()} plan
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="usc-live-actions">
+              <button 
+                className="usc-btn usc-btn-success usc-btn-small"
+                onClick={() => handleViewListing(submission)}
+              >
+                <ExternalLink size={14} />
+                View Live
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
     
     // PENDING REVIEW STATUS
     if (submission.status === 'pending_review') {
@@ -463,42 +640,66 @@ const UserSubmissionCard = ({
         );
       }
 
-      // Payment Approved - Waiting for listing to go live
-      if (isPaymentApproved(submission)) {
+      // Awaiting Payment Approval - ENHANCED with refresh
+      if (isAwaitingPaymentApproval(submission)) {
         return (
-          <div className="usc-status-message usc-status-payment-approved">
-            <CheckCircle size={14} />
+          <div className="usc-status-message usc-status-payment-pending">
+            <Clock size={14} />
             <div className="usc-message-content">
-              <div className="usc-payment-approved-info">
-                <span>💳 Payment confirmed! Your listing will go live shortly.</span>
-                <div className="usc-approved-at">
-                  Payment approved: {formatDate(paymentStatus.proofApprovedAt)}
+              <div className="usc-payment-pending-info">
+                <span>💳 Payment proof submitted - under review</span>
+                <div className="usc-pending-details">
+                  <span>Submitted: {formatDate(paymentStatus.proofSubmittedAt)}</span>
+                  <span>Expected review: Within 24 hours</span>
                 </div>
-                <div className="usc-going-live-note">
-                  <Zap size={12} />
-                  <span>Listing activation in progress...</span>
-                </div>
+              </div>
+              <div className="usc-refresh-section">
+                <button 
+                  className="usc-btn usc-btn-outline usc-btn-small"
+                  onClick={handleManualRefresh}
+                  disabled={isRefreshing}
+                >
+                  <RefreshCw size={14} className={isRefreshing ? 'spinning' : ''} />
+                  {isRefreshing ? 'Checking...' : 'Check Status'}
+                </button>
+                {lastStatusCheck && (
+                  <span className="usc-last-check">
+                    Last checked: {formatDate(lastStatusCheck)}
+                  </span>
+                )}
               </div>
             </div>
           </div>
         );
       }
 
-      // Awaiting Payment Approval
-      if (isAwaitingPaymentApproval(submission)) {
+      // Free listing - approved and going live - ENHANCED with refresh
+      if (isFreeSubmission) {
         return (
-          <div className="usc-status-message usc-status-awaiting-payment">
-            <Clock size={14} />
+          <div className="usc-status-message usc-status-approved-free">
+            <CheckCircle size={14} />
             <div className="usc-message-content">
-              <div className="usc-awaiting-payment-info">
-                <span>📄 Payment proof submitted - under review</span>
-                <div className="usc-submitted-at">
-                  Submitted: {formatDate(paymentStatus.proofSubmittedAt)}
+              <div className="usc-approved-info">
+                <span>✅ <strong>Approved!</strong> Your free listing is going live</span>
+                <div className="usc-approval-details">
+                  <span>Approved: {formatDate(submission.adminReview?.reviewedAt)}</span>
+                  <span>Going live within a few minutes...</span>
                 </div>
-                <div className="usc-review-timeline">
-                  <Shield size={12} />
-                  <span>Admin review usually takes 24 hours</span>
-                </div>
+              </div>
+              <div className="usc-refresh-section">
+                <button 
+                  className="usc-btn usc-btn-outline usc-btn-small"
+                  onClick={handleManualRefresh}
+                  disabled={isRefreshing}
+                >
+                  <RefreshCw size={14} className={isRefreshing ? 'spinning' : ''} />
+                  {isRefreshing ? 'Checking...' : 'Check Status'}
+                </button>
+                {lastStatusCheck && (
+                  <span className="usc-last-check">
+                    Last checked: {formatDate(lastStatusCheck)}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -529,26 +730,6 @@ const UserSubmissionCard = ({
                 <DollarSign size={14} />
                 Complete Payment
               </button>
-            </div>
-          </div>
-        );
-      }
-
-      // Free Listing - Will go live automatically
-      if (isFreeSubmission) {
-        return (
-          <div className="usc-status-message usc-status-approved">
-            <CheckCircle size={14} />
-            <div className="usc-message-content">
-              <div className="usc-approval-details">
-                <span>
-                  🎉 Great! Your listing has been approved.
-                  <span className="usc-free-label"> (FREE TIER)</span>
-                </span>
-                <div className="usc-next-steps">
-                  <span>Your free listing will go live automatically! 🎉</span>
-                </div>
-              </div>
             </div>
           </div>
         );
@@ -606,14 +787,14 @@ const UserSubmissionCard = ({
   };
 
   return (
-    <div key={submission._id} className="usc-submission-card">
+    <div key={currentSubmissionStatus._id} className="usc-submission-card">
       <div className="usc-submission-main">
         {/* Image Section */}
         <div className="usc-submission-image">
           {primaryImage ? (
             <img 
               src={primaryImage} 
-              alt={submission.listingData?.title || 'Car listing'}
+              alt={currentSubmissionStatus.listingData?.title || 'Car listing'}
               className="usc-car-image"
               onError={(e) => {
                 e.target.style.display = 'none';
@@ -631,25 +812,25 @@ const UserSubmissionCard = ({
         <div className="usc-submission-content">
           <div className="usc-submission-header">
             <h4 className="usc-submission-title">
-              {submission.listingData?.title || 'Untitled Listing'}
+              {currentSubmissionStatus.listingData?.title || 'Untitled Listing'}
               {isFreeSubmission && <span className="usc-free-label">FREE</span>}
             </h4>
-            {getStatusBadge(submission.status)}
+            {getStatusBadge(currentSubmissionStatus.status)}
           </div>
 
           <div className="usc-submission-details">
             <div className="usc-detail-row">
               <span className="usc-detail-label">Vehicle:</span>
               <span className="usc-detail-value">
-                {submission.listingData?.specifications?.year} {submission.listingData?.specifications?.make} {submission.listingData?.specifications?.model}
+                {currentSubmissionStatus.listingData?.specifications?.year} {currentSubmissionStatus.listingData?.specifications?.make} {currentSubmissionStatus.listingData?.specifications?.model}
               </span>
             </div>
             
             <div className="usc-detail-row">
               <span className="usc-detail-label">Car Price:</span>
               <span className="usc-detail-value usc-price">
-                {submission.listingData?.pricing?.price 
-                  ? `P${Number(submission.listingData.pricing.price).toLocaleString()}`
+                {currentSubmissionStatus.listingData?.pricing?.price 
+                  ? `P${Number(currentSubmissionStatus.listingData.pricing.price).toLocaleString()}`
                   : 'Price not set'
                 }
               </span>
@@ -658,53 +839,53 @@ const UserSubmissionCard = ({
             <div className="usc-detail-row">
               <span className="usc-detail-label">Submitted:</span>
               <span className="usc-detail-value">
-                {formatDate(submission.submittedAt)}
+                {formatDate(currentSubmissionStatus.submittedAt)}
               </span>
             </div>
 
             {/* Payment Status Row */}
-            {!isFreeSubmission && submission.status === 'approved' && (
+            {!isFreeSubmission && currentSubmissionStatus.status === 'approved' && (
               <div className="usc-detail-row">
                 <span className="usc-detail-label">Payment:</span>
                 <span className={`usc-detail-value usc-payment-status ${
-                  isPaymentApproved(submission) ? 'usc-payment-approved' :
-                  isAwaitingPaymentApproval(submission) ? 'usc-payment-pending' :
-                  isPaymentRejected(submission) ? 'usc-payment-rejected' :
+                  isPaymentApproved(currentSubmissionStatus) ? 'usc-payment-approved' :
+                  isAwaitingPaymentApproval(currentSubmissionStatus) ? 'usc-payment-pending' :
+                  isPaymentRejected(currentSubmissionStatus) ? 'usc-payment-rejected' :
                   'usc-payment-needed'
                 }`}>
-                  {isPaymentApproved(submission) ? '✅ Confirmed' :
-                   isAwaitingPaymentApproval(submission) ? '⏳ Under Review' :
-                   isPaymentRejected(submission) ? '❌ Rejected' :
+                  {isPaymentApproved(currentSubmissionStatus) ? '✅ Confirmed' :
+                   isAwaitingPaymentApproval(currentSubmissionStatus) ? '⏳ Under Review' :
+                   isPaymentRejected(currentSubmissionStatus) ? '❌ Rejected' :
                    '💳 Required'}
                 </span>
               </div>
             )}
 
             {/* Show edit history if available */}
-            {submission.editHistory && submission.editHistory.length > 0 && (
+            {currentSubmissionStatus.editHistory && currentSubmissionStatus.editHistory.length > 0 && (
               <div className="usc-detail-row">
                 <span className="usc-detail-label">Last edited:</span>
                 <span className="usc-detail-value">
-                  {formatDate(submission.editHistory[submission.editHistory.length - 1].editedAt)}
+                  {formatDate(currentSubmissionStatus.editHistory[currentSubmissionStatus.editHistory.length - 1].editedAt)}
                 </span>
               </div>
             )}
 
             {/* Show admin review info if available */}
-            {submission.adminReview && (
+            {currentSubmissionStatus.adminReview && (
               <div className="usc-detail-row">
                 <span className="usc-detail-label">Reviewed:</span>
                 <span className="usc-detail-value">
-                  {formatDate(submission.adminReview.reviewedAt)}
+                  {formatDate(currentSubmissionStatus.adminReview.reviewedAt)}
                 </span>
               </div>
             )}
 
-            {submission.listingData?.location?.city && (
+            {currentSubmissionStatus.listingData?.location?.city && (
               <div className="usc-detail-row">
                 <span className="usc-detail-label">Location:</span>
                 <span className="usc-detail-value">
-                  {submission.listingData.location.city}
+                  {currentSubmissionStatus.listingData.location.city}
                 </span>
               </div>
             )}
@@ -744,7 +925,7 @@ const UserSubmissionCard = ({
               {canView && (
                 <button
                   className="usc-btn usc-btn-success usc-btn-small"
-                  onClick={() => handleViewListing(submission)}
+                  onClick={() => handleViewListing(currentSubmissionStatus)}
                   title="View your listing on the website"
                 >
                   <ExternalLink size={14} />
@@ -753,7 +934,7 @@ const UserSubmissionCard = ({
               )}
 
               {/* Legacy: Old resubmit button for rejected listings */}
-              {submission.status === 'rejected' && !canEdit && (
+              {currentSubmissionStatus.status === 'rejected' && !canEdit && (
                 <button
                   className="usc-btn usc-btn-warning usc-btn-small"
                   onClick={handleResubmit}
@@ -767,37 +948,45 @@ const UserSubmissionCard = ({
 
             {/* Secondary Actions Row - Status Messages */}
             <div className="usc-secondary-actions">
-              {submission.status === 'pending_review' && (
+              {currentSubmissionStatus.status === 'pending_review' && (
                 <div className="usc-status-indicator">
                   <Clock size={12} />
                   <span>Awaiting admin review</span>
                 </div>
               )}
 
-              {submission.status === 'rejected' && (
+              {currentSubmissionStatus.status === 'rejected' && (
                 <div className="usc-status-indicator usc-status-error">
                   <AlertCircle size={12} />
                   <span>Needs attention</span>
                 </div>
               )}
 
-              {submission.status === 'approved' && (
+              {currentSubmissionStatus.status === 'approved' && (
                 <div className="usc-status-indicator usc-status-success">
                   <CheckCircle size={12} />
                   <span>
                     {isFreeSubmission ? 'Going live soon' : 
-                     isPaymentApproved(submission) ? 'Going live soon' :
-                     isAwaitingPaymentApproval(submission) ? 'Payment under review' :
-                     isPaymentRejected(submission) ? 'Payment rejected' :
+                     isPaymentApproved(currentSubmissionStatus) ? 'Going live soon' :
+                     isAwaitingPaymentApproval(currentSubmissionStatus) ? 'Payment under review' :
+                     isPaymentRejected(currentSubmissionStatus) ? 'Payment rejected' :
                      'Payment required'}
                   </span>
                 </div>
               )}
 
-              {submission.status === 'listing_created' && (
+              {(currentSubmissionStatus.status === 'listing_created' || 
+                currentSubmissionStatus.status === 'approved_paid_active' || 
+                currentSubmissionStatus.isLive) && (
                 <div className="usc-status-indicator usc-status-live">
                   <Star size={12} />
                   <span>Live on platform</span>
+                  {currentSubmissionStatus.adminReview?.isFeatured && (
+                    <>
+                      <Star size={12} />
+                      <span>Featured</span>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -879,7 +1068,7 @@ const UserSubmissionCard = ({
           )}
 
           {/* Payment Timeline for Non-Free Submissions */}
-          {!isFreeSubmission && submission.status === 'approved' && (
+          {!isFreeSubmission && currentSubmissionStatus.status === 'approved' && (
             <div className="usc-payment-timeline">
               <div className="usc-timeline-header">
                 <h5>Payment Progress</h5>
@@ -889,7 +1078,7 @@ const UserSubmissionCard = ({
                   <div className="usc-step-indicator">✅</div>
                   <div className="usc-step-content">
                     <span className="usc-step-title">Listing Approved</span>
-                    <span className="usc-step-date">{formatDate(submission.adminReview?.reviewedAt)}</span>
+                    <span className="usc-step-date">{formatDate(currentSubmissionStatus.adminReview?.reviewedAt)}</span>
                   </div>
                 </div>
                 
@@ -907,15 +1096,15 @@ const UserSubmissionCard = ({
                   </div>
                 </div>
                 
-                <div className={`usc-timeline-step ${isPaymentApproved(submission) ? 'usc-completed' : ''}`}>
+                <div className={`usc-timeline-step ${isPaymentApproved(currentSubmissionStatus) ? 'usc-completed' : ''}`}>
                   <div className="usc-step-indicator">
-                    {isPaymentApproved(submission) ? '✅' : 
-                     isPaymentRejected(submission) ? '❌' : '⏳'}
+                    {isPaymentApproved(currentSubmissionStatus) ? '✅' : 
+                     isPaymentRejected(currentSubmissionStatus) ? '❌' : '⏳'}
                   </div>
                   <div className="usc-step-content">
                     <span className="usc-step-title">
-                      {isPaymentApproved(submission) ? 'Payment Approved' :
-                       isPaymentRejected(submission) ? 'Payment Rejected' :
+                      {isPaymentApproved(currentSubmissionStatus) ? 'Payment Approved' :
+                       isPaymentRejected(currentSubmissionStatus) ? 'Payment Rejected' :
                        'Payment Review'}
                     </span>
                     {paymentStatus.proofApprovedAt && (
@@ -924,16 +1113,16 @@ const UserSubmissionCard = ({
                   </div>
                 </div>
                 
-                <div className={`usc-timeline-step ${submission.status === 'listing_created' ? 'usc-completed' : ''}`}>
+                <div className={`usc-timeline-step ${currentSubmissionStatus.status === 'listing_created' || currentSubmissionStatus.isLive ? 'usc-completed' : ''}`}>
                   <div className="usc-step-indicator">
-                    {submission.status === 'listing_created' ? '🚗' : '⏳'}
+                    {currentSubmissionStatus.status === 'listing_created' || currentSubmissionStatus.isLive ? '🚗' : '⏳'}
                   </div>
                   <div className="usc-step-content">
                     <span className="usc-step-title">
-                      {submission.status === 'listing_created' ? 'Listing Live' : 'Going Live'}
+                      {currentSubmissionStatus.status === 'listing_created' || currentSubmissionStatus.isLive ? 'Listing Live' : 'Going Live'}
                     </span>
-                    {submission.status === 'listing_created' && submission.listingCreatedAt && (
-                      <span className="usc-step-date">{formatDate(submission.listingCreatedAt)}</span>
+                    {(currentSubmissionStatus.status === 'listing_created' || currentSubmissionStatus.isLive) && currentSubmissionStatus.listingCreatedAt && (
+                      <span className="usc-step-date">{formatDate(currentSubmissionStatus.listingCreatedAt)}</span>
                     )}
                   </div>
                 </div>
@@ -942,7 +1131,7 @@ const UserSubmissionCard = ({
           )}
 
           {/* Edit History Section */}
-          {submission.editHistory && submission.editHistory.length > 0 && (
+          {currentSubmissionStatus.editHistory && currentSubmissionStatus.editHistory.length > 0 && (
             <div className="usc-edit-history">
               <div className="usc-edit-header">
                 <h5>Recent Changes</h5>
@@ -950,15 +1139,15 @@ const UserSubmissionCard = ({
               <div className="usc-edit-item">
                 <div className="usc-edit-info">
                   <span className="usc-edit-date">
-                    {formatDate(submission.editHistory[submission.editHistory.length - 1].editedAt)}
+                    {formatDate(currentSubmissionStatus.editHistory[currentSubmissionStatus.editHistory.length - 1].editedAt)}
                   </span>
-                  {submission.editHistory[submission.editHistory.length - 1].editNote && (
+                  {currentSubmissionStatus.editHistory[currentSubmissionStatus.editHistory.length - 1].editNote && (
                     <span className="usc-edit-note">
-                      "{submission.editHistory[submission.editHistory.length - 1].editNote}"
+                      "{currentSubmissionStatus.editHistory[currentSubmissionStatus.editHistory.length - 1].editNote}"
                     </span>
                   )}
                 </div>
-                {submission.editHistory[submission.editHistory.length - 1].requiresReview && (
+                {currentSubmissionStatus.editHistory[currentSubmissionStatus.editHistory.length - 1].requiresReview && (
                   <span className="usc-review-indicator">
                     <Clock size={12} />
                     Review required
@@ -969,15 +1158,15 @@ const UserSubmissionCard = ({
           )}
 
           {/* Admin Review Notes */}
-          {submission.adminReview && submission.adminReview.adminNotes && (
+          {currentSubmissionStatus.adminReview && currentSubmissionStatus.adminReview.adminNotes && (
             <div className="usc-admin-review">
               <div className="usc-admin-header">
                 <h5>Admin Review</h5>
               </div>
               <div className="usc-admin-content">
-                <p className="usc-admin-notes">{submission.adminReview.adminNotes}</p>
+                <p className="usc-admin-notes">{currentSubmissionStatus.adminReview.adminNotes}</p>
                 <span className="usc-review-date">
-                  Reviewed: {formatDate(submission.adminReview.reviewedAt)}
+                  Reviewed: {formatDate(currentSubmissionStatus.adminReview.reviewedAt)}
                 </span>
               </div>
             </div>
@@ -985,9 +1174,9 @@ const UserSubmissionCard = ({
         </div>
       </div>
 
-      {/* Status-specific actions with ENHANCED PAYMENT TRACKING */}
+      {/* Status-specific actions with ENHANCED REAL-TIME STATUS UPDATES */}
       <div className="usc-submission-status">
-        {renderSubmissionStatus(submission)}
+        {renderSubmissionStatus(currentSubmissionStatus)}
       </div>
 
       {/* Manual Payment Modal */}
