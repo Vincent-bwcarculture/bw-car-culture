@@ -1,10 +1,11 @@
-/* client/src/components/profile/ProfileSettings.css - Complete Implementation */
+/* client/src/components/profile/ProfileSettings.css - Complete with Logout Functionality */
 
 /* === CSS VARIABLES === */
 :root {
   --uprofile-bg-primary: #ffffff;
   --uprofile-bg-secondary: #f8f9fa;
   --uprofile-bg-tertiary: #e9ecef;
+  --uprofile-bg-quaternary: #dee2e6;
   --uprofile-text-primary: #333333;
   --uprofile-text-secondary: #666666;
   --uprofile-text-muted: #999999;
@@ -24,6 +25,7 @@
     --uprofile-bg-primary: #1a1a1a;
     --uprofile-bg-secondary: #2a2a2a;
     --uprofile-bg-tertiary: #3a3a3a;
+    --uprofile-bg-quaternary: #4a4a4a;
     --uprofile-text-primary: #ffffff;
     --uprofile-text-secondary: #cccccc;
     --uprofile-text-muted: #999999;
@@ -299,6 +301,107 @@
   box-shadow: none;
 }
 
+/* === LOGOUT BUTTON STYLES === */
+.psettings-btn-logout {
+  background: var(--uprofile-primary-accent) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.psettings-btn-logout:hover {
+  background: #cc2900 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.3);
+}
+
+.psettings-btn-logout:active {
+  transform: translateY(0);
+}
+
+/* === DANGER BUTTON === */
+.psettings-btn-danger {
+  background: var(--uprofile-error-color);
+  color: white;
+}
+
+.psettings-btn-danger:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* === ACCOUNT MANAGEMENT STYLES === */
+.psettings-account-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.psettings-action-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--uprofile-border-color);
+  border-radius: var(--uprofile-border-radius-sm);
+  background: var(--uprofile-bg-secondary);
+  transition: var(--uprofile-transition);
+}
+
+.psettings-action-item:hover {
+  border-color: var(--uprofile-primary-accent);
+  background: var(--uprofile-bg-primary);
+  box-shadow: 0 2px 8px rgba(255, 51, 0, 0.1);
+}
+
+.psettings-action-info {
+  flex: 1;
+}
+
+.psettings-action-info h4 {
+  margin: 0 0 4px 0;
+  color: var(--uprofile-text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.psettings-action-info p {
+  margin: 0;
+  color: var(--uprofile-text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* === SESSION INFO === */
+.psettings-session-info {
+  padding: 16px;
+  background: var(--uprofile-bg-secondary);
+  border-radius: var(--uprofile-border-radius-sm);
+  border: 1px solid var(--uprofile-border-color);
+}
+
+.psettings-session-item {
+  width: 100%;
+}
+
+.psettings-session-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.psettings-session-details p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--uprofile-text-secondary);
+  line-height: 1.4;
+}
+
+.psettings-session-details p strong {
+  color: var(--uprofile-text-primary);
+  font-weight: 600;
+}
+
 /* === NOTIFICATION SETTINGS === */
 .psettings-notification-groups,
 .psettings-privacy-groups {
@@ -415,6 +518,23 @@
   .psettings-checkbox-item {
     padding: 8px;
   }
+
+  /* Mobile logout actions */
+  .psettings-action-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .psettings-action-item button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .psettings-session-details {
+    text-align: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -459,6 +579,16 @@
 
   .psettings-checkbox-input {
     align-self: flex-start;
+  }
+
+  /* Mobile navigation wrapping */
+  .psettings-nav-btn {
+    min-width: calc(33.33% - 6px);
+  }
+
+  .psettings-action-info {
+    text-align: center;
+    width: 100%;
   }
 }
 
@@ -520,5 +650,59 @@
 
   .psettings-checkbox-input {
     filter: brightness(1.2);
+  }
+
+  .psettings-action-item {
+    background: var(--uprofile-bg-tertiary);
+    border-color: var(--uprofile-border-color);
+  }
+
+  .psettings-action-item:hover {
+    background: var(--uprofile-bg-secondary);
+    border-color: var(--uprofile-primary-accent);
+  }
+}
+
+/* === TOUCH DEVICE OPTIMIZATIONS === */
+@media (hover: none) and (pointer: coarse) {
+  .psettings-btn,
+  .psettings-checkbox-item,
+  .psettings-action-item {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  .psettings-nav-btn {
+    min-height: 40px;
+    touch-action: manipulation;
+  }
+
+  .psettings-password-toggle {
+    min-width: 40px;
+    min-height: 40px;
+    touch-action: manipulation;
+  }
+}
+
+/* === PRINT STYLES === */
+@media print {
+  .psettings-navigation,
+  .psettings-btn,
+  .psettings-password-toggle {
+    display: none !important;
+  }
+
+  .psettings-container {
+    background: white;
+    box-shadow: none;
+    border: none;
+  }
+
+  .psettings-section-header {
+    page-break-after: avoid;
+  }
+
+  .psettings-form-group {
+    page-break-inside: avoid;
   }
 }

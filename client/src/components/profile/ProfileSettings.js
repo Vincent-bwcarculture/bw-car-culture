@@ -1,4 +1,4 @@
-// client/src/components/profile/ProfileSettings.js - Complete Fixed Implementation
+// client/src/components/profile/ProfileSettings.js - Complete with Logout Functionality
 import React, { useState, useEffect } from 'react';
 import { 
   Settings, 
@@ -15,13 +15,17 @@ import {
   Shield,
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
+  LogOut,
+  Trash2
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
+import { useNavigate } from 'react-router-dom';
 import './ProfileSettings.css';
 
 const ProfileSettings = ({ profileData, refreshProfile }) => {
-  const { user, setUser } = useAuth();
+  const { user, setUser, logout } = useAuth();
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('profile');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -300,6 +304,22 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
       showMessage('error', 'Failed to update password. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // NEW: Handle Logout
+  const handleLogout = async () => {
+    if (window.confirm('Are you sure you want to sign out?')) {
+      try {
+        await logout();
+        navigate('/');
+        showMessage('success', 'Successfully signed out! 👋');
+      } catch (error) {
+        console.error('Logout error:', error);
+        // Force logout even if API fails
+        localStorage.removeItem('token');
+        window.location.href = '/';
+      }
     }
   };
 
@@ -853,6 +873,73 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     </div>
   );
 
+  // NEW: Account Management Section with Logout
+  const renderAccountSection = () => (
+    <div className="psettings-section">
+      <div className="psettings-section-header">
+        <h3>Account Management</h3>
+        <p>Manage your account and security settings</p>
+      </div>
+
+      {/* Account Actions */}
+      <div className="psettings-form">
+        <div className="psettings-form-group">
+          <label>Account Actions</label>
+          <div className="psettings-account-actions">
+            <div className="psettings-action-item">
+              <div className="psettings-action-info">
+                <h4>Sign Out</h4>
+                <p>Sign out of your account on this device</p>
+              </div>
+              <button 
+                type="button"
+                className="psettings-btn psettings-btn-logout"
+                onClick={handleLogout}
+              >
+                <LogOut size={16} />
+                Sign Out
+              </button>
+            </div>
+            
+            <div className="psettings-action-item">
+              <div className="psettings-action-info">
+                <h4>Delete Account</h4>
+                <p>Permanently delete your account and all data</p>
+              </div>
+              <button 
+                type="button"
+                className="psettings-btn psettings-btn-danger"
+                onClick={() => setMessage({
+                  type: 'error',
+                  text: 'Account deletion feature coming soon. Contact support for assistance.'
+                })}
+              >
+                <Trash2 size={16} />
+                Delete Account
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Current Session Info */}
+        <div className="psettings-form-group">
+          <label>Current Session</label>
+          <div className="psettings-session-info">
+            <div className="psettings-session-item">
+              <div className="psettings-session-details">
+                <p><strong>User:</strong> {user?.name || 'Unknown'}</p>
+                <p><strong>Email:</strong> {user?.email || 'Unknown'}</p>
+                <p><strong>Role:</strong> {user?.role || 'User'}</p>
+                <p><strong>Device:</strong> {navigator.userAgent.includes('Mobile') ? 'Mobile Device' : 'Desktop'}</p>
+                <p><strong>Last Login:</strong> {user?.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Today'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="psettings-container">
       {/* Success/Error Messages */}
@@ -893,6 +980,13 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
           <Lock size={18} />
           Password
         </button>
+        <button 
+          className={`psettings-nav-btn ${activeSection === 'account' ? 'active' : ''}`}
+          onClick={() => setActiveSection('account')}
+        >
+          <LogOut size={18} />
+          Account
+        </button>
       </div>
 
       {/* Settings Content */}
@@ -901,6 +995,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
         {activeSection === 'notifications' && renderNotificationSection()}
         {activeSection === 'privacy' && renderPrivacySection()}
         {activeSection === 'password' && renderPasswordSection()}
+        {activeSection === 'account' && renderAccountSection()}
       </div>
     </div>
   );
