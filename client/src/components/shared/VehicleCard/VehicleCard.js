@@ -544,7 +544,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     const message = `Hi! I'm interested in this vehicle from Bw Car Culture:\n\n${vehicleDetails}\n\nI'd like to ${contactAction}. Please provide more details.`;
     
     // Contact dealer
-    const phone = dealer?.contact?.phone;
+    const phone = car.dealer?.contact?.phone || car.dealer?.phone || car.dealer?.contactPhone || dealer?.contact?.phone;
     if (phone) {
       // Format phone number for WhatsApp (remove spaces, ensure it starts with country code)
       const formattedPhone = phone.startsWith('+') ? phone.replace(/\s+/g, '') : `+267${phone.replace(/\s+/g, '')}`;
