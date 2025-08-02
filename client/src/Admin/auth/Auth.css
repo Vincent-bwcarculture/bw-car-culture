@@ -139,6 +139,90 @@
   opacity: 0.6;
 }
 
+/* ===== WEBKIT AUTOFILL FIXES ===== */
+/* These styles fix the white text on white background issue on mobile browsers */
+
+.form-group input:-webkit-autofill,
+.form-group input:-webkit-autofill:hover,
+.form-group input:-webkit-autofill:focus,
+.form-group input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px rgba(255, 255, 255, 0.05) inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  background-clip: content-box !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+  border: 1px solid #2c2c2c !important;
+  caret-color: #ffffff !important;
+}
+
+/* Additional specificity for email inputs specifically */
+input[type="email"]:-webkit-autofill,
+input[type="email"]:-webkit-autofill:hover,
+input[type="email"]:-webkit-autofill:focus,
+input[type="email"]:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px rgba(255, 255, 255, 0.05) inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+}
+
+/* Force text color for all input states */
+.form-group input {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Make sure placeholder text remains visible */
+.form-group input::placeholder {
+  color: #888888 !important;
+  opacity: 0.8 !important;
+  -webkit-text-fill-color: #888888 !important;
+}
+
+/* Additional mobile browser compatibility */
+.form-group input:not(:placeholder-shown) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* Focus state enhancements */
+.form-group input:focus {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+/* ===== MOBILE BROWSER SPECIFIC FIXES ===== */
+/* Additional fixes for iOS Safari and Chrome mobile */
+
+@supports (-webkit-appearance: none) {
+  .form-group input[type="email"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+}
+
+/* Android Chrome specific fixes */
+.form-group input:-internal-autofill-selected {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  background-image: none !important;
+  color: #ffffff !important;
+}
+
+/* Ensure consistent styling across all browsers */
+.form-group input[type="email"],
+.form-group input[type="password"] {
+  font-size: 16px !important; /* Prevents zoom on iOS */
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: none !important;
+}
+
 .error-message {
   color: #ff6b81;
   font-size: 0.85rem;
@@ -551,6 +635,13 @@
   
   .auth-button {
     border: 2px solid #ff3300;
+  }
+
+  .form-group input:-webkit-autofill,
+  .form-group input:-webkit-autofill:hover,
+  .form-group input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #ffffff !important;
+    -webkit-box-shadow: 0 0 0 30px rgba(255, 255, 255, 0.1) inset !important;
   }
 }
 
