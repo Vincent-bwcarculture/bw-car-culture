@@ -299,11 +299,11 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         verification: {
           isVerified: !!car.dealer.verification?.isVerified || car.dealer.verification?.status === 'verified'
         },
-        contact: {
-          phone: car.dealer.contact?.phone || null,
-          email: car.dealer.contact?.email || null,
-          website: !isPrivateSeller ? car.dealer.contact?.website : null // Only show website for dealerships
-        },
+       contact: {
+  phone: car.dealer.contact?.phone || car.dealer.phone || car.dealer.contactPhone || null,
+  email: car.dealer.contact?.email || car.dealer.email || car.dealer.contactEmail || null,
+  website: !isPrivateSeller ? (car.dealer.contact?.website || car.dealer.website) : null
+},
         // Private seller specific data
         privateSeller: isPrivateSeller ? {
           firstName: car.dealer.privateSeller?.firstName || null,
