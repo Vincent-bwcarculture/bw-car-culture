@@ -19,7 +19,7 @@ const VehicleManagement = () => {
   const navigate = useNavigate();
 
   // === MAIN STATE VARIABLES ===
-  const [activeSection, setActiveSection] = useState('vehicles');
+  const [activeSection, setActiveSection] = useState('create-listing');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   
