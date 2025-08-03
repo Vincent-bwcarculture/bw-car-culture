@@ -912,6 +912,13 @@ const handleSubmit = async (e) => {
                   <option value="SUV">SUV</option>
                   <option value="Hatchback">Hatchback</option>
                   <option value="Sports Car">Sports Car</option>
+                  <option value="Performance Hatchback">Performance Hatchback</option>
+                   <option value="Performance SUV">Performance SUV</option>
+                    <option value="Performance Sedan">Performance Sedan</option>
+                     <option value="Performance Wagon">Performance Wagon</option>
+                      <option value="Performance Bakkie">Performance Bakkie</option>
+                       <option value="Offroad SUV">Offroad SUV</option>
+                       <option value="Offroad Bakkie">Offroad Bakkie</option>
                   <option value="Family">Family Car</option>
                   <option value="Luxury">Luxury</option>
                   <option value="Electric">Electric</option>
