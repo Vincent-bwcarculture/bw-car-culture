@@ -1189,13 +1189,13 @@ const VehicleManagement = () => {
 
       {/* Navigation Tabs */}
       <div className="vm-section-tabs">
-        <button 
+        {/* <button 
           className={`vm-tab-button ${activeSection === 'vehicles' ? 'vm-active' : ''}`}
           onClick={() => setActiveSection('vehicles')}
         >
           <Car size={16} />
           My Vehicles
-        </button>
+        </button> */}
         
         <button 
           className={`vm-tab-button ${activeSection === 'create-listing' ? 'vm-active' : ''}`}
