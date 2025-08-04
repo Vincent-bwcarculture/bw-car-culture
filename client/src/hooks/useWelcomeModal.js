@@ -4,10 +4,19 @@ import { useState, useEffect } from 'react';
 const STORAGE_KEY = 'bw_car_culture_welcome_shown';
 const MODAL_COOLDOWN = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
+// Check if welcome modal is disabled via environment variable
+const WELCOME_MODAL_DISABLED = process.env.REACT_APP_DISABLE_WELCOME_MODAL === 'true';
+
 export const useWelcomeModal = () => {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
+    // If disabled via environment variable, never show modal
+    if (WELCOME_MODAL_DISABLED) {
+      setShowModal(false);
+      return;
+    }
+
     const checkShouldShowModal = () => {
       try {
         const storedData = localStorage.getItem(STORAGE_KEY);
@@ -18,7 +27,14 @@ export const useWelcomeModal = () => {
           return;
         }
 
-        const { lastShown, count } = JSON.parse(storedData);
+        const { lastShown, count, disabled } = JSON.parse(storedData);
+        
+        // If manually disabled, don't show
+        if (disabled) {
+          setShowModal(false);
+          return;
+        }
+
         const now = Date.now();
         const timeSinceLastShown = now - lastShown;
 
@@ -28,8 +44,8 @@ export const useWelcomeModal = () => {
         }
       } catch (error) {
         console.error('Error checking welcome modal status:', error);
-        // On error, show modal to be safe
-        setShowModal(true);
+        // On error, show modal to be safe (unless disabled via env)
+        setShowModal(!WELCOME_MODAL_DISABLED);
       }
     };
 
@@ -60,7 +76,7 @@ export const useWelcomeModal = () => {
   };
 
   return {
-    showModal,
+    showModal: WELCOME_MODAL_DISABLED ? false : showModal,
     hideModal
   };
 };
