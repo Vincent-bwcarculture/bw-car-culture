@@ -200,7 +200,7 @@ const getAvailableTabs = () => {
   // === UNIVERSAL TABS (Everyone gets these) ===
   
   // Always show vehicles for anyone who might own a car
-  tabs.push({ id: 'vehicles', label: 'Garage', icon: Car });
+  tabs.push({ id: 'vehicles', label: 'Sell My Vehicle', icon: Car });
 
   
 
