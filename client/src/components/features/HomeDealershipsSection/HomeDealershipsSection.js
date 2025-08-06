@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dealerService } from '../../../services/dealerService.js';
-import DealershipCard from '../../shared/DealershipCard/DealershipCard.js';
+import BusinessCard from '../../shared/BusinessCard/BusinessCard.js';
 import './HomeDealershipsSection.css';
 
 const HomeDealershipsSection = () => {
@@ -74,7 +74,7 @@ const HomeDealershipsSection = () => {
 
   const scrollToNext = () => {
     if (carouselRef.current) {
-      const cardWidth = carouselRef.current.querySelector('.bcc-dealership-card')?.offsetWidth;
+      const cardWidth = carouselRef.current.querySelector('.bcc-business-card')?.offsetWidth;
       const gap = 20;
       
       if (cardWidth) {
@@ -94,7 +94,7 @@ const HomeDealershipsSection = () => {
 
   const scrollToPrev = () => {
     if (carouselRef.current) {
-      const cardWidth = carouselRef.current.querySelector('.bcc-dealership-card')?.offsetWidth;
+      const cardWidth = carouselRef.current.querySelector('.bcc-business-card')?.offsetWidth;
       const gap = 20;
       
       if (cardWidth) {
@@ -161,8 +161,8 @@ const HomeDealershipsSection = () => {
               key={dealer._id} 
               className={`carousel-item ${activeSlide === index ? 'active' : ''}`}
             >
-              <DealershipCard 
-                dealer={dealer}
+              <BusinessCard 
+                business={dealer}
                 onAction={handleDealerAction}
                 compact={false} // Full version with gallery for home page
               />
@@ -197,7 +197,7 @@ const HomeDealershipsSection = () => {
               className={`pagination-dot ${activeSlide === index ? 'active' : ''}`}
               onClick={() => {
                 if (carouselRef.current) {
-                  const cardWidth = carouselRef.current.querySelector('.bcc-dealership-card')?.offsetWidth;
+                  const cardWidth = carouselRef.current.querySelector('.bcc-business-card')?.offsetWidth;
                   const gap = 20;
                   setActiveSlide(index);
                   carouselRef.current.scrollTo({
