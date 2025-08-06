@@ -833,72 +833,74 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           </div>
         )}
         
-        {/* OPTIMIZED: Compact seller info section for better space utilization */}
+        {/* FIXED: Avatar fallback section with improved logic */}
         <div className={`vc-dealer-info ${dealer?.sellerType === 'private' ? 'private-seller' : 'dealership'}`} 
              onClick={dealer?.sellerType !== 'private' ? handleDealerClick : undefined}>
           
           {(() => {
-            // Determine the correct image source with multiple fallbacks
-            let imageSource = null;
+            // Helper to get initials (IMPROVED)
+            const getInitials = () => {
+              const name = dealer?.businessName || dealer?.name || 'Unknown';
+              return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().substring(0, 2);
+            };
+
+            // Check all possible image sources more thoroughly (IMPROVED)
+            const possibleSources = [
+              dealer?.avatar?.url,
+              dealer?.avatar,
+              dealer?.logo?.url,
+              dealer?.logo,
+              dealer?.profilePicture?.url,
+              dealer?.profilePicture,
+              car?.dealer?.profile?.logo,
+              car?.dealer?.logo,
+              car?.dealer?.profilePicture,
+              car?.dealer?.avatar
+            ];
             
-            // Try multiple possible image sources in order of preference
-            if (car.dealer?.profile?.logo) {
-              imageSource = car.dealer.profile.logo;
-            } else if (dealer?.logo) {
-              imageSource = dealer.logo;
-            } else if (car.dealer?.logo) {
-              imageSource = car.dealer.logo;
-            } else if (car.dealer?.profilePicture) {
-              imageSource = car.dealer.profilePicture;
-            } else if (car.dealer?.avatar) {
-              imageSource = car.dealer.avatar;
+            // Find first valid source (IMPROVED)
+            let imageSource = null;
+            for (const source of possibleSources) {
+              if (source && 
+                  typeof source === 'string' && 
+                  source.trim() !== '' && 
+                  source !== 'undefined' && 
+                  source !== 'null' &&
+                  !source.includes('undefined') &&
+                  !source.includes('null')) {
+                imageSource = source;
+                break;
+              }
             }
             
-            // Show placeholder if no image source or previous error
+            // Show placeholder if no image source OR previous error (IMPROVED)
             if (!imageSource || dealerImageError) {
               return (
                 <div className="vc-dealer-avatar-placeholder">
-                  {dealer?.businessName?.charAt(0) || dealer?.name?.charAt(0) || '?'}
+                  {getInitials()}
                 </div>
               );
             }
             
-            // Return image with comprehensive error handling
+            // Return image with existing error handling
             return (
               <img 
                 className="vc-dealer-avatar" 
                 src={imageSource}
                 alt={dealer?.businessName || dealer?.name || 'Seller'}
                 onError={(e) => {
-                  // Prevent infinite loop
                   if (dealerImageError) return;
                   
-                  const originalSrc = e.target.src;
-                  
-                  // Strategy 1: Try fixing common S3 path issues
-                  if (originalSrc.includes('/images/images/')) {
-                    e.target.src = originalSrc.replace(/\/images\/images\//g, '/images/');
+                  // Try one fallback, then show placeholder (SIMPLIFIED)
+                  if (!e.target.src.includes('/images/placeholders/')) {
+                    e.target.src = '/images/placeholders/avatar.jpg';
                     return;
                   }
                   
-                  // Strategy 2: Try different file extensions or fallback paths
-                  if (originalSrc.includes('/api/images/s3-proxy/')) {
-                    const filename = originalSrc.split('/').pop();
-                    e.target.src = `/uploads/dealers/${filename}`;
-                    return;
-                  }
-                  
-                  // Strategy 3: Try alternative placeholder paths
-                  if (dealer?.sellerType === 'private') {
-                    e.target.src = '/images/placeholders/private-seller-avatar.jpg';
-                    return;
-                  }
-                  
-                  // Final fallback - trigger placeholder display
+                  // Final fallback - show placeholder
                   setDealerImageError(true);
                 }}
                 onLoad={() => {
-                  // Reset error state on successful load
                   if (dealerImageError) {
                     setDealerImageError(false);
                   }
