@@ -1,4 +1,6 @@
 // src/components/features/HomeDealershipsSection/HomeDealershipsSection.js
+// FIXED VERSION - Fix the syntax error in the compact prop
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dealerService } from '../../../services/dealerService.js';
@@ -60,22 +62,21 @@ const HomeDealershipsSection = () => {
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
-      setActiveSlide(0); // Reset active slide when changing page
+      setActiveSlide(0);
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      setActiveSlide(0); // Reset active slide when changing page
+      setActiveSlide(0);
     }
   };
 
-  // Handle carousel navigation
   const scrollToNext = () => {
     if (carouselRef.current) {
       const cardWidth = carouselRef.current.querySelector('.bcc-dealership-card')?.offsetWidth;
-      const gap = 20; // Approximate gap between items
+      const gap = 20;
       
       if (cardWidth) {
         const newActiveSlide = activeSlide + 1;
@@ -86,7 +87,6 @@ const HomeDealershipsSection = () => {
             behavior: 'smooth'
           });
         } else if (currentPage < totalPages) {
-          // If we're at the end of the current page of dealers, load the next page
           handleNextPage();
         }
       }
@@ -96,7 +96,7 @@ const HomeDealershipsSection = () => {
   const scrollToPrev = () => {
     if (carouselRef.current) {
       const cardWidth = carouselRef.current.querySelector('.bcc-dealership-card')?.offsetWidth;
-      const gap = 20; // Approximate gap between items
+      const gap = 20;
       
       if (cardWidth) {
         const newActiveSlide = activeSlide - 1;
@@ -107,7 +107,6 @@ const HomeDealershipsSection = () => {
             behavior: 'smooth'
           });
         } else if (currentPage > 1) {
-          // If we're at the beginning of the current page, go to previous page
           handlePrevPage();
         }
       }
@@ -128,10 +127,9 @@ const HomeDealershipsSection = () => {
   }
 
   if (error && dealers.length === 0) {
-    return null; // Don't show section on error to avoid breaking the homepage flow
+    return null;
   }
 
-  // If no dealers found, don't display the section
   if (dealers.length === 0 && !loading) {
     return null;
   }
@@ -149,7 +147,6 @@ const HomeDealershipsSection = () => {
       </div>
 
       <div className="home-dealerships-carousel-container">
-        {/* Carousel navigation buttons */}
         <button 
           className={`carousel-nav carousel-prev ${activeSlide === 0 && currentPage === 1 ? 'disabled' : ''}`}
           onClick={scrollToPrev}
@@ -168,8 +165,7 @@ const HomeDealershipsSection = () => {
               <DealershipCard 
                 dealer={dealer}
                 onAction={handleDealerAction}
-                compact={false
-                } // Use compact version for home page
+                compact={false} // Full version with gallery for home page
               />
             </div>
           ))}
@@ -191,7 +187,6 @@ const HomeDealershipsSection = () => {
         </button>
       </div>
 
-      {/* Pagination indicators */}
       <div className="carousel-pagination">
         <span className="pagination-info">
           Page {currentPage} of {totalPages}
