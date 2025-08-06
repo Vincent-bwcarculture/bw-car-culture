@@ -856,29 +856,34 @@
   }
 
   .pheader-content-wrapper {
-    flex-direction: row;
-    text-align: left;
-    justify-content: space-between;
-    align-items: flex-start;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
     margin-top: -100px;
+    padding: 30px;
   }
 
   .pheader-user-info {
     flex-direction: row;
     align-items: flex-end;
-    gap: 25px;
+    gap: 30px;
+    margin-bottom: 20px;
   }
 
   .pheader-user-details {
     align-items: flex-start;
+    text-align: left;
   }
 
   .pheader-user-name {
     text-align: left;
+    font-size: 2rem;
   }
 
   .pheader-social-section {
-    margin: 20px 0;
+    margin: 10px 0;
+    width: 100%;
+    max-width: 600px;
   }
 
   .pheader-social-stats {
@@ -906,8 +911,15 @@
   }
 
   .pheader-profile-meta {
-    justify-content: flex-end;
-    max-width: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    max-width: 600px;
+  }
+
+  .pheader-meta-item {
+    justify-content: center;
   }
 
   /* Hover effects for desktop */
@@ -925,6 +937,22 @@
 
   .pheader-stat-item:hover::before {
     width: 80%;
+  }
+
+  /* Better avatar sizing for desktop */
+  .pheader-avatar-image,
+  .pheader-avatar-placeholder {
+    width: 120px;
+    height: 120px;
+  }
+
+  .pheader-avatar-placeholder {
+    font-size: 2.5rem;
+  }
+
+  .pheader-avatar-edit-overlay {
+    width: 40px;
+    height: 40px;
   }
 }
 
