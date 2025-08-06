@@ -26,14 +26,13 @@ const HomeDealershipsSection = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch active dealers with pagination
-        const filters = {
+        // Fetch active dealers with pagination - match dealerships page API call pattern
+        const apiFilters = {
           status: 'active',
-          limit: DEALERS_PER_PAGE,
-          page: currentPage
+          sort: '-createdAt' // Default sort like dealerships page
         };
 
-        const response = await dealerService.getDealers(filters, currentPage);
+        const response = await dealerService.getDealers(apiFilters, currentPage);
         setDealers(response.dealers || []);
         
         // Calculate total pages
