@@ -1,7 +1,7 @@
 // client/src/components/profile/ProfileHeader.js
-// FIXED VERSION - Updates AuthContext when profile picture changes + Edit Profile Button Fix
+// COMPLETE VERSION - With Social Features (Followers/Associates) Integrated
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Camera, 
   Edit2, 
@@ -13,15 +13,190 @@ import {
   X,
   Upload,
   Trash2,
-  Loader
+  Loader,
+  Users,
+  UserPlus,
+  UserCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import './ProfileHeader.css';
 
+// === SOCIAL STATS SECTION COMPONENT ===
+const SocialStatsSection = ({ profileData, isOwnProfile = false, onFollowAction }) => {
+  const [socialStats, setSocialStats] = useState({
+    followers: 0,
+    following: 0,
+    associates: 0,
+    isFollowing: false
+  });
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Fetch social stats on component mount
+  useEffect(() => {
+    fetchSocialStats();
+  }, [profileData]);
+
+  const fetchSocialStats = async () => {
+    try {
+      setLoading(true);
+      
+      // Get social stats for current user or target user
+      let statsEndpoint = '/api/user/social-stats';
+      if (!isOwnProfile && profileData?._id) {
+        // If viewing another user's profile, we might want to fetch their stats too
+        // For now, we'll get current user's stats and follow status
+        statsEndpoint = '/api/user/social-stats';
+      }
+
+      const statsResponse = await fetch(statsEndpoint, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        setSocialStats(prev => ({
+          ...prev,
+          ...statsData.data
+        }));
+      }
+
+      // If viewing another user's profile, check follow status
+      if (!isOwnProfile && profileData?._id) {
+        const followStatusResponse = await fetch(`/api/user/follow-status/${profileData._id}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (followStatusResponse.ok) {
+          const followData = await followStatusResponse.json();
+          setSocialStats(prev => ({
+            ...prev,
+            isFollowing: followData.data.isFollowing
+          }));
+        }
+      }
+
+    } catch (error) {
+      console.error('Error fetching social stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFollowAction = async () => {
+    if (!profileData?._id || isOwnProfile) return;
+
+    try {
+      setActionLoading(true);
+      
+      const endpoint = socialStats.isFollowing ? '/api/user/unfollow' : '/api/user/follow';
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ targetUserId: profileData._id })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        // Update local state
+        setSocialStats(prev => ({
+          ...prev,
+          isFollowing: !prev.isFollowing,
+          following: result.data.followingCount || prev.following
+        }));
+
+        // Refresh social stats to get updated counts
+        setTimeout(fetchSocialStats, 500);
+
+        if (onFollowAction) {
+          onFollowAction(!socialStats.isFollowing);
+        }
+      }
+    } catch (error) {
+      console.error('Error following/unfollowing user:', error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const formatCount = (count) => {
+    if (count >= 1000) {
+      return (count / 1000).toFixed(1) + 'k';
+    }
+    return count.toString();
+  };
+
+  return (
+    <div className="pheader-social-section">
+      {/* Social Stats */}
+      <div className="pheader-social-stats">
+        <div className="pheader-stat-item">
+          <div className="pheader-stat-number">
+            {loading ? '...' : formatCount(socialStats.followers)}
+          </div>
+          <div className="pheader-stat-label">Followers</div>
+        </div>
+        
+        <div className="pheader-stat-divider"></div>
+        
+        <div className="pheader-stat-item">
+          <div className="pheader-stat-number">
+            {loading ? '...' : formatCount(socialStats.following)}
+          </div>
+          <div className="pheader-stat-label">Following</div>
+        </div>
+        
+        <div className="pheader-stat-divider"></div>
+        
+        <div className="pheader-stat-item pheader-stat-associates">
+          <div className="pheader-stat-number">
+            {loading ? '...' : formatCount(socialStats.associates)}
+          </div>
+          <div className="pheader-stat-label">Associates</div>
+        </div>
+      </div>
+
+      {/* Follow/Unfollow Button - Only show if not own profile */}
+      {!isOwnProfile && profileData?._id && (
+        <div className="pheader-follow-section">
+          <button 
+            className={`pheader-follow-btn ${socialStats.isFollowing ? 'following' : 'not-following'}`}
+            onClick={handleFollowAction}
+            disabled={actionLoading}
+          >
+            {actionLoading ? (
+              <Loader size={16} className="spin" />
+            ) : socialStats.isFollowing ? (
+              <>
+                <UserCheck size={16} />
+                <span>Following</span>
+              </>
+            ) : (
+              <>
+                <UserPlus size={16} />
+                <span>Follow</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// === MAIN PROFILE HEADER COMPONENT ===
 const ProfileHeader = ({ 
   profileData, 
   onProfileUpdate,
-  onEditProfile // ADDED: New prop for edit profile functionality
+  onEditProfile // Edit profile functionality
 }) => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
@@ -33,6 +208,13 @@ const ProfileHeader = ({
   // Create refs for file inputs
   const avatarInputRef = useRef(null);
   const coverInputRef = useRef(null);
+
+  // Determine if viewing own profile
+  const isOwnProfile = user && profileData && (
+    user.id === profileData._id || 
+    user._id === profileData._id ||
+    user.id === profileData.id
+  );
 
   const getInitials = (name) => {
     if (!name) return 'U';
@@ -54,7 +236,7 @@ const ProfileHeader = ({
     setTimeout(() => setUploadError(''), 5000);
   };
 
-  // ADDED: Handle edit profile click
+  // Handle edit profile click
   const handleEditProfileClick = () => {
     console.log('Edit profile clicked');
     if (onEditProfile) {
@@ -64,7 +246,7 @@ const ProfileHeader = ({
     }
   };
 
-  // Handle avatar upload - FIXED: Updates AuthContext
+  // Handle avatar upload - Updates AuthContext
   const handleAvatarChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -91,7 +273,7 @@ const ProfileHeader = ({
 
       console.log('Uploading avatar...', file.name);
 
-      // FIXED: Use correct backend API URL
+      // Use correct backend API URL
       const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/avatar', {
         method: 'POST',
         headers: {
@@ -131,7 +313,7 @@ const ProfileHeader = ({
           });
         }
         
-        // FIXED: Update AuthContext user data so navigation shows new avatar
+        // Update AuthContext user data so navigation shows new avatar
         if (user && setUser) {
           setUser({
             ...user,
@@ -156,7 +338,7 @@ const ProfileHeader = ({
     }
   };
 
-  // Handle cover picture upload - FIXED: Use correct backend API URL
+  // Handle cover picture upload
   const handleCoverPictureChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -183,7 +365,7 @@ const ProfileHeader = ({
 
       console.log('Uploading cover picture...', file.name);
 
-      // FIXED: Use correct backend API URL
+      // Use correct backend API URL
       const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/cover-picture', {
         method: 'POST',
         headers: {
@@ -237,14 +419,14 @@ const ProfileHeader = ({
     }
   };
 
-  // Handle cover picture deletion - FIXED: Use correct backend API URL
+  // Handle cover picture deletion
   const handleDeleteCoverPicture = async () => {
     if (!profileData.coverPicture?.url) return;
 
     setUploadingCover(true);
 
     try {
-      // FIXED: Use correct backend API URL
+      // Use correct backend API URL
       const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/cover-picture', {
         method: 'DELETE',
         headers: {
@@ -289,77 +471,85 @@ const ProfileHeader = ({
   };
 
   // Check if user has business, transport, or dealer profile
-  const hasBusinessProfile = profileData.businessProfile?.services?.length > 0;
-  const hasTransportProfile = profileData.transportProfile?.route;
-  const hasDealerProfile = profileData.dealerProfile?.businessName;
+  const hasBusinessProfile = profileData?.businessProfile?.services?.length > 0;
+  const hasTransportProfile = profileData?.transportProfile?.route;
+  const hasDealerProfile = profileData?.dealerProfile?.businessName;
 
   return (
     <div className="pheader-main-container">
       {/* Cover Picture Section */}
       <div className="pheader-cover-section">
-        {profileData.coverPicture?.url ? (
+        {profileData?.coverPicture?.url ? (
           <div className="pheader-cover-image-container">
             <img 
               src={profileData.coverPicture.url} 
               alt="Cover" 
               className="pheader-cover-image"
             />
-            <div className="pheader-cover-overlay">
-              <button 
-                className="pheader-cover-action-btn pheader-cover-delete-btn"
-                onClick={handleDeleteCoverPicture}
-                disabled={uploadingCover}
-                title="Delete cover picture"
-              >
-                {uploadingCover ? <Loader size={16} className="pheader-spin" /> : <Trash2 size={16} />}
-              </button>
-              <button 
-                className="pheader-cover-action-btn pheader-cover-upload-btn"
-                onClick={handleCoverUploadClick}
-                disabled={uploadingCover}
-                title="Change cover picture"
-              >
-                {uploadingCover ? <Loader size={16} className="pheader-spin" /> : <Camera size={16} />}
-              </button>
-            </div>
+            {/* Only show overlay controls if it's own profile */}
+            {isOwnProfile && (
+              <div className="pheader-cover-overlay">
+                <button 
+                  className="pheader-cover-action-btn pheader-cover-delete-btn"
+                  onClick={handleDeleteCoverPicture}
+                  disabled={uploadingCover}
+                  title="Delete cover picture"
+                >
+                  {uploadingCover ? <Loader size={16} className="pheader-spin" /> : <Trash2 size={16} />}
+                </button>
+                <button 
+                  className="pheader-cover-action-btn pheader-cover-upload-btn"
+                  onClick={handleCoverUploadClick}
+                  disabled={uploadingCover}
+                  title="Change cover picture"
+                >
+                  {uploadingCover ? <Loader size={16} className="pheader-spin" /> : <Camera size={16} />}
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="pheader-cover-placeholder">
-            <div className="pheader-cover-placeholder-content">
-              <button 
-                className="pheader-cover-upload-prompt"
-                onClick={handleCoverUploadClick}
-                disabled={uploadingCover}
-                type="button"
-              >
-                {uploadingCover ? (
-                  <Loader size={24} className="pheader-spin" />
-                ) : (
-                  <>
-                    <Upload size={24} />
-                    <span>Add Cover Picture</span>
-                  </>
-                )}
-              </button>
-            </div>
+            {/* Only show upload prompt if it's own profile */}
+            {isOwnProfile && (
+              <div className="pheader-cover-placeholder-content">
+                <button 
+                  className="pheader-cover-upload-prompt"
+                  onClick={handleCoverUploadClick}
+                  disabled={uploadingCover}
+                  type="button"
+                >
+                  {uploadingCover ? (
+                    <Loader size={24} className="pheader-spin" />
+                  ) : (
+                    <>
+                      <Upload size={24} />
+                      <span>Add Cover Picture</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         )}
         
-        {/* ALWAYS VISIBLE Cover Picture Upload Button - Similar to Profile Picture */}
-        <div className="pheader-cover-upload-button-container">
-          <button 
-            className="pheader-cover-camera-btn"
-            onClick={handleCoverUploadClick}
-            disabled={uploadingCover}
-            title="Upload cover picture"
-          >
-            {uploadingCover ? (
-              <Loader size={16} className="pheader-spin" />
-            ) : (
-              <Camera size={16} />
-            )}
-          </button>
-        </div>
+        {/* Cover Picture Upload Button - Only visible if own profile */}
+        {isOwnProfile && (
+          <div className="pheader-cover-upload-button-container">
+            <button 
+              className="pheader-cover-camera-btn"
+              onClick={handleCoverUploadClick}
+              disabled={uploadingCover}
+              title="Upload cover picture"
+            >
+              {uploadingCover ? (
+                <Loader size={16} className="pheader-spin" />
+              ) : (
+                <Camera size={16} />
+              )}
+            </button>
+          </div>
+        )}
         
         {/* Hidden cover picture input */}
         <input
@@ -381,7 +571,7 @@ const ProfileHeader = ({
           {/* Avatar Section */}
           <div className="pheader-avatar-section">
             <div className="pheader-avatar-container">
-              {profileData.avatar?.url ? (
+              {profileData?.avatar?.url ? (
                 <img 
                   src={profileData.avatar.url} 
                   alt={profileData.name || 'Profile'} 
@@ -389,23 +579,25 @@ const ProfileHeader = ({
                 />
               ) : (
                 <div className="pheader-avatar-placeholder">
-                  {getInitials(profileData.name)}
+                  {getInitials(profileData?.name)}
                 </div>
               )}
               
-              {/* Avatar Edit Overlay */}
-              <button 
-                className="pheader-avatar-edit-overlay"
-                onClick={handleAvatarUploadClick}
-                disabled={uploadingAvatar}
-                title="Change profile picture"
-              >
-                {uploadingAvatar ? (
-                  <Loader size={20} className="pheader-spin" />
-                ) : (
-                  <Camera size={20} />
-                )}
-              </button>
+              {/* Avatar Edit Overlay - Only show if own profile */}
+              {isOwnProfile && (
+                <button 
+                  className="pheader-avatar-edit-overlay"
+                  onClick={handleAvatarUploadClick}
+                  disabled={uploadingAvatar}
+                  title="Change profile picture"
+                >
+                  {uploadingAvatar ? (
+                    <Loader size={20} className="pheader-spin" />
+                  ) : (
+                    <Camera size={20} />
+                  )}
+                </button>
+              )}
             </div>
             
             {/* Hidden avatar input */}
@@ -429,35 +621,48 @@ const ProfileHeader = ({
           {/* User Details */}
           <div className="pheader-user-details">
             <h1 className="pheader-user-name">
-              {profileData.name || 'User'}
-              {profileData.isVerified && (
+              {profileData?.name || 'User'}
+              {profileData?.isVerified && (
                 <CheckCircle size={24} className="pheader-verified-badge" />
               )}
             </h1>
             
-            <div className="pheader-user-email">{profileData.email}</div>
+            <div className="pheader-user-email">{profileData?.email}</div>
             
-            {/* FIXED: Added onClick handler to Edit Profile button */}
-            <button 
-              className="pheader-edit-profile-button"
-              onClick={handleEditProfileClick}
-              type="button"
-            >
-              <Edit2 size={16} />
-              Edit Profile
-            </button>
+            {/* Edit Profile button - Only show if own profile */}
+            {isOwnProfile && (
+              <button 
+                className="pheader-edit-profile-button"
+                onClick={handleEditProfileClick}
+                type="button"
+              >
+                <Edit2 size={16} />
+                Edit Profile
+              </button>
+            )}
           </div>
         </div>
 
+        {/* === SOCIAL STATS SECTION - NEW ADDITION === */}
+        <SocialStatsSection 
+          profileData={profileData}
+          isOwnProfile={isOwnProfile}
+          onFollowAction={(isNowFollowing) => {
+            // Optional: Handle follow action callback
+            console.log('Follow action:', isNowFollowing);
+            // You could trigger a refresh of profile data here if needed
+          }}
+        />
+
         {/* Profile Meta Information */}
         <div className="pheader-profile-meta">
-          {profileData.profile?.location && (
+          {profileData?.profile?.address?.city && (
             <div className="pheader-meta-item">
               <MapPin size={16} />
-              <span>{profileData.profile.location}</span>
+              <span>{profileData.profile.address.city}</span>
             </div>
           )}
-          {profileData.profile?.phone && (
+          {profileData?.profile?.phone && (
             <div className="pheader-meta-item">
               <Phone size={16} />
               <span>{profileData.profile.phone}</span>
@@ -465,12 +670,12 @@ const ProfileHeader = ({
           )}
           <div className="pheader-meta-item">
             <Calendar size={16} />
-            <span>Joined {formatJoinDate(profileData.createdAt)}</span>
+            <span>Joined {formatJoinDate(profileData?.createdAt)}</span>
           </div>
           <div className="pheader-meta-item">
             <User size={16} />
             <span>
-              {profileData.role === 'admin' ? 'Site Administrator' : 
+              {profileData?.role === 'admin' ? 'Site Administrator' : 
                hasBusinessProfile ? 'Business Owner' :
                hasTransportProfile ? 'Transport Provider' :
                hasDealerProfile ? 'Dealer' : 'User'}
