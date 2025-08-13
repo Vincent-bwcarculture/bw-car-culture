@@ -12,9 +12,9 @@ import { initializeGA, trackPageView, trackException, trackTiming } from './conf
 import UserProfilePage from './pages/UserProfilePage.js';
 import AdminUserSubmissions from './Admin/components/AdminUserSubmissions.js';
 
-// Add these imports
-import WelcomeModal from './components/shared/WelcomeModal/WelcomeModal.js';
-import { useWelcomeModal } from './hooks/useWelcomeModal.js';
+// // Add these imports
+// import WelcomeModal from './components/shared/WelcomeModal/WelcomeModal.js';
+// import { useWelcomeModal } from './hooks/useWelcomeModal.js';
 
 import { InternalAnalyticsProvider } from './components/shared/InternalAnalyticsProvider.js';
 import AnalyticsDashboard from './Admin/AnalyticsDashboard/AnalyticsDashboard.js';
@@ -975,7 +975,7 @@ function App() {
   const [analyticsInitialized, setAnalyticsInitialized] = useState(false);
   const appStartTime = React.useRef(Date.now());
 
-  const { showModal: showWelcomeModal, hideModal: hideWelcomeModal } = useWelcomeModal();
+  // const { showModal: showWelcomeModal, hideModal: hideWelcomeModal } = useWelcomeModal();
 
   // Enhanced Google Analytics initialization
   useEffect(() => {
@@ -1207,9 +1207,7 @@ function App() {
 )}
 
                  {/* Add this WelcomeModal component */}
-                {showWelcomeModal && (
-                  <WelcomeModal onClose={hideWelcomeModal} />
-                )}
+               
               </div>
             </AnalyticsWrapper>
           </InternalAnalyticsProvider>
