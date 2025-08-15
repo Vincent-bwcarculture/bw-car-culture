@@ -36,6 +36,17 @@ const UserCard = ({
     setImageError(false);
     setImageLoading(true);
     setRetryCount(0);
+
+    // Add timeout to prevent infinite loading
+    const timer = setTimeout(() => {
+      if (imageLoading) {
+        console.log('Image loading timeout for user:', user.name);
+        setImageLoading(false);
+        setImageError(true);
+      }
+    }, 5000); // 5 second timeout
+
+    return () => clearTimeout(timer);
   }, [user._id, user.id]);
 
   // Get user type display name with better formatting
@@ -70,6 +81,7 @@ const UserCard = ({
       allKeys: Object.keys(user)
     });
 
+    // If we've had an error or no real image data, use fallback immediately
     if (imageError) {
       console.log('Image error occurred, using fallback avatar');
       return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=1a1a1a&color=ff3300&size=150&bold=true&format=svg`;
@@ -97,15 +109,27 @@ const UserCard = ({
       typeof url === 'string' && 
       url.trim() !== '' &&
       url !== 'null' &&
-      url !== 'undefined'
+      url !== 'undefined' &&
+      url.length > 3 // Basic length check
     );
 
     console.log('Selected avatar URL:', avatarUrl);
 
-    if (avatarUrl) {
-      // Handle different URL types
-      let processedUrl = avatarUrl;
+    // If no valid URL found, skip loading and use fallback immediately
+    if (!avatarUrl) {
+      console.log('No valid avatar URL found, using generated avatar');
+      // Set error state to skip loading animation
+      setTimeout(() => {
+        setImageLoading(false);
+        setImageError(true);
+      }, 0);
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=1a1a1a&color=ff3300&size=150&bold=true&format=svg`;
+    }
 
+    // Process the URL
+    let processedUrl = avatarUrl;
+
+    try {
       // Handle relative URLs by making them absolute
       if (avatarUrl.startsWith('/')) {
         processedUrl = `${window.location.origin}${avatarUrl}`;
@@ -117,7 +141,6 @@ const UserCard = ({
       // Handle other cloud storage URLs
       else if (!avatarUrl.startsWith('http') && !avatarUrl.startsWith('data:')) {
         // If it doesn't start with http and isn't a data URL, it might be a cloud storage key
-        // Try to construct a proper URL (adjust this based on your storage setup)
         if (avatarUrl.includes('amazonaws.com') || avatarUrl.includes('s3')) {
           processedUrl = avatarUrl.startsWith('//') ? `https:${avatarUrl}` : `https://${avatarUrl}`;
         } else {
@@ -128,11 +151,15 @@ const UserCard = ({
 
       console.log('Processed avatar URL:', processedUrl);
       return processedUrl;
+    } catch (error) {
+      console.log('Error processing avatar URL:', error);
+      // Fallback on any error
+      setTimeout(() => {
+        setImageLoading(false);
+        setImageError(true);
+      }, 0);
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=1a1a1a&color=ff3300&size=150&bold=true&format=svg`;
     }
-
-    console.log('No valid avatar found, using generated avatar');
-    // Fallback to generated avatar
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=1a1a1a&color=ff3300&size=150&bold=true&format=svg`;
   };
 
   // Get role color for visual distinction (using theme colors)
@@ -228,9 +255,23 @@ const UserCard = ({
               className={`usercard-avatar ${imageLoading ? 'loading' : ''}`}
               onLoad={handleImageLoad}
               onError={handleImageError}
-              style={{ display: imageLoading && !imageError ? 'none' : 'block' }}
+              style={{ 
+                display: imageLoading && !imageError ? 'none' : 'block',
+                opacity: imageLoading ? 0 : 1,
+                transition: 'opacity 0.3s ease'
+              }}
               key={`${user._id || user.id}-${retryCount}`} // Force reload on retry
+              crossOrigin="anonymous" // Help with CORS issues
             />
+            {/* Fallback: If loading takes too long, show generated avatar */}
+            {!imageLoading && imageError && (
+              <img 
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=1a1a1a&color=ff3300&size=150&bold=true&format=svg`}
+                alt={user.name}
+                className="usercard-avatar usercard-avatar-fallback"
+                style={{ display: 'block' }}
+              />
+            )}
             {/* Debug info for development */}
             {process.env.NODE_ENV === 'development' && imageError && (
               <div 

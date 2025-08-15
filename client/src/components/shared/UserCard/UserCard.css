@@ -86,6 +86,18 @@
   opacity: 0;
 }
 
+.usercard-avatar-fallback {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--uprofile-border-color);
+  background: var(--uprofile-bg-primary);
+}
+
 .usercard-avatar-loading {
   position: absolute;
   top: 0;
