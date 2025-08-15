@@ -13,7 +13,6 @@ import {
   Filter,
   Grid,
   List,
-  Car,
   MoreHorizontal,
   ExternalLink,
   Mail,
@@ -41,31 +40,55 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
     fetchNetworkUsers();
   }, []);
 
+  // Debounce search and filters
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchNetworkUsers();
+    }, 500); // 500ms debounce for search
+
+    return () => clearTimeout(timeoutId);
+  }, [filters, searchTerm]);
+
   const fetchNetworkUsers = async () => {
     try {
       setLoading(true);
       setError('');
 
-      // Try to fetch users from available API endpoints
-      const response = await axios.get('/admin/users/all'); // This endpoint exists based on project structure
+      // Build query parameters for filtering
+      const params = new URLSearchParams({
+        page: '1',
+        limit: '50' // Get more users for better browsing experience
+      });
+
+      // Add filters if they're not 'all'
+      if (filters.userType !== 'all') {
+        params.append('userType', filters.userType);
+      }
+      if (filters.verified !== 'all') {
+        params.append('verified', filters.verified);
+      }
+      if (searchTerm.trim()) {
+        params.append('search', searchTerm.trim());
+      }
+
+      // Fetch users from the new network endpoint
+      const response = await axios.get(`/api/users/network?${params.toString()}`);
       
       if (response.data.success) {
-        // Filter out current user and process the data
-        const currentUserId = profileData?.id || profileData?._id;
-        const filteredUsers = response.data.data.filter(user => 
-          user._id !== currentUserId && user.id !== currentUserId
-        );
-        
-        setUsers(filteredUsers);
+        setUsers(response.data.data);
       } else {
-        throw new Error('Failed to fetch users');
+        throw new Error(response.data.message || 'Failed to fetch users');
       }
     } catch (error) {
       console.error('Failed to fetch network users:', error);
       
-      // If the admin endpoint fails, try alternative or show error
-      if (error.response?.status === 403) {
-        setError('Unable to load user network. This feature may require additional permissions.');
+      // Handle different error types
+      if (error.response?.status === 401) {
+        setError('Please log in to view the network.');
+      } else if (error.response?.status === 403) {
+        setError('You do not have permission to view the user network.');
+      } else if (error.response?.status === 404) {
+        setError('Network feature is not available at the moment.');
       } else {
         setError('Failed to load network users. Please try again later.');
       }
@@ -74,26 +97,8 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
     }
   };
 
-  // Filter users based on search term and filters
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = !searchTerm || 
-      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.role?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesUserType = filters.userType === 'all' || 
-      user.role === filters.userType;
-
-    const matchesLocation = filters.location === 'all' || 
-      user.city?.toLowerCase().includes(filters.location.toLowerCase()) ||
-      user.address?.toLowerCase().includes(filters.location.toLowerCase());
-
-    const matchesVerified = filters.verified === 'all' || 
-      (filters.verified === 'verified' && user.emailVerified) ||
-      (filters.verified === 'unverified' && !user.emailVerified);
-
-    return matchesSearch && matchesUserType && matchesLocation && matchesVerified;
-  });
+  // Since filtering is now done server-side, we just display the users from API
+  const filteredUsers = users;
 
   // Handle follow/unfollow (placeholder for now)
   const handleFollowToggle = async (userId) => {
@@ -129,7 +134,9 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
 
   // Get user avatar
   const getUserAvatar = (user) => {
-    return user.avatar?.url || user.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=ff3300&color=fff`;
+    return user.avatar?.url || 
+           user.profilePicture || 
+           `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=ff3300&color=fff&size=128`;
   };
 
   if (loading) {
