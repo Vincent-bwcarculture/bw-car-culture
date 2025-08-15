@@ -11,8 +11,8 @@ import {
   Heart,
   Search,
   Filter,
-  Grid,
   Car,
+  Grid,
   List,
   MoreHorizontal,
   ExternalLink,
@@ -20,6 +20,7 @@ import {
   Phone
 } from 'lucide-react';
 import axios from '../../config/axios.js';
+import UserCard from '../shared/UserCard/UserCard.js';
 import './NetworkTab.css';
 
 const NetworkTab = ({ profileData, refreshProfile }) => {
@@ -164,26 +165,7 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
     }
   };
 
-  // Get user type display name
-  const getUserTypeDisplay = (role) => {
-    const roleMap = {
-      'business_owner': 'Business Owner',
-      'dealership_owner': 'Dealership Owner',
-      'transport_coordinator': 'Transport Coordinator',
-      'driver': 'Driver',
-      'ministry_official': 'Ministry Official',
-      'user': 'Community Member'
-    };
-    return roleMap[role] || role || 'User';
-  };
-
-  // Get user avatar
-  const getUserAvatar = (user) => {
-    return user.avatar?.url || 
-           user.profilePicture || 
-           `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=ff3300&color=fff&size=128`;
-  };
-
+  // Handle loading state
   if (loading) {
     return (
       <div className="network-tab">
@@ -195,6 +177,7 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
     );
   }
 
+  // Handle error state
   if (error) {
     return (
       <div className="network-tab">
@@ -326,83 +309,12 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
               user={user}
               isFollowing={following.has(user._id || user.id)}
               onFollowToggle={() => handleFollowToggle(user._id || user.id)}
-              getUserTypeDisplay={getUserTypeDisplay}
-              getUserAvatar={getUserAvatar}
               viewMode={viewMode}
+              onMessage={(user) => console.log('Message user:', user)}
+              onViewProfile={(user) => console.log('View profile:', user)}
             />
           ))
         )}
-      </div>
-    </div>
-  );
-};
-
-// User Card Component
-const UserCard = ({ user, isFollowing, onFollowToggle, getUserTypeDisplay, getUserAvatar, viewMode }) => {
-  return (
-    <div className={`user-card ${viewMode}`}>
-      <div className="user-card-header">
-        <img 
-          src={getUserAvatar(user)} 
-          alt={user.name}
-          className="user-avatar"
-        />
-        
-        <div className="user-info">
-          <h3 className="user-name">
-            {user.name}
-            {user.emailVerified && (
-              <span className="user-verified" title="Verified User">
-                ✓
-              </span>
-            )}
-          </h3>
-          <p className="user-role">{getUserTypeDisplay(user.role)}</p>
-          {user.city && (
-            <p className="user-location">
-              <MapPin size={14} />
-              {user.city}
-            </p>
-          )}
-        </div>
-
-        <button 
-          className={`follow-btn ${isFollowing ? 'following' : ''}`}
-          onClick={onFollowToggle}
-        >
-          {isFollowing ? <UserCheck size={16} /> : <UserPlus size={16} />}
-          {isFollowing ? 'Following' : 'Follow'}
-        </button>
-      </div>
-
-      {user.bio && (
-        <div className="user-bio">
-          <p>{user.bio}</p>
-        </div>
-      )}
-
-      <div className="user-stats">
-        {user.totalListings && (
-          <span className="user-stat">
-            <Car size={14} />
-            {user.totalListings} listings
-          </span>
-        )}
-        <span className="user-stat">
-          <Eye size={14} />
-          Member since {new Date(user.createdAt).getFullYear()}
-        </span>
-      </div>
-
-      <div className="user-actions">
-        <button className="user-action-btn">
-          <MessageCircle size={16} />
-          Message
-        </button>
-        <button className="user-action-btn">
-          <ExternalLink size={16} />
-          View Profile
-        </button>
       </div>
     </div>
   );

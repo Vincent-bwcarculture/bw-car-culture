@@ -211,195 +211,15 @@
 /* === USERS GRID/LIST === */
 .network-users {
   display: grid;
-  gap: 20px;
+  gap: 24px;
 }
 
 .network-users.grid {
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 }
 
 .network-users.list {
   grid-template-columns: 1fr;
-}
-
-/* === USER CARD === */
-.user-card {
-  background: var(--uprofile-bg-secondary);
-  border: 1px solid var(--uprofile-border-color);
-  border-radius: var(--uprofile-border-radius);
-  padding: 20px;
-  transition: var(--uprofile-transition);
-}
-
-.user-card:hover {
-  border-color: var(--uprofile-primary-accent);
-  box-shadow: var(--uprofile-shadow-md);
-  transform: translateY(-2px);
-}
-
-.user-card.list {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 16px 20px;
-}
-
-.user-card.list .user-card-header {
-  flex: 1;
-}
-
-.user-card.list .user-bio,
-.user-card.list .user-stats,
-.user-card.list .user-actions {
-  display: none;
-}
-
-.user-card-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.user-card.list .user-card-header {
-  margin-bottom: 0;
-}
-
-.user-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--uprofile-border-color);
-  flex-shrink: 0;
-}
-
-.user-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.user-name {
-  margin: 0 0 4px 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--uprofile-text-primary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.user-verified {
-  background: var(--uprofile-success-green);
-  color: white;
-  font-size: 10px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-}
-
-.user-role {
-  margin: 0 0 8px 0;
-  color: var(--uprofile-text-secondary);
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.user-location {
-  margin: 0;
-  color: var(--uprofile-text-muted);
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.follow-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border: 1px solid var(--uprofile-primary-accent);
-  border-radius: var(--uprofile-border-radius-sm);
-  background: transparent;
-  color: var(--uprofile-primary-accent);
-  cursor: pointer;
-  transition: var(--uprofile-transition);
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.follow-btn:hover {
-  background: var(--uprofile-primary-accent);
-  color: white;
-}
-
-.follow-btn.following {
-  background: var(--uprofile-success-green);
-  border-color: var(--uprofile-success-green);
-  color: white;
-}
-
-.follow-btn.following:hover {
-  background: var(--uprofile-secondary-red);
-  border-color: var(--uprofile-secondary-red);
-}
-
-.user-bio {
-  margin-bottom: 16px;
-}
-
-.user-bio p {
-  margin: 0;
-  color: var(--uprofile-text-secondary);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.user-stats {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.user-stat {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--uprofile-text-muted);
-}
-
-.user-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.user-action-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 16px;
-  border: 1px solid var(--uprofile-border-color);
-  border-radius: var(--uprofile-border-radius-sm);
-  background: var(--uprofile-bg-tertiary);
-  color: var(--uprofile-text-secondary);
-  cursor: pointer;
-  transition: var(--uprofile-transition);
-  font-size: 13px;
-}
-
-.user-action-btn:hover {
-  border-color: var(--uprofile-primary-accent);
-  color: var(--uprofile-primary-accent);
 }
 
 /* === LOADING & ERROR STATES === */
@@ -527,25 +347,7 @@
 
   .network-users.grid {
     grid-template-columns: 1fr;
-  }
-
-  .user-card-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 12px;
-  }
-
-  .user-info {
-    text-align: center;
-  }
-
-  .follow-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .user-actions {
-    flex-direction: column;
+    gap: 20px;
   }
 }
 
@@ -563,13 +365,8 @@
     gap: 16px;
   }
 
-  .user-card {
-    padding: 16px;
-  }
-
-  .user-avatar {
-    width: 48px;
-    height: 48px;
+  .network-users.grid {
+    gap: 16px;
   }
 }
 
@@ -583,15 +380,6 @@
 /* Desktop */
 @media (min-width: 1024px) {
   .network-users.grid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  }
-
-  .user-card.list {
-    padding: 20px;
-  }
-
-  .user-card.list .user-actions {
-    display: flex;
-    margin-left: auto;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   }
 }

@@ -1,0 +1,267 @@
+// client/src/components/shared/UserCard/UserCard.js
+import React, { useState } from 'react';
+import { 
+  MapPin, 
+  UserCheck, 
+  UserPlus, 
+  MessageCircle, 
+  ExternalLink,
+  Eye,
+  Car,
+  Shield,
+  Calendar,
+  Star,
+  MoreHorizontal,
+  Mail,
+  Phone,
+  Award
+} from 'lucide-react';
+import './UserCard.css';
+
+const UserCard = ({ 
+  user, 
+  isFollowing, 
+  onFollowToggle, 
+  viewMode = 'grid',
+  onMessage,
+  onViewProfile,
+  className = ''
+}) => {
+  const [imageError, setImageError] = useState(false);
+
+  // Get user type display name with better formatting
+  const getUserTypeDisplay = (role) => {
+    const roleMap = {
+      'business_owner': 'Business Owner',
+      'dealership_owner': 'Dealership Owner',
+      'transport_coordinator': 'Transport Coordinator',
+      'combi_driver': 'Combi Driver',
+      'taxi_driver': 'Taxi Driver', 
+      'driver': 'Professional Driver',
+      'ministry_official': 'Ministry Official',
+      'government_admin': 'Government Admin',
+      'mechanic': 'Auto Mechanic',
+      'parts_supplier': 'Parts Supplier',
+      'service_provider': 'Service Provider',
+      'user': 'Community Member'
+    };
+    return roleMap[role] || role || 'Community Member';
+  };
+
+  // Get user avatar with fallback
+  const getUserAvatar = () => {
+    if (imageError || (!user.avatar?.url && !user.profilePicture)) {
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=ff3300&color=fff&size=150&bold=true`;
+    }
+    return user.avatar?.url || user.profilePicture;
+  };
+
+  // Get role color for visual distinction
+  const getRoleColor = (role) => {
+    const colorMap = {
+      'business_owner': '#3498db',
+      'dealership_owner': '#e74c3c', 
+      'transport_coordinator': '#f39c12',
+      'driver': '#27ae60',
+      'combi_driver': '#27ae60',
+      'taxi_driver': '#27ae60',
+      'ministry_official': '#9b59b6',
+      'government_admin': '#9b59b6',
+      'mechanic': '#34495e',
+      'service_provider': '#16a085',
+      'user': '#95a5a6'
+    };
+    return colorMap[role] || '#95a5a6';
+  };
+
+  // Format member since date
+  const formatMemberSince = (date) => {
+    if (!date) return 'Recently joined';
+    const memberDate = new Date(date);
+    const now = new Date();
+    const diffTime = Math.abs(now - memberDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 30) {
+      return 'New member';
+    } else if (diffDays < 365) {
+      const months = Math.floor(diffDays / 30);
+      return `${months} month${months > 1 ? 's' : ''} ago`;
+    } else {
+      const years = Math.floor(diffDays / 365);
+      return `${years} year${years > 1 ? 's' : ''} ago`;
+    }
+  };
+
+  // Handle follow button click
+  const handleFollowClick = (e) => {
+    e.stopPropagation();
+    onFollowToggle?.();
+  };
+
+  // Handle message button click
+  const handleMessageClick = (e) => {
+    e.stopPropagation();
+    onMessage?.(user);
+  };
+
+  // Handle view profile click
+  const handleViewProfileClick = (e) => {
+    e.stopPropagation();
+    onViewProfile?.(user);
+  };
+
+  // Handle card click
+  const handleCardClick = () => {
+    onViewProfile?.(user);
+  };
+
+  return (
+    <div 
+      className={`user-card ${viewMode} ${className}`}
+      onClick={handleCardClick}
+    >
+      {/* Card Header */}
+      <div className="user-card-header">
+        <div className="user-avatar-container">
+          <img 
+            src={getUserAvatar()} 
+            alt={user.name}
+            className="user-avatar"
+            onError={() => setImageError(true)}
+          />
+          {user.isVerified && (
+            <div className="user-verified-badge" title="Verified User">
+              <Shield size={12} />
+            </div>
+          )}
+          <div 
+            className="user-role-indicator"
+            style={{ backgroundColor: getRoleColor(user.role) }}
+          />
+        </div>
+        
+        <div className="user-info">
+          <div className="user-name-row">
+            <h3 className="user-name">
+              {user.name}
+              {user.emailVerified && (
+                <span className="user-verified-icon" title="Verified Email">
+                  <Award size={16} />
+                </span>
+              )}
+            </h3>
+            {viewMode === 'grid' && (
+              <button className="user-menu-btn" title="More options">
+                <MoreHorizontal size={16} />
+              </button>
+            )}
+          </div>
+          
+          <p className="user-role" style={{ color: getRoleColor(user.role) }}>
+            {getUserTypeDisplay(user.role)}
+          </p>
+          
+          {user.city && (
+            <p className="user-location">
+              <MapPin size={14} />
+              <span>{user.city}</span>
+            </p>
+          )}
+        </div>
+
+        {viewMode === 'grid' && (
+          <button 
+            className={`follow-btn ${isFollowing ? 'following' : ''}`}
+            onClick={handleFollowClick}
+            title={isFollowing ? 'Unfollow' : 'Follow'}
+          >
+            {isFollowing ? <UserCheck size={16} /> : <UserPlus size={16} />}
+            <span className="follow-btn-text">
+              {isFollowing ? 'Following' : 'Follow'}
+            </span>
+          </button>
+        )}
+      </div>
+
+      {/* Bio Section (Grid view only) */}
+      {viewMode === 'grid' && user.bio && (
+        <div className="user-bio">
+          <p>{user.bio}</p>
+        </div>
+      )}
+
+      {/* Stats Section */}
+      <div className="user-stats">
+        {user.totalListings && (
+          <div className="user-stat">
+            <Car size={14} />
+            <span>{user.totalListings} listing{user.totalListings !== 1 ? 's' : ''}</span>
+          </div>
+        )}
+        
+        <div className="user-stat">
+          <Calendar size={14} />
+          <span>{formatMemberSince(user.createdAt || user.memberSince)}</span>
+        </div>
+
+        {user.rating && (
+          <div className="user-stat">
+            <Star size={14} />
+            <span>{user.rating.toFixed(1)}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="user-actions">
+        {viewMode === 'list' && (
+          <button 
+            className={`follow-btn compact ${isFollowing ? 'following' : ''}`}
+            onClick={handleFollowClick}
+            title={isFollowing ? 'Unfollow' : 'Follow'}
+          >
+            {isFollowing ? <UserCheck size={14} /> : <UserPlus size={14} />}
+            <span className="follow-btn-text">
+              {isFollowing ? 'Following' : 'Follow'}
+            </span>
+          </button>
+        )}
+        
+        <button 
+          className="user-action-btn message"
+          onClick={handleMessageClick}
+          title="Send message"
+        >
+          <MessageCircle size={16} />
+          <span>Message</span>
+        </button>
+        
+        <button 
+          className="user-action-btn profile"
+          onClick={handleViewProfileClick}
+          title="View profile"
+        >
+          <ExternalLink size={16} />
+          <span>Profile</span>
+        </button>
+      </div>
+
+      {/* Hover Overlay (Grid view only) */}
+      {viewMode === 'grid' && (
+        <div className="user-card-overlay">
+          <div className="overlay-actions">
+            <button className="overlay-btn" title="View Profile">
+              <Eye size={20} />
+            </button>
+            <button className="overlay-btn" title="Send Message">
+              <MessageCircle size={20} />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default UserCard;
