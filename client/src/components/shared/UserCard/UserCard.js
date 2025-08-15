@@ -68,57 +68,54 @@ const UserCard = ({
     return roleMap[role] || role || 'Community Member';
   };
 
-  // Enhanced avatar logic to handle multiple possible field names
+  // Enhanced avatar logic - matching the working vehicle card implementation
   const getUserAvatar = () => {
-    // Debug: Log the user object to see what fields are available
-    console.log('User data for avatar:', {
+    // Debug: Log the user object exactly like vehicle cards do
+    console.log(`User ${user.name} avatar data:`, {
       userId: user._id || user.id,
       userName: user.name,
-      avatar: user.avatar,
-      profilePicture: user.profilePicture,
-      picture: user.picture,
-      image: user.image,
+      hasAvatar: !!user.avatar,
+      avatarUrl: user.avatar?.url,
+      avatarStructure: user.avatar,
+      hasProfilePicture: !!user.profilePicture,
+      profilePictureUrl: user.profilePicture?.url,
       allKeys: Object.keys(user)
     });
 
-    // If we've had an error or no real image data, use fallback immediately
-    if (imageError) {
-      console.log('Image error occurred, using fallback avatar');
-      // Use a different avatar service that doesn't have CORS issues
-      return `https://avatar.vercel.sh/${encodeURIComponent(user.name || 'User')}.svg?size=150`;
+    let userProfilePicture = null;
+
+    // Use the EXACT SAME logic as working vehicle cards
+    if (user.avatar && user.avatar.url) {
+      userProfilePicture = user.avatar.url;
+      console.log(`✅ Using user avatar.url for ${user.name}: ${userProfilePicture}`);
+    } 
+    // Fallback: check if avatar is a string directly
+    else if (user.avatar && typeof user.avatar === 'string') {
+      userProfilePicture = user.avatar;
+      console.log(`✅ Using user avatar string for ${user.name}: ${userProfilePicture}`);
+    }
+    // Additional fallback checks
+    else if (user.profilePicture?.url) {
+      userProfilePicture = user.profilePicture.url;
+      console.log(`✅ Using user profilePicture.url for ${user.name}: ${userProfilePicture}`);
+    }
+    else if (user.profilePicture && typeof user.profilePicture === 'string') {
+      userProfilePicture = user.profilePicture;
+      console.log(`✅ Using user profilePicture string for ${user.name}: ${userProfilePicture}`);
+    }
+    else {
+      console.log(`⚠️ No profile picture found for user ${user.name}, using default placeholder`);
     }
 
-    // Check multiple possible avatar field names
-    const possibleAvatars = [
-      user.avatar?.url,
-      user.avatar,
-      user.profilePicture?.url,
-      user.profilePicture,
-      user.picture?.url,
-      user.picture,
-      user.image?.url,
-      user.image,
-      user.photo?.url,
-      user.photo
-    ];
+    // If we found a profile picture, return it
+    if (userProfilePicture) {
+      console.log(`Final avatar URL for ${user.name}:`, userProfilePicture);
+      return userProfilePicture;
+    }
 
-    console.log('Checking possible avatars:', possibleAvatars);
-
-    // Find the first valid avatar URL
-    const avatarUrl = possibleAvatars.find(url => 
-      url && 
-      typeof url === 'string' && 
-      url.trim() !== '' &&
-      url !== 'null' &&
-      url !== 'undefined' &&
-      url.length > 3 // Basic length check
-    );
-
-    console.log('Selected avatar URL:', avatarUrl);
-
-    // If no valid URL found, skip loading and use fallback immediately
-    if (!avatarUrl) {
-      console.log('No valid avatar URL found, using generated avatar');
+    // If we've had an error or no real image data, use fallback
+    if (imageError || !userProfilePicture) {
+      console.log('Using fallback avatar for:', user.name);
       // Set error state to skip loading animation
       setTimeout(() => {
         setImageLoading(false);
@@ -127,40 +124,7 @@ const UserCard = ({
       return `https://avatar.vercel.sh/${encodeURIComponent(user.name || 'User')}.svg?size=150`;
     }
 
-    // Process the URL
-    let processedUrl = avatarUrl;
-
-    try {
-      // Handle relative URLs by making them absolute
-      if (avatarUrl.startsWith('/')) {
-        processedUrl = `${window.location.origin}${avatarUrl}`;
-      }
-      // Handle AWS S3 URLs that might be incomplete
-      else if (avatarUrl.includes('s3') && !avatarUrl.startsWith('http')) {
-        processedUrl = `https://${avatarUrl}`;
-      }
-      // Handle other cloud storage URLs
-      else if (!avatarUrl.startsWith('http') && !avatarUrl.startsWith('data:')) {
-        // If it doesn't start with http and isn't a data URL, it might be a cloud storage key
-        if (avatarUrl.includes('amazonaws.com') || avatarUrl.includes('s3')) {
-          processedUrl = avatarUrl.startsWith('//') ? `https:${avatarUrl}` : `https://${avatarUrl}`;
-        } else {
-          // For other cases, assume it's relative to your domain
-          processedUrl = `${window.location.origin}/${avatarUrl}`;
-        }
-      }
-
-      console.log('Processed avatar URL:', processedUrl);
-      return processedUrl;
-    } catch (error) {
-      console.log('Error processing avatar URL:', error);
-      // Fallback on any error
-      setTimeout(() => {
-        setImageLoading(false);
-        setImageError(true);
-      }, 0);
-      return `https://avatar.vercel.sh/${encodeURIComponent(user.name || 'User')}.svg?size=150`;
-    }
+    return userProfilePicture;
   };
 
   // Get role color for visual distinction (using theme colors)

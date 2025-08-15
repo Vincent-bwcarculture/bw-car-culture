@@ -12,7 +12,6 @@ import {
   Search,
   Filter,
   Grid,
-  Car,
   List,
   MoreHorizontal,
   ExternalLink,
@@ -202,14 +201,14 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
           <p>Connect with automotive professionals and enthusiasts</p>
           <p className="network-privacy-note">
             <Shield size={14} />
-            Showing only users with public profiles
+            Currently showing site administrators only (while privacy features are being developed)
           </p>
         </div>
         
         <div className="network-stats">
           <div className="network-stat">
             <span className="network-stat-number">{users.length}</span>
-            <span className="network-stat-label">Public Users</span>
+            <span className="network-stat-label">Administrators</span>
           </div>
           <div className="network-stat">
             <span className="network-stat-number">{following.size}</span>
@@ -265,11 +264,10 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
               value={filters.userType} 
               onChange={(e) => setFilters({...filters, userType: e.target.value})}
             >
-              <option value="all">All Types</option>
-              <option value="business_owner">Business Owners</option>
-              <option value="dealership_owner">Dealership Owners</option>
-              <option value="driver">Drivers</option>
-              <option value="user">Community Members</option>
+              <option value="all">All Administrators</option>
+              <option value="admin">Admin</option>
+              <option value="super_admin">Super Admin</option>
+              <option value="site_admin">Site Admin</option>
             </select>
           </div>
 
@@ -303,9 +301,12 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
       <div className={`network-users ${viewMode}`}>
         {filteredUsers.length === 0 ? (
           <div className="network-empty">
-            <Users size={48} />
-            <h3>No users found</h3>
-            <p>Try adjusting your search or filters</p>
+            <Shield size={48} />
+            <h3>No administrators found</h3>
+            <p>No site administrators match your current search criteria.</p>
+            <p className="network-empty-hint">
+              Currently showing only site administrators while privacy features are being developed.
+            </p>
           </div>
         ) : (
           filteredUsers.map(user => (
