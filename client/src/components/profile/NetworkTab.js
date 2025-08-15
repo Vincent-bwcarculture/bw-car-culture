@@ -12,7 +12,6 @@ import {
   Search,
   Filter,
   Grid,
-  Car,
   List,
   MoreHorizontal,
   ExternalLink,
@@ -41,42 +40,78 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
     fetchNetworkUsers();
   }, []);
 
-  // Debounce search and filters
+  // Debounce search and re-fetch for filters (but not search since we do client-side filtering for fallback)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      fetchNetworkUsers();
-    }, 500); // 500ms debounce for search
+      if (filters.userType !== 'all' || filters.verified !== 'all') {
+        fetchNetworkUsers();
+      }
+    }, 300); // 300ms debounce for filters
 
     return () => clearTimeout(timeoutId);
-  }, [filters, searchTerm]);
+  }, [filters]); // Only re-fetch on filter changes, not search
 
   const fetchNetworkUsers = async () => {
     try {
       setLoading(true);
       setError('');
 
-      // Build query parameters for filtering
-      const params = new URLSearchParams({
-        page: '1',
-        limit: '50' // Get more users for better browsing experience
-      });
+      // Try the existing auth/users endpoint first as a fallback
+      let response;
+      try {
+        // Try the dedicated network endpoint first
+        const params = new URLSearchParams({
+          page: '1',
+          limit: '50'
+        });
 
-      // Add filters if they're not 'all'
-      if (filters.userType !== 'all') {
-        params.append('userType', filters.userType);
-      }
-      if (filters.verified !== 'all') {
-        params.append('verified', filters.verified);
-      }
-      if (searchTerm.trim()) {
-        params.append('search', searchTerm.trim());
-      }
+        if (filters.userType !== 'all') {
+          params.append('userType', filters.userType);
+        }
+        if (filters.verified !== 'all') {
+          params.append('verified', filters.verified);
+        }
+        if (searchTerm.trim()) {
+          params.append('search', searchTerm.trim());
+        }
 
-      // Fetch users from the new network endpoint
-      const response = await axios.get(`/api/users/network?${params.toString()}`);
+        response = await axios.get(`/api/users/network?${params.toString()}`);
+      } catch (networkError) {
+        console.log('Network endpoint not available, trying fallback:', networkError.message);
+        
+        // Fallback to existing auth/users endpoint
+        response = await axios.get('/auth/users');
+      }
       
       if (response.data.success) {
-        setUsers(response.data.data);
+        let users = response.data.data || response.data.available || [];
+        
+        // Filter out current user
+        const currentUserId = profileData?.id || profileData?._id;
+        users = users.filter(user => 
+          (user._id || user.id) !== currentUserId
+        );
+        
+        // Apply client-side filtering if using fallback endpoint
+        if (response.config.url.includes('/auth/users')) {
+          users = users.filter(user => {
+            const matchesSearch = !searchTerm || 
+              user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              user.role?.toLowerCase().includes(searchTerm.toLowerCase());
+
+            const matchesUserType = filters.userType === 'all' || 
+              user.role === filters.userType;
+
+            const matchesVerified = filters.verified === 'all' || 
+              (filters.verified === 'verified' && user.emailVerified) ||
+              (filters.verified === 'unverified' && !user.emailVerified);
+
+            return matchesSearch && matchesUserType && matchesVerified;
+          });
+        }
+        
+        setUsers(users);
       } else {
         throw new Error(response.data.message || 'Failed to fetch users');
       }
@@ -89,7 +124,7 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
       } else if (error.response?.status === 403) {
         setError('You do not have permission to view the user network.');
       } else if (error.response?.status === 404) {
-        setError('Network feature is not available at the moment.');
+        setError('Network feature is temporarily unavailable. The endpoint needs to be added to the API.');
       } else {
         setError('Failed to load network users. Please try again later.');
       }
@@ -98,8 +133,16 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
     }
   };
 
-  // Since filtering is now done server-side, we just display the users from API
-  const filteredUsers = users;
+  // Filter users (handles both server-side filtered and client-side fallback)
+  const filteredUsers = users.filter(user => {
+    // Apply search filter (always client-side for responsive UI)
+    const matchesSearch = !searchTerm || 
+      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.role?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return matchesSearch;
+  });
 
   // Handle follow/unfollow (placeholder for now)
   const handleFollowToggle = async (userId) => {
