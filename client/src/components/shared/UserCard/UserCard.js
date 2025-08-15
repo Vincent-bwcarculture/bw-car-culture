@@ -28,6 +28,7 @@ const UserCard = ({
   className = ''
 }) => {
   const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
 
   // Get user type display name with better formatting
   const getUserTypeDisplay = (role) => {
@@ -48,30 +49,57 @@ const UserCard = ({
     return roleMap[role] || role || 'Community Member';
   };
 
-  // Get user avatar with fallback
+  // Enhanced avatar logic to handle multiple possible field names
   const getUserAvatar = () => {
-    if (imageError || (!user.avatar?.url && !user.profilePicture)) {
-      return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=ff3300&color=fff&size=150&bold=true`;
+    if (imageError) {
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=1a1a1a&color=ff3300&size=150&bold=true&format=svg`;
     }
-    return user.avatar?.url || user.profilePicture;
+
+    // Check multiple possible avatar field names
+    const possibleAvatars = [
+      user.avatar?.url,
+      user.avatar,
+      user.profilePicture?.url,
+      user.profilePicture,
+      user.picture?.url,
+      user.picture,
+      user.image?.url,
+      user.image
+    ];
+
+    // Find the first valid avatar URL
+    const avatarUrl = possibleAvatars.find(url => 
+      url && typeof url === 'string' && url.trim() !== ''
+    );
+
+    if (avatarUrl) {
+      // Handle relative URLs by making them absolute
+      if (avatarUrl.startsWith('/')) {
+        return `${window.location.origin}${avatarUrl}`;
+      }
+      return avatarUrl;
+    }
+
+    // Fallback to generated avatar
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=1a1a1a&color=ff3300&size=150&bold=true&format=svg`;
   };
 
-  // Get role color for visual distinction
+  // Get role color for visual distinction (using theme colors)
   const getRoleColor = (role) => {
     const colorMap = {
-      'business_owner': '#3498db',
-      'dealership_owner': '#e74c3c', 
+      'business_owner': '#ff3300', // Primary accent
+      'dealership_owner': '#ff3300', 
       'transport_coordinator': '#f39c12',
       'driver': '#27ae60',
       'combi_driver': '#27ae60',
       'taxi_driver': '#27ae60',
       'ministry_official': '#9b59b6',
       'government_admin': '#9b59b6',
-      'mechanic': '#34495e',
+      'mechanic': '#3498db',
       'service_provider': '#16a085',
-      'user': '#95a5a6'
+      'user': '#7f8c8d'
     };
-    return colorMap[role] || '#95a5a6';
+    return colorMap[role] || '#7f8c8d';
   };
 
   // Format member since date
@@ -91,6 +119,17 @@ const UserCard = ({
       const years = Math.floor(diffDays / 365);
       return `${years} year${years > 1 ? 's' : ''} ago`;
     }
+  };
+
+  // Handle image loading
+  const handleImageLoad = () => {
+    setImageLoading(false);
+    setImageError(false);
+  };
+
+  const handleImageError = () => {
+    setImageLoading(false);
+    setImageError(true);
   };
 
   // Handle follow button click
@@ -124,13 +163,22 @@ const UserCard = ({
       {/* Card Header */}
       <div className="usercard-header">
         <div className="usercard-avatar-container">
-          <img 
-            src={getUserAvatar()} 
-            alt={user.name}
-            className="usercard-avatar"
-            onError={() => setImageError(true)}
-          />
-          {user.isVerified && (
+          <div className="usercard-avatar-wrapper">
+            {imageLoading && !imageError && (
+              <div className="usercard-avatar-loading">
+                <div className="usercard-avatar-spinner"></div>
+              </div>
+            )}
+            <img 
+              src={getUserAvatar()} 
+              alt={user.name}
+              className={`usercard-avatar ${imageLoading ? 'loading' : ''}`}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              style={{ display: imageLoading && !imageError ? 'none' : 'block' }}
+            />
+          </div>
+          {(user.isVerified || user.emailVerified) && (
             <div className="usercard-verified-badge" title="Verified User">
               <Shield size={12} />
             </div>
