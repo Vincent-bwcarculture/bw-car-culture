@@ -10,7 +10,8 @@ import {
   BarChart3,
   BookOpen, 
   Shield,
-  UserCheck 
+  UserCheck,
+  Users  // Added Users icon for Network tab
 } from 'lucide-react';
 import axios from '../config/axios.js';
 
@@ -55,12 +56,12 @@ const UserProfilePage = () => {
     const tab = params.get('tab');
     const action = params.get('action');
     
-    // UPDATED: Enhanced tab handling for car selling
+    // UPDATED: Enhanced tab handling for car selling and network
     if (tab) {
       if (tab === 'sell-car' || tab === 'sell_car') {
         setActiveTab('vehicles'); // Redirect to vehicles tab
         setUrlAction('sell'); // Set action to sell
-      } else if (['overview', 'services', 'routes', 'vehicles', 'business', 'settings'].includes(tab)) {
+      } else if (['overview', 'services', 'routes', 'vehicles', 'business', 'network', 'settings'].includes(tab)) {
         setActiveTab(tab);
       }
     }
@@ -191,7 +192,6 @@ const getProfileHints = (userType) => {
 
   // Determine available tabs based on user profile and permissions - UPDATED LOGIC
 
-
 const getAvailableTabs = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Eye }
@@ -290,6 +290,10 @@ const getAvailableTabs = () => {
 
   // === UNIVERSAL TABS (Always at the end) ===
   // REMOVED: tabs.push({ id: 'roles', label: 'Role Management', icon: Shield })
+  
+  // Add Network tab before Settings
+  tabs.push({ id: 'network', label: 'Network', icon: Users });
+  
   tabs.push({ id: 'settings', label: 'Settings', icon: Settings });
 
   return tabs;
@@ -403,6 +407,14 @@ const getAvailableTabs = () => {
           <DriverOperatorDashboard 
             profileData={displayData} 
           />
+        )}
+
+        {/* NEW: Network tab content */}
+        {activeTab === 'network' && (
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <h2>Network - Coming Soon</h2>
+            <p>Connect with other users in the automotive community</p>
+          </div>
         )}
 
         {/* REMOVED: roles tab content */}
