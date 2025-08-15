@@ -13,6 +13,7 @@ import {
   Filter,
   Grid,
   List,
+  Car,
   MoreHorizontal,
   ExternalLink,
   Mail,
@@ -201,14 +202,14 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
           <p>Connect with automotive professionals and enthusiasts</p>
           <p className="network-privacy-note">
             <Shield size={14} />
-            Currently showing site administrators only (while privacy features are being developed)
+            Currently showing only admin users (while privacy features are being developed)
           </p>
         </div>
         
         <div className="network-stats">
           <div className="network-stat">
             <span className="network-stat-number">{users.length}</span>
-            <span className="network-stat-label">Administrators</span>
+            <span className="network-stat-label">Admin Users</span>
           </div>
           <div className="network-stat">
             <span className="network-stat-number">{following.size}</span>
@@ -264,10 +265,8 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
               value={filters.userType} 
               onChange={(e) => setFilters({...filters, userType: e.target.value})}
             >
-              <option value="all">All Administrators</option>
+              <option value="all">All Admin Users</option>
               <option value="admin">Admin</option>
-              <option value="super_admin">Super Admin</option>
-              <option value="site_admin">Site Admin</option>
             </select>
           </div>
 
@@ -302,10 +301,10 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
         {filteredUsers.length === 0 ? (
           <div className="network-empty">
             <Shield size={48} />
-            <h3>No administrators found</h3>
-            <p>No site administrators match your current search criteria.</p>
+            <h3>No admin users found</h3>
+            <p>No users with admin role match your current search criteria.</p>
             <p className="network-empty-hint">
-              Currently showing only site administrators while privacy features are being developed.
+              Currently showing only users with "admin" role while privacy features are being developed.
             </p>
           </div>
         ) : (
