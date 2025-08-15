@@ -29,6 +29,14 @@ const UserCard = ({
 }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
+
+  // Reset image state when user changes
+  React.useEffect(() => {
+    setImageError(false);
+    setImageLoading(true);
+    setRetryCount(0);
+  }, [user._id, user.id]);
 
   // Get user type display name with better formatting
   const getUserTypeDisplay = (role) => {
@@ -51,7 +59,19 @@ const UserCard = ({
 
   // Enhanced avatar logic to handle multiple possible field names
   const getUserAvatar = () => {
+    // Debug: Log the user object to see what fields are available
+    console.log('User data for avatar:', {
+      userId: user._id || user.id,
+      userName: user.name,
+      avatar: user.avatar,
+      profilePicture: user.profilePicture,
+      picture: user.picture,
+      image: user.image,
+      allKeys: Object.keys(user)
+    });
+
     if (imageError) {
+      console.log('Image error occurred, using fallback avatar');
       return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=1a1a1a&color=ff3300&size=150&bold=true&format=svg`;
     }
 
@@ -64,22 +84,53 @@ const UserCard = ({
       user.picture?.url,
       user.picture,
       user.image?.url,
-      user.image
+      user.image,
+      user.photo?.url,
+      user.photo
     ];
+
+    console.log('Checking possible avatars:', possibleAvatars);
 
     // Find the first valid avatar URL
     const avatarUrl = possibleAvatars.find(url => 
-      url && typeof url === 'string' && url.trim() !== ''
+      url && 
+      typeof url === 'string' && 
+      url.trim() !== '' &&
+      url !== 'null' &&
+      url !== 'undefined'
     );
 
+    console.log('Selected avatar URL:', avatarUrl);
+
     if (avatarUrl) {
+      // Handle different URL types
+      let processedUrl = avatarUrl;
+
       // Handle relative URLs by making them absolute
       if (avatarUrl.startsWith('/')) {
-        return `${window.location.origin}${avatarUrl}`;
+        processedUrl = `${window.location.origin}${avatarUrl}`;
       }
-      return avatarUrl;
+      // Handle AWS S3 URLs that might be incomplete
+      else if (avatarUrl.includes('s3') && !avatarUrl.startsWith('http')) {
+        processedUrl = `https://${avatarUrl}`;
+      }
+      // Handle other cloud storage URLs
+      else if (!avatarUrl.startsWith('http') && !avatarUrl.startsWith('data:')) {
+        // If it doesn't start with http and isn't a data URL, it might be a cloud storage key
+        // Try to construct a proper URL (adjust this based on your storage setup)
+        if (avatarUrl.includes('amazonaws.com') || avatarUrl.includes('s3')) {
+          processedUrl = avatarUrl.startsWith('//') ? `https:${avatarUrl}` : `https://${avatarUrl}`;
+        } else {
+          // For other cases, assume it's relative to your domain
+          processedUrl = `${window.location.origin}/${avatarUrl}`;
+        }
+      }
+
+      console.log('Processed avatar URL:', processedUrl);
+      return processedUrl;
     }
 
+    console.log('No valid avatar found, using generated avatar');
     // Fallback to generated avatar
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=1a1a1a&color=ff3300&size=150&bold=true&format=svg`;
   };
@@ -123,11 +174,13 @@ const UserCard = ({
 
   // Handle image loading
   const handleImageLoad = () => {
+    console.log('Image loaded successfully for user:', user.name);
     setImageLoading(false);
     setImageError(false);
   };
 
-  const handleImageError = () => {
+  const handleImageError = (e) => {
+    console.log('Image failed to load for user:', user.name, 'URL:', e.target.src);
     setImageLoading(false);
     setImageError(true);
   };
@@ -176,7 +229,34 @@ const UserCard = ({
               onLoad={handleImageLoad}
               onError={handleImageError}
               style={{ display: imageLoading && !imageError ? 'none' : 'block' }}
+              key={`${user._id || user.id}-${retryCount}`} // Force reload on retry
             />
+            {/* Debug info for development */}
+            {process.env.NODE_ENV === 'development' && imageError && (
+              <div 
+                className="usercard-avatar-debug" 
+                title="Click to retry loading image"
+                onClick={() => {
+                  setRetryCount(prev => prev + 1);
+                  setImageError(false);
+                  setImageLoading(true);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  left: '-5px',
+                  background: 'red',
+                  color: 'white',
+                  fontSize: '10px',
+                  padding: '2px 4px',
+                  borderRadius: '3px',
+                  cursor: 'pointer',
+                  zIndex: 10
+                }}
+              >
+                ❌
+              </div>
+            )}
           </div>
           {(user.isVerified || user.emailVerified) && (
             <div className="usercard-verified-badge" title="Verified User">
