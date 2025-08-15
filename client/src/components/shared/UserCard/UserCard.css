@@ -1,6 +1,6 @@
 /* client/src/components/shared/UserCard/UserCard.css */
 
-.user-card {
+.usercard-container {
   background: linear-gradient(135deg, var(--uprofile-bg-secondary) 0%, var(--uprofile-bg-tertiary) 100%);
   border: 1px solid var(--uprofile-border-color);
   border-radius: 16px;
@@ -13,7 +13,7 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-.user-card::before {
+.usercard-container::before {
   content: '';
   position: absolute;
   top: 0;
@@ -25,17 +25,17 @@
   transition: opacity 0.3s ease;
 }
 
-.user-card:hover {
+.usercard-container:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 40px rgba(255, 51, 0, 0.15);
   border-color: var(--uprofile-primary-accent);
 }
 
-.user-card:hover::before {
+.usercard-container:hover::before {
   opacity: 1;
 }
 
-.user-card.list {
+.usercard-container.list {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -43,12 +43,12 @@
   border-radius: 12px;
 }
 
-.user-card.list:hover {
+.usercard-container.list:hover {
   transform: translateX(4px);
 }
 
 /* === CARD HEADER === */
-.user-card-header {
+.usercard-header {
   display: flex;
   align-items: flex-start;
   gap: 16px;
@@ -56,18 +56,18 @@
   position: relative;
 }
 
-.user-card.list .user-card-header {
+.usercard-container.list .usercard-header {
   flex: 1;
   margin-bottom: 0;
 }
 
 /* === AVATAR CONTAINER === */
-.user-avatar-container {
+.usercard-avatar-container {
   position: relative;
   flex-shrink: 0;
 }
 
-.user-avatar {
+.usercard-avatar {
   width: 64px;
   height: 64px;
   border-radius: 50%;
@@ -77,12 +77,12 @@
   background: var(--uprofile-bg-primary);
 }
 
-.user-card:hover .user-avatar {
+.usercard-container:hover .usercard-avatar {
   border-color: var(--uprofile-primary-accent);
   box-shadow: 0 0 20px rgba(255, 51, 0, 0.3);
 }
 
-.user-verified-badge {
+.usercard-verified-badge {
   position: absolute;
   top: -2px;
   right: -2px;
@@ -98,7 +98,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.user-role-indicator {
+.usercard-role-indicator {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -110,19 +110,19 @@
 }
 
 /* === USER INFO === */
-.user-info {
+.usercard-info {
   flex: 1;
   min-width: 0;
 }
 
-.user-name-row {
+.usercard-name-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 4px;
 }
 
-.user-name {
+.usercard-name {
   margin: 0;
   font-size: 1.2rem;
   font-weight: 700;
@@ -133,14 +133,14 @@
   line-height: 1.2;
 }
 
-.user-verified-icon {
+.usercard-verified-icon {
   color: var(--uprofile-success-green);
   display: flex;
   align-items: center;
   opacity: 0.8;
 }
 
-.user-menu-btn {
+.usercard-menu-btn {
   background: transparent;
   border: none;
   color: var(--uprofile-text-muted);
@@ -151,16 +151,16 @@
   opacity: 0;
 }
 
-.user-card:hover .user-menu-btn {
+.usercard-container:hover .usercard-menu-btn {
   opacity: 1;
 }
 
-.user-menu-btn:hover {
+.usercard-menu-btn:hover {
   background: var(--uprofile-bg-tertiary);
   color: var(--uprofile-text-primary);
 }
 
-.user-role {
+.usercard-role {
   margin: 0 0 8px 0;
   font-size: 14px;
   font-weight: 600;
@@ -169,7 +169,7 @@
   opacity: 0.9;
 }
 
-.user-location {
+.usercard-location {
   margin: 0;
   color: var(--uprofile-text-muted);
   font-size: 13px;
@@ -180,7 +180,7 @@
 }
 
 /* === FOLLOW BUTTON === */
-.follow-btn {
+.usercard-follow-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -198,7 +198,7 @@
   overflow: hidden;
 }
 
-.follow-btn::before {
+.usercard-follow-btn::before {
   content: '';
   position: absolute;
   top: 0;
@@ -210,43 +210,43 @@
   z-index: -1;
 }
 
-.follow-btn:hover::before {
+.usercard-follow-btn:hover::before {
   left: 0;
 }
 
-.follow-btn:hover {
+.usercard-follow-btn:hover {
   color: white;
   transform: scale(1.05);
   box-shadow: 0 4px 15px rgba(255, 51, 0, 0.3);
 }
 
-.follow-btn.following {
+.usercard-follow-btn.following {
   background: var(--uprofile-success-green);
   border-color: var(--uprofile-success-green);
   color: white;
 }
 
-.follow-btn.following:hover {
+.usercard-follow-btn.following:hover {
   background: var(--uprofile-secondary-red);
   border-color: var(--uprofile-secondary-red);
   transform: scale(1.05);
 }
 
-.follow-btn.following:hover .follow-btn-text::after {
+.usercard-follow-btn.following:hover .usercard-follow-btn-text::after {
   content: 'Unfollow';
 }
 
-.follow-btn.following:hover .follow-btn-text {
+.usercard-follow-btn.following:hover .usercard-follow-btn-text {
   opacity: 0;
 }
 
-.follow-btn.compact {
+.usercard-follow-btn.compact {
   padding: 8px 12px;
   font-size: 13px;
 }
 
 /* === BIO === */
-.user-bio {
+.usercard-bio {
   margin-bottom: 16px;
   padding: 12px 16px;
   background: var(--uprofile-bg-primary);
@@ -254,7 +254,7 @@
   border-left: 4px solid var(--uprofile-primary-accent);
 }
 
-.user-bio p {
+.usercard-bio p {
   margin: 0;
   color: var(--uprofile-text-secondary);
   font-size: 14px;
@@ -263,7 +263,7 @@
 }
 
 /* === STATS === */
-.user-stats {
+.usercard-stats {
   display: flex;
   gap: 16px;
   margin-bottom: 16px;
@@ -273,7 +273,7 @@
   border-bottom: 1px solid var(--uprofile-border-color);
 }
 
-.user-stat {
+.usercard-stat {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -283,21 +283,21 @@
   transition: color 0.2s ease;
 }
 
-.user-stat:hover {
+.usercard-stat:hover {
   color: var(--uprofile-text-primary);
 }
 
-.user-stat svg {
+.usercard-stat svg {
   opacity: 0.7;
 }
 
 /* === ACTIONS === */
-.user-actions {
+.usercard-actions {
   display: flex;
   gap: 8px;
 }
 
-.user-action-btn {
+.usercard-action-btn {
   flex: 1;
   display: flex;
   align-items: center;
@@ -316,7 +316,7 @@
   overflow: hidden;
 }
 
-.user-action-btn::before {
+.usercard-action-btn::before {
   content: '';
   position: absolute;
   top: 0;
@@ -327,31 +327,31 @@
   transition: left 0.4s ease;
 }
 
-.user-action-btn:hover::before {
+.usercard-action-btn:hover::before {
   left: 100%;
 }
 
-.user-action-btn:hover {
+.usercard-action-btn:hover {
   border-color: var(--uprofile-primary-accent);
   color: var(--uprofile-primary-accent);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(255, 51, 0, 0.1);
 }
 
-.user-action-btn.message:hover {
+.usercard-action-btn.message:hover {
   border-color: #3498db;
   color: #3498db;
   box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
 }
 
-.user-action-btn.profile:hover {
+.usercard-action-btn.profile:hover {
   border-color: var(--uprofile-success-green);
   color: var(--uprofile-success-green);
   box-shadow: 0 4px 12px rgba(39, 174, 96, 0.1);
 }
 
 /* === HOVER OVERLAY === */
-.user-card-overlay {
+.usercard-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -366,16 +366,16 @@
   border-radius: 16px;
 }
 
-.user-card:hover .user-card-overlay {
+.usercard-container:hover .usercard-overlay {
   opacity: 1;
 }
 
-.overlay-actions {
+.usercard-overlay-actions {
   display: flex;
   gap: 16px;
 }
 
-.overlay-btn {
+.usercard-overlay-btn {
   background: rgba(255, 255, 255, 0.2);
   border: 2px solid white;
   border-radius: 50%;
@@ -390,7 +390,7 @@
   backdrop-filter: blur(10px);
 }
 
-.overlay-btn:hover {
+.usercard-overlay-btn:hover {
   background: white;
   color: var(--uprofile-primary-accent);
   transform: scale(1.1);
@@ -398,84 +398,84 @@
 
 /* === RESPONSIVE DESIGN === */
 @media (max-width: 767px) {
-  .user-card {
+  .usercard-container {
     padding: 20px;
   }
 
-  .user-card-header {
+  .usercard-header {
     flex-direction: column;
     text-align: center;
     gap: 12px;
   }
 
-  .user-info {
+  .usercard-info {
     text-align: center;
   }
 
-  .user-name-row {
+  .usercard-name-row {
     justify-content: center;
   }
 
-  .follow-btn {
+  .usercard-follow-btn {
     width: 100%;
     justify-content: center;
   }
 
-  .user-actions {
+  .usercard-actions {
     flex-direction: column;
   }
 
-  .user-stats {
+  .usercard-stats {
     justify-content: center;
   }
 
-  .user-card-overlay {
+  .usercard-overlay {
     opacity: 0.95;
   }
 
-  .user-card:hover .user-card-overlay {
+  .usercard-container:hover .usercard-overlay {
     opacity: 1;
   }
 }
 
 @media (max-width: 480px) {
-  .user-card {
+  .usercard-container {
     padding: 16px;
     border-radius: 12px;
   }
 
-  .user-avatar {
+  .usercard-avatar {
     width: 56px;
     height: 56px;
   }
 
-  .user-name {
+  .usercard-name {
     font-size: 1.1rem;
   }
 
-  .user-stats {
+  .usercard-stats {
     gap: 12px;
   }
 
-  .overlay-btn {
+  .usercard-overlay-btn {
     width: 44px;
     height: 44px;
   }
 }
 
 /* === LIST VIEW SPECIFIC === */
-.user-card.list .user-bio,
-.user-card.list .user-card-overlay {
+.usercard-container.list .usercard-bio,
+.usercard-container.list .usercard-overlay {
   display: none;
 }
 
-.user-card.list .user-stats {
+.usercard-container.list .usercard-stats {
   border: none;
   padding: 0;
   margin: 0;
 }
 
-.user-card.list .user-actions {
+.usercard-container.list .usercard-actions {
   margin-left: auto;
   flex-shrink: 0;
 }

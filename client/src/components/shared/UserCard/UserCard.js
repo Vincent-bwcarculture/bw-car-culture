@@ -118,52 +118,52 @@ const UserCard = ({
 
   return (
     <div 
-      className={`user-card ${viewMode} ${className}`}
+      className={`usercard-container ${viewMode} ${className}`}
       onClick={handleCardClick}
     >
       {/* Card Header */}
-      <div className="user-card-header">
-        <div className="user-avatar-container">
+      <div className="usercard-header">
+        <div className="usercard-avatar-container">
           <img 
             src={getUserAvatar()} 
             alt={user.name}
-            className="user-avatar"
+            className="usercard-avatar"
             onError={() => setImageError(true)}
           />
           {user.isVerified && (
-            <div className="user-verified-badge" title="Verified User">
+            <div className="usercard-verified-badge" title="Verified User">
               <Shield size={12} />
             </div>
           )}
           <div 
-            className="user-role-indicator"
+            className="usercard-role-indicator"
             style={{ backgroundColor: getRoleColor(user.role) }}
           />
         </div>
         
-        <div className="user-info">
-          <div className="user-name-row">
-            <h3 className="user-name">
+        <div className="usercard-info">
+          <div className="usercard-name-row">
+            <h3 className="usercard-name">
               {user.name}
               {user.emailVerified && (
-                <span className="user-verified-icon" title="Verified Email">
+                <span className="usercard-verified-icon" title="Verified Email">
                   <Award size={16} />
                 </span>
               )}
             </h3>
             {viewMode === 'grid' && (
-              <button className="user-menu-btn" title="More options">
+              <button className="usercard-menu-btn" title="More options">
                 <MoreHorizontal size={16} />
               </button>
             )}
           </div>
           
-          <p className="user-role" style={{ color: getRoleColor(user.role) }}>
+          <p className="usercard-role" style={{ color: getRoleColor(user.role) }}>
             {getUserTypeDisplay(user.role)}
           </p>
           
           {user.city && (
-            <p className="user-location">
+            <p className="usercard-location">
               <MapPin size={14} />
               <span>{user.city}</span>
             </p>
@@ -172,12 +172,12 @@ const UserCard = ({
 
         {viewMode === 'grid' && (
           <button 
-            className={`follow-btn ${isFollowing ? 'following' : ''}`}
+            className={`usercard-follow-btn ${isFollowing ? 'following' : ''}`}
             onClick={handleFollowClick}
             title={isFollowing ? 'Unfollow' : 'Follow'}
           >
             {isFollowing ? <UserCheck size={16} /> : <UserPlus size={16} />}
-            <span className="follow-btn-text">
+            <span className="usercard-follow-btn-text">
               {isFollowing ? 'Following' : 'Follow'}
             </span>
           </button>
@@ -186,27 +186,27 @@ const UserCard = ({
 
       {/* Bio Section (Grid view only) */}
       {viewMode === 'grid' && user.bio && (
-        <div className="user-bio">
+        <div className="usercard-bio">
           <p>{user.bio}</p>
         </div>
       )}
 
       {/* Stats Section */}
-      <div className="user-stats">
+      <div className="usercard-stats">
         {user.totalListings && (
-          <div className="user-stat">
+          <div className="usercard-stat">
             <Car size={14} />
             <span>{user.totalListings} listing{user.totalListings !== 1 ? 's' : ''}</span>
           </div>
         )}
         
-        <div className="user-stat">
+        <div className="usercard-stat">
           <Calendar size={14} />
           <span>{formatMemberSince(user.createdAt || user.memberSince)}</span>
         </div>
 
         {user.rating && (
-          <div className="user-stat">
+          <div className="usercard-stat">
             <Star size={14} />
             <span>{user.rating.toFixed(1)}</span>
           </div>
@@ -214,22 +214,22 @@ const UserCard = ({
       </div>
 
       {/* Action Buttons */}
-      <div className="user-actions">
+      <div className="usercard-actions">
         {viewMode === 'list' && (
           <button 
-            className={`follow-btn compact ${isFollowing ? 'following' : ''}`}
+            className={`usercard-follow-btn compact ${isFollowing ? 'following' : ''}`}
             onClick={handleFollowClick}
             title={isFollowing ? 'Unfollow' : 'Follow'}
           >
             {isFollowing ? <UserCheck size={14} /> : <UserPlus size={14} />}
-            <span className="follow-btn-text">
+            <span className="usercard-follow-btn-text">
               {isFollowing ? 'Following' : 'Follow'}
             </span>
           </button>
         )}
         
         <button 
-          className="user-action-btn message"
+          className="usercard-action-btn message"
           onClick={handleMessageClick}
           title="Send message"
         >
@@ -238,7 +238,7 @@ const UserCard = ({
         </button>
         
         <button 
-          className="user-action-btn profile"
+          className="usercard-action-btn profile"
           onClick={handleViewProfileClick}
           title="View profile"
         >
@@ -249,12 +249,12 @@ const UserCard = ({
 
       {/* Hover Overlay (Grid view only) */}
       {viewMode === 'grid' && (
-        <div className="user-card-overlay">
-          <div className="overlay-actions">
-            <button className="overlay-btn" title="View Profile">
+        <div className="usercard-overlay">
+          <div className="usercard-overlay-actions">
+            <button className="usercard-overlay-btn" title="View Profile">
               <Eye size={20} />
             </button>
-            <button className="overlay-btn" title="Send Message">
+            <button className="usercard-overlay-btn" title="Send Message">
               <MessageCircle size={20} />
             </button>
           </div>
