@@ -11,13 +11,14 @@ import {
   Heart,
   Search,
   Filter,
-  Car,
   Grid,
+  Car,
   List,
   MoreHorizontal,
   ExternalLink,
   Mail,
-  Phone
+  Phone,
+  Shield
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import UserCard from '../shared/UserCard/UserCard.js';
@@ -199,12 +200,16 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
         <div className="network-title-section">
           <h2>Network</h2>
           <p>Connect with automotive professionals and enthusiasts</p>
+          <p className="network-privacy-note">
+            <Shield size={14} />
+            Showing only users with public profiles
+          </p>
         </div>
         
         <div className="network-stats">
           <div className="network-stat">
             <span className="network-stat-number">{users.length}</span>
-            <span className="network-stat-label">Total Users</span>
+            <span className="network-stat-label">Public Users</span>
           </div>
           <div className="network-stat">
             <span className="network-stat-number">{following.size}</span>
