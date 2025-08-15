@@ -84,7 +84,8 @@ const UserCard = ({
     // If we've had an error or no real image data, use fallback immediately
     if (imageError) {
       console.log('Image error occurred, using fallback avatar');
-      return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=1a1a1a&color=ff3300&size=150&bold=true&format=svg`;
+      // Use a different avatar service that doesn't have CORS issues
+      return `https://avatar.vercel.sh/${encodeURIComponent(user.name || 'User')}.svg?size=150`;
     }
 
     // Check multiple possible avatar field names
@@ -123,7 +124,7 @@ const UserCard = ({
         setImageLoading(false);
         setImageError(true);
       }, 0);
-      return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=1a1a1a&color=ff3300&size=150&bold=true&format=svg`;
+      return `https://avatar.vercel.sh/${encodeURIComponent(user.name || 'User')}.svg?size=150`;
     }
 
     // Process the URL
@@ -158,7 +159,7 @@ const UserCard = ({
         setImageLoading(false);
         setImageError(true);
       }, 0);
-      return `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=1a1a1a&color=ff3300&size=150&bold=true&format=svg`;
+      return `https://avatar.vercel.sh/${encodeURIComponent(user.name || 'User')}.svg?size=150`;
     }
   };
 
@@ -261,12 +262,11 @@ const UserCard = ({
                 transition: 'opacity 0.3s ease'
               }}
               key={`${user._id || user.id}-${retryCount}`} // Force reload on retry
-              crossOrigin="anonymous" // Help with CORS issues
             />
             {/* Fallback: If loading takes too long, show generated avatar */}
             {!imageLoading && imageError && (
               <img 
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=1a1a1a&color=ff3300&size=150&bold=true&format=svg`}
+                src={`https://avatar.vercel.sh/${encodeURIComponent(user.name || 'User')}.svg?size=150`}
                 alt={user.name}
                 className="usercard-avatar usercard-avatar-fallback"
                 style={{ display: 'block' }}
