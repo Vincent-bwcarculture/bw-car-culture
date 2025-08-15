@@ -23,6 +23,7 @@ import RouteManagement from '../components/profile/RouteManagement.js';
 import VehicleManagement from '../components/profile/VehicleManagement.js';
 import BusinessDashboard from '../components/profile/BusinessDashboard.js';
 import ProfileSettings from '../components/profile/ProfileSettings.js';
+import NetworkTab from '../components/profile/NetworkTab.js';
 
 import CoordinatorManagement from '../components/profile/CoordinatorManagement.js';
 import RealTimeCoordinatorDashboard from '../components/profile/RealTimeCoordinatorDashboard.js';
@@ -409,12 +410,12 @@ const getAvailableTabs = () => {
           />
         )}
 
-        {/* NEW: Network tab content */}
+        {/* Network tab content */}
         {activeTab === 'network' && (
-          <div style={{ padding: '20px', textAlign: 'center' }}>
-            <h2>Network - Coming Soon</h2>
-            <p>Connect with other users in the automotive community</p>
-          </div>
+          <NetworkTab 
+            profileData={displayData}
+            refreshProfile={fetchUserProfile}
+          />
         )}
 
         {/* REMOVED: roles tab content */}
