@@ -1,4 +1,4 @@
-// src/services/analyticsService.js - Complete Updated Version for Vercel
+// src/services/analyticsService.js - Complete Fixed Version
 const BASE_URL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
 
 class AnalyticsService {
@@ -10,6 +10,8 @@ class AnalyticsService {
     this.isInitialized = false;
     this.sessionId = this.generateSessionId();
     this.isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+    this.requestQueue = [];
+    this.isProcessingQueue = false;
   }
 
   // Initialize service with better error handling
@@ -95,6 +97,49 @@ class AnalyticsService {
     console.log('✅ Analytics Service initialized');
   }
 
+  // CRITICAL: Missing sendEvent method implementation
+  async sendEvent(endpoint, payload) {
+    try {
+      // Check if online
+      if (!this.isOnline) {
+        console.warn('📱 Offline - queuing analytics event');
+        this.storeFailedEvent(endpoint, payload);
+        return null;
+      }
+
+      // Add session information
+      const enrichedPayload = {
+        ...payload,
+        sessionId: this.sessionId,
+        timestamp: new Date().toISOString(),
+        device: this.getDeviceInfo(),
+        connection: this.getConnectionInfo()
+      };
+
+      console.log(`📤 Sending analytics event to: ${endpoint}`);
+
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(enrichedPayload)
+      });
+
+      const data = await this.handleResponse(response);
+      
+      console.log(`✅ Analytics event sent successfully: ${endpoint}`);
+      return data;
+
+    } catch (error) {
+      console.error(`❌ Failed to send analytics event to ${endpoint}:`, error.message);
+      
+      // Store failed event for retry
+      this.storeFailedEvent(endpoint, payload);
+      
+      // Don't throw error to prevent blocking the app
+      return null;
+    }
+  }
+
   // Generate unique session ID
   generateSessionId() {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -174,6 +219,82 @@ class AnalyticsService {
     if (this.cache.size > 50) {
       const oldestKey = this.cache.keys().next().value;
       this.cache.delete(oldestKey);
+    }
+  }
+
+  // Store failed events for retry
+  storeFailedEvent(endpoint, eventData) {
+    if (typeof localStorage === 'undefined') return;
+    
+    try {
+      const failedEvents = JSON.parse(localStorage.getItem('failedAnalyticsEvents') || '[]');
+      
+      // Prevent storing too many failed events
+      if (failedEvents.length >= 100) {
+        failedEvents.shift(); // Remove oldest
+      }
+      
+      failedEvents.push({
+        endpoint,
+        data: eventData,
+        timestamp: Date.now(),
+        retryCount: 0
+      });
+      
+      localStorage.setItem('failedAnalyticsEvents', JSON.stringify(failedEvents));
+      console.log(`💾 Stored failed analytics event: ${endpoint}`);
+    } catch (error) {
+      console.warn('❌ Failed to store failed analytics event:', error);
+    }
+  }
+
+  // Retry failed events
+  async retryFailedEvents() {
+    if (typeof localStorage === 'undefined' || !this.isOnline) return;
+    
+    try {
+      const failedEvents = JSON.parse(localStorage.getItem('failedAnalyticsEvents') || '[]');
+      
+      if (failedEvents.length === 0) return;
+      
+      console.log(`🔄 Retrying ${failedEvents.length} failed analytics events...`);
+      
+      let successCount = 0;
+      
+      for (let i = failedEvents.length - 1; i >= 0; i--) {
+        const event = failedEvents[i];
+        
+        // Skip events that are too old (older than 24 hours)
+        if (Date.now() - event.timestamp > 24 * 60 * 60 * 1000) {
+          failedEvents.splice(i, 1);
+          continue;
+        }
+        
+        // Skip events that have been retried too many times
+        if (event.retryCount >= 3) {
+          failedEvents.splice(i, 1);
+          continue;
+        }
+        
+        try {
+          await this.sendEvent(event.endpoint, event.data);
+          failedEvents.splice(i, 1); // Remove on success
+          successCount++;
+        } catch (error) {
+          // Increment retry count
+          event.retryCount++;
+          console.warn(`⚠️ Retry failed for ${event.endpoint}:`, error.message);
+        }
+      }
+      
+      localStorage.setItem('failedAnalyticsEvents', JSON.stringify(failedEvents));
+      
+      if (successCount > 0) {
+        console.log(`✅ Successfully retried ${successCount} analytics events`);
+      }
+      
+    } catch (error) {
+      console.warn('❌ Failed to retry analytics events:', error);
     }
   }
 
@@ -312,6 +433,36 @@ class AnalyticsService {
     }
   }
 
+  // Track page performance automatically
+  trackPagePerformance() {
+    if (typeof window === 'undefined' || typeof performance === 'undefined') return;
+    
+    try {
+      const navigation = performance.getEntriesByType('navigation')[0];
+      const paint = performance.getEntriesByType('paint');
+      
+      if (navigation) {
+        const performanceData = {
+          page: window.location.pathname,
+          metrics: {
+            loadTime: Math.round(navigation.loadEventEnd - navigation.loadEventStart),
+            domContentLoaded: Math.round(navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart),
+            firstContentfulPaint: paint.find(p => p.name === 'first-contentful-paint')?.startTime || 0,
+            timeToFirstByte: Math.round(navigation.responseStart - navigation.requestStart),
+            networkTime: Math.round(navigation.responseEnd - navigation.fetchStart),
+            renderTime: Math.round(navigation.loadEventEnd - navigation.responseEnd)
+          }
+        };
+        
+        this.trackPerformance(performanceData).catch(error => {
+          console.warn('⚠️ Failed to track page performance:', error.message);
+        });
+      }
+    } catch (error) {
+      console.warn('⚠️ Error tracking page performance:', error);
+    }
+  }
+
   // Dashboard data retrieval methods
   async getDashboardData(days = 30) {
     const cacheKey = `dashboard-${days}`;
@@ -372,259 +523,20 @@ class AnalyticsService {
     }
   }
 
-  async getTrafficData(days = 30) {
-    const cacheKey = `traffic-${days}`;
-    const cached = this.getCachedData(cacheKey);
-    if (cached) return cached;
-
-    try {
-      console.log(`🚦 Fetching traffic data for ${days} days...`);
-      
-      const response = await fetch(`${this.baseURL}/traffic?days=${days}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-      
-      const data = await this.handleResponse(response);
-      
-      if (!data.success) {
-        throw new Error(data.message || 'Traffic data request was not successful');
+  // Filter tracking
+  async trackFilterUsage(filters, resultsCount) {
+    return this.trackEvent({
+      eventType: 'filter_usage',
+      category: 'interaction',
+      metadata: {
+        filters,
+        filterCount: Object.keys(filters).length,
+        resultsCount
       }
-      
-      console.log('✅ Traffic data loaded successfully');
-      this.setCachedData(cacheKey, data);
-      return data;
-      
-    } catch (error) {
-      console.error('❌ Error fetching traffic data:', error);
-      throw error;
-    }
+    });
   }
 
-  async getContentData(days = 30) {
-    const cacheKey = `content-${days}`;
-    const cached = this.getCachedData(cacheKey);
-    if (cached) return cached;
-
-    try {
-      console.log(`📝 Fetching content data for ${days} days...`);
-      
-      const response = await fetch(`${this.baseURL}/content?days=${days}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-      
-      const data = await this.handleResponse(response);
-      
-      if (!data.success) {
-        throw new Error(data.message || 'Content data request was not successful');
-      }
-      
-      console.log('✅ Content data loaded successfully');
-      this.setCachedData(cacheKey, data);
-      return data;
-      
-    } catch (error) {
-      console.error('❌ Error fetching content data:', error);
-      throw error;
-    }
-  }
-
-  async getPerformanceData(days = 7) {
-    const cacheKey = `performance-${days}`;
-    const cached = this.getCachedData(cacheKey);
-    if (cached) return cached;
-
-    try {
-      console.log(`⚡ Fetching performance data for ${days} days...`);
-      
-      const response = await fetch(`${this.baseURL}/performance?days=${days}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-      
-      const data = await this.handleResponse(response);
-      
-      if (!data.success) {
-        throw new Error(data.message || 'Performance data request was not successful');
-      }
-      
-      console.log('✅ Performance data loaded successfully');
-      this.setCachedData(cacheKey, data);
-      return data;
-      
-    } catch (error) {
-      console.error('❌ Error fetching performance data:', error);
-      throw error;
-    }
-  }
-
-  // Export data functionality
-  async exportData(format = 'csv', days = 30) {
-    try {
-      console.log(`📤 Exporting analytics data (${format}, ${days} days)...`);
-      
-      const response = await fetch(`${this.baseURL}/export?format=${format}&days=${days}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Export failed: HTTP ${response.status}`);
-      }
-      
-      console.log('✅ Data export successful');
-      return response.blob();
-      
-    } catch (error) {
-      console.error('❌ Error exporting data:', error);
-      throw error;
-    }
-  }
-
-  // Health check - returns detailed status
-  async checkHealth() {
-    try {
-      console.log('🔍 Checking analytics API health...');
-      
-      const response = await fetch(`${this.baseURL}/health`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      const data = await this.handleResponse(response);
-      
-      console.log('✅ Analytics API health check passed:', data);
-      return data;
-      
-    } catch (error) {
-      console.error('❌ Analytics health check failed:', error);
-      return { 
-        success: false, 
-        error: error.message,
-        status: 'unhealthy',
-        timestamp: new Date().toISOString()
-      };
-    }
-  }
-
-  // Utility methods
-  getSessionId() {
-    if (typeof sessionStorage === 'undefined') return this.sessionId;
-    
-    let sessionId = sessionStorage.getItem('analyticsSessionId');
-    if (!sessionId) {
-      sessionId = this.sessionId;
-      sessionStorage.setItem('analyticsSessionId', sessionId);
-    }
-    return sessionId;
-  }
-
-  // Failed events management for offline support
-  storeFailedEvent(type, data) {
-    if (typeof localStorage === 'undefined') return;
-    
-    try {
-      const failedEvents = JSON.parse(localStorage.getItem('failedAnalyticsEvents') || '[]');
-      failedEvents.push({
-        type,
-        data,
-        timestamp: Date.now(),
-        retryCount: 0
-      });
-      
-      // Keep only last 100 failed events
-      if (failedEvents.length > 100) {
-        failedEvents.splice(0, failedEvents.length - 100);
-      }
-      
-      localStorage.setItem('failedAnalyticsEvents', JSON.stringify(failedEvents));
-      console.log(`💾 Stored failed analytics event: ${type}`);
-      
-    } catch (error) {
-      console.warn('❌ Failed to store failed analytics event:', error);
-    }
-  }
-
-  // Retry failed events
-  async retryFailedEvents() {
-    if (typeof localStorage === 'undefined' || !this.isOnline) return;
-    
-    try {
-      const failedEvents = JSON.parse(localStorage.getItem('failedAnalyticsEvents') || '[]');
-      if (failedEvents.length === 0) return;
-      
-      console.log(`🔄 Retrying ${failedEvents.length} failed analytics events...`);
-      
-      const eventsToRetry = failedEvents.filter(event => 
-        event.retryCount < 3 && (Date.now() - event.timestamp) < 24 * 60 * 60 * 1000 // 24 hours
-      );
-      
-      let successCount = 0;
-      
-      for (const event of eventsToRetry) {
-        try {
-          if (event.type === 'trackEvent') {
-            await this.trackEvent(event.data);
-          } else if (event.type === 'trackSearch') {
-            await this.trackSearch(event.data);
-          }
-          
-          // Remove successful retry
-          const index = failedEvents.indexOf(event);
-          if (index > -1) {
-            failedEvents.splice(index, 1);
-            successCount++;
-          }
-        } catch (error) {
-          // Increment retry count
-          event.retryCount++;
-          console.warn(`⚠️ Retry failed for ${event.type}:`, error.message);
-        }
-      }
-      
-      localStorage.setItem('failedAnalyticsEvents', JSON.stringify(failedEvents));
-      
-      if (successCount > 0) {
-        console.log(`✅ Successfully retried ${successCount} analytics events`);
-      }
-      
-    } catch (error) {
-      console.warn('❌ Failed to retry analytics events:', error);
-    }
-  }
-
-  // Track page performance automatically
-  trackPagePerformance() {
-    if (typeof window === 'undefined' || typeof performance === 'undefined') return;
-    
-    try {
-      const navigation = performance.getEntriesByType('navigation')[0];
-      const paint = performance.getEntriesByType('paint');
-      
-      if (navigation) {
-        const performanceData = {
-          page: window.location.pathname,
-          metrics: {
-            loadTime: Math.round(navigation.loadEventEnd - navigation.loadEventStart),
-            domContentLoaded: Math.round(navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart),
-            firstContentfulPaint: paint.find(p => p.name === 'first-contentful-paint')?.startTime || 0,
-            timeToFirstByte: Math.round(navigation.responseStart - navigation.requestStart),
-            networkTime: Math.round(navigation.responseEnd - navigation.fetchStart),
-            renderTime: Math.round(navigation.loadEventEnd - navigation.responseEnd)
-          }
-        };
-        
-        this.trackPerformance(performanceData).catch(error => {
-          console.warn('⚠️ Failed to track page performance:', error.message);
-        });
-      }
-    } catch (error) {
-      console.warn('⚠️ Error tracking page performance:', error);
-    }
-  }
-
-  // Business-specific tracking methods
+  // Specialized tracking methods
   trackListingView(listingId, listingData = {}) {
     return this.trackEvent({
       eventType: 'listing_view',
@@ -632,93 +544,14 @@ class AnalyticsService {
       elementId: listingId,
       metadata: {
         listingId,
-        title: listingData.title,
-        price: listingData.price,
-        make: listingData.make,
-        model: listingData.model,
-        dealerId: listingData.dealerId,
-        source: listingData.source || 'unknown'
+        ...listingData
       }
     });
   }
 
-  trackDealerContact(dealerId, method = 'form', listingId = null) {
+  trackFormSubmission(formName, formId = null, success = true) {
     return this.trackEvent({
-      eventType: 'dealer_contact',
-      category: 'conversion',
-      elementId: dealerId,
-      metadata: {
-        dealerId,
-        contactMethod: method,
-        listingId
-      }
-    });
-  }
-
-  trackPhoneClick(phoneNumber, source = 'unknown', dealerId = null) {
-    return this.trackEvent({
-      eventType: 'phone_call',
-      category: 'conversion',
-      metadata: {
-        phoneNumber: phoneNumber.replace(/[^\d]/g, ''), // Remove formatting
-        source,
-        dealerId
-      }
-    });
-  }
-
-  trackListingFavorite(listingId, action = 'add') {
-    return this.trackEvent({
-      eventType: 'listing_favorite',
-      category: 'engagement',
-      elementId: listingId,
-      metadata: {
-        listingId,
-        action
-      }
-    });
-  }
-
-  trackNewsArticleRead(articleId, articleTitle, readTime = null) {
-    return this.trackEvent({
-      eventType: 'news_read',
-      category: 'content',
-      elementId: articleId,
-      metadata: {
-        articleId,
-        articleTitle,
-        readTime
-      }
-    });
-  }
-
-  trackFilterUsage(filters, resultCount) {
-    return this.trackEvent({
-      eventType: 'filter',
-      category: 'navigation',
-      metadata: {
-        filters,
-        resultCount
-      }
-    });
-  }
-
-  // Form tracking
-  trackFormStart(formName, formId = null) {
-    return this.trackEvent({
-      eventType: 'form_start',
-      category: 'engagement',
-      elementId: formId,
-      metadata: {
-        formName,
-        formId
-      }
-    });
-  }
-
-  trackFormComplete(formName, formId = null, success = true) {
-    return this.trackEvent({
-      eventType: 'form_complete',
+      eventType: 'form_submission',
       category: success ? 'conversion' : 'engagement',
       elementId: formId,
       metadata: {
@@ -766,6 +599,32 @@ class AnalyticsService {
         value
       }
     });
+  }
+
+  // Health check - returns detailed status
+  async checkHealth() {
+    try {
+      console.log('🔍 Checking analytics API health...');
+      
+      const response = await fetch(`${this.baseURL}/health`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      const data = await this.handleResponse(response);
+      
+      console.log('✅ Analytics API health check passed:', data);
+      return data;
+      
+    } catch (error) {
+      console.error('❌ Analytics health check failed:', error);
+      return { 
+        success: false, 
+        error: error.message,
+        status: 'unhealthy',
+        timestamp: new Date().toISOString()
+      };
+    }
   }
 
   // Clear cache method

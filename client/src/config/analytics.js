@@ -26,17 +26,14 @@ export const initializeGA = async () => {
       return;
     }
 
-    // Initialize with configuration array as per react-ga4 documentation
-    ReactGA.initialize([
-      {
-        trackingId: GA_MEASUREMENT_ID,
-        testMode: process.env.NODE_ENV !== 'production',
-        gaOptions: {
-          anonymizeIp: true,
-          debug_mode: process.env.NODE_ENV !== 'production'
-        }
+    // Initialize with proper configuration for react-ga4
+    ReactGA.initialize(GA_MEASUREMENT_ID, {
+      testMode: process.env.NODE_ENV !== 'production',
+      gaOptions: {
+        anonymizeIp: true,
+        debug_mode: process.env.NODE_ENV !== 'production'
       }
-    ]);
+    });
 
     // Mark as initialized
     window.GA_INITIALIZED = true;
@@ -62,6 +59,12 @@ export const trackPageView = (path) => {
     // Validate path
     if (!path || typeof path !== 'string') {
       console.warn('⚠️ Invalid path provided to trackPageView:', path);
+      return;
+    }
+
+    // Check if GA is initialized
+    if (!window.GA_INITIALIZED) {
+      console.warn('⚠️ Google Analytics not initialized, skipping page view tracking');
       return;
     }
 
@@ -92,215 +95,216 @@ export const trackEvent = (category, action, label, value) => {
       return;
     }
 
+    // Check if GA is initialized
+    if (!window.GA_INITIALIZED) {
+      console.warn('⚠️ Google Analytics not initialized, skipping event tracking');
+      return;
+    }
+
     ReactGA.event({
       category: String(category),
       action: String(action),
       label: label ? String(label) : undefined,
-      value: value ? Number(value) : undefined,
+      value: value ? Number(value) : undefined
     });
     
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`📊 GA Event tracked: ${category} - ${action} - ${label || 'no label'}`);
+      console.log(`📊 GA Event tracked: ${category} - ${action}`, { label, value });
     }
   } catch (error) {
     console.warn('⚠️ Error tracking event:', error);
+    // Don't throw - analytics failures shouldn't break the app
   }
 };
 
-// Safe user login tracking
-export const trackLogin = (method) => {
-  try {
-    if (!method) {
-      console.warn('⚠️ Login method is required');
-      return;
-    }
-    trackEvent('User', 'Login', method);
-  } catch (error) {
-    console.warn('⚠️ Error tracking login:', error);
-  }
-};
-
-// Safe inventory interaction tracking
-export const trackInventoryInteraction = (action, itemId, itemName) => {
-  try {
-    if (!action) {
-      console.warn('⚠️ Action is required for inventory tracking');
-      return;
-    }
-    
-    const label = itemId && itemName ? `${itemId} - ${itemName}` : itemId || itemName || 'unknown';
-    trackEvent('Inventory', action, label);
-  } catch (error) {
-    console.warn('⚠️ Error tracking inventory interaction:', error);
-  }
-};
-
-// Enhanced search tracking
-export const trackSearch = (searchTerm, resultsCount) => {
-  try {
-    if (!searchTerm) {
-      console.warn('⚠️ Search term is required');
-      return;
-    }
-
-    // Also send as a search event for better GA4 reporting
-    ReactGA.event({
-      category: 'Search',
-      action: 'Execute',
-      label: searchTerm,
-      value: resultsCount || 0,
-      // GA4 specific search parameters
-      search_term: searchTerm,
-      search_results: resultsCount || 0
-    });
-
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`📊 GA Search tracked: "${searchTerm}" (${resultsCount || 0} results)`);
-    }
-  } catch (error) {
-    console.warn('⚠️ Error tracking search:', error);
-  }
-};
-
-// Safe business interaction tracking
-export const trackBusinessInteraction = (action, businessId, businessName) => {
-  try {
-    if (!action) {
-      console.warn('⚠️ Action is required for business tracking');
-      return;
-    }
-
-    const label = businessId && businessName ? `${businessId} - ${businessName}` : businessId || businessName || 'unknown';
-    trackEvent('Business', action, label);
-  } catch (error) {
-    console.warn('⚠️ Error tracking business interaction:', error);
-  }
-};
-
-// Enhanced exception tracking
+// Enhanced exception tracking with validation
 export const trackException = (description, fatal = false) => {
   if (!isBrowser) return;
   
   try {
+    // Validate description
     if (!description) {
-      console.warn('⚠️ Description is required for exception tracking');
+      console.warn('⚠️ Description is required for tracking exceptions');
       return;
     }
 
-    // Limit description length to prevent oversized events
-    const limitedDescription = String(description).substring(0, 500);
+    // Check if GA is initialized
+    if (!window.GA_INITIALIZED) {
+      console.warn('⚠️ Google Analytics not initialized, skipping exception tracking');
+      return;
+    }
 
     ReactGA.gtag('event', 'exception', {
-      description: limitedDescription,
+      description: String(description),
       fatal: Boolean(fatal)
     });
-
+    
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`📊 GA Exception tracked: ${limitedDescription} (fatal: ${fatal})`);
+      console.log(`📊 GA Exception tracked: ${description} (fatal: ${fatal})`);
     }
   } catch (error) {
     console.warn('⚠️ Error tracking exception:', error);
+    // Don't throw - analytics failures shouldn't break the app
   }
 };
 
-// Enhanced timing tracking
-export const trackTiming = (category, variable, value, label) => {
+// Enhanced timing tracking with validation
+export const trackTiming = (category, variable, time, label) => {
   if (!isBrowser) return;
   
   try {
-    if (!category || !variable || value === undefined) {
-      console.warn('⚠️ Category, variable, and value are required for timing tracking');
+    // Validate required parameters
+    if (!category || !variable || typeof time !== 'number') {
+      console.warn('⚠️ Category, variable, and time (number) are required for tracking timing');
+      return;
+    }
+
+    // Check if GA is initialized
+    if (!window.GA_INITIALIZED) {
+      console.warn('⚠️ Google Analytics not initialized, skipping timing tracking');
       return;
     }
 
     ReactGA.gtag('event', 'timing_complete', {
-      name: String(variable),
-      value: Number(value),
-      event_category: String(category),
+      name: variable,
+      value: Math.round(time),
+      event_category: category,
       event_label: label ? String(label) : undefined
     });
-
+    
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`📊 GA Timing tracked: ${category}/${variable} = ${value}ms`);
+      console.log(`📊 GA Timing tracked: ${category} - ${variable}: ${time}ms`, { label });
     }
   } catch (error) {
     console.warn('⚠️ Error tracking timing:', error);
+    // Don't throw - analytics failures shouldn't break the app
   }
 };
 
-// New: Track custom conversions for business metrics
-export const trackConversion = (conversionType, value, currency = 'BWP') => {
+// Custom dimensions tracking (enhanced)
+export const trackCustomDimension = (index, value) => {
+  if (!isBrowser) return;
+  
   try {
-    if (!conversionType) {
-      console.warn('⚠️ Conversion type is required');
+    // Validate parameters
+    if (!index || !value || typeof index !== 'number') {
+      console.warn('⚠️ Index (number) and value are required for custom dimensions');
       return;
     }
 
-    ReactGA.gtag('event', 'conversion', {
-      send_to: GA_MEASUREMENT_ID,
-      conversion_type: conversionType,
-      value: value || 0,
-      currency: currency
-    });
-
-    if (process.env.NODE_ENV !== 'production') {
-      console.log(`📊 GA Conversion tracked: ${conversionType} (${value} ${currency})`);
-    }
-  } catch (error) {
-    console.warn('⚠️ Error tracking conversion:', error);
-  }
-};
-
-// New: Track user engagement
-export const trackEngagement = (engagementType, duration) => {
-  try {
-    if (!engagementType) {
-      console.warn('⚠️ Engagement type is required');
+    // Check if GA is initialized
+    if (!window.GA_INITIALIZED) {
+      console.warn('⚠️ Google Analytics not initialized, skipping custom dimension tracking');
       return;
     }
 
-    ReactGA.event({
-      category: 'Engagement',
-      action: engagementType,
-      value: duration || 0
-    });
-
+    const customDimension = {};
+    customDimension[`custom_parameter_${index}`] = String(value);
+    
+    ReactGA.gtag('event', 'custom_dimension', customDimension);
+    
     if (process.env.NODE_ENV !== 'production') {
-      console.log(`📊 GA Engagement tracked: ${engagementType} (${duration || 0}s)`);
+      console.log(`📊 GA Custom dimension tracked: ${index} = ${value}`);
     }
   } catch (error) {
-    console.warn('⚠️ Error tracking engagement:', error);
+    console.warn('⚠️ Error tracking custom dimension:', error);
+    // Don't throw - analytics failures shouldn't break the app
   }
 };
 
-// New: Check if GA is ready
-export const isGAReady = () => {
-  return isBrowser && window.gtag && window.GA_INITIALIZED;
+// Enhanced user tracking
+export const setUserProperties = (properties) => {
+  if (!isBrowser) return;
+  
+  try {
+    // Validate properties
+    if (!properties || typeof properties !== 'object') {
+      console.warn('⚠️ Properties object is required for setting user properties');
+      return;
+    }
+
+    // Check if GA is initialized
+    if (!window.GA_INITIALIZED) {
+      console.warn('⚠️ Google Analytics not initialized, skipping user properties');
+      return;
+    }
+
+    ReactGA.gtag('set', 'user_properties', properties);
+    
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('📊 GA User properties set:', properties);
+    }
+  } catch (error) {
+    console.warn('⚠️ Error setting user properties:', error);
+    // Don't throw - analytics failures shouldn't break the app
+  }
 };
 
-// New: Get GA status for debugging
-export const getGAStatus = () => {
-  return {
-    isBrowser,
-    measurementId: GA_MEASUREMENT_ID,
-    isInitialized: window.GA_INITIALIZED || false,
-    hasGtag: typeof window.gtag === 'function',
-    environment: process.env.NODE_ENV
-  };
+// Enhanced consent tracking
+export const grantConsent = (consentTypes = {}) => {
+  if (!isBrowser) return;
+  
+  try {
+    const defaultConsent = {
+      ad_storage: 'granted',
+      analytics_storage: 'granted',
+      functionality_storage: 'granted',
+      personalization_storage: 'granted',
+      security_storage: 'granted',
+      ...consentTypes
+    };
+
+    ReactGA.gtag('consent', 'update', defaultConsent);
+    
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('📊 GA Consent granted:', defaultConsent);
+    }
+  } catch (error) {
+    console.warn('⚠️ Error granting consent:', error);
+    // Don't throw - analytics failures shouldn't break the app
+  }
 };
 
-export default {
-  initializeGA,
-  trackPageView,
-  trackEvent,
-  trackLogin,
-  trackInventoryInteraction,
-  trackSearch,
-  trackBusinessInteraction,
-  trackException,
-  trackTiming,
-  trackConversion,
-  trackEngagement,
-  isGAReady,
-  getGAStatus
+// Enhanced consent denial
+export const denyConsent = (consentTypes = {}) => {
+  if (!isBrowser) return;
+  
+  try {
+    const defaultDenial = {
+      ad_storage: 'denied',
+      analytics_storage: 'denied',
+      functionality_storage: 'denied',
+      personalization_storage: 'denied',
+      ...consentTypes
+    };
+
+    ReactGA.gtag('consent', 'update', defaultDenial);
+    
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('📊 GA Consent denied:', defaultDenial);
+    }
+  } catch (error) {
+    console.warn('⚠️ Error denying consent:', error);
+    // Don't throw - analytics failures shouldn't break the app
+  }
 };
+
+// GA status check
+export const isGAInitialized = () => {
+  return isBrowser && window.GA_INITIALIZED === true;
+};
+
+// Enhanced configuration object
+export const analyticsConfig = {
+  measurementId: GA_MEASUREMENT_ID,
+  isProduction: process.env.NODE_ENV === 'production',
+  debugMode: process.env.NODE_ENV !== 'production',
+  anonymizeIp: true,
+  sampleRate: process.env.NODE_ENV === 'production' ? 100 : 100, // 100% sampling
+  siteSpeedSampleRate: process.env.NODE_ENV === 'production' ? 10 : 100, // 10% in prod, 100% in dev
+  cookieDomain: 'auto',
+  cookieExpires: 63072000 // 2 years
+};
+
+// Export default configuration
+export default analyticsConfig;
