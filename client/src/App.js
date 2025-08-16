@@ -1,54 +1,30 @@
 // src/App.js - Enhanced with Complete Analytics Integration
+
+// React Core Imports
 import React, { Suspense, useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+// Context Imports
 import { AuthProvider } from './context/AuthContext.js';
 import { useAuth } from './context/AuthContext.js';
 import { NewsProvider } from './context/NewsContext.js';
+
+// Layout Components
 import MainLayout from './components/layout/MainLayout.js';
 import LoadingScreen from './components/shared/LoadingScreen/LoadingScreen.js';
 import SplashScreen from './components/SplashScreen.js';
+
+// Analytics Imports
 import { initializeGA, trackPageView, trackException, trackTiming } from './config/analytics.js';
-import UserProfilePage from './pages/UserProfilePage.js';
-import AdminUserSubmissions from './Admin/components/AdminUserSubmissions.js';
-
 import { analyticsService } from './services/analyticsService.js';
-
-// Create safe Google Analytics functions to prevent errors
-const safeTrackPageView = (page) => {
-  try {
-    if (typeof trackPageView === 'function') {
-      trackPageView(page);
-    }
-  } catch (error) {
-    console.warn('Google Analytics trackPageView failed:', error);
-  }
-};
-
-const safeTrackException = (message, fatal) => {
-  try {
-    if (typeof trackException === 'function') {
-      trackException(message, fatal);
-    }
-  } catch (error) {
-    console.warn('Google Analytics trackException failed:', error);
-  }
-};
-
-const safeTrackTiming = (category, variable, time, label) => {
-  try {
-    if (typeof trackTiming === 'function') {
-      trackTiming(category, variable, time, label);
-    }
-  } catch (error) {
-    console.warn('Google Analytics trackTiming failed:', error);
-  }
-};
-
-// Keep existing internal analytics as fallback
 import { InternalAnalyticsProvider } from './components/shared/InternalAnalyticsProvider.js';
 import AnalyticsDashboard from './Admin/AnalyticsDashboard/AnalyticsDashboard.js';
 import internalAnalytics from './utils/internalAnalytics.js';
+
+// User Components
+import UserProfilePage from './pages/UserProfilePage.js';
+import AdminUserSubmissions from './Admin/components/AdminUserSubmissions.js';
 
 // Admin Components
 import AdminLayout from './Admin/layout/AdminLayout.js';
@@ -83,8 +59,13 @@ import HomeDealershipsSection from './components/features/HomeDealershipsSection
 import ConnectionTest from './components/shared/ConnectionTest.js';
 import NewsManager from './components/NewsManager/NewsManager.js';
 
-// Import GION App component
+// GION App and Related Components
 import GIONApp from './components/GION/GIONApp.js';
+import GIONAdminDashboard from './components/GION/GIONAdminDashboard/GIONAdminDashboard.js';
+import MinistryDashboard from './components/GION/GorvDashboards/MinistryDashboard.js';
+import ServiceProviderDashboard from './components/GION/ServiceProviderDashboards/ServiceProviderDashboard.js';
+
+// Policy Pages
 import PrivacyPolicyPage from './components/pages/PolicyPages/PrivacyPolicyPage.js';
 import TermsOfServicePage from './components/pages/PolicyPages/TermsOfServicePage.js';
 import CookiesPolicyPage from './components/pages/PolicyPages/CookiesPolicyPage.js';
@@ -93,21 +74,16 @@ import FeedbackManager from './Admin/FeedbackManager/FeedbackManager.js';
 import InventoryManager from './Admin/InventoryManager/InventoryManager.js';
 import InventoryPage from './components/pages/InventoryPage/InventoryPage.js';
 
-// Import GION Dashboard Components
-import GIONAdminDashboard from './components/GION/GIONAdminDashboard/GIONAdminDashboard.js';
-import MinistryDashboard from './components/GION/GorvDashboards/MinistryDashboard.js';
-import ServiceProviderDashboard from './components/GION/ServiceProviderDashboards/ServiceProviderDashboard.js';
-
 // Service Manager Components
 import ServiceProviderManager from './Admin/ServiceProviderManager/ServiceProviderManager.js';
 import RentalVehicleManager from './Admin/RentalVehicleManager/RentalVehicleManager.js';
 import TrailerListingManager from './Admin/TrailerListingManager/TrailerListingManager.js';
 import TransportRouteManager from './Admin/TransportRouteManager/TransportRouteManager.js';
 
+// Request and Payment Components
 import RequestManager from './Admin/RequestManager/RequestManager.js';
 import ServiceProviderRequest from './Admin/auth/ServiceProviderRequest.js';
 import MinistryRequest from './Admin/auth/MinistryRequest.js';
-
 import AdminPaymentDashboard from './Admin/components/AdminPaymentDashboard.js';
 
 // Pages
@@ -122,7 +98,7 @@ import VideoSection from './components/features/VideoSection/VideoSection.js';
 import HomeRentalsSection from './components/features/HomeRentalsSection/HomeRentalsSection.js';
 import HomeServicesSection from './components/features/HomeServicesSection/HomeServicesSection.js';
 
-// Styles
+// Styles and Utilities
 import './App.css';
 import './styles/base.css';
 import './utils/imagePathDiagnostics.js';
@@ -134,6 +110,37 @@ const MarketplaceList = React.lazy(() => import('./components/features/Marketpla
 const CarMarketPlace = React.lazy(() => import('./components/features/MarketplaceSection/CarMarketPlace.js'));
 const EditorDashboard = React.lazy(() => import('./Admin/dashboards/EditorDashboard.js'));
 const DealerDashboard = React.lazy(() => import('./Admin/dashboards/DealerDashboard.js'));
+
+// Create safe Google Analytics functions to prevent errors
+const safeTrackPageView = (page) => {
+  try {
+    if (typeof trackPageView === 'function') {
+      trackPageView(page);
+    }
+  } catch (error) {
+    console.warn('Google Analytics trackPageView failed:', error);
+  }
+};
+
+const safeTrackException = (message, fatal) => {
+  try {
+    if (typeof trackException === 'function') {
+      trackException(message, fatal);
+    }
+  } catch (error) {
+    console.warn('Google Analytics trackException failed:', error);
+  }
+};
+
+const safeTrackTiming = (category, variable, time, label) => {
+  try {
+    if (typeof trackTiming === 'function') {
+      trackTiming(category, variable, time, label);
+    }
+  } catch (error) {
+    console.warn('Google Analytics trackTiming failed:', error);
+  }
+};
 
 // Enhanced Analytics Wrapper component with safe tracking
 const AnalyticsWrapper = ({ children }) => {
