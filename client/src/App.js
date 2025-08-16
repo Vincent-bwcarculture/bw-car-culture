@@ -12,8 +12,38 @@ import { initializeGA, trackPageView, trackException, trackTiming } from './conf
 import UserProfilePage from './pages/UserProfilePage.js';
 import AdminUserSubmissions from './Admin/components/AdminUserSubmissions.js';
 
-// Import the new analytics service
 import { analyticsService } from './services/analyticsService.js';
+
+// Create safe Google Analytics functions to prevent errors
+const safeTrackPageView = (page) => {
+  try {
+    if (typeof trackPageView === 'function') {
+      trackPageView(page);
+    }
+  } catch (error) {
+    console.warn('Google Analytics trackPageView failed:', error);
+  }
+};
+
+const safeTrackException = (message, fatal) => {
+  try {
+    if (typeof trackException === 'function') {
+      trackException(message, fatal);
+    }
+  } catch (error) {
+    console.warn('Google Analytics trackException failed:', error);
+  }
+};
+
+const safeTrackTiming = (category, variable, time, label) => {
+  try {
+    if (typeof trackTiming === 'function') {
+      trackTiming(category, variable, time, label);
+    }
+  } catch (error) {
+    console.warn('Google Analytics trackTiming failed:', error);
+  }
+};
 
 // Keep existing internal analytics as fallback
 import { InternalAnalyticsProvider } from './components/shared/InternalAnalyticsProvider.js';
@@ -105,7 +135,7 @@ const CarMarketPlace = React.lazy(() => import('./components/features/Marketplac
 const EditorDashboard = React.lazy(() => import('./Admin/dashboards/EditorDashboard.js'));
 const DealerDashboard = React.lazy(() => import('./Admin/dashboards/DealerDashboard.js'));
 
-// Enhanced Analytics Wrapper component with comprehensive tracking
+// Enhanced Analytics Wrapper component with safe tracking
 const AnalyticsWrapper = ({ children }) => {
   const location = useLocation();
   const sessionStartTime = React.useRef(Date.now());
@@ -116,85 +146,59 @@ const AnalyticsWrapper = ({ children }) => {
     const currentPath = location.pathname + location.search;
     
     // Track page view when location changes
-    try {
-      // Calculate time on previous page
-      const timeOnPreviousPage = lastPath.current ? Date.now() - pageStartTime.current : 0;
-      
-      // Track with Google Analytics
-      trackPageView(currentPath);
-      
-      // Track with new analytics service (primary)
-      analyticsService.trackPageView({
-        page: currentPath,
-        title: document.title,
-        metadata: {
-          previousPage: lastPath.current || null,
-          timeOnPreviousPage,
-          referrer: document.referrer,
-          sessionDuration: Date.now() - sessionStartTime.current,
-          userAgent: navigator.userAgent,
-          screenResolution: typeof window !== 'undefined' && window.screen ? 
-            `${window.screen.width}x${window.screen.height}` : 'unknown',
-          viewport: `${window.innerWidth}x${window.innerHeight}`,
-          language: navigator.language,
-          platform: navigator.platform
-        }
-      }).catch(error => {
-        console.warn('Analytics page view tracking failed:', error);
-      });
-      
-      // Track with internal analytics as fallback
-      if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-        internalAnalytics.trackEvent('page_view', {
-          category: 'navigation',
+    const trackPageViews = async () => {
+      try {
+        // Calculate time on previous page
+        const timeOnPreviousPage = lastPath.current ? Date.now() - pageStartTime.current : 0;
+        
+        // Track with Google Analytics (safe)
+        safeTrackPageView(currentPath);
+        
+        // Track with primary analytics service
+        await analyticsService.trackPageView({
+          page: currentPath,
+          title: document.title,
           metadata: {
-            page: currentPath,
             previousPage: lastPath.current || null,
             timeOnPreviousPage,
             referrer: document.referrer,
-            timestamp: new Date().toISOString(),
             sessionDuration: Date.now() - sessionStartTime.current
           }
         });
-      }
-      
-      // Update tracking references
-      lastPath.current = currentPath;
-      pageStartTime.current = Date.now();
-      
-    } catch (error) {
-      console.error('Error in AnalyticsWrapper page tracking:', error);
-      
-      // Track the error with both services
-      analyticsService.trackEvent({
-        eventType: 'error',
-        category: 'system',
-        metadata: {
-          errorType: 'AnalyticsWrapperError',
-          errorMessage: error.message,
-          page: currentPath,
-          function: 'pageView'
+        
+        // Update tracking references
+        lastPath.current = currentPath;
+        pageStartTime.current = Date.now();
+        
+      } catch (error) {
+        console.error('Error in AnalyticsWrapper page tracking:', error);
+        
+        // Track the error itself (safe)
+        try {
+          await analyticsService.trackEvent({
+            eventType: 'error',
+            category: 'system',
+            metadata: {
+              errorType: 'AnalyticsWrapperError',
+              errorMessage: error.message,
+              page: currentPath,
+              function: 'pageView'
+            }
+          });
+        } catch (trackError) {
+          console.warn('Failed to track analytics wrapper error:', trackError);
         }
-      }).catch(console.warn);
-      
-      if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-        internalAnalytics.trackEvent('error', {
-          category: 'system',
-          metadata: {
-            errorType: 'AnalyticsWrapperError',
-            errorMessage: error.message,
-            page: currentPath,
-            function: 'pageView'
-          }
-        });
       }
-    }
+    };
+
+    // Use setTimeout to prevent blocking
+    setTimeout(trackPageViews, 100);
   }, [location]);
 
-  // Track app performance metrics
+  // Track app performance metrics (safe)
   useEffect(() => {
     if ('performance' in window) {
-      const trackPerformanceMetrics = () => {
+      const trackPerformanceMetrics = async () => {
         try {
           const navigation = performance.getEntriesByType('navigation')[0];
           const paint = performance.getEntriesByType('paint');
@@ -209,33 +213,14 @@ const AnalyticsWrapper = ({ children }) => {
                 timeToFirstByte: Math.round(navigation.responseStart - navigation.requestStart),
                 networkTime: Math.round(navigation.responseEnd - navigation.fetchStart),
                 renderTime: Math.round(navigation.loadEventEnd - navigation.responseEnd)
-              },
-              connection: {
-                type: navigator.connection?.effectiveType || 'unknown',
-                downlink: navigator.connection?.downlink || 0,
-                rtt: navigator.connection?.rtt || 0
-              },
-              device: {
-                memory: navigator.deviceMemory || 'unknown',
-                cores: navigator.hardwareConcurrency || 'unknown'
               }
             };
             
-            // Track with new analytics service (primary)
-            analyticsService.trackPerformance(performanceData).catch(error => {
-              console.warn('Performance tracking failed:', error);
-            });
+            // Track with primary analytics service
+            await analyticsService.trackPerformance(performanceData);
             
-            // Track with Google Analytics timing
-            trackTiming('App Performance', 'Page Load', performanceData.metrics.loadTime, location.pathname);
-            
-            // Track with internal analytics as fallback
-            if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-              internalAnalytics.trackEvent('performance', {
-                category: 'system',
-                metadata: performanceData
-              });
-            }
+            // Track with Google Analytics (safe)
+            safeTrackTiming('App Performance', 'Page Load', performanceData.metrics.loadTime, location.pathname);
           }
         } catch (error) {
           console.error('Performance tracking error:', error);
@@ -1122,58 +1107,71 @@ function App() {
   const [analyticsInitialized, setAnalyticsInitialized] = useState(false);
   const appStartTime = React.useRef(Date.now());
 
-  // Enhanced analytics initialization
+  // Enhanced analytics initialization with error prevention
   useEffect(() => {
     const initializeAnalytics = async () => {
       try {
         console.log('🔧 Initializing analytics systems...');
         
-        // Initialize new analytics service (primary)
-        analyticsService.init();
+        // Initialize primary analytics service first
+        try {
+          analyticsService.init();
+          console.log('✅ Primary analytics service initialized');
+        } catch (serviceError) {
+          console.error('❌ Primary analytics service failed:', serviceError);
+        }
         
-        // Initialize Google Analytics
-        await initializeGA();
-        
-        // Track app initialization with new analytics service
-        analyticsService.trackEvent({
-          eventType: 'app_init',
-          category: 'system',
-          metadata: {
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent,
-            screenResolution: typeof window !== 'undefined' && window.screen ? 
-              `${window.screen.width}x${window.screen.height}` : 'unknown',
-            viewport: `${window.innerWidth}x${window.innerHeight}`,
-            language: navigator.language,
-            platform: navigator.platform,
-            cookieEnabled: navigator.cookieEnabled,
-            connectionType: navigator.connection?.effectiveType || 'unknown',
-            deviceMemory: navigator.deviceMemory || 'unknown',
-            hardwareConcurrency: navigator.hardwareConcurrency || 'unknown'
+        // Initialize Google Analytics with delay and error handling
+        try {
+          // Add delay to prevent conflicts
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // Only initialize GA if the function exists and we have an ID
+          if (typeof initializeGA === 'function') {
+            await initializeGA();
+            console.log('✅ Google Analytics initialized');
+          } else {
+            console.log('📊 Google Analytics initialization skipped (function not available)');
           }
-        }).catch(console.warn);
+        } catch (gaError) {
+          console.warn('⚠️ Google Analytics failed to initialize:', gaError);
+          // Don't let GA failures block the app
+        }
         
-        // Track with internal analytics as fallback
-        if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-          internalAnalytics.trackEvent('app_init', {
+        // Track app initialization with primary analytics only
+        try {
+          await analyticsService.trackEvent({
+            eventType: 'app_init',
             category: 'system',
             metadata: {
               timestamp: new Date().toISOString(),
               userAgent: navigator.userAgent,
-              analyticsService: 'primary_and_fallback'
+              screenResolution: typeof window !== 'undefined' && window.screen ? 
+                `${window.screen.width}x${window.screen.height}` : 'unknown',
+              viewport: `${window.innerWidth}x${window.innerHeight}`,
+              language: navigator.language,
+              platform: navigator.platform,
+              cookieEnabled: navigator.cookieEnabled,
+              connectionType: navigator.connection?.effectiveType || 'unknown'
             }
           });
+          console.log('✅ App initialization tracked');
+        } catch (trackError) {
+          console.warn('⚠️ Failed to track app initialization:', trackError);
         }
         
         setAnalyticsInitialized(true);
-        console.log('✅ Analytics systems initialized successfully');
+        console.log('✅ Analytics initialization completed');
         
       } catch (error) {
-        console.error('❌ Failed to initialize analytics:', error);
+        console.error('❌ Critical analytics initialization failure:', error);
         
-        // Track initialization failure
+        // Always set as initialized to prevent blocking the app
+        setAnalyticsInitialized(true);
+        
+        // Try to track the failure
         try {
-          analyticsService.trackEvent({
+          await analyticsService.trackEvent({
             eventType: 'error',
             category: 'system',
             metadata: {
@@ -1181,41 +1179,29 @@ function App() {
               errorMessage: error.message,
               timestamp: new Date().toISOString()
             }
-          }).catch(console.warn);
+          });
         } catch (trackError) {
           console.error('Failed to track analytics init error:', trackError);
         }
       }
     };
 
-    initializeAnalytics();
+    // Delay initialization to ensure DOM is ready
+    const initTimer = setTimeout(initializeAnalytics, 500);
+    
+    return () => clearTimeout(initTimer);
   }, []);
 
-  // Enhanced error handling setup
+  // Enhanced error handling setup with safe tracking
   useEffect(() => {
     // Track unhandled JavaScript errors
-    const handleError = (event) => {
+    const handleError = async (event) => {
       console.error('Unhandled error:', event.error);
       
-      // Track with new analytics service (primary)
-      analyticsService.trackEvent({
-        eventType: 'error',
-        category: 'system',
-        metadata: {
-          errorType: 'UnhandledError',
-          errorMessage: event.error?.message || 'Unknown error',
-          filename: event.filename,
-          lineno: event.lineno,
-          colno: event.colno,
-          stack: event.error?.stack,
-          timestamp: new Date().toISOString(),
-          page: window.location.pathname
-        }
-      }).catch(console.warn);
-      
-      // Track with fallback systems
-      if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-        internalAnalytics.trackEvent('error', {
+      try {
+        // Track with primary analytics service
+        await analyticsService.trackEvent({
+          eventType: 'error',
           category: 'system',
           metadata: {
             errorType: 'UnhandledError',
@@ -1223,66 +1209,51 @@ function App() {
             filename: event.filename,
             lineno: event.lineno,
             colno: event.colno,
-            stack: event.error?.stack,
+            stack: event.error?.stack?.substring(0, 500), // Limit stack trace length
             timestamp: new Date().toISOString(),
             page: window.location.pathname
           }
         });
+        
+        // Track with Google Analytics (safe)
+        safeTrackException(event.error?.message || 'Unknown error', false);
+        
+      } catch (trackingError) {
+        console.warn('Failed to track error:', trackingError);
       }
-      
-      trackException(event.error?.message || 'Unknown error', false);
     };
 
     // Track unhandled promise rejections
-    const handleUnhandledRejection = (event) => {
+    const handleUnhandledRejection = async (event) => {
       console.error('Unhandled promise rejection:', event.reason);
       
-      // Track with new analytics service (primary)
-      analyticsService.trackEvent({
-        eventType: 'error',
-        category: 'system',
-        metadata: {
-          errorType: 'UnhandledPromiseRejection',
-          errorMessage: event.reason?.message || 'Unknown promise rejection',
-          reason: String(event.reason),
-          timestamp: new Date().toISOString(),
-          page: window.location.pathname
-        }
-      }).catch(console.warn);
-      
-      // Track with fallback
-      if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-        internalAnalytics.trackEvent('error', {
+      try {
+        // Track with primary analytics service
+        await analyticsService.trackEvent({
+          eventType: 'error',
           category: 'system',
           metadata: {
             errorType: 'UnhandledPromiseRejection',
             errorMessage: event.reason?.message || 'Unknown promise rejection',
-            reason: String(event.reason),
+            reason: String(event.reason).substring(0, 500), // Limit reason length
             timestamp: new Date().toISOString(),
             page: window.location.pathname
           }
         });
+        
+      } catch (trackingError) {
+        console.warn('Failed to track promise rejection:', trackingError);
       }
     };
 
     // Track session end
-    const handleBeforeUnload = () => {
+    const handleBeforeUnload = async () => {
       const sessionDuration = Date.now() - appStartTime.current;
       
-      // Track with new analytics service (primary)
-      analyticsService.trackEvent({
-        eventType: 'session_end',
-        category: 'system',
-        metadata: {
-          sessionDuration,
-          exitPage: window.location.pathname,
-          timestamp: new Date().toISOString()
-        }
-      }).catch(console.warn);
-      
-      // Track with fallback
-      if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-        internalAnalytics.trackEvent('session_end', {
+      try {
+        // Track with primary analytics service
+        await analyticsService.trackEvent({
+          eventType: 'session_end',
           category: 'system',
           metadata: {
             sessionDuration,
@@ -1290,25 +1261,17 @@ function App() {
             timestamp: new Date().toISOString()
           }
         });
+      } catch (trackingError) {
+        console.warn('Failed to track session end:', trackingError);
       }
     };
 
     // Track visibility changes (tab switching)
-    const handleVisibilityChange = () => {
-      // Track with new analytics service (primary)
-      analyticsService.trackEvent({
-        eventType: 'visibility_change',
-        category: 'interaction',
-        metadata: {
-          visibilityState: document.visibilityState,
-          page: window.location.pathname,
-          timestamp: new Date().toISOString()
-        }
-      }).catch(console.warn);
-      
-      // Track with fallback
-      if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-        internalAnalytics.trackEvent('visibility_change', {
+    const handleVisibilityChange = async () => {
+      try {
+        // Track with primary analytics service
+        await analyticsService.trackEvent({
+          eventType: 'visibility_change',
           category: 'interaction',
           metadata: {
             visibilityState: document.visibilityState,
@@ -1316,6 +1279,8 @@ function App() {
             timestamp: new Date().toISOString()
           }
         });
+      } catch (trackingError) {
+        console.warn('Failed to track visibility change:', trackingError);
       }
     };
 
@@ -1390,28 +1355,23 @@ function App() {
     }
   }, []);
 
-  const handleSplashFinished = () => {
+  const handleSplashFinished = async () => {
     setShowSplash(false);
     
-    // Track splash screen completion with new analytics service
-    analyticsService.trackEvent({
-      eventType: 'splash_complete',
-      category: 'interaction',
-      metadata: {
-        splashDuration: Date.now() - appStartTime.current,
-        timestamp: new Date().toISOString()
-      }
-    }).catch(console.warn);
-    
-    // Track with fallback
-    if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-      internalAnalytics.trackEvent('splash_complete', {
+    try {
+      // Track splash screen completion with primary analytics service
+      await analyticsService.trackEvent({
+        eventType: 'splash_complete',
         category: 'interaction',
         metadata: {
           splashDuration: Date.now() - appStartTime.current,
           timestamp: new Date().toISOString()
         }
       });
+      
+      console.log('✅ Splash completion tracked');
+    } catch (error) {
+      console.warn('⚠️ Failed to track splash completion:', error);
     }
   };
 

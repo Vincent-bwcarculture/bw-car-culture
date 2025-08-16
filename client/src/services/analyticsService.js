@@ -12,12 +12,18 @@ class AnalyticsService {
     this.isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
   }
 
-  // Initialize service
+  // Initialize service with better error handling
   init() {
     if (this.isInitialized) return;
     
     console.log('🔧 Initializing Analytics Service...');
     console.log('Analytics API URL:', this.baseURL);
+    
+    // Validate API URL
+    if (!this.baseURL || this.baseURL === 'undefined/api/analytics') {
+      console.error('❌ Invalid API URL detected. Please check REACT_APP_API_URL environment variable.');
+      this.baseURL = 'https://bw-car-culture-api.vercel.app/api/analytics';
+    }
     
     // Setup online/offline detection
     if (typeof window !== 'undefined') {
@@ -200,13 +206,18 @@ class AnalyticsService {
     };
   }
 
-  // Track custom event with retry logic
+  // Track custom event with enhanced error handling
   async trackEvent(eventData) {
     try {
-      // Don't track if offline
-      if (!this.isOnline) {
-        this.storeFailedEvent('trackEvent', eventData);
-        return;
+      // Validate event data
+      if (!eventData || typeof eventData !== 'object') {
+        console.warn('❌ Analytics: Invalid event data provided');
+        return null;
+      }
+
+      if (!eventData.eventType) {
+        console.warn('❌ Analytics: Event type is required');
+        return null;
       }
 
       const payload = {
@@ -219,32 +230,16 @@ class AnalyticsService {
           ...eventData.metadata,
           url: typeof window !== 'undefined' ? window.location.href : '',
           referrer: typeof document !== 'undefined' ? document.referrer : ''
-        },
-        sessionId: this.sessionId,
-        timestamp: new Date().toISOString(),
-        device: this.getDeviceInfo(),
-        connection: this.getConnectionInfo()
+        }
       };
       
-      console.log('📊 Tracking event:', eventData.eventType, payload);
+      console.log('📊 Tracking event:', eventData.eventType);
       
-      const response = await fetch(`${this.baseURL}/track`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(payload)
-      });
-      
-      const result = await this.handleResponse(response);
-      console.log('✅ Event tracked successfully:', eventData.eventType);
-      return result;
+      return await this.sendEvent('/track', payload);
       
     } catch (error) {
       console.error('❌ Analytics trackEvent failed:', error.message);
-      
-      // Store failed events for retry
       this.storeFailedEvent('trackEvent', eventData);
-      
-      // Don't re-throw the error to prevent breaking user experience
       return null;
     }
   }
@@ -262,13 +257,13 @@ class AnalyticsService {
     });
   }
 
-  // Track search with enhanced data
+  // Track search with enhanced error handling
   async trackSearch(searchData) {
     try {
-      // Don't track if offline
-      if (!this.isOnline) {
-        this.storeFailedEvent('trackSearch', searchData);
-        return;
+      // Validate search data
+      if (!searchData || !searchData.query) {
+        console.warn('❌ Analytics: Search query is required');
+        return null;
       }
 
       const payload = {
@@ -277,22 +272,12 @@ class AnalyticsService {
         resultsCount: searchData.resultsCount || 0,
         filters: searchData.filters || {},
         searchTime: searchData.searchTime || 0,
-        sessionId: this.sessionId,
-        timestamp: new Date().toISOString(),
         page: typeof window !== 'undefined' ? window.location.pathname : '/'
       };
       
-      console.log('🔍 Tracking search:', searchData.query, payload);
+      console.log('🔍 Tracking search:', searchData.query);
       
-      const response = await fetch(`${this.baseURL}/track/search`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(payload)
-      });
-      
-      const result = await this.handleResponse(response);
-      console.log('✅ Search tracked successfully:', searchData.query);
-      return result;
+      return await this.sendEvent('/track/search', payload);
       
     } catch (error) {
       console.error('❌ Analytics trackSearch failed:', error.message);
@@ -301,29 +286,25 @@ class AnalyticsService {
     }
   }
 
-  // Track performance metrics
+  // Track performance metrics with enhanced error handling
   async trackPerformance(performanceData) {
     try {
+      // Validate performance data
+      if (!performanceData || !performanceData.metrics) {
+        console.warn('❌ Analytics: Performance metrics are required');
+        return null;
+      }
+
       const payload = {
         page: performanceData.page || (typeof window !== 'undefined' ? window.location.pathname : '/'),
         metrics: performanceData.metrics,
         connection: this.getConnectionInfo(),
-        device: this.getDeviceInfo(),
-        sessionId: this.sessionId,
-        timestamp: new Date().toISOString()
+        device: this.getDeviceInfo()
       };
       
-      console.log('⚡ Tracking performance:', performanceData.page, payload);
+      console.log('⚡ Tracking performance:', performanceData.page);
       
-      const response = await fetch(`${this.baseURL}/track/performance`, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(payload)
-      });
-      
-      const result = await this.handleResponse(response);
-      console.log('✅ Performance tracked successfully');
-      return result;
+      return await this.sendEvent('/track/performance', payload);
       
     } catch (error) {
       console.error('❌ Analytics trackPerformance failed:', error.message);
