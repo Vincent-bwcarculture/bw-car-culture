@@ -12,10 +12,10 @@ import { initializeGA, trackPageView, trackException, trackTiming } from './conf
 import UserProfilePage from './pages/UserProfilePage.js';
 import AdminUserSubmissions from './Admin/components/AdminUserSubmissions.js';
 
-// // Add these imports
-// import WelcomeModal from './components/shared/WelcomeModal/WelcomeModal.js';
-// import { useWelcomeModal } from './hooks/useWelcomeModal.js';
+// Import the new analytics service
+import { analyticsService } from './services/analyticsService.js';
 
+// Keep existing internal analytics as fallback
 import { InternalAnalyticsProvider } from './components/shared/InternalAnalyticsProvider.js';
 import AnalyticsDashboard from './Admin/AnalyticsDashboard/AnalyticsDashboard.js';
 import internalAnalytics from './utils/internalAnalytics.js';
@@ -105,7 +105,6 @@ const CarMarketPlace = React.lazy(() => import('./components/features/Marketplac
 const EditorDashboard = React.lazy(() => import('./Admin/dashboards/EditorDashboard.js'));
 const DealerDashboard = React.lazy(() => import('./Admin/dashboards/DealerDashboard.js'));
 
-
 // Enhanced Analytics Wrapper component with comprehensive tracking
 const AnalyticsWrapper = ({ children }) => {
   const location = useLocation();
@@ -118,14 +117,34 @@ const AnalyticsWrapper = ({ children }) => {
     
     // Track page view when location changes
     try {
+      // Calculate time on previous page
+      const timeOnPreviousPage = lastPath.current ? Date.now() - pageStartTime.current : 0;
+      
       // Track with Google Analytics
       trackPageView(currentPath);
       
-      // Track with internal analytics
+      // Track with new analytics service (primary)
+      analyticsService.trackPageView({
+        page: currentPath,
+        title: document.title,
+        metadata: {
+          previousPage: lastPath.current || null,
+          timeOnPreviousPage,
+          referrer: document.referrer,
+          sessionDuration: Date.now() - sessionStartTime.current,
+          userAgent: navigator.userAgent,
+          screenResolution: typeof window !== 'undefined' && window.screen ? 
+            `${window.screen.width}x${window.screen.height}` : 'unknown',
+          viewport: `${window.innerWidth}x${window.innerHeight}`,
+          language: navigator.language,
+          platform: navigator.platform
+        }
+      }).catch(error => {
+        console.warn('Analytics page view tracking failed:', error);
+      });
+      
+      // Track with internal analytics as fallback
       if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-        // Calculate time on previous page
-        const timeOnPreviousPage = lastPath.current ? Date.now() - pageStartTime.current : 0;
-        
         internalAnalytics.trackEvent('page_view', {
           category: 'navigation',
           metadata: {
@@ -134,13 +153,7 @@ const AnalyticsWrapper = ({ children }) => {
             timeOnPreviousPage,
             referrer: document.referrer,
             timestamp: new Date().toISOString(),
-            sessionDuration: Date.now() - sessionStartTime.current,
-            userAgent: navigator.userAgent,
-            screenResolution: typeof window !== 'undefined' && window.screen ? 
-              `${window.screen.width}x${window.screen.height}` : 'unknown',
-            viewport: `${window.innerWidth}x${window.innerHeight}`,
-            language: navigator.language,
-            platform: navigator.platform
+            sessionDuration: Date.now() - sessionStartTime.current
           }
         });
       }
@@ -152,7 +165,18 @@ const AnalyticsWrapper = ({ children }) => {
     } catch (error) {
       console.error('Error in AnalyticsWrapper page tracking:', error);
       
-      // Track the error itself
+      // Track the error with both services
+      analyticsService.trackEvent({
+        eventType: 'error',
+        category: 'system',
+        metadata: {
+          errorType: 'AnalyticsWrapperError',
+          errorMessage: error.message,
+          page: currentPath,
+          function: 'pageView'
+        }
+      }).catch(console.warn);
+      
       if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
         internalAnalytics.trackEvent('error', {
           category: 'system',
@@ -175,24 +199,43 @@ const AnalyticsWrapper = ({ children }) => {
           const navigation = performance.getEntriesByType('navigation')[0];
           const paint = performance.getEntriesByType('paint');
           
-          if (navigation && internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
+          if (navigation) {
             const performanceData = {
-              loadTime: Math.round(navigation.loadEventEnd - navigation.loadEventStart),
-              domContentLoaded: Math.round(navigation.domContentLoadedEventEnd - navigation.loadEventStart),
-              firstContentfulPaint: paint.find(p => p.name === 'first-contentful-paint')?.startTime || 0,
-              timeToFirstByte: Math.round(navigation.responseStart - navigation.requestStart),
               page: location.pathname,
-              connectionType: navigator.connection?.effectiveType || 'unknown',
-              deviceMemory: navigator.deviceMemory || 'unknown'
+              metrics: {
+                loadTime: Math.round(navigation.loadEventEnd - navigation.loadEventStart),
+                domContentLoaded: Math.round(navigation.domContentLoadedEventEnd - navigation.loadEventStart),
+                firstContentfulPaint: paint.find(p => p.name === 'first-contentful-paint')?.startTime || 0,
+                timeToFirstByte: Math.round(navigation.responseStart - navigation.requestStart),
+                networkTime: Math.round(navigation.responseEnd - navigation.fetchStart),
+                renderTime: Math.round(navigation.loadEventEnd - navigation.responseEnd)
+              },
+              connection: {
+                type: navigator.connection?.effectiveType || 'unknown',
+                downlink: navigator.connection?.downlink || 0,
+                rtt: navigator.connection?.rtt || 0
+              },
+              device: {
+                memory: navigator.deviceMemory || 'unknown',
+                cores: navigator.hardwareConcurrency || 'unknown'
+              }
             };
             
-            internalAnalytics.trackEvent('performance', {
-              category: 'system',
-              metadata: performanceData
+            // Track with new analytics service (primary)
+            analyticsService.trackPerformance(performanceData).catch(error => {
+              console.warn('Performance tracking failed:', error);
             });
             
-            // Also track with Google Analytics timing
-            trackTiming('App Performance', 'Page Load', performanceData.loadTime, location.pathname);
+            // Track with Google Analytics timing
+            trackTiming('App Performance', 'Page Load', performanceData.metrics.loadTime, location.pathname);
+            
+            // Track with internal analytics as fallback
+            if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
+              internalAnalytics.trackEvent('performance', {
+                category: 'system',
+                metadata: performanceData
+              });
+            }
           }
         } catch (error) {
           console.error('Performance tracking error:', error);
@@ -232,7 +275,27 @@ class AppErrorBoundary extends React.Component {
       errorInfo: errorInfo
     });
     
-    // Track error with internal analytics
+    // Track error with new analytics service (primary)
+    try {
+      analyticsService.trackEvent({
+        eventType: 'error',
+        category: 'system',
+        metadata: {
+          errorType: 'ReactErrorBoundary',
+          errorMessage: error.message,
+          errorStack: error.stack,
+          componentStack: errorInfo.componentStack,
+          page: window.location.pathname,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          url: window.location.href
+        }
+      }).catch(console.warn);
+    } catch (analyticsError) {
+      console.error('Error tracking failed:', analyticsError);
+    }
+    
+    // Track with internal analytics as fallback
     try {
       if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
         internalAnalytics.trackEvent('error', {
@@ -253,7 +316,7 @@ class AppErrorBoundary extends React.Component {
       // Track with Google Analytics
       trackException(error.message, true);
     } catch (analyticsError) {
-      console.error('Error tracking failed:', analyticsError);
+      console.error('Fallback error tracking failed:', analyticsError);
     }
 
     // Report to external error service if configured
@@ -309,6 +372,17 @@ const NewsLayout = ({ children }) => (
 const PlaceholderPage = ({ title }) => {
   // Track placeholder page views
   useEffect(() => {
+    // Track with new analytics service (primary)
+    analyticsService.trackEvent({
+      eventType: 'placeholder_page_view',
+      category: 'content',
+      metadata: {
+        placeholderTitle: title,
+        page: window.location.pathname
+      }
+    }).catch(console.warn);
+    
+    // Track with internal analytics as fallback
     if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
       internalAnalytics.trackEvent('placeholder_page_view', {
         category: 'content',
@@ -335,6 +409,18 @@ const HomeContent = () => {
 
   // Track home page engagement
   useEffect(() => {
+    // Track with new analytics service (primary)
+    analyticsService.trackEvent({
+      eventType: 'home_page_load',
+      category: 'content',
+      metadata: {
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        referrer: document.referrer
+      }
+    }).catch(console.warn);
+    
+    // Track with internal analytics as fallback
     if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
       internalAnalytics.trackEvent('home_page_load', {
         category: 'content',
@@ -351,7 +437,10 @@ const HomeContent = () => {
     console.log("Filters changed:", newFilters);
     setCarFilters(newFilters);
     
-    // Track filter usage
+    // Track filter usage with new analytics service (primary)
+    analyticsService.trackFilterUsage(newFilters, 0).catch(console.warn);
+    
+    // Track with internal analytics as fallback
     if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
       internalAnalytics.trackEvent('filter_change', {
         category: 'interaction',
@@ -368,21 +457,41 @@ const HomeContent = () => {
     console.log("Search performed:", performed);
     setHasSearched(performed);
     
-    // Track search interaction
-    if (performed && internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-      internalAnalytics.trackEvent('search_performed', {
-        category: 'conversion',
-        metadata: {
-          source: 'home_page',
-          filters: carFilters,
-          hasFilters: Object.keys(carFilters).length > 0
-        }
-      });
+    if (performed) {
+      // Track search with new analytics service (primary)
+      analyticsService.trackSearch({
+        query: 'home_search',
+        category: 'general',
+        resultsCount: 0,
+        filters: carFilters
+      }).catch(console.warn);
+      
+      // Track with internal analytics as fallback
+      if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
+        internalAnalytics.trackEvent('search_performed', {
+          category: 'conversion',
+          metadata: {
+            source: 'home_page',
+            filters: carFilters,
+            hasFilters: Object.keys(carFilters).length > 0
+          }
+        });
+      }
     }
   };
 
   const handleExpandFilter = () => {
-    // Track filter expansion
+    // Track filter expansion with new analytics service (primary)
+    analyticsService.trackEvent({
+      eventType: 'filter_expand',
+      category: 'interaction',
+      metadata: {
+        action: 'expand_filters',
+        source: 'search_results'
+      }
+    }).catch(console.warn);
+    
+    // Track with internal analytics as fallback
     if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
       internalAnalytics.trackEvent('filter_expand', {
         category: 'interaction',
@@ -447,23 +556,41 @@ const HomeContent = () => {
 };
 
 // Enhanced Protected Route components with analytics
-const ProtectedRoute = ({ children, requiredRoles = [] }) => {
+const ProtectedRoute = ({ children, requiredRoles = [], adminOnly = false }) => {
   const { isAuthenticated, loading, user } = useAuth();
+  
+  // Convert adminOnly to requiredRoles for backward compatibility
+  const roles = adminOnly ? ['admin'] : requiredRoles;
   
   // Track authentication attempts
   useEffect(() => {
-    if (!loading && internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-      internalAnalytics.trackEvent('auth_check', {
+    if (!loading) {
+      // Track with new analytics service (primary)
+      analyticsService.trackEvent({
+        eventType: 'auth_check',
         category: 'system',
         metadata: {
           isAuthenticated,
-          requiredRoles,
+          requiredRoles: roles,
           userRole: user?.role || null,
           page: window.location.pathname
         }
-      });
+      }).catch(console.warn);
+      
+      // Track with internal analytics as fallback
+      if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
+        internalAnalytics.trackEvent('auth_check', {
+          category: 'system',
+          metadata: {
+            isAuthenticated,
+            requiredRoles: roles,
+            userRole: user?.role || null,
+            page: window.location.pathname
+          }
+        });
+      }
     }
-  }, [isAuthenticated, loading, user, requiredRoles]);
+  }, [isAuthenticated, loading, user, roles]);
   
   if (loading) {
     return <LoadingScreen />;
@@ -471,39 +598,61 @@ const ProtectedRoute = ({ children, requiredRoles = [] }) => {
   
   if (!isAuthenticated) {
     // Track authentication redirect
+    analyticsService.trackEvent({
+      eventType: 'auth_redirect',
+      category: 'conversion',
+      metadata: {
+        fromPage: window.location.pathname,
+        reason: 'not_authenticated',
+        requiredRoles: roles
+      }
+    }).catch(console.warn);
+    
     if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
       internalAnalytics.trackEvent('auth_redirect', {
         category: 'conversion',
         metadata: {
           fromPage: window.location.pathname,
           reason: 'not_authenticated',
-          requiredRoles
+          requiredRoles: roles
         }
       });
     }
+    
     return <Navigate to="/login" replace />;
   }
   
   // Check for role requirements if specified
-  if (requiredRoles.length > 0 && (!user || !requiredRoles.includes(user.role))) {
+  if (roles.length > 0 && (!user || !roles.includes(user.role))) {
     // Track authorization failure
+    analyticsService.trackEvent({
+      eventType: 'auth_unauthorized',
+      category: 'system',
+      metadata: {
+        userRole: user?.role || null,
+        requiredRoles: roles,
+        page: window.location.pathname
+      }
+    }).catch(console.warn);
+    
     if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
       internalAnalytics.trackEvent('auth_unauthorized', {
         category: 'system',
         metadata: {
           userRole: user?.role || null,
-          requiredRoles,
+          requiredRoles: roles,
           page: window.location.pathname
         }
       });
     }
+    
     return <Navigate to="/unauthorized" replace />;
   }
   
   return children;
 };
 
-// App routes component (unchanged - keeping existing structure)
+// App routes component (keeping existing structure)
 const AppRoutes = () => {
   return (
     <Suspense fallback={<LoadingScreen />}>
@@ -580,17 +729,17 @@ const AppRoutes = () => {
         } />
 
         <Route 
-  path="/admin/user-submissions" 
-  element={
-    <ProtectedRoute adminOnly={true}>
-      <AdminLayout>
-        <AdminUserSubmissions />
-      </AdminLayout>
-    </ProtectedRoute>
-  } 
-/>
+          path="/admin/user-submissions" 
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <AdminLayout>
+                <AdminUserSubmissions />
+              </AdminLayout>
+            </ProtectedRoute>
+          } 
+        />
 
-  {/* PAYMENT MANAGEMENT ROUTES - NEW */}
+        {/* PAYMENT MANAGEMENT ROUTES */}
         <Route path="/admin/payments" element={
           <ProtectedRoute requiredRoles={['admin']}>
             <AdminLayout>
@@ -679,8 +828,6 @@ const AppRoutes = () => {
             </AdminLayout>
           </ProtectedRoute>
         } />
-
-
         
         <Route path="/admin/gion" element={
           <AdminLayout>
@@ -975,53 +1122,68 @@ function App() {
   const [analyticsInitialized, setAnalyticsInitialized] = useState(false);
   const appStartTime = React.useRef(Date.now());
 
-  // const { showModal: showWelcomeModal, hideModal: hideWelcomeModal } = useWelcomeModal();
-
-  // Enhanced Google Analytics initialization
+  // Enhanced analytics initialization
   useEffect(() => {
     const initializeAnalytics = async () => {
       try {
-        console.log('Initializing analytics systems...');
+        console.log('🔧 Initializing analytics systems...');
+        
+        // Initialize new analytics service (primary)
+        analyticsService.init();
         
         // Initialize Google Analytics
         await initializeGA();
         
-        // Track app initialization
+        // Track app initialization with new analytics service
+        analyticsService.trackEvent({
+          eventType: 'app_init',
+          category: 'system',
+          metadata: {
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            screenResolution: typeof window !== 'undefined' && window.screen ? 
+              `${window.screen.width}x${window.screen.height}` : 'unknown',
+            viewport: `${window.innerWidth}x${window.innerHeight}`,
+            language: navigator.language,
+            platform: navigator.platform,
+            cookieEnabled: navigator.cookieEnabled,
+            connectionType: navigator.connection?.effectiveType || 'unknown',
+            deviceMemory: navigator.deviceMemory || 'unknown',
+            hardwareConcurrency: navigator.hardwareConcurrency || 'unknown'
+          }
+        }).catch(console.warn);
+        
+        // Track with internal analytics as fallback
         if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
           internalAnalytics.trackEvent('app_init', {
             category: 'system',
             metadata: {
               timestamp: new Date().toISOString(),
               userAgent: navigator.userAgent,
-              screenResolution: typeof window !== 'undefined' && window.screen ? 
-                `${window.screen.width}x${window.screen.height}` : 'unknown',
-              viewport: `${window.innerWidth}x${window.innerHeight}`,
-              language: navigator.language,
-              platform: navigator.platform,
-              cookieEnabled: navigator.cookieEnabled,
-              connectionType: navigator.connection?.effectiveType || 'unknown',
-              deviceMemory: navigator.deviceMemory || 'unknown',
-              hardwareConcurrency: navigator.hardwareConcurrency || 'unknown'
+              analyticsService: 'primary_and_fallback'
             }
           });
         }
         
         setAnalyticsInitialized(true);
-        console.log('Analytics systems initialized successfully');
+        console.log('✅ Analytics systems initialized successfully');
         
       } catch (error) {
-        console.error('Failed to initialize analytics:', error);
+        console.error('❌ Failed to initialize analytics:', error);
         
         // Track initialization failure
-        if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-          internalAnalytics.trackEvent('error', {
+        try {
+          analyticsService.trackEvent({
+            eventType: 'error',
             category: 'system',
             metadata: {
               errorType: 'AnalyticsInitializationFailed',
               errorMessage: error.message,
               timestamp: new Date().toISOString()
             }
-          });
+          }).catch(console.warn);
+        } catch (trackError) {
+          console.error('Failed to track analytics init error:', trackError);
         }
       }
     };
@@ -1035,6 +1197,23 @@ function App() {
     const handleError = (event) => {
       console.error('Unhandled error:', event.error);
       
+      // Track with new analytics service (primary)
+      analyticsService.trackEvent({
+        eventType: 'error',
+        category: 'system',
+        metadata: {
+          errorType: 'UnhandledError',
+          errorMessage: event.error?.message || 'Unknown error',
+          filename: event.filename,
+          lineno: event.lineno,
+          colno: event.colno,
+          stack: event.error?.stack,
+          timestamp: new Date().toISOString(),
+          page: window.location.pathname
+        }
+      }).catch(console.warn);
+      
+      // Track with fallback systems
       if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
         internalAnalytics.trackEvent('error', {
           category: 'system',
@@ -1058,6 +1237,20 @@ function App() {
     const handleUnhandledRejection = (event) => {
       console.error('Unhandled promise rejection:', event.reason);
       
+      // Track with new analytics service (primary)
+      analyticsService.trackEvent({
+        eventType: 'error',
+        category: 'system',
+        metadata: {
+          errorType: 'UnhandledPromiseRejection',
+          errorMessage: event.reason?.message || 'Unknown promise rejection',
+          reason: String(event.reason),
+          timestamp: new Date().toISOString(),
+          page: window.location.pathname
+        }
+      }).catch(console.warn);
+      
+      // Track with fallback
       if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
         internalAnalytics.trackEvent('error', {
           category: 'system',
@@ -1076,6 +1269,18 @@ function App() {
     const handleBeforeUnload = () => {
       const sessionDuration = Date.now() - appStartTime.current;
       
+      // Track with new analytics service (primary)
+      analyticsService.trackEvent({
+        eventType: 'session_end',
+        category: 'system',
+        metadata: {
+          sessionDuration,
+          exitPage: window.location.pathname,
+          timestamp: new Date().toISOString()
+        }
+      }).catch(console.warn);
+      
+      // Track with fallback
       if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
         internalAnalytics.trackEvent('session_end', {
           category: 'system',
@@ -1090,6 +1295,18 @@ function App() {
 
     // Track visibility changes (tab switching)
     const handleVisibilityChange = () => {
+      // Track with new analytics service (primary)
+      analyticsService.trackEvent({
+        eventType: 'visibility_change',
+        category: 'interaction',
+        metadata: {
+          visibilityState: document.visibilityState,
+          page: window.location.pathname,
+          timestamp: new Date().toISOString()
+        }
+      }).catch(console.warn);
+      
+      // Track with fallback
       if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
         internalAnalytics.trackEvent('visibility_change', {
           category: 'interaction',
@@ -1176,7 +1393,17 @@ function App() {
   const handleSplashFinished = () => {
     setShowSplash(false);
     
-    // Track splash screen completion
+    // Track splash screen completion with new analytics service
+    analyticsService.trackEvent({
+      eventType: 'splash_complete',
+      category: 'interaction',
+      metadata: {
+        splashDuration: Date.now() - appStartTime.current,
+        timestamp: new Date().toISOString()
+      }
+    }).catch(console.warn);
+    
+    // Track with fallback
     if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
       internalAnalytics.trackEvent('splash_complete', {
         category: 'interaction',
@@ -1203,11 +1430,8 @@ function App() {
                 <AppRoutes />
                 {/* <Chatbot /> */}
                 {false && (
-  <GIONApp withChatbot={false} />
-)}
-
-                 {/* Add this WelcomeModal component */}
-               
+                  <GIONApp withChatbot={false} />
+                )}
               </div>
             </AnalyticsWrapper>
           </InternalAnalyticsProvider>
