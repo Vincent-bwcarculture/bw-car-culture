@@ -1,5 +1,5 @@
 /* client/src/components/profile/ProfileHeader.css */
-/* COMPLETE VERSION - Fixed Cover Picture Display & Responsive Design + Social Features */
+/* COMPLETE VERSION - With Social Features + Admin Dashboard Styles Integrated */
 
 /* === CSS VARIABLES === */
 :root {
@@ -25,6 +25,11 @@
   --uprofile-warning-orange: #fd7e14;
   --uprofile-purple: #6f42c1;
   --uprofile-bg-hover: rgba(255, 51, 0, 0.1);
+  
+  /* NEW: Admin colors */
+  --pheader-admin-color: #dc2626;
+  --pheader-admin-color-dark: #b91c1c;
+  --pheader-admin-color-light: #fef2f2;
 }
 
 /* === MAIN CONTAINER === */
@@ -376,6 +381,16 @@
   font-weight: 500;
 }
 
+/* === ACTION BUTTONS SECTION - NEW === */
+.pheader-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .pheader-edit-profile-button {
   background: var(--uprofile-primary-accent);
   color: var(--uprofile-text-white);
@@ -389,12 +404,55 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 8px;
 }
 
 .pheader-edit-profile-button:hover {
   background: var(--uprofile-primary-accent-dark);
   transform: translateY(-2px);
+}
+
+/* === ADMIN DASHBOARD BUTTON - NEW === */
+.pheader-admin-dashboard-button {
+  background: var(--pheader-admin-color);
+  color: var(--uprofile-text-white);
+  border: none;
+  border-radius: var(--uprofile-border-radius);
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--uprofile-transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pheader-admin-dashboard-button:hover {
+  background: var(--pheader-admin-color-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.pheader-admin-dashboard-button:active {
+  transform: translateY(0);
+}
+
+/* Admin button special styling */
+.pheader-admin-dashboard-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.pheader-admin-dashboard-button:hover::before {
+  left: 100%;
 }
 
 /* === SOCIAL STATS SECTION === */
@@ -639,7 +697,8 @@
     font-size: 2rem;
   }
 
-  .pheader-edit-profile-button {
+  .pheader-edit-profile-button,
+  .pheader-admin-dashboard-button {
     padding: 10px 20px;
   }
 
@@ -732,6 +791,19 @@
   .pheader-content-wrapper {
     padding: 15px 10px;
     margin-top: -50px;
+  }
+
+  .pheader-action-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .pheader-edit-profile-button,
+  .pheader-admin-dashboard-button {
+    width: 100%;
+    justify-content: center;
+    padding: 10px 16px;
   }
 
   .pheader-social-stats {
@@ -998,7 +1070,9 @@
 .pheader-cover-action-btn:focus,
 .pheader-cover-camera-btn:focus,
 .pheader-stat-item:focus,
-.pheader-follow-btn:focus {
+.pheader-follow-btn:focus,
+.pheader-edit-profile-button:focus,
+.pheader-admin-dashboard-button:focus {
   outline: 2px solid var(--uprofile-primary-accent);
   outline-offset: 2px;
 }

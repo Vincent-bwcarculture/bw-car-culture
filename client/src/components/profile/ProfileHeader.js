@@ -1,5 +1,5 @@
 // client/src/components/profile/ProfileHeader.js
-// COMPLETE VERSION - With Social Features (Followers/Associates) Integrated
+// COMPLETE VERSION - With Social Features + Admin Dashboard Access Integrated
 
 import React, { useState, useRef, useEffect } from 'react';
 import { 
@@ -16,9 +16,11 @@ import {
   Loader,
   Users,
   UserPlus,
-  UserCheck
+  UserCheck,
+  Shield  // Added for admin dashboard icon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
+import { useNavigate } from 'react-router-dom';  // Added for navigation
 import './ProfileHeader.css';
 
 // === SOCIAL STATS SECTION COMPONENT ===
@@ -204,6 +206,7 @@ const ProfileHeader = ({
   
   // Get AuthContext to update user data
   const { user, setUser } = useAuth();
+  const navigate = useNavigate();  // Added for navigation
   
   // Create refs for file inputs
   const avatarInputRef = useRef(null);
@@ -215,6 +218,12 @@ const ProfileHeader = ({
     user._id === profileData._id ||
     user.id === profileData.id
   );
+
+  // NEW: Check if user has admin role - COMPREHENSIVE ADMIN CHECK
+  const isAdmin = profileData?.role === 'admin' || 
+                  profileData?.role === 'super_admin' ||
+                  profileData?.role === 'ministry_official' ||
+                  profileData?.role === 'government_admin';
 
   const getInitials = (name) => {
     if (!name) return 'U';
@@ -244,6 +253,12 @@ const ProfileHeader = ({
     } else {
       console.warn('onEditProfile prop not provided to ProfileHeader');
     }
+  };
+
+  // NEW: Handle admin dashboard access
+  const handleAdminDashboardClick = () => {
+    console.log('Admin dashboard access clicked');
+    navigate('/admin/dashboard');
   };
 
   // Handle avatar upload - Updates AuthContext
@@ -629,21 +644,37 @@ const ProfileHeader = ({
             
             <div className="pheader-user-email">{profileData?.email}</div>
             
-            {/* Edit Profile button - Only show if own profile */}
+            {/* Action buttons section - Only show if own profile */}
             {isOwnProfile && (
-              <button 
-                className="pheader-edit-profile-button"
-                onClick={handleEditProfileClick}
-                type="button"
-              >
-                <Edit2 size={16} />
-                Edit Profile
-              </button>
+              <div className="pheader-action-buttons">
+                {/* Edit Profile button */}
+                <button 
+                  className="pheader-edit-profile-button"
+                  onClick={handleEditProfileClick}
+                  type="button"
+                >
+                  <Edit2 size={16} />
+                  Edit Profile
+                </button>
+
+                {/* Admin Dashboard Access button - NEW ADDITION */}
+                {isAdmin && (
+                  <button 
+                    className="pheader-admin-dashboard-button"
+                    onClick={handleAdminDashboardClick}
+                    type="button"
+                    title="Access Admin Dashboard"
+                  >
+                    <Shield size={16} />
+                    Admin Dashboard
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
 
-        {/* === SOCIAL STATS SECTION - NEW ADDITION === */}
+        {/* === SOCIAL STATS SECTION === */}
         <SocialStatsSection 
           profileData={profileData}
           isOwnProfile={isOwnProfile}
@@ -675,7 +706,10 @@ const ProfileHeader = ({
           <div className="pheader-meta-item">
             <User size={16} />
             <span>
-              {profileData?.role === 'admin' ? 'Site Administrator' : 
+              {profileData?.role === 'admin' || profileData?.role === 'super_admin' ? 
+               'Site Administrator' : 
+               profileData?.role === 'ministry_official' ? 'Ministry Official' :
+               profileData?.role === 'government_admin' ? 'Government Administrator' :
                hasBusinessProfile ? 'Business Owner' :
                hasTransportProfile ? 'Transport Provider' :
                hasDealerProfile ? 'Dealer' : 'User'}
