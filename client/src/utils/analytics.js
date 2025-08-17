@@ -23,23 +23,24 @@ class ClientAnalytics {
     const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
     const now = Date.now();
     
+    // If session exists, check if it's still valid
     if (sessionId && sessionStart) {
-      const lastActivity = localStorage.getItem('bwcc_last_activity');
+      const sessionAge = now - parseInt(sessionStart);
+      const lastActivity = localStorage.getItem('bwcc_last_activity') || sessionStart;
+      const timeSinceActivity = now - parseInt(lastActivity);
       
-      if (lastActivity) {
-        const timeSinceActivity = now - parseInt(lastActivity);
-        
-        // If session exists and is recent, keep using it
-        if (timeSinceActivity < SESSION_TIMEOUT) {
-          console.log('♻️ Reusing existing session:', sessionId);
-          // Update last activity
-          localStorage.setItem('bwcc_last_activity', now.toString());
-          return sessionId;
-        }
+      // Reuse session if it's less than 30 minutes since last activity
+      if (timeSinceActivity < SESSION_TIMEOUT) {
+        console.log('♻️ Reusing existing session:', sessionId, `(${Math.round(timeSinceActivity/1000/60)}min ago)`);
+        // Update last activity
+        localStorage.setItem('bwcc_last_activity', now.toString());
+        return sessionId;
+      } else {
+        console.log('⏰ Session expired, creating new one. Last activity:', Math.round(timeSinceActivity/1000/60), 'minutes ago');
       }
     }
     
-    // Create new session only when needed
+    // Create new session
     sessionId = `bwcc_${now}_${Math.random().toString(36).substr(2, 9)}`;
     sessionStorage.setItem('bwcc_session_id', sessionId);
     sessionStorage.setItem('bwcc_session_start', now.toString());
