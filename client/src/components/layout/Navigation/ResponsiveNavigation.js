@@ -14,7 +14,7 @@ const categories = [
   {
     id: 'home',
     name: 'Home',
-    path: '/',
+    path: '/home',
     icon: <Home size={20} />
   },
   {

@@ -872,11 +872,19 @@ const AppRoutes = () => {
           </MainLayout>
         } />
         
-        <Route path="/" element={
-          <MainLayout>
-            <HomeContent />
-          </MainLayout>
-        } />
+     <Route path="/" element={
+  <MainLayout>
+    <Suspense fallback={<LoadingScreen />}>
+      <MarketplaceList />
+    </Suspense>
+  </MainLayout>
+} />
+
+<Route path="/home" element={
+  <MainLayout>
+    <HomeContent />
+  </MainLayout>
+} />
         
         {/* Services Routes */}
         <Route path="/services" element={
