@@ -14,6 +14,36 @@ class AnalyticsService {
     this.isProcessingQueue = false;
   }
 
+  // Track page performance automatically
+  trackPagePerformance() {
+    if (typeof window === 'undefined' || typeof performance === 'undefined') return;
+    
+    try {
+      const navigation = performance.getEntriesByType('navigation')[0];
+      const paint = performance.getEntriesByType('paint');
+      
+      if (navigation) {
+        const performanceData = {
+          page: window.location.pathname,
+          metrics: {
+            loadTime: Math.round(navigation.loadEventEnd - navigation.loadEventStart),
+            domContentLoaded: Math.round(navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart),
+            firstContentfulPaint: paint.find(p => p.name === 'first-contentful-paint')?.startTime || 0,
+            timeToFirstByte: Math.round(navigation.responseStart - navigation.requestStart),
+            networkTime: Math.round(navigation.responseEnd - navigation.fetchStart),
+            renderTime: Math.round(navigation.loadEventEnd - navigation.responseEnd)
+          }
+        };
+        
+        this.trackPerformance(performanceData).catch(error => {
+          console.warn('⚠️ Failed to track page performance:', error.message);
+        });
+      }
+    } catch (error) {
+      console.warn('⚠️ Error tracking page performance:', error);
+    }
+  }
+
   // Initialize service with better error handling
   init() {
     if (this.isInitialized) return;
@@ -100,6 +130,12 @@ class AnalyticsService {
   // CRITICAL: Missing sendEvent method implementation
   async sendEvent(endpoint, payload) {
     try {
+      // Validate endpoint
+      if (!endpoint || typeof endpoint !== 'string') {
+        console.warn('❌ Invalid endpoint provided to sendEvent:', endpoint);
+        return null;
+      }
+
       // Check if online
       if (!this.isOnline) {
         console.warn('📱 Offline - queuing analytics event');
@@ -116,7 +152,7 @@ class AnalyticsService {
         connection: this.getConnectionInfo()
       };
 
-      console.log(`📤 Sending analytics event to: ${endpoint}`);
+      console.log(`📤 Sending analytics event to: ${this.baseURL}${endpoint}`);
 
       const response = await fetch(`${this.baseURL}${endpoint}`, {
         method: 'POST',
@@ -356,11 +392,12 @@ class AnalyticsService {
       
       console.log('📊 Tracking event:', eventData.eventType);
       
+      // Ensure we pass the correct endpoint
       return await this.sendEvent('/track', payload);
       
     } catch (error) {
       console.error('❌ Analytics trackEvent failed:', error.message);
-      this.storeFailedEvent('trackEvent', eventData);
+      this.storeFailedEvent('/track', eventData);
       return null;
     }
   }
@@ -402,7 +439,7 @@ class AnalyticsService {
       
     } catch (error) {
       console.error('❌ Analytics trackSearch failed:', error.message);
-      this.storeFailedEvent('trackSearch', searchData);
+      this.storeFailedEvent('/track/search', searchData);
       return null;
     }
   }
@@ -429,37 +466,95 @@ class AnalyticsService {
       
     } catch (error) {
       console.error('❌ Analytics trackPerformance failed:', error.message);
+      this.storeFailedEvent('/track/performance', performanceData);
       return null;
     }
   }
 
-  // Track page performance automatically
-  trackPagePerformance() {
-    if (typeof window === 'undefined' || typeof performance === 'undefined') return;
-    
+  async getTrafficData(days = 30) {
+    const cacheKey = `traffic-${days}`;
+    const cached = this.getCachedData(cacheKey);
+    if (cached) return cached;
+
     try {
-      const navigation = performance.getEntriesByType('navigation')[0];
-      const paint = performance.getEntriesByType('paint');
+      console.log(`🚦 Fetching traffic data for ${days} days...`);
       
-      if (navigation) {
-        const performanceData = {
-          page: window.location.pathname,
-          metrics: {
-            loadTime: Math.round(navigation.loadEventEnd - navigation.loadEventStart),
-            domContentLoaded: Math.round(navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart),
-            firstContentfulPaint: paint.find(p => p.name === 'first-contentful-paint')?.startTime || 0,
-            timeToFirstByte: Math.round(navigation.responseStart - navigation.requestStart),
-            networkTime: Math.round(navigation.responseEnd - navigation.fetchStart),
-            renderTime: Math.round(navigation.loadEventEnd - navigation.responseEnd)
-          }
-        };
-        
-        this.trackPerformance(performanceData).catch(error => {
-          console.warn('⚠️ Failed to track page performance:', error.message);
-        });
+      const response = await fetch(`${this.baseURL}/traffic?days=${days}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      const data = await this.handleResponse(response);
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Traffic data request was not successful');
       }
+      
+      console.log('✅ Traffic data loaded successfully');
+      this.setCachedData(cacheKey, data);
+      return data;
+      
     } catch (error) {
-      console.warn('⚠️ Error tracking page performance:', error);
+      console.error('❌ Error fetching traffic data:', error);
+      throw error;
+    }
+  }
+
+  async getContentData(days = 30) {
+    const cacheKey = `content-${days}`;
+    const cached = this.getCachedData(cacheKey);
+    if (cached) return cached;
+
+    try {
+      console.log(`📝 Fetching content data for ${days} days...`);
+      
+      const response = await fetch(`${this.baseURL}/content?days=${days}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      const data = await this.handleResponse(response);
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Content data request was not successful');
+      }
+      
+      console.log('✅ Content data loaded successfully');
+      this.setCachedData(cacheKey, data);
+      return data;
+      
+    } catch (error) {
+      console.error('❌ Error fetching content data:', error);
+      throw error;
+    }
+  }
+
+  async getPerformanceData(days = 7) {
+    const cacheKey = `performance-${days}`;
+    const cached = this.getCachedData(cacheKey);
+    if (cached) return cached;
+
+    try {
+      console.log(`⚡ Fetching performance data for ${days} days...`);
+      
+      const response = await fetch(`${this.baseURL}/performance?days=${days}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+      
+      const data = await this.handleResponse(response);
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Performance data request was not successful');
+      }
+      
+      console.log('✅ Performance data loaded successfully');
+      this.setCachedData(cacheKey, data);
+      return data;
+      
+    } catch (error) {
+      console.error('❌ Error fetching performance data:', error);
+      throw error;
     }
   }
 
