@@ -93,7 +93,7 @@ const CompactFooter = () => {
       <div className="footer-bottom">
         <p>
           &copy; {new Date().getFullYear()} I3w Car Culture
-          <Link to="/admin-access/register" className="hidden-admin-link">.</Link>
+          <Link to="/admin-access/register" className="hidden-admin-link"> </Link>
         </p>
         <div className="footer-bottom-links">
           <Link to="/privacy">Privacy</Link>
