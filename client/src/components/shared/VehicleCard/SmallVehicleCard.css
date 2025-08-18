@@ -1,0 +1,481 @@
+/* client/src/components/shared/VehicleCard/SmallVehicleCard.css */
+
+/* ===== SMALL VEHICLE CARD - COMPACT DESIGN ===== */
+.small-vehicle-card {
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 320px; /* Fixed height for consistency */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.small-vehicle-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 51, 0, 0.5);
+}
+
+.small-vehicle-card.featured {
+  border-color: #ff3300;
+  box-shadow: 0 2px 12px rgba(255, 51, 0, 0.3);
+}
+
+.small-vehicle-card.premium {
+  background: linear-gradient(135deg, rgba(255, 51, 0, 0.05), rgba(255, 102, 0, 0.02));
+  border-color: rgba(255, 51, 0, 0.3);
+}
+
+/* ===== IMAGE CONTAINER ===== */
+.svc-image-container {
+  position: relative;
+  width: 100%;
+  height: 140px; /* Smaller height like BMW cards */
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.svc-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.small-vehicle-card:hover .svc-image {
+  transform: scale(1.03);
+}
+
+.svc-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: rgba(35, 35, 35, 0.85);
+  color: #64748b;
+}
+
+.svc-placeholder-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.svc-image-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.svc-loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #ff3300;
+  border-radius: 50%;
+  animation: svc-spin 1s linear infinite;
+}
+
+@keyframes svc-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== SAVINGS BADGE ===== */
+.svc-savings-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: linear-gradient(135deg, #ff3300, #ff6600);
+  color: white;
+  padding: 3px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(255, 51, 0, 0.4);
+}
+
+/* ===== SHARE BUTTON ===== */
+.svc-share-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+  backdrop-filter: blur(4px);
+}
+
+.svc-share-button:hover {
+  background: rgba(255, 51, 0, 0.8);
+  transform: scale(1.1);
+}
+
+/* ===== CONTENT AREA ===== */
+.svc-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 8px;
+}
+
+/* ===== PRICE SECTION ===== */
+.svc-price-section {
+  margin-bottom: 4px;
+}
+
+.svc-price {
+  color: #ff3300;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.svc-original-price {
+  color: #888;
+  font-size: 12px;
+  text-decoration: line-through;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+/* ===== TITLE ===== */
+.svc-title {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6em; /* Reserve space for 2 lines */
+}
+
+/* ===== COMPACT SPECS ===== */
+.svc-specs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  margin: 6px 0;
+}
+
+.svc-spec {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+}
+
+.svc-spec-value {
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ===== DEALER INFO - COMPACT ===== */
+.svc-dealer-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: auto;
+}
+
+.svc-dealer-info.dealership {
+  cursor: pointer;
+  transition: background 0.3s ease;
+  border-radius: 4px;
+  padding: 6px;
+  margin: 0 -6px;
+}
+
+.svc-dealer-info.dealership:hover {
+  background: rgba(255, 51, 0, 0.1);
+}
+
+.svc-dealer-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.svc-dealer-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.svc-avatar-initials {
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.svc-dealer-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.svc-dealer-name {
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 500;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.svc-dealer-location {
+  color: #888;
+  font-size: 10px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.svc-verified-badge {
+  background: #28a745;
+  color: white;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* ===== ERROR CARD ===== */
+.small-vehicle-card.error-card {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid #dc3545;
+}
+
+.svc-error {
+  text-align: center;
+  color: #dc3545;
+  padding: 20px;
+  font-size: 12px;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet */
+@media (max-width: 1200px) {
+  .small-vehicle-card {
+    height: 300px;
+  }
+  
+  .svc-image-container {
+    height: 130px;
+  }
+  
+  .svc-content {
+    padding: 10px;
+    gap: 6px;
+  }
+  
+  .svc-title {
+    font-size: 13px;
+  }
+  
+  .svc-price {
+    font-size: 15px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .small-vehicle-card {
+    height: 280px;
+  }
+  
+  .svc-image-container {
+    height: 120px;
+  }
+  
+  .svc-content {
+    padding: 8px;
+    gap: 6px;
+  }
+  
+  .svc-title {
+    font-size: 12px;
+    -webkit-line-clamp: 3;
+    min-height: 3.6em;
+  }
+  
+  .svc-price {
+    font-size: 14px;
+  }
+  
+  .svc-original-price {
+    font-size: 11px;
+  }
+  
+  .svc-specs {
+    gap: 3px;
+  }
+  
+  .svc-spec {
+    padding: 3px 4px;
+    min-height: 24px;
+  }
+  
+  .svc-spec-value {
+    font-size: 10px;
+  }
+  
+  .svc-dealer-avatar {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .svc-avatar-initials {
+    font-size: 8px;
+  }
+  
+  .svc-dealer-name {
+    font-size: 10px;
+  }
+  
+  .svc-dealer-location {
+    font-size: 9px;
+  }
+  
+  .svc-share-button {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .svc-share-button svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .svc-savings-badge {
+    padding: 2px 4px;
+    font-size: 9px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .small-vehicle-card {
+    height: 260px;
+    border-radius: 6px;
+  }
+  
+  .svc-image-container {
+    height: 100px;
+  }
+  
+  .svc-content {
+    padding: 6px;
+    gap: 4px;
+  }
+  
+  .svc-title {
+    font-size: 11px;
+    min-height: 2.6em;
+    -webkit-line-clamp: 2;
+  }
+  
+  .svc-price {
+    font-size: 13px;
+  }
+  
+  .svc-original-price {
+    font-size: 10px;
+  }
+  
+  .svc-specs {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+  }
+  
+  .svc-spec {
+    padding: 2px 3px;
+    min-height: 20px;
+  }
+  
+  .svc-spec-value {
+    font-size: 9px;
+  }
+  
+  .svc-dealer-info {
+    gap: 4px;
+    padding: 4px 0;
+  }
+  
+  .svc-dealer-avatar {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .svc-avatar-initials {
+    font-size: 7px;
+  }
+  
+  .svc-dealer-name {
+    font-size: 9px;
+  }
+  
+  .svc-dealer-location {
+    font-size: 8px;
+  }
+  
+  .svc-verified-badge {
+    width: 12px;
+    height: 12px;
+    font-size: 7px;
+  }
+}

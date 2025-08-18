@@ -1,0 +1,650 @@
+/* client/src/components/shared/VehicleCard/ListVehicleCard.css */
+
+/* ===== LIST VEHICLE CARD - HORIZONTAL LAYOUT ===== */
+.list-vehicle-card {
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid #2c2c2c;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  height: 180px; /* Fixed height for list view */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  margin-bottom: 12px;
+}
+
+.list-vehicle-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 51, 0, 0.5);
+}
+
+.list-vehicle-card.featured {
+  border-color: #ff3300;
+  box-shadow: 0 4px 20px rgba(255, 51, 0, 0.3);
+}
+
+.list-vehicle-card.premium {
+  background: linear-gradient(135deg, rgba(255, 51, 0, 0.05), rgba(255, 102, 0, 0.02));
+  border-color: rgba(255, 51, 0, 0.3);
+}
+
+/* ===== IMAGE CONTAINER ===== */
+.lvc-image-container {
+  position: relative;
+  width: 280px;
+  height: 100%;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.lvc-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.list-vehicle-card:hover .lvc-image {
+  transform: scale(1.05);
+}
+
+.lvc-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: rgba(35, 35, 35, 0.85);
+  color: #64748b;
+}
+
+.lvc-placeholder-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.lvc-image-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.lvc-loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #ff3300;
+  border-radius: 50%;
+  animation: lvc-spin 1s linear infinite;
+}
+
+@keyframes lvc-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== SAVINGS BADGE ===== */
+.lvc-savings-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #ff3300, #ff6600);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(255, 51, 0, 0.4);
+}
+
+/* ===== SHARE BUTTON ===== */
+.lvc-share-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+  backdrop-filter: blur(4px);
+}
+
+.lvc-share-button:hover {
+  background: rgba(255, 51, 0, 0.8);
+  transform: scale(1.1);
+}
+
+/* ===== CONTENT AREA ===== */
+.lvc-content {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+/* ===== HEADER SECTION ===== */
+.lvc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.lvc-title-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.lvc-title {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.lvc-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lvc-service-badge,
+.lvc-warranty-badge,
+.lvc-certified-badge {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.lvc-service-badge {
+  background: rgba(34, 139, 34, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(34, 139, 34, 0.3);
+}
+
+.lvc-warranty-badge {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.lvc-certified-badge {
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.lvc-price-section {
+  text-align: right;
+  flex-shrink: 0;
+  min-width: 120px;
+}
+
+.lvc-price {
+  color: #ff3300;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.lvc-original-price {
+  color: #888;
+  font-size: 14px;
+  text-decoration: line-through;
+  margin-top: 4px;
+  line-height: 1.2;
+}
+
+/* ===== SPECIFICATIONS GRID ===== */
+.lvc-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.lvc-spec-item {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 50px;
+}
+
+.lvc-spec-label {
+  color: #888;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.lvc-spec-value {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ===== FOOTER ===== */
+.lvc-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 12px;
+}
+
+/* ===== DEALER INFO ===== */
+.lvc-dealer-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.lvc-dealer-info.dealership {
+  cursor: pointer;
+  transition: background 0.3s ease;
+  border-radius: 6px;
+  padding: 6px;
+  margin: -6px;
+}
+
+.lvc-dealer-info.dealership:hover {
+  background: rgba(255, 51, 0, 0.1);
+}
+
+.lvc-dealer-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.lvc-dealer-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lvc-avatar-initials {
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.lvc-dealer-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.lvc-dealer-name {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lvc-dealer-location {
+  color: #888;
+  font-size: 11px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lvc-verified-badge {
+  background: #28a745;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* ===== LISTING DATE ===== */
+.lvc-listing-date {
+  color: #888;
+  font-size: 11px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ===== ERROR CARD ===== */
+.list-vehicle-card.error-card {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid #dc3545;
+}
+
+.lvc-error {
+  text-align: center;
+  color: #dc3545;
+  padding: 20px;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet */
+@media (max-width: 1200px) {
+  .lvc-image-container {
+    width: 240px;
+  }
+  
+  .lvc-content {
+    padding: 14px;
+  }
+  
+  .lvc-specs-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  
+  .lvc-title {
+    font-size: 17px;
+  }
+  
+  .lvc-price {
+    font-size: 18px;
+  }
+}
+
+/* Tablet Portrait */
+@media (max-width: 992px) {
+  .list-vehicle-card {
+    height: 160px;
+  }
+  
+  .lvc-image-container {
+    width: 200px;
+  }
+  
+  .lvc-content {
+    padding: 12px;
+  }
+  
+  .lvc-header {
+    margin-bottom: 10px;
+    gap: 12px;
+  }
+  
+  .lvc-specs-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .lvc-spec-item {
+    padding: 6px;
+    min-height: 45px;
+  }
+  
+  .lvc-title {
+    font-size: 16px;
+  }
+  
+  .lvc-price {
+    font-size: 17px;
+  }
+  
+  .lvc-footer {
+    gap: 12px;
+    padding-top: 10px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .list-vehicle-card {
+    flex-direction: column;
+    height: auto;
+    margin-bottom: 8px;
+  }
+  
+  .lvc-image-container {
+    width: 100%;
+    height: 160px;
+  }
+  
+  .lvc-content {
+    padding: 10px;
+  }
+  
+  .lvc-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  
+  .lvc-title-section,
+  .lvc-price-section {
+    width: 100%;
+    text-align: left;
+  }
+  
+  .lvc-title {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  
+  .lvc-price {
+    font-size: 16px;
+  }
+  
+  .lvc-original-price {
+    font-size: 13px;
+  }
+  
+  .lvc-specs-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  
+  .lvc-spec-item {
+    padding: 6px;
+    min-height: 40px;
+  }
+  
+  .lvc-spec-label {
+    font-size: 10px;
+  }
+  
+  .lvc-spec-value {
+    font-size: 12px;
+  }
+  
+  .lvc-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding-top: 8px;
+  }
+  
+  .lvc-dealer-info {
+    width: 100%;
+  }
+  
+  .lvc-dealer-avatar {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .lvc-avatar-initials {
+    font-size: 10px;
+  }
+  
+  .lvc-dealer-name {
+    font-size: 12px;
+  }
+  
+  .lvc-dealer-location {
+    font-size: 10px;
+  }
+  
+  .lvc-listing-date {
+    font-size: 10px;
+  }
+  
+  .lvc-share-button {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .lvc-share-button svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .lvc-savings-badge {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+  
+  .lvc-badges {
+    gap: 4px;
+  }
+  
+  .lvc-service-badge,
+  .lvc-warranty-badge,
+  .lvc-certified-badge {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .list-vehicle-card {
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+  
+  .lvc-image-container {
+    height: 140px;
+  }
+  
+  .lvc-content {
+    padding: 8px;
+  }
+  
+  .lvc-header {
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  
+  .lvc-title {
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  
+  .lvc-price {
+    font-size: 15px;
+  }
+  
+  .lvc-original-price {
+    font-size: 12px;
+  }
+  
+  .lvc-specs-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  
+  .lvc-spec-item {
+    padding: 4px 6px;
+    min-height: 35px;
+  }
+  
+  .lvc-footer {
+    gap: 6px;
+    padding-top: 6px;
+  }
+  
+  .lvc-dealer-info {
+    gap: 6px;
+  }
+  
+  .lvc-dealer-avatar {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .lvc-avatar-initials {
+    font-size: 9px;
+  }
+  
+  .lvc-dealer-name {
+    font-size: 11px;
+  }
+  
+  .lvc-dealer-location {
+    font-size: 9px;
+  }
+  
+  .lvc-verified-badge {
+    width: 16px;
+    height: 16px;
+    font-size: 9px;
+  }
+  
+  .lvc-listing-date {
+    font-size: 9px;
+  }
+}
