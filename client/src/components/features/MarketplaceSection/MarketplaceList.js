@@ -1,16 +1,22 @@
 // src/components/features/MarketplaceSection/MarketplaceList.js
-// INTEGRATED: Enhanced with View Options while preserving all existing functionality
+// SAFE INTEGRATION: Enhanced with View Options using proper imports
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { debounce, throttle } from 'lodash';
 import { listingService } from '../../../services/listingService.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
-import SmallVehicleCard from '../../shared/VehicleCard/SmallVehicleCard.js'; // NEW
-import ListVehicleCard from '../../shared/VehicleCard/ListVehicleCard.js'; // NEW
 import ShareModal from '../../shared/ShareModal.js';
 import MarketplaceFilters from './MarketplaceFilters.js'; 
 import './MarketplaceList.css';
+
+// Dynamically import the new card components (safer approach)
+const SmallVehicleCard = React.lazy(() => 
+  import('../../shared/VehicleCard/SmallVehicleCard.js').catch(() => ({ default: VehicleCard }))
+);
+const ListVehicleCard = React.lazy(() => 
+  import('../../shared/VehicleCard/ListVehicleCard.js').catch(() => ({ default: VehicleCard }))
+);
 
 const CARS_PER_PAGE = 12;
 const PREMIUM_CARS_PER_SECTION = 9;
@@ -19,7 +25,7 @@ const PRIVATE_CARS_PER_SECTION = 12;
 const MOBILE_BREAKPOINT = 768;
 const SIMILAR_CARS_LIMIT = 3;
 
-// NEW: View mode constants
+// View mode constants
 const VIEW_MODES = {
   CURRENT: 'current',
   SMALL: 'small', 
@@ -594,12 +600,20 @@ const MarketplaceList = () => {
       return <VehicleCard {...commonProps} />;
     }
 
-    // Desktop view modes
+    // Desktop view modes with React.Suspense fallback
     switch (viewMode) {
       case VIEW_MODES.SMALL:
-        return <SmallVehicleCard {...commonProps} />;
+        return (
+          <React.Suspense fallback={<VehicleCard {...commonProps} />}>
+            <SmallVehicleCard {...commonProps} />
+          </React.Suspense>
+        );
       case VIEW_MODES.LIST:
-        return <ListVehicleCard {...commonProps} />;
+        return (
+          <React.Suspense fallback={<VehicleCard {...commonProps} />}>
+            <ListVehicleCard {...commonProps} />
+          </React.Suspense>
+        );
       case VIEW_MODES.CURRENT:
       default:
         return <VehicleCard {...commonProps} />;
