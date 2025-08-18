@@ -1,10 +1,12 @@
 // client/src/components/profile/RoleSelectionComponent.js
+// COMPLETE VERSION - Current Working Code with Courier Role Integrated
+
 import React, { useState, useEffect } from 'react';
 import { 
   User, Users, Car, Truck, Building2, Shield, 
   MapPin, Phone, Mail, FileText, Upload, 
   Clock, CheckCircle, XCircle, AlertCircle,
-  ArrowRight, ChevronDown, ChevronUp
+  ArrowRight, ChevronDown, ChevronUp, Package  // Added Package icon for courier
 } from 'lucide-react';
 import './RoleSelectionComponent.css';
 
@@ -44,6 +46,13 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     department: '',
     ministryName: '',
     position: '',
+    
+    // NEW: Courier-specific fields
+    transportModes: [],
+    deliveryCapacity: '',
+    operatingSchedule: '',
+    coverageAreas: '',
+    courierExperience: '',
     
     // Additional Information
     experience: '',
@@ -132,6 +141,25 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
       requiredFields: [],
       requiredDocs: []
     },
+    // NEW: Courier role
+    'courier': {
+      id: 'courier',
+      title: 'Courier Service Provider',
+      icon: Package,
+      color: '#7c3aed',
+      description: 'Deliver packages and goods using various transport modes',
+      requiresApproval: true,
+      benefits: [
+        'Trip posting and management',
+        'Transport proof uploads',
+        'Delivery capacity management',
+        'Earnings analytics',
+        'Customer rating system',
+        'Flexible schedule management'
+      ],
+      requiredFields: [],
+      requiredDocs: []
+    },
     'ministry_official': {
       id: 'ministry_official',
       title: 'Ministry Official',
@@ -201,6 +229,16 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     }));
   };
 
+  // NEW: Handle transport modes for courier
+  const handleTransportModeChange = (mode, isChecked) => {
+    setFormData(prev => ({
+      ...prev,
+      transportModes: isChecked 
+        ? [...prev.transportModes, mode]
+        : prev.transportModes.filter(m => m !== mode)
+    }));
+  };
+
   const validateForm = () => {
     if (!selectedRole) return { isValid: false, message: 'Please select a role' };
     
@@ -245,7 +283,13 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         position: formData.position,
         experience: formData.experience,
         description: formData.description,
-        specializations: formData.specializations
+        specializations: formData.specializations,
+        // NEW: Courier-specific data
+        transportModes: formData.transportModes,
+        deliveryCapacity: formData.deliveryCapacity,
+        operatingSchedule: formData.operatingSchedule,
+        coverageAreas: formData.coverageAreas,
+        courierExperience: formData.courierExperience
       };
 
       console.log('Submitting role request:', {
@@ -300,6 +344,9 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
           dealershipType: '', transportRoutes: '', fleetSize: '', 
           operatingAreas: '', employeeId: '', department: '', ministryName: '', 
           position: '', experience: '', description: '', specializations: '',
+          // Reset courier fields
+          transportModes: [], deliveryCapacity: '', operatingSchedule: '', 
+          coverageAreas: '', courierExperience: '',
           businessLicense: null, taxCertificate: null, idDocument: null, proofOfAddress: null
         });
         setIsExpanded(false);
@@ -368,6 +415,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         </div>
 
         <div className="role-form-sections">
+          {/* Business Information Section */}
           <div className="role-form-section">
             <h5>Business Information</h5>
             <div className="role-form-grid">
@@ -423,6 +471,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
             </div>
           </div>
 
+          {/* Contact Information Section */}
           <div className="role-form-section">
             <h5>Contact Information</h5>
             <div className="role-form-grid">
@@ -460,6 +509,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
             </div>
           </div>
 
+          {/* Transportation Details Section */}
           {selectedRole === 'transport_admin' && (
             <div className="role-form-section">
               <h5>Transportation Details</h5>
@@ -501,6 +551,79 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
             </div>
           )}
 
+          {/* NEW: Courier-specific Section */}
+          {selectedRole === 'courier' && (
+            <div className="role-form-section">
+              <h5>Courier Service Details</h5>
+              <div className="role-form-grid">
+                <div className="role-form-field role-form-field-full">
+                  <label>Transport Modes Available</label>
+                  <div className="role-checkbox-group">
+                    {[
+                      { value: 'private_car', label: 'Private Car' },
+                      { value: 'taxi', label: 'Taxi' },
+                      { value: 'combi', label: 'Combi' },
+                      { value: 'bus', label: 'Bus' },
+                      { value: 'motorcycle', label: 'Motorcycle' },
+                      { value: 'bicycle', label: 'Bicycle' },
+                      { value: 'walking', label: 'Walking' }
+                    ].map(mode => (
+                      <label key={mode.value} className="role-checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={formData.transportModes.includes(mode.value)}
+                          onChange={(e) => handleTransportModeChange(mode.value, e.target.checked)}
+                        />
+                        <span>{mode.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="role-form-field">
+                  <label>Delivery Capacity</label>
+                  <input
+                    type="text"
+                    value={formData.deliveryCapacity}
+                    onChange={(e) => handleInputChange('deliveryCapacity', e.target.value)}
+                    placeholder="e.g., 2kg, small box, medium bag, suitcase"
+                  />
+                </div>
+                
+                <div className="role-form-field">
+                  <label>Operating Schedule</label>
+                  <textarea
+                    value={formData.operatingSchedule}
+                    onChange={(e) => handleInputChange('operatingSchedule', e.target.value)}
+                    placeholder="Describe your availability (e.g., weekends, evenings, flexible schedule)"
+                    rows="3"
+                  />
+                </div>
+                
+                <div className="role-form-field">
+                  <label>Coverage Areas</label>
+                  <textarea
+                    value={formData.coverageAreas}
+                    onChange={(e) => handleInputChange('coverageAreas', e.target.value)}
+                    placeholder="Which areas/routes do you frequently travel? (e.g., Gaborone-Maun, local Gabs deliveries)"
+                    rows="3"
+                  />
+                </div>
+                
+                <div className="role-form-field role-form-field-full">
+                  <label>Courier Experience</label>
+                  <textarea
+                    value={formData.courierExperience}
+                    onChange={(e) => handleInputChange('courierExperience', e.target.value)}
+                    placeholder="Tell us about your experience with deliveries, why you want to be a courier, and how you plan to ensure safe delivery"
+                    rows="4"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Government Details Section */}
           {selectedRole === 'ministry_official' && (
             <div className="role-form-section">
               <h5>Government Details</h5>
@@ -548,6 +671,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
             </div>
           )}
 
+          {/* Supporting Documents Section */}
           <div className="role-form-section">
             <h5>Supporting Documents (Optional)</h5>
             <p className="role-docs-note">Upload documents to improve your approval chances</p>
@@ -618,6 +742,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
             </div>
           </div>
 
+          {/* Additional Information Section */}
           <div className="role-form-section">
             <h5>Additional Information</h5>
             <div className="role-form-field">

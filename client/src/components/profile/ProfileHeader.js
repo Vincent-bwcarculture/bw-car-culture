@@ -17,7 +17,8 @@ import {
   Users,
   UserPlus,
   UserCheck,
-  Shield  // Added for admin dashboard icon
+  Shield,  // Added for admin dashboard icon
+  Package   // Added for courier role icon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import { useNavigate } from 'react-router-dom';  // Added for navigation
@@ -710,6 +711,12 @@ const ProfileHeader = ({
                'Site Administrator' : 
                profileData?.role === 'ministry_official' ? 'Ministry Official' :
                profileData?.role === 'government_admin' ? 'Government Administrator' :
+               profileData?.role === 'courier' ? 'Courier' :
+               profileData?.role === 'taxi_driver' ? 'Taxi Driver' :
+               profileData?.role === 'transport_coordinator' ? 'Transport Coordinator' :
+               profileData?.role === 'dealership_admin' ? 'Dealership Admin' :
+               profileData?.role === 'transport_admin' ? 'Transport Admin' :
+               profileData?.role === 'rental_admin' ? 'Rental Admin' :
                hasBusinessProfile ? 'Business Owner' :
                hasTransportProfile ? 'Transport Provider' :
                hasDealerProfile ? 'Dealer' : 'User'}
