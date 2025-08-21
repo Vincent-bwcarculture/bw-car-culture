@@ -1,4 +1,4 @@
-// src/components/pages/DealershipsPage/DealershipsPage.js
+// src/components/features/Dealerships/DealershipsPage.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { http } from '../../../config/axios.js';
@@ -15,7 +15,9 @@ const DealershipsPage = () => {
     businessType: 'all',
     search: '',
     city: '',
-    sortBy: 'newest'
+    sortBy: 'newest',
+    // ADDED: Filter to show only dealerships, exclude private sellers
+    sellerType: 'dealership'
   });
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -76,6 +78,8 @@ const DealershipsPage = () => {
       // Prepare API filter parameters
       const apiFilters = {
         status: filters.status,
+        // ADDED: Always filter to show only dealerships on this page
+        sellerType: 'dealership',
         ...(filters.businessType !== 'all' && { businessType: filters.businessType }),
         ...(filters.search && { search: filters.search }),
         ...(filters.city && { city: filters.city }),
@@ -260,3 +264,4 @@ const DealershipsPage = () => {
 };
 
 export default DealershipsPage;
+
