@@ -5,7 +5,7 @@ import { debounce, throttle } from 'lodash';
 import { listingService } from '../../../services/listingService.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
 import ShareModal from '../../shared/ShareModal.js';
-import FloatingCreateButton from './FloatingCreateButton.js';
+import CreateListingPromoCard from './CreateListingPromoCard.js';
 import MarketplaceFilters from './MarketplaceFilters.js'; 
 import './MarketplaceList.css';
 
@@ -15,6 +15,7 @@ const SAVINGS_CARS_PER_SECTION = 9;
 const PRIVATE_CARS_PER_SECTION = 12;
 const MOBILE_BREAKPOINT = 768;
 const SIMILAR_CARS_LIMIT = 3;
+const PROMO_CARD_FREQUENCY = 8; // Show promo card every 8 listings
 
 const MarketplaceList = () => {
   const navigate = useNavigate();
@@ -111,6 +112,35 @@ const MarketplaceList = () => {
       debouncedResizeHandler.cancel();
     };
   }, [debouncedResizeHandler]);
+
+  // Function to inject promo cards randomly into listings
+  const injectPromoCards = useCallback((cars, frequency = PROMO_CARD_FREQUENCY) => {
+    if (!Array.isArray(cars) || cars.length === 0) return cars;
+    
+    const result = [];
+    let promoCardCount = 0;
+    
+    cars.forEach((car, index) => {
+      result.push(car);
+      
+      // Add promo card at strategic intervals with some randomization
+      const shouldAddPromo = (index + 1) % frequency === 0 && 
+                             index > 3 && // Don't add in first few positions
+                             promoCardCount < Math.ceil(cars.length / frequency); // Limit total promo cards
+      
+      if (shouldAddPromo) {
+        result.push({
+          _id: `promo-card-${promoCardCount}`,
+          id: `promo-card-${promoCardCount}`,
+          isPromoCard: true,
+          promoIndex: promoCardCount
+        });
+        promoCardCount++;
+      }
+    });
+    
+    return result;
+  }, []);
 
   // Memoized car classification functions (ORIGINAL WORKING LOGIC)
   const carHasSavings = useCallback((car) => {
@@ -302,8 +332,8 @@ const MarketplaceList = () => {
     
     cars.forEach(car => {
       const carId = car._id || car.id;
-      if (carId) {
-        const similarCars = findSimilarCars(car, cars);
+      if (carId && !car.isPromoCard) { // Skip promo cards for similar car generation
+        const similarCars = findSimilarCars(car, cars.filter(c => !c.isPromoCard));
         similarData.set(carId, similarCars);
       }
     });
@@ -389,7 +419,7 @@ const MarketplaceList = () => {
       .slice(0, limit);
   }, [getCarClassification, calculateListingScore]);
 
-  // ENHANCED: Better mixed listing algorithm
+  // ENHANCED: Better mixed listing algorithm with promo card injection
   const getAllListings = useCallback((cars, limit = CARS_PER_PAGE) => {
     if (!Array.isArray(cars) || cars.length === 0) return [];
     
@@ -402,8 +432,8 @@ const MarketplaceList = () => {
       regular: []
     };
     
-    // Categorize all cars
-    cars.forEach(car => {
+    // Categorize all cars (excluding promo cards)
+    cars.filter(car => !car.isPromoCard).forEach(car => {
       const classification = getCarClassification(car);
       switch (classification) {
         case 'premium':
@@ -445,22 +475,23 @@ const MarketplaceList = () => {
       if (categorizedCars.regular[i] && mixed.length < limit) mixed.push(categorizedCars.regular[i]);
     }
     
-    return mixed.slice(0, limit);
-  }, [getCarClassification, calculateListingScore]);
+    // Inject promo cards
+    return injectPromoCards(mixed.slice(0, limit));
+  }, [getCarClassification, calculateListingScore, injectPromoCards]);
 
   // Enhanced total savings calculation including private sellers
   const totalSavingsAmount = useMemo(() => {
     if (!Array.isArray(allCars) || allCars.length === 0) return 0;
     
     return allCars
-      .filter(car => carHasSavings(car))
+      .filter(car => !car.isPromoCard && carHasSavings(car))
       .reduce((total, car) => total + calculateCarSavings(car), 0);
   }, [allCars, carHasSavings, calculateCarSavings]);
 
-  // ENHANCED: Get comprehensive section statistics
+  // ENHANCED: Get comprehensive section statistics (excluding promo cards)
   const getSectionStatistics = useMemo(() => {
     const stats = {
-      total: Array.isArray(allCars) ? allCars.length : 0,
+      total: Array.isArray(allCars) ? allCars.filter(car => !car.isPromoCard).length : 0,
       premium: 0,
       savings: 0,
       private: 0,
@@ -472,7 +503,7 @@ const MarketplaceList = () => {
     
     if (!Array.isArray(allCars)) return stats;
     
-    allCars.forEach(car => {
+    allCars.filter(car => !car.isPromoCard).forEach(car => {
       if (!car) return;
       
       const classification = getCarClassification(car);
@@ -511,18 +542,20 @@ const MarketplaceList = () => {
 
   // Get current section's cars with memoization
   const getCurrentSectionCars = useCallback(() => {
+    const realCars = allCars.filter(car => !car.isPromoCard);
+    
     switch (activeSection) {
       case 'premium':
-        return getPremiumListings(allCars);
+        return injectPromoCards(getPremiumListings(realCars), 6); // Less frequent for premium
       case 'savings':
-        return getSavingsListings(allCars);
+        return injectPromoCards(getSavingsListings(realCars), 7); // Moderate frequency
       case 'private':
-        return getPrivateSellerListings(allCars);
+        return injectPromoCards(getPrivateSellerListings(realCars), 8); // Regular frequency
       case 'all':
       default:
         return getAllListings(allCars, visibleItems);
     }
-  }, [activeSection, allCars, getPremiumListings, getSavingsListings, getPrivateSellerListings, getAllListings, visibleItems]);
+  }, [activeSection, allCars, getPremiumListings, getSavingsListings, getPrivateSellerListings, getAllListings, visibleItems, injectPromoCards]);
 
   // ENHANCED: Better search filters with private seller support
   const prepareSearchFilters = useCallback((searchParams) => {
@@ -574,6 +607,9 @@ const MarketplaceList = () => {
     const searchWords = searchTerm.toLowerCase().split(' ').filter(word => word.length > 0);
     
     return cars.filter(car => {
+      // Skip promo cards in search
+      if (car.isPromoCard) return true;
+      
       const searchableFields = [
         car.title,
         car.description,
@@ -611,15 +647,16 @@ const MarketplaceList = () => {
     // ENHANCED: Seller type filter
     if (filters.sellerType) {
       if (filters.sellerType === 'private') {
-        filterFunctions.push(car => carIsFromPrivateSeller(car));
+        filterFunctions.push(car => car.isPromoCard || carIsFromPrivateSeller(car));
       } else if (filters.sellerType === 'dealership') {
-        filterFunctions.push(car => !carIsFromPrivateSeller(car));
+        filterFunctions.push(car => car.isPromoCard || !carIsFromPrivateSeller(car));
       }
     }
     
     if (filters.make) {
       const makeLower = filters.make.toLowerCase();
       filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
         const carMake = car.make || car.specifications?.make;
         return carMake && carMake.toLowerCase().includes(makeLower);
       });
@@ -628,6 +665,7 @@ const MarketplaceList = () => {
     if (filters.model) {
       const modelLower = filters.model.toLowerCase();
       filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
         const carModel = car.model || car.specifications?.model;
         return carModel && carModel.toLowerCase().includes(modelLower);
       });
@@ -635,6 +673,7 @@ const MarketplaceList = () => {
     
     if (filters.minPrice) {
       filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
         const price = parseFloat(car.price);
         return !isNaN(price) && price >= filters.minPrice;
       });
@@ -642,6 +681,7 @@ const MarketplaceList = () => {
     
     if (filters.maxPrice) {
       filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
         const price = parseFloat(car.price);
         return !isNaN(price) && price <= filters.maxPrice;
       });
@@ -649,6 +689,7 @@ const MarketplaceList = () => {
     
     if (filters.minYear) {
       filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
         const year = parseInt(car.year || car.specifications?.year);
         return !isNaN(year) && year >= filters.minYear;
       });
@@ -656,6 +697,7 @@ const MarketplaceList = () => {
     
     if (filters.maxYear) {
       filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
         const year = parseInt(car.year || car.specifications?.year);
         return !isNaN(year) && year <= filters.maxYear;
       });
@@ -664,6 +706,7 @@ const MarketplaceList = () => {
     if (filters.category) {
       const categoryLower = filters.category.toLowerCase();
       filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
         const category = car.category || car.bodyStyle;
         return category && category.toLowerCase().includes(categoryLower);
       });
@@ -672,6 +715,7 @@ const MarketplaceList = () => {
     if (filters.city) {
       const cityLower = filters.city.toLowerCase();
       filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
         const city = car.location?.city || car.dealer?.location?.city;
         return city && city.toLowerCase().includes(cityLower);
       });
@@ -718,7 +762,7 @@ const MarketplaceList = () => {
       setPagination({
         currentPage: response.pagination?.currentPage || 1,
         totalPages: response.pagination?.totalPages || 1,
-        total: cars.length
+        total: cars.filter(car => !car.isPromoCard).length
       });
       
       // Generate similar cars for mobile
@@ -817,10 +861,10 @@ const MarketplaceList = () => {
 
   // Virtual scrolling for large datasets
   const handleLoadMore = useCallback(() => {
-    if (allCars.length > visibleItems) {
+    if (allCars.filter(car => !car.isPromoCard).length > visibleItems) {
       setVisibleItems(prev => Math.min(prev + 6, allCars.length));
     }
-  }, [allCars.length, visibleItems]);
+  }, [allCars, visibleItems]);
 
   // Retry handler with better UX
   const handleRetry = useCallback(async () => {
@@ -855,7 +899,7 @@ const MarketplaceList = () => {
 
   // Intersection Observer for infinite scrolling
   useEffect(() => {
-    if (!containerRef.current || allCars.length <= visibleItems) return;
+    if (!containerRef.current || allCars.filter(car => !car.isPromoCard).length <= visibleItems) return;
     
     const options = {
       rootMargin: '200px',
@@ -934,7 +978,7 @@ const MarketplaceList = () => {
     };
   }, [getCurrentSectionCars, getSectionStatistics, visibleItems]);
 
-  // Mobile horizontal car row component
+  // Mobile horizontal car row component with promo card support
   const MobileHorizontalCarRow = ({ mainCar, similarCars }) => {
     const allCarsInRow = [mainCar, ...similarCars];
     
@@ -946,11 +990,15 @@ const MarketplaceList = () => {
               key={car._id || car.id || `car-${index}`} 
               className="mobile-car-card"
             >
-              <VehicleCard 
-                car={car}
-                onShare={handleShare}
-                compact={true}
-              />
+              {car.isPromoCard ? (
+                <CreateListingPromoCard compact={true} />
+              ) : (
+                <VehicleCard 
+                  car={car}
+                  onShare={handleShare}
+                  compact={true}
+                />
+              )}
             </div>
           ))}
         </div>
@@ -1022,7 +1070,7 @@ const MarketplaceList = () => {
             </button>
           </div>
         </div>
-      ) : displayData.displayCars.length === 0 ? (
+      ) : displayData.displayCars.filter(car => !car.isPromoCard).length === 0 ? (
         /* Empty State */
         <div className="empty-state">
           <div className="empty-icon">🔍</div>
@@ -1056,7 +1104,19 @@ const MarketplaceList = () => {
               </div>
               <div className={`marketplace-grid premium-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
                 {isMobile ? (
-                  displayData.displayCars.map((car) => {
+                  displayData.displayCars.map((car, index) => {
+                    if (car.isPromoCard) {
+                      return (
+                        <div key={car._id} className="mobile-horizontal-scroll">
+                          <div className="mobile-cards-row">
+                            <div className="mobile-car-card">
+                              <CreateListingPromoCard compact={true} />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
                     const carId = car._id || car.id;
                     const similarCars = similarCarsData.get(carId) || [];
                     
@@ -1070,12 +1130,16 @@ const MarketplaceList = () => {
                   })
                 ) : (
                   displayData.displayCars.map((car, index) => (
-                    <VehicleCard 
-                      key={car._id || car.id || `premium-${index}`}
-                      car={car}
-                      onShare={handleShare}
-                      compact={isMobile}
-                    />
+                    car.isPromoCard ? (
+                      <CreateListingPromoCard key={car._id} compact={false} />
+                    ) : (
+                      <VehicleCard 
+                        key={car._id || car.id || `premium-${index}`}
+                        car={car}
+                        onShare={handleShare}
+                        compact={isMobile}
+                      />
+                    )
                   ))
                 )}
               </div>
@@ -1101,7 +1165,19 @@ const MarketplaceList = () => {
               </div>
               <div className={`marketplace-grid savings-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
                 {isMobile ? (
-                  displayData.displayCars.map((car) => {
+                  displayData.displayCars.map((car, index) => {
+                    if (car.isPromoCard) {
+                      return (
+                        <div key={car._id} className="mobile-horizontal-scroll">
+                          <div className="mobile-cards-row">
+                            <div className="mobile-car-card">
+                              <CreateListingPromoCard compact={true} />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
                     const carId = car._id || car.id;
                     const similarCars = similarCarsData.get(carId) || [];
                     
@@ -1115,12 +1191,16 @@ const MarketplaceList = () => {
                   })
                 ) : (
                   displayData.displayCars.map((car, index) => (
-                    <VehicleCard 
-                      key={car._id || car.id || `savings-${index}`}
-                      car={car}
-                      onShare={handleShare}
-                      compact={isMobile}
-                    />
+                    car.isPromoCard ? (
+                      <CreateListingPromoCard key={car._id} compact={false} />
+                    ) : (
+                      <VehicleCard 
+                        key={car._id || car.id || `savings-${index}`}
+                        car={car}
+                        onShare={handleShare}
+                        compact={isMobile}
+                      />
+                    )
                   ))
                 )}
               </div>
@@ -1148,7 +1228,19 @@ const MarketplaceList = () => {
               </div>
               <div className={`marketplace-grid private-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
                 {isMobile ? (
-                  displayData.displayCars.map((car) => {
+                  displayData.displayCars.map((car, index) => {
+                    if (car.isPromoCard) {
+                      return (
+                        <div key={car._id} className="mobile-horizontal-scroll">
+                          <div className="mobile-cards-row">
+                            <div className="mobile-car-card">
+                              <CreateListingPromoCard compact={true} />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
                     const carId = car._id || car.id;
                     const similarCars = similarCarsData.get(carId) || [];
                     
@@ -1162,12 +1254,16 @@ const MarketplaceList = () => {
                   })
                 ) : (
                   displayData.displayCars.map((car, index) => (
-                    <VehicleCard 
-                      key={car._id || car.id || `private-${index}`}
-                      car={car}
-                      onShare={handleShare}
-                      compact={isMobile}
-                    />
+                    car.isPromoCard ? (
+                      <CreateListingPromoCard key={car._id} compact={false} />
+                    ) : (
+                      <VehicleCard 
+                        key={car._id || car.id || `private-${index}`}
+                        car={car}
+                        onShare={handleShare}
+                        compact={isMobile}
+                      />
+                    )
                   ))
                 )}
               </div>
@@ -1190,7 +1286,19 @@ const MarketplaceList = () => {
               </div>
               <div className={`marketplace-grid all-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
                 {isMobile ? (
-                  displayData.displayCars.map((car) => {
+                  displayData.displayCars.map((car, index) => {
+                    if (car.isPromoCard) {
+                      return (
+                        <div key={car._id} className="mobile-horizontal-scroll">
+                          <div className="mobile-cards-row">
+                            <div className="mobile-car-card">
+                              <CreateListingPromoCard compact={true} />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
                     const carId = car._id || car.id;
                     const similarCars = similarCarsData.get(carId) || [];
                     
@@ -1204,18 +1312,22 @@ const MarketplaceList = () => {
                   })
                 ) : (
                   displayData.displayCars.map((car, index) => (
-                    <VehicleCard 
-                      key={car._id || car.id || `all-${index}`}
-                      car={car}
-                      onShare={handleShare}
-                      compact={isMobile}
-                    />
+                    car.isPromoCard ? (
+                      <CreateListingPromoCard key={car._id} compact={false} />
+                    ) : (
+                      <VehicleCard 
+                        key={car._id || car.id || `all-${index}`}
+                        car={car}
+                        onShare={handleShare}
+                        compact={isMobile}
+                      />
+                    )
                   ))
                 )}
               </div>
               
               {/* Load More Sentinel for Infinite Scroll */}
-              {allCars.length > visibleItems && (
+              {allCars.filter(car => !car.isPromoCard).length > visibleItems && (
                 <div className="load-more-container">
                   <div className="load-more-sentinel"></div>
                   <button 
@@ -1223,7 +1335,7 @@ const MarketplaceList = () => {
                     onClick={handleLoadMore}
                     disabled={isScrolling}
                   >
-                    {isScrolling ? 'Loading...' : `Load More (${allCars.length - visibleItems} remaining)`}
+                    {isScrolling ? 'Loading...' : `Load More (${allCars.filter(car => !car.isPromoCard).length - visibleItems} remaining)`}
                   </button>
                 </div>
               )}
@@ -1240,9 +1352,6 @@ const MarketplaceList = () => {
           buttonRef={shareButtonRef}
         />
       )}
-
-      {/* Floating Create Button */}
-      <FloatingCreateButton />
     </div>
   );
 };
