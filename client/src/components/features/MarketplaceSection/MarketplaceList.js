@@ -5,6 +5,7 @@ import { debounce, throttle } from 'lodash';
 import { listingService } from '../../../services/listingService.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
 import ShareModal from '../../shared/ShareModal.js';
+import FloatingCreateButton from './FloatingCreateButton.js';
 import MarketplaceFilters from './MarketplaceFilters.js'; 
 import './MarketplaceList.css';
 
@@ -1239,6 +1240,9 @@ const MarketplaceList = () => {
           buttonRef={shareButtonRef}
         />
       )}
+
+      {/* Floating Create Button */}
+      <FloatingCreateButton />
     </div>
   );
 };
