@@ -133,6 +133,7 @@ const CreateListingPromoCard = ({ compact = false }) => {
               <div className="clpc-cta-icon"></div>
               <h3 className="clpc-cta-title">Sell Your Car</h3>
               <p className="clpc-cta-subtitle">Join the go to Premium Marketplace</p>
+              <p className="clpc-cta-subtitle">Sell Fast, with Value!</p>
             </div>
           </div>
         </div>
