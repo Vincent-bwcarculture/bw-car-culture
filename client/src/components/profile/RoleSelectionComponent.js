@@ -1,12 +1,12 @@
 // client/src/components/profile/RoleSelectionComponent.js
-// COMPLETE VERSION - Current Working Code with Courier Role Integrated
+// COMPLETE VERSION - Current Working Code with Courier Role + NEW Journalist Role Integrated
 
 import React, { useState, useEffect } from 'react';
 import { 
   User, Users, Car, Truck, Building2, Shield, 
   MapPin, Phone, Mail, FileText, Upload, 
   Clock, CheckCircle, XCircle, AlertCircle,
-  ArrowRight, ChevronDown, ChevronUp, Package  // Added Package icon for courier
+  ArrowRight, ChevronDown, ChevronUp, Package, PenTool  // Added PenTool icon for journalist
 } from 'lucide-react';
 import './RoleSelectionComponent.css';
 
@@ -47,12 +47,19 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     ministryName: '',
     position: '',
     
-    // NEW: Courier-specific fields
+    // Courier-specific fields
     transportModes: [],
     deliveryCapacity: '',
     operatingSchedule: '',
     coverageAreas: '',
     courierExperience: '',
+    
+    // NEW: Journalist-specific fields
+    writingExperience: '',
+    portfolio: '',
+    specializations: [],
+    motivation: '',
+    socialMediaHandles: '',
     
     // Additional Information
     experience: '',
@@ -141,7 +148,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
       requiredFields: [],
       requiredDocs: []
     },
-    // NEW: Courier role
+    // Courier role
     'courier': {
       id: 'courier',
       title: 'Courier Service Provider',
@@ -156,6 +163,25 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         'Earnings analytics',
         'Customer rating system',
         'Flexible schedule management'
+      ],
+      requiredFields: [],
+      requiredDocs: []
+    },
+    // NEW: Journalist role
+    'journalist': {
+      id: 'journalist',
+      title: 'Content Journalist',
+      icon: PenTool,
+      color: '#06b6d4',
+      description: 'Create articles and automotive content for the platform',
+      requiresApproval: true,
+      benefits: [
+        'Create and publish articles',
+        'Automotive content management',
+        'Traffic-based reward system',
+        'Content analytics dashboard',
+        'Featured author profile',
+        'Content monetization tools'
       ],
       requiredFields: [],
       requiredDocs: []
@@ -229,13 +255,23 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     }));
   };
 
-  // NEW: Handle transport modes for courier
+  // Handle transport modes for courier
   const handleTransportModeChange = (mode, isChecked) => {
     setFormData(prev => ({
       ...prev,
       transportModes: isChecked 
         ? [...prev.transportModes, mode]
         : prev.transportModes.filter(m => m !== mode)
+    }));
+  };
+
+  // NEW: Handle specializations for journalist
+  const handleSpecializationChange = (specialization, isChecked) => {
+    setFormData(prev => ({
+      ...prev,
+      specializations: isChecked 
+        ? [...prev.specializations, specialization]
+        : prev.specializations.filter(s => s !== specialization)
     }));
   };
 
@@ -284,12 +320,17 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         experience: formData.experience,
         description: formData.description,
         specializations: formData.specializations,
-        // NEW: Courier-specific data
+        // Courier-specific data
         transportModes: formData.transportModes,
         deliveryCapacity: formData.deliveryCapacity,
         operatingSchedule: formData.operatingSchedule,
         coverageAreas: formData.coverageAreas,
-        courierExperience: formData.courierExperience
+        courierExperience: formData.courierExperience,
+        // NEW: Journalist-specific data
+        writingExperience: formData.writingExperience,
+        portfolio: formData.portfolio,
+        motivation: formData.motivation,
+        socialMediaHandles: formData.socialMediaHandles
       };
 
       console.log('Submitting role request:', {
@@ -347,6 +388,8 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
           // Reset courier fields
           transportModes: [], deliveryCapacity: '', operatingSchedule: '', 
           coverageAreas: '', courierExperience: '',
+          // Reset journalist fields
+          writingExperience: '', portfolio: '', motivation: '', socialMediaHandles: '',
           businessLicense: null, taxCertificate: null, idDocument: null, proofOfAddress: null
         });
         setIsExpanded(false);
@@ -551,7 +594,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
             </div>
           )}
 
-          {/* NEW: Courier-specific Section */}
+          {/* Courier-specific Section */}
           {selectedRole === 'courier' && (
             <div className="role-form-section">
               <h5>Courier Service Details</h5>
@@ -617,6 +660,79 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                     onChange={(e) => handleInputChange('courierExperience', e.target.value)}
                     placeholder="Tell us about your experience with deliveries, why you want to be a courier, and how you plan to ensure safe delivery"
                     rows="4"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* NEW: Journalist-specific Section */}
+          {selectedRole === 'journalist' && (
+            <div className="role-form-section">
+              <h5>Journalism & Writing Details</h5>
+              <div className="role-form-grid">
+                <div className="role-form-field role-form-field-full">
+                  <label>Writing Experience</label>
+                  <textarea
+                    value={formData.writingExperience}
+                    onChange={(e) => handleInputChange('writingExperience', e.target.value)}
+                    placeholder="Describe your writing background, experience in journalism, previous publications, etc."
+                    rows="4"
+                  />
+                </div>
+                
+                <div className="role-form-field role-form-field-full">
+                  <label>Portfolio / Sample Work</label>
+                  <textarea
+                    value={formData.portfolio}
+                    onChange={(e) => handleInputChange('portfolio', e.target.value)}
+                    placeholder="Share links to your published articles, blog posts, or writing samples. Include automotive content if available."
+                    rows="3"
+                  />
+                </div>
+                
+                <div className="role-form-field role-form-field-full">
+                  <label>Content Specializations</label>
+                  <div className="role-checkbox-group">
+                    {[
+                      { value: 'automotive_news', label: 'Automotive News' },
+                      { value: 'car_reviews', label: 'Car Reviews' },
+                      { value: 'buying_guides', label: 'Buying Guides' },
+                      { value: 'maintenance_tips', label: 'Maintenance Tips' },
+                      { value: 'transport_policy', label: 'Transport Policy' },
+                      { value: 'industry_analysis', label: 'Industry Analysis' },
+                      { value: 'local_events', label: 'Local Automotive Events' },
+                      { value: 'technology', label: 'Auto Technology' }
+                    ].map(spec => (
+                      <label key={spec.value} className="role-checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={formData.specializations.includes(spec.value)}
+                          onChange={(e) => handleSpecializationChange(spec.value, e.target.checked)}
+                        />
+                        <span>{spec.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="role-form-field role-form-field-full">
+                  <label>Motivation & Content Vision</label>
+                  <textarea
+                    value={formData.motivation}
+                    onChange={(e) => handleInputChange('motivation', e.target.value)}
+                    placeholder="Why do you want to write for BW Car Culture? What type of content do you plan to create? How will you contribute to the automotive community?"
+                    rows="4"
+                  />
+                </div>
+                
+                <div className="role-form-field">
+                  <label>Social Media / Online Presence</label>
+                  <textarea
+                    value={formData.socialMediaHandles}
+                    onChange={(e) => handleInputChange('socialMediaHandles', e.target.value)}
+                    placeholder="Share your social media handles, personal website, or any online presence that showcases your writing or automotive interests"
+                    rows="3"
                   />
                 </div>
               </div>
