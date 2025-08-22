@@ -51,15 +51,15 @@ const FloatingCreateButton = () => {
 
   return (
     <button
-      className={`floating-create-button ${loading ? 'loading' : ''}`}
+      className={`marketplace-fab-button ${loading ? 'marketplace-fab-loading' : ''}`}
       onClick={handleCreateListing}
       disabled={loading}
       aria-label="Create car listing"
       title={isAuthenticated ? "Create a new car listing" : "Login to create a car listing"}
     >
-      <div className="floating-create-button-content">
-        <span className="floating-create-button-icon">+</span>
-        <span className="floating-create-button-text">
+      <div className="marketplace-fab-content">
+        <span className="marketplace-fab-icon">+</span>
+        <span className="marketplace-fab-text">
           {loading ? 'Loading...' : 'Create listing'}
         </span>
       </div>

@@ -1,9 +1,10 @@
-/* FloatingCreateButton.css */
+/* FloatingCreateButton.css - Unique classes with left-side positioning */
 
-.floating-create-button {
+.marketplace-fab-button {
   position: fixed;
-  bottom: 80px; /* Above mobile navigation if present */
-  right: 20px;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -27,19 +28,19 @@
   margin: 0;
 }
 
-.floating-create-button:hover {
+.marketplace-fab-button:hover {
   width: 160px;
   background: linear-gradient(135deg, #e62e00, #ff4400);
   box-shadow: 0 12px 40px rgba(255, 51, 0, 0.6);
-  transform: translateY(-2px);
+  transform: translateY(-50%) translateX(2px);
 }
 
-.floating-create-button:active {
-  transform: translateY(0px) scale(0.98);
+.marketplace-fab-button:active {
+  transform: translateY(-50%) translateX(0px) scale(0.98);
   transition: all 0.1s ease;
 }
 
-.floating-create-button-content {
+.marketplace-fab-content {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,7 +50,7 @@
   position: relative;
 }
 
-.floating-create-button-icon {
+.marketplace-fab-icon {
   font-size: 24px;
   font-weight: 300;
   line-height: 1;
@@ -62,12 +63,12 @@
   height: 24px;
 }
 
-.floating-create-button:hover .floating-create-button-icon {
+.marketplace-fab-button:hover .marketplace-fab-icon {
   transform: rotate(90deg);
   margin-right: 8px;
 }
 
-.floating-create-button-text {
+.marketplace-fab-text {
   opacity: 0;
   transform: translateX(-10px);
   transition: all 0.3s ease;
@@ -77,126 +78,122 @@
   letter-spacing: 0.3px;
 }
 
-.floating-create-button:hover .floating-create-button-text {
+.marketplace-fab-button:hover .marketplace-fab-text {
   opacity: 1;
   transform: translateX(0);
 }
 
 /* Loading state */
-.floating-create-button.loading {
+.marketplace-fab-button.marketplace-fab-loading {
   pointer-events: none;
   opacity: 0.8;
 }
 
-.floating-create-button.loading .floating-create-button-icon {
-  animation: spin 1s linear infinite;
+.marketplace-fab-button.marketplace-fab-loading .marketplace-fab-icon {
+  animation: marketplace-fab-spin 1s linear infinite;
 }
 
-@keyframes spin {
+@keyframes marketplace-fab-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
 /* Mobile optimizations for smartphone users */
 @media (max-width: 768px) {
-  .floating-create-button {
-    bottom: 100px; /* More space from bottom on mobile */
-    right: 16px;
+  .marketplace-fab-button {
+    left: 16px;
     width: 52px;
     height: 52px;
     border-radius: 26px;
   }
   
-  .floating-create-button:hover {
+  .marketplace-fab-button:hover {
     width: 140px;
   }
   
-  .floating-create-button-icon {
+  .marketplace-fab-icon {
     font-size: 22px;
   }
   
-  .floating-create-button-text {
+  .marketplace-fab-text {
     font-size: 13px;
   }
 }
 
 /* Ultra-mobile optimization (small phones) */
 @media (max-width: 480px) {
-  .floating-create-button {
-    bottom: 90px;
-    right: 12px;
+  .marketplace-fab-button {
+    left: 12px;
     width: 48px;
     height: 48px;
     border-radius: 24px;
   }
   
-  .floating-create-button:hover {
+  .marketplace-fab-button:hover {
     width: 130px;
   }
   
-  .floating-create-button-icon {
+  .marketplace-fab-icon {
     font-size: 20px;
   }
   
-  .floating-create-button-text {
+  .marketplace-fab-text {
     font-size: 12px;
   }
 }
 
 /* Tablet styles */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .floating-create-button {
-    bottom: 30px;
-    right: 24px;
+  .marketplace-fab-button {
+    left: 24px;
     width: 60px;
     height: 60px;
     border-radius: 30px;
   }
   
-  .floating-create-button:hover {
+  .marketplace-fab-button:hover {
     width: 180px;
   }
   
-  .floating-create-button-icon {
+  .marketplace-fab-icon {
     font-size: 26px;
   }
   
-  .floating-create-button-text {
+  .marketplace-fab-text {
     font-size: 15px;
   }
 }
 
 /* Desktop styles */
 @media (min-width: 1025px) {
-  .floating-create-button {
-    bottom: 30px;
-    right: 30px;
+  .marketplace-fab-button {
+    left: 30px;
     width: 64px;
     height: 64px;
     border-radius: 32px;
   }
   
-  .floating-create-button:hover {
+  .marketplace-fab-button:hover {
     width: 190px;
   }
   
-  .floating-create-button-icon {
+  .marketplace-fab-icon {
     font-size: 28px;
   }
   
-  .floating-create-button-text {
+  .marketplace-fab-text {
     font-size: 16px;
   }
 }
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
-  .floating-create-button {
+  .marketplace-fab-button {
     border: 2px solid #ffffff;
     background: #ff3300;
   }
   
-  .floating-create-button:hover {
+  .marketplace-fab-button:hover {
     background: #e62e00;
     border-color: #ffffff;
   }
@@ -204,14 +201,40 @@
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .floating-create-button,
-  .floating-create-button-icon,
-  .floating-create-button-text {
+  .marketplace-fab-button,
+  .marketplace-fab-icon,
+  .marketplace-fab-text {
     transition: none;
     animation: none;
   }
   
-  .floating-create-button:hover .floating-create-button-icon {
+  .marketplace-fab-button:hover .marketplace-fab-icon {
     transform: none;
+  }
+}
+
+/* Ensure button is above other content but below modals */
+.marketplace-fab-button {
+  z-index: 999;
+}
+
+/* Special positioning for pages with left navigation */
+@media (min-width: 1200px) {
+  .marketplace-fab-button {
+    left: 40px;
+  }
+}
+
+/* Avoid overlapping with fixed headers/navigation */
+@media (max-height: 600px) {
+  .marketplace-fab-button {
+    top: 60%;
+  }
+}
+
+/* Very tall screens - keep it more centered */
+@media (min-height: 1000px) {
+  .marketplace-fab-button {
+    top: 45%;
   }
 }
