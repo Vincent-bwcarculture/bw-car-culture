@@ -1,14 +1,84 @@
 // client/src/components/features/MarketplaceSection/CreateListingPromoCard.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.js';
 import './CreateListingPromoCard.css';
 
+// Realistic car price ranges for Botswana market
+const PRICE_RANGES = [
+  'P45,000',
+  'P78,500',
+  'P125,000',
+  'P89,900',
+  'P156,000',
+  'P234,500',
+  'P67,800',
+  'P198,000',
+  'P145,500',
+  'P389,000',
+  'P92,300',
+  'P167,500',
+  'P245,000',
+  'P118,700',
+  'P298,500',
+  'P56,000',
+  'P184,200',
+  'P312,000',
+  'P73,500',
+  'P159,800'
+];
+
 const CreateListingPromoCard = ({ compact = false }) => {
   const [loading, setLoading] = useState(false);
+  const [currentPrice, setCurrentPrice] = useState('');
+  const [isTyping, setIsTyping] = useState(true);
+  const [priceIndex, setPriceIndex] = useState(0);
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Typing animation effect
+  useEffect(() => {
+    let timeout;
+    const targetPrice = PRICE_RANGES[priceIndex];
+    
+    if (isTyping) {
+      // Typing forward
+      if (currentPrice.length < targetPrice.length) {
+        timeout = setTimeout(() => {
+          setCurrentPrice(targetPrice.slice(0, currentPrice.length + 1));
+        }, 100 + Math.random() * 100); // Variable typing speed
+      } else {
+        // Finished typing, wait then start deleting
+        timeout = setTimeout(() => {
+          setIsTyping(false);
+        }, 2000 + Math.random() * 1000);
+      }
+    } else {
+      // Deleting backward
+      if (currentPrice.length > 0) {
+        timeout = setTimeout(() => {
+          setCurrentPrice(currentPrice.slice(0, -1));
+        }, 50 + Math.random() * 50); // Faster deletion
+      } else {
+        // Finished deleting, move to next price
+        setPriceIndex((prev) => (prev + 1) % PRICE_RANGES.length);
+        setIsTyping(true);
+        timeout = setTimeout(() => {
+          // Small delay before starting next price
+        }, 500);
+      }
+    }
+
+    return () => clearTimeout(timeout);
+  }, [currentPrice, isTyping, priceIndex]);
+
+  // Initialize with first price
+  useEffect(() => {
+    if (currentPrice === '') {
+      setCurrentPrice('P');
+    }
+  }, [currentPrice]);
 
   const handleCreateListing = async () => {
     if (loading) return;
@@ -56,16 +126,16 @@ const CreateListingPromoCard = ({ compact = false }) => {
         <div className="clpc-promotional-image">
           <div className="clpc-image-overlay">
             <div className="clpc-call-to-action">
-              <div className="clpc-cta-icon">🚗</div>
+              <div className="clpc-cta-icon"></div>
               <h3 className="clpc-cta-title">Sell Your Car</h3>
-              <p className="clpc-cta-subtitle">Join thousands of sellers</p>
+              <p className="clpc-cta-subtitle">Join the go to Premium Marketplace</p>
             </div>
           </div>
         </div>
         
         {/* Badge similar to VehicleCard status badges */}
         <div className="clpc-promo-badge">
-          Free Listing
+          Quality Listing
         </div>
       </div>
 
@@ -74,8 +144,11 @@ const CreateListingPromoCard = ({ compact = false }) => {
         {/* Price Section - promotional twist */}
         <div className="clpc-price-section">
           <div className="clpc-price-content">
-            <span className="clpc-price-label">Earn up to</span>
-            <span className="clpc-price-amount">P500,000+</span>
+            <span className="clpc-price-label">Set price, sell fast</span>
+            <span className="clpc-price-amount">
+              {currentPrice}
+              <span className={`clpc-typing-cursor ${isTyping ? 'clpc-typing' : 'clpc-deleting'}`}>|</span>
+            </span>
           </div>
           <div className="clpc-price-badge">
             Fast Sale
@@ -90,6 +163,11 @@ const CreateListingPromoCard = ({ compact = false }) => {
           
           {/* Benefits - mimics specs section */}
           <div className="clpc-benefits">
+
+             <div className="clpc-benefit-item">
+              <span className="clpc-benefit-icon">✓</span>
+              <span className="clpc-benefit-text">Trusted & Active</span>
+            </div>
             <div className="clpc-benefit-item">
               <span className="clpc-benefit-icon">✓</span>
               <span className="clpc-benefit-text">Free to list</span>
@@ -130,7 +208,7 @@ const CreateListingPromoCard = ({ compact = false }) => {
 
         {/* Additional motivational text */}
         <div className="clpc-motivation">
-          <p>Join thousands of successful sellers on our platform!</p>
+          <p>Join the go to Premium Marketplace - Sell with Value!</p>
         </div>
       </div>
     </div>
