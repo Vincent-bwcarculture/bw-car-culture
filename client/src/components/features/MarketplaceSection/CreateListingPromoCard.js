@@ -208,7 +208,7 @@ const CreateListingPromoCard = ({ compact = false }) => {
 
         {/* Additional motivational text */}
         <div className="clpc-motivation">
-          <p>Join the go to Premium Marketplace - Sell with Value!</p>
+          <p>Join the go to Premium Marketplace - Sell Fast with Value!</p>
         </div>
       </div>
     </div>
