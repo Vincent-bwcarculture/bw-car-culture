@@ -37,6 +37,7 @@ import ResetPasswordPage from './Admin/auth/ResetPasswordPage.js';
 import UnauthorizedPage from './Admin/auth/UnauthorizedPage.js';
 import AdminDashboard from './Admin/AdminDashboard.js';
 import ListingManager from './Admin/ListingManager/ListingManager.js';
+import RoleManager from './Admin/components/RoleRequests.js';
 
 // Main Site Components
 import FeaturedNews from './components/features/CarNews/FeaturedNews.js';
