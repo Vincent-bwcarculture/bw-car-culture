@@ -15,7 +15,7 @@ import {
   Users,
   MapPin
 } from 'lucide-react';
-import './RoleManager.css';
+import './RoleRequests.css';
 
 const RoleManager = () => {
   const [requests, setRequests] = useState([]);
