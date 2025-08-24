@@ -731,6 +731,22 @@ const AppRoutes = () => {
           } 
         />
 
+ <Route path="/admin/roles" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <AdminLayout>
+              <RoleManager />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/role-requests" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <AdminLayout>
+              <RoleManager />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
         {/* PAYMENT MANAGEMENT ROUTES */}
         <Route path="/admin/payments" element={
           <ProtectedRoute requiredRoles={['admin']}>

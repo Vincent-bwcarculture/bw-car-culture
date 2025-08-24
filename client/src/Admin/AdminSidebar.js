@@ -102,6 +102,17 @@ const AdminSidebar = ({ collapsed }) => {
       path: '/admin/users'
     },
     {
+    title: 'Role Management',
+    icon: '🔐',
+    path: '/admin/roles',
+    roles: ['admin'],
+    submenu: [
+      { title: 'All Requests', path: '/admin/roles' },
+      { title: 'Pending Reviews', path: '/admin/role-requests' },
+      { title: 'User Roles', path: '/admin/users' }
+    ]
+    },
+    {
       title: 'Analytics',
       icon: '📈',
       path: '/admin/analytics'
