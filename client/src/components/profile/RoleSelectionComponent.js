@@ -213,7 +213,8 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
       const token = localStorage.getItem('token');
       console.log('Fetching pending requests from /user/role-requests');
       
-      const response = await fetch('/user/role-requests', {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
+const response = await fetch(`${API_BASE_URL}/role-requests`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
