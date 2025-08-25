@@ -179,7 +179,7 @@ const RoleManager = () => {
     const matchesSearch = searchTerm === '' || 
       request.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.userEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.requestType?.toLowerCase().includes(searchTerm.toLowerCase());
+      request.role?.toLowerCase().includes(searchTerm.toLowerCase());
     
     return matchesSearch;
   });
@@ -196,8 +196,8 @@ const RoleManager = () => {
   };
 
   const renderRequestCard = (request) => {
-    const role = roleConfig[request.requestType] || {
-      title: request.requestType,
+    const role = roleConfig[request.role] || {
+      title: request.role,
       icon: User,
       color: '#6b7280',
       bgColor: 'rgba(107, 114, 128, 0.1)',
@@ -244,7 +244,7 @@ const RoleManager = () => {
             </div>
             <div className="bw-user-detail">
               <Calendar size={16} />
-              <span className="bw-user-detail__text">Applied {formatDate(request.createdAt)}</span>
+              <span className="bw-user-detail__text">Applied {formatDate(request.submittedAt)}</span>
             </div>
           </div>
         </div>
@@ -355,29 +355,29 @@ const RoleManager = () => {
         )}
 
         {/* Business Info Preview */}
-        {(request.businessInfo?.businessName || request.contactInfo?.businessPhone) && (
+        {(request.applicationData?.businessName || request.applicationData?.businessPhone) && (
           <div className="bw-business-preview">
             <h4 className="bw-business-preview__title">
               <Briefcase size={16} />
               Business Information
             </h4>
             <div className="bw-business-details">
-              {request.businessInfo?.businessName && (
+              {request.applicationData?.businessName && (
                 <div className="bw-business-detail">
                   <Building2 size={14} />
-                  <span>{request.businessInfo.businessName}</span>
+                  <span>{request.applicationData.businessName}</span>
                 </div>
               )}
-              {request.contactInfo?.businessPhone && (
+              {request.applicationData?.businessPhone && (
                 <div className="bw-business-detail">
                   <Phone size={14} />
-                  <span>{request.contactInfo.businessPhone}</span>
+                  <span>{request.applicationData.businessPhone}</span>
                 </div>
               )}
-              {request.contactInfo?.businessEmail && (
+              {request.applicationData?.businessEmail && (
                 <div className="bw-business-detail">
                   <Mail size={14} />
-                  <span>{request.contactInfo.businessEmail}</span>
+                  <span>{request.applicationData.businessEmail}</span>
                 </div>
               )}
             </div>
@@ -421,8 +421,8 @@ const RoleManager = () => {
   const renderRequestModal = () => {
     if (!selectedRequest) return null;
 
-    const role = roleConfig[selectedRequest.requestType] || {
-      title: selectedRequest.requestType,
+    const role = roleConfig[selectedRequest.role] || {
+      title: selectedRequest.role,
       icon: User,
       color: '#6b7280',
       bgColor: 'rgba(107, 114, 128, 0.1)'
@@ -467,7 +467,7 @@ const RoleManager = () => {
                 </div>
                 <div className="bw-info-item">
                   <span className="bw-info-item__label">Application Date:</span>
-                  <span className="bw-info-item__value">{formatDate(selectedRequest.createdAt)}</span>
+                  <span className="bw-info-item__value">{formatDate(selectedRequest.submittedAt)}</span>
                 </div>
                 <div className="bw-info-item">
                   <span className="bw-info-item__label">Current Status:</span>
@@ -487,61 +487,61 @@ const RoleManager = () => {
             </div>
 
             {/* Business Information */}
-            {(selectedRequest.businessInfo || selectedRequest.contactInfo) && (
+            {(selectedRequest.applicationData?.businessName || selectedRequest.applicationData?.businessPhone) && (
               <div className="bw-modal-section">
                 <h3 className="bw-modal-section__title">
                   <Briefcase size={20} />
                   Business Information
                 </h3>
                 <div className="bw-info-grid">
-                  {selectedRequest.businessInfo?.businessName && (
+                  {selectedRequest.applicationData?.businessName && (
                     <div className="bw-info-item">
                       <span className="bw-info-item__label">Business Name:</span>
-                      <span className="bw-info-item__value">{selectedRequest.businessInfo.businessName}</span>
+                      <span className="bw-info-item__value">{selectedRequest.applicationData.businessName}</span>
                     </div>
                   )}
-                  {selectedRequest.businessInfo?.businessType && (
+                  {selectedRequest.applicationData?.businessType && (
                     <div className="bw-info-item">
                       <span className="bw-info-item__label">Business Type:</span>
-                      <span className="bw-info-item__value">{selectedRequest.businessInfo.businessType}</span>
+                      <span className="bw-info-item__value">{selectedRequest.applicationData.businessType}</span>
                     </div>
                   )}
-                  {selectedRequest.businessInfo?.licenseNumber && (
+                  {selectedRequest.applicationData?.licenseNumber && (
                     <div className="bw-info-item">
                       <span className="bw-info-item__label">License Number:</span>
-                      <span className="bw-info-item__value bw-mono">{selectedRequest.businessInfo.licenseNumber}</span>
+                      <span className="bw-info-item__value bw-mono">{selectedRequest.applicationData.licenseNumber}</span>
                     </div>
                   )}
-                  {selectedRequest.businessInfo?.taxId && (
+                  {selectedRequest.applicationData?.taxId && (
                     <div className="bw-info-item">
                       <span className="bw-info-item__label">Tax ID:</span>
-                      <span className="bw-info-item__value bw-mono">{selectedRequest.businessInfo.taxId}</span>
+                      <span className="bw-info-item__value bw-mono">{selectedRequest.applicationData.taxId}</span>
                     </div>
                   )}
-                  {selectedRequest.contactInfo?.businessPhone && (
+                  {selectedRequest.applicationData?.businessPhone && (
                     <div className="bw-info-item">
                       <span className="bw-info-item__label">Business Phone:</span>
-                      <span className="bw-info-item__value">{selectedRequest.contactInfo.businessPhone}</span>
+                      <span className="bw-info-item__value">{selectedRequest.applicationData.businessPhone}</span>
                     </div>
                   )}
-                  {selectedRequest.contactInfo?.businessEmail && (
+                  {selectedRequest.applicationData?.businessEmail && (
                     <div className="bw-info-item">
                       <span className="bw-info-item__label">Business Email:</span>
-                      <span className="bw-info-item__value">{selectedRequest.contactInfo.businessEmail}</span>
+                      <span className="bw-info-item__value">{selectedRequest.applicationData.businessEmail}</span>
                     </div>
                   )}
-                  {selectedRequest.contactInfo?.businessAddress && (
+                  {selectedRequest.applicationData?.businessAddress && (
                     <div className="bw-info-item bw-info-item--full">
                       <span className="bw-info-item__label">Business Address:</span>
-                      <span className="bw-info-item__value">{selectedRequest.contactInfo.businessAddress}</span>
+                      <span className="bw-info-item__value">{selectedRequest.applicationData.businessAddress}</span>
                     </div>
                   )}
-                  {selectedRequest.businessInfo?.website && (
+                  {selectedRequest.applicationData?.website && (
                     <div className="bw-info-item">
                       <span className="bw-info-item__label">Website:</span>
                       <span className="bw-info-item__value">
-                        <a href={selectedRequest.businessInfo.website} target="_blank" rel="noopener noreferrer">
-                          {selectedRequest.businessInfo.website}
+                        <a href={selectedRequest.applicationData.website} target="_blank" rel="noopener noreferrer">
+                          {selectedRequest.applicationData.website}
                         </a>
                       </span>
                     </div>
@@ -551,38 +551,38 @@ const RoleManager = () => {
             )}
 
             {/* Detailed Journalist Application */}
-            {selectedRequest.requestType === 'journalist' && selectedRequest.roleSpecificInfo && (
+            {selectedRequest.role === 'journalist' && selectedRequest.applicationData && (
               <div className="bw-modal-section">
                 <h3 className="bw-modal-section__title">
                   <PenTool size={20} />
                   Journalism Application Details
                 </h3>
                 
-                {selectedRequest.roleSpecificInfo.writingExperience && (
+                {selectedRequest.applicationData.writingExperience && (
                   <div className="bw-detail-block">
                     <h4 className="bw-detail-block__title">
                       <FileText size={18} />
                       Writing Experience & Background
                     </h4>
                     <div className="bw-detail-block__content">
-                      <p>{selectedRequest.roleSpecificInfo.writingExperience}</p>
+                      <p>{selectedRequest.applicationData.writingExperience}</p>
                     </div>
                   </div>
                 )}
 
-                {selectedRequest.roleSpecificInfo.portfolio && (
+                {selectedRequest.applicationData.portfolio && (
                   <div className="bw-detail-block">
                     <h4 className="bw-detail-block__title">
                       <Globe size={18} />
                       Portfolio & Sample Work
                     </h4>
                     <div className="bw-detail-block__content">
-                      <p>{selectedRequest.roleSpecificInfo.portfolio}</p>
+                      <p>{selectedRequest.applicationData.portfolio}</p>
                     </div>
                   </div>
                 )}
 
-                {selectedRequest.roleSpecificInfo.specializations?.length > 0 && (
+                {selectedRequest.applicationData.specializations?.length > 0 && (
                   <div className="bw-detail-block">
                     <h4 className="bw-detail-block__title">
                       <Award size={18} />
@@ -590,7 +590,7 @@ const RoleManager = () => {
                     </h4>
                     <div className="bw-detail-block__content">
                       <div className="bw-tags bw-tags--large">
-                        {selectedRequest.roleSpecificInfo.specializations.map((spec, index) => (
+                        {selectedRequest.applicationData.specializations.map((spec, index) => (
                           <span key={index} className="bw-tag bw-tag--journalist bw-tag--large">
                             {spec.replace('_', ' ')}
                           </span>
@@ -600,24 +600,24 @@ const RoleManager = () => {
                   </div>
                 )}
 
-                {selectedRequest.roleSpecificInfo.motivation && (
+                {selectedRequest.applicationData.motivation && (
                   <div className="bw-detail-block">
                     <h4 className="bw-detail-block__title">
                       💭 Motivation & Content Vision
                     </h4>
                     <div className="bw-detail-block__content">
-                      <p>{selectedRequest.roleSpecificInfo.motivation}</p>
+                      <p>{selectedRequest.applicationData.motivation}</p>
                     </div>
                   </div>
                 )}
 
-                {selectedRequest.roleSpecificInfo.socialMediaHandles && (
+                {selectedRequest.applicationData.socialMediaHandles && (
                   <div className="bw-detail-block">
                     <h4 className="bw-detail-block__title">
                       🌐 Social Media & Online Presence
                     </h4>
                     <div className="bw-detail-block__content">
-                      <p>{selectedRequest.roleSpecificInfo.socialMediaHandles}</p>
+                      <p>{selectedRequest.applicationData.socialMediaHandles}</p>
                     </div>
                   </div>
                 )}
@@ -625,21 +625,21 @@ const RoleManager = () => {
             )}
 
             {/* Detailed Courier Application */}
-            {selectedRequest.requestType === 'courier' && selectedRequest.roleSpecificInfo && (
+            {selectedRequest.role === 'courier' && selectedRequest.applicationData && (
               <div className="bw-modal-section">
                 <h3 className="bw-modal-section__title">
                   <Package size={20} />
                   Courier Service Details
                 </h3>
                 
-                {selectedRequest.roleSpecificInfo.transportModes?.length > 0 && (
+                {selectedRequest.applicationData.transportModes?.length > 0 && (
                   <div className="bw-detail-block">
                     <h4 className="bw-detail-block__title">
                       🚗 Available Transport Modes
                     </h4>
                     <div className="bw-detail-block__content">
                       <div className="bw-tags bw-tags--large">
-                        {selectedRequest.roleSpecificInfo.transportModes.map((mode, index) => (
+                        {selectedRequest.applicationData.transportModes.map((mode, index) => (
                           <span key={index} className="bw-tag bw-tag--courier bw-tag--large">
                             {mode.replace('_', ' ')}
                           </span>
@@ -649,38 +649,38 @@ const RoleManager = () => {
                   </div>
                 )}
 
-                {selectedRequest.roleSpecificInfo.deliveryCapacity && (
+                {selectedRequest.applicationData.deliveryCapacity && (
                   <div className="bw-detail-block">
                     <h4 className="bw-detail-block__title">📦 Delivery Capacity</h4>
                     <div className="bw-detail-block__content">
-                      <p>{selectedRequest.roleSpecificInfo.deliveryCapacity}</p>
+                      <p>{selectedRequest.applicationData.deliveryCapacity}</p>
                     </div>
                   </div>
                 )}
 
-                {selectedRequest.roleSpecificInfo.operatingSchedule && (
+                {selectedRequest.applicationData.operatingSchedule && (
                   <div className="bw-detail-block">
                     <h4 className="bw-detail-block__title">⏰ Operating Schedule</h4>
                     <div className="bw-detail-block__content">
-                      <p>{selectedRequest.roleSpecificInfo.operatingSchedule}</p>
+                      <p>{selectedRequest.applicationData.operatingSchedule}</p>
                     </div>
                   </div>
                 )}
 
-                {selectedRequest.roleSpecificInfo.coverageAreas && (
+                {selectedRequest.applicationData.coverageAreas && (
                   <div className="bw-detail-block">
                     <h4 className="bw-detail-block__title">📍 Coverage Areas</h4>
                     <div className="bw-detail-block__content">
-                      <p>{selectedRequest.roleSpecificInfo.coverageAreas}</p>
+                      <p>{selectedRequest.applicationData.coverageAreas}</p>
                     </div>
                   </div>
                 )}
 
-                {selectedRequest.roleSpecificInfo.courierExperience && (
+                {selectedRequest.applicationData.courierExperience && (
                   <div className="bw-detail-block">
                     <h4 className="bw-detail-block__title">📋 Courier Experience</h4>
                     <div className="bw-detail-block__content">
-                      <p>{selectedRequest.roleSpecificInfo.courierExperience}</p>
+                      <p>{selectedRequest.applicationData.courierExperience}</p>
                     </div>
                   </div>
                 )}
@@ -756,7 +756,7 @@ const RoleManager = () => {
             <span className="bw-stat__label">Pending Applications</span>
           </div>
           <div className="bw-stat">
-            <span className="bw-stat__number">{requests.filter(r => r.requestType === 'journalist').length}</span>
+            <span className="bw-stat__number">{requests.filter(r => r.role === 'journalist').length}</span>
             <span className="bw-stat__label">Journalist Applications</span>
           </div>
           <div className="bw-stat">
