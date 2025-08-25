@@ -1,4 +1,6 @@
 // client/src/pages/UserProfilePage.js
+// ENHANCED VERSION - Articles tab added for journalists between Sell My Vehicle and Network
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
@@ -11,7 +13,8 @@ import {
   BookOpen, 
   Shield,
   UserCheck,
-  Users  // Added Users icon for Network tab
+  Users,  // Added Users icon for Network tab
+  PenTool  // NEW: Added for Articles tab
 } from 'lucide-react';
 import axios from '../config/axios.js';
 
@@ -24,6 +27,7 @@ import VehicleManagement from '../components/profile/VehicleManagement.js';
 import BusinessDashboard from '../components/profile/BusinessDashboard.js';
 import ProfileSettings from '../components/profile/ProfileSettings.js';
 import NetworkTab from '../components/profile/NetworkTab.js';
+import ArticleManagement from '../components/profile/ArticleManagement.js'; // NEW: Import ArticleManagement
 
 import CoordinatorManagement from '../components/profile/CoordinatorManagement.js';
 import RealTimeCoordinatorDashboard from '../components/profile/RealTimeCoordinatorDashboard.js';
@@ -57,12 +61,12 @@ const UserProfilePage = () => {
     const tab = params.get('tab');
     const action = params.get('action');
     
-    // UPDATED: Enhanced tab handling for car selling and network
+    // UPDATED: Enhanced tab handling for car selling, articles, and network
     if (tab) {
       if (tab === 'sell-car' || tab === 'sell_car') {
         setActiveTab('vehicles'); // Redirect to vehicles tab
         setUrlAction('sell'); // Set action to sell
-      } else if (['overview', 'services', 'routes', 'vehicles', 'business', 'network', 'settings'].includes(tab)) {
+      } else if (['overview', 'services', 'routes', 'vehicles', 'articles', 'business', 'network', 'settings'].includes(tab)) {
         setActiveTab(tab);
       }
     }
@@ -203,7 +207,15 @@ const getAvailableTabs = () => {
   // Always show vehicles for anyone who might own a car
   tabs.push({ id: 'vehicles', label: 'Sell My Vehicle', icon: Car });
 
+  // === NEW: JOURNALIST ARTICLES TAB ===
+  // Show Articles tab for journalists (primary OR additional role)
+  const isJournalist = profileData?.role === 'journalist' ||
+                       (profileData?.additionalRoles && 
+                        profileData.additionalRoles.includes('journalist'));
   
+  if (isJournalist) {
+    tabs.push({ id: 'articles', label: 'Articles', icon: PenTool });
+  }
 
   // === BUSINESS & SERVICE TABS ===
   
@@ -286,8 +298,6 @@ const getAvailableTabs = () => {
   if (profileData?.role === 'ministry_official' || profileData?.role === 'government_admin') {
     tabs.push({ id: 'ministry', label: 'Ministry Dashboard', icon: Shield });
   }
-
-  
 
   // === UNIVERSAL TABS (Always at the end) ===
   // REMOVED: tabs.push({ id: 'roles', label: 'Role Management', icon: Shield })
@@ -376,6 +386,14 @@ const getAvailableTabs = () => {
             profileData={displayData}
             refreshProfile={fetchUserProfile}
             urlAction={urlAction}
+          />
+        )}
+
+        {/* NEW: Articles tab content for journalists */}
+        {activeTab === 'articles' && (
+          <ArticleManagement 
+            profileData={displayData}
+            refreshProfile={fetchUserProfile}
           />
         )}
 

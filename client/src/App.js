@@ -38,6 +38,7 @@ import UnauthorizedPage from './Admin/auth/UnauthorizedPage.js';
 import AdminDashboard from './Admin/AdminDashboard.js';
 import ListingManager from './Admin/ListingManager/ListingManager.js';
 import RoleManager from './Admin/components/RoleRequests.js';
+import CreateArticle from './components/journalist/CreateArticle.js';
 
 // Main Site Components
 import FeaturedNews from './components/features/CarNews/FeaturedNews.js';
@@ -897,6 +898,8 @@ const AppRoutes = () => {
   </MainLayout>
 } />
 
+
+
 <Route path="/home" element={
   <MainLayout>
     <HomeContent />
@@ -921,6 +924,14 @@ const AppRoutes = () => {
           <ProtectedRoute requiredRoles={['user', 'admin']}>
             <MainLayout>
               <UserProfilePage />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+           <Route path="/journalist/create-article" element={
+          <ProtectedRoute requiredRoles={['journalist', 'admin']}>
+            <MainLayout>
+              <CreateArticle />
             </MainLayout>
           </ProtectedRoute>
         } />
