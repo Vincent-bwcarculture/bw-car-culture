@@ -1,5 +1,5 @@
 // client/src/components/profile/RoleSelectionComponent.js
-// COMPLETE VERSION - Current Working Code with Courier Role + NEW Journalist Role Integrated
+// COMPLETE VERSION - Fixed API calls to use correct API server
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -54,7 +54,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     coverageAreas: '',
     courierExperience: '',
     
-    // NEW: Journalist-specific fields
+    // Journalist-specific fields
     writingExperience: '',
     portfolio: '',
     specializations: [],
@@ -66,6 +66,9 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     description: '',
     specializations: ''
   });
+
+  // API Configuration - Use environment variable or fallback
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
 
   const availableRoles = {
     'dealership_admin': {
@@ -167,7 +170,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
       requiredFields: [],
       requiredDocs: []
     },
-    // NEW: Journalist role
+    // Journalist role
     'journalist': {
       id: 'journalist',
       title: 'Content Journalist',
@@ -213,8 +216,8 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
       const token = localStorage.getItem('token');
       console.log('Fetching pending requests from /user/role-requests');
       
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
-const response = await fetch(`${API_BASE_URL}/role-requests`, {
+      // FIXED: Use correct API URL
+      const response = await fetch(`${API_BASE_URL}/user/role-requests`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -266,7 +269,7 @@ const response = await fetch(`${API_BASE_URL}/role-requests`, {
     }));
   };
 
-  // NEW: Handle specializations for journalist
+  // Handle specializations for journalist
   const handleSpecializationChange = (specialization, isChecked) => {
     setFormData(prev => ({
       ...prev,
@@ -297,7 +300,7 @@ const response = await fetch(`${API_BASE_URL}/role-requests`, {
     try {
       const token = localStorage.getItem('token');
       
-      // Prepare request data as JSON (simplified for now)
+      // Prepare request data as JSON
       const requestData = {
         businessName: formData.businessName,
         businessType: formData.businessType,
@@ -327,7 +330,7 @@ const response = await fetch(`${API_BASE_URL}/role-requests`, {
         operatingSchedule: formData.operatingSchedule,
         coverageAreas: formData.coverageAreas,
         courierExperience: formData.courierExperience,
-        // NEW: Journalist-specific data
+        // Journalist-specific data
         writingExperience: formData.writingExperience,
         portfolio: formData.portfolio,
         motivation: formData.motivation,
@@ -340,7 +343,8 @@ const response = await fetch(`${API_BASE_URL}/role-requests`, {
         requestData: requestData
       });
 
-      const response = await fetch('/role-requests', {
+      // FIXED: Use correct API URL
+      const response = await fetch(`${API_BASE_URL}/role-requests`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -667,7 +671,7 @@ const response = await fetch(`${API_BASE_URL}/role-requests`, {
             </div>
           )}
 
-          {/* NEW: Journalist-specific Section */}
+          {/* Journalist-specific Section */}
           {selectedRole === 'journalist' && (
             <div className="role-form-section">
               <h5>Journalism & Writing Details</h5>
