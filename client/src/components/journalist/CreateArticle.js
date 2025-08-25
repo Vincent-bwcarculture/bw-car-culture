@@ -2,7 +2,7 @@
 // Placeholder component for journalist article creation
 
 import React from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext.js';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, PenTool, FileText, Settings } from 'lucide-react';
 import './CreateArticle.css';
