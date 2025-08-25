@@ -1,4 +1,6 @@
 // client/src/Admin/RoleManager/RoleManager.js
+// COMPLETE FIXED VERSION - API calls now use correct API server URL
+
 import React, { useState, useEffect } from 'react';
 import { 
   User, 
@@ -18,6 +20,9 @@ import {
 import './RoleRequests.css';
 
 const RoleManager = () => {
+  // FIXED: API Configuration - Use environment variable or fallback
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
+
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -95,7 +100,8 @@ const RoleManager = () => {
         params.append('requestType', filterRole);
       }
 
-      const response = await fetch(`/api/admin/role-requests?${params}`, {
+      // FIXED: Use full API URL instead of relative path
+      const response = await fetch(`${API_BASE_URL}/api/admin/role-requests?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -127,7 +133,8 @@ const RoleManager = () => {
       
       const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
       
-      const response = await fetch(`/api/admin/role-requests/${requestId}`, {
+      // FIXED: Use full API URL instead of relative path
+      const response = await fetch(`${API_BASE_URL}/api/admin/role-requests/${requestId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -160,7 +167,7 @@ const RoleManager = () => {
     const matchesSearch = searchTerm === '' || 
       request.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.userEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.role?.toLowerCase().includes(searchTerm.toLowerCase());
+      request.requestType?.toLowerCase().includes(searchTerm.toLowerCase());
     
     return matchesSearch;
   });
@@ -177,8 +184,8 @@ const RoleManager = () => {
   };
 
   const renderRequestCard = (request) => {
-    const role = roleConfig[request.role] || {
-      title: request.role,
+    const role = roleConfig[request.requestType] || {
+      title: request.requestType,
       icon: User,
       color: '#6b7280',
       description: 'Role request'
@@ -224,34 +231,62 @@ const RoleManager = () => {
             </div>
             <div className="user-detail">
               <span>📅</span>
-              <span>Applied {formatDate(request.submittedAt)}</span>
+              <span>Applied {formatDate(request.createdAt)}</span>
             </div>
           </div>
         </div>
 
         {/* Show application data for journalists */}
-        {request.role === 'journalist' && request.applicationData && (
+        {request.requestType === 'journalist' && request.roleSpecificInfo && (
           <div className="journalist-application-preview">
             <h4>📝 Application Summary</h4>
-            {request.applicationData.writingExperience && (
+            {request.roleSpecificInfo.writingExperience && (
               <div className="application-field">
                 <strong>Writing Experience:</strong>
-                <p>{request.applicationData.writingExperience.substring(0, 120)}...</p>
+                <p>{request.roleSpecificInfo.writingExperience.substring(0, 120)}...</p>
               </div>
             )}
-            {request.applicationData.specializations?.length > 0 && (
+            {request.roleSpecificInfo.specializations?.length > 0 && (
               <div className="application-field">
                 <strong>Specializations:</strong>
                 <div className="specializations">
-                  {request.applicationData.specializations.slice(0, 3).map((spec, index) => (
+                  {request.roleSpecificInfo.specializations.slice(0, 3).map((spec, index) => (
                     <span key={index} className="specialization-tag">
                       {spec.replace('_', ' ')}
                     </span>
                   ))}
-                  {request.applicationData.specializations.length > 3 && (
-                    <span className="more-specs">+{request.applicationData.specializations.length - 3} more</span>
+                  {request.roleSpecificInfo.specializations.length > 3 && (
+                    <span className="more-specs">+{request.roleSpecificInfo.specializations.length - 3} more</span>
                   )}
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Show application data for courier */}
+        {request.requestType === 'courier' && request.roleSpecificInfo && (
+          <div className="courier-application-preview">
+            <h4>📦 Courier Application Summary</h4>
+            {request.roleSpecificInfo.transportModes?.length > 0 && (
+              <div className="application-field">
+                <strong>Transport Modes:</strong>
+                <div className="transport-modes">
+                  {request.roleSpecificInfo.transportModes.slice(0, 3).map((mode, index) => (
+                    <span key={index} className="transport-mode-tag">
+                      {mode.replace('_', ' ')}
+                    </span>
+                  ))}
+                  {request.roleSpecificInfo.transportModes.length > 3 && (
+                    <span className="more-modes">+{request.roleSpecificInfo.transportModes.length - 3} more</span>
+                  )}
+                </div>
+              </div>
+            )}
+            {request.roleSpecificInfo.deliveryCapacity && (
+              <div className="application-field">
+                <strong>Delivery Capacity:</strong>
+                <p>{request.roleSpecificInfo.deliveryCapacity}</p>
               </div>
             )}
           </div>
@@ -294,8 +329,8 @@ const RoleManager = () => {
   const renderRequestModal = () => {
     if (!selectedRequest) return null;
 
-    const role = roleConfig[selectedRequest.role] || {
-      title: selectedRequest.role,
+    const role = roleConfig[selectedRequest.requestType] || {
+      title: selectedRequest.requestType,
       icon: User,
       color: '#6b7280'
     };
@@ -327,7 +362,7 @@ const RoleManager = () => {
                 </div>
                 <div className="info-item">
                   <span>Applied:</span>
-                  <span>{formatDate(selectedRequest.submittedAt)}</span>
+                  <span>{formatDate(selectedRequest.createdAt)}</span>
                 </div>
                 <div className="info-item">
                   <span>Status:</span>
@@ -338,30 +373,63 @@ const RoleManager = () => {
               </div>
             </div>
 
+            {/* Business Information */}
+            {(selectedRequest.businessInfo || selectedRequest.contactInfo) && (
+              <div className="business-info">
+                <h3>🏢 Business Information</h3>
+                <div className="info-grid">
+                  {selectedRequest.businessInfo?.businessName && (
+                    <div className="info-item">
+                      <span>Business Name:</span>
+                      <span>{selectedRequest.businessInfo.businessName}</span>
+                    </div>
+                  )}
+                  {selectedRequest.businessInfo?.businessType && (
+                    <div className="info-item">
+                      <span>Business Type:</span>
+                      <span>{selectedRequest.businessInfo.businessType}</span>
+                    </div>
+                  )}
+                  {selectedRequest.contactInfo?.businessPhone && (
+                    <div className="info-item">
+                      <span>Phone:</span>
+                      <span>{selectedRequest.contactInfo.businessPhone}</span>
+                    </div>
+                  )}
+                  {selectedRequest.contactInfo?.businessEmail && (
+                    <div className="info-item">
+                      <span>Business Email:</span>
+                      <span>{selectedRequest.contactInfo.businessEmail}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Detailed application data for journalists */}
-            {selectedRequest.role === 'journalist' && selectedRequest.applicationData && (
+            {selectedRequest.requestType === 'journalist' && selectedRequest.roleSpecificInfo && (
               <div className="application-details">
                 <h3>📝 Journalist Application Details</h3>
                 
-                {selectedRequest.applicationData.writingExperience && (
+                {selectedRequest.roleSpecificInfo.writingExperience && (
                   <div className="detail-section">
                     <h4>✍️ Writing Experience</h4>
-                    <p>{selectedRequest.applicationData.writingExperience}</p>
+                    <p>{selectedRequest.roleSpecificInfo.writingExperience}</p>
                   </div>
                 )}
 
-                {selectedRequest.applicationData.portfolio && (
+                {selectedRequest.roleSpecificInfo.portfolio && (
                   <div className="detail-section">
                     <h4>📂 Portfolio / Sample Work</h4>
-                    <p>{selectedRequest.applicationData.portfolio}</p>
+                    <p>{selectedRequest.roleSpecificInfo.portfolio}</p>
                   </div>
                 )}
 
-                {selectedRequest.applicationData.specializations?.length > 0 && (
+                {selectedRequest.roleSpecificInfo.specializations?.length > 0 && (
                   <div className="detail-section">
                     <h4>🎯 Content Specializations</h4>
                     <div className="specializations">
-                      {selectedRequest.applicationData.specializations.map((spec, index) => (
+                      {selectedRequest.roleSpecificInfo.specializations.map((spec, index) => (
                         <span key={index} className="specialization-tag">
                           {spec.replace('_', ' ')}
                         </span>
@@ -370,30 +438,86 @@ const RoleManager = () => {
                   </div>
                 )}
 
-                {selectedRequest.applicationData.motivation && (
+                {selectedRequest.roleSpecificInfo.motivation && (
                   <div className="detail-section">
                     <h4>💭 Motivation & Content Vision</h4>
-                    <p>{selectedRequest.applicationData.motivation}</p>
+                    <p>{selectedRequest.roleSpecificInfo.motivation}</p>
                   </div>
                 )}
 
-                {selectedRequest.applicationData.socialMediaHandles && (
+                {selectedRequest.roleSpecificInfo.socialMediaHandles && (
                   <div className="detail-section">
                     <h4>🌐 Social Media / Online Presence</h4>
-                    <p>{selectedRequest.applicationData.socialMediaHandles}</p>
+                    <p>{selectedRequest.roleSpecificInfo.socialMediaHandles}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Detailed application data for courier */}
+            {selectedRequest.requestType === 'courier' && selectedRequest.roleSpecificInfo && (
+              <div className="application-details">
+                <h3>📦 Courier Application Details</h3>
+                
+                {selectedRequest.roleSpecificInfo.transportModes?.length > 0 && (
+                  <div className="detail-section">
+                    <h4>🚗 Available Transport Modes</h4>
+                    <div className="transport-modes">
+                      {selectedRequest.roleSpecificInfo.transportModes.map((mode, index) => (
+                        <span key={index} className="transport-mode-tag">
+                          {mode.replace('_', ' ')}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedRequest.roleSpecificInfo.deliveryCapacity && (
+                  <div className="detail-section">
+                    <h4>📦 Delivery Capacity</h4>
+                    <p>{selectedRequest.roleSpecificInfo.deliveryCapacity}</p>
+                  </div>
+                )}
+
+                {selectedRequest.roleSpecificInfo.operatingSchedule && (
+                  <div className="detail-section">
+                    <h4>⏰ Operating Schedule</h4>
+                    <p>{selectedRequest.roleSpecificInfo.operatingSchedule}</p>
+                  </div>
+                )}
+
+                {selectedRequest.roleSpecificInfo.coverageAreas && (
+                  <div className="detail-section">
+                    <h4>📍 Coverage Areas</h4>
+                    <p>{selectedRequest.roleSpecificInfo.coverageAreas}</p>
+                  </div>
+                )}
+
+                {selectedRequest.roleSpecificInfo.courierExperience && (
+                  <div className="detail-section">
+                    <h4>📋 Courier Experience</h4>
+                    <p>{selectedRequest.roleSpecificInfo.courierExperience}</p>
                   </div>
                 )}
               </div>
             )}
 
             {/* Review notes */}
-            {selectedRequest.notes && (
+            {(selectedRequest.adminNotes || selectedRequest.reviewNotes) && (
               <div className="review-notes">
                 <h3>📋 Admin Notes</h3>
-                <p>{selectedRequest.notes}</p>
-                {selectedRequest.reviewedBy && (
-                  <small>Reviewed by: {selectedRequest.reviewedBy} on {formatDate(selectedRequest.reviewedAt)}</small>
+                <p>{selectedRequest.adminNotes || selectedRequest.reviewNotes}</p>
+                {selectedRequest.reviewedByName && (
+                  <small>Reviewed by: {selectedRequest.reviewedByName} on {formatDate(selectedRequest.reviewedAt)}</small>
                 )}
+              </div>
+            )}
+
+            {/* General reason */}
+            {selectedRequest.reason && (
+              <div className="request-reason">
+                <h3>📄 Application Reason</h3>
+                <p>{selectedRequest.reason}</p>
               </div>
             )}
           </div>
@@ -436,7 +560,7 @@ const RoleManager = () => {
             <span className="stat-label">Pending</span>
           </div>
           <div className="stat">
-            <span className="stat-number">{requests.filter(r => r.role === 'journalist').length}</span>
+            <span className="stat-number">{requests.filter(r => r.requestType === 'journalist').length}</span>
             <span className="stat-label">Journalists</span>
           </div>
         </div>
