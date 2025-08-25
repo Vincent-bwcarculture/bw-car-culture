@@ -1,0 +1,357 @@
+/* client/src/components/journalist/CreateArticle.css */
+/* Styles for the journalist article creation placeholder page */
+
+/* CSS Variables */
+:root {
+  --journalist-primary: #28a745;
+  --journalist-primary-dark: #218838;
+  --journalist-primary-light: #d4edda;
+  --journalist-bg-primary: #1a1a1a;
+  --journalist-bg-secondary: #2d2d2d;
+  --journalist-bg-tertiary: #3d3d3d;
+  --journalist-text-primary: #ffffff;
+  --journalist-text-secondary: #b0b0b0;
+  --journalist-text-muted: #808080;
+  --journalist-border-color: #404040;
+  --journalist-border-radius: 12px;
+  --journalist-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --journalist-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --journalist-transition: all 0.3s ease;
+}
+
+/* Main Container */
+.create-article-container {
+  min-height: 100vh;
+  background: var(--journalist-bg-primary);
+  color: var(--journalist-text-primary);
+  padding: 20px;
+}
+
+/* Header Section */
+.create-article-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: var(--journalist-bg-secondary);
+  border-radius: var(--journalist-border-radius);
+  border: 1px solid var(--journalist-border-color);
+  box-shadow: var(--journalist-shadow-sm);
+}
+
+.back-button {
+  background: var(--journalist-bg-tertiary);
+  border: 1px solid var(--journalist-border-color);
+  color: var(--journalist-text-primary);
+  padding: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: var(--journalist-transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+}
+
+.back-button:hover {
+  background: var(--journalist-primary);
+  border-color: var(--journalist-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--journalist-shadow-md);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  background: var(--journalist-primary);
+  padding: 12px;
+  border-radius: var(--journalist-border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--journalist-shadow-sm);
+}
+
+.header-icon svg {
+  color: white;
+}
+
+.header-text h1 {
+  margin: 0 0 4px 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--journalist-text-primary);
+}
+
+.header-text p {
+  margin: 0;
+  color: var(--journalist-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Main Content */
+.create-article-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 200px);
+}
+
+.placeholder-content {
+  text-align: center;
+  max-width: 600px;
+  background: var(--journalist-bg-secondary);
+  padding: 40px;
+  border-radius: var(--journalist-border-radius);
+  border: 1px solid var(--journalist-border-color);
+  box-shadow: var(--journalist-shadow-md);
+}
+
+.placeholder-icon {
+  margin-bottom: 24px;
+  color: var(--journalist-primary);
+  display: flex;
+  justify-content: center;
+}
+
+.placeholder-content h2 {
+  margin: 0 0 16px 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--journalist-text-primary);
+}
+
+.placeholder-description {
+  color: var(--journalist-text-secondary);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+/* Feature Preview */
+.feature-preview {
+  margin-bottom: 32px;
+  padding: 24px;
+  background: var(--journalist-bg-primary);
+  border-radius: var(--journalist-border-radius);
+  border: 1px solid var(--journalist-border-color);
+}
+
+.feature-preview h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--journalist-primary);
+}
+
+.feature-list {
+  display: grid;
+  gap: 16px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--journalist-bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--journalist-border-color);
+  transition: var(--journalist-transition);
+}
+
+.feature-item:hover {
+  background: var(--journalist-bg-tertiary);
+  border-color: var(--journalist-primary);
+  transform: translateY(-1px);
+}
+
+.feature-item svg {
+  color: var(--journalist-primary);
+  flex-shrink: 0;
+}
+
+.feature-item span {
+  color: var(--journalist-text-primary);
+  font-weight: 500;
+}
+
+/* User Info */
+.user-info {
+  background: var(--journalist-bg-primary);
+  padding: 24px;
+  border-radius: var(--journalist-border-radius);
+  border: 1px solid var(--journalist-border-color);
+  text-align: left;
+}
+
+.user-info h4 {
+  margin: 0 0 16px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--journalist-primary);
+  text-align: center;
+}
+
+.user-info p {
+  margin: 8px 0;
+  color: var(--journalist-text-secondary);
+  font-size: 0.95rem;
+}
+
+.user-info strong {
+  color: var(--journalist-text-primary);
+}
+
+/* Unauthorized Access */
+.create-article-unauthorized {
+  min-height: 100vh;
+  background: var(--journalist-bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.unauthorized-content {
+  text-align: center;
+  background: var(--journalist-bg-secondary);
+  padding: 40px;
+  border-radius: var(--journalist-border-radius);
+  border: 1px solid var(--journalist-border-color);
+  box-shadow: var(--journalist-shadow-md);
+}
+
+.unauthorized-content h2 {
+  color: #dc3545;
+  margin-bottom: 16px;
+}
+
+.unauthorized-content p {
+  color: var(--journalist-text-secondary);
+  margin-bottom: 24px;
+}
+
+.unauthorized-content .back-button {
+  background: var(--journalist-primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--journalist-border-radius);
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: var(--journalist-transition);
+  min-width: auto;
+  height: auto;
+}
+
+.unauthorized-content .back-button:hover {
+  background: var(--journalist-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--journalist-shadow-md);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .create-article-container {
+    padding: 15px;
+  }
+
+  .create-article-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+    padding: 20px 15px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .header-text h1 {
+    font-size: 1.5rem;
+  }
+
+  .placeholder-content {
+    padding: 24px 20px;
+  }
+
+  .placeholder-content h2 {
+    font-size: 1.6rem;
+  }
+
+  .feature-list {
+    gap: 12px;
+  }
+
+  .feature-item {
+    padding: 10px 12px;
+  }
+
+  .user-info,
+  .feature-preview {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .create-article-header {
+    padding: 15px 10px;
+  }
+
+  .placeholder-content {
+    padding: 20px 15px;
+  }
+
+  .header-text h1 {
+    font-size: 1.3rem;
+  }
+
+  .placeholder-content h2 {
+    font-size: 1.4rem;
+  }
+
+  .placeholder-description {
+    font-size: 1rem;
+  }
+}
+
+/* Animation for the placeholder content */
+.placeholder-content {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .placeholder-content {
+    animation: none;
+  }
+  
+  .feature-item:hover,
+  .back-button:hover {
+    transform: none;
+  }
+}

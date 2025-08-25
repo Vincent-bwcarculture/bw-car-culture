@@ -1,5 +1,5 @@
 // client/src/components/profile/ProfileHeader.js
-// COMPLETE VERSION - With Social Features + Admin Dashboard Access Integrated
+// COMPLETE VERSION - With Social Features + Admin Dashboard Access + Create Article Button for Journalists
 
 import React, { useState, useRef, useEffect } from 'react';
 import { 
@@ -18,7 +18,8 @@ import {
   UserPlus,
   UserCheck,
   Shield,  // Added for admin dashboard icon
-  Package   // Added for courier role icon
+  Package, // Added for courier role icon
+  PenTool  // NEW: Added for Create Article button
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import { useNavigate } from 'react-router-dom';  // Added for navigation
@@ -226,6 +227,11 @@ const ProfileHeader = ({
                   profileData?.role === 'ministry_official' ||
                   profileData?.role === 'government_admin';
 
+  // NEW: Check if user has journalist role (primary OR additional)
+  const isJournalist = profileData?.role === 'journalist' ||
+                       (profileData?.additionalRoles && 
+                        profileData.additionalRoles.includes('journalist'));
+
   const getInitials = (name) => {
     if (!name) return 'U';
     return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2);
@@ -260,6 +266,12 @@ const ProfileHeader = ({
   const handleAdminDashboardClick = () => {
     console.log('Admin dashboard access clicked');
     navigate('/admin/dashboard');
+  };
+
+  // NEW: Handle create article access for journalists
+  const handleCreateArticleClick = () => {
+    console.log('Create article clicked - journalist access');
+    navigate('/journalist/create-article');
   };
 
   // Handle avatar upload - Updates AuthContext
@@ -658,7 +670,7 @@ const ProfileHeader = ({
                   Edit Profile
                 </button>
 
-                {/* Admin Dashboard Access button - NEW ADDITION */}
+                {/* Admin Dashboard Access button */}
                 {isAdmin && (
                   <button 
                     className="pheader-admin-dashboard-button"
@@ -668,6 +680,19 @@ const ProfileHeader = ({
                   >
                     <Shield size={16} />
                     Admin Dashboard
+                  </button>
+                )}
+
+                {/* NEW: Create Article button for journalists */}
+                {isJournalist && (
+                  <button 
+                    className="pheader-create-article-button"
+                    onClick={handleCreateArticleClick}
+                    type="button"
+                    title="Create New Article"
+                  >
+                    <PenTool size={16} />
+                    Create Article
                   </button>
                 )}
               </div>
@@ -717,6 +742,7 @@ const ProfileHeader = ({
                profileData?.role === 'dealership_admin' ? 'Dealership Admin' :
                profileData?.role === 'transport_admin' ? 'Transport Admin' :
                profileData?.role === 'rental_admin' ? 'Rental Admin' :
+               profileData?.role === 'journalist' ? 'Journalist' :
                hasBusinessProfile ? 'Business Owner' :
                hasTransportProfile ? 'Transport Provider' :
                hasDealerProfile ? 'Dealer' : 'User'}
