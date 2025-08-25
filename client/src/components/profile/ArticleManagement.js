@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement.js
-// Complete article management dashboard for journalists
+// ENHANCED VERSION - Complete article management dashboard with earnings tracking
 
 import React, { useState, useEffect, useRef } from 'react';
 import { 
@@ -28,7 +28,11 @@ import {
   ExternalLink,
   FileText,
   Tag,
-  Globe
+  Globe,
+  DollarSign,  // NEW: For earnings
+  Wallet,      // NEW: For earnings
+  CreditCard,  // NEW: For payments
+  Target       // NEW: For goals
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import './ArticleManagement.css';
@@ -43,16 +47,38 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isCreating, setIsCreating] = useState(false);
   const [editingArticle, setEditingArticle] = useState(null);
+  
+  // Enhanced stats with earnings
   const [stats, setStats] = useState({
     totalArticles: 0,
     publishedArticles: 0,
     draftArticles: 0,
     totalViews: 0,
     totalShares: 0,
-    totalLikes: 0
+    totalLikes: 0,
+    // NEW: Earnings tracking
+    totalEarnings: 0,
+    thisMonthEarnings: 0,
+    pendingEarnings: 0,
+    averageEarningsPerView: 0,
+    topEarningArticle: null
   });
 
-  // Article form states
+  // NEW: Earnings configuration
+  const earningsConfig = {
+    ratePerView: 0.01,        // P0.01 per view (P100 for 10,000 views)
+    minimumPayout: 50,        // Minimum P50 before payout
+    bonusThresholds: {
+      1000: 5,   // P5 bonus for 1k+ views
+      5000: 25,  // P25 bonus for 5k+ views  
+      10000: 75, // P75 bonus for 10k+ views
+      25000: 200 // P200 bonus for 25k+ views
+    },
+    premiumMultiplier: 1.5,   // 50% more for premium content
+    weekendBonus: 1.2         // 20% weekend bonus
+  };
+
+  // Article form states (existing)
   const [articleForm, setArticleForm] = useState({
     title: '',
     subtitle: '',
@@ -64,23 +90,25 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
     publishDate: null,
     metaTitle: '',
     metaDescription: '',
-    authorNotes: ''
+    authorNotes: '',
+    isPremium: false,  // NEW: Premium content flag
+    earningsEnabled: true  // NEW: Enable/disable earnings for article
   });
 
   const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Categories for articles
+  // Categories for articles (existing)
   const categories = [
-    { id: 'news', label: 'Breaking News', color: '#dc3545' },
-    { id: 'reviews', label: 'Vehicle Reviews', color: '#28a745' },
-    { id: 'industry', label: 'Industry Analysis', color: '#007bff' },
-    { id: 'events', label: 'Events & Shows', color: '#ffc107' },
-    { id: 'technology', label: 'Automotive Tech', color: '#6f42c1' },
-    { id: 'lifestyle', label: 'Car Culture', color: '#fd7e14' },
-    { id: 'maintenance', label: 'Tips & Maintenance', color: '#20c997' },
-    { id: 'motorsport', label: 'Motorsport', color: '#e83e8c' }
+    { id: 'news', label: 'Breaking News', color: '#dc3545', multiplier: 1.2 },
+    { id: 'reviews', label: 'Vehicle Reviews', color: '#28a745', multiplier: 1.5 },
+    { id: 'industry', label: 'Industry Analysis', color: '#007bff', multiplier: 1.3 },
+    { id: 'events', label: 'Events & Shows', color: '#ffc107', multiplier: 1.1 },
+    { id: 'technology', label: 'Automotive Tech', color: '#6f42c1', multiplier: 1.4 },
+    { id: 'lifestyle', label: 'Car Culture', color: '#fd7e14', multiplier: 1.0 },
+    { id: 'maintenance', label: 'Tips & Maintenance', color: '#20c997', multiplier: 1.2 },
+    { id: 'motorsport', label: 'Motorsport', color: '#e83e8c', multiplier: 1.3 }
   ];
 
   useEffect(() => {
@@ -91,7 +119,7 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
   const loadArticles = async () => {
     try {
       setLoading(true);
-      // Mock data for now - replace with actual API call
+      // Enhanced mock data with earnings information
       const mockArticles = [
         {
           id: '1',
@@ -104,10 +132,20 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
           publishDate: '2024-01-15',
           createdAt: '2024-01-10',
           updatedAt: '2024-01-15',
-          views: 1250,
-          likes: 45,
-          shares: 12,
-          featuredImage: null
+          views: 12500,
+          likes: 145,
+          shares: 32,
+          featuredImage: null,
+          isPremium: true,
+          earningsEnabled: true,
+          // NEW: Earnings data
+          earnings: {
+            totalEarned: 187.50,
+            viewsEarnings: 125.00,
+            bonusEarnings: 62.50,
+            isPaid: false,
+            earningDate: '2024-01-15'
+          }
         },
         {
           id: '2',
@@ -116,14 +154,76 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
           content: 'Detailed review content here...',
           category: 'reviews',
           tags: ['toyota', 'prius', 'hybrid', 'review'],
-          status: 'draft',
-          publishDate: null,
+          status: 'published',
+          publishDate: '2024-01-12',
           createdAt: '2024-01-08',
           updatedAt: '2024-01-12',
+          views: 8750,
+          likes: 89,
+          shares: 15,
+          featuredImage: null,
+          isPremium: false,
+          earningsEnabled: true,
+          // NEW: Earnings data
+          earnings: {
+            totalEarned: 131.25,
+            viewsEarnings: 87.50,
+            bonusEarnings: 43.75,
+            isPaid: false,
+            earningDate: '2024-01-12'
+          }
+        },
+        {
+          id: '3',
+          title: 'Best Car Maintenance Tips for 2024',
+          subtitle: 'Keep your vehicle running smoothly with expert advice',
+          content: 'Maintenance tips and tricks...',
+          category: 'maintenance',
+          tags: ['maintenance', 'tips', 'car-care'],
+          status: 'published',
+          publishDate: '2024-01-10',
+          createdAt: '2024-01-08',
+          updatedAt: '2024-01-10',
+          views: 4200,
+          likes: 67,
+          shares: 8,
+          featuredImage: null,
+          isPremium: false,
+          earningsEnabled: true,
+          // NEW: Earnings data
+          earnings: {
+            totalEarned: 50.40,
+            viewsEarnings: 42.00,
+            bonusEarnings: 8.40,
+            isPaid: true,
+            earningDate: '2024-01-10'
+          }
+        },
+        {
+          id: '4',
+          title: 'Draft: Upcoming Car Shows in Gaborone',
+          subtitle: 'Preview of exciting automotive events',
+          content: 'Draft content about car shows...',
+          category: 'events',
+          tags: ['events', 'gaborone', 'car-shows'],
+          status: 'draft',
+          publishDate: null,
+          createdAt: '2024-01-18',
+          updatedAt: '2024-01-18',
           views: 0,
           likes: 0,
           shares: 0,
-          featuredImage: null
+          featuredImage: null,
+          isPremium: false,
+          earningsEnabled: true,
+          // NEW: Earnings data
+          earnings: {
+            totalEarned: 0,
+            viewsEarnings: 0,
+            bonusEarnings: 0,
+            isPaid: false,
+            earningDate: null
+          }
         }
       ];
       
@@ -137,20 +237,86 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
 
   const loadStats = async () => {
     try {
-      // Mock stats - replace with actual API call
+      // Enhanced mock stats with earnings
+      const totalViews = 25450;
+      const totalEarnings = 369.15;
+      const thisMonthViews = 15800;
+      const thisMonthEarnings = 231.75;
+      
       setStats({
-        totalArticles: 15,
-        publishedArticles: 12,
+        totalArticles: 18,
+        publishedArticles: 15,
         draftArticles: 3,
-        totalViews: 25430,
+        totalViews: totalViews,
         totalShares: 234,
-        totalLikes: 1890
+        totalLikes: 1890,
+        // NEW: Enhanced earnings stats
+        totalEarnings: totalEarnings,
+        thisMonthEarnings: thisMonthEarnings,
+        pendingEarnings: 187.40, // Unpaid earnings
+        averageEarningsPerView: totalEarnings / totalViews,
+        topEarningArticle: {
+          title: 'The Future of Electric Vehicles in Botswana',
+          earnings: 187.50,
+          views: 12500
+        },
+        projectedMonthlyEarnings: calculateProjectedEarnings(thisMonthEarnings, new Date().getDate())
       });
     } catch (error) {
       console.error('Failed to load stats:', error);
     }
   };
 
+  // NEW: Calculate earnings for an article
+  const calculateArticleEarnings = (article) => {
+    if (!article.earningsEnabled || article.status !== 'published') {
+      return { totalEarned: 0, breakdown: { base: 0, bonus: 0, premium: 0 } };
+    }
+
+    const baseEarnings = article.views * earningsConfig.ratePerView;
+    let bonusEarnings = 0;
+    
+    // Apply view-based bonuses
+    Object.entries(earningsConfig.bonusThresholds).forEach(([threshold, bonus]) => {
+      if (article.views >= parseInt(threshold)) {
+        bonusEarnings = Math.max(bonusEarnings, bonus);
+      }
+    });
+
+    // Apply category multiplier
+    const category = categories.find(cat => cat.id === article.category);
+    const categoryMultiplier = category ? category.multiplier : 1;
+    
+    // Apply premium multiplier
+    const premiumMultiplier = article.isPremium ? earningsConfig.premiumMultiplier : 1;
+    
+    const totalMultiplier = categoryMultiplier * premiumMultiplier;
+    const finalEarnings = (baseEarnings * totalMultiplier) + bonusEarnings;
+
+    return {
+      totalEarned: parseFloat(finalEarnings.toFixed(2)),
+      breakdown: {
+        base: parseFloat(baseEarnings.toFixed(2)),
+        bonus: bonusEarnings,
+        premium: parseFloat(((baseEarnings * (premiumMultiplier - 1))).toFixed(2)),
+        category: parseFloat(((baseEarnings * (categoryMultiplier - 1))).toFixed(2))
+      }
+    };
+  };
+
+  // NEW: Calculate projected earnings
+  const calculateProjectedEarnings = (currentMonthEarnings, dayOfMonth) => {
+    const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+    const dailyAverage = currentMonthEarnings / dayOfMonth;
+    return parseFloat((dailyAverage * daysInMonth).toFixed(2));
+  };
+
+  // NEW: Format currency (Botswana Pula)
+  const formatCurrency = (amount) => {
+    return `P${parseFloat(amount).toFixed(2)}`;
+  };
+
+  // Existing functions with earnings enhancements
   const handleCreateNew = () => {
     setArticleForm({
       title: '',
@@ -163,7 +329,9 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
       publishDate: null,
       metaTitle: '',
       metaDescription: '',
-      authorNotes: ''
+      authorNotes: '',
+      isPremium: false,
+      earningsEnabled: true
     });
     setFormErrors({});
     setEditingArticle(null);
@@ -182,7 +350,9 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
       publishDate: article.publishDate,
       metaTitle: article.metaTitle || '',
       metaDescription: article.metaDescription || '',
-      authorNotes: article.authorNotes || ''
+      authorNotes: article.authorNotes || '',
+      isPremium: article.isPremium || false,
+      earningsEnabled: article.earningsEnabled !== false
     });
     setEditingArticle(article);
     setFormErrors({});
@@ -232,7 +402,14 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
           updatedAt: new Date().toISOString(),
           views: 0,
           likes: 0,
-          shares: 0
+          shares: 0,
+          earnings: {
+            totalEarned: 0,
+            viewsEarnings: 0,
+            bonusEarnings: 0,
+            isPaid: false,
+            earningDate: null
+          }
         };
         setArticles(prev => [newArticle, ...prev]);
       }
@@ -351,9 +528,27 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
           articles={articles}
           onCreateNew={handleCreateNew}
           onViewAll={() => setActiveView('list')}
+          onViewEarnings={() => setActiveView('earnings')}
           onEdit={handleEdit}
           categories={categories}
           formatNumber={formatNumber}
+          formatCurrency={formatCurrency}
+          calculateArticleEarnings={calculateArticleEarnings}
+          earningsConfig={earningsConfig}
+        />
+      )}
+
+      {activeView === 'earnings' && (
+        <EarningsView
+          stats={stats}
+          articles={articles}
+          onBack={() => setActiveView('dashboard')}
+          formatCurrency={formatCurrency}
+          formatNumber={formatNumber}
+          formatDate={formatDate}
+          calculateArticleEarnings={calculateArticleEarnings}
+          earningsConfig={earningsConfig}
+          categories={categories}
         />
       )}
 
@@ -373,8 +568,10 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
           onBack={() => setActiveView('dashboard')}
           formatDate={formatDate}
           formatNumber={formatNumber}
+          formatCurrency={formatCurrency}
           getCategoryColor={getCategoryColor}
           getCategoryLabel={getCategoryLabel}
+          calculateArticleEarnings={calculateArticleEarnings}
         />
       )}
 
@@ -398,8 +595,8 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
   );
 };
 
-// Dashboard View Component
-const DashboardView = ({ stats, articles, onCreateNew, onViewAll, onEdit, categories, formatNumber }) => {
+// Enhanced Dashboard View Component with Earnings
+const DashboardView = ({ stats, articles, onCreateNew, onViewAll, onViewEarnings, onEdit, categories, formatNumber, formatCurrency, calculateArticleEarnings, earningsConfig }) => {
   const recentArticles = articles.slice(0, 3);
 
   return (
@@ -407,7 +604,7 @@ const DashboardView = ({ stats, articles, onCreateNew, onViewAll, onEdit, catego
       <div className="dashboard-header">
         <div className="header-content">
           <h2>Articles Dashboard</h2>
-          <p>Manage your articles, track performance, and create engaging content</p>
+          <p>Manage your articles, track performance, and monitor your earnings</p>
         </div>
         <button className="create-button primary" onClick={onCreateNew}>
           <Plus size={16} />
@@ -415,7 +612,7 @@ const DashboardView = ({ stats, articles, onCreateNew, onViewAll, onEdit, catego
         </button>
       </div>
 
-      {/* Stats Cards */}
+      {/* Enhanced Stats Cards with Earnings */}
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-icon">
@@ -438,16 +635,6 @@ const DashboardView = ({ stats, articles, onCreateNew, onViewAll, onEdit, catego
         </div>
         
         <div className="stat-card">
-          <div className="stat-icon draft">
-            <Edit2 size={24} />
-          </div>
-          <div className="stat-content">
-            <div className="stat-number">{stats.draftArticles}</div>
-            <div className="stat-label">Drafts</div>
-          </div>
-        </div>
-        
-        <div className="stat-card">
           <div className="stat-icon views">
             <Eye size={24} />
           </div>
@@ -456,29 +643,108 @@ const DashboardView = ({ stats, articles, onCreateNew, onViewAll, onEdit, catego
             <div className="stat-label">Total Views</div>
           </div>
         </div>
-        
-        <div className="stat-card">
-          <div className="stat-icon engagement">
-            <Heart size={24} />
+
+        {/* NEW: Total Earnings Card */}
+        <div className="stat-card earnings-card">
+          <div className="stat-icon earnings">
+            <Wallet size={24} />
           </div>
           <div className="stat-content">
-            <div className="stat-number">{formatNumber(stats.totalLikes)}</div>
-            <div className="stat-label">Total Likes</div>
+            <div className="stat-number">{formatCurrency(stats.totalEarnings)}</div>
+            <div className="stat-label">Total Earnings</div>
           </div>
         </div>
-        
+
+        {/* NEW: This Month Earnings Card */}
         <div className="stat-card">
-          <div className="stat-icon shares">
-            <Share2 size={24} />
+          <div className="stat-icon monthly-earnings">
+            <DollarSign size={24} />
           </div>
           <div className="stat-content">
-            <div className="stat-number">{formatNumber(stats.totalShares)}</div>
-            <div className="stat-label">Total Shares</div>
+            <div className="stat-number">{formatCurrency(stats.thisMonthEarnings)}</div>
+            <div className="stat-label">This Month</div>
+          </div>
+        </div>
+
+        {/* NEW: Pending Earnings Card */}
+        <div className="stat-card">
+          <div className="stat-icon pending">
+            <Clock size={24} />
+          </div>
+          <div className="stat-content">
+            <div className="stat-number">{formatCurrency(stats.pendingEarnings)}</div>
+            <div className="stat-label">Pending Payout</div>
           </div>
         </div>
       </div>
 
-      {/* Recent Articles */}
+      {/* NEW: Earnings Overview Section */}
+      <div className="earnings-overview">
+        <div className="section-header">
+          <h3>Earnings Overview</h3>
+          <button className="view-earnings-button" onClick={onViewEarnings}>
+            View Detailed Earnings
+            <ExternalLink size={14} />
+          </button>
+        </div>
+
+        <div className="earnings-grid">
+          {/* Earnings Rate Info */}
+          <div className="earnings-info-card">
+            <div className="earnings-info-header">
+              <Target size={20} />
+              <h4>Your Earning Rate</h4>
+            </div>
+            <div className="rate-info">
+              <div className="rate-item">
+                <span className="rate-label">Per View:</span>
+                <span className="rate-value">{formatCurrency(earningsConfig.ratePerView)}</span>
+              </div>
+              <div className="rate-item">
+                <span className="rate-label">Average per View:</span>
+                <span className="rate-value">{formatCurrency(stats.averageEarningsPerView)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Top Earning Article */}
+          {stats.topEarningArticle && (
+            <div className="earnings-info-card">
+              <div className="earnings-info-header">
+                <TrendingUp size={20} />
+                <h4>Top Earning Article</h4>
+              </div>
+              <div className="top-article-info">
+                <p className="article-title">{stats.topEarningArticle.title}</p>
+                <div className="article-stats">
+                  <span>{formatNumber(stats.topEarningArticle.views)} views</span>
+                  <span className="earnings-amount">{formatCurrency(stats.topEarningArticle.earnings)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Projected Monthly Earnings */}
+          <div className="earnings-info-card">
+            <div className="earnings-info-header">
+              <BarChart3 size={20} />
+              <h4>Monthly Projection</h4>
+            </div>
+            <div className="projection-info">
+              <div className="projection-item">
+                <span className="projection-label">Current:</span>
+                <span className="projection-value">{formatCurrency(stats.thisMonthEarnings)}</span>
+              </div>
+              <div className="projection-item">
+                <span className="projection-label">Projected:</span>
+                <span className="projection-value projected">{formatCurrency(stats.projectedMonthlyEarnings)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Articles with Earnings */}
       <div className="recent-articles">
         <div className="section-header">
           <h3>Recent Articles</h3>
@@ -490,54 +756,78 @@ const DashboardView = ({ stats, articles, onCreateNew, onViewAll, onEdit, catego
         
         {recentArticles.length > 0 ? (
           <div className="articles-grid">
-            {recentArticles.map(article => (
-              <div key={article.id} className="article-card">
-                <div className="article-header">
-                  <h4>{article.title}</h4>
-                  <div className="article-status">
-                    {article.status === 'published' ? (
-                      <span className="status published">
-                        <CheckCircle size={14} />
-                        Published
-                      </span>
-                    ) : (
-                      <span className="status draft">
-                        <Clock size={14} />
-                        Draft
-                      </span>
+            {recentArticles.map(article => {
+              const earnings = calculateArticleEarnings(article);
+              return (
+                <div key={article.id} className="article-card">
+                  <div className="article-header">
+                    <h4>{article.title}</h4>
+                    <div className="article-status">
+                      {article.status === 'published' ? (
+                        <span className="status published">
+                          <CheckCircle size={14} />
+                          Published
+                        </span>
+                      ) : (
+                        <span className="status draft">
+                          <Clock size={14} />
+                          Draft
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <p className="article-subtitle">{article.subtitle}</p>
+                  
+                  <div className="article-meta">
+                    <span className="category" style={{ color: categories.find(c => c.id === article.category)?.color }}>
+                      {categories.find(c => c.id === article.category)?.label}
+                    </span>
+                    <span className="date">{new Date(article.updatedAt).toLocaleDateString()}</span>
+                    {article.isPremium && (
+                      <span className="premium-badge">Premium</span>
                     )}
                   </div>
+                  
+                  <div className="article-stats">
+                    <span><Eye size={12} /> {formatNumber(article.views)}</span>
+                    <span><Heart size={12} /> {formatNumber(article.likes)}</span>
+                    <span><Share2 size={12} /> {formatNumber(article.shares)}</span>
+                  </div>
+
+                  {/* NEW: Earnings Display */}
+                  <div className="article-earnings">
+                    <div className="earnings-row">
+                      <span className="earnings-label">Earned:</span>
+                      <span className="earnings-amount">{formatCurrency(earnings.totalEarned)}</span>
+                    </div>
+                    {article.earnings?.isPaid ? (
+                      <span className="payment-status paid">Paid</span>
+                    ) : (
+                      <span className="payment-status pending">Pending</span>
+                    )}
+                  </div>
+                  
+                  <div className="article-actions">
+                    <button onClick={() => onEdit(article)} className="edit-button">
+                      <Edit2 size={14} />
+                      Edit
+                    </button>
+                  </div>
                 </div>
-                
-                <p className="article-subtitle">{article.subtitle}</p>
-                
-                <div className="article-meta">
-                  <span className="category" style={{ color: categories.find(c => c.id === article.category)?.color }}>
-                    {categories.find(c => c.id === article.category)?.label}
-                  </span>
-                  <span className="date">{new Date(article.updatedAt).toLocaleDateString()}</span>
-                </div>
-                
-                <div className="article-stats">
-                  <span><Eye size={12} /> {formatNumber(article.views)}</span>
-                  <span><Heart size={12} /> {formatNumber(article.likes)}</span>
-                  <span><Share2 size={12} /> {formatNumber(article.shares)}</span>
-                </div>
-                
-                <div className="article-actions">
-                  <button onClick={() => onEdit(article)} className="edit-button">
-                    <Edit2 size={14} />
-                    Edit
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="empty-state">
             <PenTool size={48} />
             <h3>No Articles Yet</h3>
-            <p>Start creating engaging content for your audience</p>
+            <p>Start creating engaging content to begin earning</p>
+            <div className="earning-potential">
+              <p className="earning-info">
+                💡 Potential: <strong>10,000 views = {formatCurrency(100)}</strong>
+              </p>
+            </div>
             <button className="create-button primary" onClick={onCreateNew}>
               <Plus size={16} />
               Create Your First Article
@@ -549,7 +839,232 @@ const DashboardView = ({ stats, articles, onCreateNew, onViewAll, onEdit, catego
   );
 };
 
-// List View Component (for managing all articles)
+// NEW: Dedicated Earnings View Component
+const EarningsView = ({ stats, articles, onBack, formatCurrency, formatNumber, formatDate, calculateArticleEarnings, earningsConfig, categories }) => {
+  const publishedArticles = articles.filter(article => article.status === 'published');
+  const unpaidEarnings = publishedArticles
+    .filter(article => article.earnings && !article.earnings.isPaid)
+    .reduce((total, article) => total + (article.earnings.totalEarned || 0), 0);
+
+  return (
+    <div className="earnings-view">
+      <div className="earnings-header">
+        <button className="back-button" onClick={onBack}>
+          ← Back to Dashboard
+        </button>
+        
+        <div className="header-content">
+          <h2>Earnings Overview</h2>
+          <p>Track your article performance and revenue</p>
+        </div>
+      </div>
+
+      {/* Earnings Summary Cards */}
+      <div className="earnings-summary">
+        <div className="earnings-card total">
+          <div className="earnings-card-icon">
+            <Wallet size={28} />
+          </div>
+          <div className="earnings-card-content">
+            <h3>{formatCurrency(stats.totalEarnings)}</h3>
+            <p>Total Earnings</p>
+            <span className="earnings-note">From {formatNumber(stats.totalViews)} views</span>
+          </div>
+        </div>
+
+        <div className="earnings-card pending">
+          <div className="earnings-card-icon">
+            <Clock size={28} />
+          </div>
+          <div className="earnings-card-content">
+            <h3>{formatCurrency(unpaidEarnings)}</h3>
+            <p>Pending Payout</p>
+            <span className="earnings-note">
+              {unpaidEarnings >= earningsConfig.minimumPayout ? 
+                'Ready for payout' : 
+                `${formatCurrency(earningsConfig.minimumPayout - unpaidEarnings)} to minimum`
+              }
+            </span>
+          </div>
+        </div>
+
+        <div className="earnings-card monthly">
+          <div className="earnings-card-icon">
+            <TrendingUp size={28} />
+          </div>
+          <div className="earnings-card-content">
+            <h3>{formatCurrency(stats.thisMonthEarnings)}</h3>
+            <p>This Month</p>
+            <span className="earnings-note">
+              Projected: {formatCurrency(stats.projectedMonthlyEarnings)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Earnings Rate Information */}
+      <div className="earnings-rates">
+        <h3>Your Earning Rates</h3>
+        <div className="rates-grid">
+          <div className="rate-card">
+            <h4>Base Rate</h4>
+            <div className="rate-value">{formatCurrency(earningsConfig.ratePerView)} per view</div>
+            <p>Standard rate for all articles</p>
+          </div>
+
+          <div className="rate-card">
+            <h4>Category Multipliers</h4>
+            <div className="multipliers-list">
+              {categories.map(category => (
+                <div key={category.id} className="multiplier-item">
+                  <span className="category-name" style={{ color: category.color }}>
+                    {category.label}
+                  </span>
+                  <span className="multiplier-value">{category.multiplier}x</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rate-card">
+            <h4>Bonus Tiers</h4>
+            <div className="bonus-tiers">
+              {Object.entries(earningsConfig.bonusThresholds).map(([views, bonus]) => (
+                <div key={views} className="tier-item">
+                  <span className="tier-views">{formatNumber(parseInt(views))}+ views</span>
+                  <span className="tier-bonus">+{formatCurrency(bonus)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rate-card">
+            <h4>Premium Content</h4>
+            <div className="premium-info">
+              <div className="premium-multiplier">
+                {earningsConfig.premiumMultiplier}x base rate
+              </div>
+              <p>Mark articles as premium for higher earnings</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Article Earnings Breakdown */}
+      <div className="article-earnings-list">
+        <h3>Article Earnings Breakdown</h3>
+        
+        <div className="earnings-table">
+          <div className="earnings-table-header">
+            <div className="col-title">Article</div>
+            <div className="col-views">Views</div>
+            <div className="col-category">Category</div>
+            <div className="col-earnings">Earnings</div>
+            <div className="col-status">Status</div>
+          </div>
+
+          {publishedArticles.map(article => {
+            const earnings = calculateArticleEarnings(article);
+            const category = categories.find(c => c.id === article.category);
+            
+            return (
+              <div key={article.id} className="earnings-table-row">
+                <div className="col-title">
+                  <div className="article-info">
+                    <h4>{article.title}</h4>
+                    <span className="publish-date">{formatDate(article.publishDate)}</span>
+                    {article.isPremium && <span className="premium-tag">Premium</span>}
+                  </div>
+                </div>
+                
+                <div className="col-views">
+                  {formatNumber(article.views)}
+                </div>
+                
+                <div className="col-category">
+                  <span 
+                    className="category-badge"
+                    style={{ 
+                      backgroundColor: category?.color + '20', 
+                      color: category?.color 
+                    }}
+                  >
+                    {category?.label}
+                  </span>
+                </div>
+                
+                <div className="col-earnings">
+                  <div className="earnings-breakdown">
+                    <div className="total-earnings">
+                      {formatCurrency(earnings.totalEarned)}
+                    </div>
+                    {earnings.breakdown.bonus > 0 && (
+                      <div className="bonus-earnings">
+                        +{formatCurrency(earnings.breakdown.bonus)} bonus
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="col-status">
+                  {article.earnings?.isPaid ? (
+                    <span className="status-badge paid">Paid</span>
+                  ) : (
+                    <span className="status-badge pending">Pending</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Payout Information */}
+      <div className="payout-info">
+        <div className="payout-card">
+          <h3>Payout Information</h3>
+          <div className="payout-details">
+            <div className="payout-item">
+              <span className="payout-label">Minimum Payout:</span>
+              <span className="payout-value">{formatCurrency(earningsConfig.minimumPayout)}</span>
+            </div>
+            <div className="payout-item">
+              <span className="payout-label">Current Pending:</span>
+              <span className="payout-value">{formatCurrency(unpaidEarnings)}</span>
+            </div>
+            <div className="payout-item">
+              <span className="payout-label">Next Payout Date:</span>
+              <span className="payout-value">End of month</span>
+            </div>
+          </div>
+          
+          {unpaidEarnings >= earningsConfig.minimumPayout ? (
+            <div className="payout-ready">
+              <CheckCircle size={16} />
+              <span>Ready for payout!</span>
+            </div>
+          ) : (
+            <div className="payout-progress">
+              <div className="progress-bar">
+                <div 
+                  className="progress-fill" 
+                  style={{ 
+                    width: `${(unpaidEarnings / earningsConfig.minimumPayout) * 100}%` 
+                  }}
+                ></div>
+              </div>
+              <span className="progress-text">
+                {formatCurrency(earningsConfig.minimumPayout - unpaidEarnings)} more needed
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Enhanced List View Component with Earnings
 const ListView = ({ 
   articles, 
   searchTerm, 
@@ -565,8 +1080,10 @@ const ListView = ({
   onBack,
   formatDate,
   formatNumber,
+  formatCurrency,
   getCategoryColor,
-  getCategoryLabel
+  getCategoryLabel,
+  calculateArticleEarnings
 }) => {
   return (
     <div className="list-view">
@@ -614,63 +1131,73 @@ const ListView = ({
         </select>
       </div>
 
-      {/* Articles List */}
+      {/* Articles List with Earnings */}
       <div className="articles-list">
         {articles.length > 0 ? (
-          articles.map(article => (
-            <div key={article.id} className="list-item">
-              <div className="item-content">
-                <div className="item-header">
-                  <h3>{article.title}</h3>
-                  <div className="item-status">
-                    {article.status === 'published' ? (
-                      <span className="status published">
-                        <CheckCircle size={14} />
-                        Published
-                      </span>
-                    ) : (
-                      <span className="status draft">
-                        <Clock size={14} />
-                        Draft
-                      </span>
+          articles.map(article => {
+            const earnings = calculateArticleEarnings(article);
+            return (
+              <div key={article.id} className="list-item">
+                <div className="item-content">
+                  <div className="item-header">
+                    <h3>{article.title}</h3>
+                    <div className="item-status">
+                      {article.status === 'published' ? (
+                        <span className="status published">
+                          <CheckCircle size={14} />
+                          Published
+                        </span>
+                      ) : (
+                        <span className="status draft">
+                          <Clock size={14} />
+                          Draft
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <p className="item-subtitle">{article.subtitle}</p>
+                  
+                  <div className="item-meta">
+                    <span 
+                      className="category-badge" 
+                      style={{ backgroundColor: getCategoryColor(article.category) + '20', color: getCategoryColor(article.category) }}
+                    >
+                      {getCategoryLabel(article.category)}
+                    </span>
+                    <span className="meta-text">Updated: {formatDate(article.updatedAt)}</span>
+                    {article.publishDate && (
+                      <span className="meta-text">Published: {formatDate(article.publishDate)}</span>
                     )}
+                    {article.isPremium && (
+                      <span className="premium-badge">Premium</span>
+                    )}
+                  </div>
+                  
+                  <div className="item-stats">
+                    <span><Eye size={12} /> {formatNumber(article.views)}</span>
+                    <span><Heart size={12} /> {formatNumber(article.likes)}</span>
+                    <span><Share2 size={12} /> {formatNumber(article.shares)}</span>
+                    {/* NEW: Earnings in list */}
+                    <span className="earnings-stat">
+                      <DollarSign size={12} /> {formatCurrency(earnings.totalEarned)}
+                    </span>
                   </div>
                 </div>
                 
-                <p className="item-subtitle">{article.subtitle}</p>
-                
-                <div className="item-meta">
-                  <span 
-                    className="category-badge" 
-                    style={{ backgroundColor: getCategoryColor(article.category) + '20', color: getCategoryColor(article.category) }}
-                  >
-                    {getCategoryLabel(article.category)}
-                  </span>
-                  <span className="meta-text">Updated: {formatDate(article.updatedAt)}</span>
-                  {article.publishDate && (
-                    <span className="meta-text">Published: {formatDate(article.publishDate)}</span>
-                  )}
-                </div>
-                
-                <div className="item-stats">
-                  <span><Eye size={12} /> {formatNumber(article.views)}</span>
-                  <span><Heart size={12} /> {formatNumber(article.likes)}</span>
-                  <span><Share2 size={12} /> {formatNumber(article.shares)}</span>
+                <div className="item-actions">
+                  <button onClick={() => onEdit(article)} className="action-button edit">
+                    <Edit2 size={16} />
+                    Edit
+                  </button>
+                  <button onClick={() => onDelete(article.id)} className="action-button delete">
+                    <Trash2 size={16} />
+                    Delete
+                  </button>
                 </div>
               </div>
-              
-              <div className="item-actions">
-                <button onClick={() => onEdit(article)} className="action-button edit">
-                  <Edit2 size={16} />
-                  Edit
-                </button>
-                <button onClick={() => onDelete(article.id)} className="action-button delete">
-                  <Trash2 size={16} />
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div className="empty-state">
             <Search size={48} />
@@ -683,7 +1210,7 @@ const ListView = ({
   );
 };
 
-// Editor View Component (for creating/editing articles)
+// Enhanced Editor View Component with Premium Options
 const EditorView = ({ 
   articleForm, 
   setArticleForm, 
@@ -832,10 +1359,49 @@ const EditorView = ({
             >
               {categories.map(category => (
                 <option key={category.id} value={category.id}>
-                  {category.label}
+                  {category.label} ({category.multiplier}x)
                 </option>
               ))}
             </select>
+            <small>Higher multipliers = better earnings</small>
+          </div>
+
+          {/* NEW: Premium Content & Earnings */}
+          <div className="sidebar-section">
+            <h3>Monetization</h3>
+            
+            <div className="form-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={articleForm.isPremium}
+                  onChange={(e) => setArticleForm(prev => ({ ...prev, isPremium: e.target.checked }))}
+                />
+                <span className="checkmark"></span>
+                Premium Content (1.5x earnings)
+              </label>
+            </div>
+
+            <div className="form-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={articleForm.earningsEnabled}
+                  onChange={(e) => setArticleForm(prev => ({ ...prev, earningsEnabled: e.target.checked }))}
+                />
+                <span className="checkmark"></span>
+                Enable Earnings
+              </label>
+            </div>
+
+            <div className="earnings-preview">
+              <h4>Potential Earnings:</h4>
+              <div className="earning-tiers">
+                <div className="tier">1k views = P{(1000 * 0.01 * (categories.find(c => c.id === articleForm.category)?.multiplier || 1) * (articleForm.isPremium ? 1.5 : 1)).toFixed(2)}</div>
+                <div className="tier">10k views = P{(10000 * 0.01 * (categories.find(c => c.id === articleForm.category)?.multiplier || 1) * (articleForm.isPremium ? 1.5 : 1) + 75).toFixed(2)}</div>
+                <div className="tier">25k views = P{(25000 * 0.01 * (categories.find(c => c.id === articleForm.category)?.multiplier || 1) * (articleForm.isPremium ? 1.5 : 1) + 200).toFixed(2)}</div>
+              </div>
+            </div>
           </div>
 
           {/* Featured Image */}

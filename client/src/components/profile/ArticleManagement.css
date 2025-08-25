@@ -1,5 +1,5 @@
 /* client/src/components/profile/ArticleManagement.css */
-/* Complete styling for journalist article management dashboard */
+/* ENHANCED VERSION - Complete styling with earnings tracking for journalist dashboard */
 
 /* CSS Variables */
 :root {
@@ -11,6 +11,13 @@
   --article-danger: #dc3545;
   --article-info: #17a2b8;
   --article-success: #28a745;
+  
+  /* NEW: Earnings colors */
+  --earnings-gold: #ffd700;
+  --earnings-green: #28a745;
+  --earnings-pending: #ffc107;
+  --earnings-paid: #28a745;
+  --premium-purple: #6f42c1;
   
   --article-bg-primary: #1a1a1a;
   --article-bg-secondary: #2d2d2d;
@@ -136,7 +143,7 @@
   border-color: var(--article-border-light);
 }
 
-/* Stats Grid */
+/* Enhanced Stats Grid with Earnings */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -153,12 +160,30 @@
   align-items: center;
   gap: 16px;
   transition: var(--article-transition);
+  position: relative;
+  overflow: hidden;
 }
 
 .stat-card:hover {
   background: var(--article-bg-hover);
   transform: translateY(-2px);
   box-shadow: var(--article-shadow-md);
+}
+
+/* Earnings card special styling */
+.stat-card.earnings-card {
+  background: linear-gradient(135deg, var(--earnings-gold), #b8860b);
+  color: #000;
+}
+
+.stat-card.earnings-card .stat-icon {
+  background: rgba(0, 0, 0, 0.1);
+  color: #000;
+}
+
+.stat-card.earnings-card .stat-number,
+.stat-card.earnings-card .stat-label {
+  color: #000;
 }
 
 .stat-icon {
@@ -176,6 +201,9 @@
 .stat-icon.views { background: rgba(23, 162, 184, 0.2); color: var(--article-info); }
 .stat-icon.engagement { background: rgba(220, 53, 69, 0.2); color: var(--article-danger); }
 .stat-icon.shares { background: rgba(108, 117, 125, 0.2); color: var(--article-secondary); }
+.stat-icon.earnings { background: rgba(255, 215, 0, 0.2); color: var(--earnings-gold); }
+.stat-icon.monthly-earnings { background: rgba(40, 167, 69, 0.2); color: var(--earnings-green); }
+.stat-icon.pending { background: rgba(255, 193, 7, 0.2); color: var(--earnings-pending); }
 
 .stat-content {
   flex: 1;
@@ -195,9 +223,13 @@
   font-weight: 500;
 }
 
-/* Recent Articles Section */
-.recent-articles {
-  margin-top: 40px;
+/* NEW: Earnings Overview Section */
+.earnings-overview {
+  margin: 40px 0;
+  padding: 24px;
+  background: var(--article-bg-card);
+  border-radius: var(--article-border-radius);
+  border: 1px solid var(--article-border-color);
 }
 
 .section-header {
@@ -214,7 +246,8 @@
   color: var(--article-text-primary);
 }
 
-.view-all-button {
+.view-all-button,
+.view-earnings-button {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -229,12 +262,91 @@
   transition: var(--article-transition);
 }
 
-.view-all-button:hover {
+.view-all-button:hover,
+.view-earnings-button:hover {
   background: var(--article-primary);
   color: white;
 }
 
-/* Articles Grid */
+.earnings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.earnings-info-card {
+  background: var(--article-bg-primary);
+  border: 1px solid var(--article-border-color);
+  border-radius: var(--article-border-radius);
+  padding: 20px;
+}
+
+.earnings-info-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.earnings-info-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--article-text-primary);
+}
+
+.rate-info,
+.projection-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rate-item,
+.projection-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rate-label,
+.projection-label {
+  color: var(--article-text-secondary);
+  font-size: 0.9rem;
+}
+
+.rate-value,
+.projection-value {
+  color: var(--article-text-primary);
+  font-weight: 600;
+}
+
+.projection-value.projected {
+  color: var(--earnings-green);
+}
+
+.top-article-info .article-title {
+  margin: 0 0 8px 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--article-text-primary);
+  line-height: 1.3;
+}
+
+.article-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--article-text-secondary);
+}
+
+.earnings-amount {
+  color: var(--earnings-green);
+  font-weight: 600;
+}
+
+/* Enhanced Articles Grid with Earnings */
 .articles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -247,6 +359,7 @@
   border-radius: var(--article-border-radius);
   padding: 24px;
   transition: var(--article-transition);
+  position: relative;
 }
 
 .article-card:hover {
@@ -305,6 +418,7 @@
   align-items: center;
   margin-bottom: 16px;
   font-size: 0.85rem;
+  gap: 8px;
 }
 
 .category {
@@ -316,6 +430,17 @@
 
 .date {
   color: var(--article-text-muted);
+}
+
+/* NEW: Premium badge */
+.premium-badge {
+  background: var(--premium-purple);
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: var(--article-border-radius-sm);
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .article-stats {
@@ -330,6 +455,50 @@
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+/* NEW: Article earnings display */
+.article-earnings {
+  background: var(--article-bg-primary);
+  padding: 12px;
+  border-radius: var(--article-border-radius-sm);
+  border: 1px solid var(--article-border-color);
+  margin-bottom: 16px;
+}
+
+.earnings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.earnings-label {
+  color: var(--article-text-secondary);
+  font-size: 0.85rem;
+}
+
+.earnings-amount {
+  color: var(--earnings-green);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.payment-status {
+  font-size: 0.8rem;
+  padding: 2px 8px;
+  border-radius: var(--article-border-radius-sm);
+  font-weight: 500;
+}
+
+.payment-status.paid {
+  background: rgba(40, 167, 69, 0.2);
+  color: var(--earnings-paid);
+}
+
+.payment-status.pending {
+  background: rgba(255, 193, 7, 0.2);
+  color: var(--earnings-pending);
 }
 
 .article-actions {
@@ -364,7 +533,7 @@
   color: white;
 }
 
-/* Empty State */
+/* Empty State with Earnings Info */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
@@ -383,17 +552,32 @@
 }
 
 .empty-state p {
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   font-size: 1rem;
 }
 
-/* ===== LIST VIEW ===== */
-.list-view {
+/* NEW: Earning potential display */
+.earning-potential {
+  margin: 16px 0 24px 0;
+}
+
+.earning-info {
+  background: rgba(40, 167, 69, 0.1);
+  color: var(--earnings-green);
+  padding: 12px 16px;
+  border-radius: var(--article-border-radius);
+  border: 1px solid rgba(40, 167, 69, 0.3);
+  font-size: 0.9rem;
+  display: inline-block;
+}
+
+/* ===== NEW: EARNINGS VIEW ===== */
+.earnings-view {
   max-width: 1400px;
   margin: 0 auto;
 }
 
-.list-header {
+.earnings-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -421,7 +605,332 @@
   color: var(--article-primary);
 }
 
-/* Filters */
+.earnings-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.earnings-card {
+  background: var(--article-bg-card);
+  border: 1px solid var(--article-border-color);
+  border-radius: var(--article-border-radius);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: var(--article-transition);
+}
+
+.earnings-card.total {
+  background: linear-gradient(135deg, var(--earnings-gold), #b8860b);
+  color: #000;
+  border-color: var(--earnings-gold);
+}
+
+.earnings-card.pending {
+  background: linear-gradient(135deg, var(--earnings-pending), #e0a800);
+  color: #000;
+  border-color: var(--earnings-pending);
+}
+
+.earnings-card.monthly {
+  background: linear-gradient(135deg, var(--earnings-green), #1e7e34);
+  color: white;
+  border-color: var(--earnings-green);
+}
+
+.earnings-card-icon {
+  padding: 16px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.earnings-card-content h3 {
+  margin: 0 0 4px 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.earnings-card-content p {
+  margin: 0 0 4px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.earnings-note {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+/* Earnings Rates Section */
+.earnings-rates {
+  margin: 40px 0;
+}
+
+.earnings-rates h3 {
+  margin: 0 0 24px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--article-text-primary);
+}
+
+.rates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.rate-card {
+  background: var(--article-bg-card);
+  border: 1px solid var(--article-border-color);
+  border-radius: var(--article-border-radius);
+  padding: 20px;
+}
+
+.rate-card h4 {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--article-text-primary);
+}
+
+.rate-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--earnings-green);
+  margin-bottom: 8px;
+}
+
+.multipliers-list,
+.bonus-tiers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.multiplier-item,
+.tier-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--article-bg-primary);
+  border-radius: var(--article-border-radius-sm);
+}
+
+.multiplier-value,
+.tier-bonus {
+  font-weight: 600;
+  color: var(--earnings-green);
+}
+
+.premium-multiplier {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--premium-purple);
+  margin-bottom: 8px;
+}
+
+/* Earnings Table */
+.article-earnings-list {
+  margin: 40px 0;
+}
+
+.article-earnings-list h3 {
+  margin: 0 0 24px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--article-text-primary);
+}
+
+.earnings-table {
+  background: var(--article-bg-card);
+  border-radius: var(--article-border-radius);
+  border: 1px solid var(--article-border-color);
+  overflow: hidden;
+}
+
+.earnings-table-header,
+.earnings-table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 16px;
+  padding: 16px;
+  align-items: center;
+}
+
+.earnings-table-header {
+  background: var(--article-bg-primary);
+  color: var(--article-text-secondary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.earnings-table-row {
+  border-top: 1px solid var(--article-border-color);
+}
+
+.earnings-table-row:hover {
+  background: var(--article-bg-hover);
+}
+
+.article-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--article-text-primary);
+}
+
+.publish-date {
+  font-size: 0.8rem;
+  color: var(--article-text-muted);
+}
+
+.premium-tag {
+  display: inline-block;
+  background: var(--premium-purple);
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: var(--article-border-radius-sm);
+  margin-left: 8px;
+}
+
+.category-badge {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: var(--article-border-radius-sm);
+  font-weight: 500;
+}
+
+.earnings-breakdown .total-earnings {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--earnings-green);
+}
+
+.bonus-earnings {
+  font-size: 0.8rem;
+  color: var(--earnings-pending);
+  margin-top: 2px;
+}
+
+.status-badge {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: var(--article-border-radius-sm);
+  font-weight: 500;
+}
+
+.status-badge.paid {
+  background: rgba(40, 167, 69, 0.2);
+  color: var(--earnings-paid);
+}
+
+.status-badge.pending {
+  background: rgba(255, 193, 7, 0.2);
+  color: var(--earnings-pending);
+}
+
+/* Payout Information */
+.payout-info {
+  margin: 40px 0;
+}
+
+.payout-card {
+  background: var(--article-bg-card);
+  border: 1px solid var(--article-border-color);
+  border-radius: var(--article-border-radius);
+  padding: 24px;
+}
+
+.payout-card h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--article-text-primary);
+}
+
+.payout-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.payout-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.payout-label {
+  color: var(--article-text-secondary);
+}
+
+.payout-value {
+  color: var(--article-text-primary);
+  font-weight: 600;
+}
+
+.payout-ready {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--earnings-green);
+  font-weight: 600;
+  background: rgba(40, 167, 69, 0.1);
+  padding: 12px 16px;
+  border-radius: var(--article-border-radius);
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.payout-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--article-bg-primary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--earnings-pending);
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  color: var(--article-text-secondary);
+}
+
+/* ===== LIST VIEW ENHANCEMENTS ===== */
+.list-view {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  gap: 20px;
+}
+
 .list-filters {
   display: flex;
   gap: 16px;
@@ -476,7 +985,6 @@
   border-color: var(--article-primary);
 }
 
-/* Articles List */
 .articles-list {
   display: flex;
   flex-direction: column;
@@ -562,13 +1070,19 @@
   gap: 4px;
 }
 
+/* NEW: Earnings stat in list */
+.earnings-stat {
+  color: var(--earnings-green) !important;
+  font-weight: 600;
+}
+
 .item-actions {
   display: flex;
   gap: 12px;
   flex-shrink: 0;
 }
 
-/* ===== EDITOR VIEW ===== */
+/* ===== EDITOR ENHANCEMENTS ===== */
 .editor-view {
   max-width: 1400px;
   margin: 0 auto;
@@ -622,7 +1136,6 @@
   background: var(--article-primary-dark);
 }
 
-/* Error Message */
 .error-message {
   background: rgba(220, 53, 69, 0.1);
   color: var(--article-danger);
@@ -636,7 +1149,6 @@
   font-size: 0.9rem;
 }
 
-/* Editor Content */
 .editor-content {
   display: grid;
   grid-template-columns: 1fr 300px;
@@ -724,6 +1236,47 @@
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--article-text-primary);
+}
+
+/* NEW: Checkbox styling for premium content */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+/* NEW: Earnings preview */
+.earnings-preview {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--article-bg-primary);
+  border-radius: var(--article-border-radius-sm);
+  border: 1px solid var(--article-border-color);
+}
+
+.earnings-preview h4 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--article-text-primary);
+}
+
+.earning-tiers {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tier {
+  font-size: 0.85rem;
+  color: var(--earnings-green);
+  font-weight: 500;
 }
 
 /* Image Preview */
@@ -822,7 +1375,6 @@
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
-/* Mobile First - optimized for smartphone users */
 @media (max-width: 768px) {
   .article-management {
     padding: 16px;
@@ -840,9 +1392,41 @@
     gap: 16px;
   }
 
+  .earnings-grid {
+    grid-template-columns: 1fr;
+  }
+
   .articles-grid {
     grid-template-columns: 1fr;
     gap: 16px;
+  }
+
+  /* Earnings View */
+  .earnings-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .rates-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .earnings-table-header,
+  .earnings-table-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    text-align: left;
+  }
+
+  .earnings-table-header {
+    display: none; /* Hide header on mobile, make it more card-like */
+  }
+
+  .earnings-table-row {
+    display: block;
+    padding: 16px;
+    border: 1px solid var(--article-border-color);
+    border-radius: var(--article-border-radius);
+    margin-bottom: 16px;
   }
 
   /* List View */
@@ -943,6 +1527,17 @@
   .sidebar-section {
     padding: 16px;
   }
+
+  .earnings-card {
+    padding: 16px;
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .earnings-card-icon {
+    align-self: center;
+  }
 }
 
 /* Tablet */
@@ -951,7 +1546,15 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .earnings-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .articles-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .earnings-summary {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -964,6 +1567,10 @@
 
   .articles-grid {
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+
+  .earnings-summary {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -988,7 +1595,8 @@
 .edit-button:focus,
 .action-button:focus,
 .back-button:focus,
-.upload-button:focus {
+.upload-button:focus,
+.view-earnings-button:focus {
   outline: 2px solid var(--article-primary);
   outline-offset: 2px;
 }
