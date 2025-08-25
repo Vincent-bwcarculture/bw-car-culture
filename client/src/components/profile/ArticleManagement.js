@@ -30,7 +30,7 @@ import {
   Tag,
   Globe
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext.js';
 import './ArticleManagement.css';
 
 const ArticleManagement = ({ profileData, refreshProfile }) => {
