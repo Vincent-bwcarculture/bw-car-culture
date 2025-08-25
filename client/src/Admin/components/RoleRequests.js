@@ -24,7 +24,7 @@ import {
   Calendar,
   Briefcase
 } from 'lucide-react';
-import './RoleManager.css';
+import './RoleRequests.css';
 
 const RoleManager = () => {
   // API Configuration
