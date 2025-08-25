@@ -174,6 +174,8 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
     );
   };
 
+  
+
   // UPDATED: Enhanced earnings calculation with engagement bonuses
   const calculateArticleEarnings = (article) => {
     if (!article || !article.earningsEnabled) {
