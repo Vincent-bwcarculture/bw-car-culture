@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement.js
-// ENHANCED VERSION - Complete article management dashboard with P100 + 20K engagement requirements
+// FIXED VERSION - Part 1: Main component with proper prop passing
 
 import React, { useState, useEffect, useRef } from 'react';
 import { 
@@ -152,6 +152,37 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
     { id: 'motorsport', label: 'Motorsport', color: '#e83e8c', multiplier: 1.3 }
   ];
 
+  // FIXED: Utility functions defined here
+  const formatCurrency = (amount) => {
+    return `P${parseFloat(amount).toFixed(2)}`;
+  };
+
+  const formatNumber = (num) => {
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'k';
+    }
+    return num.toString();
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Not set';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const getCategoryColor = (categoryId) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    return category ? category.color : '#6c757d';
+  };
+
+  const getCategoryLabel = (categoryId) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    return category ? category.label : categoryId;
+  };
+
   // NEW: Enhanced engagement calculation function
   const calculateArticleEngagement = (article) => {
     if (!article) return 0;
@@ -173,8 +204,6 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
       (readTime * weights.readTime)
     );
   };
-
-  
 
   // UPDATED: Enhanced earnings calculation with engagement bonuses
   const calculateArticleEarnings = (article) => {
@@ -490,38 +519,7 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
     return parseFloat((dailyAverage * daysInMonth).toFixed(2));
   };
 
-  // Format currency (Botswana Pula)
-  const formatCurrency = (amount) => {
-    return `P${parseFloat(amount).toFixed(2)}`;
-  };
-
-  const formatNumber = (num) => {
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'k';
-    }
-    return num.toString();
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Not set';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const getCategoryColor = (categoryId) => {
-    const category = categories.find(cat => cat.id === categoryId);
-    return category ? category.color : '#6c757d';
-  };
-
-  const getCategoryLabel = (categoryId) => {
-    const category = categories.find(cat => cat.id === categoryId);
-    return category ? category.label : categoryId;
-  };
-
-  // Existing functions with earnings enhancements
+  // Event handlers
   const handleCreateNew = () => {
     setArticleForm({
       title: '',
@@ -722,6 +720,9 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
           categories={categories}
           formatNumber={formatNumber}
           formatCurrency={formatCurrency}
+          formatDate={formatDate}
+          getCategoryColor={getCategoryColor}
+          getCategoryLabel={getCategoryLabel}
           calculateArticleEarnings={calculateArticleEarnings}
           calculateArticleEngagement={calculateArticleEngagement}
           checkCashoutEligibility={checkCashoutEligibility}
@@ -737,6 +738,8 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
           formatCurrency={formatCurrency}
           formatNumber={formatNumber}
           formatDate={formatDate}
+          getCategoryColor={getCategoryColor}
+          getCategoryLabel={getCategoryLabel}
           calculateArticleEarnings={calculateArticleEarnings}
           calculateArticleEngagement={calculateArticleEngagement}
           checkCashoutEligibility={checkCashoutEligibility}
@@ -784,11 +787,16 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
           addTag={addTag}
           removeTag={removeTag}
           fileInputRef={fileInputRef}
+          getCategoryColor={getCategoryColor}
+          getCategoryLabel={getCategoryLabel}
+          formatCurrency={formatCurrency}
         />
       )}
     </div>
   );
 };
+
+// FIXED VERSION - Part 2: Child components with proper prop usage
 
 // UPDATED: Enhanced Dashboard View with Engagement Metrics
 const EnhancedDashboardView = ({ 
@@ -800,7 +808,10 @@ const EnhancedDashboardView = ({
   onEdit, 
   categories, 
   formatNumber, 
-  formatCurrency, 
+  formatCurrency,
+  formatDate,
+  getCategoryColor,
+  getCategoryLabel,
   calculateArticleEarnings, 
   calculateArticleEngagement,
   checkCashoutEligibility,
@@ -989,7 +1000,7 @@ const EnhancedDashboardView = ({
 
         {!cashoutInfo.eligible && (
           <div className="improvement-suggestions">
-            <h4>💡 Tips to Improve Eligibility:</h4>
+            <h4>Tips to Improve Eligibility:</h4>
             <div className="suggestions-grid">
               {!cashoutInfo.requirements.minimumEarnings.met && (
                 <div className="suggestion">
@@ -1159,10 +1170,10 @@ const EnhancedDashboardView = ({
             <p>Start creating engaging content to begin earning</p>
             <div className="earning-potential">
               <p className="earning-info">
-                💡 <strong>New Requirements:</strong> P100 minimum + 20,000 engagement for cashout
+                <strong>New Requirements:</strong> P100 minimum + 20,000 engagement for cashout
               </p>
               <p className="earning-info">
-                💰 Potential: <strong>10,000 views + engagement = {formatCurrency(100)}+</strong>
+                <strong>Potential: 10,000 views + engagement = {formatCurrency(100)}+</strong>
               </p>
             </div>
             <button className="create-button primary" onClick={onCreateNew}>
@@ -1183,7 +1194,9 @@ const EnhancedEarningsView = ({
   onBack, 
   formatCurrency, 
   formatNumber, 
-  formatDate, 
+  formatDate,
+  getCategoryColor,
+  getCategoryLabel,
   calculateArticleEarnings, 
   calculateArticleEngagement,
   checkCashoutEligibility,
@@ -1298,7 +1311,7 @@ const EnhancedEarningsView = ({
         
         <div className="requirements-detailed">
           <div className="requirement-section">
-            <h4>💰 Minimum Earnings: P{earningsConfig.minimumPayout}</h4>
+            <h4>Minimum Earnings: P{earningsConfig.minimumPayout}</h4>
             <div className="requirement-status">
               <div className="progress-bar-large">
                 <div 
@@ -1309,14 +1322,14 @@ const EnhancedEarningsView = ({
               <div className="progress-labels">
                 <span>{formatCurrency(cashoutInfo.unpaidEarnings)}</span>
                 <span className={cashoutInfo.requirements.minimumEarnings.met ? 'met' : 'pending'}>
-                  {cashoutInfo.requirements.minimumEarnings.met ? '✅ Met' : `Need ${formatCurrency(earningsConfig.minimumPayout - cashoutInfo.unpaidEarnings)} more`}
+                  {cashoutInfo.requirements.minimumEarnings.met ? 'Met' : `Need ${formatCurrency(earningsConfig.minimumPayout - cashoutInfo.unpaidEarnings)} more`}
                 </span>
               </div>
             </div>
           </div>
 
           <div className="requirement-section">
-            <h4>⚡ Minimum Engagement: {formatNumber(earningsConfig.minimumEngagementForCashout)}</h4>
+            <h4>Minimum Engagement: {formatNumber(earningsConfig.minimumEngagementForCashout)}</h4>
             <div className="requirement-status">
               <div className="progress-bar-large">
                 <div 
@@ -1327,14 +1340,14 @@ const EnhancedEarningsView = ({
               <div className="progress-labels">
                 <span>{formatNumber(cashoutInfo.totalEngagement)}</span>
                 <span className={cashoutInfo.requirements.minimumEngagement.met ? 'met' : 'pending'}>
-                  {cashoutInfo.requirements.minimumEngagement.met ? '✅ Met' : `Need ${formatNumber(earningsConfig.minimumEngagementForCashout - cashoutInfo.totalEngagement)} more`}
+                  {cashoutInfo.requirements.minimumEngagement.met ? 'Met' : `Need ${formatNumber(earningsConfig.minimumEngagementForCashout - cashoutInfo.totalEngagement)} more`}
                 </span>
               </div>
             </div>
           </div>
 
           <div className="requirement-section">
-            <h4>📊 Engagement to Earnings Ratio</h4>
+            <h4>Engagement to Earnings Ratio</h4>
             <p className="ratio-explanation">
               Required: {earningsConfig.engagementToEarningsRatio} engagement points per P1 earned
             </p>
@@ -1348,7 +1361,7 @@ const EnhancedEarningsView = ({
               <div className="progress-labels">
                 <span>Current ratio: {cashoutInfo.unpaidEarnings > 0 ? Math.round(cashoutInfo.totalEngagement / cashoutInfo.unpaidEarnings) : 0}:1</span>
                 <span className={cashoutInfo.requirements.engagementRatio.met ? 'met' : 'pending'}>
-                  {cashoutInfo.requirements.engagementRatio.met ? '✅ Met' : `Need ${formatNumber(cashoutInfo.requirements.engagementRatio.required - cashoutInfo.totalEngagement)} more`}
+                  {cashoutInfo.requirements.engagementRatio.met ? 'Met' : `Need ${formatNumber(cashoutInfo.requirements.engagementRatio.required - cashoutInfo.totalEngagement)} more`}
                 </span>
               </div>
             </div>
@@ -1495,12 +1508,70 @@ const EnhancedEarningsView = ({
         </div>
       )}
 
-      {/* Rest of the enhanced earnings view components would continue here... */}
-      {/* Article earnings breakdown, rates information, etc. */}
-      
+      {/* Article Earnings Table */}
+      <div className="article-earnings-table">
+        <div className="section-header">
+          <h3>Article Performance & Earnings</h3>
+        </div>
+        
+        <div className="earnings-table">
+          <div className="table-header">
+            <div className="header-cell">Article</div>
+            <div className="header-cell">Category</div>
+            <div className="header-cell">Views</div>
+            <div className="header-cell">Engagement</div>
+            <div className="header-cell">Earnings</div>
+            <div className="header-cell">Status</div>
+          </div>
+          
+          {publishedArticles.map(article => {
+            const earnings = calculateArticleEarnings(article);
+            const engagement = calculateArticleEngagement(article);
+            
+            return (
+              <div key={article.id} className="table-row">
+                <div className="table-cell article-info">
+                  <h4>{article.title}</h4>
+                  <span className="publish-date">{formatDate(article.publishDate)}</span>
+                </div>
+                <div className="table-cell">
+                  <span 
+                    className="category-tag" 
+                    style={{ color: getCategoryColor(article.category) }}
+                  >
+                    {getCategoryLabel(article.category)}
+                  </span>
+                </div>
+                <div className="table-cell">
+                  {formatNumber(article.views)}
+                </div>
+                <div className="table-cell">
+                  {formatNumber(engagement)}
+                </div>
+                <div className="table-cell earnings-cell">
+                  <div className="earnings-breakdown">
+                    <span className="total">{formatCurrency(earnings.totalEarned)}</span>
+                    {earnings.engagementBonus > 0 && (
+                      <span className="bonus">+{formatCurrency(earnings.engagementBonus)} bonus</span>
+                    )}
+                  </div>
+                </div>
+                <div className="table-cell">
+                  {article.earnings?.isPaid ? (
+                    <span className="payment-status paid">Paid</span>
+                  ) : (
+                    <span className="payment-status pending">Pending</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };
+// FIXED VERSION - Part 3: Remaining child components with proper prop usage
 
 // Enhanced List View Component
 const EnhancedListView = ({ 
@@ -1633,6 +1704,10 @@ const EnhancedListView = ({
                       <Edit2 size={14} />
                       Edit
                     </button>
+                    <button onClick={() => onDelete(article.id)} className="delete-button">
+                      <Trash2 size={14} />
+                      Delete
+                    </button>
                   </div>
                 </div>
               );
@@ -1645,10 +1720,10 @@ const EnhancedListView = ({
             <p>Start creating engaging content to begin earning</p>
             <div className="earning-potential">
               <p className="earning-info">
-                💡 <strong>New System:</strong> P100 minimum + 20,000 engagement required for cashout
+                <strong>New System:</strong> P100 minimum + 20,000 engagement required for cashout
               </p>
               <p className="earning-info">
-                📊 <strong>Engagement Formula:</strong> Views + Likes×3 + Comments×5 + Shares×8
+                <strong>Engagement Formula:</strong> Views + Likes×3 + Comments×5 + Shares×8
               </p>
             </div>
             <button className="create-button primary" onClick={onCreateNew}>
@@ -1676,7 +1751,10 @@ const EnhancedEditorView = ({
   onImageUpload,
   addTag,
   removeTag,
-  fileInputRef
+  fileInputRef,
+  getCategoryColor,
+  getCategoryLabel,
+  formatCurrency
 }) => {
   const [tagInput, setTagInput] = useState('');
 
