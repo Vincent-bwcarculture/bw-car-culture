@@ -56,13 +56,13 @@ const MarketplaceFilters = ({
     premium: {
       title: 'Premium Collection',
       description: 'Luxury and high-end vehicles from verified dealers and private sellers',
-      icon: '👑',
+      icon: '',
       features: ['Premium Brands', 'Luxury Features', 'High-End Models', 'Verified Sellers'],
       badge: 'premium',
       searchPlaceholder: 'Search premium vehicles...'
     },
     savings: {
-      title: 'Save with BW Car Culture',
+      title: 'With Savings',
       description: 'Exclusive deals and savings from dealers and private sellers',
       icon: '',
       features: ['Special Offers', 'Price Reductions', 'Exclusive Deals', 'Limited Time'],
@@ -70,7 +70,7 @@ const MarketplaceFilters = ({
       searchPlaceholder: 'Search savings deals...'
     },
     private: {
-      title: 'Private Seller Marketplace', 
+      title: 'Private Sellers', 
       description: 'Connect directly with individual vehicle owners',
       icon: '',
       features: ['No Dealer Fees', 'Direct Negotiation', 'Personal Service', 'Meet the Owner'],
