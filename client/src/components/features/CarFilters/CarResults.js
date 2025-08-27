@@ -452,8 +452,7 @@ const CarResults = ({ filters = {}, hasSearched = false, onExpandFilter, onSearc
     return (
       <div className="featured-content">
         <div className="featured-message">
-          <h3>Featured Vehicles</h3>
-          <p>Tell us more about the vehicle you're looking for. Use the search filters above to find your perfect match.</p>
+          <p>Use the search filters above to find your perfect match.</p>
         </div>
         
         {renderCarousel(featuredListings, featuredCarouselRef, featuredActiveSlide, setFeaturedActiveSlide, "", false)}
