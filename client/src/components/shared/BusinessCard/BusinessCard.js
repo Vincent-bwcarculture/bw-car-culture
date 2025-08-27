@@ -227,7 +227,7 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
               
               {business.location && (
                 <div className="bcc-business-location">
-                  <span className="bcc-location-icon">📍</span>
+                  <span className="bcc-location-icon"></span>
                   <span>
                     {business.location?.city || 'Unknown'}
                     {business.location?.country ? `, ${business.location.country}` : ''}
