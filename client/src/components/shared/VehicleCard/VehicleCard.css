@@ -1,16 +1,19 @@
-/* VehicleCard.css - Enhanced with Zoom Functionality
-   Optimized with compact seller layout and future expansion capability
+/* VehicleCard.css - Enhanced with TRUE ZOOM Functionality
+   Solves image cropping by switching between object-fit modes and showing full original image
+
+TRUE ZOOM BEHAVIOR:
+- Zoom Level 1.0 (100%): Normal cropped view with object-fit: cover
+- Zoom Level > 1.0: Full image view with object-fit: contain + scaling
+- Zoom Level < 1.0: Reduced view for better overview
 
 LAYOUT STRUCTURE (Future-proof):
-- Image area (fixed height with navigation/badges/zoom controls)
+- Image area (fixed height with navigation/badges/zoom controls + true zoom support)
 - Title section (title + finance/lease badges - flexible for additional badges)  
 - Price area (price, savings, monthly payment - flexible for payment options)
 - Specs grid (2 columns, expandable to 3 for additional vehicle data)
 - Feature badges (flexible wrap for any number of badges)
 - Seller info (horizontal 3-row layout with larger avatar)
 - Footer (condition + action buttons)
-
-NEW: Zoom functionality integrated with existing navigation
 */
 
 .vc-card {
@@ -32,46 +35,65 @@ NEW: Zoom functionality integrated with existing navigation
   border-color: #ff3300;
 }
 
-/* Image Container - INCREASED HEIGHT especially for mobile */
+/* TRUE ZOOM: Enhanced Image Container - supports dynamic image display */
 .vc-image-container {
   position: relative;
   width: 100%;
-  height: 220px; /* Further increased from 200px for better image display */
+  height: 220px; /* Increased for better image display */
   overflow: hidden;
   background: rgba(0, 0, 0, 0.2);
-  /* NEW: Enable touch events for zoom/pan on mobile */
+  /* TRUE ZOOM: Enable touch events for zoom/pan on mobile */
   touch-action: none;
+  /* TRUE ZOOM: Create stacking context for absolute positioned zoomed images */
+  isolation: isolate;
 }
 
-/* NEW: Improved image container states */
 .vc-image-container.show-zoom-controls {
   /* When zoom controls are shown, adjust interaction */
 }
 
+/* TRUE ZOOM: Enhanced image wrapper - supports both display modes */
+.vc-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* TRUE ZOOM: Ensure proper stacking for overlaid elements */
+  z-index: 1;
+  /* TRUE ZOOM: Center content for absolute positioned zoomed images */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* TRUE ZOOM: Enhanced image styling - supports dynamic object-fit and positioning */
 .vc-image {
+  /* Default properties for normal view (zoom level 1.0) */
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
-  /* NEW: Better transform origin for zoom */
+  transition: all 0.3s ease;
   transform-origin: center center;
+  
+  /* TRUE ZOOM: Will be overridden by inline styles for zoomed view */
+  /* When zoomed, becomes absolutely positioned with object-fit: contain */
 }
 
+/* TRUE ZOOM: Disable hover scale when using true zoom to prevent interference */
 .vc-card:hover .vc-image {
   transform: scale(1.05);
 }
 
-/* NEW: Override hover scale when zoomed to prevent interference */
-.vc-image-container .vc-image[style*="scale"] {
-  /* When zoom is applied via style attribute, disable hover scale */
+/* TRUE ZOOM: Override hover effects when image has custom positioning */
+.vc-image[style*="position: absolute"] {
+  /* Disable hover transform when true zoom is active */
 }
 
-.vc-card:hover .vc-image-container .vc-image[style*="scale"] {
-  /* Prevent hover scaling when zoom is active */
-  transform: var(--zoom-transform) !important;
+.vc-card:hover .vc-image[style*="position: absolute"] {
+  /* Prevent hover scaling when true zoom is active */
+  transform: var(--image-transform, none) !important;
 }
 
-/* NEW: Zoom Controls Styling */
+/* TRUE ZOOM: Zoom Controls Styling - Show on hover for desktop, smaller for mobile */
 .vc-zoom-controls {
   position: absolute;
   top: 10px;
@@ -92,7 +114,7 @@ NEW: Zoom functionality integrated with existing navigation
   user-select: none;
 }
 
-/* Show zoom controls on desktop hover or mobile tap */
+/* Desktop: Show zoom controls on hover (like navigation arrows) */
 @media (min-width: 769px) {
   .vc-image-container:hover .vc-zoom-controls {
     opacity: 1;
@@ -108,8 +130,8 @@ NEW: Zoom functionality integrated with existing navigation
   }
 }
 
-/* Always show zoom controls when zoomed in */
-.vc-zoom-controls:has(.vc-zoom-level:not([data-zoom="100%"])) {
+/* Always show zoom controls when zoomed away from normal (100%) */
+.vc-zoom-controls:has(.vc-zoom-level:not(:contains("100%"))) {
   opacity: 1;
   visibility: visible;
 }
@@ -373,7 +395,7 @@ NEW: Zoom functionality integrated with existing navigation
   border-radius: 10px;
   font-size: 0.7rem;
   z-index: 3;
-  /* NEW: Adjust position when zoom controls are visible */
+  /* TRUE ZOOM: Adjust position when zoom controls are visible */
   transition: bottom 0.3s ease;
 }
 
@@ -883,38 +905,52 @@ NEW: Zoom functionality integrated with existing navigation
   background: #cc2900;
 }
 
-/* Mobile responsive adjustments */
+/* TRUE ZOOM: Mobile responsive adjustments with smaller controls */
 @media (max-width: 768px) {
   .vc-image-container {
     height: 200px; /* Significantly increased from 180px for better mobile image display */
-    /* Make image container tappable for navigation reveal */
     cursor: pointer;
   }
   
-  /* NEW: Mobile zoom controls adjustments */
+  /* REDUCED: Mobile zoom controls - smaller for better mobile UX */
   .vc-zoom-controls {
     top: 8px;
     right: 8px;
-    padding: 0.25rem 0.5rem;
-    gap: 0.3rem;
-    font-size: 0.8rem;
-    border-radius: 16px;
+    padding: 0.2rem 0.4rem; /* Reduced padding */
+    gap: 0.25rem; /* Smaller gap */
+    font-size: 0.75rem; /* Smaller font */
+    border-radius: 14px; /* Smaller radius */
   }
   
   .vc-zoom-btn {
-    width: 32px;
-    height: 32px;
-    font-size: 0.85rem;
+    width: 26px; /* Reduced from 32px */
+    height: 26px;
+    font-size: 0.75rem; /* Reduced font size */
   }
   
   .vc-zoom-btn.zoom-reset {
-    width: 36px;
-    font-size: 0.8rem;
+    width: 30px; /* Reduced from 36px */
+    font-size: 0.7rem;
   }
   
   .vc-zoom-level {
-    font-size: 0.7rem;
-    min-width: 30px;
+    font-size: 0.65rem; /* Smaller zoom level text */
+    min-width: 28px; /* Reduced width */
+  }
+  
+  /* REDUCED: Mobile navigation arrows - smaller size */
+  .vc-image-nav {
+    width: 36px; /* Reduced from 44px */
+    height: 36px;
+    margin: 0 6px;
+    background: rgba(0, 0, 0, 0.6);
+    font-size: 14px; /* Reduced from 16px */
+  }
+  
+  .vc-image-nav:hover,
+  .vc-image-nav:active {
+    background: rgba(255, 51, 0, 0.9);
+    transform: scale(1.05);
   }
   
   /* Adjust other elements for mobile */
@@ -931,58 +967,42 @@ NEW: Zoom functionality integrated with existing navigation
   }
   
   .vc-header {
-    /* Keep side-by-side layout on mobile */
     flex-direction: row;
-    gap: 0.6rem; /* Reduced gap to fit better */
+    gap: 0.6rem;
     align-items: flex-start;
   }
   
   .vc-title-section {
     order: 1;
-    max-width: 65%; /* Allow more space for title on mobile */
+    max-width: 65%;
   }
   
   .vc-title {
-    font-size: 1.1rem; /* Slightly smaller than desktop but larger than before */
+    font-size: 1.1rem;
     font-weight: 600;
-    -webkit-line-clamp: 2; /* Limit to 2 lines on mobile */
+    -webkit-line-clamp: 2;
   }
   
   .vc-title-badges {
-    gap: 0.3rem; /* Smaller gap on mobile */
-    margin-top: 0.1rem; /* Tighter spacing on mobile */
+    gap: 0.3rem;
+    margin-top: 0.1rem;
   }
   
   .vc-price-container {
     order: 2;
-    min-width: 35%; /* Ensure price area has enough space */
+    min-width: 35%;
     flex-shrink: 0;
   }
   
   .vc-price {
-    font-size: 1.2rem; /* Increased for better mobile readability */
+    font-size: 1.2rem;
     font-weight: bold;
-  }
-  
-  /* Mobile navigation arrows - larger touch targets */
-  .vc-image-nav {
-    width: 44px; /* Larger for better touch target */
-    height: 44px;
-    margin: 0 6px;
-    background: rgba(0, 0, 0, 0.6); /* More visible on mobile when shown */
-    font-size: 16px;
-  }
-  
-  .vc-image-nav:hover,
-  .vc-image-nav:active {
-    background: rgba(255, 51, 0, 0.9);
-    transform: scale(1.05);
   }
   
   .vc-dealer-info {
     padding: 0.3rem;
     margin-bottom: 0.3rem;
-    min-height: 50px; /* Increased to accommodate larger avatar */
+    min-height: 50px;
   }
   
   .vc-dealer-name {
@@ -1011,7 +1031,7 @@ NEW: Zoom functionality integrated with existing navigation
   
   .vc-dealer-avatar,
   .vc-dealer-avatar-placeholder {
-    width: 40px; /* Larger on mobile to maintain prominence */
+    width: 40px;
     height: 40px;
     font-size: 16px;
   }
@@ -1023,41 +1043,40 @@ NEW: Zoom functionality integrated with existing navigation
   }
   
   .vc-image-container {
-    overflow: hidden; /* Ensure scaled image doesn't overflow */
+    overflow: hidden;
   }
 }
 
 @media (max-width: 480px) {
   .vc-image-container {
-    height: 190px; /* Significantly increased from 170px for better small screen display */
-    /* Enhanced tap indication */
+    height: 190px;
     position: relative;
   }
   
-  /* NEW: Mobile zoom controls for small screens */
+  /* FURTHER REDUCED: Mobile zoom controls for small screens */
   .vc-zoom-controls {
     top: 6px;
     right: 6px;
-    padding: 0.2rem 0.4rem;
-    gap: 0.25rem;
-    font-size: 0.75rem;
-    border-radius: 14px;
+    padding: 0.15rem 0.3rem; /* Further reduced padding */
+    gap: 0.2rem; /* Even smaller gap */
+    font-size: 0.7rem; /* Smaller font */
+    border-radius: 12px; /* Smaller radius */
   }
   
   .vc-zoom-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 0.8rem;
+    width: 22px; /* Further reduced from 28px */
+    height: 22px;
+    font-size: 0.7rem; /* Smaller font size */
   }
   
   .vc-zoom-btn.zoom-reset {
-    width: 32px;
-    font-size: 0.75rem;
+    width: 26px; /* Further reduced from 32px */
+    font-size: 0.65rem;
   }
   
   .vc-zoom-level {
-    font-size: 0.65rem;
-    min-width: 25px;
+    font-size: 0.6rem; /* Even smaller zoom level text */
+    min-width: 22px; /* Reduced width */
   }
   
   /* Add subtle tap indicator for small screens */
@@ -1091,48 +1110,47 @@ NEW: Zoom functionality integrated with existing navigation
   }
   
   .vc-header {
-    /* On very small screens, consider stacking if needed */
     gap: 0.4rem;
   }
   
   .vc-title-section {
-    max-width: 60%; /* More compact on small screens */
+    max-width: 60%;
   }
   
   .vc-title {
-    font-size: 1.05rem; /* Increased for better readability on small screens */
+    font-size: 1.05rem;
     font-weight: 600;
     -webkit-line-clamp: 2;
   }
   
   .vc-price-container {
-    min-width: 40%; /* Ensure price area has enough space */
+    min-width: 40%;
   }
   
   .vc-price {
-    font-size: 1.1rem; /* Increased for better mobile readability */
+    font-size: 1.1rem;
     font-weight: bold;
   }
   
-  /* Enhanced mobile navigation arrows */
+  /* Enhanced mobile navigation arrows - kept reasonable size */
   .vc-image-nav {
-    width: 48px; /* Even larger touch targets for small screens */
-    height: 48px;
+    width: 40px; /* Slightly larger than tablet for better touch */
+    height: 40px;
     margin: 0 4px;
-    background: rgba(0, 0, 0, 0.7); /* More visible on small screens */
-    font-size: 18px; /* Larger arrows */
-    border-width: 2px; /* Thicker border for better visibility */
+    background: rgba(0, 0, 0, 0.7);
+    font-size: 16px;
+    border-width: 2px;
   }
   
   .vc-image-nav:hover,
   .vc-image-nav:active {
-    background: rgba(255, 51, 0, 0.95); /* Almost opaque on interaction */
-    transform: scale(1.05); /* Subtle scale to show interaction */
+    background: rgba(255, 51, 0, 0.95);
+    transform: scale(1.05);
   }
   
   .vc-dealer-info {
     padding: 0.25rem;
-    min-height: 45px; /* Accommodate larger avatar on small screens */
+    min-height: 45px;
   }
   
   .vc-dealer-meta {
@@ -1143,7 +1161,6 @@ NEW: Zoom functionality integrated with existing navigation
     gap: 0.3rem;
   }
   
-  /* Stack vertically on very small screens if needed */
   .vc-dealer-meta {
     flex-direction: column;
     align-items: flex-start;
@@ -1152,19 +1169,19 @@ NEW: Zoom functionality integrated with existing navigation
   
   .vc-dealer-avatar,
   .vc-dealer-avatar-placeholder {
-    width: 36px; /* Still larger than original even on smallest screens */
+    width: 36px;
     height: 36px;
     font-size: 14px;
   }
   
   .vc-title-badges {
-    gap: 0.25rem; /* Very tight spacing on small screens */
+    gap: 0.25rem;
     margin-top: 0.1rem;
   }
   
   .vc-finance-badge,
   .vc-lease-badge {
-    font-size: 0.7rem; /* Smaller badges on small screens */
+    font-size: 0.7rem;
     padding: 2px 6px;
   }
 
@@ -1202,21 +1219,21 @@ NEW: Zoom functionality integrated with existing navigation
   .vc-zoom-controls {
     top: 4px;
     right: 4px;
-    padding: 0.15rem 0.3rem;
-    gap: 0.2rem;
-    font-size: 0.7rem;
-    border-radius: 12px;
+    padding: 0.1rem 0.25rem;
+    gap: 0.15rem;
+    font-size: 0.65rem;
+    border-radius: 10px;
   }
   
   .vc-zoom-btn {
-    width: 24px;
-    height: 24px;
-    font-size: 0.75rem;
+    width: 20px;
+    height: 20px;
+    font-size: 0.65rem;
   }
   
   .vc-zoom-level {
-    font-size: 0.6rem;
-    min-width: 20px;
+    font-size: 0.55rem;
+    min-width: 18px;
   }
 }
 
@@ -1241,7 +1258,7 @@ NEW: Zoom functionality integrated with existing navigation
 .vc-card.compact .vc-dealer-info {
   padding: 0.25rem;
   margin-bottom: 0.25rem;
-  min-height: 45px; /* Accommodate larger avatar in compact mode */
+  min-height: 45px;
 }
 
 .vc-card.compact .vc-dealer-name {
@@ -1265,7 +1282,7 @@ NEW: Zoom functionality integrated with existing navigation
 
 .vc-card.compact .vc-dealer-avatar,
 .vc-card.compact .vc-dealer-avatar-placeholder {
-  width: 40px; /* Larger even in compact mode */
+  width: 40px;
   height: 40px;
   font-size: 16px;
 }
@@ -1290,7 +1307,7 @@ NEW: Zoom functionality integrated with existing navigation
   font-size: 0.7rem;
 }
 
-/* Compact mode zoom adjustments */
+/* TRUE ZOOM: Compact mode zoom adjustments */
 .vc-card.compact .vc-zoom-controls {
   padding: 0.2rem 0.4rem;
   gap: 0.3rem;
@@ -1332,7 +1349,7 @@ NEW: Zoom functionality integrated with existing navigation
     border: 2px solid #ffffff;
   }
   
-  /* NEW: High contrast zoom controls */
+  /* TRUE ZOOM: High contrast zoom controls */
   .vc-zoom-controls {
     background: #000000;
     border: 2px solid #ffffff;
@@ -1363,13 +1380,11 @@ NEW: Zoom functionality integrated with existing navigation
     animation: none;
   }
   
-  /* NEW: Disable zoom transitions for reduced motion */
+  /* TRUE ZOOM: Disable zoom transitions for reduced motion */
   .vc-image {
     transition: none !important;
   }
 }
-
-/* Add these styles to your existing VehicleCard.css file */
 
 /* === SOLD BADGE OVERLAY STYLES === */
 .vc-sold-overlay {
@@ -1405,7 +1420,6 @@ NEW: Zoom functionality integrated with existing navigation
   overflow: hidden;
 }
 
-/* Premium shine effect */
 .vc-sold-badge::before {
   content: '';
   position: absolute;
@@ -1446,7 +1460,6 @@ NEW: Zoom functionality integrated with existing navigation
   z-index: 1;
 }
 
-/* Hover effect for sold vehicles */
 .vc-card:hover .vc-sold-badge {
   transform: scale(1.05);
   box-shadow: 
@@ -1454,19 +1467,10 @@ NEW: Zoom functionality integrated with existing navigation
     0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
-/* Ensure image wrapper is relative for overlay positioning */
-.vc-image-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-/* Sold overlay should not interfere with clicks when not sold */
 .vc-sold-overlay {
   pointer-events: none;
 }
 
-/* Reduce opacity of sold vehicle content to indicate unavailability */
 .vc-card[data-status="sold"] .vc-content {
   opacity: 0.8;
 }
@@ -1476,13 +1480,11 @@ NEW: Zoom functionality integrated with existing navigation
   opacity: 0.7;
 }
 
-/* Add subtle border to sold vehicle cards */
 .vc-card[data-status="sold"] {
   border: 2px solid rgba(74, 144, 226, 0.3);
   background: rgba(74, 144, 226, 0.02);
 }
 
-/* Disable reserve button for sold vehicles */
 .vc-card[data-status="sold"] .vc-reserve-btn {
   background-color: #6c757d;
   cursor: not-allowed;
@@ -1494,19 +1496,17 @@ NEW: Zoom functionality integrated with existing navigation
   transform: none;
 }
 
-/* Hide savings badge for sold vehicles (handled in JS but backup CSS) */
 .vc-card[data-status="sold"] .vc-savings-badge {
   display: none;
 }
 
-/* Hide finance options for sold vehicles */
 .vc-card[data-status="sold"] .vc-monthly-payment,
 .vc-card[data-status="sold"] .vc-savings-highlight,
 .vc-card[data-status="sold"] .vc-original-price {
   display: none;
 }
 
-/* NEW: Disable zoom controls on sold vehicles */
+/* TRUE ZOOM: Disable zoom controls on sold vehicles */
 .vc-card[data-status="sold"] .vc-zoom-controls {
   display: none;
 }
@@ -1528,7 +1528,6 @@ NEW: Zoom functionality integrated with existing navigation
   }
 }
 
-/* Extra small screens */
 @media (max-width: 420px) {
   .vc-sold-badge {
     padding: 0.6rem 1rem;
@@ -1545,36 +1544,41 @@ NEW: Zoom functionality integrated with existing navigation
   }
 }
 
-/* NEW: Touch device enhancements for zoom */
+/* TRUE ZOOM: Touch device enhancements */
 @media (hover: none) {
   .vc-zoom-controls,
   .vc-image-navigation {
     opacity: 1;
   }
   
-  /* Always show touch-friendly controls on touch devices */
   .vc-zoom-btn {
     min-height: 44px;
     min-width: 44px;
   }
 }
 
-/* NEW: Prevent text selection during drag operations */
+/* TRUE ZOOM: Prevent text selection during drag operations */
 .vc-image-container.dragging {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
 }
 
-/* NEW: Custom cursor for different zoom states */
+/* TRUE ZOOM: Custom cursor for different zoom states */
 .vc-image {
   cursor: pointer;
 }
 
-.vc-image[style*="scale(1)"] {
+.vc-image[style*="object-fit: cover"] {
   cursor: zoom-in;
 }
 
-.vc-image[style*="scale"]:not([style*="scale(1)"]) {
+.vc-image[style*="object-fit: contain"] {
   cursor: move;
+}
+
+/* TRUE ZOOM: Ensure proper stacking context for absolutely positioned images */
+.vc-image-wrapper {
+  isolation: isolate;
+  position: relative;
 }

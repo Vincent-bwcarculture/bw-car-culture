@@ -11,20 +11,26 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const [imageLoadError, setImageLoadError] = useState(false);
   const [hasBeenViewed, setHasBeenViewed] = useState(false);
   const [dealerImageError, setDealerImageError] = useState(false);
-  const [showNavigation, setShowNavigation] = useState(false); // For mobile tap-to-reveal
+  const [showNavigation, setShowNavigation] = useState(false);
   
-  // NEW: Zoom functionality state - Default to 75% zoom
-  const [zoomLevel, setZoomLevel] = useState(0.75);
+  // TRUE ZOOM: Enhanced zoom functionality state
+  const [zoomLevel, setZoomLevel] = useState(1); // Start at 100% (normal cropped view)
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
   const [showZoomControls, setShowZoomControls] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [lastPanPosition, setLastPanPosition] = useState({ x: 0, y: 0 });
   
-  // NEW: Refs for zoom functionality
+  // TRUE ZOOM: Image dimension tracking
+  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 });
+  const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
+  const [isImageFullyLoaded, setIsImageFullyLoaded] = useState(false);
+  
+  // Refs for zoom functionality
   const imageRef = useRef(null);
   const containerRef = useRef(null);
   const dragTimeoutRef = useRef(null);
+  const resizeObserverRef = useRef(null);
 
   // FIXED: Enhanced checkFailedImage function to include type
   const checkFailedImage = useCallback((url, type = 'general') => {
@@ -35,7 +41,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       
       if (!failureTime) return false;
       
-      // Clear cache entries older than 1 hour to allow retry
       const oneHourAgo = Date.now() - (60 * 60 * 1000);
       if (failureTime < oneHourAgo) {
         delete failedImages[key];
@@ -49,14 +54,12 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     }
   }, []);
 
-  // FIXED: Enhanced markFailedImage function
   const markFailedImage = useCallback((url, type = 'general') => {
     try {
       const failedImages = JSON.parse(localStorage.getItem('failedImages') || '{}');
       const key = `${url}_${type}`;
       failedImages[key] = Date.now();
       
-      // Limit cache size to prevent localStorage bloat
       const keys = Object.keys(failedImages);
       if (keys.length > 100) {
         const oldestKey = keys.sort((a, b) => failedImages[a] - failedImages[b])[0];
@@ -68,7 +71,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     }
   }, []);
 
-  // Helper function to safely extract IDs from various formats
   const safeGetStringId = useCallback((id) => {
     if (!id) return null;
     
@@ -104,20 +106,117 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     return null;
   }, []);
 
-  // NEW: Reset zoom when image changes - Default to 75%
+  // TRUE ZOOM: Track container dimensions
   useEffect(() => {
-    setZoomLevel(0.75);
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateContainerDimensions = () => {
+      const rect = container.getBoundingClientRect();
+      setContainerDimensions({ width: rect.width, height: rect.height });
+    };
+
+    // Initial measurement
+    updateContainerDimensions();
+
+    // Set up ResizeObserver for responsive updates
+    if (window.ResizeObserver) {
+      resizeObserverRef.current = new ResizeObserver(updateContainerDimensions);
+      resizeObserverRef.current.observe(container);
+    } else {
+      // Fallback for older browsers
+      window.addEventListener('resize', updateContainerDimensions);
+    }
+
+    return () => {
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+      } else {
+        window.removeEventListener('resize', updateContainerDimensions);
+      }
+    };
+  }, []);
+
+  // TRUE ZOOM: Reset zoom when image changes
+  useEffect(() => {
+    setZoomLevel(1);
     setPanPosition({ x: 0, y: 0 });
     setShowZoomControls(false);
     setIsDragging(false);
+    setIsImageFullyLoaded(false);
+    setImageDimensions({ width: 0, height: 0 });
   }, [activeImageIndex, car]);
 
-  // NEW: Zoom functionality - Updated range and increments
+  // TRUE ZOOM: Calculate image display properties
+  const imageDisplayProps = useMemo(() => {
+    if (!isImageFullyLoaded || !imageDimensions.width || !containerDimensions.width) {
+      return {
+        objectFit: 'cover',
+        width: '100%',
+        height: '100%',
+        transform: 'none',
+        maxWidth: 'none',
+        maxHeight: 'none'
+      };
+    }
+
+    // At zoom level 1.0: normal cropped view (object-fit: cover)
+    if (zoomLevel === 1) {
+      return {
+        objectFit: 'cover',
+        width: '100%',
+        height: '100%',
+        transform: 'none',
+        maxWidth: 'none',
+        maxHeight: 'none'
+      };
+    }
+
+    // Above zoom level 1.0: show full image with true zoom
+    const containerAspect = containerDimensions.width / containerDimensions.height;
+    const imageAspect = imageDimensions.width / imageDimensions.height;
+    
+    let baseWidth, baseHeight;
+    
+    // Calculate base size to fit full image in container
+    if (imageAspect > containerAspect) {
+      // Image is wider - fit to container width
+      baseWidth = containerDimensions.width;
+      baseHeight = containerDimensions.width / imageAspect;
+    } else {
+      // Image is taller - fit to container height  
+      baseHeight = containerDimensions.height;
+      baseWidth = containerDimensions.height * imageAspect;
+    }
+
+    // Apply zoom scaling
+    const displayWidth = baseWidth * (zoomLevel - 1 + 1); // Zoom from actual image size
+    const displayHeight = baseHeight * (zoomLevel - 1 + 1);
+    
+    // Calculate transform for panning
+    const transformX = panPosition.x / zoomLevel;
+    const transformY = panPosition.y / zoomLevel;
+
+    return {
+      objectFit: 'contain',
+      width: `${displayWidth}px`,
+      height: `${displayHeight}px`,
+      maxWidth: 'none',
+      maxHeight: 'none',
+      transform: `translate(${transformX}px, ${transformY}px)`,
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      marginTop: `${-displayHeight / 2}px`,
+      marginLeft: `${-displayWidth / 2}px`
+    };
+  }, [zoomLevel, panPosition, imageDimensions, containerDimensions, isImageFullyLoaded]);
+
+  // TRUE ZOOM: Enhanced zoom functionality
   const handleZoomIn = useCallback((e) => {
     e.stopPropagation();
-    setZoomLevel(prev => Math.min(prev + 0.25, 3)); // Max zoom 3x (300%), smaller increments
+    setZoomLevel(prev => Math.min(prev + 0.25, 4)); // Max zoom 4x
     
-    // Track zoom usage
     try {
       analytics.trackClick('image_zoom', 'zoom_in', {
         listingId: car._id,
@@ -131,15 +230,14 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
 
   const handleZoomOut = useCallback((e) => {
     e.stopPropagation();
-    const newZoom = Math.max(zoomLevel - 0.25, 0.5); // Min zoom 50%, smaller decrements
+    const newZoom = Math.max(zoomLevel - 0.25, 0.5); // Min zoom 50%
     setZoomLevel(newZoom);
     
-    // Reset pan if zoom is back to default (75%)
-    if (newZoom === 0.75) {
+    // Reset pan if back to normal cropped view
+    if (newZoom === 1) {
       setPanPosition({ x: 0, y: 0 });
     }
     
-    // Track zoom usage
     try {
       analytics.trackClick('image_zoom', 'zoom_out', {
         listingId: car._id,
@@ -153,10 +251,9 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
 
   const handleZoomReset = useCallback((e) => {
     e.stopPropagation();
-    setZoomLevel(0.75); // Reset to 75% instead of 100%
+    setZoomLevel(1);
     setPanPosition({ x: 0, y: 0 });
     
-    // Track zoom reset
     try {
       analytics.trackClick('image_zoom', 'reset', {
         listingId: car._id,
@@ -167,9 +264,9 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     }
   }, [analytics, car, activeImageIndex]);
 
-  // NEW: Mouse drag handlers for panning - Updated for new zoom range
+  // TRUE ZOOM: Enhanced mouse drag handlers
   const handleMouseDown = useCallback((e) => {
-    if (zoomLevel <= 0.75) return; // Only allow panning when zoomed beyond default
+    if (zoomLevel <= 1) return; // Only allow panning when zoomed beyond normal view
     
     e.preventDefault();
     e.stopPropagation();
@@ -177,14 +274,13 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     setDragStart({ x: e.clientX, y: e.clientY });
     setLastPanPosition(panPosition);
     
-    // Clear any existing timeout
     if (dragTimeoutRef.current) {
       clearTimeout(dragTimeoutRef.current);
     }
   }, [zoomLevel, panPosition]);
 
   const handleMouseMove = useCallback((e) => {
-    if (!isDragging || zoomLevel <= 0.75) return; // Updated for new zoom range
+    if (!isDragging || zoomLevel <= 1) return;
     
     e.preventDefault();
     e.stopPropagation();
@@ -192,19 +288,32 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     const deltaX = e.clientX - dragStart.x;
     const deltaY = e.clientY - dragStart.y;
     
-    // Calculate container bounds to limit panning
-    const container = containerRef.current;
-    if (!container) return;
+    // Calculate max pan limits based on actual image display size
+    if (!imageDimensions.width || !containerDimensions.width) return;
     
-    const containerRect = container.getBoundingClientRect();
-    const maxPanX = (containerRect.width * (zoomLevel - 0.75)) / 2; // Adjusted for 75% base
-    const maxPanY = (containerRect.height * (zoomLevel - 0.75)) / 2;
+    const containerAspect = containerDimensions.width / containerDimensions.height;
+    const imageAspect = imageDimensions.width / imageDimensions.height;
+    
+    let baseWidth, baseHeight;
+    if (imageAspect > containerAspect) {
+      baseWidth = containerDimensions.width;
+      baseHeight = containerDimensions.width / imageAspect;
+    } else {
+      baseHeight = containerDimensions.height;
+      baseWidth = containerDimensions.height * imageAspect;
+    }
+    
+    const displayWidth = baseWidth * zoomLevel;
+    const displayHeight = baseHeight * zoomLevel;
+    
+    const maxPanX = Math.max(0, (displayWidth - containerDimensions.width) / 2);
+    const maxPanY = Math.max(0, (displayHeight - containerDimensions.height) / 2);
     
     const newX = Math.max(-maxPanX, Math.min(maxPanX, lastPanPosition.x + deltaX));
     const newY = Math.max(-maxPanY, Math.min(maxPanY, lastPanPosition.y + deltaY));
     
     setPanPosition({ x: newX, y: newY });
-  }, [isDragging, zoomLevel, dragStart, lastPanPosition]);
+  }, [isDragging, zoomLevel, dragStart, lastPanPosition, imageDimensions, containerDimensions]);
 
   const handleMouseUp = useCallback((e) => {
     if (!isDragging) return;
@@ -213,16 +322,14 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     e.stopPropagation();
     setIsDragging(false);
     
-    // Set a timeout to prevent click events immediately after drag
     dragTimeoutRef.current = setTimeout(() => {
       dragTimeoutRef.current = null;
     }, 100);
   }, [isDragging]);
 
-  // NEW: Touch handlers for mobile pinch-to-zoom and pan - Updated range
+  // TRUE ZOOM: Enhanced touch handlers
   const handleTouchStart = useCallback((e) => {
     if (e.touches.length === 2) {
-      // Pinch to zoom start
       e.preventDefault();
       e.stopPropagation();
       
@@ -234,8 +341,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       );
       
       setDragStart({ distance, zoom: zoomLevel });
-    } else if (e.touches.length === 1 && zoomLevel > 0.75) { // Updated condition
-      // Single touch pan start
+    } else if (e.touches.length === 1 && zoomLevel > 1) {
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(true);
@@ -246,7 +352,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
 
   const handleTouchMove = useCallback((e) => {
     if (e.touches.length === 2) {
-      // Pinch to zoom
       e.preventDefault();
       e.stopPropagation();
       
@@ -259,40 +364,52 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       
       if (dragStart.distance) {
         const scale = distance / dragStart.distance;
-        const newZoom = Math.max(0.5, Math.min(3, dragStart.zoom * scale)); // Updated range: 50% to 300%
+        const newZoom = Math.max(0.5, Math.min(4, dragStart.zoom * scale));
         setZoomLevel(newZoom);
         
-        if (newZoom === 0.75) { // Reset pan at default zoom
+        if (newZoom === 1) {
           setPanPosition({ x: 0, y: 0 });
         }
       }
-    } else if (e.touches.length === 1 && isDragging && zoomLevel > 0.75) { // Updated condition
-      // Single touch pan
+    } else if (e.touches.length === 1 && isDragging && zoomLevel > 1) {
       e.preventDefault();
       e.stopPropagation();
       
       const deltaX = e.touches[0].clientX - dragStart.x;
       const deltaY = e.touches[0].clientY - dragStart.y;
       
-      const container = containerRef.current;
-      if (!container) return;
+      // Use same pan logic as mouse
+      if (!imageDimensions.width || !containerDimensions.width) return;
       
-      const containerRect = container.getBoundingClientRect();
-      const maxPanX = (containerRect.width * (zoomLevel - 0.75)) / 2; // Adjusted for 75% base
-      const maxPanY = (containerRect.height * (zoomLevel - 0.75)) / 2;
+      const containerAspect = containerDimensions.width / containerDimensions.height;
+      const imageAspect = imageDimensions.width / imageDimensions.height;
+      
+      let baseWidth, baseHeight;
+      if (imageAspect > containerAspect) {
+        baseWidth = containerDimensions.width;
+        baseHeight = containerDimensions.width / imageAspect;
+      } else {
+        baseHeight = containerDimensions.height;
+        baseWidth = containerDimensions.height * imageAspect;
+      }
+      
+      const displayWidth = baseWidth * zoomLevel;
+      const displayHeight = baseHeight * zoomLevel;
+      
+      const maxPanX = Math.max(0, (displayWidth - containerDimensions.width) / 2);
+      const maxPanY = Math.max(0, (displayHeight - containerDimensions.height) / 2);
       
       const newX = Math.max(-maxPanX, Math.min(maxPanX, lastPanPosition.x + deltaX));
       const newY = Math.max(-maxPanY, Math.min(maxPanY, lastPanPosition.y + deltaY));
       
       setPanPosition({ x: newX, y: newY });
     }
-  }, [isDragging, zoomLevel, dragStart, lastPanPosition]);
+  }, [isDragging, zoomLevel, dragStart, lastPanPosition, imageDimensions, containerDimensions]);
 
   const handleTouchEnd = useCallback((e) => {
     e.preventDefault();
     setIsDragging(false);
     
-    // Set timeout to prevent click events after touch
     dragTimeoutRef.current = setTimeout(() => {
       dragTimeoutRef.current = null;
     }, 150);
@@ -326,40 +443,28 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     try {
       if (typeof currentImage === 'object' && currentImage.url) {
         let imageUrl = currentImage.url;
-        
-        // Fix problematic S3 URLs with duplicate paths
         if (imageUrl.includes('/images/images/')) {
           imageUrl = imageUrl.replace(/\/images\/images\//g, '/images/');
         }
-        
         return imageUrl;
       }
       
       if (typeof currentImage === 'string') {
-        // If it's already a full URL
         if (currentImage.startsWith('http://') || currentImage.startsWith('https://')) {
           let imageUrl = currentImage;
-          
-          // Fix problematic S3 URLs with duplicate paths
           if (imageUrl.includes('/images/images/')) {
             imageUrl = imageUrl.replace(/\/images\/images\//g, '/images/');
           }
-          
           return imageUrl;
         }
         
-        // If it's a relative path, ensure it starts with /
         const imageUrl = currentImage.startsWith('/') ? currentImage : `/${currentImage}`;
-        
-        // Fix problematic paths
         if (imageUrl.includes('/images/images/')) {
           return imageUrl.replace(/\/images\/images\//g, '/images/');
         }
-        
         return imageUrl;
       }
       
-      // Fallback
       return '/images/placeholders/car.jpg';
     } catch (error) {
       console.error('Error processing image URL:', error);
@@ -376,7 +481,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       
       let imageUrl = null;
       
-      // Try to get the image from various possible sources
       if (type === 'logo') {
         imageUrl = car.dealer.profile?.logo || car.dealer.logo || car.dealer.profilePicture;
       } else {
@@ -384,24 +488,20 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       }
       
       if (imageUrl) {
-        // If it's already a full URL
         if (typeof imageUrl === 'string' && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
           return imageUrl;
         }
         
-        // If it's an object with url property
         if (typeof imageUrl === 'object' && imageUrl.url) {
           return imageUrl.url;
         }
         
-        // If it's a relative path
         if (typeof imageUrl === 'string') {
           const fullUrl = imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
           return fullUrl.replace(/\/images\/images\//g, '/images/');
         }
       }
       
-      // Final fallback
       return `/images/placeholders/${type === 'logo' ? 'dealer-logo' : 'dealer-avatar'}.jpg`;
     } catch (error) {
       console.error(`Error getting dealer ${type} URL:`, error);
@@ -417,7 +517,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     
     if (!showSavings) return null;
     
-    // If we have explicit savings amount
     if (savingsAmount && savingsAmount > 0) {
       return {
         amount: savingsAmount,
@@ -429,7 +528,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       };
     }
     
-    // If we have original price, calculate savings
     if (originalPrice && originalPrice > car.price) {
       const savings = originalPrice - car.price;
       return {
@@ -452,7 +550,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     if (car.dealer) {
       let dealerId = null;
       
-      // Extract dealer ID
       if (car.dealerId) {
         dealerId = safeGetStringId(car.dealerId);
       } else if (car.dealer._id) {
@@ -461,22 +558,16 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         dealerId = safeGetStringId(car.dealer.id);
       }
       
-      // ENHANCED: Multiple ways to detect private seller
       const isPrivateSeller = 
-        // Explicit seller type
         car.dealer.sellerType === 'private' ||
-        // Has private seller data
         (car.dealer.privateSeller && 
          car.dealer.privateSeller.firstName && 
          car.dealer.privateSeller.lastName) ||
-        // Business name indicates private seller
         (car.dealer.businessName && 
          (car.dealer.businessName.includes('Private') || 
           car.dealer.businessName.match(/^[A-Z][a-z]+ [A-Z][a-z]+$/))) ||
-        // No business type (dealerships should have business type)
         (!car.dealer.businessType && car.dealer.name && !car.dealer.businessName);
 
-      // ENHANCED: Better display name calculation
       let displayName = 'Unknown Seller';
       let contactName = null;
       let sellerTypeLabel = 'Dealership';
@@ -484,7 +575,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       if (isPrivateSeller) {
         sellerTypeLabel = 'Private Seller';
         
-        // Try different sources for private seller name
         if (car.dealer.privateSeller && car.dealer.privateSeller.firstName && car.dealer.privateSeller.lastName) {
           displayName = `${car.dealer.privateSeller.firstName} ${car.dealer.privateSeller.lastName}`;
           contactName = displayName;
@@ -524,20 +614,17 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   email: car.dealer.contact?.email || car.dealer.email || car.dealer.contactEmail || null,
   website: !isPrivateSeller ? (car.dealer.contact?.website || car.dealer.website) : null
 },
-        // Private seller specific data
         privateSeller: isPrivateSeller ? {
           firstName: car.dealer.privateSeller?.firstName || null,
           lastName: car.dealer.privateSeller?.lastName || null,
           preferredContactMethod: car.dealer.privateSeller?.preferredContactMethod || 'both',
           canShowContactInfo: car.dealer.privateSeller?.canShowContactInfo !== false
         } : null,
-        // Dealership specific data
         businessType: !isPrivateSeller ? car.dealer.businessType : null,
         workingHours: !isPrivateSeller ? car.dealer.workingHours : null
       };
     }
     
-    // Fallback when no dealer info is available
     if (car.dealerId) {
       const dealerId = safeGetStringId(car.dealerId);
       
@@ -567,7 +654,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       };
     }
     
-    // Final fallback
     return {
       id: null,
       name: 'Private Seller',
@@ -621,7 +707,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         } catch (error) {
           console.warn('Analytics tracking failed:', error);
         }
-      }, 1000); // Track after 1 second of visibility
+      }, 1000);
 
       return () => clearTimeout(timer);
     }
@@ -632,7 +718,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   }, [car, activeImageIndex]);
 
   const handleCardClick = useCallback(() => {
-    // Prevent navigation if drag just completed
     if (dragTimeoutRef.current) return;
     
     if (!car || !car._id) {
@@ -642,7 +727,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       return;
     }
 
-    // Track card click
     try {
       analytics.trackClick('vehicle_card', 'card', {
         listingId: car._id,
@@ -659,26 +743,22 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     navigate(`/marketplace/${car._id}`);
   }, [car, navigate, analytics, dealer]);
 
-  // Handle image container tap for mobile navigation reveal - Updated for new zoom range
+  // Handle image container tap for mobile navigation reveal
   const handleImageContainerClick = useCallback((e) => {
-    // Prevent if drag just completed or if zoomed beyond default
-    if (dragTimeoutRef.current || zoomLevel > 0.75) return;
+    if (dragTimeoutRef.current || zoomLevel > 1) return;
     
-    // Only handle this on mobile devices (768px and below)
     if (window.innerWidth <= 768) {
-      e.stopPropagation(); // Prevent card click
+      e.stopPropagation();
       setShowNavigation(true);
-      setShowZoomControls(true); // Also show zoom controls on mobile tap
+      setShowZoomControls(true);
       
-      // Hide navigation after 3 seconds of inactivity
       setTimeout(() => {
         setShowNavigation(false);
-        if (zoomLevel === 0.75) { // Hide zoom controls only at default zoom
+        if (zoomLevel === 1) {
           setShowZoomControls(false);
         }
       }, 3000);
     } else {
-      // Desktop: show zoom controls on click
       setShowZoomControls(!showZoomControls);
     }
   }, [zoomLevel, showZoomControls]);
@@ -688,7 +768,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     
     if (!car || !car.images || !Array.isArray(car.images) || car.images.length <= 1) return;
     
-    // Track image navigation
     try {
       analytics.trackClick('image_navigation', 'button', {
         listingId: car._id,
@@ -712,7 +791,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const handleShareClick = useCallback((e) => {
     e.stopPropagation();
     
-    // Track share click
     try {
       analytics.trackClick('share_button', 'button', {
         listingId: car._id,
@@ -729,7 +807,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     if (onShare) {
       onShare(car);
     } else {
-      // Fallback share functionality
       if (navigator.share) {
         navigator.share({
           title: car.title,
@@ -743,7 +820,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const handleReserveClick = useCallback((e) => {
     e.stopPropagation();
     
-    // Track reserve/contact click
     try {
       analytics.trackClick('reserve_button', 'button', {
         listingId: car._id,
@@ -757,7 +833,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       console.warn('Analytics tracking failed:', error);
     }
     
-    // Generate message content for WhatsApp
     const vehicleDetails = [
       `${car.title}`,
       `Price: P${car.price?.toLocaleString()}`,
@@ -776,10 +851,8 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     const contactAction = dealer?.sellerType === 'private' ? 'contact this private seller' : 'reserve this vehicle';
     const message = `Hi! I'm interested in this vehicle from Bw Car Culture:\n\n${vehicleDetails}\n\nI'd like to ${contactAction}. Please provide more details.`;
     
-    // Contact dealer
     const phone = car.dealer?.contact?.phone || car.dealer?.phone || car.dealer?.contactPhone || dealer?.contact?.phone;
     if (phone) {
-      // Format phone number for WhatsApp (remove spaces, ensure it starts with country code)
       const formattedPhone = phone.startsWith('+') ? phone.replace(/\s+/g, '') : `+267${phone.replace(/\s+/g, '')}`;
       const encodedMessage = encodeURIComponent(message);
       window.open(`https://wa.me/${formattedPhone}?text=${encodedMessage}`, '_blank');
@@ -789,16 +862,13 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     }
   }, [car, dealer, analytics]);
 
-  // ENHANCED: Different handling for private sellers vs dealerships
   const handleDealerClick = useCallback((e) => {
     e.stopPropagation();
     
-    // Don't navigate for private sellers - they don't have dealer pages
     if (dealer?.sellerType === 'private') {
       return;
     }
     
-    // Track dealer click
     try {
       analytics.trackClick('dealer_info', 'link', {
         dealerId: dealer?.id,
@@ -820,6 +890,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     }
   }, [dealer, navigate, analytics, car]);
 
+  // TRUE ZOOM: Enhanced image error handling with dimension tracking
   const handleImageError = useCallback((e) => {
     const originalSrc = e.target.src;
     if (process.env.NODE_ENV === 'development') {
@@ -827,7 +898,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     }
     markFailedImage(originalSrc);
     
-    // Track image load errors
     try {
       analytics.trackEvent('image_load_error', {
         category: 'system',
@@ -841,7 +911,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       console.warn('Analytics tracking failed:', error);
     }
     
-    // If URL already contains certain patterns, go straight to placeholder
     if (originalSrc.includes('/api/images/s3-proxy/') || 
         originalSrc.includes('/uploads/listings/') ||
         originalSrc.includes('images/images/') ||
@@ -850,30 +919,34 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       return;
     }
     
-    // For S3 URLs, try the proxy once
     if (originalSrc.includes('amazonaws.com')) {
-      // Extract key from S3 URL
       const key = originalSrc.split('.amazonaws.com/').pop();
       if (key) {
-        // Normalize the key to prevent duplicate segments
         const normalizedKey = key.replace(/images\/images\//g, 'images/');
         e.target.src = `/api/images/s3-proxy/${normalizedKey}`;
         return;
       }
     }
     
-    // For relative paths, try direct listing path once
     const filename = originalSrc.split('/').pop();
     if (filename && !originalSrc.includes('/images/placeholders/')) {
       e.target.src = `/uploads/listings/${filename}`;
       return;
     }
     
-    // Final fallback - always a direct path to placeholder
     e.target.src = '/images/placeholders/car.jpg';
   }, [markFailedImage, analytics, car, activeImageIndex]);
 
-  // Format valid until date
+  // TRUE ZOOM: Handle image load to get dimensions
+  const handleImageLoad = useCallback((e) => {
+    const img = e.target;
+    setImageDimensions({
+      width: img.naturalWidth,
+      height: img.naturalHeight
+    });
+    setIsImageFullyLoaded(true);
+  }, []);
+
   const formatValidUntil = useCallback((date) => {
     if (!date) return null;
     
@@ -911,13 +984,10 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             src={getImageUrl()} 
             alt={car.title || 'Vehicle'} 
             className="vc-image"
-            style={{
-              transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
-              cursor: zoomLevel > 1 ? 'move' : 'pointer',
-              transition: isDragging ? 'none' : 'transform 0.3s ease'
-            }}
+            style={imageDisplayProps}
             loading="lazy"
             onError={handleImageError}
+            onLoad={handleImageLoad}
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
@@ -925,7 +995,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             draggable={false}
           />
           
-          {/* SOLD BADGE OVERLAY - NEW ADDITION */}
+          {/* SOLD BADGE OVERLAY */}
           {car.status === 'sold' && (
             <div className="vc-sold-overlay">
               <div className="vc-sold-badge">
@@ -942,13 +1012,13 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             </div>
           )}
           
-          {/* NEW: Zoom Controls */}
-          {(showZoomControls || zoomLevel > 1) && (
+          {/* TRUE ZOOM: Enhanced Zoom Controls */}
+          {(showZoomControls || zoomLevel !== 1) && (
             <div className="vc-zoom-controls">
               <button 
                 className="vc-zoom-btn zoom-in" 
                 onClick={handleZoomIn}
-                disabled={zoomLevel >= 3}
+                disabled={zoomLevel >= 4}
                 aria-label="Zoom in"
                 title="Zoom in"
               >
@@ -964,12 +1034,12 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               >
                 -
               </button>
-              {zoomLevel !== 0.75 && (
+              {zoomLevel !== 1 && (
                 <button 
                   className="vc-zoom-btn zoom-reset" 
                   onClick={handleZoomReset}
                   aria-label="Reset zoom"
-                  title="Reset to 75%"
+                  title="Reset to normal view"
                 >
                   ↻
                 </button>
@@ -1047,7 +1117,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         <div className="vc-header">
           <div className="vc-title-section">
             <h4 className="vc-title">{car.title || 'Vehicle Listing'}</h4>
-            {/* Only move finance/lease badges under title - keep monthly payment with price */}
             <div className="vc-title-badges">
               {car.priceOptions?.financeAvailable && dealer?.sellerType === 'dealership' && (
                 <div className="vc-finance-badge">Finance Available</div>
@@ -1113,18 +1182,15 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           </div>
         )}
         
-        {/* FIXED: Avatar fallback section with improved logic */}
         <div className={`vc-dealer-info ${dealer?.sellerType === 'private' ? 'private-seller' : 'dealership'}`} 
              onClick={dealer?.sellerType !== 'private' ? handleDealerClick : undefined}>
           
           {(() => {
-            // Helper to get initials (IMPROVED)
             const getInitials = () => {
               const name = dealer?.businessName || dealer?.name || 'Unknown';
               return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().substring(0, 2);
             };
 
-            // Check all possible image sources more thoroughly (IMPROVED)
             const possibleSources = [
               dealer?.avatar?.url,
               dealer?.avatar,
@@ -1138,7 +1204,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               car?.dealer?.avatar
             ];
             
-            // Find first valid source (IMPROVED)
             let imageSource = null;
             for (const source of possibleSources) {
               if (source && 
@@ -1153,7 +1218,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               }
             }
             
-            // Show placeholder if no image source OR previous error (IMPROVED)
             if (!imageSource || dealerImageError) {
               return (
                 <div className="vc-dealer-avatar-placeholder">
@@ -1162,7 +1226,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               );
             }
             
-            // Return image with existing error handling
             return (
               <img 
                 className="vc-dealer-avatar" 
@@ -1171,13 +1234,11 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
                 onError={(e) => {
                   if (dealerImageError) return;
                   
-                  // Try one fallback, then show placeholder (SIMPLIFIED)
                   if (!e.target.src.includes('/images/placeholders/')) {
                     e.target.src = '/images/placeholders/avatar.jpg';
                     return;
                   }
                   
-                  // Final fallback - show placeholder
                   setDealerImageError(true);
                 }}
                 onLoad={() => {
@@ -1190,7 +1251,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           })()}
 
           <div className="vc-dealer-details">
-            {/* Top row: Name and verification */}
             <div className="vc-dealer-name">
               {dealer?.businessName || dealer?.name || 'Unknown Seller'}
               {dealer?.verification?.isVerified && (
@@ -1198,7 +1258,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               )}
             </div>
             
-            {/* Second row: Seller type and location */}
             <div className="vc-dealer-meta">
               <span className={`vc-seller-type ${dealer?.sellerType || 'dealership'}`}>
                 {dealer?.sellerTypeLabel || (dealer?.sellerType === 'private' ? 'Private Seller' : 'Dealership')}
@@ -1209,13 +1268,10 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               </span>
             </div>
             
-            {/* Third row: Actions and contact preferences */}
             <div className="vc-dealer-actions">
-              {/* Only show "View Dealership" link for actual dealerships */}
               {dealer.id && dealer.sellerType === 'dealership' && (
                 <span className="vc-dealer-link">View Dealership</span>
               )}
-              {/* Show contact preference for private sellers */}
               {dealer.sellerType === 'private' && dealer.privateSeller?.preferredContactMethod && (
                 <span className="vc-contact-preference">
                   Contact: {dealer.privateSeller.preferredContactMethod === 'phone' ? 'Phone' : 
