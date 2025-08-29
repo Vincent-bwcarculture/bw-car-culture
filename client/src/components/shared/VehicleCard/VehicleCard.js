@@ -1012,40 +1012,38 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             </div>
           )}
           
-          {/* TRUE ZOOM: Enhanced Zoom Controls */}
-          {(showZoomControls || zoomLevel !== 1) && (
-            <div className={`vc-zoom-controls ${zoomLevel !== 1 ? 'zoomed' : ''}`}>
+          {/* TRUE ZOOM: Enhanced Zoom Controls - ALWAYS RENDERED (like navigation arrows) */}
+          <div className={`vc-zoom-controls ${zoomLevel !== 1 ? 'zoomed' : ''}`}>
+            <button 
+              className="vc-zoom-btn zoom-in" 
+              onClick={handleZoomIn}
+              disabled={zoomLevel >= 4}
+              aria-label="Zoom in"
+              title="Zoom in"
+            >
+              +
+            </button>
+            <span className="vc-zoom-level">{Math.round(zoomLevel * 100)}%</span>
+            <button 
+              className="vc-zoom-btn zoom-out" 
+              onClick={handleZoomOut}
+              disabled={zoomLevel <= 0.5}
+              aria-label="Zoom out"
+              title="Zoom out"
+            >
+              -
+            </button>
+            {zoomLevel !== 1 && (
               <button 
-                className="vc-zoom-btn zoom-in" 
-                onClick={handleZoomIn}
-                disabled={zoomLevel >= 4}
-                aria-label="Zoom in"
-                title="Zoom in"
+                className="vc-zoom-btn zoom-reset" 
+                onClick={handleZoomReset}
+                aria-label="Reset zoom"
+                title="Reset to normal view"
               >
-                +
+                ↻
               </button>
-              <span className="vc-zoom-level">{Math.round(zoomLevel * 100)}%</span>
-              <button 
-                className="vc-zoom-btn zoom-out" 
-                onClick={handleZoomOut}
-                disabled={zoomLevel <= 0.5}
-                aria-label="Zoom out"
-                title="Zoom out"
-              >
-                -
-              </button>
-              {zoomLevel !== 1 && (
-                <button 
-                  className="vc-zoom-btn zoom-reset" 
-                  onClick={handleZoomReset}
-                  aria-label="Reset zoom"
-                  title="Reset to normal view"
-                >
-                  ↻
-                </button>
-              )}
-            </div>
-          )}
+            )}
+          </div>
           
           {/* Savings Badge */}
           {calculateSavings && car.status !== 'sold' && (

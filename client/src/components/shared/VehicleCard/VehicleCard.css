@@ -93,47 +93,54 @@ LAYOUT STRUCTURE (Future-proof):
   transform: var(--image-transform, none) !important;
 }
 
-/* TRUE ZOOM: Zoom Controls - EXACT SAME PATTERN AS NAVIGATION ARROWS */
+/* TRUE ZOOM: Zoom Controls - SIMPLIFIED to match navigation arrows exactly */
 .vc-zoom-controls {
   position: absolute;
   top: 10px;
   right: 10px;
   display: flex;
   align-items: center;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(255, 0, 0, 0.8); /* RED BACKGROUND FOR TESTING */
   border-radius: 20px;
   padding: 0.3rem 0.6rem;
   gap: 0.4rem;
   z-index: 5;
-  opacity: 0; /* Hidden by default for clean look - SAME AS NAVIGATION */
+  /* EXACT SAME PATTERN AS NAVIGATION ARROWS */
+  opacity: 0;
   transition: opacity 0.3s ease;
-  pointer-events: none; /* Allow clicking through when hidden - SAME AS NAVIGATION */
+  pointer-events: none;
   backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 2px solid #ffffff; /* WHITE BORDER FOR VISIBILITY */
   font-size: 0.85rem;
   user-select: none;
 }
 
-/* Desktop/Tablet: Show on hover - EXACT SAME PATTERN AS NAVIGATION */
+/* TEST: Show on ALL screen sizes for debugging */
+.vc-image-container:hover .vc-zoom-controls {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* DESKTOP HOVER - EXACT SAME AS NAVIGATION */
 @media (min-width: 769px) {
   .vc-image-container:hover .vc-zoom-controls {
-    opacity: 1;
-    pointer-events: auto;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 }
 
-/* Mobile: Show when image container has zoom controls state */
+/* MOBILE TAP */
 @media (max-width: 768px) {
   .vc-image-container.show-zoom-controls .vc-zoom-controls {
-    opacity: 1;
-    pointer-events: auto;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 }
 
-/* Always show zoom controls when actively zoomed (on any device) */
+/* ALWAYS SHOW WHEN ZOOMED */
 .vc-zoom-controls.zoomed {
-  opacity: 1;
-  pointer-events: auto;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 .vc-zoom-btn {
