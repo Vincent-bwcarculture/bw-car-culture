@@ -122,18 +122,25 @@ LAYOUT STRUCTURE (Future-proof):
   }
 }
 
-/* MOBILE TAP */
+/* MOBILE TAP - Only show when .show-navigation class is present */
 @media (max-width: 768px) {
-  .vc-image-container.show-zoom-controls .vc-zoom-controls {
+  /* OVERRIDE: Hide zoom controls on mobile by default */
+  .vc-zoom-controls {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  
+  /* ONLY show zoom controls when navigation is shown (on tap) */
+  .vc-image-container.show-navigation .vc-zoom-controls {
     opacity: 1 !important;
     pointer-events: auto !important;
   }
-}
-
-/* ALWAYS SHOW WHEN ZOOMED */
-.vc-zoom-controls.zoomed {
-  opacity: 1 !important;
-  pointer-events: auto !important;
+  
+  /* Keep zoomed state override */
+  .vc-zoom-controls.zoomed {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
 }
 
 .vc-zoom-btn {
@@ -339,18 +346,18 @@ LAYOUT STRUCTURE (Future-proof):
   }
 }
 
-/* Mobile: Show when image container has active/focus state */
+/* Mobile: Show when image container has active/focus state - ONLY ON TAP */
 @media (max-width: 768px) {
-  .vc-image-container.show-navigation .vc-image-navigation {
-    opacity: 1;
-    pointer-events: auto;
+  /* HIDE navigation arrows by default on mobile */
+  .vc-image-navigation {
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
   
-  /* Alternative: Show on active/focus state */
-  .vc-image-container:active .vc-image-navigation,
-  .vc-image-container:focus-within .vc-image-navigation {
-    opacity: 1;
-    pointer-events: auto;
+  /* ONLY show navigation when .show-navigation class is present */
+  .vc-image-container.show-navigation .vc-image-navigation {
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 }
 
