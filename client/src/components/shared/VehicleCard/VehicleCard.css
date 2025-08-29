@@ -93,7 +93,7 @@ LAYOUT STRUCTURE (Future-proof):
   transform: var(--image-transform, none) !important;
 }
 
-/* TRUE ZOOM: Zoom Controls Styling - Show on hover for desktop, smaller for mobile */
+/* TRUE ZOOM: Zoom Controls - EXACT SAME PATTERN AS NAVIGATION ARROWS */
 .vc-zoom-controls {
   position: absolute;
   top: 10px;
@@ -105,26 +105,20 @@ LAYOUT STRUCTURE (Future-proof):
   padding: 0.3rem 0.6rem;
   gap: 0.4rem;
   z-index: 5;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
+  opacity: 0; /* Hidden by default for clean look - SAME AS NAVIGATION */
+  transition: opacity 0.3s ease;
+  pointer-events: none; /* Allow clicking through when hidden - SAME AS NAVIGATION */
   backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.85rem;
   user-select: none;
 }
 
-/* Desktop: Show zoom controls on hover (like navigation arrows) */
+/* Desktop/Tablet: Show on hover - EXACT SAME PATTERN AS NAVIGATION */
 @media (min-width: 769px) {
   .vc-image-container:hover .vc-zoom-controls {
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-  
-  /* Also show when actively zoomed on desktop */
-  .vc-image-container .vc-zoom-controls.zoomed {
     opacity: 1;
-    visibility: visible;
+    pointer-events: auto;
   }
 }
 
@@ -132,14 +126,14 @@ LAYOUT STRUCTURE (Future-proof):
 @media (max-width: 768px) {
   .vc-image-container.show-zoom-controls .vc-zoom-controls {
     opacity: 1;
-    visibility: visible;
+    pointer-events: auto;
   }
-  
-  /* Also show when actively zoomed on mobile */
-  .vc-image-container .vc-zoom-controls.zoomed {
-    opacity: 1;
-    visibility: visible;
-  }
+}
+
+/* Always show zoom controls when actively zoomed (on any device) */
+.vc-zoom-controls.zoomed {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .vc-zoom-btn {
