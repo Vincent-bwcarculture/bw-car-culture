@@ -1,5 +1,5 @@
 // src/components/shared/VehicleCard/VehicleCard.js
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAnalytics } from '../../../hooks/useAnalytics.js';
 import './VehicleCard.css';
@@ -12,6 +12,19 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const [hasBeenViewed, setHasBeenViewed] = useState(false);
   const [dealerImageError, setDealerImageError] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false); // For mobile tap-to-reveal
+  
+  // NEW: Zoom functionality state
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+  const [showZoomControls, setShowZoomControls] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [lastPanPosition, setLastPanPosition] = useState({ x: 0, y: 0 });
+  
+  // NEW: Refs for zoom functionality
+  const imageRef = useRef(null);
+  const containerRef = useRef(null);
+  const dragTimeoutRef = useRef(null);
 
   // FIXED: Enhanced checkFailedImage function to include type
   const checkFailedImage = useCallback((url, type = 'general') => {
@@ -90,6 +103,213 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     }
     return null;
   }, []);
+
+  // NEW: Reset zoom when image changes
+  useEffect(() => {
+    setZoomLevel(1);
+    setPanPosition({ x: 0, y: 0 });
+    setShowZoomControls(false);
+    setIsDragging(false);
+  }, [activeImageIndex, car]);
+
+  // NEW: Zoom functionality
+  const handleZoomIn = useCallback((e) => {
+    e.stopPropagation();
+    setZoomLevel(prev => Math.min(prev + 0.5, 4)); // Max zoom 4x
+    
+    // Track zoom usage
+    try {
+      analytics.trackClick('image_zoom', 'zoom_in', {
+        listingId: car._id,
+        zoomLevel: zoomLevel + 0.5,
+        imageIndex: activeImageIndex
+      });
+    } catch (error) {
+      console.warn('Analytics tracking failed:', error);
+    }
+  }, [zoomLevel, analytics, car, activeImageIndex]);
+
+  const handleZoomOut = useCallback((e) => {
+    e.stopPropagation();
+    const newZoom = Math.max(zoomLevel - 0.5, 1);
+    setZoomLevel(newZoom);
+    
+    // Reset pan if zoom is back to 1
+    if (newZoom === 1) {
+      setPanPosition({ x: 0, y: 0 });
+    }
+    
+    // Track zoom usage
+    try {
+      analytics.trackClick('image_zoom', 'zoom_out', {
+        listingId: car._id,
+        zoomLevel: newZoom,
+        imageIndex: activeImageIndex
+      });
+    } catch (error) {
+      console.warn('Analytics tracking failed:', error);
+    }
+  }, [zoomLevel, analytics, car, activeImageIndex]);
+
+  const handleZoomReset = useCallback((e) => {
+    e.stopPropagation();
+    setZoomLevel(1);
+    setPanPosition({ x: 0, y: 0 });
+    
+    // Track zoom reset
+    try {
+      analytics.trackClick('image_zoom', 'reset', {
+        listingId: car._id,
+        imageIndex: activeImageIndex
+      });
+    } catch (error) {
+      console.warn('Analytics tracking failed:', error);
+    }
+  }, [analytics, car, activeImageIndex]);
+
+  // NEW: Mouse drag handlers for panning
+  const handleMouseDown = useCallback((e) => {
+    if (zoomLevel <= 1) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+    setLastPanPosition(panPosition);
+    
+    // Clear any existing timeout
+    if (dragTimeoutRef.current) {
+      clearTimeout(dragTimeoutRef.current);
+    }
+  }, [zoomLevel, panPosition]);
+
+  const handleMouseMove = useCallback((e) => {
+    if (!isDragging || zoomLevel <= 1) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
+    
+    // Calculate container bounds to limit panning
+    const container = containerRef.current;
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const maxPanX = (containerRect.width * (zoomLevel - 1)) / 2;
+    const maxPanY = (containerRect.height * (zoomLevel - 1)) / 2;
+    
+    const newX = Math.max(-maxPanX, Math.min(maxPanX, lastPanPosition.x + deltaX));
+    const newY = Math.max(-maxPanY, Math.min(maxPanY, lastPanPosition.y + deltaY));
+    
+    setPanPosition({ x: newX, y: newY });
+  }, [isDragging, zoomLevel, dragStart, lastPanPosition]);
+
+  const handleMouseUp = useCallback((e) => {
+    if (!isDragging) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    // Set a timeout to prevent click events immediately after drag
+    dragTimeoutRef.current = setTimeout(() => {
+      dragTimeoutRef.current = null;
+    }, 100);
+  }, [isDragging]);
+
+  // NEW: Touch handlers for mobile pinch-to-zoom and pan
+  const handleTouchStart = useCallback((e) => {
+    if (e.touches.length === 2) {
+      // Pinch to zoom start
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      
+      setDragStart({ distance, zoom: zoomLevel });
+    } else if (e.touches.length === 1 && zoomLevel > 1) {
+      // Single touch pan start
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(true);
+      setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+      setLastPanPosition(panPosition);
+    }
+  }, [zoomLevel, panPosition]);
+
+  const handleTouchMove = useCallback((e) => {
+    if (e.touches.length === 2) {
+      // Pinch to zoom
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      
+      if (dragStart.distance) {
+        const scale = distance / dragStart.distance;
+        const newZoom = Math.max(1, Math.min(4, dragStart.zoom * scale));
+        setZoomLevel(newZoom);
+        
+        if (newZoom === 1) {
+          setPanPosition({ x: 0, y: 0 });
+        }
+      }
+    } else if (e.touches.length === 1 && isDragging && zoomLevel > 1) {
+      // Single touch pan
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const deltaX = e.touches[0].clientX - dragStart.x;
+      const deltaY = e.touches[0].clientY - dragStart.y;
+      
+      const container = containerRef.current;
+      if (!container) return;
+      
+      const containerRect = container.getBoundingClientRect();
+      const maxPanX = (containerRect.width * (zoomLevel - 1)) / 2;
+      const maxPanY = (containerRect.height * (zoomLevel - 1)) / 2;
+      
+      const newX = Math.max(-maxPanX, Math.min(maxPanX, lastPanPosition.x + deltaX));
+      const newY = Math.max(-maxPanY, Math.min(maxPanY, lastPanPosition.y + deltaY));
+      
+      setPanPosition({ x: newX, y: newY });
+    }
+  }, [isDragging, zoomLevel, dragStart, lastPanPosition]);
+
+  const handleTouchEnd = useCallback((e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    // Set timeout to prevent click events after touch
+    dragTimeoutRef.current = setTimeout(() => {
+      dragTimeoutRef.current = null;
+    }, 150);
+  }, []);
+
+  // Add global mouse event listeners for drag
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   // Get reliable image URL with fallbacks
   const getImageUrl = useCallback(() => {
@@ -412,6 +632,9 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   }, [car, activeImageIndex]);
 
   const handleCardClick = useCallback(() => {
+    // Prevent navigation if drag just completed
+    if (dragTimeoutRef.current) return;
+    
     if (!car || !car._id) {
       if (process.env.NODE_ENV === 'development') {
         console.error("Cannot navigate: Missing car ID", car);
@@ -438,17 +661,27 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
 
   // Handle image container tap for mobile navigation reveal
   const handleImageContainerClick = useCallback((e) => {
+    // Prevent if drag just completed or if zoomed
+    if (dragTimeoutRef.current || zoomLevel > 1) return;
+    
     // Only handle this on mobile devices (768px and below)
     if (window.innerWidth <= 768) {
       e.stopPropagation(); // Prevent card click
       setShowNavigation(true);
+      setShowZoomControls(true); // Also show zoom controls on mobile tap
       
       // Hide navigation after 3 seconds of inactivity
       setTimeout(() => {
         setShowNavigation(false);
+        if (zoomLevel === 1) {
+          setShowZoomControls(false);
+        }
       }, 3000);
+    } else {
+      // Desktop: show zoom controls on click
+      setShowZoomControls(!showZoomControls);
     }
-  }, []);
+  }, [zoomLevel, showZoomControls]);
 
   const handleImageNavigation = useCallback((e, direction) => {
     e.stopPropagation();
@@ -668,16 +901,28 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       data-status={car.status || 'active'}
     >
       <div 
-        className={`vc-image-container ${showNavigation ? 'show-navigation' : ''}`}
+        className={`vc-image-container ${showNavigation ? 'show-navigation' : ''} ${showZoomControls ? 'show-zoom-controls' : ''}`}
         onClick={handleImageContainerClick}
+        ref={containerRef}
       >
         <div className="vc-image-wrapper">
           <img 
+            ref={imageRef}
             src={getImageUrl()} 
             alt={car.title || 'Vehicle'} 
             className="vc-image"
+            style={{
+              transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${panPosition.y / zoomLevel}px)`,
+              cursor: zoomLevel > 1 ? 'move' : 'pointer',
+              transition: isDragging ? 'none' : 'transform 0.3s ease'
+            }}
             loading="lazy"
             onError={handleImageError}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            draggable={false}
           />
           
           {/* SOLD BADGE OVERLAY - NEW ADDITION */}
@@ -694,6 +939,41 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
                   </span>
                 )}
               </div>
+            </div>
+          )}
+          
+          {/* NEW: Zoom Controls */}
+          {(showZoomControls || zoomLevel > 1) && (
+            <div className="vc-zoom-controls">
+              <button 
+                className="vc-zoom-btn zoom-in" 
+                onClick={handleZoomIn}
+                disabled={zoomLevel >= 4}
+                aria-label="Zoom in"
+                title="Zoom in"
+              >
+                +
+              </button>
+              <span className="vc-zoom-level">{Math.round(zoomLevel * 100)}%</span>
+              <button 
+                className="vc-zoom-btn zoom-out" 
+                onClick={handleZoomOut}
+                disabled={zoomLevel <= 1}
+                aria-label="Zoom out"
+                title="Zoom out"
+              >
+                -
+              </button>
+              {zoomLevel > 1 && (
+                <button 
+                  className="vc-zoom-btn zoom-reset" 
+                  onClick={handleZoomReset}
+                  aria-label="Reset zoom"
+                  title="Reset zoom"
+                >
+                  ↻
+                </button>
+              )}
             </div>
           )}
           
