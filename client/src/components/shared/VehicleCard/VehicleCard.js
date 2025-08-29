@@ -212,15 +212,15 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     };
   }, [zoomLevel, panPosition, imageDimensions, containerDimensions, isImageFullyLoaded]);
 
-  // TRUE ZOOM: Enhanced zoom functionality
+  // TRUE ZOOM: Enhanced zoom functionality with 5% increments
   const handleZoomIn = useCallback((e) => {
     e.stopPropagation();
-    setZoomLevel(prev => Math.min(prev + 0.25, 4)); // Max zoom 4x
+    setZoomLevel(prev => Math.min(prev + 0.05, 4)); // 5% increments, Max zoom 4x
     
     try {
       analytics.trackClick('image_zoom', 'zoom_in', {
         listingId: car._id,
-        zoomLevel: zoomLevel + 0.25,
+        zoomLevel: zoomLevel + 0.05,
         imageIndex: activeImageIndex
       });
     } catch (error) {
@@ -230,7 +230,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
 
   const handleZoomOut = useCallback((e) => {
     e.stopPropagation();
-    const newZoom = Math.max(zoomLevel - 0.25, 0.5); // Min zoom 50%
+    const newZoom = Math.max(zoomLevel - 0.05, 0.5); // 5% decrements, Min zoom 50%
     setZoomLevel(newZoom);
     
     // Reset pan if back to normal cropped view
