@@ -13,8 +13,8 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const [dealerImageError, setDealerImageError] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false); // For mobile tap-to-reveal
   
-  // NEW: Zoom functionality state
-  const [zoomLevel, setZoomLevel] = useState(1);
+  // NEW: Zoom functionality state - Default to 75% zoom
+  const [zoomLevel, setZoomLevel] = useState(0.75);
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
   const [showZoomControls, setShowZoomControls] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -104,24 +104,24 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     return null;
   }, []);
 
-  // NEW: Reset zoom when image changes
+  // NEW: Reset zoom when image changes - Default to 75%
   useEffect(() => {
-    setZoomLevel(1);
+    setZoomLevel(0.75);
     setPanPosition({ x: 0, y: 0 });
     setShowZoomControls(false);
     setIsDragging(false);
   }, [activeImageIndex, car]);
 
-  // NEW: Zoom functionality
+  // NEW: Zoom functionality - Updated range and increments
   const handleZoomIn = useCallback((e) => {
     e.stopPropagation();
-    setZoomLevel(prev => Math.min(prev + 0.5, 4)); // Max zoom 4x
+    setZoomLevel(prev => Math.min(prev + 0.25, 3)); // Max zoom 3x (300%), smaller increments
     
     // Track zoom usage
     try {
       analytics.trackClick('image_zoom', 'zoom_in', {
         listingId: car._id,
-        zoomLevel: zoomLevel + 0.5,
+        zoomLevel: zoomLevel + 0.25,
         imageIndex: activeImageIndex
       });
     } catch (error) {
@@ -131,11 +131,11 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
 
   const handleZoomOut = useCallback((e) => {
     e.stopPropagation();
-    const newZoom = Math.max(zoomLevel - 0.5, 1);
+    const newZoom = Math.max(zoomLevel - 0.25, 0.5); // Min zoom 50%, smaller decrements
     setZoomLevel(newZoom);
     
-    // Reset pan if zoom is back to 1
-    if (newZoom === 1) {
+    // Reset pan if zoom is back to default (75%)
+    if (newZoom === 0.75) {
       setPanPosition({ x: 0, y: 0 });
     }
     
@@ -153,7 +153,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
 
   const handleZoomReset = useCallback((e) => {
     e.stopPropagation();
-    setZoomLevel(1);
+    setZoomLevel(0.75); // Reset to 75% instead of 100%
     setPanPosition({ x: 0, y: 0 });
     
     // Track zoom reset
@@ -167,9 +167,9 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     }
   }, [analytics, car, activeImageIndex]);
 
-  // NEW: Mouse drag handlers for panning
+  // NEW: Mouse drag handlers for panning - Updated for new zoom range
   const handleMouseDown = useCallback((e) => {
-    if (zoomLevel <= 1) return;
+    if (zoomLevel <= 0.75) return; // Only allow panning when zoomed beyond default
     
     e.preventDefault();
     e.stopPropagation();
@@ -184,7 +184,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   }, [zoomLevel, panPosition]);
 
   const handleMouseMove = useCallback((e) => {
-    if (!isDragging || zoomLevel <= 1) return;
+    if (!isDragging || zoomLevel <= 0.75) return; // Updated for new zoom range
     
     e.preventDefault();
     e.stopPropagation();
@@ -197,8 +197,8 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     if (!container) return;
     
     const containerRect = container.getBoundingClientRect();
-    const maxPanX = (containerRect.width * (zoomLevel - 1)) / 2;
-    const maxPanY = (containerRect.height * (zoomLevel - 1)) / 2;
+    const maxPanX = (containerRect.width * (zoomLevel - 0.75)) / 2; // Adjusted for 75% base
+    const maxPanY = (containerRect.height * (zoomLevel - 0.75)) / 2;
     
     const newX = Math.max(-maxPanX, Math.min(maxPanX, lastPanPosition.x + deltaX));
     const newY = Math.max(-maxPanY, Math.min(maxPanY, lastPanPosition.y + deltaY));
@@ -219,7 +219,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     }, 100);
   }, [isDragging]);
 
-  // NEW: Touch handlers for mobile pinch-to-zoom and pan
+  // NEW: Touch handlers for mobile pinch-to-zoom and pan - Updated range
   const handleTouchStart = useCallback((e) => {
     if (e.touches.length === 2) {
       // Pinch to zoom start
@@ -234,7 +234,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       );
       
       setDragStart({ distance, zoom: zoomLevel });
-    } else if (e.touches.length === 1 && zoomLevel > 1) {
+    } else if (e.touches.length === 1 && zoomLevel > 0.75) { // Updated condition
       // Single touch pan start
       e.preventDefault();
       e.stopPropagation();
@@ -259,14 +259,14 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       
       if (dragStart.distance) {
         const scale = distance / dragStart.distance;
-        const newZoom = Math.max(1, Math.min(4, dragStart.zoom * scale));
+        const newZoom = Math.max(0.5, Math.min(3, dragStart.zoom * scale)); // Updated range: 50% to 300%
         setZoomLevel(newZoom);
         
-        if (newZoom === 1) {
+        if (newZoom === 0.75) { // Reset pan at default zoom
           setPanPosition({ x: 0, y: 0 });
         }
       }
-    } else if (e.touches.length === 1 && isDragging && zoomLevel > 1) {
+    } else if (e.touches.length === 1 && isDragging && zoomLevel > 0.75) { // Updated condition
       // Single touch pan
       e.preventDefault();
       e.stopPropagation();
@@ -278,8 +278,8 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       if (!container) return;
       
       const containerRect = container.getBoundingClientRect();
-      const maxPanX = (containerRect.width * (zoomLevel - 1)) / 2;
-      const maxPanY = (containerRect.height * (zoomLevel - 1)) / 2;
+      const maxPanX = (containerRect.width * (zoomLevel - 0.75)) / 2; // Adjusted for 75% base
+      const maxPanY = (containerRect.height * (zoomLevel - 0.75)) / 2;
       
       const newX = Math.max(-maxPanX, Math.min(maxPanX, lastPanPosition.x + deltaX));
       const newY = Math.max(-maxPanY, Math.min(maxPanY, lastPanPosition.y + deltaY));
@@ -659,10 +659,10 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     navigate(`/marketplace/${car._id}`);
   }, [car, navigate, analytics, dealer]);
 
-  // Handle image container tap for mobile navigation reveal
+  // Handle image container tap for mobile navigation reveal - Updated for new zoom range
   const handleImageContainerClick = useCallback((e) => {
-    // Prevent if drag just completed or if zoomed
-    if (dragTimeoutRef.current || zoomLevel > 1) return;
+    // Prevent if drag just completed or if zoomed beyond default
+    if (dragTimeoutRef.current || zoomLevel > 0.75) return;
     
     // Only handle this on mobile devices (768px and below)
     if (window.innerWidth <= 768) {
@@ -673,7 +673,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       // Hide navigation after 3 seconds of inactivity
       setTimeout(() => {
         setShowNavigation(false);
-        if (zoomLevel === 1) {
+        if (zoomLevel === 0.75) { // Hide zoom controls only at default zoom
           setShowZoomControls(false);
         }
       }, 3000);
@@ -948,7 +948,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               <button 
                 className="vc-zoom-btn zoom-in" 
                 onClick={handleZoomIn}
-                disabled={zoomLevel >= 4}
+                disabled={zoomLevel >= 3}
                 aria-label="Zoom in"
                 title="Zoom in"
               >
@@ -958,18 +958,18 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               <button 
                 className="vc-zoom-btn zoom-out" 
                 onClick={handleZoomOut}
-                disabled={zoomLevel <= 1}
+                disabled={zoomLevel <= 0.5}
                 aria-label="Zoom out"
                 title="Zoom out"
               >
                 -
               </button>
-              {zoomLevel > 1 && (
+              {zoomLevel !== 0.75 && (
                 <button 
                   className="vc-zoom-btn zoom-reset" 
                   onClick={handleZoomReset}
                   aria-label="Reset zoom"
-                  title="Reset zoom"
+                  title="Reset to 75%"
                 >
                   ↻
                 </button>
