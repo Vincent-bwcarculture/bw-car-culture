@@ -1014,7 +1014,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           
           {/* TRUE ZOOM: Enhanced Zoom Controls */}
           {(showZoomControls || zoomLevel !== 1) && (
-            <div className="vc-zoom-controls">
+            <div className={`vc-zoom-controls ${zoomLevel !== 1 ? 'zoomed' : ''}`}>
               <button 
                 className="vc-zoom-btn zoom-in" 
                 onClick={handleZoomIn}

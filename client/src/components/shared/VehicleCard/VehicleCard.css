@@ -117,6 +117,12 @@ LAYOUT STRUCTURE (Future-proof):
 /* Desktop: Show zoom controls on hover (like navigation arrows) */
 @media (min-width: 769px) {
   .vc-image-container:hover .vc-zoom-controls {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* Also show when actively zoomed on desktop */
+  .vc-image-container .vc-zoom-controls.zoomed {
     opacity: 1;
     visibility: visible;
   }
@@ -128,12 +134,12 @@ LAYOUT STRUCTURE (Future-proof):
     opacity: 1;
     visibility: visible;
   }
-}
-
-/* Always show zoom controls when zoomed away from normal (100%) */
-.vc-zoom-controls:has(.vc-zoom-level:not(:contains("100%"))) {
-  opacity: 1;
-  visibility: visible;
+  
+  /* Also show when actively zoomed on mobile */
+  .vc-image-container .vc-zoom-controls.zoomed {
+    opacity: 1;
+    visibility: visible;
+  }
 }
 
 .vc-zoom-btn {
