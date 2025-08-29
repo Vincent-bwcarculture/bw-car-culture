@@ -905,46 +905,52 @@ LAYOUT STRUCTURE (Future-proof):
   background: #cc2900;
 }
 
-/* TRUE ZOOM: Mobile responsive adjustments with smaller controls */
+/* TRUE ZOOM: Mobile responsive adjustments with much smaller controls */
 @media (max-width: 768px) {
   .vc-image-container {
-    height: 200px; /* Significantly increased from 180px for better mobile image display */
+    height: 200px;
     cursor: pointer;
   }
   
-  /* REDUCED: Mobile zoom controls - smaller for better mobile UX */
+  /* MOBILE: Show zoom controls on tap (same as navigation) */
+  .vc-image-container.show-navigation .vc-zoom-controls {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+  
+  /* MUCH SMALLER: Mobile zoom controls - reduced significantly */
   .vc-zoom-controls {
-    top: 8px;
-    right: 8px;
-    padding: 0.2rem 0.4rem; /* Reduced padding */
-    gap: 0.25rem; /* Smaller gap */
-    font-size: 0.75rem; /* Smaller font */
-    border-radius: 14px; /* Smaller radius */
+    top: 6px;
+    right: 6px;
+    padding: 0.15rem 0.3rem; /* Much smaller padding */
+    gap: 0.2rem; /* Smaller gap */
+    font-size: 0.7rem; /* Smaller font */
+    border-radius: 12px; /* Smaller radius */
   }
   
   .vc-zoom-btn {
-    width: 26px; /* Reduced from 32px */
-    height: 26px;
-    font-size: 0.75rem; /* Reduced font size */
+    width: 20px; /* Much smaller - was 26px */
+    height: 20px;
+    font-size: 0.7rem; /* Smaller font size */
   }
   
   .vc-zoom-btn.zoom-reset {
-    width: 30px; /* Reduced from 36px */
-    font-size: 0.7rem;
+    width: 24px; /* Much smaller - was 30px */
+    font-size: 0.65rem;
   }
   
   .vc-zoom-level {
-    font-size: 0.65rem; /* Smaller zoom level text */
-    min-width: 28px; /* Reduced width */
+    font-size: 0.6rem; /* Smaller zoom level text */
+    min-width: 20px; /* Reduced width */
   }
   
   /* REDUCED: Mobile navigation arrows - smaller size */
   .vc-image-nav {
-    width: 36px; /* Reduced from 44px */
-    height: 36px;
+    width: 32px; /* Reduced from 36px */
+    height: 32px;
     margin: 0 6px;
     background: rgba(0, 0, 0, 0.6);
-    font-size: 14px; /* Reduced from 16px */
+    font-size: 12px; /* Reduced from 14px */
   }
   
   .vc-image-nav:hover,
@@ -1053,30 +1059,36 @@ LAYOUT STRUCTURE (Future-proof):
     position: relative;
   }
   
-  /* FURTHER REDUCED: Mobile zoom controls for small screens */
+  /* MOBILE: Show zoom controls on tap (same as navigation) */
+  .vc-image-container.show-navigation .vc-zoom-controls {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+  
+  /* EXTRA SMALL: Mobile zoom controls for small screens */
   .vc-zoom-controls {
-    top: 6px;
-    right: 6px;
-    padding: 0.15rem 0.3rem; /* Further reduced padding */
-    gap: 0.2rem; /* Even smaller gap */
-    font-size: 0.7rem; /* Smaller font */
-    border-radius: 12px; /* Smaller radius */
+    top: 4px;
+    right: 4px;
+    padding: 0.1rem 0.25rem; /* Even smaller padding */
+    gap: 0.15rem; /* Tiny gap */
+    font-size: 0.65rem; /* Smaller font */
+    border-radius: 10px; /* Smaller radius */
   }
   
   .vc-zoom-btn {
-    width: 22px; /* Further reduced from 28px */
-    height: 22px;
-    font-size: 0.7rem; /* Smaller font size */
+    width: 18px; /* Much smaller - was 22px */
+    height: 18px;
+    font-size: 0.65rem; /* Smaller font size */
   }
   
   .vc-zoom-btn.zoom-reset {
-    width: 26px; /* Further reduced from 32px */
-    font-size: 0.65rem;
+    width: 22px; /* Much smaller - was 26px */
+    font-size: 0.6rem;
   }
   
   .vc-zoom-level {
-    font-size: 0.6rem; /* Even smaller zoom level text */
-    min-width: 22px; /* Reduced width */
+    font-size: 0.55rem; /* Tiny zoom level text */
+    min-width: 18px; /* Very small width */
   }
   
   /* Add subtle tap indicator for small screens */
@@ -1104,8 +1116,7 @@ LAYOUT STRUCTURE (Future-proof):
   }
   
   /* Hide hint when navigation or zoom controls are shown */
-  .vc-image-container.show-navigation::after,
-  .vc-image-container.show-zoom-controls::after {
+  .vc-image-container.show-navigation::after {
     opacity: 0;
   }
   
