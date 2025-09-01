@@ -346,15 +346,8 @@ LAYOUT STRUCTURE (Future-proof):
   }
 }
 
-/* Mobile: Show when image container has active/focus state - ONLY ON TAP */
+/* Mobile: Show ONLY when tapped (.show-navigation class) */
 @media (max-width: 768px) {
-  /* HIDE navigation arrows by default on mobile */
-  .vc-image-navigation {
-    opacity: 0 !important;
-    pointer-events: none !important;
-  }
-  
-  /* ONLY show navigation when .show-navigation class is present */
   .vc-image-container.show-navigation .vc-image-navigation {
     opacity: 1 !important;
     pointer-events: auto !important;
