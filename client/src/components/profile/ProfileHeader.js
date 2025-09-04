@@ -269,11 +269,16 @@ const ProfileHeader = ({
   };
 
   // NEW: Handle create article access for journalists
- const handleCreateArticleClick = () => {
+const handleCreateArticleClick = () => {
   console.log('Create article clicked - journalist access');
-  navigate('/profile?view=articles&action=create');  // Navigate to ArticleManagement
+  
+  // Instead of navigate, trigger a callback to parent component
+  if (onCreateArticle) {
+    onCreateArticle(); // This will be passed from parent Profile component
+  } else {
+    navigate('/profile?tab=articles&action=create');
+  }
 };
-
   // Handle avatar upload - Updates AuthContext
   const handleAvatarChange = async (event) => {
     const file = event.target.files[0];
