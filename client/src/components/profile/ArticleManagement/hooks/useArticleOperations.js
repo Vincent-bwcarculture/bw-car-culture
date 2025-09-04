@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { defaultArticleForm, VIEWS } from '../utils/constants.js';
-import { useAuth } from '../../../context/AuthContext.js';
+import { useAuth } from '../../../../context/AuthContext.js';
 
 /**
  * Custom hook for managing article operations, form state, and navigation
