@@ -1,7 +1,7 @@
 // client/src/components/profile/ArticleManagement/index.js
 // Main ArticleManagement coordinator component (simplified)
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Loader } from 'lucide-react';
 
 // Hooks
@@ -36,8 +36,9 @@ import './ArticleManagement.css';
  * @param {Object} props - Component props
  * @param {Object} props.profileData - User profile data
  * @param {Function} props.refreshProfile - Function to refresh profile
+ * @param {string} props.initialAction - Initial action to perform (e.g., 'create')
  */
-const ArticleManagement = ({ profileData, refreshProfile }) => {
+const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
   const fileInputRef = useRef(null);
   
   // Data management
@@ -92,7 +93,7 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
 
   // Handle initial action (like create article from profile header)
   useEffect(() => {
-    if (initialAction === 'create') {
+    if (initialAction === 'create' && handleCreateNew) {
       handleCreateNew(); // This triggers the create article flow
     }
   }, [initialAction, handleCreateNew]);
