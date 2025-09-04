@@ -90,6 +90,13 @@ const ArticleManagement = ({ profileData, refreshProfile }) => {
     refreshData 
   });
 
+  // Handle initial action (like create article from profile header)
+  useEffect(() => {
+    if (initialAction === 'create') {
+      handleCreateNew(); // This triggers the create article flow
+    }
+  }, [initialAction, handleCreateNew]);
+
   // Get filtered articles for list view
   const filteredArticles = getFilteredArticles(articles);
 

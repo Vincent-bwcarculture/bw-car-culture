@@ -47,7 +47,7 @@ const UserProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [urlAction, setUrlAction] = useState(null);
-
+const [articleAction, setArticleAction] = useState(null);
   // Set dark theme as default and apply it immediately
   useEffect(() => {
     // Force dark theme on page load
@@ -89,6 +89,12 @@ const UserProfilePage = () => {
       }
     }
   }, [isAuthenticated, user, authLoading]);
+
+const handleCreateArticle = () => {
+  console.log('Switching to articles tab and creating new article');
+  setActiveTab('articles'); // Switch to articles tab
+  setArticleAction('create'); // Set action to trigger create mode
+};
 
   const fetchUserProfile = async () => {
     try {
@@ -344,11 +350,12 @@ const getAvailableTabs = () => {
   return (
     <div className="uprofile-main-container">
       {/* Enhanced Profile Header Component */}
-      <ProfileHeader 
-        profileData={displayData}
-        onProfileUpdate={setProfileData}
-        onEditProfile={() => setActiveTab('settings')} // ADDED: Edit profile handler
-      />
+    <ProfileHeader 
+  profileData={displayData}
+  onProfileUpdate={setProfileData}
+  onEditProfile={() => setActiveTab('settings')}
+  onCreateArticle={handleCreateArticle} // NEW: Create article handler
+/>
 
       {/* Enhanced Profile Navigation Component */}
       <EnhancedProfileNavigation 
@@ -389,13 +396,14 @@ const getAvailableTabs = () => {
           />
         )}
 
-        {/* NEW: Articles tab content for journalists */}
-        {activeTab === 'articles' && (
-          <ArticleManagement 
-            profileData={displayData}
-            refreshProfile={fetchUserProfile}
-          />
-        )}
+     {/* NEW: Articles tab content for journalists */}
+{activeTab === 'articles' && (
+  <ArticleManagement 
+    profileData={displayData}
+    refreshProfile={fetchUserProfile}
+    initialAction={articleAction} // NEW: Pass initial action
+  />
+)}
 
         {activeTab === 'business' && (
           <BusinessDashboard 

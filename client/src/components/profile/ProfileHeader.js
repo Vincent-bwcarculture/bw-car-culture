@@ -200,7 +200,8 @@ const SocialStatsSection = ({ profileData, isOwnProfile = false, onFollowAction 
 const ProfileHeader = ({ 
   profileData, 
   onProfileUpdate,
-  onEditProfile // Edit profile functionality
+  onEditProfile, // Edit profile functionality
+  onCreateArticle
 }) => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
@@ -271,14 +272,13 @@ const ProfileHeader = ({
   // NEW: Handle create article access for journalists
 const handleCreateArticleClick = () => {
   console.log('Create article clicked - journalist access');
-  
-  // Instead of navigate, trigger a callback to parent component
   if (onCreateArticle) {
-    onCreateArticle(); // This will be passed from parent Profile component
+    onCreateArticle(); // Call parent callback instead of navigate
   } else {
-    navigate('/profile?tab=articles&action=create');
+    console.warn('onCreateArticle prop not provided to ProfileHeader');
   }
 };
+
   // Handle avatar upload - Updates AuthContext
   const handleAvatarChange = async (event) => {
     const file = event.target.files[0];
