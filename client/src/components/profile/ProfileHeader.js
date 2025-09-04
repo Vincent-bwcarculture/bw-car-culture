@@ -269,10 +269,10 @@ const ProfileHeader = ({
   };
 
   // NEW: Handle create article access for journalists
-  const handleCreateArticleClick = () => {
-    console.log('Create article clicked - journalist access');
-    navigate('/journalist/create-article');
-  };
+ const handleCreateArticleClick = () => {
+  console.log('Create article clicked - journalist access');
+  navigate('/profile?view=articles&action=create');  // Navigate to ArticleManagement
+};
 
   // Handle avatar upload - Updates AuthContext
   const handleAvatarChange = async (event) => {
