@@ -69,15 +69,6 @@ export const WALLET_PROVIDERS = [
   { id: 'btc_smega', name: 'BTC Smega' }
 ];
 
-// Named exports for individual constants
-export { categories };
-export { defaultArticleForm };
-export { VIEWS };
-export { ARTICLE_STATUS };
-export { PAYMENT_METHODS };
-export { BANKS };
-export { WALLET_PROVIDERS };
-
 // Default export with all constants
 export default {
   categories,
