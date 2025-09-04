@@ -27,7 +27,7 @@ import VehicleManagement from '../components/profile/VehicleManagement.js';
 import BusinessDashboard from '../components/profile/BusinessDashboard.js';
 import ProfileSettings from '../components/profile/ProfileSettings.js';
 import NetworkTab from '../components/profile/NetworkTab.js';
-import ArticleManagement from '../components/profile/ArticleManagement.js'; // NEW: Import ArticleManagement
+import ArticleManagement from '../components/profile/ArticleManagement/index.js'; // NEW: Import ArticleManagement
 
 import CoordinatorManagement from '../components/profile/CoordinatorManagement.js';
 import RealTimeCoordinatorDashboard from '../components/profile/RealTimeCoordinatorDashboard.js';
