@@ -8,6 +8,9 @@ import { Loader } from 'lucide-react';
 import { useArticleData } from './hooks/useArticleData.js';
 import { useArticleOperations } from './hooks/useArticleOperations.js';
 
+// API Service
+import './services/articleService.js'; // Import to ensure service is loaded
+
 // Utils and Constants
 import { categories, VIEWS } from './utils/constants.js';
 import { 
