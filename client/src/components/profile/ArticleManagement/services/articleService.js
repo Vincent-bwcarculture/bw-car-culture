@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement/services/articleService.js
-// COMPLETE VERSION - AuthContext integration with all methods preserved
+// COMPLETE VERSION - AuthContext integration with all methods preserved and enhanced
 
 import axios from '../../../../config/axios.js';
 
@@ -22,7 +22,7 @@ class ArticleApiService {
   // Set current user from AuthContext - SAME PATTERN as working components
   setCurrentUser(user) {
     this.currentUser = user;
-    console.log('Article service user set:', user?.role);
+    console.log('Article service user set:', user?.role, 'ID:', user?.id);
   }
 
   /**
@@ -31,6 +31,11 @@ class ArticleApiService {
    */
   getAuthHeaders() {
     const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('ArticleService: No auth token found in localStorage');
+      throw new Error('Authentication token not found. Please log in again.');
+    }
+    
     return {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -43,6 +48,11 @@ class ArticleApiService {
    */
   getFormDataHeaders() {
     const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('ArticleService: No auth token found for FormData');
+      throw new Error('Authentication token not found. Please log in again.');
+    }
+    
     return {
       'Authorization': `Bearer ${token}`
     };
@@ -53,6 +63,11 @@ class ArticleApiService {
    */
   getSimpleAuthHeaders() {
     const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('ArticleService: No auth token found for simple headers');
+      throw new Error('Authentication token not found. Please log in again.');
+    }
+    
     return {
       'Authorization': `Bearer ${token}`
     };
@@ -94,6 +109,14 @@ class ArticleApiService {
    */
   canPublishDirectly() {
     return this.isAdmin(); // Only admins can publish directly now
+  }
+
+  /**
+   * Clear cache
+   */
+  clearCache() {
+    this.cache.clear();
+    console.log('ArticleService: Cache cleared');
   }
 
   // ========================================
@@ -192,11 +215,19 @@ class ArticleApiService {
    */
   async getAllArticles(filters = {}) {
     try {
+      if (!this.isAdmin()) {
+        throw new Error('Admin access required to view all articles');
+      }
+
       const params = new URLSearchParams({
         page: filters.page || 1,
-        limit: filters.limit || 100,
-        ...filters
+        limit: filters.limit || 100
       });
+
+      // Add status filter if provided
+      if (filters.status && filters.status !== 'all') {
+        params.append('status', filters.status);
+      }
 
       const response = await this.axios.get(`/news?${params}`, {
         headers: this.getAuthHeaders()
@@ -210,8 +241,108 @@ class ArticleApiService {
       }
     } catch (error) {
       console.error('Error fetching all articles:', error.response?.data || error.message);
-      // Return empty array on error to prevent frontend crashes
-      return [];
+      
+      // Enhanced error handling
+      if (error.response?.status === 403) {
+        throw new Error('Admin access required');
+      } else if (error.response?.status === 401) {
+        throw new Error('Authentication failed. Please log in again.');
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Get pending articles for admin review
+   * @param {Object} params - Query parameters  
+   * @returns {Promise<Object>} Pending articles response
+   */
+  async getPendingArticles(params = {}) {
+    try {
+      console.log('Getting pending articles for admin review...');
+      
+      if (!this.isAdmin()) {
+        throw new Error('Admin access required to view pending articles');
+      }
+
+      const queryParams = new URLSearchParams({
+        page: params.page || 1,
+        limit: params.limit || 10
+      });
+
+      const response = await this.axios.get(`/news/pending?${queryParams}`, {
+        headers: this.getSimpleAuthHeaders()
+      });
+
+      if (response.data?.success) {
+        console.log(`Found ${response.data.data?.length || 0} pending articles`);
+        return {
+          articles: response.data.data || [],
+          total: response.data.total,
+          currentPage: response.data.currentPage,
+          totalPages: response.data.totalPages
+        };
+      } else {
+        throw new Error(response.data?.message || 'Failed to fetch pending articles');
+      }
+    } catch (error) {
+      console.error('Error fetching pending articles:', error.response?.data || error.message);
+      
+      // Enhanced error handling
+      if (error.response?.status === 403) {
+        throw new Error('Admin access required');
+      } else if (error.response?.status === 401) {
+        throw new Error('Authentication failed. Please log in again.');
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Review article (approve/reject) - Admin only
+   * @param {string} articleId - Article ID
+   * @param {string} action - 'approve' or 'reject'
+   * @param {string} notes - Review notes
+   * @returns {Promise<Object>} Review response
+   */
+  async reviewArticle(articleId, action, notes = '') {
+    try {
+      console.log(`Reviewing article ${articleId}: ${action}`);
+      
+      if (!this.isAdmin()) {
+        throw new Error('Admin access required to review articles');
+      }
+
+      if (!action || !['approve', 'reject'].includes(action)) {
+        throw new Error('Invalid review action. Must be "approve" or "reject"');
+      }
+
+      const response = await this.axios.put(`/news/${articleId}/review`, {
+        action,
+        notes
+      }, {
+        headers: this.getAuthHeaders()
+      });
+
+      if (response.data?.success) {
+        console.log(`Article ${action}ed successfully`);
+        return response.data.data;
+      } else {
+        throw new Error(response.data?.message || `Failed to ${action} article`);
+      }
+    } catch (error) {
+      console.error(`Error ${action}ing article:`, error.response?.data || error.message);
+      
+      // Enhanced error handling
+      if (error.response?.status === 403) {
+        throw new Error('Admin access required');
+      } else if (error.response?.status === 401) {
+        throw new Error('Authentication failed. Please log in again.');
+      }
+      
+      throw error;
     }
   }
 
@@ -223,6 +354,10 @@ class ArticleApiService {
   async createAdminArticle(articleData) {
     try {
       console.log('Creating article as admin:', articleData.title);
+      
+      if (!this.isAdmin()) {
+        throw new Error('Admin access required to create articles');
+      }
       
       // Prepare FormData for image upload support
       const formData = new FormData();
@@ -295,6 +430,10 @@ class ArticleApiService {
     try {
       console.log('Updating article as admin:', articleId);
       
+      if (!this.isAdmin()) {
+        throw new Error('Admin access required to update articles');
+      }
+      
       // For updates, use JSON instead of FormData for simplicity
       // unless there's a new image to upload
       if (articleData.featuredImageFile) {
@@ -349,6 +488,10 @@ class ArticleApiService {
     try {
       console.log('Deleting article as admin:', articleId);
 
+      if (!this.isAdmin()) {
+        throw new Error('Admin access required to delete articles');
+      }
+
       const response = await this.axios.delete(`/news/${articleId}`, {
         headers: this.getSimpleAuthHeaders()
       });
@@ -361,6 +504,50 @@ class ArticleApiService {
       }
     } catch (error) {
       console.error('Error deleting admin article:', error.response?.data || error.message);
+      
+      // Enhanced error handling
+      if (error.response?.status === 403) {
+        throw new Error('Admin access required');
+      } else if (error.response?.status === 401) {
+        throw new Error('Authentication failed. Please log in again.');
+      }
+      
+      throw error;
+    }
+  }
+
+  /**
+   * Get admin article statistics
+   * @returns {Promise<Object>} Article statistics
+   */
+  async getAdminStats() {
+    try {
+      console.log('Getting admin article statistics...');
+      
+      if (!this.isAdmin()) {
+        throw new Error('Admin access required for statistics');
+      }
+
+      const response = await this.axios.get('/news/admin/stats', {
+        headers: this.getAuthHeaders()
+      });
+
+      if (response.data?.success) {
+        console.log('Admin stats loaded successfully');
+        return response.data.data;
+      } else {
+        throw new Error(response.data?.message || 'Failed to fetch admin statistics');
+      }
+    } catch (error) {
+      console.error('Error fetching admin stats:', error.response?.data || error.message);
+      
+      // Enhanced error handling
+      if (error.response?.status === 403) {
+        throw new Error('Admin access required');
+      } else if (error.response?.status === 401) {
+        throw new Error('Authentication failed. Please log in again.');
+      }
+      
       throw error;
     }
   }
@@ -531,81 +718,6 @@ class ArticleApiService {
   }
 
   // ========================================
-  // ADMIN REVIEW ENDPOINTS
-  // ========================================
-
-  /**
-   * Get pending articles for review (admin only)
-   * @param {Object} params - Query parameters
-   * @returns {Promise<Object>} Pending articles
-   */
-  async getPendingArticles(params = {}) {
-    if (!this.isAdmin()) {
-      throw new Error('Admin access required');
-    }
-
-    try {
-      const queryParams = new URLSearchParams({
-        page: params.page || 1,
-        limit: params.limit || 10
-      });
-
-      const response = await this.axios.get(`/news/pending?${queryParams}`, {
-        headers: this.getSimpleAuthHeaders()
-      });
-
-      if (response.data?.success) {
-        console.log(`Loaded ${response.data.data?.length || 0} pending articles`);
-        return {
-          articles: response.data.data || [],
-          total: response.data.total,
-          currentPage: response.data.currentPage,
-          totalPages: response.data.totalPages
-        };
-      } else {
-        throw new Error(response.data?.message || 'Failed to fetch pending articles');
-      }
-    } catch (error) {
-      console.error('Error fetching pending articles:', error.response?.data || error.message);
-      throw error;
-    }
-  }
-
-  /**
-   * Approve or reject pending article (admin only)
-   * @param {string} articleId - Article ID
-   * @param {string} action - 'approve' or 'reject'
-   * @param {string} notes - Review notes
-   * @returns {Promise<Object>} Review result
-   */
-  async reviewArticle(articleId, action, notes = '') {
-    if (!this.isAdmin()) {
-      throw new Error('Admin access required');
-    }
-
-    try {
-      console.log(`Reviewing article ${articleId}: ${action}`);
-
-      const response = await this.axios.put(`/news/${articleId}/review`, {
-        action,
-        notes
-      }, {
-        headers: this.getAuthHeaders()
-      });
-
-      if (response.data?.success) {
-        console.log(`Article ${action}d successfully`);
-        return response.data.data;
-      } else {
-        throw new Error(response.data?.message || `Failed to ${action} article`);
-      }
-    } catch (error) {
-      console.error(`Error ${action}ing article:`, error.response?.data || error.message);
-      throw error;
-    }
-  }
-
-  // ========================================
   // PUBLIC & UTILITY METHODS
   // ========================================
 
@@ -742,6 +854,62 @@ class ArticleApiService {
       isAdmin: this.isAdmin(),
       isJournalist: this.isJournalist()
     };
+  }
+
+  /**
+   * Test admin access - verifies authentication and permissions
+   * @returns {Promise<Object>} Test result
+   */
+  async testAdminAccess() {
+    try {
+      console.log('Testing admin access...');
+      
+      const user = this.getUser();
+      if (!user) {
+        throw new Error('No user found');
+      }
+
+      if (!this.isAdmin()) {
+        throw new Error(`User role '${user.role}' is not admin`);
+      }
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      // Test admin stats endpoint (lightweight test)
+      console.log('Testing admin stats endpoint...');
+      const response = await this.axios.get('/news/admin/stats', {
+        headers: this.getAuthHeaders()
+      });
+
+      if (response.data?.success) {
+        console.log('✅ Admin access test passed');
+        return {
+          success: true,
+          message: 'Admin access verified',
+          userRole: user.role,
+          userId: user.id
+        };
+      } else {
+        throw new Error(response.data?.message || 'Admin stats test failed');
+      }
+
+    } catch (error) {
+      console.error('❌ Admin access test failed:', error);
+      
+      let errorMessage = 'Admin access test failed';
+      if (error.response?.status === 403) {
+        errorMessage = 'Access denied: Admin role required';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Authentication failed: Please log in again';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      throw new Error(errorMessage);
+    }
   }
 
   // Error handling - SAME as listingService
