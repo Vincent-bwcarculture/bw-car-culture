@@ -15,7 +15,7 @@ import {
   Filter,
   Search
 } from 'lucide-react';
-import { articleApiService } from '../profile/ArticleManagement/services/articleService';
+import articleApiService from '../profile/ArticleManagement/services/articleService.js';
 import './AdminArticleManagement.css';
 
 const AdminArticleManagement = () => {
