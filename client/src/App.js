@@ -60,7 +60,7 @@ import Chatbot from './components/shared/Chatbot/Chatbot.js';
 import HomeDealershipsSection from './components/features/HomeDealershipsSection/HomeDealershipsSection.js';
 import ConnectionTest from './components/shared/ConnectionTest.js';
 import NewsManager from './components/NewsManager/NewsManager.js';
-import AdminArticleManagement from './components/Admin/AdminArticleManagement.js';
+import AdminArticleManagement from './components/Admin/ArticleManagement.js';
 
 // GION App and Related Components
 import GIONApp from './components/GION/GIONApp.js';
