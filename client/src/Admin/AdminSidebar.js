@@ -26,6 +26,18 @@ const AdminSidebar = ({ collapsed }) => {
     roles: ['admin'],
     badge: 'new' // Optional badge for new feedback
   },
+  {
+  title: 'Article Management',
+  icon: '📝',
+  path: '/admin/articles',
+  roles: ['admin'],
+  submenu: [
+    { title: 'Pending Review', path: '/admin/articles?tab=pending' },
+    { title: 'All Articles', path: '/admin/articles?tab=all' },
+    { title: 'Published', path: '/admin/articles?status=published' },
+    { title: 'Rejected', path: '/admin/articles?status=rejected' }
+  ]
+},
      {
       title: 'Payments', // NEW PAYMENTS SECTION
       icon: '💳',
@@ -122,17 +134,6 @@ const AdminSidebar = ({ collapsed }) => {
       icon: '⚙️',
       path: '/admin/settings'
     },
-    {
-      title: 'News & Reviews',
-      icon: '📰',
-      path: '/admin/reviews',
-      roles: ['editor', 'admin'],
-      submenu: [
-        { title: 'All Articles', path: '/admin/reviews' },
-        { title: 'Create New', path: '/admin/news/create' },
-        { title: 'Categories', path: '/admin/news/categories' }
-      ]
-    }
   ];
 
 
