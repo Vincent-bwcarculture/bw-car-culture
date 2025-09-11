@@ -1,12 +1,28 @@
 // client/src/components/profile/ArticleManagement/services/articleService.js
-// COMPLETE FIXED VERSION - All data structure and API integration issues resolved
+// COMPLETE VERSION - AuthContext integration with all methods preserved
 
-const API_BASE_URL = 'https://bw-car-culture-api.vercel.app/api';
+import axios from '../../../../config/axios.js';
 
 class ArticleApiService {
   constructor() {
-    this.baseURL = API_BASE_URL;
+    this.baseURL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app/api';
     this.endpoint = `${this.baseURL}/news`;
+    this.axios = axios.create({
+      baseURL: this.baseURL,
+      timeout: 300000 // 5 mins timeout
+    });
+    this.cache = new Map();
+    this.cacheDuration = 5 * 60 * 1000; // 5 minutes
+    this.pendingRequests = {};
+    
+    // Store user reference - will be set by components using AuthContext
+    this.currentUser = null;
+  }
+
+  // Set current user from AuthContext - SAME PATTERN as working components
+  setCurrentUser(user) {
+    this.currentUser = user;
+    console.log('Article service user set:', user?.role);
   }
 
   /**
@@ -43,15 +59,10 @@ class ArticleApiService {
   }
 
   /**
-   * Get user info from localStorage
+   * Get user info - USES AUTHCONTEXT USER (not localStorage)
    */
   getUser() {
-    try {
-      return JSON.parse(localStorage.getItem('user') || '{}');
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-      return {};
-    }
+    return this.currentUser || null;
   }
 
   /**
@@ -59,7 +70,7 @@ class ArticleApiService {
    */
   getUserRole() {
     const user = this.getUser();
-    return user.role || 'user';
+    return user?.role || 'user';
   }
 
   /**
@@ -74,8 +85,8 @@ class ArticleApiService {
    */
   isJournalist() {
     const user = this.getUser();
-    return user.role === 'journalist' || 
-           (user.additionalRoles && user.additionalRoles.includes('journalist'));
+    return user?.role === 'journalist' || 
+           (user?.additionalRoles && user.additionalRoles.includes('journalist'));
   }
 
   /**
@@ -97,6 +108,7 @@ class ArticleApiService {
    */
   async getUserArticles(filters = {}) {
     try {
+      console.log('Getting user articles, role:', this.getUserRole());
       if (this.isAdmin()) {
         // Admin can see all articles with any status
         return await this.getAllArticles({...filters, status: filters.status || 'all'});
@@ -186,26 +198,18 @@ class ArticleApiService {
         ...filters
       });
 
-      const response = await fetch(`${this.endpoint}?${params}`, {
-        method: 'GET',
+      const response = await this.axios.get(`/news?${params}`, {
         headers: this.getAuthHeaders()
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log(`Loaded ${data.data?.length || 0} articles (admin view)`);
-        return data.data || [];
+      if (response.data?.success) {
+        console.log(`Loaded ${response.data.data?.length || 0} articles (admin view)`);
+        return response.data.data || [];
       } else {
-        throw new Error(data.message || 'Failed to fetch articles');
+        throw new Error(response.data?.message || 'Failed to fetch articles');
       }
     } catch (error) {
-      console.error('Error fetching all articles:', error);
+      console.error('Error fetching all articles:', error.response?.data || error.message);
       // Return empty array on error to prevent frontend crashes
       return [];
     }
@@ -265,27 +269,18 @@ class ArticleApiService {
         formData.append('featuredImage', articleData.featuredImageFile);
       }
 
-      const response = await fetch(this.endpoint, {
-        method: 'POST',
-        headers: this.getFormDataHeaders(),
-        body: formData
+      const response = await this.axios.post('/news', formData, {
+        headers: this.getFormDataHeaders()
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log('Admin article created successfully:', data.data._id);
-        return data.data;
+      if (response.data?.success) {
+        console.log('Admin article created successfully:', response.data.data._id);
+        return response.data.data;
       } else {
-        throw new Error(data.message || 'Failed to create article');
+        throw new Error(response.data?.message || 'Failed to create article');
       }
     } catch (error) {
-      console.error('Error creating admin article:', error);
+      console.error('Error creating admin article:', error.response?.data || error.message);
       throw error;
     }
   }
@@ -316,49 +311,31 @@ class ArticleApiService {
           }
         });
 
-        const response = await fetch(`${this.endpoint}/${articleId}`, {
-          method: 'PUT',
-          headers: this.getFormDataHeaders(),
-          body: formData
+        const response = await this.axios.put(`/news/${articleId}`, formData, {
+          headers: this.getFormDataHeaders()
         });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        if (data.success) {
+        if (response.data?.success) {
           console.log('Admin article updated successfully');
-          return data.data;
+          return response.data.data;
         } else {
-          throw new Error(data.message || 'Failed to update article');
+          throw new Error(response.data?.message || 'Failed to update article');
         }
       } else {
         // Use JSON for text-only updates
-        const response = await fetch(`${this.endpoint}/${articleId}`, {
-          method: 'PUT',
-          headers: this.getAuthHeaders(),
-          body: JSON.stringify(articleData)
+        const response = await this.axios.put(`/news/${articleId}`, articleData, {
+          headers: this.getAuthHeaders()
         });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        if (data.success) {
+        if (response.data?.success) {
           console.log('Admin article updated successfully');
-          return data.data;
+          return response.data.data;
         } else {
-          throw new Error(data.message || 'Failed to update article');
+          throw new Error(response.data?.message || 'Failed to update article');
         }
       }
     } catch (error) {
-      console.error('Error updating admin article:', error);
+      console.error('Error updating admin article:', error.response?.data || error.message);
       throw error;
     }
   }
@@ -372,26 +349,18 @@ class ArticleApiService {
     try {
       console.log('Deleting article as admin:', articleId);
 
-      const response = await fetch(`${this.endpoint}/${articleId}`, {
-        method: 'DELETE',
+      const response = await this.axios.delete(`/news/${articleId}`, {
         headers: this.getSimpleAuthHeaders()
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
+      if (response.data?.success) {
         console.log('Admin article deleted successfully');
-        return data;
+        return response.data;
       } else {
-        throw new Error(data.message || 'Failed to delete article');
+        throw new Error(response.data?.message || 'Failed to delete article');
       }
     } catch (error) {
-      console.error('Error deleting admin article:', error);
+      console.error('Error deleting admin article:', error.response?.data || error.message);
       throw error;
     }
   }
@@ -414,27 +383,19 @@ class ArticleApiService {
         status: filters.status || 'all'
       });
 
-      const response = await fetch(`${this.endpoint}/user/my-articles?${params}`, {
-        method: 'GET',
+      const response = await this.axios.get(`/news/user/my-articles?${params}`, {
         headers: this.getSimpleAuthHeaders()
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log(`Loaded ${data.data?.length || 0} user articles`);
+      if (response.data?.success) {
+        console.log(`Loaded ${response.data.data?.length || 0} user articles`);
         // FIXED: Return the articles array directly (not wrapped in object)
-        return data.data || [];
+        return response.data.data || [];
       } else {
-        throw new Error(data.message || 'Failed to fetch user articles');
+        throw new Error(response.data?.message || 'Failed to fetch user articles');
       }
     } catch (error) {
-      console.error('Error fetching user articles:', error);
+      console.error('Error fetching user articles:', error.response?.data || error.message);
       // Return empty array on error to prevent frontend crashes
       return [];
     }
@@ -494,35 +455,26 @@ class ArticleApiService {
         formData.append('featuredImage', articleData.featuredImageFile);
       }
 
-      const response = await fetch(`${this.endpoint}/user`, {
-        method: 'POST',
-        headers: this.getFormDataHeaders(),
-        body: formData
+      const response = await this.axios.post('/news/user', formData, {
+        headers: this.getFormDataHeaders()
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log('User article created successfully:', data.data._id);
-        console.log('User permissions:', data.userPermissions);
+      if (response.data?.success) {
+        console.log('User article created successfully:', response.data.data._id);
+        console.log('User permissions:', response.data.userPermissions);
         
         // Return enhanced data with permission info
         return {
-          ...data.data,
-          userPermissions: data.userPermissions,
-          canPublish: data.userPermissions?.canPublish || false,
-          actualStatus: data.data.status
+          ...response.data.data,
+          userPermissions: response.data.userPermissions,
+          canPublish: response.data.userPermissions?.canPublish || false,
+          actualStatus: response.data.data.status
         };
       } else {
-        throw new Error(data.message || 'Failed to create article');
+        throw new Error(response.data?.message || 'Failed to create article');
       }
     } catch (error) {
-      console.error('Error creating user article:', error);
+      console.error('Error creating user article:', error.response?.data || error.message);
       throw error;
     }
   }
@@ -537,27 +489,18 @@ class ArticleApiService {
     try {
       console.log('Updating user article:', articleId);
 
-      const response = await fetch(`${this.endpoint}/user/${articleId}`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(articleData)
+      const response = await this.axios.put(`/news/user/${articleId}`, articleData, {
+        headers: this.getAuthHeaders()
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
+      if (response.data?.success) {
         console.log('User article updated successfully');
-        return data.data;
+        return response.data.data;
       } else {
-        throw new Error(data.message || 'Failed to update article');
+        throw new Error(response.data?.message || 'Failed to update article');
       }
     } catch (error) {
-      console.error('Error updating user article:', error);
+      console.error('Error updating user article:', error.response?.data || error.message);
       throw error;
     }
   }
@@ -571,26 +514,18 @@ class ArticleApiService {
     try {
       console.log('Deleting user article:', articleId);
 
-      const response = await fetch(`${this.endpoint}/user/${articleId}`, {
-        method: 'DELETE',
+      const response = await this.axios.delete(`/news/user/${articleId}`, {
         headers: this.getSimpleAuthHeaders()
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
+      if (response.data?.success) {
         console.log('User article deleted successfully');
-        return data;
+        return response.data;
       } else {
-        throw new Error(data.message || 'Failed to delete article');
+        throw new Error(response.data?.message || 'Failed to delete article');
       }
     } catch (error) {
-      console.error('Error deleting user article:', error);
+      console.error('Error deleting user article:', error.response?.data || error.message);
       throw error;
     }
   }
@@ -615,31 +550,23 @@ class ArticleApiService {
         limit: params.limit || 10
       });
 
-      const response = await fetch(`${this.endpoint}/pending?${queryParams}`, {
-        method: 'GET',
+      const response = await this.axios.get(`/news/pending?${queryParams}`, {
         headers: this.getSimpleAuthHeaders()
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log(`Loaded ${data.data?.length || 0} pending articles`);
+      if (response.data?.success) {
+        console.log(`Loaded ${response.data.data?.length || 0} pending articles`);
         return {
-          articles: data.data || [],
-          total: data.total,
-          currentPage: data.currentPage,
-          totalPages: data.totalPages
+          articles: response.data.data || [],
+          total: response.data.total,
+          currentPage: response.data.currentPage,
+          totalPages: response.data.totalPages
         };
       } else {
-        throw new Error(data.message || 'Failed to fetch pending articles');
+        throw new Error(response.data?.message || 'Failed to fetch pending articles');
       }
     } catch (error) {
-      console.error('Error fetching pending articles:', error);
+      console.error('Error fetching pending articles:', error.response?.data || error.message);
       throw error;
     }
   }
@@ -659,27 +586,21 @@ class ArticleApiService {
     try {
       console.log(`Reviewing article ${articleId}: ${action}`);
 
-      const response = await fetch(`${this.endpoint}/${articleId}/review`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ action, notes })
+      const response = await this.axios.put(`/news/${articleId}/review`, {
+        action,
+        notes
+      }, {
+        headers: this.getAuthHeaders()
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
+      if (response.data?.success) {
         console.log(`Article ${action}d successfully`);
-        return data.data;
+        return response.data.data;
       } else {
-        throw new Error(data.message || `Failed to ${action} article`);
+        throw new Error(response.data?.message || `Failed to ${action} article`);
       }
     } catch (error) {
-      console.error(`Error ${action}ing article:`, error);
+      console.error(`Error ${action}ing article:`, error.response?.data || error.message);
       throw error;
     }
   }
@@ -695,25 +616,17 @@ class ArticleApiService {
    */
   async getArticle(articleId) {
     try {
-      const response = await fetch(`${this.endpoint}/${articleId}`, {
-        method: 'GET',
+      const response = await this.axios.get(`/news/${articleId}`, {
         headers: this.getSimpleAuthHeaders()
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
-        return data.data;
+      if (response.data?.success) {
+        return response.data.data;
       } else {
-        throw new Error(data.message || 'Failed to fetch article');
+        throw new Error(response.data?.message || 'Failed to fetch article');
       }
     } catch (error) {
-      console.error('Error fetching article:', error);
+      console.error('Error fetching article:', error.response?.data || error.message);
       throw error;
     }
   }
@@ -829,6 +742,21 @@ class ArticleApiService {
       isAdmin: this.isAdmin(),
       isJournalist: this.isJournalist()
     };
+  }
+
+  // Error handling - SAME as listingService
+  handleError(message, error) {
+    console.error(message, error.response?.data || error.message);
+    if (error.response?.status === 429) {
+      console.warn('Rate limited. Please try again later.');
+      throw new Error('Too many requests. Please try again later.');
+    }
+    throw error;
+  }
+
+  // Cleanup - SAME as listingService
+  destroy() {
+    this.cache.clear();
   }
 }
 
