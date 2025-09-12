@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement/services/articleService.js
-// COMPLETE VERSION - AuthContext integration with all methods preserved and enhanced
+// UPDATED VERSION - Enhanced with multiple image support while preserving all existing functionality
 
 import axios from '../../../../config/axios.js';
 
@@ -119,6 +119,46 @@ class ArticleApiService {
     console.log('ArticleService: Cache cleared');
   }
 
+  /**
+   * ENHANCED: Create proper FormData with support for multiple images
+   * @param {Object} articleData - Article data with potential image files
+   * @returns {FormData} - Properly formatted form data
+   */
+  createFormData(articleData) {
+    const formData = new FormData();
+
+    // Add all non-file fields
+    Object.keys(articleData).forEach(key => {
+      if (key === 'featuredImageFile' || key === 'galleryImageFiles') return; // Skip file fields
+      
+      const value = articleData[key];
+      if (value !== undefined && value !== null) {
+        if (key === 'tags' && Array.isArray(value)) {
+          formData.append(key, JSON.stringify(value));
+        } else {
+          formData.append(key, value.toString());
+        }
+      }
+    });
+
+    // Add featured image if present
+    if (articleData.featuredImageFile) {
+      formData.append('featuredImage', articleData.featuredImageFile);
+      console.log('Added featured image to FormData:', articleData.featuredImageFile.name);
+    }
+
+    // NEW: Add gallery images if present (using 'gallery' field name to match backend)
+    if (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0) {
+      articleData.galleryImageFiles.forEach((file, index) => {
+        formData.append('gallery', file); // Backend expects 'gallery' field name
+        console.log(`Added gallery image ${index + 1} to FormData:`, file.name);
+      });
+    }
+
+    console.log('FormData created with fields:', [...formData.keys()]);
+    return formData;
+  }
+
   // ========================================
   // SMART ROUTING METHODS (Choose endpoint based on user role)
   // ========================================
@@ -147,8 +187,8 @@ class ArticleApiService {
   }
 
   /**
-   * Create article (smart routing based on role)
-   * @param {Object} articleData - Article data
+   * ENHANCED: Create article (smart routing based on role) with FormData support
+   * @param {Object} articleData - Article data (may include image files)
    * @returns {Promise<Object>} Created article
    */
   async createArticle(articleData) {
@@ -167,9 +207,9 @@ class ArticleApiService {
   }
 
   /**
-   * Update article (smart routing based on role)
+   * ENHANCED: Update article (smart routing based on role) with FormData support
    * @param {string} articleId - Article ID
-   * @param {Object} articleData - Updated article data
+   * @param {Object} articleData - Updated article data (may include image files)
    * @returns {Promise<Object>} Updated article
    */
   async updateArticle(articleId, articleData) {
@@ -252,6 +292,337 @@ class ArticleApiService {
       throw error;
     }
   }
+
+  /**
+   * ENHANCED: Create article as admin with FormData support for multiple images
+   * @param {Object} articleData - Article data (may include image files)
+   * @returns {Promise<Object>} Created article
+   */
+  async createAdminArticle(articleData) {
+    try {
+      console.log('Creating article as admin:', articleData.title);
+      
+      if (!this.isAdmin()) {
+        throw new Error('Admin access required to create articles');
+      }
+      
+      // Check if we have any image files
+      const hasImages = articleData.featuredImageFile || 
+                       (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
+      
+      if (hasImages) {
+        // Use FormData for image upload
+        const formData = this.createFormData(articleData);
+
+        const response = await this.axios.post('/news', formData, {
+          headers: this.getFormDataHeaders()
+        });
+
+        if (response.data?.success) {
+          console.log('Admin article created successfully with images:', response.data.data._id);
+          return response.data.data;
+        } else {
+          throw new Error(response.data?.message || 'Failed to create article');
+        }
+      } else {
+        // Use JSON for text-only articles
+        const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
+        
+        const response = await this.axios.post('/news', cleanData, {
+          headers: this.getAuthHeaders()
+        });
+
+        if (response.data?.success) {
+          console.log('Admin article created successfully (text only):', response.data.data._id);
+          return response.data.data;
+        } else {
+          throw new Error(response.data?.message || 'Failed to create article');
+        }
+      }
+    } catch (error) {
+      console.error('Error creating admin article:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * ENHANCED: Update article as admin with FormData support for multiple images
+   * @param {string} articleId - Article ID
+   * @param {Object} articleData - Updated article data (may include image files)
+   * @returns {Promise<Object>} Updated article
+   */
+  async updateAdminArticle(articleId, articleData) {
+    try {
+      console.log('Updating article as admin:', articleId);
+      
+      if (!this.isAdmin()) {
+        throw new Error('Admin access required to update articles');
+      }
+      
+      // Check if we have any new image files
+      const hasImages = articleData.featuredImageFile || 
+                       (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
+      
+      if (hasImages) {
+        // Use FormData for image upload
+        const formData = this.createFormData(articleData);
+
+        const response = await this.axios.put(`/news/${articleId}`, formData, {
+          headers: this.getFormDataHeaders()
+        });
+
+        if (response.data?.success) {
+          console.log('Admin article updated successfully with images');
+          return response.data.data;
+        } else {
+          throw new Error(response.data?.message || 'Failed to update article');
+        }
+      } else {
+        // Use JSON for text-only updates
+        const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
+        
+        const response = await this.axios.put(`/news/${articleId}`, cleanData, {
+          headers: this.getAuthHeaders()
+        });
+
+        if (response.data?.success) {
+          console.log('Admin article updated successfully (text only)');
+          return response.data.data;
+        } else {
+          throw new Error(response.data?.message || 'Failed to update article');
+        }
+      }
+    } catch (error) {
+      console.error('Error updating admin article:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete article as admin
+   * @param {string} articleId - Article ID
+   * @returns {Promise<Object>} Success response
+   */
+  async deleteAdminArticle(articleId) {
+    try {
+      console.log('Deleting article as admin:', articleId);
+
+      if (!this.isAdmin()) {
+        throw new Error('Admin access required to delete articles');
+      }
+
+      const response = await this.axios.delete(`/news/${articleId}`, {
+        headers: this.getSimpleAuthHeaders()
+      });
+
+      if (response.data?.success) {
+        console.log('Admin article deleted successfully');
+        return response.data;
+      } else {
+        throw new Error(response.data?.message || 'Failed to delete article');
+      }
+    } catch (error) {
+      console.error('Error deleting admin article:', error.response?.data || error.message);
+      
+      // Enhanced error handling
+      if (error.response?.status === 403) {
+        throw new Error('Admin access required');
+      } else if (error.response?.status === 401) {
+        throw new Error('Authentication failed. Please log in again.');
+      }
+      
+      throw error;
+    }
+  }
+
+  // ========================================
+  // USER & JOURNALIST ENDPOINTS (Permission-based)
+  // ========================================
+
+  /**
+   * Get user's own articles
+   * FIXED: Returns array directly for frontend compatibility
+   * @param {Object} filters - Filtering options
+   * @returns {Promise<Array>} User's articles (returns array directly)
+   */
+  async getMyOwnArticles(filters = {}) {
+    try {
+      const params = new URLSearchParams({
+        page: filters.page || 1,
+        limit: filters.limit || 100,
+        status: filters.status || 'all'
+      });
+
+      const response = await this.axios.get(`/news/user/my-articles?${params}`, {
+        headers: this.getSimpleAuthHeaders()
+      });
+
+      if (response.data?.success) {
+        console.log(`Loaded ${response.data.data?.length || 0} user articles`);
+        // FIXED: Return the articles array directly (not wrapped in object)
+        return response.data.data || [];
+      } else {
+        throw new Error(response.data?.message || 'Failed to fetch user articles');
+      }
+    } catch (error) {
+      console.error('Error fetching user articles:', error.response?.data || error.message);
+      // Return empty array on error to prevent frontend crashes
+      return [];
+    }
+  }
+
+  /**
+   * ENHANCED: Create article as user/journalist with FormData support for multiple images
+   * @param {Object} articleData - Article data (may include image files)
+   * @returns {Promise<Object>} Created article
+   */
+  async createUserArticle(articleData) {
+    try {
+      console.log('Creating article as user/journalist:', articleData.title);
+      
+      // Check if we have any image files
+      const hasImages = articleData.featuredImageFile || 
+                       (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
+      
+      if (hasImages) {
+        // Use FormData for image upload
+        const formData = this.createFormData(articleData);
+
+        console.log('Uploading article with images via FormData...');
+        console.log('Featured image:', articleData.featuredImageFile ? articleData.featuredImageFile.name : 'None');
+        console.log('Gallery images:', articleData.galleryImageFiles ? articleData.galleryImageFiles.length : 0);
+
+        const response = await this.axios.post('/news/user', formData, {
+          headers: this.getFormDataHeaders()
+        });
+
+        if (response.data?.success) {
+          console.log('User article created successfully with images:', response.data.data._id);
+          console.log('User permissions:', response.data.userPermissions);
+          
+          // Return enhanced data with permission info
+          return {
+            ...response.data.data,
+            userPermissions: response.data.userPermissions,
+            canPublish: response.data.userPermissions?.canPublish || false,
+            actualStatus: response.data.data.status
+          };
+        } else {
+          throw new Error(response.data?.message || 'Failed to create article');
+        }
+      } else {
+        // Use JSON for text-only articles
+        const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
+        
+        console.log('Creating article without images via JSON...');
+
+        const response = await this.axios.post('/news/user', cleanData, {
+          headers: this.getAuthHeaders()
+        });
+
+        if (response.data?.success) {
+          console.log('User article created successfully (text only):', response.data.data._id);
+          console.log('User permissions:', response.data.userPermissions);
+          
+          return {
+            ...response.data.data,
+            userPermissions: response.data.userPermissions,
+            canPublish: response.data.userPermissions?.canPublish || false,
+            actualStatus: response.data.data.status
+          };
+        } else {
+          throw new Error(response.data?.message || 'Failed to create article');
+        }
+      }
+    } catch (error) {
+      console.error('Error creating user article:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * ENHANCED: Update user's own article with FormData support for multiple images
+   * @param {string} articleId - Article ID
+   * @param {Object} articleData - Updated article data (may include image files)
+   * @returns {Promise<Object>} Updated article
+   */
+  async updateUserArticle(articleId, articleData) {
+    try {
+      console.log('Updating user article:', articleId);
+
+      // Check if we have any new image files
+      const hasImages = articleData.featuredImageFile || 
+                       (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
+      
+      if (hasImages) {
+        // Use FormData for image upload
+        const formData = this.createFormData(articleData);
+
+        console.log('Updating article with images via FormData...');
+        console.log('Featured image:', articleData.featuredImageFile ? articleData.featuredImageFile.name : 'None');
+        console.log('Gallery images:', articleData.galleryImageFiles ? articleData.galleryImageFiles.length : 0);
+
+        const response = await this.axios.put(`/news/user/${articleId}`, formData, {
+          headers: this.getFormDataHeaders()
+        });
+
+        if (response.data?.success) {
+          console.log('User article updated successfully with images');
+          return response.data.data;
+        } else {
+          throw new Error(response.data?.message || 'Failed to update article');
+        }
+      } else {
+        // Use JSON for text-only updates
+        const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
+        
+        console.log('Updating article without images via JSON...');
+
+        const response = await this.axios.put(`/news/user/${articleId}`, cleanData, {
+          headers: this.getAuthHeaders()
+        });
+
+        if (response.data?.success) {
+          console.log('User article updated successfully (text only)');
+          return response.data.data;
+        } else {
+          throw new Error(response.data?.message || 'Failed to update article');
+        }
+      }
+    } catch (error) {
+      console.error('Error updating user article:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete user's own article
+   * @param {string} articleId - Article ID
+   * @returns {Promise<Object>} Success response
+   */
+  async deleteUserArticle(articleId) {
+    try {
+      console.log('Deleting user article:', articleId);
+
+      const response = await this.axios.delete(`/news/user/${articleId}`, {
+        headers: this.getSimpleAuthHeaders()
+      });
+
+      if (response.data?.success) {
+        console.log('User article deleted successfully');
+        return response.data;
+      } else {
+        throw new Error(response.data?.message || 'Failed to delete article');
+      }
+    } catch (error) {
+      console.error('Error deleting user article:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  // ========================================
+  // EXISTING METHODS (PRESERVED)
+  // ========================================
 
   /**
    * Get pending articles for admin review
@@ -345,381 +716,6 @@ class ArticleApiService {
       throw error;
     }
   }
-
-  /**
-   * Create article as admin (full permissions)
-   * @param {Object} articleData - Article data
-   * @returns {Promise<Object>} Created article
-   */
-  async createAdminArticle(articleData) {
-    try {
-      console.log('Creating article as admin:', articleData.title);
-      
-      if (!this.isAdmin()) {
-        throw new Error('Admin access required to create articles');
-      }
-      
-      // Prepare FormData for image upload support
-      const formData = new FormData();
-      
-      // Add text fields
-      formData.append('title', articleData.title);
-      formData.append('content', articleData.content);
-      formData.append('category', articleData.category);
-      formData.append('status', articleData.status || 'draft');
-      
-      if (articleData.subtitle) {
-        formData.append('subtitle', articleData.subtitle);
-      }
-      
-      if (articleData.publishDate) {
-        formData.append('publishDate', articleData.publishDate);
-      }
-      
-      if (articleData.metaTitle) {
-        formData.append('metaTitle', articleData.metaTitle);
-      }
-      
-      if (articleData.metaDescription) {
-        formData.append('metaDescription', articleData.metaDescription);
-      }
-      
-      if (articleData.authorNotes) {
-        formData.append('authorNotes', articleData.authorNotes);
-      }
-      
-      // Boolean fields
-      formData.append('isPremium', articleData.isPremium || false);
-      formData.append('earningsEnabled', articleData.earningsEnabled !== false);
-      formData.append('allowComments', articleData.allowComments !== false);
-      formData.append('allowSharing', articleData.allowSharing !== false);
-      
-      // Tags array
-      if (articleData.tags && articleData.tags.length > 0) {
-        formData.append('tags', JSON.stringify(articleData.tags));
-      }
-      
-      // Handle featured image upload
-      if (articleData.featuredImageFile) {
-        formData.append('featuredImage', articleData.featuredImageFile);
-      }
-
-      const response = await this.axios.post('/news', formData, {
-        headers: this.getFormDataHeaders()
-      });
-
-      if (response.data?.success) {
-        console.log('Admin article created successfully:', response.data.data._id);
-        return response.data.data;
-      } else {
-        throw new Error(response.data?.message || 'Failed to create article');
-      }
-    } catch (error) {
-      console.error('Error creating admin article:', error.response?.data || error.message);
-      throw error;
-    }
-  }
-
-  /**
-   * Update article as admin
-   * @param {string} articleId - Article ID
-   * @param {Object} articleData - Updated article data
-   * @returns {Promise<Object>} Updated article
-   */
-  async updateAdminArticle(articleId, articleData) {
-    try {
-      console.log('Updating article as admin:', articleId);
-      
-      if (!this.isAdmin()) {
-        throw new Error('Admin access required to update articles');
-      }
-      
-      // For updates, use JSON instead of FormData for simplicity
-      // unless there's a new image to upload
-      if (articleData.featuredImageFile) {
-        // Use FormData if there's a new image
-        const formData = new FormData();
-        
-        Object.keys(articleData).forEach(key => {
-          if (key === 'featuredImageFile') {
-            formData.append('featuredImage', articleData[key]);
-          } else if (key === 'tags' && Array.isArray(articleData[key])) {
-            formData.append(key, JSON.stringify(articleData[key]));
-          } else if (articleData[key] !== undefined) {
-            formData.append(key, articleData[key]);
-          }
-        });
-
-        const response = await this.axios.put(`/news/${articleId}`, formData, {
-          headers: this.getFormDataHeaders()
-        });
-
-        if (response.data?.success) {
-          console.log('Admin article updated successfully');
-          return response.data.data;
-        } else {
-          throw new Error(response.data?.message || 'Failed to update article');
-        }
-      } else {
-        // Use JSON for text-only updates
-        const response = await this.axios.put(`/news/${articleId}`, articleData, {
-          headers: this.getAuthHeaders()
-        });
-
-        if (response.data?.success) {
-          console.log('Admin article updated successfully');
-          return response.data.data;
-        } else {
-          throw new Error(response.data?.message || 'Failed to update article');
-        }
-      }
-    } catch (error) {
-      console.error('Error updating admin article:', error.response?.data || error.message);
-      throw error;
-    }
-  }
-
-  /**
-   * Delete article as admin
-   * @param {string} articleId - Article ID
-   * @returns {Promise<Object>} Success response
-   */
-  async deleteAdminArticle(articleId) {
-    try {
-      console.log('Deleting article as admin:', articleId);
-
-      if (!this.isAdmin()) {
-        throw new Error('Admin access required to delete articles');
-      }
-
-      const response = await this.axios.delete(`/news/${articleId}`, {
-        headers: this.getSimpleAuthHeaders()
-      });
-
-      if (response.data?.success) {
-        console.log('Admin article deleted successfully');
-        return response.data;
-      } else {
-        throw new Error(response.data?.message || 'Failed to delete article');
-      }
-    } catch (error) {
-      console.error('Error deleting admin article:', error.response?.data || error.message);
-      
-      // Enhanced error handling
-      if (error.response?.status === 403) {
-        throw new Error('Admin access required');
-      } else if (error.response?.status === 401) {
-        throw new Error('Authentication failed. Please log in again.');
-      }
-      
-      throw error;
-    }
-  }
-
-  /**
-   * Get admin article statistics
-   * @returns {Promise<Object>} Article statistics
-   */
-  async getAdminStats() {
-    try {
-      console.log('Getting admin article statistics...');
-      
-      if (!this.isAdmin()) {
-        throw new Error('Admin access required for statistics');
-      }
-
-      const response = await this.axios.get('/news/admin/stats', {
-        headers: this.getAuthHeaders()
-      });
-
-      if (response.data?.success) {
-        console.log('Admin stats loaded successfully');
-        return response.data.data;
-      } else {
-        throw new Error(response.data?.message || 'Failed to fetch admin statistics');
-      }
-    } catch (error) {
-      console.error('Error fetching admin stats:', error.response?.data || error.message);
-      
-      // Enhanced error handling
-      if (error.response?.status === 403) {
-        throw new Error('Admin access required');
-      } else if (error.response?.status === 401) {
-        throw new Error('Authentication failed. Please log in again.');
-      }
-      
-      throw error;
-    }
-  }
-
-  // ========================================
-  // USER & JOURNALIST ENDPOINTS (Permission-based)
-  // ========================================
-
-  /**
-   * Get user's own articles
-   * FIXED: Returns array directly for frontend compatibility
-   * @param {Object} filters - Filtering options
-   * @returns {Promise<Array>} User's articles (returns array directly)
-   */
-  async getMyOwnArticles(filters = {}) {
-    try {
-      const params = new URLSearchParams({
-        page: filters.page || 1,
-        limit: filters.limit || 100,
-        status: filters.status || 'all'
-      });
-
-      const response = await this.axios.get(`/news/user/my-articles?${params}`, {
-        headers: this.getSimpleAuthHeaders()
-      });
-
-      if (response.data?.success) {
-        console.log(`Loaded ${response.data.data?.length || 0} user articles`);
-        // FIXED: Return the articles array directly (not wrapped in object)
-        return response.data.data || [];
-      } else {
-        throw new Error(response.data?.message || 'Failed to fetch user articles');
-      }
-    } catch (error) {
-      console.error('Error fetching user articles:', error.response?.data || error.message);
-      // Return empty array on error to prevent frontend crashes
-      return [];
-    }
-  }
-
-  /**
-   * Create article as user/journalist (permissions handled automatically)
-   * @param {Object} articleData - Article data
-   * @returns {Promise<Object>} Created article
-   */
-  async createUserArticle(articleData) {
-    try {
-      console.log('Creating article as user/journalist:', articleData.title);
-      
-      // Prepare FormData for image upload support
-      const formData = new FormData();
-      
-      // Add text fields
-      formData.append('title', articleData.title);
-      formData.append('content', articleData.content);
-      formData.append('category', articleData.category);
-      formData.append('status', articleData.status || 'draft');
-      
-      if (articleData.subtitle) {
-        formData.append('subtitle', articleData.subtitle);
-      }
-      
-      if (articleData.publishDate) {
-        formData.append('publishDate', articleData.publishDate);
-      }
-      
-      if (articleData.metaTitle) {
-        formData.append('metaTitle', articleData.metaTitle);
-      }
-      
-      if (articleData.metaDescription) {
-        formData.append('metaDescription', articleData.metaDescription);
-      }
-      
-      if (articleData.authorNotes) {
-        formData.append('authorNotes', articleData.authorNotes);
-      }
-      
-      // Boolean fields
-      formData.append('isPremium', articleData.isPremium || false);
-      formData.append('earningsEnabled', articleData.earningsEnabled !== false);
-      formData.append('allowComments', articleData.allowComments !== false);
-      formData.append('allowSharing', articleData.allowSharing !== false);
-      
-      // Tags array
-      if (articleData.tags && articleData.tags.length > 0) {
-        formData.append('tags', JSON.stringify(articleData.tags));
-      }
-      
-      // Handle featured image upload
-      if (articleData.featuredImageFile) {
-        formData.append('featuredImage', articleData.featuredImageFile);
-      }
-
-      const response = await this.axios.post('/news/user', formData, {
-        headers: this.getFormDataHeaders()
-      });
-
-      if (response.data?.success) {
-        console.log('User article created successfully:', response.data.data._id);
-        console.log('User permissions:', response.data.userPermissions);
-        
-        // Return enhanced data with permission info
-        return {
-          ...response.data.data,
-          userPermissions: response.data.userPermissions,
-          canPublish: response.data.userPermissions?.canPublish || false,
-          actualStatus: response.data.data.status
-        };
-      } else {
-        throw new Error(response.data?.message || 'Failed to create article');
-      }
-    } catch (error) {
-      console.error('Error creating user article:', error.response?.data || error.message);
-      throw error;
-    }
-  }
-
-  /**
-   * Update user's own article
-   * @param {string} articleId - Article ID
-   * @param {Object} articleData - Updated article data
-   * @returns {Promise<Object>} Updated article
-   */
-  async updateUserArticle(articleId, articleData) {
-    try {
-      console.log('Updating user article:', articleId);
-
-      const response = await this.axios.put(`/news/user/${articleId}`, articleData, {
-        headers: this.getAuthHeaders()
-      });
-
-      if (response.data?.success) {
-        console.log('User article updated successfully');
-        return response.data.data;
-      } else {
-        throw new Error(response.data?.message || 'Failed to update article');
-      }
-    } catch (error) {
-      console.error('Error updating user article:', error.response?.data || error.message);
-      throw error;
-    }
-  }
-
-  /**
-   * Delete user's own article
-   * @param {string} articleId - Article ID
-   * @returns {Promise<Object>} Success response
-   */
-  async deleteUserArticle(articleId) {
-    try {
-      console.log('Deleting user article:', articleId);
-
-      const response = await this.axios.delete(`/news/user/${articleId}`, {
-        headers: this.getSimpleAuthHeaders()
-      });
-
-      if (response.data?.success) {
-        console.log('User article deleted successfully');
-        return response.data;
-      } else {
-        throw new Error(response.data?.message || 'Failed to delete article');
-      }
-    } catch (error) {
-      console.error('Error deleting user article:', error.response?.data || error.message);
-      throw error;
-    }
-  }
-
-  // ========================================
-  // PUBLIC & UTILITY METHODS
-  // ========================================
 
   /**
    * Get article by ID (public access)
@@ -854,62 +850,6 @@ class ArticleApiService {
       isAdmin: this.isAdmin(),
       isJournalist: this.isJournalist()
     };
-  }
-
-  /**
-   * Test admin access - verifies authentication and permissions
-   * @returns {Promise<Object>} Test result
-   */
-  async testAdminAccess() {
-    try {
-      console.log('Testing admin access...');
-      
-      const user = this.getUser();
-      if (!user) {
-        throw new Error('No user found');
-      }
-
-      if (!this.isAdmin()) {
-        throw new Error(`User role '${user.role}' is not admin`);
-      }
-
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      // Test admin stats endpoint (lightweight test)
-      console.log('Testing admin stats endpoint...');
-      const response = await this.axios.get('/news/admin/stats', {
-        headers: this.getAuthHeaders()
-      });
-
-      if (response.data?.success) {
-        console.log('✅ Admin access test passed');
-        return {
-          success: true,
-          message: 'Admin access verified',
-          userRole: user.role,
-          userId: user.id
-        };
-      } else {
-        throw new Error(response.data?.message || 'Admin stats test failed');
-      }
-
-    } catch (error) {
-      console.error('❌ Admin access test failed:', error);
-      
-      let errorMessage = 'Admin access test failed';
-      if (error.response?.status === 403) {
-        errorMessage = 'Access denied: Admin role required';
-      } else if (error.response?.status === 401) {
-        errorMessage = 'Authentication failed: Please log in again';
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      throw new Error(errorMessage);
-    }
   }
 
   // Error handling - SAME as listingService
