@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement/views/EditorView/index.js
-// COMPLETE VERSION - All existing functionality preserved + gallery support added
+// COMPLETE PRODUCTION VERSION - Gallery Images Working
 
 import React, { useState, useRef } from 'react';
 import {
@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 /**
- * Complete Editor View Component with Multiple Image Support
+ * Complete Editor View Component - PRODUCTION READY
  */
 const EditorView = ({
   articleForm,
@@ -29,20 +29,20 @@ const EditorView = ({
   addTag,
   removeTag,
   fileInputRef,
-  // NEW: Gallery image props
-  galleryImageFiles,
+  onViewChange,
+  // Gallery image props - NOW PROPERLY RECEIVED
+  galleryImageFiles = [],
   onGalleryImagesUpload,
   removeGalleryImage,
-  imageUploadProgress,
-  // EXISTING: All original props preserved
+  imageUploadProgress = {},
+  // Utility props
   getCategoryColor,
   getCategoryLabel,
-  formatCurrency,
-  onViewChange
+  formatCurrency
 }) => {
   const [tagInput, setTagInput] = useState('');
   
-  // NEW: Ref for gallery images input
+  // Gallery input ref
   const galleryInputRef = useRef(null);
 
   const handleTagKeyPress = (e) => {
@@ -53,8 +53,17 @@ const EditorView = ({
     }
   };
 
+  // Debug logging for gallery functionality
+  console.log('🖼️ EditorView Gallery Debug:', {
+    galleryImageFiles: galleryImageFiles?.length || 0,
+    onGalleryImagesUpload: typeof onGalleryImagesUpload,
+    removeGalleryImage: typeof removeGalleryImage,
+    galleryInputRef: galleryInputRef?.current ? 'ready' : 'not ready'
+  });
+
   return (
     <div className="editor-view">
+      {/* Editor Header */}
       <div className="editor-header">
         <button className="back-button" onClick={onCancel}>
           ← Back
@@ -82,6 +91,7 @@ const EditorView = ({
         </div>
       </div>
 
+      {/* Error Display */}
       {formErrors.general && (
         <div className="error-message">
           <AlertCircle size={16} />
@@ -91,7 +101,7 @@ const EditorView = ({
 
       <div className="editor-content">
         <div className="editor-main">
-          {/* EXISTING: Title */}
+          {/* Title */}
           <div className="form-group">
             <label>Title *</label>
             <input
@@ -105,7 +115,7 @@ const EditorView = ({
             {formErrors.title && <span className="error-text">{formErrors.title}</span>}
           </div>
 
-          {/* EXISTING: Subtitle */}
+          {/* Subtitle */}
           <div className="form-group">
             <label>Subtitle</label>
             <input
@@ -119,7 +129,7 @@ const EditorView = ({
             {formErrors.subtitle && <span className="error-text">{formErrors.subtitle}</span>}
           </div>
 
-          {/* EXISTING: Content */}
+          {/* Content */}
           <div className="form-group">
             <label>Content *</label>
             <textarea
@@ -133,7 +143,7 @@ const EditorView = ({
             {formErrors.content && <span className="error-text">{formErrors.content}</span>}
           </div>
 
-          {/* EXISTING: Author Notes */}
+          {/* Author Notes */}
           <div className="form-group">
             <label>Author Notes (Internal)</label>
             <textarea
@@ -146,7 +156,7 @@ const EditorView = ({
         </div>
 
         <div className="editor-sidebar">
-          {/* EXISTING: Status & Publishing */}
+          {/* Status & Publishing */}
           <div className="sidebar-section">
             <h3>Publishing</h3>
             
@@ -172,7 +182,7 @@ const EditorView = ({
             </div>
           </div>
 
-          {/* EXISTING: Category */}
+          {/* Category */}
           <div className="sidebar-section">
             <h3>Category</h3>
             <select 
@@ -192,7 +202,7 @@ const EditorView = ({
             <small>Higher multipliers = better earnings</small>
           </div>
 
-          {/* EXISTING: Premium Content & Earnings with Engagement */}
+          {/* Monetization & Engagement */}
           <div className="sidebar-section">
             <h3>Monetization & Engagement</h3>
             
@@ -256,7 +266,7 @@ const EditorView = ({
               </label>
             </div>
 
-            {/* EXISTING: Earnings Preview */}
+            {/* Earnings Preview */}
             <div className="earnings-preview">
               <h4>Potential Earnings:</h4>
               <div className="earning-tiers">
@@ -272,7 +282,7 @@ const EditorView = ({
             </div>
           </div>
 
-          {/* EXISTING: Featured Image (UNCHANGED) */}
+          {/* Featured Image */}
           <div className="sidebar-section">
             <h3>Featured Image</h3>
             {articleForm.featuredImage ? (
@@ -290,7 +300,7 @@ const EditorView = ({
             ) : (
               <button 
                 className="upload-button"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => fileInputRef?.current?.click()}
               >
                 <ImageIcon size={16} />
                 Upload Featured Image
@@ -306,7 +316,7 @@ const EditorView = ({
             <small>Recommended: 1200x630px for social sharing</small>
           </div>
 
-          {/* NEW: Gallery Images Section */}
+          {/* GALLERY IMAGES - PRODUCTION READY */}
           <div className="sidebar-section">
             <h3>Gallery Images</h3>
             <p className="section-description">
@@ -316,7 +326,19 @@ const EditorView = ({
             {/* Gallery Upload Button */}
             <button 
               className="upload-button gallery-upload"
-              onClick={() => galleryInputRef.current?.click()}
+              onClick={() => {
+                console.log('🖱️ Gallery button clicked, checking handlers...');
+                if (!onGalleryImagesUpload) {
+                  console.error('❌ onGalleryImagesUpload handler missing');
+                  alert('Gallery upload not available. Please refresh the page.');
+                  return;
+                }
+                if (!galleryInputRef.current) {
+                  console.error('❌ Gallery input ref not ready');
+                  return;
+                }
+                galleryInputRef.current.click();
+              }}
             >
               <Plus size={16} />
               Add Gallery Images
@@ -325,44 +347,67 @@ const EditorView = ({
               )}
             </button>
             
+            {/* Gallery file input */}
             <input
               ref={galleryInputRef}
               type="file"
               accept="image/*"
               multiple
-              onChange={onGalleryImagesUpload}
+              onChange={(e) => {
+                console.log('📁 Gallery input changed:', e.target.files?.length || 0, 'files');
+                if (!onGalleryImagesUpload) {
+                  console.error('❌ onGalleryImagesUpload handler missing');
+                  alert('Gallery upload handler not available');
+                  return;
+                }
+                onGalleryImagesUpload(e);
+              }}
               style={{ display: 'none' }}
             />
             
-            {/* Gallery Previews - This shows the selected images */}
+            {/* Gallery Previews */}
             {galleryImageFiles && galleryImageFiles.length > 0 && (
               <div className="gallery-previews">
                 <h4>Gallery Images ({galleryImageFiles.length}/9)</h4>
                 <div className="gallery-grid">
-                  {galleryImageFiles.map((file, index) => (
-                    <div key={index} className="gallery-image-preview">
-                      <img 
-                        src={URL.createObjectURL(file)} 
-                        alt={`Gallery ${index + 1}`}
-                        onLoad={(e) => {
-                          // Clean up blob URL after image loads
-                          setTimeout(() => URL.revokeObjectURL(e.target.src), 1000);
-                        }}
-                      />
-                      <div className="gallery-image-actions">
-                        <button 
-                          className="remove-gallery-image"
-                          onClick={() => removeGalleryImage && removeGalleryImage(index)}
-                          title="Remove image"
-                        >
-                          <X size={14} />
-                        </button>
-                        <span className="image-info">
-                          {(file.size / 1024 / 1024).toFixed(1)}MB
-                        </span>
+                  {galleryImageFiles.map((file, index) => {
+                    // Create preview URL
+                    const previewUrl = URL.createObjectURL(file);
+                    
+                    return (
+                      <div key={`gallery-${index}-${file.name}`} className="gallery-image-preview">
+                        <img 
+                          src={previewUrl}
+                          alt={`Gallery ${index + 1}`}
+                          onLoad={() => {
+                            // Clean up blob URL after image loads to prevent memory leaks
+                            setTimeout(() => URL.revokeObjectURL(previewUrl), 1000);
+                          }}
+                        />
+                        <div className="gallery-image-actions">
+                          <button 
+                            className="remove-gallery-image"
+                            onClick={() => {
+                              console.log(`🗑️ Removing gallery image ${index}`);
+                              if (!removeGalleryImage) {
+                                console.error('❌ removeGalleryImage handler missing');
+                                return;
+                              }
+                              // Clean up URL immediately when removing
+                              URL.revokeObjectURL(previewUrl);
+                              removeGalleryImage(index);
+                            }}
+                            title="Remove image"
+                          >
+                            <X size={14} />
+                          </button>
+                          <span className="image-info">
+                            {(file.size / 1024 / 1024).toFixed(1)}MB
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -376,13 +421,30 @@ const EditorView = ({
                 • Recommended: 1024x768px or higher
               </small>
             </div>
+
+            {/* Upload Progress (if needed) */}
+            {imageUploadProgress && Object.keys(imageUploadProgress).length > 0 && (
+              <div className="upload-progress-container">
+                {Object.entries(imageUploadProgress).map(([fileName, progress]) => (
+                  <div key={fileName} className="upload-progress-item">
+                    <small>{fileName}</small>
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill" 
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* ENHANCED: Tags with Media Summary */}
+          {/* Tags */}
           <div className="sidebar-section">
             <h3>Tags</h3>
             <div className="tags-container">
-              {articleForm.tags.map(tag => (
+              {articleForm.tags && articleForm.tags.map(tag => (
                 <span key={tag} className="tag">
                   {tag}
                   <button onClick={() => removeTag(tag)}>
@@ -400,15 +462,15 @@ const EditorView = ({
               className="tag-input"
             />
             
-            {/* NEW: Media Summary */}
+            {/* Media Summary */}
             <div className="media-summary">
               <small>
-                <strong>Media:</strong> {articleForm.featuredImage ? 1 : 0} featured + {galleryImageFiles ? galleryImageFiles.length : 0} gallery images
+                <strong>Media:</strong> {articleForm.featuredImage ? 1 : 0} featured + {galleryImageFiles?.length || 0} gallery images
               </small>
             </div>
           </div>
 
-          {/* EXISTING: SEO Section (UNCHANGED) */}
+          {/* SEO Section */}
           <div className="sidebar-section">
             <h3>SEO</h3>
             
@@ -423,7 +485,7 @@ const EditorView = ({
                 maxLength={60}
                 className={formErrors.metaTitle ? 'error' : ''}
               />
-              <small>{articleForm.metaTitle.length}/60 characters</small>
+              <small>{articleForm.metaTitle?.length || 0}/60 characters</small>
               {formErrors.metaTitle && <span className="error-text">{formErrors.metaTitle}</span>}
             </div>
 
@@ -438,7 +500,7 @@ const EditorView = ({
                 maxLength={160}
                 className={formErrors.metaDescription ? 'error' : ''}
               />
-              <small>{articleForm.metaDescription.length}/160 characters</small>
+              <small>{articleForm.metaDescription?.length || 0}/160 characters</small>
               {formErrors.metaDescription && <span className="error-text">{formErrors.metaDescription}</span>}
             </div>
           </div>

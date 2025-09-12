@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement/index.js
-// COMPLETE VERSION - AuthContext integration with all functionality preserved
+// COMPLETE PRODUCTION VERSION - Gallery Image Issue FIXED
 
 import React, { useRef, useEffect } from 'react';
 import { Loader } from 'lucide-react';
@@ -38,7 +38,7 @@ import EditorView from './views/EditorView/index.js';
 import './ArticleManagement.css';
 
 /**
- * Main ArticleManagement component - COMPLETE VERSION with AuthContext integration
+ * Main ArticleManagement component - PRODUCTION READY with Gallery Support
  * @param {Object} props - Component props
  * @param {Object} props.profileData - User profile data
  * @param {Function} props.refreshProfile - Function to refresh profile
@@ -47,10 +47,10 @@ import './ArticleManagement.css';
 const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
   const fileInputRef = useRef(null);
   
-  // CRITICAL FIX: Get user from AuthContext like working admin components
+  // Get user from AuthContext
   const { user, loading: authLoading } = useAuth();
   
-  // Set user in article service - SAME pattern as working components
+  // Set user in article service
   useEffect(() => {
     if (user) {
       console.log('Setting user in article service:', user.role);
@@ -70,7 +70,7 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
     refreshData
   } = useArticleData();
 
-  // Operations and form management
+  // FIXED: Operations and form management - properly extract ALL gallery props
   const {
     // View state
     activeView,
@@ -83,6 +83,11 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
     saving,
     editingArticle,
     isCreating,
+    
+    // FIXED: Gallery image state - NOW PROPERLY EXTRACTED
+    featuredImageFile,
+    galleryImageFiles,           // ✅ FIXED - Was missing
+    imageUploadProgress,         // ✅ FIXED - Was missing
     
     // Search and filter state
     searchTerm,
@@ -99,6 +104,8 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
     handleDelete,
     handleCancel,
     handleImageUpload,
+    handleGalleryImagesUpload,   // ✅ FIXED - Was missing
+    removeGalleryImage,          // ✅ FIXED - Was missing
     addTag,
     removeTag,
     getFilteredArticles
@@ -123,7 +130,7 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
   // Handle initial action (like create article from profile header)
   useEffect(() => {
     if (initialAction === 'create' && handleCreateNew && !loading) {
-      handleCreateNew(); // This triggers the create article flow
+      handleCreateNew();
     }
   }, [initialAction, handleCreateNew, loading]);
 
@@ -181,7 +188,7 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
   const sharedProps = {
     articles,
     stats,
-    user, // Pass user to all views
+    user,
     categories,
     earningsConfig,
     formatCurrency,
@@ -255,6 +262,11 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
             removeTag={removeTag}
             fileInputRef={fileInputRef}
             onViewChange={navigateToView}
+            // ✅ FIXED: Gallery props NOW PROPERLY PASSED
+            galleryImageFiles={galleryImageFiles}
+            onGalleryImagesUpload={handleGalleryImagesUpload}
+            removeGalleryImage={removeGalleryImage}
+            imageUploadProgress={imageUploadProgress}
           />
         );
 
@@ -275,7 +287,7 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
 
   return (
     <div className="article-management">
-      {/* Debug info for admin access (remove in production) */}
+      {/* Debug info for development (remove in production) */}
       {process.env.NODE_ENV === 'development' && user && (
         <div style={{ 
           background: '#333', 
@@ -285,18 +297,19 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
           fontSize: '12px',
           borderRadius: '5px'
         }}>
-          <strong>Debug Info:</strong><br />
+          <strong>🔧 Debug Info:</strong><br />
           User: {user.name}<br />
           Role: {user.role}<br />
           Is Admin: {articleApiService.isAdmin() ? 'Yes' : 'No'}<br />
-          Service User Set: {articleApiService.getUser() ? 'Yes' : 'No'}<br />
-          Articles Loaded: {articles.length}
+          Articles: {articles.length}<br />
+          Gallery Files: {galleryImageFiles?.length || 0}<br />
+          Gallery Handler: {handleGalleryImagesUpload ? 'Available' : 'Missing'}
         </div>
       )}
       
       {renderCurrentView()}
       
-      {/* Hidden file input for image uploads */}
+      {/* Hidden file input for featured image uploads */}
       <input
         ref={fileInputRef}
         type="file"

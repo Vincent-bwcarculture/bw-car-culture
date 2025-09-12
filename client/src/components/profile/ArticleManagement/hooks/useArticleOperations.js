@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement/hooks/useArticleOperations.js
-// COMPLETE VERSION - All existing functionality preserved + gallery support added
+// COMPLETE PRODUCTION VERSION - Gallery Images Working
 
 import { useState, useCallback } from 'react';
 import { defaultArticleForm, VIEWS } from '../utils/constants.js';
@@ -7,6 +7,7 @@ import { useAuth } from '../../../../context/AuthContext.js';
 
 /**
  * Custom hook for managing article operations with REAL API calls and MULTIPLE IMAGE support
+ * PRODUCTION READY VERSION
  * @param {Function} addArticle - Function to add article
  * @param {Function} updateArticle - Function to update article
  * @param {Function} deleteArticle - Function to delete article
@@ -15,28 +16,30 @@ import { useAuth } from '../../../../context/AuthContext.js';
  */
 export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle, refreshData }) => {
   const { user } = useAuth();
+  
+  // View state
   const [activeView, setActiveView] = useState(VIEWS.DASHBOARD);
   const [editingArticle, setEditingArticle] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null);
   
-  // Form state - ALL EXISTING
+  // Form state
   const [articleForm, setArticleForm] = useState(defaultArticleForm);
   const [formErrors, setFormErrors] = useState({});
   const [featuredImageFile, setFeaturedImageFile] = useState(null);
 
-  // NEW: Gallery image state
+  // Gallery image state
   const [galleryImageFiles, setGalleryImageFiles] = useState([]);
   const [imageUploadProgress, setImageUploadProgress] = useState({});
 
-  // Search and filter state - ALL EXISTING
+  // Search and filter state
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   /**
-   * EXISTING: Navigate to create new article (enhanced with gallery reset)
+   * Navigate to create new article
    */
   const handleCreateNew = useCallback(() => {
     console.log('Creating new article...');
@@ -46,13 +49,13 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     setIsCreating(true);
     setSaveStatus(null);
     setFeaturedImageFile(null);
-    setGalleryImageFiles([]); // NEW: Reset gallery
-    setImageUploadProgress({}); // NEW: Reset progress
+    setGalleryImageFiles([]);
+    setImageUploadProgress({});
     setActiveView(VIEWS.EDITOR);
   }, []);
 
   /**
-   * EXISTING: Navigate to edit existing article (enhanced with gallery reset)
+   * Navigate to edit existing article
    * @param {Object} article - Article to edit
    */
   const handleEdit = (article) => {
@@ -80,13 +83,13 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     setIsCreating(false);
     setSaveStatus(null);
     setFeaturedImageFile(null);
-    setGalleryImageFiles([]); // NEW: Reset gallery when editing
-    setImageUploadProgress({}); // NEW: Reset progress
+    setGalleryImageFiles([]);
+    setImageUploadProgress({});
     setActiveView(VIEWS.EDITOR);
   };
 
   /**
-   * EXISTING: Enhanced validation with better error messages (UNCHANGED)
+   * Validate form with enhanced error messages
    * @param {boolean} publishNow - Whether article is being published
    * @returns {Object} Validation errors
    */
@@ -135,7 +138,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
   };
 
   /**
-   * ENHANCED: Save article via API (enhanced with gallery support)
+   * Save article via API with gallery support
    * @param {boolean} publishNow - Whether to publish immediately
    */
   const handleSave = async (publishNow = false) => {
@@ -175,12 +178,12 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
         authorName: user?.name || 'Anonymous User'
       };
 
-      // ENHANCED: Add image files
+      // Add image files
       if (featuredImageFile) {
         articleData.featuredImageFile = featuredImageFile;
       }
 
-      // NEW: Add gallery images
+      // Add gallery images
       if (galleryImageFiles.length > 0) {
         articleData.galleryImageFiles = galleryImageFiles;
       }
@@ -243,7 +246,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
   };
 
   /**
-   * EXISTING: Delete article with enhanced confirmation (UNCHANGED)
+   * Delete article with confirmation
    * @param {string} articleId - Article ID to delete
    */
   const handleDelete = async (articleId) => {
@@ -269,7 +272,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
   };
 
   /**
-   * EXISTING: Handle featured image upload (UNCHANGED)
+   * Handle featured image upload
    * @param {Event} event - File input change event
    */
   const handleImageUpload = async (event) => {
@@ -311,12 +314,14 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
   };
 
   /**
-   * NEW: Handle multiple gallery images upload
+   * PRODUCTION READY: Handle multiple gallery images upload
    * @param {Event} event - File input change event
    */
   const handleGalleryImagesUpload = async (event) => {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
+
+    console.log(`📸 Gallery upload triggered with ${files.length} files`);
 
     // Validate file count (max 9 gallery images)
     const maxGalleryImages = 9;
@@ -348,8 +353,16 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     if (validFiles.length === 0) return;
 
     try {
-      console.log(`Adding ${validFiles.length} gallery images`);
-      setGalleryImageFiles(prev => [...prev, ...validFiles]);
+      console.log(`✅ Adding ${validFiles.length} valid gallery images`);
+      setGalleryImageFiles(prev => {
+        const newFiles = [...prev, ...validFiles];
+        console.log('Gallery files updated:', newFiles.map(f => f.name));
+        return newFiles;
+      });
+      
+      // Reset the input so the same files can be selected again if needed
+      event.target.value = '';
+      
       console.log('Gallery images ready for upload:', validFiles.map(f => f.name));
     } catch (error) {
       console.error('Error handling gallery images:', error);
@@ -358,19 +371,26 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
   };
 
   /**
-   * NEW: Remove gallery image
+   * PRODUCTION READY: Remove gallery image
    * @param {number} index - Index of image to remove
    */
   const removeGalleryImage = (index) => {
+    console.log(`🗑️ Removing gallery image at index ${index}`);
     setGalleryImageFiles(prev => {
+      if (index < 0 || index >= prev.length) {
+        console.error('Invalid gallery image index:', index);
+        return prev;
+      }
+      
       const newFiles = [...prev];
-      newFiles.splice(index, 1);
+      const removedFile = newFiles.splice(index, 1)[0];
+      console.log('Gallery image removed:', removedFile?.name);
       return newFiles;
     });
   };
 
   /**
-   * EXISTING: Add tag with duplicate checking and validation (UNCHANGED)
+   * Add tag with validation
    * @param {string} tag - Tag to add
    */
   const addTag = (tag) => {
@@ -414,7 +434,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
   };
 
   /**
-   * EXISTING: Remove tag from article form (UNCHANGED)
+   * Remove tag from article form
    * @param {string} tagToRemove - Tag to remove
    */
   const removeTag = (tagToRemove) => {
@@ -427,7 +447,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
   };
 
   /**
-   * EXISTING: Navigate to different views (UNCHANGED)
+   * Navigate to different views
    * @param {string} view - View to navigate to
    */
   const navigateToView = (view) => {
@@ -435,7 +455,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
   };
 
   /**
-   * ENHANCED: Cancel editing and go back (enhanced with gallery cleanup)
+   * Cancel editing and go back with cleanup
    */
   const handleCancel = () => {
     // Clean up preview URLs if they exist
@@ -443,7 +463,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
       URL.revokeObjectURL(articleForm.featuredImage);
     }
     
-    // NEW: Clean up gallery image blob URLs
+    // Clean up gallery image blob URLs
     galleryImageFiles.forEach(file => {
       if (file && typeof file === 'object') {
         const blobUrl = URL.createObjectURL(file);
@@ -464,7 +484,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
   };
 
   /**
-   * EXISTING: Filter articles based on search and filters (UNCHANGED)
+   * Filter articles based on search and filters
    * @param {Array} articles - Articles to filter
    * @returns {Array} Filtered articles
    */
@@ -483,11 +503,11 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
   };
 
   return {
-    // View state (ALL EXISTING)
+    // View state
     activeView,
     navigateToView,
     
-    // Form state (ENHANCED with gallery)
+    // Form state (with gallery support)
     articleForm,
     setArticleForm,
     formErrors,
@@ -496,10 +516,10 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     editingArticle,
     isCreating,
     featuredImageFile,
-    galleryImageFiles, // NEW
-    imageUploadProgress, // NEW
+    galleryImageFiles,              // PRODUCTION READY
+    imageUploadProgress,            // PRODUCTION READY
     
-    // Search and filter state (ALL EXISTING)
+    // Search and filter state
     searchTerm,
     setSearchTerm,
     selectedStatus,
@@ -507,15 +527,15 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     selectedCategory,
     setSelectedCategory,
     
-    // Operations (ENHANCED with gallery functions)
+    // Operations (with gallery functions)
     handleCreateNew,
     handleEdit,
     handleSave,
     handleDelete,
     handleCancel,
     handleImageUpload,
-    handleGalleryImagesUpload, // NEW
-    removeGalleryImage, // NEW
+    handleGalleryImagesUpload,      // PRODUCTION READY
+    removeGalleryImage,             // PRODUCTION READY
     addTag,
     removeTag,
     getFilteredArticles
