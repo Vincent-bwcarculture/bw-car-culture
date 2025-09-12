@@ -1,19 +1,10 @@
 // client/src/components/profile/ArticleManagement/hooks/useArticleOperations.js
-// COMPLETE PRODUCTION VERSION - Gallery Images Working
+// FIXED VERSION - Using the same simple pattern as working UserCarListingForm
 
 import { useState, useCallback } from 'react';
 import { defaultArticleForm, VIEWS } from '../utils/constants.js';
 import { useAuth } from '../../../../context/AuthContext.js';
 
-/**
- * Custom hook for managing article operations with REAL API calls and MULTIPLE IMAGE support
- * PRODUCTION READY VERSION
- * @param {Function} addArticle - Function to add article
- * @param {Function} updateArticle - Function to update article
- * @param {Function} deleteArticle - Function to delete article
- * @param {Function} refreshData - Function to refresh data
- * @returns {Object} Operations and form state
- */
 export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle, refreshData }) => {
   const { user } = useAuth();
   
@@ -29,18 +20,15 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
   const [formErrors, setFormErrors] = useState({});
   const [featuredImageFile, setFeaturedImageFile] = useState(null);
 
-  // Gallery image state
-  const [galleryImageFiles, setGalleryImageFiles] = useState([]);
-  const [imageUploadProgress, setImageUploadProgress] = useState({});
+  // SIMPLIFIED: Gallery images - using same pattern as UserCarListingForm
+  const [galleryImages, setGalleryImages] = useState([]); // Array of {file, preview, name, size}
 
   // Search and filter state
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  /**
-   * Navigate to create new article
-   */
+  // Navigate to create new article
   const handleCreateNew = useCallback(() => {
     console.log('Creating new article...');
     setArticleForm(defaultArticleForm);
@@ -49,15 +37,11 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     setIsCreating(true);
     setSaveStatus(null);
     setFeaturedImageFile(null);
-    setGalleryImageFiles([]);
-    setImageUploadProgress({});
+    setGalleryImages([]); // Reset gallery
     setActiveView(VIEWS.EDITOR);
   }, []);
 
-  /**
-   * Navigate to edit existing article
-   * @param {Object} article - Article to edit
-   */
+  // Navigate to edit existing article
   const handleEdit = (article) => {
     console.log('Editing article:', article.title);
     setArticleForm({
@@ -83,93 +67,51 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     setIsCreating(false);
     setSaveStatus(null);
     setFeaturedImageFile(null);
-    setGalleryImageFiles([]);
-    setImageUploadProgress({});
+    setGalleryImages([]); // Reset gallery when editing
     setActiveView(VIEWS.EDITOR);
   };
 
-  /**
-   * Validate form with enhanced error messages
-   * @param {boolean} publishNow - Whether article is being published
-   * @returns {Object} Validation errors
-   */
+  // Form validation
   const validateForm = (publishNow = false) => {
     const errors = {};
     
-    // Title validation
     if (!articleForm.title.trim()) {
       errors.title = 'Title is required';
     } else if (articleForm.title.trim().length < 5) {
       errors.title = 'Title must be at least 5 characters long';
-    } else if (articleForm.title.trim().length > 100) {
-      errors.title = 'Title must be less than 100 characters';
     }
     
-    // Content validation
     if (!articleForm.content.trim()) {
       errors.content = 'Content is required';
     } else if (articleForm.content.trim().length < 50) {
       errors.content = 'Content must be at least 50 characters long';
     }
     
-    // Subtitle validation for publishing
     if (publishNow && !articleForm.subtitle.trim()) {
       errors.subtitle = 'Subtitle is required for publishing';
-    } else if (articleForm.subtitle && articleForm.subtitle.length > 200) {
-      errors.subtitle = 'Subtitle must be less than 200 characters';
     }
 
-    // Category validation
     if (!articleForm.category) {
       errors.category = 'Please select a category';
-    }
-
-    // SEO validation for published articles
-    if (publishNow) {
-      if (articleForm.metaTitle && articleForm.metaTitle.length > 60) {
-        errors.metaTitle = 'Meta title should be less than 60 characters for better SEO';
-      }
-      if (articleForm.metaDescription && articleForm.metaDescription.length > 160) {
-        errors.metaDescription = 'Meta description should be less than 160 characters for better SEO';
-      }
     }
 
     return errors;
   };
 
-  /**
-   * Save article via API with gallery support
-   * @param {boolean} publishNow - Whether to publish immediately
-   */
+  // Save article
   const handleSave = async (publishNow = false) => {
     try {
       setSaving(true);
       setSaveStatus(null);
       setFormErrors({});
 
-      const action = publishNow ? 'Publishing' : 'Saving';
-      console.log(`${action} article:`, articleForm.title);
-
-      // Validate form
       const errors = validateForm(publishNow);
       if (Object.keys(errors).length > 0) {
         setFormErrors(errors);
         setSaveStatus('error');
-        
-        // Focus on first error field
-        const firstErrorField = Object.keys(errors)[0];
-        setTimeout(() => {
-          const errorElement = document.querySelector(`[name="${firstErrorField}"], .${firstErrorField}`);
-          if (errorElement) {
-            errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            errorElement.focus();
-          }
-        }, 100);
-        
         return;
       }
 
-      // Prepare article data for API
       const articleData = {
         ...articleForm,
         status: publishNow ? 'published' : articleForm.status,
@@ -178,52 +120,38 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
         authorName: user?.name || 'Anonymous User'
       };
 
-      // Add image files
+      // Add featured image
       if (featuredImageFile) {
         articleData.featuredImageFile = featuredImageFile;
       }
 
-      // Add gallery images
-      if (galleryImageFiles.length > 0) {
-        articleData.galleryImageFiles = galleryImageFiles;
+      // SIMPLIFIED: Add gallery images using same pattern as car listings
+      if (galleryImages.length > 0) {
+        articleData.galleryImageFiles = galleryImages.map(img => img.file);
       }
 
-      // Add default metadata if not provided
-      if (!articleData.metaTitle) {
-        articleData.metaTitle = articleData.title;
-      }
-      if (!articleData.metaDescription && articleData.subtitle) {
-        articleData.metaDescription = articleData.subtitle;
-      }
+      console.log('Submitting article...', {
+        title: articleData.title,
+        featuredImage: !!featuredImageFile,
+        galleryImages: galleryImages.length
+      });
 
-      console.log('Submitting article with images...');
-      console.log('Featured image:', featuredImageFile ? featuredImageFile.name : 'None');
-      console.log('Gallery images:', galleryImageFiles.length);
-
-      // Call the appropriate API function
       let result;
       if (editingArticle) {
         result = await updateArticle(editingArticle._id || editingArticle.id, articleData);
-        console.log('Article updated successfully');
       } else {
         result = await addArticle(articleData);
-        console.log('New article created successfully');
       }
 
       setSaveStatus('success');
-      
-      // Clear image files after successful save
       setFeaturedImageFile(null);
-      setGalleryImageFiles([]);
-      setImageUploadProgress({});
+      setGalleryImages([]);
       
-      // Show success message
       const actionPastTense = publishNow ? 'published' : 'saved';
       setTimeout(() => {
         alert(`Article "${articleForm.title}" ${actionPastTense} successfully!`);
       }, 500);
       
-      // Navigate back to list after a brief delay
       setTimeout(() => {
         setActiveView(VIEWS.LIST);
       }, 1500);
@@ -235,7 +163,6 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
       });
       setSaveStatus('error');
       
-      // Show error alert
       setTimeout(() => {
         alert(`Failed to save article: ${error.message}`);
       }, 500);
@@ -245,25 +172,18 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     }
   };
 
-  /**
-   * Delete article with confirmation
-   * @param {string} articleId - Article ID to delete
-   */
+  // Delete article
   const handleDelete = async (articleId) => {
     try {
-      // Find the article title for confirmation
       const articleToDelete = document.querySelector(`[data-article-id="${articleId}"]`);
       const articleTitle = articleToDelete?.getAttribute('data-article-title') || 'this article';
       
-      const confirmMessage = `Are you sure you want to delete "${articleTitle}"?\n\nThis action cannot be undone and will permanently remove the article from your account.`;
+      const confirmMessage = `Are you sure you want to delete "${articleTitle}"?\n\nThis action cannot be undone.`;
       
       if (!window.confirm(confirmMessage)) return;
 
-      console.log('Deleting article via API:', articleId);
       await deleteArticle(articleId);
-      
       alert('Article deleted successfully!');
-      console.log('Article deleted:', articleId);
       
     } catch (error) {
       console.error('Failed to delete article:', error);
@@ -271,21 +191,16 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     }
   };
 
-  /**
-   * Handle featured image upload
-   * @param {Event} event - File input change event
-   */
+  // Handle featured image upload
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file (JPG, PNG, GIF, WebP, etc.)');
       return;
     }
 
-    // Validate file size (10MB limit for high quality images)
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
       alert('Image size must be less than 10MB. Please choose a smaller image or compress it.');
@@ -293,19 +208,14 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     }
 
     try {
-      console.log('Selected featured image:', file.name, `${(file.size / 1024 / 1024).toFixed(2)}MB`);
-      
-      // Store the file for upload when saving
+      console.log('Selected featured image:', file.name);
       setFeaturedImageFile(file);
       
-      // Create a preview URL for the form
       const previewUrl = URL.createObjectURL(file);
       setArticleForm(prev => ({ 
         ...prev, 
         featuredImage: previewUrl 
       }));
-      
-      console.log('Featured image ready for upload');
       
     } catch (error) {
       console.error('Error handling image:', error);
@@ -313,93 +223,75 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     }
   };
 
-  /**
-   * PRODUCTION READY: Handle multiple gallery images upload
-   * @param {Event} event - File input change event
-   */
-  const handleGalleryImagesUpload = async (event) => {
-    const files = Array.from(event.target.files);
-    if (files.length === 0) return;
-
-    console.log(`📸 Gallery upload triggered with ${files.length} files`);
-
-    // Validate file count (max 9 gallery images)
-    const maxGalleryImages = 9;
+  // SIMPLIFIED: Handle gallery images - using exact same pattern as UserCarListingForm
+  const handleGalleryImagesUpload = (e) => {
+    const files = Array.from(e.target.files);
     
-    if (galleryImageFiles.length + files.length > maxGalleryImages) {
-      alert(`You can upload maximum ${maxGalleryImages} gallery images. Current: ${galleryImageFiles.length}, Trying to add: ${files.length}`);
+    if (files.length > 9) {
+      alert('Maximum 9 gallery images allowed');
       return;
     }
 
-    const validFiles = [];
+    if (galleryImages.length + files.length > 9) {
+      alert(`You can upload maximum 9 gallery images. Current: ${galleryImages.length}, Trying to add: ${files.length}`);
+      return;
+    }
+
     const maxSize = 10 * 1024 * 1024; // 10MB
-
-    for (const file of files) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        alert(`"${file.name}" is not an image file. Skipping.`);
-        continue;
-      }
-
-      // Validate file size
-      if (file.size > maxSize) {
-        alert(`"${file.name}" is larger than 10MB. Skipping.`);
-        continue;
-      }
-
-      validFiles.push(file);
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    
+    const invalidFiles = files.filter(file => 
+      file.size > maxSize || !validTypes.includes(file.type.toLowerCase())
+    );
+    
+    if (invalidFiles.length > 0) {
+      alert('Some files are invalid. Use JPEG/PNG/WebP under 10MB each.');
+      return;
     }
 
-    if (validFiles.length === 0) return;
-
-    try {
-      console.log(`✅ Adding ${validFiles.length} valid gallery images`);
-      setGalleryImageFiles(prev => {
-        const newFiles = [...prev, ...validFiles];
-        console.log('Gallery files updated:', newFiles.map(f => f.name));
-        return newFiles;
-      });
-      
-      // Reset the input so the same files can be selected again if needed
-      event.target.value = '';
-      
-      console.log('Gallery images ready for upload:', validFiles.map(f => f.name));
-    } catch (error) {
-      console.error('Error handling gallery images:', error);
-      alert('Failed to process some images. Please try again.');
-    }
+    console.log(`Selected ${files.length} gallery images`);
+    
+    // SAME PATTERN AS UserCarListingForm - create previews synchronously
+    const newImages = files.map((file, index) => {
+      return {
+        file,
+        preview: URL.createObjectURL(file),
+        name: file.name,
+        size: file.size
+      };
+    });
+    
+    setGalleryImages(prev => [...prev, ...newImages]);
+    
+    // Clear input so same files can be selected again
+    e.target.value = '';
+    
+    console.log(`${files.length} gallery images added. Total: ${galleryImages.length + files.length}`);
   };
 
-  /**
-   * PRODUCTION READY: Remove gallery image
-   * @param {number} index - Index of image to remove
-   */
+  // SIMPLIFIED: Remove gallery image - same pattern as UserCarListingForm
   const removeGalleryImage = (index) => {
-    console.log(`🗑️ Removing gallery image at index ${index}`);
-    setGalleryImageFiles(prev => {
-      if (index < 0 || index >= prev.length) {
-        console.error('Invalid gallery image index:', index);
-        return prev;
+    setGalleryImages(prev => {
+      if (index < 0 || index >= prev.length) return prev;
+      
+      // Clean up the preview URL
+      if (prev[index] && prev[index].preview) {
+        URL.revokeObjectURL(prev[index].preview);
       }
       
-      const newFiles = [...prev];
-      const removedFile = newFiles.splice(index, 1)[0];
-      console.log('Gallery image removed:', removedFile?.name);
-      return newFiles;
+      const newImages = [...prev];
+      newImages.splice(index, 1);
+      return newImages;
     });
   };
 
-  /**
-   * Add tag with validation
-   * @param {string} tag - Tag to add
-   */
+  // Add tag
   const addTag = (tag) => {
     if (!tag) return;
     
     const cleanTag = tag.trim().toLowerCase();
     if (!cleanTag) return;
     
-    // Validate tag format
     if (!/^[a-z0-9-_]+$/.test(cleanTag)) {
       alert('Tags can only contain letters, numbers, hyphens, and underscores');
       return;
@@ -407,11 +299,6 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     
     if (cleanTag.length < 2) {
       alert('Tags must be at least 2 characters long');
-      return;
-    }
-    
-    if (cleanTag.length > 20) {
-      alert('Tags must be less than 20 characters long');
       return;
     }
     
@@ -429,45 +316,32 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
       ...prev,
       tags: [...prev.tags, cleanTag]
     }));
-    
-    console.log('Tag added:', cleanTag);
   };
 
-  /**
-   * Remove tag from article form
-   * @param {string} tagToRemove - Tag to remove
-   */
+  // Remove tag
   const removeTag = (tagToRemove) => {
     setArticleForm(prev => ({
       ...prev,
       tags: prev.tags.filter(tag => tag !== tagToRemove)
     }));
-    
-    console.log('Tag removed:', tagToRemove);
   };
 
-  /**
-   * Navigate to different views
-   * @param {string} view - View to navigate to
-   */
+  // Navigate to view
   const navigateToView = (view) => {
     setActiveView(view);
   };
 
-  /**
-   * Cancel editing and go back with cleanup
-   */
+  // Cancel editing
   const handleCancel = () => {
-    // Clean up preview URLs if they exist
+    // Clean up preview URLs
     if (articleForm.featuredImage && articleForm.featuredImage.startsWith('blob:')) {
       URL.revokeObjectURL(articleForm.featuredImage);
     }
     
-    // Clean up gallery image blob URLs
-    galleryImageFiles.forEach(file => {
-      if (file && typeof file === 'object') {
-        const blobUrl = URL.createObjectURL(file);
-        URL.revokeObjectURL(blobUrl);
+    // Clean up gallery previews
+    galleryImages.forEach(image => {
+      if (image.preview) {
+        URL.revokeObjectURL(image.preview);
       }
     });
     
@@ -478,16 +352,11 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     setArticleForm(defaultArticleForm);
     setFormErrors({});
     setFeaturedImageFile(null);
-    setGalleryImageFiles([]);
-    setImageUploadProgress({});
+    setGalleryImages([]);
     setSaveStatus(null);
   };
 
-  /**
-   * Filter articles based on search and filters
-   * @param {Array} articles - Articles to filter
-   * @returns {Array} Filtered articles
-   */
+  // Filter articles
   const getFilteredArticles = (articles) => {
     return articles.filter(article => {
       const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -507,7 +376,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     activeView,
     navigateToView,
     
-    // Form state (with gallery support)
+    // Form state - SIMPLIFIED
     articleForm,
     setArticleForm,
     formErrors,
@@ -516,8 +385,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     editingArticle,
     isCreating,
     featuredImageFile,
-    galleryImageFiles,              // PRODUCTION READY
-    imageUploadProgress,            // PRODUCTION READY
+    galleryImages,  // CHANGED: Simple array instead of complex state
     
     // Search and filter state
     searchTerm,
@@ -527,15 +395,15 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     selectedCategory,
     setSelectedCategory,
     
-    // Operations (with gallery functions)
+    // Operations - SIMPLIFIED
     handleCreateNew,
     handleEdit,
     handleSave,
     handleDelete,
     handleCancel,
     handleImageUpload,
-    handleGalleryImagesUpload,      // PRODUCTION READY
-    removeGalleryImage,             // PRODUCTION READY
+    handleGalleryImagesUpload,  // SIMPLIFIED
+    removeGalleryImage,         // SIMPLIFIED
     addTag,
     removeTag,
     getFilteredArticles
