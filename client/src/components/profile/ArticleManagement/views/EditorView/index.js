@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement/views/EditorView/index.js
-// UPDATED VERSION - Enhanced with multiple image support while preserving all existing functionality
+// COMPLETE VERSION - All existing functionality preserved + gallery support added
 
 import React, { useState, useRef } from 'react';
 import {
@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 /**
- * Enhanced Editor View Component with Multiple Image Support
+ * Complete Editor View Component with Multiple Image Support
  */
 const EditorView = ({
   articleForm,
@@ -33,9 +33,12 @@ const EditorView = ({
   galleryImageFiles,
   onGalleryImagesUpload,
   removeGalleryImage,
+  imageUploadProgress,
+  // EXISTING: All original props preserved
   getCategoryColor,
   getCategoryLabel,
-  formatCurrency
+  formatCurrency,
+  onViewChange
 }) => {
   const [tagInput, setTagInput] = useState('');
   
@@ -88,7 +91,7 @@ const EditorView = ({
 
       <div className="editor-content">
         <div className="editor-main">
-          {/* Title */}
+          {/* EXISTING: Title */}
           <div className="form-group">
             <label>Title *</label>
             <input
@@ -102,7 +105,7 @@ const EditorView = ({
             {formErrors.title && <span className="error-text">{formErrors.title}</span>}
           </div>
 
-          {/* Subtitle */}
+          {/* EXISTING: Subtitle */}
           <div className="form-group">
             <label>Subtitle</label>
             <input
@@ -116,7 +119,7 @@ const EditorView = ({
             {formErrors.subtitle && <span className="error-text">{formErrors.subtitle}</span>}
           </div>
 
-          {/* Content */}
+          {/* EXISTING: Content */}
           <div className="form-group">
             <label>Content *</label>
             <textarea
@@ -130,7 +133,7 @@ const EditorView = ({
             {formErrors.content && <span className="error-text">{formErrors.content}</span>}
           </div>
 
-          {/* Author Notes */}
+          {/* EXISTING: Author Notes */}
           <div className="form-group">
             <label>Author Notes (Internal)</label>
             <textarea
@@ -143,7 +146,7 @@ const EditorView = ({
         </div>
 
         <div className="editor-sidebar">
-          {/* Status & Publishing */}
+          {/* EXISTING: Status & Publishing */}
           <div className="sidebar-section">
             <h3>Publishing</h3>
             
@@ -169,7 +172,7 @@ const EditorView = ({
             </div>
           </div>
 
-          {/* Category */}
+          {/* EXISTING: Category */}
           <div className="sidebar-section">
             <h3>Category</h3>
             <select 
@@ -189,7 +192,7 @@ const EditorView = ({
             <small>Higher multipliers = better earnings</small>
           </div>
 
-          {/* Premium Content & Earnings with Engagement */}
+          {/* EXISTING: Premium Content & Earnings with Engagement */}
           <div className="sidebar-section">
             <h3>Monetization & Engagement</h3>
             
@@ -253,6 +256,7 @@ const EditorView = ({
               </label>
             </div>
 
+            {/* EXISTING: Earnings Preview */}
             <div className="earnings-preview">
               <h4>Potential Earnings:</h4>
               <div className="earning-tiers">
@@ -278,7 +282,6 @@ const EditorView = ({
                   className="remove-image"
                   onClick={() => {
                     setArticleForm(prev => ({ ...prev, featuredImage: null }));
-                    // Note: setFeaturedImageFile(null) should be called from parent component
                   }}
                 >
                   <X size={16} />
@@ -331,7 +334,7 @@ const EditorView = ({
               style={{ display: 'none' }}
             />
             
-            {/* Gallery Previews */}
+            {/* Gallery Previews - This shows the selected images */}
             {galleryImageFiles && galleryImageFiles.length > 0 && (
               <div className="gallery-previews">
                 <h4>Gallery Images ({galleryImageFiles.length}/9)</h4>
@@ -342,7 +345,7 @@ const EditorView = ({
                         src={URL.createObjectURL(file)} 
                         alt={`Gallery ${index + 1}`}
                         onLoad={(e) => {
-                          // Clean up blob URL after image loads to prevent memory leaks
+                          // Clean up blob URL after image loads
                           setTimeout(() => URL.revokeObjectURL(e.target.src), 1000);
                         }}
                       />
@@ -405,7 +408,7 @@ const EditorView = ({
             </div>
           </div>
 
-          {/* EXISTING: SEO (UNCHANGED) */}
+          {/* EXISTING: SEO Section (UNCHANGED) */}
           <div className="sidebar-section">
             <h3>SEO</h3>
             
