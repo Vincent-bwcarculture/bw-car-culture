@@ -348,18 +348,9 @@ LAYOUT STRUCTURE (Future-proof):
 
 /* Mobile: Show ONLY when tapped (.show-navigation class) */
 @media (max-width: 768px) {
-  /* Force hide navigation arrows by default on mobile */
-  .vc-image-navigation {
-    opacity: 0 !important;
-    pointer-events: none !important;
-    visibility: hidden;
-  }
-  
-  /* Only show when explicitly activated via tap (.show-navigation class) */
   .vc-image-container.show-navigation .vc-image-navigation {
     opacity: 1 !important;
     pointer-events: auto !important;
-    visibility: visible;
   }
 }
 
@@ -925,27 +916,6 @@ LAYOUT STRUCTURE (Future-proof):
   .vc-image-container.show-navigation .vc-zoom-controls {
     opacity: 1 !important;
     pointer-events: auto !important;
-  }
-  
-  /* Also ensure zoom controls follow the same pattern */
-  .vc-zoom-controls {
-    opacity: 0 !important;
-    pointer-events: none !important;
-    visibility: hidden;
-  }
-  
-  /* Show zoom controls when navigation is shown (on tap) */
-  .vc-image-container.show-navigation .vc-zoom-controls {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    visibility: visible;
-  }
-  
-  /* Keep zoomed state override */
-  .vc-zoom-controls.zoomed {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    visibility: visible;
   }
   
   /* MUCH SMALLER: Mobile zoom controls - reduced significantly */
@@ -1585,11 +1555,14 @@ LAYOUT STRUCTURE (Future-proof):
   }
 }
 
-/* FIXED: Touch device enhancements - don't force visibility */
+/* TRUE ZOOM: Touch device enhancements */
 @media (hover: none) {
-  /* Only make zoom buttons larger when they're visible, don't force visibility */
-  .vc-zoom-controls.zoomed .vc-zoom-btn,
-  .vc-image-container.show-navigation .vc-zoom-btn {
+  .vc-zoom-controls,
+  .vc-image-navigation {
+    opacity: 1;
+  }
+  
+  .vc-zoom-btn {
     min-height: 44px;
     min-width: 44px;
   }
