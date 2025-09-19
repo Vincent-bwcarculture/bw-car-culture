@@ -1070,6 +1070,7 @@ LAYOUT STRUCTURE (Future-proof):
   .vc-image-container.show-navigation .vc-image-navigation {
     opacity: 1 !important;
     pointer-events: auto !important;
+    visibility: visible !important;
   }
   
   /* Small screens: Compact zoom controls */
