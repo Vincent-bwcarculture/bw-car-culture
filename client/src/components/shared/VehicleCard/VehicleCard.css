@@ -348,10 +348,27 @@ LAYOUT STRUCTURE (Future-proof):
 
 /* Mobile: Show ONLY when tapped (.show-navigation class) */
 @media (max-width: 768px) {
+  /* Force hide by default */
+  .vc-image-navigation {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    display: flex !important;
+  }
+  
+  /* Force show when tapped - HIGHEST SPECIFICITY */
   .vc-image-container.show-navigation .vc-image-navigation {
     opacity: 1 !important;
     pointer-events: auto !important;
     visibility: visible !important;
+    display: flex !important;
+  }
+  
+  /* Ensure arrows are visible */
+  .vc-image-container.show-navigation .vc-image-nav {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
   }
 }
 
@@ -1061,18 +1078,34 @@ LAYOUT STRUCTURE (Future-proof):
     position: relative;
   }
   
-  /* FORCE OVERRIDE: Small devices navigation visibility */
+  /* FORCE HIDE everything by default on small screens */
   .vc-image-navigation {
     opacity: 0 !important;
     pointer-events: none !important;
     visibility: hidden !important;
+    display: flex !important;
   }
   
+  .vc-image-nav {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+  
+  /* FORCE SHOW everything when tapped */
   .vc-image-container.show-navigation .vc-image-navigation {
     opacity: 1 !important;
     pointer-events: auto !important;
     visibility: visible !important;
     display: flex !important;
+  }
+  
+  .vc-image-container.show-navigation .vc-image-nav {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    display: flex !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5) !important;
   }
   
   /* MOBILE: Show zoom controls on tap (same as navigation) */
