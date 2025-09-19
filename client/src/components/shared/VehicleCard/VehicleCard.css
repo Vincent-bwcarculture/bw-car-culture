@@ -1,19 +1,5 @@
 /* VehicleCard.css - Enhanced with TRUE ZOOM Functionality
-   Solves image cropping by switching between object-fit modes and showing full original image
-
-TRUE ZOOM BEHAVIOR:
-- Zoom Level 1.0 (100%): Normal cropped view with object-fit: cover
-- Zoom Level > 1.0: Full image view with object-fit: contain + scaling
-- Zoom Level < 1.0: Reduced view for better overview
-
-LAYOUT STRUCTURE (Future-proof):
-- Image area (fixed height with navigation/badges/zoom controls + true zoom support)
-- Title section (title + finance/lease badges - flexible for additional badges)  
-- Price area (price, savings, monthly payment - flexible for payment options)
-- Specs grid (2 columns, expandable to 3 for additional vehicle data)
-- Feature badges (flexible wrap for any number of badges)
-- Seller info (horizontal 3-row layout with larger avatar)
-- Footer (condition + action buttons)
+   Fixed mobile controls visibility issue
 */
 
 .vc-card {
@@ -35,65 +21,48 @@ LAYOUT STRUCTURE (Future-proof):
   border-color: #ff3300;
 }
 
-/* TRUE ZOOM: Enhanced Image Container - supports dynamic image display */
+/* Image Container */
 .vc-image-container {
   position: relative;
   width: 100%;
-  height: 220px; /* Increased for better image display */
+  height: 220px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.2);
-  /* TRUE ZOOM: Enable touch events for zoom/pan on mobile */
   touch-action: none;
-  /* TRUE ZOOM: Create stacking context for absolute positioned zoomed images */
   isolation: isolate;
 }
 
-.vc-image-container.show-zoom-controls {
-  /* When zoom controls are shown, adjust interaction */
-}
-
-/* TRUE ZOOM: Enhanced image wrapper - supports both display modes */
 .vc-image-wrapper {
   position: relative;
   width: 100%;
   height: 100%;
-  /* TRUE ZOOM: Ensure proper stacking for overlaid elements */
   z-index: 1;
-  /* TRUE ZOOM: Center content for absolute positioned zoomed images */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* TRUE ZOOM: Enhanced image styling - supports dynamic object-fit and positioning */
 .vc-image {
-  /* Default properties for normal view (zoom level 1.0) */
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: all 0.3s ease;
   transform-origin: center center;
-  
-  /* TRUE ZOOM: Will be overridden by inline styles for zoomed view */
-  /* When zoomed, becomes absolutely positioned with object-fit: contain */
 }
 
-/* TRUE ZOOM: Disable hover scale when using true zoom to prevent interference */
 .vc-card:hover .vc-image {
   transform: scale(1.05);
 }
 
-/* TRUE ZOOM: Override hover effects when image has custom positioning */
 .vc-image[style*="position: absolute"] {
   /* Disable hover transform when true zoom is active */
 }
 
 .vc-card:hover .vc-image[style*="position: absolute"] {
-  /* Prevent hover scaling when true zoom is active */
   transform: var(--image-transform, none) !important;
 }
 
-/* TRUE ZOOM: Zoom Controls - Proper styling restored */
+/* FIXED: Zoom Controls - Simplified for mobile */
 .vc-zoom-controls {
   position: absolute;
   top: 10px;
@@ -105,47 +74,38 @@ LAYOUT STRUCTURE (Future-proof):
   padding: 0.3rem 0.6rem;
   gap: 0.4rem;
   z-index: 5;
-  opacity: 0;
-  visibility: hidden; /* FIXED: Added visibility for proper hiding */
-  transition: all 0.3s ease; /* FIXED: Changed to all for visibility transition */
-  pointer-events: none;
   backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.85rem;
   user-select: none;
+  /* Default hidden state */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-/* DESKTOP HOVER - WORKING */
+/* Desktop hover state */
 @media (min-width: 769px) {
   .vc-image-container:hover .vc-zoom-controls {
-    opacity: 1 !important;
-    visibility: visible !important; /* FIXED: Added visibility */
-    pointer-events: auto !important;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 }
 
-/* MOBILE TAP - Only show when .show-navigation class is present */
-@media (max-width: 768px) {
-  /* OVERRIDE: Hide zoom controls on mobile by default */
-  .vc-zoom-controls {
-    opacity: 0 !important;
-    visibility: hidden !important; /* FIXED: Added visibility */
-    pointer-events: none !important;
-  }
-  
-  /* ONLY show zoom controls when navigation is shown (on tap) */
-  .vc-image-container.show-navigation .vc-zoom-controls {
-    opacity: 1 !important;
-    visibility: visible !important; /* FIXED: Added visibility */
-    pointer-events: auto !important;
-  }
-  
-  /* Keep zoomed state override */
-  .vc-zoom-controls.zoomed {
-    opacity: 1 !important;
-    visibility: visible !important; /* FIXED: Added visibility */
-    pointer-events: auto !important;
-  }
+/* FIXED: Mobile - Show when .show-navigation class is present */
+.vc-image-container.show-navigation .vc-zoom-controls {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Keep visible when zoomed */
+.vc-zoom-controls.zoomed {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .vc-zoom-btn {
@@ -204,7 +164,88 @@ LAYOUT STRUCTURE (Future-proof):
   opacity: 0.9;
 }
 
-/* UPDATED: Savings Badge Styles - Adjusted to coexist with zoom controls */
+/* FIXED: Image Navigation - Simplified for mobile */
+.vc-image-navigation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 4;
+  /* Default hidden state */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Desktop hover state */
+@media (min-width: 769px) {
+  .vc-image-container:hover .vc-image-navigation {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+}
+
+/* FIXED: Mobile - Show when .show-navigation class is present */
+.vc-image-container.show-navigation .vc-image-navigation {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.vc-image-nav {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin: 0 8px;
+  transition: all 0.3s ease;
+  z-index: 4;
+  backdrop-filter: blur(2px);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.vc-image-nav:hover {
+  background: rgba(255, 51, 0, 0.6);
+  border-color: rgba(255, 51, 0, 0.8);
+  transform: scale(1.05);
+  backdrop-filter: blur(4px);
+}
+
+.vc-image-nav:active {
+  transform: scale(0.95);
+}
+
+.vc-image-counter {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  z-index: 3;
+  transition: bottom 0.3s ease;
+}
+
+.vc-image-container.show-zoom-controls .vc-image-counter {
+  bottom: 50px;
+}
+
+/* Savings Badge */
 .vc-savings-badge {
   position: absolute;
   top: 10px;
@@ -225,7 +266,6 @@ LAYOUT STRUCTURE (Future-proof):
   flex-direction: column;
   align-items: center;
   line-height: 1.1;
-  /* Ensure it doesn't overlap with zoom controls */
   max-width: calc(50% - 20px);
 }
 
@@ -327,111 +367,9 @@ LAYOUT STRUCTURE (Future-proof):
   visibility: visible;
 }
 
-/* Image Gallery Navigation - Enhanced with zoom awareness and transparent backgrounds */
-.vc-image-navigation {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  opacity: 0; /* Hidden by default for clean look */
-  visibility: hidden; /* FIXED: Added visibility */
-  transition: all 0.3s ease; /* FIXED: Changed to all for visibility transition */
-  pointer-events: none; /* Allow clicking through when hidden */
-  z-index: 4; /* Below zoom controls */
-}
-
-/* Desktop/Tablet: Show on hover */
-@media (min-width: 769px) {
-  .vc-image-container:hover .vc-image-navigation {
-    opacity: 1;
-    visibility: visible; /* FIXED: Added visibility */
-    pointer-events: auto;
-  }
-}
-
-/* Mobile: Show ONLY when tapped (.show-navigation class) */
-@media (max-width: 768px) {
-  /* Force hide by default */
-  .vc-image-navigation {
-    opacity: 0 !important;
-    visibility: hidden !important; /* Ensure it's completely hidden */
-    pointer-events: none !important;
-    display: flex !important;
-  }
-  
-  /* Force show when tapped - HIGHEST SPECIFICITY */
-  .vc-image-container.show-navigation .vc-image-navigation {
-    opacity: 1 !important;
-    visibility: visible !important; /* FIXED: Ensure visibility */
-    pointer-events: auto !important;
-    display: flex !important;
-  }
-  
-  /* Ensure arrows are visible */
-  .vc-image-container.show-navigation .vc-image-nav {
-    opacity: 1 !important;
-    visibility: visible !important;
-    display: flex !important;
-  }
-}
-
-.vc-image-nav {
-  width: 32px; /* Reduced from 36px for better proportions */
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.4); /* Transparent background */
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  margin: 0 8px;
-  transition: all 0.3s ease;
-  z-index: 4;
-  pointer-events: auto;
-  backdrop-filter: blur(2px);
-  font-size: 12px; /* Reduced from 14px */
-  font-weight: bold;
-}
-
-.vc-image-nav:hover {
-  background: rgba(255, 51, 0, 0.6); /* Less opaque on hover */
-  border-color: rgba(255, 51, 0, 0.8);
-  transform: scale(1.05); /* Reduced from 1.1 */
-  backdrop-filter: blur(4px);
-}
-
-.vc-image-nav:active {
-  transform: scale(0.95);
-}
-
-.vc-image-counter {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 3px 8px;
-  border-radius: 10px;
-  font-size: 0.7rem;
-  z-index: 3;
-  /* TRUE ZOOM: Adjust position when zoom controls are visible */
-  transition: bottom 0.3s ease;
-}
-
-/* Adjust counter position when zoom controls are shown */
-.vc-image-container.show-zoom-controls .vc-image-counter {
-  bottom: 50px; /* Move up to avoid zoom controls on mobile */
-}
-
 .vc-verified-badge {
   position: absolute;
-  top: 50px; /* Moved down to avoid zoom controls */
+  top: 50px;
   right: 10px;
   background: rgba(46, 213, 115, 0.9);
   color: white;
@@ -446,9 +384,8 @@ LAYOUT STRUCTURE (Future-proof):
   transition: top 0.3s ease;
 }
 
-/* Adjust verified badge when zoom controls are visible */
 .vc-image-container.show-zoom-controls .vc-verified-badge {
-  top: 60px; /* Move further down when zoom controls are shown */
+  top: 60px;
 }
 
 /* Card Content */
@@ -464,21 +401,21 @@ LAYOUT STRUCTURE (Future-proof):
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 0.4rem;
-  gap: 0.8rem; /* Ensure proper spacing between title and price sections */
+  gap: 0.8rem;
 }
 
 .vc-title-section {
   flex: 1;
-  min-width: 0; /* Allow shrinking to prevent overflow */
-  max-width: 60%; /* Prevent title section from taking too much space */
+  min-width: 0;
+  max-width: 60%;
 }
 
 .vc-title {
-  font-size: 1.2rem; /* Increased from 1.1rem for better readability */
-  font-weight: 600; /* Slightly bolder for better prominence */
+  font-size: 1.2rem;
+  font-weight: 600;
   color: #ffffff;
-  margin: 0 0 0.2rem 0; /* Reduced bottom margin for tighter spacing */
-  line-height: 1.3; /* Slightly tighter line height */
+  margin: 0 0 0.2rem 0;
+  line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -487,38 +424,27 @@ LAYOUT STRUCTURE (Future-proof):
 }
 
 .vc-price-container {
-  flex-shrink: 0; /* Prevent price section from shrinking */
+  flex-shrink: 0;
   min-width: 0;
   text-align: right;
-}
-
-/* New container for badges under title - HORIZONTAL layout to save vertical space */
-.vc-title-badges {
-  display: flex;
-  flex-direction: row; /* HORIZONTAL - badges side by side */
-  flex-wrap: wrap;
-  gap: 0.5rem; /* Increased gap for better separation when horizontal */
-  align-items: center;
-  margin-top: 0.2rem; /* Reduced margin for tighter spacing */
-  min-height: 0; /* Flexible height - only shows when badges are present */
-}
-
-/* Empty state handling - no visual impact when no badges */
-.vc-title-badges:empty {
-  display: none;
-  margin-top: 0;
-}
-
-/* Future-proof: Allow for additional badge types */
-.vc-title-badges > * {
-  flex-shrink: 0;
-}
-
-/* UPDATED: Price styling with savings integration - no percentage */
-.vc-price-container {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+}
+
+.vc-title-badges {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.2rem;
+  min-height: 0;
+}
+
+.vc-title-badges:empty {
+  display: none;
+  margin-top: 0;
 }
 
 .vc-original-price {
@@ -530,18 +456,12 @@ LAYOUT STRUCTURE (Future-proof):
 }
 
 .vc-price {
-  font-size: 1.3rem; /* Increased from 1.1rem for better prominence */
+  font-size: 1.3rem;
   font-weight: bold;
-  color:#0051ff;
+  color: #0051ff;
   white-space: nowrap;
 }
 
-.vc-pula-price {
-  color: #0051ff;
-  font-weight: bold;
-}
-
-/* UPDATED: Savings highlight without percentage */
 .vc-savings-highlight {
   font-size: 0.8rem;
   color: #2ed573;
@@ -550,7 +470,8 @@ LAYOUT STRUCTURE (Future-proof):
   text-align: right;
 }
 
-.vc-finance-badge, .vc-lease-badge {
+.vc-finance-badge, 
+.vc-lease-badge {
   font-size: 0.75rem;
   padding: 3px 8px;
   border-radius: 10px;
@@ -579,20 +500,12 @@ LAYOUT STRUCTURE (Future-proof):
   white-space: nowrap;
 }
 
-/* Specifications - Flexible grid for future additional fields */
+/* Specifications */
 .vc-specs {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.4rem;
   margin-bottom: 0.4rem;
-  /* Future-proof: Can expand to 3 columns on larger screens if needed */
-}
-
-@media (min-width: 1200px) {
-  .vc-specs {
-    /* Optional: Allow 3 columns for additional spec fields on large screens */
-    grid-template-columns: repeat(2, 1fr); /* Keep 2 for now, easy to change to 3 */
-  }
 }
 
 .vc-spec-item {
@@ -610,22 +523,14 @@ LAYOUT STRUCTURE (Future-proof):
   color: #ffffff;
 }
 
-/* Special feature badges - Flexible container for various badge types */
+/* Feature badges */
 .vc-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem;
   margin-bottom: 0.4rem;
-  /* Future-proof: Can accommodate additional badge types like:
-     - Electric/Hybrid badges
-     - Import/Export status
-     - Inspection status
-     - Insurance status
-     - Special features (4WD, Turbo, etc.)
-  */
 }
 
-/* Empty state handling */
 .vc-badges:empty {
   margin-bottom: 0;
 }
@@ -657,36 +562,34 @@ LAYOUT STRUCTURE (Future-proof):
   border: 1px solid rgba(156, 39, 176, 0.3);
 }
 
-/* OPTIMIZED: Enhanced dealer info section - More compact horizontal layout */
+/* Dealer info */
 .vc-dealer-info {
   display: flex;
   align-items: flex-start;
-  gap: 0.6rem; /* Slightly increased to accommodate larger avatar */
+  gap: 0.6rem;
   padding: 0.4rem;
   margin-bottom: 0.4rem;
   border-bottom: 1px solid #2c2c2c;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  min-height: 56px; /* Increased to accommodate 48px avatar + padding */
+  min-height: 56px;
 }
 
 .vc-dealer-info:hover {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
-/* Compact dealer details - horizontal arrangement */
 .vc-dealer-details {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem; /* Reduced gap */
+  gap: 0.15rem;
   flex: 1;
-  min-width: 0; /* Prevent flex item from growing beyond container */
+  min-width: 0;
 }
 
-/* Top row: Name and verification icon */
 .vc-dealer-name {
   font-weight: 600;
-  font-size: 0.85rem; /* Slightly smaller */
+  font-size: 0.85rem;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -698,7 +601,6 @@ LAYOUT STRUCTURE (Future-proof):
   color: #ff3300;
 }
 
-/* Second row: Seller type and location combined */
 .vc-dealer-meta {
   display: flex;
   align-items: center;
@@ -708,11 +610,11 @@ LAYOUT STRUCTURE (Future-proof):
 }
 
 .vc-seller-type {
-  font-size: 0.7rem; /* Smaller */
+  font-size: 0.7rem;
   text-transform: uppercase;
   font-weight: 600;
   letter-spacing: 0.3px;
-  padding: 0.1rem 0.3rem; /* More compact padding */
+  padding: 0.1rem 0.3rem;
   border-radius: 3px;
   display: inline-block;
   white-space: nowrap;
@@ -731,7 +633,7 @@ LAYOUT STRUCTURE (Future-proof):
 }
 
 .vc-dealer-location {
-  font-size: 0.75rem; /* Smaller */
+  font-size: 0.75rem;
   color: #888;
   white-space: nowrap;
   overflow: hidden;
@@ -740,28 +642,20 @@ LAYOUT STRUCTURE (Future-proof):
   min-width: 0;
 }
 
-/* Third row: Actions and contact preferences - flexible for future additions */
 .vc-dealer-actions {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   margin-top: 0.1rem;
   flex-wrap: wrap;
-  /* Future-proof: Can accommodate additional dealer info like:
-     - Response time
-     - Languages spoken
-     - Special offers
-     - Business hours indicator
-  */
 }
 
-/* Empty state handling */
 .vc-dealer-actions:empty {
   display: none;
 }
 
 .vc-dealer-link {
-  font-size: 0.7rem; /* Smaller */
+  font-size: 0.7rem;
   color: #ff3300;
   text-decoration: none;
   opacity: 0.8;
@@ -769,8 +663,8 @@ LAYOUT STRUCTURE (Future-proof):
   white-space: nowrap;
 }
 
-.vc-dealer-link:hover{
-  color:#0051ff;
+.vc-dealer-link:hover {
+  color: #0051ff;
   text-decoration: underline;
   opacity: 1;
 }
@@ -789,7 +683,7 @@ LAYOUT STRUCTURE (Future-proof):
   background-color: #28a745;
   color: white;
   border-radius: 50%;
-  width: 14px; /* Smaller */
+  width: 14px;
   height: 14px;
   display: flex;
   align-items: center;
@@ -799,9 +693,8 @@ LAYOUT STRUCTURE (Future-proof):
   flex-shrink: 0;
 }
 
-/* Larger avatar taking advantage of horizontal layout */
 .vc-dealer-avatar {
-  width: 48px; /* Increased from 36px to utilize horizontal space */
+  width: 48px;
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
@@ -815,7 +708,7 @@ LAYOUT STRUCTURE (Future-proof):
 }
 
 .vc-dealer-avatar-placeholder {
-  width: 48px; /* Increased from 36px to utilize horizontal space */
+  width: 48px;
   height: 48px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -824,7 +717,7 @@ LAYOUT STRUCTURE (Future-proof):
   justify-content: center;
   color: white;
   font-weight: bold;
-  font-size: 18px; /* Increased from 16px to match larger avatar */
+  font-size: 18px;
   text-transform: uppercase;
   border: 2px solid transparent;
   transition: border-color 0.2s ease;
@@ -835,7 +728,6 @@ LAYOUT STRUCTURE (Future-proof):
   border-color: #ff3300;
 }
 
-/* Private seller styling */
 .vc-dealer-info.private-seller {
   cursor: default;
 }
@@ -858,7 +750,7 @@ LAYOUT STRUCTURE (Future-proof):
   font-size: 0.75rem;
 }
 
-.vc-condition-tag.excellent, 
+.vc-condition-tag.excellent,
 .vc-condition-tag.new {
   background: rgba(46, 213, 115, 0.1);
   color: #2ed573;
@@ -930,32 +822,24 @@ LAYOUT STRUCTURE (Future-proof):
   background: #cc2900;
 }
 
-/* TRUE ZOOM: Mobile responsive adjustments with reasonable controls sizing */
+/* Mobile adjustments */
 @media (max-width: 768px) {
   .vc-image-container {
     height: 200px;
     cursor: pointer;
   }
   
-  /* MOBILE: Show zoom controls on tap (same as navigation) */
-  .vc-image-container.show-navigation .vc-zoom-controls {
-    opacity: 1 !important;
-    visibility: visible !important; /* FIXED: Added visibility */
-    pointer-events: auto !important;
-  }
-  
-  /* Reasonable: Mobile zoom controls - not too small */
   .vc-zoom-controls {
     top: 8px;
     right: 8px;
-    padding: 0.2rem 0.4rem; /* Reasonable padding */
-    gap: 0.25rem; /* Reasonable gap */
-    font-size: 0.75rem; /* Readable font */
+    padding: 0.2rem 0.4rem;
+    gap: 0.25rem;
+    font-size: 0.75rem;
     border-radius: 12px;
   }
   
   .vc-zoom-btn {
-    width: 24px; /* Reasonable size for mobile touch */
+    width: 24px;
     height: 24px;
     font-size: 0.75rem;
   }
@@ -970,9 +854,8 @@ LAYOUT STRUCTURE (Future-proof):
     min-width: 24px;
   }
   
-  /* Mobile navigation arrows - reasonable size with original background */
   .vc-image-nav {
-    width: 28px; /* Smaller but still touchable */
+    width: 28px;
     height: 28px;
     margin: 0 6px;
     background: rgba(0, 0, 0, 0.6);
@@ -982,11 +865,10 @@ LAYOUT STRUCTURE (Future-proof):
   
   .vc-image-nav:hover,
   .vc-image-nav:active {
-    background: rgba(255, 51, 0, 0.5); /* Less opaque */
+    background: rgba(255, 51, 0, 0.5);
     transform: scale(1.05);
   }
   
-  /* Adjust other elements for mobile */
   .vc-savings-badge {
     max-width: calc(60% - 16px);
   }
@@ -1086,51 +968,6 @@ LAYOUT STRUCTURE (Future-proof):
     position: relative;
   }
   
-  /* FIXED: Force hide everything by default on small screens */
-  .vc-image-navigation {
-    opacity: 0 !important;
-    visibility: hidden !important; /* FIXED: Added visibility */
-    pointer-events: none !important;
-    display: flex !important;
-  }
-  
-  .vc-image-nav {
-    opacity: 0 !important;
-    visibility: hidden !important;
-  }
-  
-  /* FIXED: Add zoom controls hide rules for small screens */
-  .vc-zoom-controls {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-  
-  /* FIXED: Force show EVERYTHING when tapped */
-  .vc-image-container.show-navigation .vc-image-navigation {
-    opacity: 1 !important;
-    visibility: visible !important; /* FIXED: Added visibility */
-    pointer-events: auto !important;
-    display: flex !important;
-  }
-  
-  .vc-image-container.show-navigation .vc-image-nav {
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-    display: flex !important;
-    background: rgba(0, 0, 0, 0.8) !important;
-    border: 2px solid rgba(255, 255, 255, 0.5) !important;
-  }
-  
-  /* FIXED: MOBILE: Show zoom controls on tap (same as navigation) */
-  .vc-image-container.show-navigation .vc-zoom-controls {
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-  }
-  
-  /* Small screens: Compact zoom controls */
   .vc-zoom-controls {
     top: 6px;
     right: 6px;
@@ -1156,7 +993,7 @@ LAYOUT STRUCTURE (Future-proof):
     min-width: 20px;
   }
   
-  /* Add subtle tap indicator for small screens */
+  /* Tap indicator for small screens */
   .vc-image-container::after {
     content: "👆 Tap for controls";
     position: absolute;
@@ -1174,13 +1011,11 @@ LAYOUT STRUCTURE (Future-proof):
     z-index: 2;
   }
   
-  /* Show hint briefly on card hover/focus */
   .vc-card:hover .vc-image-container::after,
   .vc-card:focus-within .vc-image-container::after {
     opacity: 0.8;
   }
   
-  /* Hide hint when navigation or zoom controls are shown */
   .vc-image-container.show-navigation::after {
     opacity: 0;
   }
@@ -1208,7 +1043,6 @@ LAYOUT STRUCTURE (Future-proof):
     font-weight: bold;
   }
   
-  /* Small navigation arrows */
   .vc-image-nav {
     width: 26px;
     height: 26px;
@@ -1231,16 +1065,13 @@ LAYOUT STRUCTURE (Future-proof):
   
   .vc-dealer-meta {
     gap: 0.3rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
   }
   
   .vc-dealer-actions {
     gap: 0.3rem;
-  }
-  
-  .vc-dealer-meta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.2rem;
   }
   
   .vc-dealer-avatar,
@@ -1272,7 +1103,7 @@ LAYOUT STRUCTURE (Future-proof):
   }
 }
 
-/* Ultra small screens - stack header if absolutely necessary */
+/* Ultra small screens */
 @media (max-width: 350px) {
   .vc-header {
     flex-direction: column;
@@ -1291,7 +1122,6 @@ LAYOUT STRUCTURE (Future-proof):
     min-width: auto;
   }
 
-  /* Even more compact zoom controls */
   .vc-zoom-controls {
     top: 4px;
     right: 4px;
@@ -1383,7 +1213,6 @@ LAYOUT STRUCTURE (Future-proof):
   font-size: 0.7rem;
 }
 
-/* TRUE ZOOM: Compact mode zoom adjustments */
 .vc-card.compact .vc-zoom-controls {
   padding: 0.2rem 0.4rem;
   gap: 0.3rem;
@@ -1401,7 +1230,6 @@ LAYOUT STRUCTURE (Future-proof):
   min-width: 25px;
 }
 
-/* Compact mode savings adjustments */
 .vc-card.compact .vc-savings-badge {
   padding: 0.25rem 0.4rem;
   font-size: 0.7rem;
@@ -1425,7 +1253,6 @@ LAYOUT STRUCTURE (Future-proof):
     border: 2px solid #ffffff;
   }
   
-  /* TRUE ZOOM: High contrast zoom controls */
   .vc-zoom-controls {
     background: #000000;
     border: 2px solid #ffffff;
@@ -1456,13 +1283,12 @@ LAYOUT STRUCTURE (Future-proof):
     animation: none;
   }
   
-  /* TRUE ZOOM: Disable zoom transitions for reduced motion */
   .vc-image {
     transition: none !important;
   }
 }
 
-/* === SOLD BADGE OVERLAY STYLES === */
+/* SOLD BADGE OVERLAY STYLES */
 .vc-sold-overlay {
   position: absolute;
   top: 0;
@@ -1582,7 +1408,6 @@ LAYOUT STRUCTURE (Future-proof):
   display: none;
 }
 
-/* TRUE ZOOM: Disable zoom controls on sold vehicles */
 .vc-card[data-status="sold"] .vc-zoom-controls {
   display: none;
 }
@@ -1620,9 +1445,8 @@ LAYOUT STRUCTURE (Future-proof):
   }
 }
 
-/* FIXED: Touch device enhancements - only apply sizing when controls are visible */
+/* Touch device enhancements */
 @media (hover: none) {
-  /* Only apply touch-friendly sizing when controls are actually shown */
   .vc-image-container.show-navigation .vc-zoom-btn,
   .vc-zoom-controls.zoomed .vc-zoom-btn {
     min-height: 44px;
@@ -1630,14 +1454,14 @@ LAYOUT STRUCTURE (Future-proof):
   }
 }
 
-/* TRUE ZOOM: Prevent text selection during drag operations */
+/* Prevent text selection during drag operations */
 .vc-image-container.dragging {
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
 }
 
-/* TRUE ZOOM: Custom cursor for different zoom states */
+/* Custom cursor for different zoom states */
 .vc-image {
   cursor: pointer;
 }
@@ -1650,7 +1474,7 @@ LAYOUT STRUCTURE (Future-proof):
   cursor: move;
 }
 
-/* TRUE ZOOM: Ensure proper stacking context for absolutely positioned images */
+/* Ensure proper stacking context for absolutely positioned images */
 .vc-image-wrapper {
   isolation: isolate;
   position: relative;

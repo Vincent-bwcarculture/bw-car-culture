@@ -744,36 +744,40 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     navigate(`/marketplace/${car._id}`);
   }, [car, navigate, analytics, dealer]);
 
-  // FIXED: Enhanced image container tap for mobile navigation reveal
+  // FIXED: Enhanced image container tap for mobile navigation reveal - WORKING VERSION
   const handleImageContainerClick = useCallback((e) => {
+    // Always stop propagation to prevent card click
+    e.stopPropagation();
+    
     // Prevent if dragging or zoomed in
     if (dragTimeoutRef.current || zoomLevel > 1) return;
     
-    // Check if it's a mobile device
-    const isMobile = window.innerWidth <= 768;
+    // Check if it's a mobile device (use touch capability as well)
+    const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
+    
+    // Clear any existing timeout
+    if (navigationTimeoutRef.current) {
+      clearTimeout(navigationTimeoutRef.current);
+    }
     
     if (isMobile) {
-      e.stopPropagation(); // Prevent card click
+      console.log('Mobile tap detected - showing controls'); // Debug log
       
-      // Clear any existing timeout
-      if (navigationTimeoutRef.current) {
-        clearTimeout(navigationTimeoutRef.current);
-      }
-      
-      // Show both navigation and zoom controls
+      // Force show both navigation and zoom controls
       setShowNavigation(true);
       setShowZoomControls(true);
       
-      // Hide after 3 seconds
+      // Hide after 4 seconds (longer for mobile)
       navigationTimeoutRef.current = setTimeout(() => {
         setShowNavigation(false);
         if (zoomLevel === 1) {
           setShowZoomControls(false);
         }
-      }, 3000);
+      }, 4000);
     } else {
       // Desktop: toggle zoom controls
       setShowZoomControls(prev => !prev);
+      setShowNavigation(false); // Ensure navigation follows hover on desktop
     }
   }, [zoomLevel]);
 
@@ -1002,6 +1006,41 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       <div 
         className={`vc-image-container ${showNavigation ? 'show-navigation' : ''} ${showZoomControls ? 'show-zoom-controls' : ''} ${isDragging ? 'dragging' : ''}`}
         onClick={handleImageContainerClick}
+        onTouchStart={(e) => {
+          // Handle both tap for controls and pinch/drag for zoom
+          if (e.touches.length === 1 && !zoomLevel || zoomLevel === 1) {
+            // Single touch - might be a tap for controls
+            const touchStartTime = Date.now();
+            const touchStartX = e.touches[0].clientX;
+            const touchStartY = e.touches[0].clientY;
+            
+            const handleTouchEndForTap = (endEvent) => {
+              const touchEndTime = Date.now();
+              const touchEndX = endEvent.changedTouches[0].clientX;
+              const touchEndY = endEvent.changedTouches[0].clientY;
+              
+              // Check if it was a tap (short duration, minimal movement)
+              const duration = touchEndTime - touchStartTime;
+              const distance = Math.sqrt(
+                Math.pow(touchEndX - touchStartX, 2) + 
+                Math.pow(touchEndY - touchStartY, 2)
+              );
+              
+              if (duration < 300 && distance < 10) {
+                // It's a tap - show controls
+                handleImageContainerClick(endEvent);
+              }
+              
+              // Clean up listener
+              e.target.removeEventListener('touchend', handleTouchEndForTap);
+            };
+            
+            e.target.addEventListener('touchend', handleTouchEndForTap);
+          }
+          
+          // Continue with normal touch handling for zoom
+          handleTouchStart(e);
+        }}
         ref={containerRef}
       >
         <div className="vc-image-wrapper">
@@ -1043,6 +1082,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             <button 
               className="vc-zoom-btn zoom-in" 
               onClick={handleZoomIn}
+              onTouchEnd={(e) => { e.stopPropagation(); handleZoomIn(e); }}
               disabled={zoomLevel >= 4}
               aria-label="Zoom in"
               title="Zoom in"
@@ -1053,6 +1093,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             <button 
               className="vc-zoom-btn zoom-out" 
               onClick={handleZoomOut}
+              onTouchEnd={(e) => { e.stopPropagation(); handleZoomOut(e); }}
               disabled={zoomLevel <= 0.5}
               aria-label="Zoom out"
               title="Zoom out"
@@ -1063,6 +1104,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               <button 
                 className="vc-zoom-btn zoom-reset" 
                 onClick={handleZoomReset}
+                onTouchEnd={(e) => { e.stopPropagation(); handleZoomReset(e); }}
                 aria-label="Reset zoom"
                 title="Reset to normal view"
               >
