@@ -31,6 +31,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const containerRef = useRef(null);
   const dragTimeoutRef = useRef(null);
   const resizeObserverRef = useRef(null);
+  const navigationTimeoutRef = useRef(null);
 
   // FIXED: Enhanced checkFailedImage function to include type
   const checkFailedImage = useCallback((url, type = 'general') => {
@@ -609,11 +610,11 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         verification: {
           isVerified: !!car.dealer.verification?.isVerified || car.dealer.verification?.status === 'verified'
         },
-       contact: {
-  phone: car.dealer.contact?.phone || car.dealer.phone || car.dealer.contactPhone || null,
-  email: car.dealer.contact?.email || car.dealer.email || car.dealer.contactEmail || null,
-  website: !isPrivateSeller ? (car.dealer.contact?.website || car.dealer.website) : null
-},
+        contact: {
+          phone: car.dealer.contact?.phone || car.dealer.phone || car.dealer.contactPhone || null,
+          email: car.dealer.contact?.email || car.dealer.email || car.dealer.contactEmail || null,
+          website: !isPrivateSeller ? (car.dealer.contact?.website || car.dealer.website) : null
+        },
         privateSeller: isPrivateSeller ? {
           firstName: car.dealer.privateSeller?.firstName || null,
           lastName: car.dealer.privateSeller?.lastName || null,
@@ -743,25 +744,38 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     navigate(`/marketplace/${car._id}`);
   }, [car, navigate, analytics, dealer]);
 
-  // Handle image container tap for mobile navigation reveal
+  // FIXED: Enhanced image container tap for mobile navigation reveal
   const handleImageContainerClick = useCallback((e) => {
+    // Prevent if dragging or zoomed in
     if (dragTimeoutRef.current || zoomLevel > 1) return;
     
-    if (window.innerWidth <= 768) {
-      e.stopPropagation();
+    // Check if it's a mobile device
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+      e.stopPropagation(); // Prevent card click
+      
+      // Clear any existing timeout
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+      
+      // Show both navigation and zoom controls
       setShowNavigation(true);
       setShowZoomControls(true);
       
-      setTimeout(() => {
+      // Hide after 3 seconds
+      navigationTimeoutRef.current = setTimeout(() => {
         setShowNavigation(false);
         if (zoomLevel === 1) {
           setShowZoomControls(false);
         }
       }, 3000);
     } else {
-      setShowZoomControls(!showZoomControls);
+      // Desktop: toggle zoom controls
+      setShowZoomControls(prev => !prev);
     }
-  }, [zoomLevel, showZoomControls]);
+  }, [zoomLevel]);
 
   const handleImageNavigation = useCallback((e, direction) => {
     e.stopPropagation();
@@ -965,6 +979,18 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     return null;
   }, []);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+      if (dragTimeoutRef.current) {
+        clearTimeout(dragTimeoutRef.current);
+      }
+    };
+  }, []);
+
   if (!car) return null;
 
   return (
@@ -974,7 +1000,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       data-status={car.status || 'active'}
     >
       <div 
-        className={`vc-image-container ${showNavigation ? 'show-navigation' : ''} ${showZoomControls ? 'show-zoom-controls' : ''}`}
+        className={`vc-image-container ${showNavigation ? 'show-navigation' : ''} ${showZoomControls ? 'show-zoom-controls' : ''} ${isDragging ? 'dragging' : ''}`}
         onClick={handleImageContainerClick}
         ref={containerRef}
       >
@@ -1013,7 +1039,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           )}
           
           {/* TRUE ZOOM: Enhanced Zoom Controls - ALWAYS RENDERED (like navigation arrows) */}
-          <div className={`vc-zoom-controls ${zoomLevel !== 1 ? 'zoomed' : ''}`}>
+          <div className={`vc-zoom-controls ${zoomLevel !== 1 ? 'zoomed' : ''} ${showNavigation ? 'show' : ''}`}>
             <button 
               className="vc-zoom-btn zoom-in" 
               onClick={handleZoomIn}
@@ -1082,7 +1108,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           
           {/* Image Navigation */}
           {car.images && Array.isArray(car.images) && car.images.length > 1 && (
-            <div className="vc-image-navigation">
+            <div className={`vc-image-navigation ${showNavigation ? 'show' : ''}`}>
               <button 
                 className="vc-image-nav prev" 
                 onClick={(e) => handleImageNavigation(e, 'prev')}
