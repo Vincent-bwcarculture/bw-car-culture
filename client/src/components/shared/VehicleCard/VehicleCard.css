@@ -351,6 +351,7 @@ LAYOUT STRUCTURE (Future-proof):
   .vc-image-container.show-navigation .vc-image-navigation {
     opacity: 1 !important;
     pointer-events: auto !important;
+    visibility: visible !important;
   }
 }
 
@@ -1060,17 +1061,24 @@ LAYOUT STRUCTURE (Future-proof):
     position: relative;
   }
   
-  /* MOBILE: Show zoom controls on tap (same as navigation) */
-  .vc-image-container.show-navigation .vc-zoom-controls {
-    opacity: 1 !important;
-    pointer-events: auto !important;
+  /* FORCE OVERRIDE: Small devices navigation visibility */
+  .vc-image-navigation {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
   }
   
-  /* MOBILE: Ensure navigation arrows show on tap for small screens */
   .vc-image-container.show-navigation .vc-image-navigation {
     opacity: 1 !important;
     pointer-events: auto !important;
     visibility: visible !important;
+    display: flex !important;
+  }
+  
+  /* MOBILE: Show zoom controls on tap (same as navigation) */
+  .vc-image-container.show-navigation .vc-zoom-controls {
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
   
   /* Small screens: Compact zoom controls */
