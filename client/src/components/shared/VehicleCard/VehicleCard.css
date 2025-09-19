@@ -106,7 +106,8 @@ LAYOUT STRUCTURE (Future-proof):
   gap: 0.4rem;
   z-index: 5;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  visibility: hidden; /* FIXED: Added visibility for proper hiding */
+  transition: all 0.3s ease; /* FIXED: Changed to all for visibility transition */
   pointer-events: none;
   backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -118,6 +119,7 @@ LAYOUT STRUCTURE (Future-proof):
 @media (min-width: 769px) {
   .vc-image-container:hover .vc-zoom-controls {
     opacity: 1 !important;
+    visibility: visible !important; /* FIXED: Added visibility */
     pointer-events: auto !important;
   }
 }
@@ -127,18 +129,21 @@ LAYOUT STRUCTURE (Future-proof):
   /* OVERRIDE: Hide zoom controls on mobile by default */
   .vc-zoom-controls {
     opacity: 0 !important;
+    visibility: hidden !important; /* FIXED: Added visibility */
     pointer-events: none !important;
   }
   
   /* ONLY show zoom controls when navigation is shown (on tap) */
   .vc-image-container.show-navigation .vc-zoom-controls {
     opacity: 1 !important;
+    visibility: visible !important; /* FIXED: Added visibility */
     pointer-events: auto !important;
   }
   
   /* Keep zoomed state override */
   .vc-zoom-controls.zoomed {
     opacity: 1 !important;
+    visibility: visible !important; /* FIXED: Added visibility */
     pointer-events: auto !important;
   }
 }
@@ -333,7 +338,8 @@ LAYOUT STRUCTURE (Future-proof):
   justify-content: space-between;
   align-items: center;
   opacity: 0; /* Hidden by default for clean look */
-  transition: opacity 0.3s ease;
+  visibility: hidden; /* FIXED: Added visibility */
+  transition: all 0.3s ease; /* FIXED: Changed to all for visibility transition */
   pointer-events: none; /* Allow clicking through when hidden */
   z-index: 4; /* Below zoom controls */
 }
@@ -342,6 +348,7 @@ LAYOUT STRUCTURE (Future-proof):
 @media (min-width: 769px) {
   .vc-image-container:hover .vc-image-navigation {
     opacity: 1;
+    visibility: visible; /* FIXED: Added visibility */
     pointer-events: auto;
   }
 }
@@ -351,16 +358,16 @@ LAYOUT STRUCTURE (Future-proof):
   /* Force hide by default */
   .vc-image-navigation {
     opacity: 0 !important;
+    visibility: hidden !important; /* Ensure it's completely hidden */
     pointer-events: none !important;
-    visibility: hidden !important;
     display: flex !important;
   }
   
   /* Force show when tapped - HIGHEST SPECIFICITY */
   .vc-image-container.show-navigation .vc-image-navigation {
     opacity: 1 !important;
+    visibility: visible !important; /* FIXED: Ensure visibility */
     pointer-events: auto !important;
-    visibility: visible !important;
     display: flex !important;
   }
   
@@ -933,6 +940,7 @@ LAYOUT STRUCTURE (Future-proof):
   /* MOBILE: Show zoom controls on tap (same as navigation) */
   .vc-image-container.show-navigation .vc-zoom-controls {
     opacity: 1 !important;
+    visibility: visible !important; /* FIXED: Added visibility */
     pointer-events: auto !important;
   }
   
@@ -1078,11 +1086,11 @@ LAYOUT STRUCTURE (Future-proof):
     position: relative;
   }
   
-  /* FORCE HIDE everything by default on small screens */
+  /* FIXED: Force hide everything by default on small screens */
   .vc-image-navigation {
     opacity: 0 !important;
+    visibility: hidden !important; /* FIXED: Added visibility */
     pointer-events: none !important;
-    visibility: hidden !important;
     display: flex !important;
   }
   
@@ -1091,26 +1099,34 @@ LAYOUT STRUCTURE (Future-proof):
     visibility: hidden !important;
   }
   
-  /* FORCE SHOW everything when tapped */
+  /* FIXED: Add zoom controls hide rules for small screens */
+  .vc-zoom-controls {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  
+  /* FIXED: Force show EVERYTHING when tapped */
   .vc-image-container.show-navigation .vc-image-navigation {
     opacity: 1 !important;
+    visibility: visible !important; /* FIXED: Added visibility */
     pointer-events: auto !important;
-    visibility: visible !important;
     display: flex !important;
   }
   
   .vc-image-container.show-navigation .vc-image-nav {
     opacity: 1 !important;
-    pointer-events: auto !important;
     visibility: visible !important;
+    pointer-events: auto !important;
     display: flex !important;
     background: rgba(0, 0, 0, 0.8) !important;
     border: 2px solid rgba(255, 255, 255, 0.5) !important;
   }
   
-  /* MOBILE: Show zoom controls on tap (same as navigation) */
+  /* FIXED: MOBILE: Show zoom controls on tap (same as navigation) */
   .vc-image-container.show-navigation .vc-zoom-controls {
     opacity: 1 !important;
+    visibility: visible !important;
     pointer-events: auto !important;
   }
   
@@ -1275,7 +1291,7 @@ LAYOUT STRUCTURE (Future-proof):
     min-width: auto;
   }
 
-  /* Ultra compact zoom controls */
+  /* Even more compact zoom controls */
   .vc-zoom-controls {
     top: 4px;
     right: 4px;
