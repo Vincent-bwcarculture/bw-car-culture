@@ -4,12 +4,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { debounce, throttle } from 'lodash';
 import { listingService } from '../../../services/listingService.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
-import SmallVehicleCard from '../../shared/VehicleCard/SmallVehicleCard.js';
-import ListVehicleCard from '../../shared/VehicleCard/ListVehicleCard.js';
 import ShareModal from '../../shared/ShareModal.js';
 import CreateListingPromoCard from './CreateListingPromoCard.js';
 import MarketplaceFilters from './MarketplaceFilters.js';
-import ViewModeSelector from './ViewModeSelector.js';
 import './MarketplaceList.css';
 
 const CARS_PER_PAGE = 12;
@@ -39,9 +36,6 @@ const MarketplaceList = () => {
   const [activeSection, setActiveSection] = useState('all');
   const [isRetrying, setIsRetrying] = useState(false);
   
-  // View mode state
-  const [viewMode, setViewMode] = useState('grid');
-  
   // Performance state
   const [visibleItems, setVisibleItems] = useState(CARS_PER_PAGE);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -62,26 +56,7 @@ const MarketplaceList = () => {
   const [loadingText, setLoadingText] = useState('Loading vehicles...');
   const [similarCarsData, setSimilarCarsData] = useState(new Map());
 
-  // Enhanced view mode change handler with error handling
-  const handleViewModeChange = useCallback((mode) => {
-    // Validate the view mode
-    const validModes = ['grid', 'list', 'compact'];
-    if (!validModes.includes(mode)) {
-      console.warn('Invalid view mode:', mode);
-      return;
-    }
-
-    console.log('Changing view mode to:', mode);
-    setViewMode(mode);
-    
-    try {
-      localStorage.setItem('marketplace_view_mode', mode);
-    } catch (error) {
-      console.warn('Failed to save view mode preference:', error);
-    }
-  }, []);
-
-  // Enhanced sharing handler with buttonRef support
+  // Sharing handler
   const handleShare = useCallback((car, buttonRef) => {
     if (!car) {
       console.warn('No car data provided to handleShare');
@@ -93,18 +68,15 @@ const MarketplaceList = () => {
     setShareModalOpen(true);
   }, []);
 
-  // Enhanced helper function to render the appropriate card component
+  // Simplified render function - only VehicleCard
   const renderVehicleCard = useCallback((car, index, section = '') => {
-    // Return null early if no car data or if it's a promo card
     if (!car || car.isPromoCard) {
       return null;
     }
 
     try {
-      // Generate a unique key
       const key = car._id || car.id || `${section}-${index}`;
       
-      // Common props for all card types
       const commonProps = {
         key,
         car,
@@ -115,34 +87,12 @@ const MarketplaceList = () => {
         className: ''
       };
 
-      // Return the appropriate component based on viewMode
-      switch (viewMode) {
-        case 'list':
-          // Ensure ListVehicleCard component is available
-          if (!ListVehicleCard) {
-            console.warn('ListVehicleCard component not available, falling back to VehicleCard');
-            return <VehicleCard {...commonProps} />;
-          }
-          return <ListVehicleCard {...commonProps} />;
-          
-        case 'compact':
-          // Ensure SmallVehicleCard component is available
-          if (!SmallVehicleCard) {
-            console.warn('SmallVehicleCard component not available, falling back to VehicleCard');
-            return <VehicleCard {...commonProps} />;
-          }
-          return <SmallVehicleCard {...commonProps} />;
-          
-        case 'grid':
-        default:
-          return <VehicleCard {...commonProps} />;
-      }
+      return <VehicleCard {...commonProps} />;
+      
     } catch (error) {
       console.error('Error rendering vehicle card:', error);
       console.error('Car data:', car);
-      console.error('View mode:', viewMode);
       
-      // Fallback to default VehicleCard with error handling
       const key = car?._id || car?.id || `error-${section}-${index}`;
       return (
         <VehicleCard 
@@ -156,13 +106,12 @@ const MarketplaceList = () => {
         />
       );
     }
-  }, [viewMode, isMobile, handleShare]);
+  }, [isMobile, handleShare]);
 
-  // Update grid className based on view mode (SAFE VERSION)
+  // Simplified grid className - always grid
   const getGridClassName = useCallback((baseClass) => {
     try {
-      const validViewMode = ['grid', 'list', 'compact'].includes(viewMode) ? viewMode : 'grid';
-      const classes = [baseClass, `${baseClass}-${validViewMode}`];
+      const classes = [baseClass, `${baseClass}-grid`];
       
       if (isMobile) {
         classes.push('mobile-horizontal');
@@ -171,21 +120,9 @@ const MarketplaceList = () => {
       return classes.join(' ');
     } catch (error) {
       console.error('Error building grid class name:', error);
-      return baseClass; // Fallback to base class
+      return baseClass;
     }
-  }, [viewMode, isMobile]);
-
-  // Load saved view mode preference
-  useEffect(() => {
-    try {
-      const savedViewMode = localStorage.getItem('marketplace_view_mode');
-      if (savedViewMode && ['grid', 'list', 'compact'].includes(savedViewMode)) {
-        setViewMode(savedViewMode);
-      }
-    } catch (error) {
-      console.warn('Failed to load view mode preference:', error);
-    }
-  }, []);
+  }, [isMobile]);
 
   // Initialize active section from URL immediately with caching
   useEffect(() => {
@@ -1072,11 +1009,6 @@ const MarketplaceList = () => {
             )}
           </div>
         </div>
-        <ViewModeSelector 
-          viewMode={viewMode}
-          onViewModeChange={handleViewModeChange}
-          isMobile={isMobile}
-        />
       </div>
 
       {loading ? (
