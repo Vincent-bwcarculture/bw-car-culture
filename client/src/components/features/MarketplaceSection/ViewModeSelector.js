@@ -37,9 +37,16 @@ const ViewModeSelector = ({ viewMode, onViewModeChange, isMobile }) => {
     }
   ];
 
+  // Hide on mobile to save space
   if (isMobile) {
-    return null; // Hide on mobile to save space
+    return null;
   }
+
+  const handleModeChange = (mode) => {
+    if (onViewModeChange && typeof onViewModeChange === 'function') {
+      onViewModeChange(mode);
+    }
+  };
 
   return (
     <div className="view-mode-selector">
@@ -49,9 +56,10 @@ const ViewModeSelector = ({ viewMode, onViewModeChange, isMobile }) => {
           <button
             key={mode.key}
             className={`view-mode-btn ${viewMode === mode.key ? 'active' : ''}`}
-            onClick={() => onViewModeChange(mode.key)}
+            onClick={() => handleModeChange(mode.key)}
             title={mode.description}
             aria-label={`Switch to ${mode.label} view`}
+            type="button"
           >
             {mode.icon}
             <span className="view-mode-text">{mode.label}</span>

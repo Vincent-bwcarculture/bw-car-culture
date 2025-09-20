@@ -896,7 +896,7 @@ body.section-transitioning * {
   transform: translateZ(0);
 }
 
-/* Add these CSS rules to the END of client/src/components/features/MarketplaceSection/MarketplaceList.css */
+/* ADD THESE CLASSES TO THE END OF client/src/components/features/MarketplaceSection/MarketplaceList.css */
 
 /* ===== VIEW MODE SPECIFIC GRIDS ===== */
 
@@ -907,6 +907,7 @@ body.section-transitioning * {
   gap: 8px;
   margin-bottom: 12px;
   contain: layout;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Compact View - Small cards in grid */
@@ -916,6 +917,7 @@ body.section-transitioning * {
   gap: 12px;
   margin-bottom: 12px;
   contain: layout;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* List View - Single column horizontal cards */
@@ -925,11 +927,12 @@ body.section-transitioning * {
   gap: 8px;
   margin-bottom: 12px;
   contain: layout;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ===== RESPONSIVE GRID LAYOUTS ===== */
 
-/* Small Tablet and up */
+/* Small Tablet and up (576px+) */
 @media (min-width: 576px) {
   .marketplace-grid-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -946,6 +949,7 @@ body.section-transitioning * {
   }
 }
 
+/* Tablet (768px+) */
 @media (min-width: 768px) {
   .marketplace-grid-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -962,6 +966,7 @@ body.section-transitioning * {
   }
 }
 
+/* Desktop (992px+) */
 @media (min-width: 992px) {
   .marketplace-grid-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -978,6 +983,7 @@ body.section-transitioning * {
   }
 }
 
+/* Large Desktop (1200px+) */
 @media (min-width: 1200px) {
   .marketplace-grid-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -994,6 +1000,7 @@ body.section-transitioning * {
   }
 }
 
+/* Extra Large Desktop (1400px+) */
 @media (min-width: 1400px) {
   .marketplace-grid-grid {
     grid-template-columns: repeat(4, 1fr);
@@ -1022,30 +1029,8 @@ body.section-transitioning * {
   .marketplace-grid-compact {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
-}
-
-/* ===== VIEW MODE SPECIFIC PERFORMANCE OPTIMIZATIONS ===== */
-.marketplace-grid-grid,
-.marketplace-grid-compact,
-.marketplace-grid-list {
-  contain: layout;
-  will-change: scroll-position;
-}
-
-/* Smooth transitions when switching view modes */
-.marketplace-grid-grid,
-.marketplace-grid-compact,
-.marketplace-grid-list {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Prevent layout shift during view mode transitions */
-.marketplace-sections {
-  min-height: 400px;
-}
-
-/* Enhanced mobile horizontal scrolling for view modes */
-@media (max-width: 768px) {
+  
+  /* Mobile horizontal scrolling for all view modes */
   .marketplace-grid-grid.mobile-horizontal,
   .marketplace-grid-compact.mobile-horizontal,
   .marketplace-grid-list.mobile-horizontal {
@@ -1055,11 +1040,60 @@ body.section-transitioning * {
   }
 }
 
+/* Ultra-mobile optimization (480px and below) */
+@media (max-width: 480px) {
+  .marketplace-grid-compact {
+    grid-template-columns: 1fr;
+  }
+  
+  .marketplace-grid-grid,
+  .marketplace-grid-compact,
+  .marketplace-grid-list {
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+}
+
+/* ===== VIEW MODE SPECIFIC PERFORMANCE OPTIMIZATIONS ===== */
+.marketplace-grid-grid,
+.marketplace-grid-compact,
+.marketplace-grid-list {
+  contain: layout;
+  will-change: scroll-position;
+  transform: translateZ(0); /* GPU acceleration */
+}
+
+/* Prevent layout shift during view mode transitions */
+.marketplace-sections {
+  min-height: 400px;
+  transition: min-height 0.3s ease;
+}
+
+/* View mode transition states */
+.marketplace-grid-grid,
+.marketplace-grid-compact,
+.marketplace-grid-list {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease, grid-template-columns 0.3s ease;
+}
+
+.marketplace-grid-grid.transitioning,
+.marketplace-grid-compact.transitioning,
+.marketplace-grid-list.transitioning {
+  opacity: 0.7;
+  transform: translateY(10px);
+}
+
 /* ===== ACCESSIBILITY IMPROVEMENTS ===== */
 @media (prefers-reduced-motion: reduce) {
   .marketplace-grid-grid,
   .marketplace-grid-compact,
   .marketplace-grid-list {
+    transition: none;
+  }
+  
+  .marketplace-sections {
     transition: none;
   }
 }
@@ -1072,3 +1106,172 @@ body.section-transitioning * {
     border: 1px solid transparent;
   }
 }
+
+/* ===== LOADING STATES FOR VIEW MODES ===== */
+.marketplace-grid-grid.loading,
+.marketplace-grid-compact.loading,
+.marketplace-grid-list.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.marketplace-grid-grid.loading::after,
+.marketplace-grid-compact.loading::after,
+.marketplace-grid-list.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ===== ENHANCED TOUCH DEVICE SUPPORT ===== */
+@media (hover: none) and (pointer: coarse) {
+  .marketplace-grid-grid,
+  .marketplace-grid-compact,
+  .marketplace-grid-list {
+    /* Optimize for touch scrolling */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  .marketplace-grid-compact {
+    /* Ensure touch targets are large enough */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .marketplace-grid-grid,
+  .marketplace-grid-compact,
+  .marketplace-grid-list {
+    display: block !important;
+    gap: 20px !important;
+    page-break-inside: avoid;
+  }
+  
+  .marketplace-grid-grid > *,
+  .marketplace-grid-compact > *,
+  .marketplace-grid-list > * {
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+}
+
+/* ===== FOCUS MANAGEMENT ===== */
+.marketplace-grid-grid:focus-within,
+.marketplace-grid-compact:focus-within,
+.marketplace-grid-list:focus-within {
+  outline: 2px solid rgba(255, 51, 0, 0.5);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+/* ===== GRID SPECIFIC ENHANCEMENTS ===== */
+
+/* Grid view specific */
+.marketplace-grid-grid {
+  /* Optimize for detailed cards */
+  grid-auto-rows: minmax(400px, auto);
+}
+
+/* Compact view specific */
+.marketplace-grid-compact {
+  /* Optimize for many small cards */
+  grid-auto-rows: minmax(320px, auto);
+  justify-items: stretch;
+  align-items: start;
+}
+
+/* List view specific */
+.marketplace-grid-list {
+  /* Optimize for horizontal cards */
+  align-items: stretch;
+}
+
+.marketplace-grid-list > * {
+  width: 100%;
+  max-width: none;
+}
+
+/* ===== ERROR STATES FOR VIEW MODES ===== */
+.marketplace-grid-grid.error,
+.marketplace-grid-compact.error,
+.marketplace-grid-list.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  border-radius: 8px;
+  color: #dc3545;
+  text-align: center;
+  padding: 20px;
+}
+
+/* ===== EMPTY STATES FOR VIEW MODES ===== */
+.marketplace-grid-grid.empty,
+.marketplace-grid-compact.empty,
+.marketplace-grid-list.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  background: rgba(108, 117, 125, 0.1);
+  border: 1px solid rgba(108, 117, 125, 0.3);
+  border-radius: 8px;
+  color: #6c757d;
+  text-align: center;
+  padding: 40px;
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+.marketplace-grid-grid > *,
+.marketplace-grid-compact > *,
+.marketplace-grid-list > * {
+  contain: layout style paint;
+}
+
+/* Optimize rendering performance */
+@supports (content-visibility: auto) {
+  .marketplace-grid-grid > *,
+  .marketplace-grid-compact > *,
+  .marketplace-grid-list > * {
+    content-visibility: auto;
+    contain-intrinsic-size: 400px;
+  }
+}
+
+/* ===== SECTION SPECIFIC GRID ADJUSTMENTS ===== */
+
+/* Premium section optimizations */
+.premium-section .marketplace-grid-compact {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+/* Savings section optimizations */
+.savings-section .marketplace-grid-list {
+  gap: 10px;
+}
+
+/* Private section optimizations */
+.private-section .marketplace-grid-grid {
+  grid-auto-rows: minmax(380px, auto);
+}
+
+/* All section default behavior maintained */
+/* .all-section .marketplace-grid-grid,
+.all-section .marketplace-grid-compact,
+.all-section .marketplace-grid-list {
+  
+} */

@@ -14,6 +14,7 @@
   height: 180px; /* Fixed height for list view */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   margin-bottom: 12px;
+  contain: layout style paint;
 }
 
 .list-vehicle-card:hover {
@@ -135,6 +136,11 @@
   transform: scale(1.1);
 }
 
+.lvc-share-button:focus {
+  outline: 2px solid rgba(255, 51, 0, 0.5);
+  outline-offset: 2px;
+}
+
 /* ===== CONTENT AREA ===== */
 .lvc-content {
   flex: 1;
@@ -175,6 +181,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  margin-top: 4px;
 }
 
 .lvc-service-badge,
@@ -268,6 +275,7 @@
   gap: 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 12px;
+  margin-top: auto;
 }
 
 /* ===== DEALER INFO ===== */
@@ -289,6 +297,11 @@
 
 .lvc-dealer-info.dealership:hover {
   background: rgba(255, 51, 0, 0.1);
+}
+
+.lvc-dealer-info.dealership:focus-within {
+  outline: 2px solid rgba(255, 51, 0, 0.5);
+  outline-offset: 2px;
 }
 
 .lvc-dealer-avatar {
@@ -379,7 +392,19 @@
 
 /* ===== RESPONSIVE DESIGN ===== */
 
-/* Tablet */
+/* Large Desktop */
+@media (max-width: 1400px) {
+  .lvc-image-container {
+    width: 260px;
+  }
+  
+  .lvc-specs-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+}
+
+/* Desktop */
 @media (max-width: 1200px) {
   .lvc-image-container {
     width: 240px;
@@ -646,5 +671,192 @@
   
   .lvc-listing-date {
     font-size: 9px;
+  }
+}
+
+/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+@media (prefers-reduced-motion: reduce) {
+  .list-vehicle-card,
+  .lvc-image,
+  .lvc-share-button {
+    transition: none;
+  }
+  
+  .list-vehicle-card:hover .lvc-image {
+    transform: none;
+  }
+  
+  .lvc-share-button:hover {
+    transform: none;
+  }
+  
+  .list-vehicle-card:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .list-vehicle-card {
+    border: 2px solid #ffffff;
+  }
+  
+  .lvc-share-button {
+    border: 1px solid #ffffff;
+  }
+  
+  .lvc-savings-badge {
+    border: 1px solid #ffffff;
+  }
+  
+  .lvc-spec-item {
+    border: 1px solid #ffffff;
+  }
+}
+
+/* ===== FOCUS MANAGEMENT ===== */
+.list-vehicle-card:focus {
+  outline: 2px solid #ff3300;
+  outline-offset: 2px;
+}
+
+.list-vehicle-card:focus-visible {
+  outline: 2px solid #ff3300;
+  outline-offset: 2px;
+}
+
+.list-vehicle-card:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .list-vehicle-card {
+    background: white;
+    color: black;
+    border: 1px solid black;
+    box-shadow: none;
+    page-break-inside: avoid;
+    height: auto;
+    flex-direction: column;
+  }
+  
+  .lvc-share-button,
+  .lvc-savings-badge {
+    display: none;
+  }
+  
+  .lvc-price {
+    color: black;
+  }
+  
+  .lvc-title,
+  .lvc-spec-value,
+  .lvc-dealer-name {
+    color: black;
+  }
+  
+  .lvc-image-container {
+    width: 100%;
+    height: 200px;
+  }
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+.list-vehicle-card {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.lvc-image {
+  will-change: transform;
+}
+
+/* ===== ENHANCED TOUCH SUPPORT ===== */
+@media (hover: none) and (pointer: coarse) {
+  .list-vehicle-card {
+    /* Optimize for touch */
+    touch-action: manipulation;
+  }
+  
+  .lvc-share-button {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+  }
+  
+  .lvc-dealer-info.dealership {
+    min-height: 44px;
+    padding: 8px;
+  }
+}
+
+/* ===== DARK THEME ENHANCEMENTS ===== */
+@media (prefers-color-scheme: dark) {
+  .list-vehicle-card {
+    background: rgba(10, 10, 10, 0.95);
+    border-color: #1a1a1a;
+  }
+  
+  .lvc-image-placeholder {
+    background: rgba(15, 15, 15, 0.9);
+  }
+  
+  .lvc-spec-item {
+    background: rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* ===== LOADING STATES ===== */
+.list-vehicle-card.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.list-vehicle-card.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ===== ENHANCED VISUAL HIERARCHY ===== */
+.lvc-title {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.lvc-price {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== MICRO-INTERACTIONS ===== */
+.lvc-spec-item:hover {
+  background: rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
+}
+
+.lvc-badge:hover {
+  transform: scale(1.05);
+}
+
+.lvc-dealer-avatar:hover {
+  transform: scale(1.1);
+}
+
+/* Remove micro-interactions for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .lvc-spec-item:hover,
+  .lvc-badge:hover,
+  .lvc-dealer-avatar:hover {
+    transform: none;
   }
 }

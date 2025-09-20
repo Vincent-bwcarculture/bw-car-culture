@@ -13,6 +13,7 @@
   flex-direction: column;
   height: 320px; /* Fixed height for consistency */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  contain: layout style paint;
 }
 
 .small-vehicle-card:hover {
@@ -38,6 +39,7 @@
   height: 140px; /* Smaller height like BMW cards */
   overflow: hidden;
   background: rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
 }
 
 .svc-image {
@@ -133,6 +135,11 @@
   transform: scale(1.1);
 }
 
+.svc-share-button:focus {
+  outline: 2px solid rgba(255, 51, 0, 0.5);
+  outline-offset: 2px;
+}
+
 /* ===== CONTENT AREA ===== */
 .svc-content {
   padding: 12px;
@@ -140,11 +147,13 @@
   flex-direction: column;
   flex: 1;
   gap: 8px;
+  min-height: 0; /* Allow content to shrink */
 }
 
 /* ===== PRICE SECTION ===== */
 .svc-price-section {
   margin-bottom: 4px;
+  flex-shrink: 0;
 }
 
 .svc-price {
@@ -175,6 +184,7 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: 2.6em; /* Reserve space for 2 lines */
+  flex-shrink: 0;
 }
 
 /* ===== COMPACT SPECS ===== */
@@ -183,6 +193,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 4px;
   margin: 6px 0;
+  flex-shrink: 0;
 }
 
 .svc-spec {
@@ -211,6 +222,7 @@
   padding: 6px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   margin-top: auto;
+  flex-shrink: 0;
 }
 
 .svc-dealer-info.dealership {
@@ -223,6 +235,11 @@
 
 .svc-dealer-info.dealership:hover {
   background: rgba(255, 51, 0, 0.1);
+}
+
+.svc-dealer-info.dealership:focus-within {
+  outline: 2px solid rgba(255, 51, 0, 0.5);
+  outline-offset: 2px;
 }
 
 .svc-dealer-avatar {
@@ -329,6 +346,22 @@
   
   .svc-price {
     font-size: 15px;
+  }
+}
+
+/* Tablet Portrait */
+@media (max-width: 992px) {
+  .small-vehicle-card {
+    height: 290px;
+  }
+  
+  .svc-image-container {
+    height: 125px;
+  }
+  
+  .svc-content {
+    padding: 9px;
+    gap: 5px;
   }
 }
 
@@ -477,5 +510,128 @@
     width: 12px;
     height: 12px;
     font-size: 7px;
+  }
+}
+
+/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+@media (prefers-reduced-motion: reduce) {
+  .small-vehicle-card,
+  .svc-image,
+  .svc-share-button {
+    transition: none;
+  }
+  
+  .small-vehicle-card:hover .svc-image {
+    transform: none;
+  }
+  
+  .svc-share-button:hover {
+    transform: none;
+  }
+  
+  .small-vehicle-card:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .small-vehicle-card {
+    border: 2px solid #ffffff;
+  }
+  
+  .svc-share-button {
+    border: 1px solid #ffffff;
+  }
+  
+  .svc-savings-badge {
+    border: 1px solid #ffffff;
+  }
+}
+
+/* ===== FOCUS MANAGEMENT ===== */
+.small-vehicle-card:focus {
+  outline: 2px solid #ff3300;
+  outline-offset: 2px;
+}
+
+.small-vehicle-card:focus-visible {
+  outline: 2px solid #ff3300;
+  outline-offset: 2px;
+}
+
+.small-vehicle-card:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .small-vehicle-card {
+    background: white;
+    color: black;
+    border: 1px solid black;
+    box-shadow: none;
+    page-break-inside: avoid;
+    height: auto;
+  }
+  
+  .svc-share-button,
+  .svc-savings-badge {
+    display: none;
+  }
+  
+  .svc-price {
+    color: black;
+  }
+  
+  .svc-title,
+  .svc-spec-value,
+  .svc-dealer-name {
+    color: black;
+  }
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+.small-vehicle-card {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.svc-image {
+  will-change: transform;
+}
+
+/* ===== ENHANCED TOUCH SUPPORT ===== */
+@media (hover: none) and (pointer: coarse) {
+  .small-vehicle-card {
+    /* Optimize for touch */
+    touch-action: manipulation;
+  }
+  
+  .svc-share-button {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+  }
+  
+  .svc-dealer-info.dealership {
+    min-height: 44px;
+    padding: 8px;
+  }
+}
+
+/* ===== DARK THEME ENHANCEMENTS ===== */
+@media (prefers-color-scheme: dark) {
+  .small-vehicle-card {
+    background: rgba(10, 10, 10, 0.95);
+    border-color: #1a1a1a;
+  }
+  
+  .svc-image-placeholder {
+    background: rgba(15, 15, 15, 0.9);
+  }
+  
+  .svc-spec {
+    background: rgba(0, 0, 0, 0.5);
   }
 }

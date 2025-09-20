@@ -6,6 +6,7 @@
   gap: 12px;
   margin-bottom: 16px;
   padding: 8px 0;
+  contain: layout;
 }
 
 .view-mode-label {
@@ -13,6 +14,7 @@
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .view-mode-buttons {
@@ -23,6 +25,8 @@
   border-radius: 8px;
   padding: 4px;
   border: 1px solid #2c2c2c;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .view-mode-btn {
@@ -40,64 +44,158 @@
   transition: all 0.2s ease;
   min-width: 80px;
   justify-content: center;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.view-mode-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
 }
 
 .view-mode-btn:hover {
   background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.view-mode-btn:hover::before {
+  left: 100%;
+}
+
+.view-mode-btn:focus {
+  outline: 2px solid rgba(255, 51, 0, 0.5);
+  outline-offset: 2px;
 }
 
 .view-mode-btn.active {
   background: #ff3300;
   color: #ffffff;
   box-shadow: 0 2px 8px rgba(255, 51, 0, 0.3);
+  border: 1px solid rgba(255, 51, 0, 0.5);
 }
 
 .view-mode-btn.active:hover {
   background: #ff4d1a;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.4);
+}
+
+.view-mode-btn.active::before {
+  display: none;
 }
 
 .view-mode-text {
   font-size: 12px;
   white-space: nowrap;
+  font-weight: 500;
+}
+
+.view-mode-btn svg {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.view-mode-btn:hover svg {
+  transform: scale(1.1);
+}
+
+.view-mode-btn.active svg {
+  transform: scale(1.05);
+}
+
+/* Ripple effect */
+.view-mode-btn:active {
+  transform: scale(0.98);
+}
+
+.view-mode-btn:active:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Loading state */
+.view-mode-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.view-mode-btn:disabled:hover {
+  background: transparent;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
   .view-mode-selector {
-    display: none; /* Hide on mobile */
+    display: none; /* Hide completely on mobile */
   }
 }
 
 @media (max-width: 992px) {
+  .view-mode-selector {
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+  
   .view-mode-btn {
     min-width: 70px;
     padding: 6px 10px;
+    gap: 4px;
   }
   
   .view-mode-text {
     font-size: 11px;
   }
+  
+  .view-mode-label {
+    font-size: 13px;
+  }
 }
 
-/* High contrast mode */
+@media (max-width: 1200px) {
+  .view-mode-btn {
+    min-width: 75px;
+    padding: 7px 11px;
+  }
+}
+
+/* High contrast mode support */
 @media (prefers-contrast: high) {
   .view-mode-buttons {
     border: 2px solid #ffffff;
+    background: rgba(0, 0, 0, 0.9);
   }
   
   .view-mode-btn {
     border: 1px solid transparent;
   }
   
+  .view-mode-btn:hover {
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
   .view-mode-btn.active {
     border-color: #ffffff;
+    background: #ff3300;
+  }
+  
+  .view-mode-label {
+    color: #ffffff;
   }
 }
 
-/* Reduced motion */
+/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .view-mode-btn {
     transition: none;
@@ -109,5 +207,106 @@
   
   .view-mode-btn.active:hover {
     transform: none;
+  }
+  
+  .view-mode-btn svg {
+    transition: none;
+  }
+  
+  .view-mode-btn:hover svg {
+    transform: none;
+  }
+  
+  .view-mode-btn.active svg {
+    transform: none;
+  }
+  
+  .view-mode-btn::before {
+    display: none;
+  }
+}
+
+/* Dark theme optimization */
+@media (prefers-color-scheme: dark) {
+  .view-mode-buttons {
+    background: rgba(10, 10, 10, 0.9);
+    border-color: #1a1a1a;
+  }
+  
+  .view-mode-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Print styles */
+@media print {
+  .view-mode-selector {
+    display: none;
+  }
+}
+
+/* Focus-visible support for better accessibility */
+.view-mode-btn:focus-visible {
+  outline: 2px solid #ff3300;
+  outline-offset: 2px;
+}
+
+.view-mode-btn:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Performance optimizations */
+.view-mode-selector {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.view-mode-btn {
+  will-change: transform, background-color;
+}
+
+/* Enhance touch targets for mobile users */
+@media (hover: none) and (pointer: coarse) {
+  .view-mode-btn {
+    min-height: 44px;
+    min-width: 88px;
+    padding: 12px 16px;
+    touch-action: manipulation;
+  }
+  
+  .view-mode-text {
+    font-size: 14px;
+  }
+}
+
+/* Custom tooltip on hover */
+.view-mode-btn[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 4px;
+  opacity: 0;
+  animation: tooltipFadeIn 0.3s ease forwards;
+}
+
+@keyframes tooltipFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Remove tooltip on mobile */
+@media (max-width: 768px) {
+  .view-mode-btn[title]:hover::after {
+    display: none;
   }
 }
