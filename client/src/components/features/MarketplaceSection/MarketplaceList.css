@@ -895,3 +895,180 @@ body.section-transitioning * {
   will-change: transform;
   transform: translateZ(0);
 }
+
+/* Add these CSS rules to the END of client/src/components/features/MarketplaceSection/MarketplaceList.css */
+
+/* ===== VIEW MODE SPECIFIC GRIDS ===== */
+
+/* Grid View - Default large cards */
+.marketplace-grid-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+  contain: layout;
+}
+
+/* Compact View - Small cards in grid */
+.marketplace-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+  contain: layout;
+}
+
+/* List View - Single column horizontal cards */
+.marketplace-grid-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  contain: layout;
+}
+
+/* ===== RESPONSIVE GRID LAYOUTS ===== */
+
+/* Small Tablet and up */
+@media (min-width: 576px) {
+  .marketplace-grid-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .marketplace-grid-compact {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+  }
+  
+  .marketplace-grid-list {
+    gap: 10px;
+  }
+}
+
+@media (min-width: 768px) {
+  .marketplace-grid-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .marketplace-grid-compact {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+  }
+  
+  .marketplace-grid-list {
+    gap: 12px;
+  }
+}
+
+@media (min-width: 992px) {
+  .marketplace-grid-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  
+  .marketplace-grid-compact {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  
+  .marketplace-grid-list {
+    gap: 14px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .marketplace-grid-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  
+  .marketplace-grid-compact {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  
+  .marketplace-grid-list {
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .marketplace-grid-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  
+  .marketplace-grid-compact {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 18px;
+  }
+  
+  .marketplace-grid-list {
+    gap: 18px;
+  }
+}
+
+/* ===== MOBILE OPTIMIZATIONS ===== */
+@media (max-width: 767px) {
+  .marketplace-grid-grid,
+  .marketplace-grid-compact,
+  .marketplace-grid-list {
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  
+  .marketplace-grid-compact {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+/* ===== VIEW MODE SPECIFIC PERFORMANCE OPTIMIZATIONS ===== */
+.marketplace-grid-grid,
+.marketplace-grid-compact,
+.marketplace-grid-list {
+  contain: layout;
+  will-change: scroll-position;
+}
+
+/* Smooth transitions when switching view modes */
+.marketplace-grid-grid,
+.marketplace-grid-compact,
+.marketplace-grid-list {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Prevent layout shift during view mode transitions */
+.marketplace-sections {
+  min-height: 400px;
+}
+
+/* Enhanced mobile horizontal scrolling for view modes */
+@media (max-width: 768px) {
+  .marketplace-grid-grid.mobile-horizontal,
+  .marketplace-grid-compact.mobile-horizontal,
+  .marketplace-grid-list.mobile-horizontal {
+    display: block;
+    gap: 0;
+    margin-bottom: 4px;
+  }
+}
+
+/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+@media (prefers-reduced-motion: reduce) {
+  .marketplace-grid-grid,
+  .marketplace-grid-compact,
+  .marketplace-grid-list {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .marketplace-grid-grid,
+  .marketplace-grid-compact,
+  .marketplace-grid-list {
+    border: 1px solid transparent;
+  }
+}

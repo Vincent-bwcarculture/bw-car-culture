@@ -4,9 +4,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { debounce, throttle } from 'lodash';
 import { listingService } from '../../../services/listingService.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
+import SmallVehicleCard from '../../shared/VehicleCard/SmallVehicleCard.js';
+import ListVehicleCard from '../../shared/VehicleCard/ListVehicleCard.js';
 import ShareModal from '../../shared/ShareModal.js';
 import CreateListingPromoCard from './CreateListingPromoCard.js';
-import MarketplaceFilters from './MarketplaceFilters.js'; 
+import MarketplaceFilters from './MarketplaceFilters.js';
+import ViewModeSelector from './ViewModeSelector.js';
 import './MarketplaceList.css';
 
 const CARS_PER_PAGE = 12;
@@ -36,6 +39,9 @@ const MarketplaceList = () => {
   const [activeSection, setActiveSection] = useState('all');
   const [isRetrying, setIsRetrying] = useState(false);
   
+  // View mode state
+  const [viewMode, setViewMode] = useState('grid'); // 'grid', 'list', 'compact'
+  
   // Performance state
   const [visibleItems, setVisibleItems] = useState(CARS_PER_PAGE);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -57,6 +63,56 @@ const MarketplaceList = () => {
 
   // Similar cars functionality (only for mobile)
   const [similarCarsData, setSimilarCarsData] = useState(new Map());
+
+  // View mode handling
+  const handleViewModeChange = useCallback((mode) => {
+    setViewMode(mode);
+    try {
+      localStorage.setItem('marketplace_view_mode', mode);
+    } catch (error) {
+      console.warn('Failed to save view mode preference:', error);
+    }
+  }, []);
+
+  // Helper function to render the appropriate card component
+  const renderVehicleCard = useCallback((car, index, section = '') => {
+    const key = car._id || car.id || `${section}-${index}`;
+    const commonProps = {
+      key,
+      car,
+      onShare: handleShare,
+      compact: isMobile
+    };
+
+    switch (viewMode) {
+      case 'list':
+        return <ListVehicleCard {...commonProps} />;
+      case 'compact':
+        return <SmallVehicleCard {...commonProps} />;
+      case 'grid':
+      default:
+        return <VehicleCard {...commonProps} />;
+    }
+  }, [viewMode, isMobile]);
+
+  // Update grid className based on view mode
+  const getGridClassName = useCallback((baseClass) => {
+    const mobileClass = isMobile ? 'mobile-horizontal' : '';
+    const viewClass = `${baseClass}-${viewMode}`;
+    return `${baseClass} ${viewClass} ${mobileClass}`.trim();
+  }, [viewMode, isMobile]);
+
+  // Load saved view mode preference
+  useEffect(() => {
+    try {
+      const savedViewMode = localStorage.getItem('marketplace_view_mode');
+      if (savedViewMode && ['grid', 'list', 'compact'].includes(savedViewMode)) {
+        setViewMode(savedViewMode);
+      }
+    } catch (error) {
+      console.warn('Failed to load view mode preference:', error);
+    }
+  }, []);
 
   // Initialize active section from URL immediately with caching
   useEffect(() => {
@@ -993,11 +1049,7 @@ const MarketplaceList = () => {
               {car.isPromoCard ? (
                 <CreateListingPromoCard compact={true} />
               ) : (
-                <VehicleCard 
-                  car={car}
-                  onShare={handleShare}
-                  compact={true}
-                />
+                renderVehicleCard(car, index, 'mobile')
               )}
             </div>
           ))}
@@ -1039,6 +1091,11 @@ const MarketplaceList = () => {
             )}
           </div>
         </div>
+        <ViewModeSelector 
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+          isMobile={isMobile}
+        />
       </div>
 
       {/* Loading State */}
@@ -1102,7 +1159,7 @@ const MarketplaceList = () => {
                   )}
                 </p>
               </div>
-              <div className={`marketplace-grid premium-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
+              <div className={getGridClassName('marketplace-grid premium-grid')}>
                 {isMobile ? (
                   displayData.displayCars.map((car, index) => {
                     if (car.isPromoCard) {
@@ -1133,12 +1190,7 @@ const MarketplaceList = () => {
                     car.isPromoCard ? (
                       <CreateListingPromoCard key={car._id} compact={false} />
                     ) : (
-                      <VehicleCard 
-                        key={car._id || car.id || `premium-${index}`}
-                        car={car}
-                        onShare={handleShare}
-                        compact={isMobile}
-                      />
+                      renderVehicleCard(car, index, 'premium')
                     )
                   ))
                 )}
@@ -1163,7 +1215,7 @@ const MarketplaceList = () => {
                   )}
                 </p>
               </div>
-              <div className={`marketplace-grid savings-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
+              <div className={getGridClassName('marketplace-grid savings-grid')}>
                 {isMobile ? (
                   displayData.displayCars.map((car, index) => {
                     if (car.isPromoCard) {
@@ -1194,12 +1246,7 @@ const MarketplaceList = () => {
                     car.isPromoCard ? (
                       <CreateListingPromoCard key={car._id} compact={false} />
                     ) : (
-                      <VehicleCard 
-                        key={car._id || car.id || `savings-${index}`}
-                        car={car}
-                        onShare={handleShare}
-                        compact={isMobile}
-                      />
+                      renderVehicleCard(car, index, 'savings')
                     )
                   ))
                 )}
@@ -1226,7 +1273,7 @@ const MarketplaceList = () => {
                   )}
                 </p>
               </div>
-              <div className={`marketplace-grid private-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
+              <div className={getGridClassName('marketplace-grid private-grid')}>
                 {isMobile ? (
                   displayData.displayCars.map((car, index) => {
                     if (car.isPromoCard) {
@@ -1257,12 +1304,7 @@ const MarketplaceList = () => {
                     car.isPromoCard ? (
                       <CreateListingPromoCard key={car._id} compact={false} />
                     ) : (
-                      <VehicleCard 
-                        key={car._id || car.id || `private-${index}`}
-                        car={car}
-                        onShare={handleShare}
-                        compact={isMobile}
-                      />
+                      renderVehicleCard(car, index, 'private')
                     )
                   ))
                 )}
@@ -1284,7 +1326,7 @@ const MarketplaceList = () => {
                   )}
                 </p>
               </div>
-              <div className={`marketplace-grid all-grid ${isMobile ? 'mobile-horizontal' : ''}`}>
+              <div className={getGridClassName('marketplace-grid all-grid')}>
                 {isMobile ? (
                   displayData.displayCars.map((car, index) => {
                     if (car.isPromoCard) {
@@ -1315,12 +1357,7 @@ const MarketplaceList = () => {
                     car.isPromoCard ? (
                       <CreateListingPromoCard key={car._id} compact={false} />
                     ) : (
-                      <VehicleCard 
-                        key={car._id || car.id || `all-${index}`}
-                        car={car}
-                        onShare={handleShare}
-                        compact={isMobile}
-                      />
+                      renderVehicleCard(car, index, 'all')
                     )
                   ))
                 )}

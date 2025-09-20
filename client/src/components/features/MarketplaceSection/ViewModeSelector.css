@@ -1,0 +1,113 @@
+/* client/src/components/features/MarketplaceSection/ViewModeSelector.css */
+
+.view-mode-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 8px 0;
+}
+
+.view-mode-label {
+  color: #cccccc;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.view-mode-buttons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(20, 20, 20, 0.8);
+  border-radius: 8px;
+  padding: 4px;
+  border: 1px solid #2c2c2c;
+}
+
+.view-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #aaaaaa;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+  justify-content: center;
+}
+
+.view-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.view-mode-btn.active {
+  background: #ff3300;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(255, 51, 0, 0.3);
+}
+
+.view-mode-btn.active:hover {
+  background: #ff4d1a;
+  transform: translateY(-1px);
+}
+
+.view-mode-text {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .view-mode-selector {
+    display: none; /* Hide on mobile */
+  }
+}
+
+@media (max-width: 992px) {
+  .view-mode-btn {
+    min-width: 70px;
+    padding: 6px 10px;
+  }
+  
+  .view-mode-text {
+    font-size: 11px;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .view-mode-buttons {
+    border: 2px solid #ffffff;
+  }
+  
+  .view-mode-btn {
+    border: 1px solid transparent;
+  }
+  
+  .view-mode-btn.active {
+    border-color: #ffffff;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .view-mode-btn {
+    transition: none;
+  }
+  
+  .view-mode-btn:hover {
+    transform: none;
+  }
+  
+  .view-mode-btn.active:hover {
+    transform: none;
+  }
+}
