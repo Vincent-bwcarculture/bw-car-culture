@@ -137,16 +137,9 @@
 /* ===== FILTERS HEADER ===== */
 .filters-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin-bottom: 1rem;
-}
-
-.filters-header h2 {
-  font-size: 1.2rem;
-  color: #ffffff;
-  margin: 0;
-  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 .toggle-filters-btn {
@@ -156,9 +149,11 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
-  padding: 6px 12px;
-  border-radius: 4px;
+  letter-spacing: 0.3px;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 500;
 }
 
 .toggle-filters-btn:hover {

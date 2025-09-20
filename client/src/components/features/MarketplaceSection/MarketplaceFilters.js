@@ -422,7 +422,6 @@ const MarketplaceFilters = ({
         </div>
 
         <div className="filters-header">
-          <h2>{currentSectionConfig.title}</h2>
           <button 
             className="toggle-filters-btn"
             onClick={() => setExpanded(!expanded)}
