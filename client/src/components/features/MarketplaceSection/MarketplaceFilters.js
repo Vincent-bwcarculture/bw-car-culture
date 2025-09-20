@@ -433,8 +433,9 @@ const MarketplaceFilters = ({
           </button>
         </div>
         
-        {/* Quick Search Row */}
+        {/* UPDATED: Quick Search and Filters Row - Mobile Optimized */}
         <div className="filters-quick-row">
+          {/* Search Row - Full Width */}
           <div className="filter-control search-filter">
             <input
               type="text"
@@ -445,55 +446,58 @@ const MarketplaceFilters = ({
             />
           </div>
           
-          <div className="filter-control">
-            <select
-              value={filters.make}
-              onChange={(e) => handleFilterChange('make', e.target.value)}
-              aria-label="Select vehicle make"
-            >
-              <option value="">All Makes</option>
-              {filterOptions.makes.map(brand => (
-                <option key={brand} value={brand}>{brand}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="filter-control">
-            <select
-              value={filters.model}
-              onChange={(e) => handleFilterChange('model', e.target.value)}
-              disabled={!filters.make}
-              aria-label="Select vehicle model"
-            >
-              <option value="">All Models</option>
-              {filterOptions.models.map(model => (
-                <option key={model} value={model}>{model}</option>
-              ))}
-            </select>
-          </div>
+          {/* NEW: Horizontal Filters Row - Three dropdowns side by side on mobile */}
+          <div className="filters-horizontal-row">
+            <div className="filter-control">
+              <select
+                value={filters.make}
+                onChange={(e) => handleFilterChange('make', e.target.value)}
+                aria-label="Select vehicle make"
+              >
+                <option value="">All Makes</option>
+                {filterOptions.makes.map(brand => (
+                  <option key={brand} value={brand}>{brand}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="filter-control">
+              <select
+                value={filters.model}
+                onChange={(e) => handleFilterChange('model', e.target.value)}
+                disabled={!filters.make}
+                aria-label="Select vehicle model"
+              >
+                <option value="">All Models</option>
+                {filterOptions.models.map(model => (
+                  <option key={model} value={model}>{model}</option>
+                ))}
+              </select>
+            </div>
 
-          {/* ADDED: Sort By Dropdown */}
-          <div className="filter-control">
-            <select
-              value={filters.sortBy || ''}
-              onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-              aria-label="Sort listings by"
-            >
-              <option value="">Sort By</option>
-              <option value="-createdAt">Newest First</option>
-              <option value="createdAt">Oldest First</option>
-              <option value="price">Price: Low to High</option>
-              <option value="-price">Price: High to Low</option>
-              <option value="specifications.year">Year: Old to New</option>
-              <option value="-specifications.year">Year: New to Old</option>
-              <option value="specifications.mileage">Mileage: Low to High</option>
-              <option value="-specifications.mileage">Mileage: High to Low</option>
-              {activeSection === 'savings' && (
-                <option value="-priceOptions.savingsAmount">Highest Savings</option>
-              )}
-            </select>
+            <div className="filter-control">
+              <select
+                value={filters.sortBy || ''}
+                onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                aria-label="Sort listings by"
+              >
+                <option value="">Sort By</option>
+                <option value="-createdAt">Newest First</option>
+                <option value="createdAt">Oldest First</option>
+                <option value="price">Price: Low to High</option>
+                <option value="-price">Price: High to Low</option>
+                <option value="specifications.year">Year: Old to New</option>
+                <option value="-specifications.year">Year: New to Old</option>
+                <option value="specifications.mileage">Mileage: Low to High</option>
+                <option value="-specifications.mileage">Mileage: High to Low</option>
+                {activeSection === 'savings' && (
+                  <option value="-priceOptions.savingsAmount">Highest Savings</option>
+                )}
+              </select>
+            </div>
           </div>
           
+          {/* Action Buttons Row */}
           <div className="quick-action-buttons">
             <button 
               className="apply-filters-btn" 
