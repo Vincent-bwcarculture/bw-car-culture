@@ -72,7 +72,7 @@ const SmallVehicleCard = ({
     
     if (onClick) {
       onClick(processedCar);
-    } else {
+    } else if (processedCar?.id) {
       navigate(`/marketplace/${processedCar.id}`);
     }
   }, [onClick, processedCar, navigate]);
@@ -81,7 +81,7 @@ const SmallVehicleCard = ({
   const handleShareClick = useCallback((e) => {
     e.stopPropagation();
     if (onShare && processedCar) {
-      onShare(processedCar);
+      onShare(processedCar, shareButtonRef.current);
     }
   }, [onShare, processedCar]);
 
@@ -131,6 +131,7 @@ const SmallVehicleCard = ({
     return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().substring(0, 2);
   }, [dealer]);
 
+  // Early return for invalid car data
   if (!processedCar) {
     return (
       <div className="small-vehicle-card error-card">
@@ -223,20 +224,21 @@ const SmallVehicleCard = ({
           <div className="svc-spec">
             <span className="svc-spec-value">
               {processedCar.specifications.mileage ? 
-                `${(processedCar.specifications.mileage / 1000).toFixed(0)}k km` : 'N/A'}
+                `${processedCar.specifications.mileage.toLocaleString()}km` : 'N/A'}
             </span>
           </div>
           <div className="svc-spec">
             <span className="svc-spec-value">
-              {processedCar.specifications?.transmission === 'automatic' ? 'Auto' : 
-               processedCar.specifications?.transmission === 'manual' ? 'Manual' : 'N/A'}
+              {processedCar.specifications?.transmission ? 
+                processedCar.specifications.transmission.charAt(0).toUpperCase() + 
+                processedCar.specifications.transmission.slice(1) : 'Auto'}
             </span>
           </div>
           <div className="svc-spec">
             <span className="svc-spec-value">
-              {processedCar.specifications?.fuelType === 'petrol' ? 'Petrol' :
-               processedCar.specifications?.fuelType === 'diesel' ? 'Diesel' :
-               processedCar.specifications?.fuelType === 'electric' ? 'Electric' : 'N/A'}
+              {processedCar.specifications?.fuelType ? 
+                processedCar.specifications.fuelType.charAt(0).toUpperCase() + 
+                processedCar.specifications.fuelType.slice(1) : 'Petrol'}
             </span>
           </div>
         </div>

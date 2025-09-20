@@ -73,7 +73,7 @@ const ListVehicleCard = ({
     
     if (onClick) {
       onClick(processedCar);
-    } else {
+    } else if (processedCar?.id) {
       navigate(`/marketplace/${processedCar.id}`);
     }
   }, [onClick, processedCar, navigate]);
@@ -82,7 +82,7 @@ const ListVehicleCard = ({
   const handleShareClick = useCallback((e) => {
     e.stopPropagation();
     if (onShare && processedCar) {
-      onShare(processedCar);
+      onShare(processedCar, shareButtonRef.current);
     }
   }, [onShare, processedCar]);
 
@@ -132,6 +132,7 @@ const ListVehicleCard = ({
     return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().substring(0, 2);
   }, [dealer]);
 
+  // Early return for invalid car data
   if (!processedCar) {
     return (
       <div className="list-vehicle-card error-card">

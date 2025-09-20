@@ -62,13 +62,18 @@ const MarketplaceList = () => {
   const [loadingText, setLoadingText] = useState('Loading vehicles...');
   const [similarCarsData, setSimilarCarsData] = useState(new Map());
 
-  // View mode handling
+  // Enhanced view mode change handler with error handling
   const handleViewModeChange = useCallback((mode) => {
-    if (!['grid', 'list', 'compact'].includes(mode)) {
+    // Validate the view mode
+    const validModes = ['grid', 'list', 'compact'];
+    if (!validModes.includes(mode)) {
       console.warn('Invalid view mode:', mode);
       return;
     }
+
+    console.log('Changing view mode to:', mode);
     setViewMode(mode);
+    
     try {
       localStorage.setItem('marketplace_view_mode', mode);
     } catch (error) {
@@ -76,45 +81,78 @@ const MarketplaceList = () => {
     }
   }, []);
 
-  // Optimized sharing handler (MUST BE BEFORE renderVehicleCard)
+  // Enhanced sharing handler with buttonRef support
   const handleShare = useCallback((car, buttonRef) => {
+    if (!car) {
+      console.warn('No car data provided to handleShare');
+      return;
+    }
+    
     setSelectedCar(car);
     shareButtonRef.current = buttonRef;
     setShareModalOpen(true);
   }, []);
 
-  // Helper function to render the appropriate card component
+  // Enhanced helper function to render the appropriate card component
   const renderVehicleCard = useCallback((car, index, section = '') => {
+    // Return null early if no car data or if it's a promo card
+    if (!car || car.isPromoCard) {
+      return null;
+    }
+
     try {
-      if (!car || car.isPromoCard) return null;
-      
+      // Generate a unique key
       const key = car._id || car.id || `${section}-${index}`;
+      
+      // Common props for all card types
       const commonProps = {
         key,
         car,
         onShare: handleShare,
-        compact: isMobile
+        compact: isMobile,
+        showSavings: true,
+        showDealer: true,
+        className: ''
       };
 
+      // Return the appropriate component based on viewMode
       switch (viewMode) {
         case 'list':
+          // Ensure ListVehicleCard component is available
+          if (!ListVehicleCard) {
+            console.warn('ListVehicleCard component not available, falling back to VehicleCard');
+            return <VehicleCard {...commonProps} />;
+          }
           return <ListVehicleCard {...commonProps} />;
+          
         case 'compact':
+          // Ensure SmallVehicleCard component is available
+          if (!SmallVehicleCard) {
+            console.warn('SmallVehicleCard component not available, falling back to VehicleCard');
+            return <VehicleCard {...commonProps} />;
+          }
           return <SmallVehicleCard {...commonProps} />;
+          
         case 'grid':
         default:
           return <VehicleCard {...commonProps} />;
       }
     } catch (error) {
       console.error('Error rendering vehicle card:', error);
-      // Fallback to default VehicleCard
-      const key = car._id || car.id || `${section}-${index}`;
+      console.error('Car data:', car);
+      console.error('View mode:', viewMode);
+      
+      // Fallback to default VehicleCard with error handling
+      const key = car?._id || car?.id || `error-${section}-${index}`;
       return (
         <VehicleCard 
           key={key}
           car={car}
           onShare={handleShare}
           compact={isMobile}
+          showSavings={true}
+          showDealer={true}
+          className="error-fallback"
         />
       );
     }
