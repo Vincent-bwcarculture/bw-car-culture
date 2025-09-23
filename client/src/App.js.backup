@@ -1,4 +1,4 @@
-// src/App.js - COMPLETE VERSION with all fixes integrated including enhanced error boundary
+// src/App.js - Enhanced with Complete Analytics Integration
 
 // React Core Imports
 import React, { Suspense, useState, useEffect } from 'react';
@@ -165,18 +165,16 @@ const AnalyticsWrapper = ({ children }) => {
         safeTrackPageView(currentPath);
         
         // Track with primary analytics service
-        if (typeof analyticsService !== 'undefined' && analyticsService?.trackPageView) {
-          await analyticsService.trackPageView({
-            page: currentPath,
-            title: document.title,
-            metadata: {
-              previousPage: lastPath.current || null,
-              timeOnPreviousPage,
-              referrer: document.referrer,
-              sessionDuration: Date.now() - sessionStartTime.current
-            }
-          });
-        }
+        await analyticsService.trackPageView({
+          page: currentPath,
+          title: document.title,
+          metadata: {
+            previousPage: lastPath.current || null,
+            timeOnPreviousPage,
+            referrer: document.referrer,
+            sessionDuration: Date.now() - sessionStartTime.current
+          }
+        });
         
         // Update tracking references
         lastPath.current = currentPath;
@@ -187,18 +185,16 @@ const AnalyticsWrapper = ({ children }) => {
         
         // Track the error itself (safe)
         try {
-          if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-            await analyticsService.trackEvent({
-              eventType: 'error',
-              category: 'system',
-              metadata: {
-                errorType: 'AnalyticsWrapperError',
-                errorMessage: error.message,
-                page: currentPath,
-                function: 'pageView'
-              }
-            });
-          }
+          await analyticsService.trackEvent({
+            eventType: 'error',
+            category: 'system',
+            metadata: {
+              errorType: 'AnalyticsWrapperError',
+              errorMessage: error.message,
+              page: currentPath,
+              function: 'pageView'
+            }
+          });
         } catch (trackError) {
           console.warn('Failed to track analytics wrapper error:', trackError);
         }
@@ -231,9 +227,7 @@ const AnalyticsWrapper = ({ children }) => {
             };
             
             // Track with primary analytics service
-            if (typeof analyticsService !== 'undefined' && analyticsService?.trackPerformance) {
-              await analyticsService.trackPerformance(performanceData);
-            }
+            await analyticsService.trackPerformance(performanceData);
             
             // Track with Google Analytics (safe)
             safeTrackTiming('App Performance', 'Page Load', performanceData.metrics.loadTime, location.pathname);
@@ -257,17 +251,11 @@ const AnalyticsWrapper = ({ children }) => {
   return children;
 };
 
-// COMPLETE FIXED: Enhanced Error Boundary Component with all fixes integrated
+// Enhanced Error Boundary Component
 class AppErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { 
-      hasError: false, 
-      error: null, 
-      errorInfo: null,
-      errorCount: 0,
-      lastErrorTime: null
-    };
+    this.state = { hasError: false, error: null, errorInfo: null };
   }
 
   static getDerivedStateFromError(error) {
@@ -277,259 +265,88 @@ class AppErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     console.error('App Error Boundary caught an error:', error, errorInfo);
     
-    // FIXED: Increment error count and track timing
-    const now = Date.now();
-    this.setState(prevState => ({
+    this.setState({
       error: error,
-      errorInfo: errorInfo,
-      errorCount: prevState.errorCount + 1,
-      lastErrorTime: now
-    }));
+      errorInfo: errorInfo
+    });
     
-    // FIXED: Safe error tracking with comprehensive null checks
+    // Track error with new analytics service (primary)
     try {
-      const trackingData = {
+      analyticsService.trackEvent({
         eventType: 'error',
         category: 'system',
         metadata: {
           errorType: 'ReactErrorBoundary',
-          errorMessage: error?.message || 'Unknown error',
-          errorStack: error?.stack || 'No stack trace',
-          componentStack: errorInfo?.componentStack || 'No component stack', // FIXED: Added null check
+          errorMessage: error.message,
+          errorStack: error.stack,
+          componentStack: errorInfo.componentStack,
           page: window.location.pathname,
           timestamp: new Date().toISOString(),
           userAgent: navigator.userAgent,
-          url: window.location.href,
-          errorCount: this.state.errorCount + 1,
-          // Additional debug info
-          props: this.props ? Object.keys(this.props) : [],
-          reactVersion: React.version || 'unknown'
+          url: window.location.href
         }
-      };
-
-      // Track with analytics service (with error handling)
-      if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-        analyticsService.trackEvent(trackingData).catch(err => {
-          console.warn('Analytics tracking failed:', err);
+      }).catch(console.warn);
+    } catch (analyticsError) {
+      console.error('Error tracking failed:', analyticsError);
+    }
+    
+    // Track with internal analytics as fallback
+    try {
+      if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
+        internalAnalytics.trackEvent('error', {
+          category: 'system',
+          metadata: {
+            errorType: 'ReactErrorBoundary',
+            errorMessage: error.message,
+            errorStack: error.stack,
+            componentStack: errorInfo.componentStack,
+            page: window.location.pathname,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            url: window.location.href
+          }
         });
       }
       
-      // Track with internal analytics as fallback
-      if (typeof internalAnalytics !== 'undefined' && internalAnalytics?.trackEvent) {
-        try {
-          internalAnalytics.trackEvent('error', trackingData);
-        } catch (internalError) {
-          console.warn('Internal analytics failed:', internalError);
-        }
-      }
-      
-      // Track with Google Analytics (safe)
-      safeTrackException(error?.message || 'Unknown error', true);
-      
+      // Track with Google Analytics
+      trackException(error.message, true);
     } catch (analyticsError) {
-      console.error('Error tracking failed:', analyticsError);
+      console.error('Fallback error tracking failed:', analyticsError);
     }
 
     // Report to external error service if configured
     if (this.props.onError) {
-      try {
-        this.props.onError(error, errorInfo);
-      } catch (callbackError) {
-        console.error('Error boundary callback failed:', callbackError);
-      }
-    }
-
-    // FIXED: Auto-recovery for repeated errors
-    if (this.state.errorCount >= 3) {
-      console.warn('Multiple errors detected, attempting page reload...');
-      setTimeout(() => {
-        window.location.reload();
-      }, 5000);
-    }
-  }
-
-  handleReset = () => {
-    // FIXED: Check for error patterns
-    if (this.state.errorCount >= 5) {
-      // Too many errors, redirect to safe page
-      window.location.href = '/';
-      return;
-    }
-
-    // FIXED: Reset with improved state management
-    this.setState({ 
-      hasError: false, 
-      error: null,
-      errorInfo: null,
-      // Keep error count to track patterns
-      lastErrorTime: Date.now()
-    });
-
-    // Reload only the current component if possible
-    if (this.props.onReset) {
-      try {
-        this.props.onReset();
-      } catch (resetError) {
-        console.error('Reset callback failed:', resetError);
-        window.location.reload();
-      }
+      this.props.onError(error, errorInfo);
     }
   }
 
   render() {
     if (this.state.hasError) {
-      // FIXED: Enhanced error UI with better information
       return (
-        <div className="error-boundary" style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
-          padding: '20px',
-          backgroundColor: '#1a1a1a',
-          color: '#ffffff',
-          fontFamily: 'Arial, sans-serif'
-        }}>
-          <div className="error-boundary-content" style={{
-            maxWidth: '600px',
-            padding: '30px',
-            backgroundColor: '#2c2c2c',
-            borderRadius: '10px',
-            border: '1px solid #444',
-            textAlign: 'center'
-          }}>
-            <h2 style={{ color: '#ff6b6b', marginBottom: '20px' }}>
-              Something went wrong
-            </h2>
-            <p style={{ marginBottom: '20px', lineHeight: '1.6' }}>
-              We're sorry, but something unexpected happened. Our team has been notified.
-            </p>
-            
-            {/* FIXED: Show error count if multiple errors */}
-            {this.state.errorCount > 1 && (
-              <div style={{
-                backgroundColor: '#ff6b6b',
-                color: 'white',
-                padding: '10px',
-                borderRadius: '5px',
-                marginBottom: '20px',
-                fontSize: '14px'
-              }}>
-                Multiple errors detected ({this.state.errorCount}). 
-                {this.state.errorCount >= 3 && ' Page will reload automatically in 5 seconds.'}
-              </div>
-            )}
-            
-            {/* FIXED: Enhanced error details for development */}
-            {process.env.NODE_ENV === 'development' && (
-              <details style={{ 
-                marginTop: '20px', 
-                textAlign: 'left',
-                backgroundColor: '#1a1a1a',
-                padding: '15px',
-                borderRadius: '5px',
-                border: '1px solid #555'
-              }}>
-                <summary style={{ 
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  marginBottom: '10px',
-                  color: '#ff6b6b'
-                }}>
-                  Error Details (Development)
-                </summary>
-                <div style={{ 
-                  fontSize: '12px',
-                  fontFamily: 'monospace',
-                  whiteSpace: 'pre-wrap',
-                  lineHeight: '1.4'
-                }}>
-                  <strong>Error Message:</strong><br/>
-                  {this.state.error ? this.state.error.toString() : 'No error details available'}
-                  
-                  <br/><br/>
-                  <strong>Component Stack:</strong><br/>
-                  {this.state.errorInfo?.componentStack || 'No component stack available'}
-                  
-                  <br/><br/>
-                  <strong>Error Count:</strong> {this.state.errorCount}<br/>
-                  <strong>Last Error:</strong> {this.state.lastErrorTime ? new Date(this.state.lastErrorTime).toLocaleString() : 'N/A'}<br/>
-                  <strong>Page:</strong> {window.location.pathname}<br/>
-                  <strong>User Agent:</strong> {navigator.userAgent}
-                </div>
-              </details>
-            )}
-            
-            {/* FIXED: Enhanced action buttons */}
-            <div style={{ marginTop: '30px' }}>
-              {this.state.errorCount < 3 && (
-                <button 
-                  onClick={this.handleReset}
-                  style={{ 
-                    padding: '12px 24px',
-                    marginRight: '15px',
-                    backgroundColor: '#4CAF50',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    fontWeight: 'bold'
-                  }}
-                  onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-                  onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
-                >
-                  Try Again
-                </button>
-              )}
-              
-              <button 
-                onClick={() => window.location.reload()}
-                style={{ 
-                  padding: '12px 24px',
-                  marginRight: '15px',
-                  backgroundColor: '#2196F3',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  fontWeight: 'bold'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#1976D2'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#2196F3'}
-              >
-                Reload Page
-              </button>
-              
-              <button 
-                onClick={() => window.location.href = '/'}
-                style={{ 
-                  padding: '12px 24px',
-                  backgroundColor: '#ff9800',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  fontWeight: 'bold'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#f57c00'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#ff9800'}
-              >
-                Go to Homepage
-              </button>
-            </div>
-            
-            {/* Additional help text */}
-            <p style={{ 
-              marginTop: '20px', 
-              fontSize: '14px', 
-              color: '#ccc',
-              lineHeight: '1.5'
-            }}>
-              If this problem persists, please try clearing your browser cache or contact support.
-            </p>
+        <div className="error-boundary">
+          <div className="error-boundary-content">
+            <h2>Something went wrong</h2>
+            <p>We're sorry, but something unexpected happened.</p>
+            <details style={{ whiteSpace: 'pre-wrap', marginTop: '1rem' }}>
+              <summary>Error Details (Click to expand)</summary>
+              {this.state.error && this.state.error.toString()}
+              <br />
+              {this.state.errorInfo.componentStack}
+            </details>
+            <button 
+              onClick={() => window.location.reload()} 
+              style={{ 
+                marginTop: '1rem', 
+                padding: '0.5rem 1rem', 
+                backgroundColor: '#ff3300', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Reload Page
+            </button>
           </div>
         </div>
       );
@@ -551,30 +368,24 @@ const PlaceholderPage = ({ title }) => {
   // Track placeholder page views
   useEffect(() => {
     // Track with new analytics service (primary)
-    if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-      analyticsService.trackEvent({
-        eventType: 'placeholder_page_view',
+    analyticsService.trackEvent({
+      eventType: 'placeholder_page_view',
+      category: 'content',
+      metadata: {
+        placeholderTitle: title,
+        page: window.location.pathname
+      }
+    }).catch(console.warn);
+    
+    // Track with internal analytics as fallback
+    if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
+      internalAnalytics.trackEvent('placeholder_page_view', {
         category: 'content',
         metadata: {
           placeholderTitle: title,
           page: window.location.pathname
         }
-      }).catch(console.warn);
-    }
-    
-    // Track with internal analytics as fallback
-    if (typeof internalAnalytics !== 'undefined' && internalAnalytics?.trackEvent) {
-      try {
-        internalAnalytics.trackEvent('placeholder_page_view', {
-          category: 'content',
-          metadata: {
-            placeholderTitle: title,
-            page: window.location.pathname
-          }
-        });
-      } catch (error) {
-        console.warn('Internal analytics failed:', error);
-      }
+      });
     }
   }, [title]);
 
@@ -594,32 +405,26 @@ const HomeContent = () => {
   // Track home page engagement
   useEffect(() => {
     // Track with new analytics service (primary)
-    if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-      analyticsService.trackEvent({
-        eventType: 'home_page_load',
+    analyticsService.trackEvent({
+      eventType: 'home_page_load',
+      category: 'content',
+      metadata: {
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        referrer: document.referrer
+      }
+    }).catch(console.warn);
+    
+    // Track with internal analytics as fallback
+    if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
+      internalAnalytics.trackEvent('home_page_load', {
         category: 'content',
         metadata: {
           timestamp: new Date().toISOString(),
           userAgent: navigator.userAgent,
           referrer: document.referrer
         }
-      }).catch(console.warn);
-    }
-    
-    // Track with internal analytics as fallback
-    if (typeof internalAnalytics !== 'undefined' && internalAnalytics?.trackEvent) {
-      try {
-        internalAnalytics.trackEvent('home_page_load', {
-          category: 'content',
-          metadata: {
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent,
-            referrer: document.referrer
-          }
-        });
-      } catch (error) {
-        console.warn('Internal analytics failed:', error);
-      }
+      });
     }
   }, []);
 
@@ -628,24 +433,18 @@ const HomeContent = () => {
     setCarFilters(newFilters);
     
     // Track filter usage with new analytics service (primary)
-    if (typeof analyticsService !== 'undefined' && analyticsService?.trackFilterUsage) {
-      analyticsService.trackFilterUsage(newFilters, 0).catch(console.warn);
-    }
+    analyticsService.trackFilterUsage(newFilters, 0).catch(console.warn);
     
     // Track with internal analytics as fallback
-    if (typeof internalAnalytics !== 'undefined' && internalAnalytics?.trackEvent) {
-      try {
-        internalAnalytics.trackEvent('filter_change', {
-          category: 'interaction',
-          metadata: {
-            filters: newFilters,
-            filterCount: Object.keys(newFilters).length,
-            page: 'home'
-          }
-        });
-      } catch (error) {
-        console.warn('Internal analytics failed:', error);
-      }
+    if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
+      internalAnalytics.trackEvent('filter_change', {
+        category: 'interaction',
+        metadata: {
+          filters: newFilters,
+          filterCount: Object.keys(newFilters).length,
+          page: 'home'
+        }
+      });
     }
   };
 
@@ -655,59 +454,47 @@ const HomeContent = () => {
     
     if (performed) {
       // Track search with new analytics service (primary)
-      if (typeof analyticsService !== 'undefined' && analyticsService?.trackSearch) {
-        analyticsService.trackSearch({
-          query: 'home_search',
-          category: 'general',
-          resultsCount: 0,
-          filters: carFilters
-        }).catch(console.warn);
-      }
+      analyticsService.trackSearch({
+        query: 'home_search',
+        category: 'general',
+        resultsCount: 0,
+        filters: carFilters
+      }).catch(console.warn);
       
       // Track with internal analytics as fallback
-      if (typeof internalAnalytics !== 'undefined' && internalAnalytics?.trackEvent) {
-        try {
-          internalAnalytics.trackEvent('search_performed', {
-            category: 'conversion',
-            metadata: {
-              source: 'home_page',
-              filters: carFilters,
-              hasFilters: Object.keys(carFilters).length > 0
-            }
-          });
-        } catch (error) {
-          console.warn('Internal analytics failed:', error);
-        }
+      if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
+        internalAnalytics.trackEvent('search_performed', {
+          category: 'conversion',
+          metadata: {
+            source: 'home_page',
+            filters: carFilters,
+            hasFilters: Object.keys(carFilters).length > 0
+          }
+        });
       }
     }
   };
 
   const handleExpandFilter = () => {
     // Track filter expansion with new analytics service (primary)
-    if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-      analyticsService.trackEvent({
-        eventType: 'filter_expand',
+    analyticsService.trackEvent({
+      eventType: 'filter_expand',
+      category: 'interaction',
+      metadata: {
+        action: 'expand_filters',
+        source: 'search_results'
+      }
+    }).catch(console.warn);
+    
+    // Track with internal analytics as fallback
+    if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
+      internalAnalytics.trackEvent('filter_expand', {
         category: 'interaction',
         metadata: {
           action: 'expand_filters',
           source: 'search_results'
         }
-      }).catch(console.warn);
-    }
-    
-    // Track with internal analytics as fallback
-    if (typeof internalAnalytics !== 'undefined' && internalAnalytics?.trackEvent) {
-      try {
-        internalAnalytics.trackEvent('filter_expand', {
-          category: 'interaction',
-          metadata: {
-            action: 'expand_filters',
-            source: 'search_results'
-          }
-        });
-      } catch (error) {
-        console.warn('Internal analytics failed:', error);
-      }
+      });
     }
     
     // Find the filter element and scroll to it
@@ -774,9 +561,20 @@ const ProtectedRoute = ({ children, requiredRoles = [], adminOnly = false }) => 
   useEffect(() => {
     if (!loading) {
       // Track with new analytics service (primary)
-      if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-        analyticsService.trackEvent({
-          eventType: 'auth_check',
+      analyticsService.trackEvent({
+        eventType: 'auth_check',
+        category: 'system',
+        metadata: {
+          isAuthenticated,
+          requiredRoles: roles,
+          userRole: user?.role || null,
+          page: window.location.pathname
+        }
+      }).catch(console.warn);
+      
+      // Track with internal analytics as fallback
+      if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
+        internalAnalytics.trackEvent('auth_check', {
           category: 'system',
           metadata: {
             isAuthenticated,
@@ -784,24 +582,7 @@ const ProtectedRoute = ({ children, requiredRoles = [], adminOnly = false }) => 
             userRole: user?.role || null,
             page: window.location.pathname
           }
-        }).catch(console.warn);
-      }
-      
-      // Track with internal analytics as fallback
-      if (typeof internalAnalytics !== 'undefined' && internalAnalytics?.trackEvent) {
-        try {
-          internalAnalytics.trackEvent('auth_check', {
-            category: 'system',
-            metadata: {
-              isAuthenticated,
-              requiredRoles: roles,
-              userRole: user?.role || null,
-              page: window.location.pathname
-            }
-          });
-        } catch (error) {
-          console.warn('Internal analytics failed:', error);
-        }
+        });
       }
     }
   }, [isAuthenticated, loading, user, roles]);
@@ -812,31 +593,25 @@ const ProtectedRoute = ({ children, requiredRoles = [], adminOnly = false }) => 
   
   if (!isAuthenticated) {
     // Track authentication redirect
-    if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-      analyticsService.trackEvent({
-        eventType: 'auth_redirect',
+    analyticsService.trackEvent({
+      eventType: 'auth_redirect',
+      category: 'conversion',
+      metadata: {
+        fromPage: window.location.pathname,
+        reason: 'not_authenticated',
+        requiredRoles: roles
+      }
+    }).catch(console.warn);
+    
+    if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
+      internalAnalytics.trackEvent('auth_redirect', {
         category: 'conversion',
         metadata: {
           fromPage: window.location.pathname,
           reason: 'not_authenticated',
           requiredRoles: roles
         }
-      }).catch(console.warn);
-    }
-    
-    if (typeof internalAnalytics !== 'undefined' && internalAnalytics?.trackEvent) {
-      try {
-        internalAnalytics.trackEvent('auth_redirect', {
-          category: 'conversion',
-          metadata: {
-            fromPage: window.location.pathname,
-            reason: 'not_authenticated',
-            requiredRoles: roles
-          }
-        });
-      } catch (error) {
-        console.warn('Internal analytics failed:', error);
-      }
+      });
     }
     
     return <Navigate to="/login" replace />;
@@ -845,31 +620,25 @@ const ProtectedRoute = ({ children, requiredRoles = [], adminOnly = false }) => 
   // Check for role requirements if specified
   if (roles.length > 0 && (!user || !roles.includes(user.role))) {
     // Track authorization failure
-    if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-      analyticsService.trackEvent({
-        eventType: 'auth_unauthorized',
+    analyticsService.trackEvent({
+      eventType: 'auth_unauthorized',
+      category: 'system',
+      metadata: {
+        userRole: user?.role || null,
+        requiredRoles: roles,
+        page: window.location.pathname
+      }
+    }).catch(console.warn);
+    
+    if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
+      internalAnalytics.trackEvent('auth_unauthorized', {
         category: 'system',
         metadata: {
           userRole: user?.role || null,
           requiredRoles: roles,
           page: window.location.pathname
         }
-      }).catch(console.warn);
-    }
-    
-    if (typeof internalAnalytics !== 'undefined' && internalAnalytics?.trackEvent) {
-      try {
-        internalAnalytics.trackEvent('auth_unauthorized', {
-          category: 'system',
-          metadata: {
-            userRole: user?.role || null,
-            requiredRoles: roles,
-            page: window.location.pathname
-          }
-        });
-      } catch (error) {
-        console.warn('Internal analytics failed:', error);
-      }
+      });
     }
     
     return <Navigate to="/unauthorized" replace />;
@@ -1394,16 +1163,14 @@ function App() {
   useEffect(() => {
     const initializeAnalytics = async () => {
       try {
-        console.log('Initializing analytics systems...');
+        console.log('🔧 Initializing analytics systems...');
         
         // Initialize primary analytics service first
         try {
-          if (typeof analyticsService !== 'undefined' && analyticsService?.init) {
-            analyticsService.init();
-            console.log('Primary analytics service initialized');
-          }
+          analyticsService.init();
+          console.log('✅ Primary analytics service initialized');
         } catch (serviceError) {
-          console.error('Primary analytics service failed:', serviceError);
+          console.error('❌ Primary analytics service failed:', serviceError);
         }
         
         // Initialize Google Analytics with delay and error handling
@@ -1414,61 +1181,57 @@ function App() {
           // Only initialize GA if the function exists and we have an ID
           if (typeof initializeGA === 'function') {
             await initializeGA();
-            console.log('Google Analytics initialized');
+            console.log('✅ Google Analytics initialized');
           } else {
-            console.log('Google Analytics initialization skipped (function not available)');
+            console.log('📊 Google Analytics initialization skipped (function not available)');
           }
         } catch (gaError) {
-          console.warn('Google Analytics failed to initialize:', gaError);
+          console.warn('⚠️ Google Analytics failed to initialize:', gaError);
           // Don't let GA failures block the app
         }
         
         // Track app initialization with primary analytics only
         try {
-          if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-            await analyticsService.trackEvent({
-              eventType: 'app_init',
-              category: 'system',
-              metadata: {
-                timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent,
-                screenResolution: typeof window !== 'undefined' && window.screen ? 
-                  `${window.screen.width}x${window.screen.height}` : 'unknown',
-                viewport: `${window.innerWidth}x${window.innerHeight}`,
-                language: navigator.language,
-                platform: navigator.platform,
-                cookieEnabled: navigator.cookieEnabled,
-                connectionType: navigator.connection?.effectiveType || 'unknown'
-              }
-            });
-            console.log('App initialization tracked');
-          }
+          await analyticsService.trackEvent({
+            eventType: 'app_init',
+            category: 'system',
+            metadata: {
+              timestamp: new Date().toISOString(),
+              userAgent: navigator.userAgent,
+              screenResolution: typeof window !== 'undefined' && window.screen ? 
+                `${window.screen.width}x${window.screen.height}` : 'unknown',
+              viewport: `${window.innerWidth}x${window.innerHeight}`,
+              language: navigator.language,
+              platform: navigator.platform,
+              cookieEnabled: navigator.cookieEnabled,
+              connectionType: navigator.connection?.effectiveType || 'unknown'
+            }
+          });
+          console.log('✅ App initialization tracked');
         } catch (trackError) {
-          console.warn('Failed to track app initialization:', trackError);
+          console.warn('⚠️ Failed to track app initialization:', trackError);
         }
         
         setAnalyticsInitialized(true);
-        console.log('Analytics initialization completed');
+        console.log('✅ Analytics initialization completed');
         
       } catch (error) {
-        console.error('Critical analytics initialization failure:', error);
+        console.error('❌ Critical analytics initialization failure:', error);
         
         // Always set as initialized to prevent blocking the app
         setAnalyticsInitialized(true);
         
         // Try to track the failure
         try {
-          if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-            await analyticsService.trackEvent({
-              eventType: 'error',
-              category: 'system',
-              metadata: {
-                errorType: 'AnalyticsInitializationFailed',
-                errorMessage: error.message,
-                timestamp: new Date().toISOString()
-              }
-            });
-          }
+          await analyticsService.trackEvent({
+            eventType: 'error',
+            category: 'system',
+            metadata: {
+              errorType: 'AnalyticsInitializationFailed',
+              errorMessage: error.message,
+              timestamp: new Date().toISOString()
+            }
+          });
         } catch (trackError) {
           console.error('Failed to track analytics init error:', trackError);
         }
@@ -1489,22 +1252,20 @@ function App() {
       
       try {
         // Track with primary analytics service
-        if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-          await analyticsService.trackEvent({
-            eventType: 'error',
-            category: 'system',
-            metadata: {
-              errorType: 'UnhandledError',
-              errorMessage: event.error?.message || 'Unknown error',
-              filename: event.filename,
-              lineno: event.lineno,
-              colno: event.colno,
-              stack: event.error?.stack?.substring(0, 500), // Limit stack trace length
-              timestamp: new Date().toISOString(),
-              page: window.location.pathname
-            }
-          });
-        }
+        await analyticsService.trackEvent({
+          eventType: 'error',
+          category: 'system',
+          metadata: {
+            errorType: 'UnhandledError',
+            errorMessage: event.error?.message || 'Unknown error',
+            filename: event.filename,
+            lineno: event.lineno,
+            colno: event.colno,
+            stack: event.error?.stack?.substring(0, 500), // Limit stack trace length
+            timestamp: new Date().toISOString(),
+            page: window.location.pathname
+          }
+        });
         
         // Track with Google Analytics (safe)
         safeTrackException(event.error?.message || 'Unknown error', false);
@@ -1520,19 +1281,17 @@ function App() {
       
       try {
         // Track with primary analytics service
-        if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-          await analyticsService.trackEvent({
-            eventType: 'error',
-            category: 'system',
-            metadata: {
-              errorType: 'UnhandledPromiseRejection',
-              errorMessage: event.reason?.message || 'Unknown promise rejection',
-              reason: String(event.reason).substring(0, 500), // Limit reason length
-              timestamp: new Date().toISOString(),
-              page: window.location.pathname
-            }
-          });
-        }
+        await analyticsService.trackEvent({
+          eventType: 'error',
+          category: 'system',
+          metadata: {
+            errorType: 'UnhandledPromiseRejection',
+            errorMessage: event.reason?.message || 'Unknown promise rejection',
+            reason: String(event.reason).substring(0, 500), // Limit reason length
+            timestamp: new Date().toISOString(),
+            page: window.location.pathname
+          }
+        });
         
       } catch (trackingError) {
         console.warn('Failed to track promise rejection:', trackingError);
@@ -1545,17 +1304,15 @@ function App() {
       
       try {
         // Track with primary analytics service
-        if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-          await analyticsService.trackEvent({
-            eventType: 'session_end',
-            category: 'system',
-            metadata: {
-              sessionDuration,
-              exitPage: window.location.pathname,
-              timestamp: new Date().toISOString()
-            }
-          });
-        }
+        await analyticsService.trackEvent({
+          eventType: 'session_end',
+          category: 'system',
+          metadata: {
+            sessionDuration,
+            exitPage: window.location.pathname,
+            timestamp: new Date().toISOString()
+          }
+        });
       } catch (trackingError) {
         console.warn('Failed to track session end:', trackingError);
       }
@@ -1565,17 +1322,15 @@ function App() {
     const handleVisibilityChange = async () => {
       try {
         // Track with primary analytics service
-        if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-          await analyticsService.trackEvent({
-            eventType: 'visibility_change',
-            category: 'interaction',
-            metadata: {
-              visibilityState: document.visibilityState,
-              page: window.location.pathname,
-              timestamp: new Date().toISOString()
-            }
-          });
-        }
+        await analyticsService.trackEvent({
+          eventType: 'visibility_change',
+          category: 'interaction',
+          metadata: {
+            visibilityState: document.visibilityState,
+            page: window.location.pathname,
+            timestamp: new Date().toISOString()
+          }
+        });
       } catch (trackingError) {
         console.warn('Failed to track visibility change:', trackingError);
       }
@@ -1657,20 +1412,18 @@ function App() {
     
     try {
       // Track splash screen completion with primary analytics service
-      if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
-        await analyticsService.trackEvent({
-          eventType: 'splash_complete',
-          category: 'interaction',
-          metadata: {
-            splashDuration: Date.now() - appStartTime.current,
-            timestamp: new Date().toISOString()
-          }
-        });
-      }
+      await analyticsService.trackEvent({
+        eventType: 'splash_complete',
+        category: 'interaction',
+        metadata: {
+          splashDuration: Date.now() - appStartTime.current,
+          timestamp: new Date().toISOString()
+        }
+      });
       
-      console.log('Splash completion tracked');
+      console.log('✅ Splash completion tracked');
     } catch (error) {
-      console.warn('Failed to track splash completion:', error);
+      console.warn('⚠️ Failed to track splash completion:', error);
     }
   };
 

@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement/hooks/useArticleOperations.js
-// FIXED VERSION - Enhanced error handling and using the same simple pattern as working UserCarListingForm
+// COMPLETE VERSION - All fixes integrated including filtering and error handling
 
 import { useState, useCallback } from 'react';
 import { defaultArticleForm, VIEWS } from '../utils/constants.js';
@@ -98,15 +98,17 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     return errors;
   };
 
-  // FIXED: Enhanced handleSave function with better error handling
+  // COMPLETE: Enhanced handleSave function with comprehensive debugging and error handling
   const handleSave = async (publishNow = false) => {
     try {
+      console.log('🚀 STARTING ARTICLE SAVE...');
       setSaving(true);
       setSaveStatus(null);
       setFormErrors({});
 
       const errors = validateForm(publishNow);
       if (Object.keys(errors).length > 0) {
+        console.log('❌ Form validation failed:', errors);
         setFormErrors(errors);
         setSaveStatus('error');
         return;
@@ -123,122 +125,114 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
       // Add featured image
       if (featuredImageFile) {
         articleData.featuredImageFile = featuredImageFile;
+        console.log('📷 Featured image added:', featuredImageFile.name);
       }
 
-      // Add gallery images using same pattern as car listings
+      // Add gallery images
       if (galleryImages.length > 0) {
         articleData.galleryImageFiles = galleryImages.map(img => img.file);
+        console.log('🖼️ Gallery images added:', galleryImages.length);
       }
 
-      console.log('Submitting article...', {
+      console.log('📤 Submitting article data:', {
         title: articleData.title,
-        featuredImage: !!featuredImageFile,
-        galleryImages: galleryImages.length
+        category: articleData.category,
+        status: articleData.status,
+        hasImages: !!featuredImageFile,
+        galleryCount: galleryImages.length,
+        authorId: articleData.authorId
       });
 
       let result;
       
-      // FIXED: Enhanced error handling with detailed logging
       try {
         if (editingArticle) {
-          console.log('Updating existing article:', editingArticle._id || editingArticle.id);
+          console.log('📝 Updating existing article:', editingArticle._id || editingArticle.id);
           result = await updateArticle(editingArticle._id || editingArticle.id, articleData);
         } else {
-          console.log('Creating new article...');
+          console.log('➕ Creating new article...');
           result = await addArticle(articleData);
         }
 
-        // FIXED: Verify result before proceeding
+        console.log('✅ API Response received:', result);
+
+        // Verify result structure
         if (!result) {
           throw new Error('No response received from server');
         }
 
-        console.log('Article operation successful:', result);
-        
+        // Log result details
+        console.log('📊 Result details:', {
+          hasId: !!(result._id || result.id),
+          status: result.status,
+          title: result.title,
+          createdAt: result.createdAt
+        });
+
         setSaveStatus('success');
         setFeaturedImageFile(null);
         setGalleryImages([]);
         
         const actionPastTense = publishNow ? 'published' : 'saved';
         
-        // FIXED: Better success notification
+        // Show success message
         setTimeout(() => {
           try {
-            alert(`Article "${articleForm.title}" ${actionPastTense} successfully!`);
+            alert(`✅ Article "${articleForm.title}" ${actionPastTense} successfully!\n\nID: ${result._id || result.id || 'Unknown'}`);
           } catch (alertError) {
-            console.warn('Alert failed, using console:', alertError);
-            console.log(`Article "${articleForm.title}" ${actionPastTense} successfully!`);
+            console.warn('Alert failed:', alertError);
           }
         }, 500);
         
-        // FIXED: Safe navigation with fallback
+        // Navigate after success
         setTimeout(() => {
           try {
             setActiveView(VIEWS.LIST);
           } catch (navigationError) {
             console.error('Navigation failed:', navigationError);
-            // Force page refresh as fallback
-            window.location.reload();
           }
         }, 1500);
         
       } catch (apiError) {
-        console.error('API call failed:', apiError);
+        console.error('❌ API call failed:', apiError);
         
-        // FIXED: Better error message handling
+        // Enhanced error logging
+        console.log('🔍 Error details:', {
+          message: apiError.message,
+          status: apiError.response?.status,
+          data: apiError.response?.data,
+          isHTML: typeof apiError.response?.data === 'string' && apiError.response?.data.includes('<!DOCTYPE')
+        });
+        
         let errorMessage = 'Failed to save article. Please try again.';
         
-        if (apiError?.message) {
+        if (apiError.message?.includes('HTML instead of JSON')) {
+          errorMessage = 'API endpoint error. The server route may not exist.';
+        } else if (apiError.response?.status === 404) {
+          errorMessage = 'API endpoint not found. Please verify server routes are configured.';
+        } else if (apiError.response?.status === 401) {
+          errorMessage = 'Authentication failed. Please log in again.';
+        } else if (apiError.response?.status === 403) {
+          errorMessage = 'Permission denied. Check user role permissions.';
+        } else if (apiError.message) {
           errorMessage = apiError.message;
-        } else if (apiError?.response?.data?.message) {
-          errorMessage = apiError.response.data.message;
-        } else if (apiError?.response?.status) {
-          switch (apiError.response.status) {
-            case 401:
-              errorMessage = 'Authentication failed. Please log in again.';
-              break;
-            case 403:
-              errorMessage = 'You do not have permission to save articles.';
-              break;
-            case 413:
-              errorMessage = 'File too large. Please use smaller images.';
-              break;
-            case 500:
-              errorMessage = 'Server error. Please try again later.';
-              break;
-            default:
-              errorMessage = `Server error (${apiError.response.status}). Please try again.`;
-          }
         }
         
-        setFormErrors({ 
-          general: errorMessage
-        });
+        setFormErrors({ general: errorMessage });
         setSaveStatus('error');
         
-        // FIXED: Safe error notification
-        try {
-          alert(`Error: ${errorMessage}`);
-        } catch (alertError) {
-          console.warn('Alert failed, using console:', alertError);
-          console.error('Save failed:', errorMessage);
-        }
-        
-        throw apiError; // Re-throw for parent component handling
+        alert(`❌ Error: ${errorMessage}`);
+        throw apiError;
       }
       
     } catch (error) {
-      console.error('Failed to save article (outer catch):', error);
+      console.error('❌ Outer catch - Article save failed:', error);
       
-      // FIXED: Fallback error handling
       if (!formErrors.general) {
-        setFormErrors({ 
-          general: 'An unexpected error occurred. Please try again.'
-        });
+        setFormErrors({ general: 'An unexpected error occurred. Check console for details.' });
       }
       setSaveStatus('error');
     } finally {
-      // FIXED: Always reset saving state
       setSaving(false);
     }
   };
@@ -427,19 +421,49 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     setSaveStatus(null);
   };
 
-  // Filter articles
+  // FIXED: Safe filter articles with comprehensive null checks
   const getFilteredArticles = (articles) => {
-    return articles.filter(article => {
-      const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           article.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           (article.tags && article.tags.some(tag => 
-                             tag.toLowerCase().includes(searchTerm.toLowerCase())
-                           ));
-      const matchesStatus = selectedStatus === 'all' || article.status === selectedStatus;
-      const matchesCategory = selectedCategory === 'all' || article.category === selectedCategory;
-      
-      return matchesSearch && matchesStatus && matchesCategory;
-    });
+    if (!Array.isArray(articles)) {
+      console.warn('getFilteredArticles: articles is not an array:', articles);
+      return [];
+    }
+
+    try {
+      return articles.filter(article => {
+        if (!article) return false;
+        
+        // Safe search matching
+        const matchesSearch = (() => {
+          if (!searchTerm || searchTerm.trim() === '') return true;
+          
+          try {
+            const searchLower = searchTerm.toLowerCase();
+            
+            const titleMatch = (article.title && typeof article.title === 'string') ? 
+              article.title.toLowerCase().includes(searchLower) : false;
+            
+            const contentMatch = (article.content && typeof article.content === 'string') ? 
+              article.content.toLowerCase().includes(searchLower) : false;
+            
+            const tagsMatch = (article.tags && Array.isArray(article.tags)) ? 
+              article.tags.some(tag => tag && typeof tag === 'string' && tag.toLowerCase().includes(searchLower)) : false;
+            
+            return titleMatch || contentMatch || tagsMatch;
+          } catch (searchError) {
+            console.warn('Search error for article:', article._id, searchError);
+            return false;
+          }
+        })();
+        
+        const matchesStatus = !selectedStatus || selectedStatus === 'all' || article.status === selectedStatus;
+        const matchesCategory = !selectedCategory || selectedCategory === 'all' || article.category === selectedCategory;
+        
+        return matchesSearch && matchesStatus && matchesCategory;
+      });
+    } catch (error) {
+      console.error('Error in getFilteredArticles:', error);
+      return articles || [];
+    }
   };
 
   return {

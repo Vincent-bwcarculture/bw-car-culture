@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement/index.js
-// FIXED VERSION - Enhanced error handling and using simple pattern like working UserCarListingForm
+// COMPLETE VERSION - All fixes integrated including error handling, debugging, and safe component rendering
 
 import React, { useRef, useEffect } from 'react';
 import { Loader } from 'lucide-react';
@@ -111,6 +111,7 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
   useEffect(() => {
     if (initialAction === 'create' && handleCreateNew && !loading && !authLoading) {
       try {
+        console.log('Processing initial create action...');
         handleCreateNew();
       } catch (error) {
         console.error('Error handling initial create action:', error);
@@ -136,10 +137,22 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
     return (
       <div className="article-management">
         <div className="error-message">
+          <h3>Authentication Required</h3>
           <p>User not found. Please log in again.</p>
-          <button onClick={() => window.location.href = '/login'}>
-            Go to Login
-          </button>
+          <div className="error-actions">
+            <button 
+              onClick={() => window.location.href = '/login'}
+              className="login-button"
+            >
+              Go to Login
+            </button>
+            <button 
+              onClick={() => window.location.reload()}
+              className="reload-button"
+            >
+              Reload Page
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -152,23 +165,69 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
         <div className="loading-spinner">
           <Loader size={40} className="spin" />
           <p>Loading your articles...</p>
+          {process.env.NODE_ENV === 'development' && (
+            <div style={{ fontSize: '12px', marginTop: '10px', color: '#666' }}>
+              Debug: User ID {user?.id}, Role: {user?.role}
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
-  // FIXED: Enhanced error handling with retry option
+  // FIXED: Enhanced error handling with retry option and detailed debugging
   if (error) {
     return (
       <div className="article-management">
         <div className="error-message">
           <h3>Error Loading Articles</h3>
           <p>{error}</p>
-          <div className="error-actions">
-            <button onClick={refreshData} className="retry-button">
+          
+          {process.env.NODE_ENV === 'development' && (
+            <details style={{ marginTop: '15px', fontSize: '12px' }}>
+              <summary>Debug Information</summary>
+              <pre style={{ background: '#f5f5f5', padding: '10px', borderRadius: '4px', marginTop: '10px' }}>
+                User: {JSON.stringify({
+                  id: user?.id,
+                  role: user?.role,
+                  name: user?.name
+                }, null, 2)}
+                
+                Error Details: {error}
+                
+                API Base URL: {articleApiService.baseURL}
+              </pre>
+            </details>
+          )}
+          
+          <div className="error-actions" style={{ marginTop: '20px' }}>
+            <button 
+              onClick={refreshData} 
+              className="retry-button"
+              style={{
+                padding: '10px 20px',
+                marginRight: '10px',
+                backgroundColor: '#007cba',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
               Try Again
             </button>
-            <button onClick={() => window.location.reload()} className="reload-button">
+            <button 
+              onClick={() => window.location.reload()} 
+              className="reload-button"
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#666',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
               Reload Page
             </button>
           </div>
@@ -299,10 +358,32 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
         <div className="article-management">
           <div className="error-message">
             <h3>Rendering Error</h3>
-            <p>There was an error displaying this view.</p>
-            <button onClick={() => navigateToView(VIEWS.DASHBOARD)}>
-              Return to Dashboard
-            </button>
+            <p>There was an error displaying this view: {renderError.message}</p>
+            
+            {process.env.NODE_ENV === 'development' && (
+              <details style={{ marginTop: '15px', fontSize: '12px' }}>
+                <summary>Error Stack Trace</summary>
+                <pre style={{ background: '#ffe6e6', padding: '10px', borderRadius: '4px', marginTop: '10px' }}>
+                  {renderError.stack}
+                </pre>
+              </details>
+            )}
+            
+            <div style={{ marginTop: '20px' }}>
+              <button 
+                onClick={() => navigateToView(VIEWS.DASHBOARD)}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#007cba',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Return to Dashboard
+              </button>
+            </div>
           </div>
         </div>
       );
@@ -314,23 +395,54 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
       {/* FIXED: Enhanced debug info with error handling */}
       {process.env.NODE_ENV === 'development' && user && (
         <div style={{ 
-          background: '#333', 
-          color: '#fff', 
-          padding: '10px', 
-          marginBottom: '10px',
+          background: '#2c3e50', 
+          color: '#ecf0f1', 
+          padding: '15px', 
+          marginBottom: '15px',
           fontSize: '12px',
-          borderRadius: '5px'
+          borderRadius: '8px',
+          fontFamily: 'monospace'
         }}>
-          <strong>Debug Info:</strong><br />
-          User: {user.name || 'Unknown'}<br />
-          Role: {user.role || 'Unknown'}<br />
-          Articles: {Array.isArray(articles) ? articles.length : 'N/A'}<br />
-          Gallery Images: {Array.isArray(galleryImages) ? galleryImages.length : 0}<br />
-          Active View: {activeView || 'Unknown'}<br />
-          Saving: {saving ? 'Yes' : 'No'}<br />
-          {formErrors?.general && (
-            <>Form Error: {formErrors.general}<br /></>
-          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <strong>🛠️ ARTICLE MANAGEMENT DEBUG INFO</strong>
+            <span style={{ fontSize: '10px', opacity: 0.7 }}>
+              {new Date().toLocaleTimeString()}
+            </span>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+            <div>
+              <div><strong>👤 User Info:</strong></div>
+              <div>Name: {user.name || 'Unknown'}</div>
+              <div>Role: {user.role || 'Unknown'}</div>
+              <div>ID: {user.id || user._id || 'Unknown'}</div>
+            </div>
+            
+            <div>
+              <div><strong>📊 Data Info:</strong></div>
+              <div>Articles: {Array.isArray(articles) ? articles.length : 'N/A'}</div>
+              <div>Gallery Images: {Array.isArray(galleryImages) ? galleryImages.length : 0}</div>
+              <div>Active View: {activeView || 'Unknown'}</div>
+            </div>
+          </div>
+          
+          <div style={{ marginTop: '10px' }}>
+            <div><strong>🔧 Status:</strong></div>
+            <div>Saving: {saving ? 'Yes' : 'No'}</div>
+            <div>Loading: {loading ? 'Yes' : 'No'}</div>
+            <div>Auth Loading: {authLoading ? 'Yes' : 'No'}</div>
+            {formErrors?.general && (
+              <div style={{ color: '#e74c3c' }}>Form Error: {formErrors.general}</div>
+            )}
+          </div>
+
+          {/* API endpoint debugging */}
+          <div style={{ marginTop: '10px' }}>
+            <div><strong>🌐 API Info:</strong></div>
+            <div>Base URL: {articleApiService.baseURL}</div>
+            <div>Is Admin: {articleApiService.isAdmin() ? 'Yes' : 'No'}</div>
+            <div>Token Present: {localStorage.getItem('token') ? 'Yes' : 'No'}</div>
+          </div>
         </div>
       )}
       
@@ -349,6 +461,8 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
           try {
             if (handleImageUpload) {
               handleImageUpload(e);
+            } else {
+              console.warn('handleImageUpload function not available');
             }
           } catch (error) {
             console.error('Error handling image upload:', error);
@@ -356,6 +470,67 @@ const ArticleManagement = ({ profileData, refreshProfile, initialAction }) => {
           }
         }}
       />
+
+      {/* Add quick debugging buttons in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          background: '#34495e',
+          color: 'white',
+          padding: '10px',
+          borderRadius: '8px',
+          fontSize: '12px',
+          zIndex: 1000
+        }}>
+          <div style={{ marginBottom: '10px' }}>
+            <strong>🚀 Quick Debug Actions:</strong>
+          </div>
+          <button
+            onClick={() => {
+              console.log('=== ARTICLE MANAGEMENT STATE ===');
+              console.log('Articles:', articles);
+              console.log('User:', user);
+              console.log('Active View:', activeView);
+              console.log('Form Errors:', formErrors);
+              console.log('Gallery Images:', galleryImages);
+            }}
+            style={{
+              padding: '5px 10px',
+              marginRight: '5px',
+              backgroundColor: '#3498db',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '11px'
+            }}
+          >
+            Log State
+          </button>
+          <button
+            onClick={async () => {
+              try {
+                await articleApiService.debugApiEndpoints();
+              } catch (error) {
+                console.error('Debug failed:', error);
+              }
+            }}
+            style={{
+              padding: '5px 10px',
+              backgroundColor: '#e67e22',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '11px'
+            }}
+          >
+            Test APIs
+          </button>
+        </div>
+      )}
     </div>
   );
 };

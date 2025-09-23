@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement/services/articleService.js
-// FIXED VERSION - Enhanced with multiple image support and comprehensive error handling
+// COMPLETE VERSION - All fixes integrated including debugging, error handling, and response validation
 
 import axios from '../../../../config/axios.js';
 
@@ -117,6 +117,88 @@ class ArticleApiService {
   clearCache() {
     this.cache.clear();
     console.log('ArticleService: Cache cleared');
+  }
+
+  /**
+   * DEBUGGING: Test API endpoints to identify issues
+   */
+  async debugApiEndpoints() {
+    console.log('🔍 DEBUGGING API ENDPOINTS...');
+    
+    const endpoints = [
+      '/news/user',
+      '/news',
+      '/analytics/social-stats',
+      '/auth/me'
+    ];
+    
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`Testing endpoint: ${endpoint}`);
+        
+        const response = await this.axios.get(endpoint, {
+          headers: this.getSimpleAuthHeaders(),
+          timeout: 5000,
+          validateStatus: () => true // Accept all status codes
+        });
+        
+        console.log(`✅ ${endpoint}: Status ${response.status}`);
+        console.log(`Response type: ${typeof response.data}`);
+        console.log(`Is HTML: ${typeof response.data === 'string' && response.data.includes('<!DOCTYPE')}`);
+        
+      } catch (error) {
+        console.error(`❌ ${endpoint}: ${error.message}`);
+      }
+    }
+  }
+
+  /**
+   * FIXED: Safe social stats fetching with comprehensive error handling
+   */
+  async getSocialStats() {
+    try {
+      // Check if endpoint exists first
+      const response = await this.axios.get('/analytics/social-stats', {
+        headers: this.getSimpleAuthHeaders(),
+        timeout: 10000, // 10 second timeout
+        validateStatus: function (status) {
+          // Accept only 200 status, reject others
+          return status === 200;
+        }
+      });
+
+      // FIXED: Validate response is actually JSON
+      if (!response.data || typeof response.data !== 'object') {
+        console.warn('Social stats: Invalid response format, using defaults');
+        return this.getDefaultSocialStats();
+      }
+
+      if (response.data.success) {
+        return response.data.data || this.getDefaultSocialStats();
+      } else {
+        console.warn('Social stats: API returned success=false, using defaults');
+        return this.getDefaultSocialStats();
+      }
+    } catch (error) {
+      console.warn('Social stats fetch failed, using defaults:', error.message);
+      
+      // FIXED: Don't throw errors for social stats - they're not critical
+      return this.getDefaultSocialStats();
+    }
+  }
+
+  /**
+   * FIXED: Provide default social stats to prevent errors
+   */
+  getDefaultSocialStats() {
+    return {
+      totalViews: 0,
+      totalLikes: 0,
+      totalShares: 0,
+      totalComments: 0,
+      engagementRate: 0,
+      topPerformingArticles: []
+    };
   }
 
   /**
@@ -506,7 +588,7 @@ class ArticleApiService {
   }
 
   /**
-   * FIXED: Enhanced createUserArticle method with better error handling
+   * COMPLETE: Enhanced createUserArticle with comprehensive debugging and error handling
    * @param {Object} articleData - Article data (may include image files)
    * @returns {Promise<Object>} Created article
    */
@@ -519,169 +601,134 @@ class ArticleApiService {
         throw new Error('Title, content, and category are required');
       }
 
+      // Debug API endpoints first
+      try {
+        await this.debugApiEndpoints();
+      } catch (debugError) {
+        console.warn('Debug failed:', debugError);
+      }
+
       // Check if we have any image files
       const hasImages = articleData.featuredImageFile || 
                        (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
       
+      let response;
+      const url = '/news/user';
+      
       if (hasImages) {
-        // Use FormData for image upload
         const formData = this.createFormData(articleData);
-
-        console.log('Creating article with images via FormData...');
-        console.log('Featured image:', articleData.featuredImageFile ? articleData.featuredImageFile.name : 'None');
-        console.log('Gallery images:', articleData.galleryImageFiles ? articleData.galleryImageFiles.length : 0);
-
-        // FIXED: Enhanced request with better error handling
-        try {
-          const response = await this.axios.post('/news/user', formData, {
-            headers: this.getFormDataHeaders(),
-            timeout: 300000, // 5 minutes for large uploads
-            onUploadProgress: (progressEvent) => {
-              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-              console.log(`Upload progress: ${percentCompleted}%`);
-            }
-          });
-
-          // FIXED: Better response validation
-          if (!response) {
-            throw new Error('No response received from server');
-          }
-
-          if (!response.data) {
-            throw new Error('Invalid response format - no data received');
-          }
-
-          if (response.data.success) {
-            console.log('User article created successfully with images:', response.data.data?._id);
-            console.log('User permissions:', response.data.userPermissions);
-            
-            // FIXED: Safe data extraction with fallbacks
-            const articleResult = response.data.data || {};
-            const userPermissions = response.data.userPermissions || {};
-            
-            return {
-              ...articleResult,
-              userPermissions: userPermissions,
-              canPublish: userPermissions.canPublish || false,
-              actualStatus: articleResult.status || 'draft'
-            };
-          } else {
-            // FIXED: Better error message extraction
-            const errorMessage = response.data.message || 
-                                response.data.error || 
-                                'Failed to create article';
-            throw new Error(errorMessage);
-          }
-        } catch (requestError) {
-          console.error('FormData request failed:', requestError);
-          
-          // FIXED: Enhanced error handling for different error types
-          if (requestError.code === 'ECONNABORTED') {
-            throw new Error('Request timed out. Please try again with smaller images.');
-          }
-          
-          if (requestError.response) {
-            const status = requestError.response.status;
-            const errorData = requestError.response.data;
-            
-            console.error('Server error response:', status, errorData);
-            
-            switch (status) {
-              case 401:
-                throw new Error('Authentication failed. Please log in again.');
-              case 403:
-                throw new Error('You do not have permission to create articles.');
-              case 413:
-                throw new Error('File too large. Please use smaller images.');
-              case 422:
-                throw new Error(errorData?.message || 'Invalid article data provided.');
-              case 500:
-                throw new Error('Server error. Please try again later.');
-              default:
-                throw new Error(errorData?.message || `Server error (${status}). Please try again.`);
-            }
-          }
-          
-          if (requestError.request) {
-            throw new Error('Unable to connect to server. Please check your internet connection.');
-          }
-          
-          throw requestError;
-        }
-      } else {
-        // Use JSON for text-only articles
-        const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
+        console.log('Sending FormData to:', this.baseURL + url);
         
-        console.log('Creating article without images via JSON...');
+        response = await this.axios.post(url, formData, {
+          headers: this.getFormDataHeaders(),
+          timeout: 300000, // 5 minutes for large uploads
+          validateStatus: function (status) {
+            // Accept 200 and 201 as success
+            return status >= 200 && status < 300;
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log(`Upload progress: ${percentCompleted}%`);
+          }
+        });
+      } else {
+        const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
+        console.log('Sending JSON to:', this.baseURL + url);
+        
+        response = await this.axios.post(url, cleanData, {
+          headers: this.getAuthHeaders(),
+          timeout: 30000, // 30 seconds for JSON requests
+          validateStatus: function (status) {
+            return status >= 200 && status < 300;
+          }
+        });
+      }
 
-        try {
-          const response = await this.axios.post('/news/user', cleanData, {
-            headers: this.getAuthHeaders(),
-            timeout: 30000 // 30 seconds for JSON requests
-          });
+      console.log('Raw response status:', response.status);
+      console.log('Raw response data:', response.data);
 
-          // FIXED: Same response validation as above
-          if (!response || !response.data) {
-            throw new Error('Invalid response received from server');
-          }
+      // FIXED: Enhanced response validation
+      if (!response) {
+        throw new Error('No response received from server');
+      }
 
-          if (response.data.success) {
-            console.log('User article created successfully (text only):', response.data.data?._id);
-            console.log('User permissions:', response.data.userPermissions);
-            
-            const articleResult = response.data.data || {};
-            const userPermissions = response.data.userPermissions || {};
-            
-            return {
-              ...articleResult,
-              userPermissions: userPermissions,
-              canPublish: userPermissions.canPublish || false,
-              actualStatus: articleResult.status || 'draft'
-            };
-          } else {
-            const errorMessage = response.data.message || 
-                                response.data.error || 
-                                'Failed to create article';
-            throw new Error(errorMessage);
-          }
-        } catch (requestError) {
-          console.error('JSON request failed:', requestError);
-          
-          // FIXED: Same error handling pattern as FormData request
-          if (requestError.response) {
-            const status = requestError.response.status;
-            const errorData = requestError.response.data;
-            
-            switch (status) {
-              case 401:
-                throw new Error('Authentication failed. Please log in again.');
-              case 403:
-                throw new Error('You do not have permission to create articles.');
-              case 422:
-                throw new Error(errorData?.message || 'Invalid article data provided.');
-              case 500:
-                throw new Error('Server error. Please try again later.');
-              default:
-                throw new Error(errorData?.message || `Server error (${status}). Please try again.`);
-            }
-          }
-          
-          if (requestError.request) {
-            throw new Error('Unable to connect to server. Please check your internet connection.');
-          }
-          
-          throw requestError;
-        }
+      // FIXED: Check if response is HTML (common error)
+      if (typeof response.data === 'string' && (response.data.includes('<!DOCTYPE') || response.data.includes('<html'))) {
+        console.error('Received HTML instead of JSON - likely a routing error');
+        throw new Error('Server returned HTML instead of JSON. The API endpoint /news/user may not exist.');
+      }
+
+      if (!response.data) {
+        throw new Error('Invalid response format - no data received');
+      }
+
+      // FIXED: More flexible success checking
+      const isSuccess = response.data.success === true || 
+                       response.data.success === 'true' || 
+                       response.status === 201 || 
+                       (response.status === 200 && response.data.data);
+
+      if (isSuccess && response.data.data) {
+        console.log('✅ User article created successfully:', response.data.data._id || response.data.data.id);
+        
+        const articleResult = response.data.data;
+        const userPermissions = response.data.userPermissions || {};
+        
+        return {
+          ...articleResult,
+          userPermissions: userPermissions,
+          canPublish: userPermissions.canPublish || false,
+          actualStatus: articleResult.status || 'draft'
+        };
+      } else {
+        // FIXED: Better error message extraction
+        const errorMessage = response.data.message || 
+                            response.data.error || 
+                            response.data.errors ||
+                            `Server response indicated failure (status: ${response.status})`;
+        
+        console.error('❌ Article creation failed:', errorMessage);
+        throw new Error(errorMessage);
       }
     } catch (error) {
-      console.error('Error creating user article:', error);
+      console.error('❌ Error creating user article:', error);
       
-      // FIXED: Re-throw with enhanced error information
-      if (error.message) {
-        throw error; // Preserve the detailed error message
-      } else {
-        throw new Error('An unexpected error occurred while creating the article');
+      // FIXED: Enhanced error handling
+      if (error.response) {
+        const status = error.response.status;
+        const errorData = error.response.data;
+        
+        console.error('Server error response:', status, errorData);
+        
+        // Check if error response is HTML
+        if (typeof errorData === 'string' && (errorData.includes('<!DOCTYPE') || errorData.includes('<html'))) {
+          throw new Error(`Server error (${status}): The API endpoint /news/user may not exist or there's a routing issue.`);
+        }
+        
+        switch (status) {
+          case 401:
+            throw new Error('Authentication failed. Please log in again.');
+          case 403:
+            throw new Error('You do not have permission to create articles.');
+          case 404:
+            throw new Error('API endpoint not found. The /news/user route may not exist on the server.');
+          case 413:
+            throw new Error('File too large. Please use smaller images.');
+          case 422:
+            throw new Error(errorData?.message || 'Invalid article data provided.');
+          case 500:
+            throw new Error('Server error. Please try again later.');
+          default:
+            throw new Error(errorData?.message || `Server error (${status}). Please try again.`);
+        }
       }
+      
+      if (error.request) {
+        throw new Error('Unable to connect to server. Please check your internet connection.');
+      }
+      
+      // Re-throw the error with enhanced message
+      throw new Error(error.message || 'An unexpected error occurred while creating the article');
     }
   }
 
