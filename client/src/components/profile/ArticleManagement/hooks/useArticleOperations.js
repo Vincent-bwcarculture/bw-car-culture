@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement/hooks/useArticleOperations.js
-// COMPLETE VERSION - All fixes integrated including filtering and error handling
+// COMPLETE FIXED VERSION - Enhanced debugging and error handling integrated
 
 import { useState, useCallback } from 'react';
 import { defaultArticleForm, VIEWS } from '../utils/constants.js';
@@ -30,7 +30,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
 
   // Navigate to create new article
   const handleCreateNew = useCallback(() => {
-    console.log('Creating new article...');
+    console.log('🆕 Creating new article...');
     setArticleForm(defaultArticleForm);
     setFormErrors({});
     setEditingArticle(null);
@@ -43,7 +43,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
 
   // Navigate to edit existing article
   const handleEdit = (article) => {
-    console.log('Editing article:', article.title);
+    console.log('✏️ Editing article:', article.title);
     setArticleForm({
       title: article.title,
       subtitle: article.subtitle || '',
@@ -98,14 +98,23 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     return errors;
   };
 
-  // COMPLETE: Enhanced handleSave function with comprehensive debugging and error handling
+  // ENHANCED: handleSave function with comprehensive debugging and error handling
   const handleSave = async (publishNow = false) => {
     try {
-      console.log('🚀 STARTING ARTICLE SAVE...');
+      console.log('\n🚀 ===== STARTING ARTICLE SAVE =====');
+      console.log('📊 Save details:', {
+        publishNow,
+        editingMode: !!editingArticle,
+        userRole: user?.role,
+        userId: user?.id,
+        title: articleForm.title
+      });
+      
       setSaving(true);
       setSaveStatus(null);
       setFormErrors({});
 
+      // Validate form
       const errors = validateForm(publishNow);
       if (Object.keys(errors).length > 0) {
         console.log('❌ Form validation failed:', errors);
@@ -114,6 +123,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
         return;
       }
 
+      // Prepare article data
       const articleData = {
         ...articleForm,
         status: publishNow ? 'published' : articleForm.status,
@@ -134,7 +144,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
         console.log('🖼️ Gallery images added:', galleryImages.length);
       }
 
-      console.log('📤 Submitting article data:', {
+      console.log('📤 Final article data prepared:', {
         title: articleData.title,
         category: articleData.category,
         status: articleData.status,
@@ -145,7 +155,17 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
 
       let result;
       
+      console.log('\n🎯 Making API call...');
+      
       try {
+        // ENHANCED: Add pre-flight debugging
+        console.log('🔍 Pre-flight check:');
+        console.log('- addArticle function type:', typeof addArticle);
+        console.log('- updateArticle function type:', typeof updateArticle);
+        console.log('- User authenticated:', !!user);
+        console.log('- Token present:', !!localStorage.getItem('token'));
+        console.log('- Editing mode:', !!editingArticle);
+        
         if (editingArticle) {
           console.log('📝 Updating existing article:', editingArticle._id || editingArticle.id);
           result = await updateArticle(editingArticle._id || editingArticle.id, articleData);
@@ -154,20 +174,17 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
           result = await addArticle(articleData);
         }
 
-        console.log('✅ API Response received:', result);
+        console.log('✅ API Response received:', {
+          hasResult: !!result,
+          resultId: result?._id || result?.id,
+          resultTitle: result?.title,
+          resultStatus: result?.status
+        });
 
         // Verify result structure
         if (!result) {
           throw new Error('No response received from server');
         }
-
-        // Log result details
-        console.log('📊 Result details:', {
-          hasId: !!(result._id || result.id),
-          status: result.status,
-          title: result.title,
-          createdAt: result.createdAt
-        });
 
         setSaveStatus('success');
         setFeaturedImageFile(null);
@@ -180,7 +197,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
           try {
             alert(`✅ Article "${articleForm.title}" ${actionPastTense} successfully!\n\nID: ${result._id || result.id || 'Unknown'}`);
           } catch (alertError) {
-            console.warn('Alert failed:', alertError);
+            console.warn('⚠️ Alert failed:', alertError);
           }
         }, 500);
         
@@ -189,31 +206,39 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
           try {
             setActiveView(VIEWS.LIST);
           } catch (navigationError) {
-            console.error('Navigation failed:', navigationError);
+            console.error('❌ Navigation failed:', navigationError);
           }
         }, 1500);
         
       } catch (apiError) {
-        console.error('❌ API call failed:', apiError);
-        
-        // Enhanced error logging
-        console.log('🔍 Error details:', {
-          message: apiError.message,
-          status: apiError.response?.status,
-          data: apiError.response?.data,
-          isHTML: typeof apiError.response?.data === 'string' && apiError.response?.data.includes('<!DOCTYPE')
-        });
+        console.error('\n❌ ===== API CALL FAILED =====');
+        console.error('Error type:', apiError.constructor.name);
+        console.error('Error message:', apiError.message);
+        console.error('Error status:', apiError.response?.status);
+        console.error('Error data:', apiError.response?.data);
+        console.error('Is HTML response:', typeof apiError.response?.data === 'string' && apiError.response?.data.includes('<!DOCTYPE'));
         
         let errorMessage = 'Failed to save article. Please try again.';
         
+        // Enhanced error messaging based on the specific error patterns we've seen
         if (apiError.message?.includes('HTML instead of JSON')) {
           errorMessage = 'API endpoint error. The server route may not exist.';
+          console.error('🚨 Server returned HTML instead of JSON - API endpoint missing');
         } else if (apiError.response?.status === 404) {
           errorMessage = 'API endpoint not found. Please verify server routes are configured.';
+          console.error('🚨 404 Error - Endpoint /api/news/user not found');
         } else if (apiError.response?.status === 401) {
           errorMessage = 'Authentication failed. Please log in again.';
+          console.error('🚨 401 Error - Authentication failed');
         } else if (apiError.response?.status === 403) {
           errorMessage = 'Permission denied. Check user role permissions.';
+          console.error('🚨 403 Error - Permission denied');
+        } else if (apiError.message?.includes('Network Error')) {
+          errorMessage = 'Network error. Please check your internet connection.';
+          console.error('🚨 Network Error - No connection to server');
+        } else if (apiError.message?.includes('timeout')) {
+          errorMessage = 'Request timed out. Please try again.';
+          console.error('🚨 Timeout Error - Request took too long');
         } else if (apiError.message) {
           errorMessage = apiError.message;
         }
@@ -226,7 +251,10 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
       }
       
     } catch (error) {
-      console.error('❌ Outer catch - Article save failed:', error);
+      console.error('\n❌ ===== OUTER CATCH - SAVE FAILED =====');
+      console.error('Outer error type:', error.constructor.name);
+      console.error('Outer error message:', error.message);
+      console.error('Outer error stack:', error.stack);
       
       if (!formErrors.general) {
         setFormErrors({ general: 'An unexpected error occurred. Check console for details.' });
@@ -234,6 +262,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
       setSaveStatus('error');
     } finally {
       setSaving(false);
+      console.log('🏁 ===== ARTICLE SAVE COMPLETED =====\n');
     }
   };
 
@@ -393,6 +422,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
 
   // Navigate to view
   const navigateToView = (view) => {
+    console.log('🧭 Navigating to view:', view);
     setActiveView(view);
   };
 
@@ -480,7 +510,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     editingArticle,
     isCreating,
     featuredImageFile,
-    galleryImages,  // CHANGED: Simple array instead of complex state
+    galleryImages,  // SIMPLIFIED: Simple array instead of complex state
     
     // Search and filter state
     searchTerm,
@@ -501,7 +531,10 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     removeGalleryImage,         // SIMPLIFIED
     addTag,
     removeTag,
-    getFilteredArticles
+    getFilteredArticles,
+    
+    // Utility
+    validateForm
   };
 };
 
