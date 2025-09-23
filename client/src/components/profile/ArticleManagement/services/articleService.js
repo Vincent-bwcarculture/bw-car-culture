@@ -1,16 +1,24 @@
 // client/src/components/profile/ArticleManagement/services/articleService.js
-// FIXED VERSION - Uses main axios config to ensure requests are sent properly
+// COMPLETE FIXED VERSION - Routing issue resolved by reverting to own axios instance
 
-import axios from '../../../../config/axios.js';
+import axios from 'axios'; // Import directly, not from config to avoid URL normalization
 
 class ArticleApiService {
   constructor() {
     this.baseURL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app/api';
     this.endpoint = `${this.baseURL}/news`;
     
-    // CRITICAL FIX: Use the main axios instance instead of creating a new one
-    // This ensures all interceptors and configurations are applied
-    this.axios = axios;
+    // FIXED: Create own axios instance with correct baseURL (includes /api)
+    this.axios = axios.create({
+      baseURL: this.baseURL, // This has /api suffix which is needed
+      timeout: 300000, // 5 mins timeout
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    // Setup auth interceptors for this instance
+    this.setupAxiosInterceptors();
     
     this.cache = new Map();
     this.cacheDuration = 5 * 60 * 1000; // 5 minutes
@@ -18,6 +26,43 @@ class ArticleApiService {
     
     // Store user reference - will be set by components using AuthContext
     this.currentUser = null;
+  }
+
+  /**
+   * Setup axios interceptors for authentication
+   */
+  setupAxiosInterceptors() {
+    // Request interceptor to add auth token
+    this.axios.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        
+        // For FormData requests, remove Content-Type to let browser set boundary
+        if (config.data instanceof FormData) {
+          delete config.headers['Content-Type'];
+        }
+        
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+
+    // Response interceptor for error handling
+    this.axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
+        return Promise.reject(error);
+      }
+    );
   }
 
   // Set current user from AuthContext - SAME PATTERN as working components
@@ -125,17 +170,18 @@ class ArticleApiService {
    */
   async debugApiEndpoints() {
     console.log('🔍 DEBUGGING API ENDPOINTS...');
+    console.log('🔍 Base URL:', this.baseURL);
     
     const endpoints = [
-      '/api/news/user',
-      '/api/news',
-      '/api/analytics/social-stats',
-      '/api/auth/me'
+      '/news/user',
+      '/news',
+      '/analytics/social-stats',
+      '/auth/me'
     ];
     
     for (const endpoint of endpoints) {
       try {
-        console.log(`Testing endpoint: ${endpoint}`);
+        console.log(`Testing endpoint: ${this.baseURL}${endpoint}`);
         
         const response = await this.axios.get(endpoint, {
           timeout: 5000,
@@ -157,7 +203,7 @@ class ArticleApiService {
    */
   async getSocialStats() {
     try {
-      const response = await this.axios.get('/api/analytics/social-stats', {
+      const response = await this.axios.get('/analytics/social-stats', {
         timeout: 10000, // 10 second timeout
         validateStatus: function (status) {
           return status === 200;
@@ -375,16 +421,16 @@ class ArticleApiService {
         params.append('status', filters.status);
       }
 
-      const response = await this.axios.get(`/api/news?${params}`);
+      const response = await this.axios.get(`/news?${params}`);
 
       if (response.data?.success) {
-        console.log(`Loaded ${response.data.data?.length || 0} articles (admin view)`);
+        console.log(`✅ Loaded ${response.data.data?.length || 0} articles (admin view)`);
         return response.data.data || [];
       } else {
         throw new Error(response.data?.message || 'Failed to fetch articles');
       }
     } catch (error) {
-      console.error('Error fetching all articles:', error.response?.data || error.message);
+      console.error('❌ Error fetching all articles:', error.response?.data || error.message);
       
       if (error.response?.status === 403) {
         throw new Error('Admin access required');
@@ -415,9 +461,7 @@ class ArticleApiService {
       if (hasImages) {
         const formData = this.createFormData(articleData);
 
-        const response = await this.axios.post('/api/news', formData, {
-          headers: this.getFormDataHeaders()
-        });
+        const response = await this.axios.post('/news', formData);
 
         if (response.data?.success) {
           console.log('✅ Admin article created successfully with images:', response.data.data._id);
@@ -428,9 +472,7 @@ class ArticleApiService {
       } else {
         const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
         
-        const response = await this.axios.post('/api/news', cleanData, {
-          headers: this.getAuthHeaders()
-        });
+        const response = await this.axios.post('/news', cleanData);
 
         if (response.data?.success) {
           console.log('✅ Admin article created successfully (text only):', response.data.data._id);
@@ -463,9 +505,9 @@ class ArticleApiService {
         status: filters.status || 'all'
       });
 
-      console.log('🔍 Getting user articles from:', `/api/news/user/my-articles?${params}`);
+      console.log('🔍 Getting user articles from:', `/news/user/my-articles?${params}`);
       
-      const response = await this.axios.get(`/api/news/user/my-articles?${params}`);
+      const response = await this.axios.get(`/news/user/my-articles?${params}`);
 
       if (response.data?.success) {
         console.log(`✅ Loaded ${response.data.data?.length || 0} user articles`);
@@ -480,7 +522,7 @@ class ArticleApiService {
   }
 
   /**
-   * FIXED: Enhanced createUserArticle with proper axios usage and debugging
+   * FIXED: Enhanced createUserArticle with proper URL and debugging
    * @param {Object} articleData - Article data (may include image files)
    * @returns {Promise<Object>} Created article
    */
@@ -490,6 +532,7 @@ class ArticleApiService {
       console.log('📋 Article title:', articleData.title);
       console.log('📋 User role:', this.getUserRole());
       console.log('📋 Auth token present:', !!localStorage.getItem('token'));
+      console.log('📋 Service base URL:', this.baseURL);
 
       // Validate input data
       if (!articleData.title || !articleData.content || !articleData.category) {
@@ -501,15 +544,13 @@ class ArticleApiService {
                        (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
       
       let response;
-      const url = '/api/news/user';
+      const url = '/news/user'; // This will be combined with baseURL that has /api
       
-      console.log('📤 Making request to:', url);
+      console.log('📤 Making request to:', this.baseURL + url);
       console.log('📊 Request details:', {
         hasImages,
         featuredImage: !!articleData.featuredImageFile,
-        galleryImages: articleData.galleryImageFiles?.length || 0,
-        axios: !!this.axios,
-        baseURL: this.axios.defaults?.baseURL
+        galleryImages: articleData.galleryImageFiles?.length || 0
       });
       
       if (hasImages) {
@@ -517,16 +558,13 @@ class ArticleApiService {
         console.log('📎 Sending FormData request...');
         
         response = await this.axios.post(url, formData, {
-          headers: this.getFormDataHeaders(),
           timeout: 300000, // 5 minutes for large uploads
         });
       } else {
         const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
         console.log('📝 Sending JSON request...');
         
-        response = await this.axios.post(url, cleanData, {
-          headers: this.getAuthHeaders()
-        });
+        response = await this.axios.post(url, cleanData);
       }
 
       console.log('✅ Raw response status:', response.status);
@@ -581,14 +619,12 @@ class ArticleApiService {
       const hasImages = articleData.featuredImageFile || 
                        (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
       
-      const url = `/api/news/user/${articleId}`;
+      const url = `/news/user/${articleId}`;
       
       if (hasImages) {
         const formData = this.createFormData(articleData);
         
-        const response = await this.axios.put(url, formData, {
-          headers: this.getFormDataHeaders()
-        });
+        const response = await this.axios.put(url, formData);
 
         if (response.data?.success) {
           console.log('✅ User article updated successfully with images');
@@ -599,9 +635,7 @@ class ArticleApiService {
       } else {
         const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
         
-        const response = await this.axios.put(url, cleanData, {
-          headers: this.getAuthHeaders()
-        });
+        const response = await this.axios.put(url, cleanData);
 
         if (response.data?.success) {
           console.log('✅ User article updated successfully (text only)');
@@ -625,7 +659,7 @@ class ArticleApiService {
     try {
       console.log('🗑️ Deleting user article:', articleId);
       
-      const response = await this.axios.delete(`/api/news/user/${articleId}`);
+      const response = await this.axios.delete(`/news/user/${articleId}`);
 
       if (response.data?.success) {
         console.log('✅ User article deleted successfully');
