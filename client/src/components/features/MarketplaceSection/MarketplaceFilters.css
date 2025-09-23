@@ -587,8 +587,8 @@
   }
   
   .toggle-filters-btn {
-    padding: 3px 6px;
-    font-size: 0.7rem;
+    padding: 2px 4px;
+    font-size: 0.6rem;
   }
   
   /* UPDATED: Mobile layout for horizontal filters */
@@ -765,8 +765,8 @@
   }
   
   .toggle-filters-btn {
-    padding: 2px 4px;
-    font-size: 0.65rem;
+    padding: 1px 3px;
+    font-size: 0.55rem;
   }
   
   /* UPDATED: Keep horizontal layout even on very small screens */
