@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement/services/articleService.js
-// UPDATED VERSION - Enhanced with multiple image support while preserving all existing functionality
+// FIXED VERSION - Enhanced with multiple image support and comprehensive error handling
 
 import axios from '../../../../config/axios.js';
 
@@ -120,43 +120,77 @@ class ArticleApiService {
   }
 
   /**
-   * ENHANCED: Create proper FormData with support for multiple images
+   * FIXED: Enhanced FormData creation with validation
    * @param {Object} articleData - Article data with potential image files
    * @returns {FormData} - Properly formatted form data
    */
   createFormData(articleData) {
-    const formData = new FormData();
-
-    // Add all non-file fields
-    Object.keys(articleData).forEach(key => {
-      if (key === 'featuredImageFile' || key === 'galleryImageFiles') return; // Skip file fields
+    try {
+      const formData = new FormData();
       
-      const value = articleData[key];
-      if (value !== undefined && value !== null) {
-        if (key === 'tags' && Array.isArray(value)) {
-          formData.append(key, JSON.stringify(value));
+      // Add text fields with validation
+      const textFields = ['title', 'subtitle', 'content', 'category', 'status', 'authorId', 'authorName'];
+      textFields.forEach(field => {
+        if (articleData[field] !== undefined && articleData[field] !== null) {
+          formData.append(field, String(articleData[field]));
+        }
+      });
+      
+      // Add arrays (tags) with proper serialization
+      if (articleData.tags && Array.isArray(articleData.tags)) {
+        formData.append('tags', JSON.stringify(articleData.tags));
+      }
+      
+      // Add dates with proper formatting
+      if (articleData.publishDate) {
+        formData.append('publishDate', articleData.publishDate);
+      }
+      
+      // Add boolean fields with explicit conversion
+      const booleanFields = ['isPremium', 'earningsEnabled', 'trackEngagement', 'allowComments', 'allowSharing'];
+      booleanFields.forEach(field => {
+        if (articleData[field] !== undefined) {
+          formData.append(field, Boolean(articleData[field]).toString());
+        }
+      });
+      
+      // FIXED: Add featured image with validation
+      if (articleData.featuredImageFile) {
+        if (articleData.featuredImageFile instanceof File) {
+          formData.append('featuredImage', articleData.featuredImageFile);
+          console.log('Added featured image:', articleData.featuredImageFile.name);
         } else {
-          formData.append(key, value.toString());
+          console.warn('Featured image is not a valid File object:', typeof articleData.featuredImageFile);
         }
       }
-    });
-
-    // Add featured image if present
-    if (articleData.featuredImageFile) {
-      formData.append('featuredImage', articleData.featuredImageFile);
-      console.log('Added featured image to FormData:', articleData.featuredImageFile.name);
+      
+      // FIXED: Add gallery images with validation
+      if (articleData.galleryImageFiles && Array.isArray(articleData.galleryImageFiles)) {
+        articleData.galleryImageFiles.forEach((file, index) => {
+          if (file instanceof File) {
+            formData.append('gallery', file);
+            console.log(`Added gallery image ${index + 1}:`, file.name);
+          } else {
+            console.warn(`Gallery image ${index + 1} is not a valid File object:`, typeof file);
+          }
+        });
+      }
+      
+      // FIXED: Log FormData contents for debugging
+      console.log('FormData created with fields:');
+      for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(`${key}: [File] ${value.name} (${value.size} bytes)`);
+        } else {
+          console.log(`${key}:`, value);
+        }
+      }
+      
+      return formData;
+    } catch (error) {
+      console.error('Error creating FormData:', error);
+      throw new Error('Failed to prepare article data for upload');
     }
-
-    // NEW: Add gallery images if present (using 'gallery' field name to match backend)
-    if (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0) {
-      articleData.galleryImageFiles.forEach((file, index) => {
-        formData.append('gallery', file); // Backend expects 'gallery' field name
-        console.log(`Added gallery image ${index + 1} to FormData:`, file.name);
-      });
-    }
-
-    console.log('FormData created with fields:', [...formData.keys()]);
-    return formData;
   }
 
   // ========================================
@@ -472,14 +506,19 @@ class ArticleApiService {
   }
 
   /**
-   * ENHANCED: Create article as user/journalist with FormData support for multiple images
+   * FIXED: Enhanced createUserArticle method with better error handling
    * @param {Object} articleData - Article data (may include image files)
    * @returns {Promise<Object>} Created article
    */
   async createUserArticle(articleData) {
     try {
-      console.log('Creating article as user/journalist:', articleData.title);
-      
+      console.log('Creating user article:', articleData.title);
+
+      // Validate input data
+      if (!articleData.title || !articleData.content || !articleData.category) {
+        throw new Error('Title, content, and category are required');
+      }
+
       // Check if we have any image files
       const hasImages = articleData.featuredImageFile || 
                        (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
@@ -488,27 +527,86 @@ class ArticleApiService {
         // Use FormData for image upload
         const formData = this.createFormData(articleData);
 
-        console.log('Uploading article with images via FormData...');
+        console.log('Creating article with images via FormData...');
         console.log('Featured image:', articleData.featuredImageFile ? articleData.featuredImageFile.name : 'None');
         console.log('Gallery images:', articleData.galleryImageFiles ? articleData.galleryImageFiles.length : 0);
 
-        const response = await this.axios.post('/news/user', formData, {
-          headers: this.getFormDataHeaders()
-        });
+        // FIXED: Enhanced request with better error handling
+        try {
+          const response = await this.axios.post('/news/user', formData, {
+            headers: this.getFormDataHeaders(),
+            timeout: 300000, // 5 minutes for large uploads
+            onUploadProgress: (progressEvent) => {
+              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              console.log(`Upload progress: ${percentCompleted}%`);
+            }
+          });
 
-        if (response.data?.success) {
-          console.log('User article created successfully with images:', response.data.data._id);
-          console.log('User permissions:', response.data.userPermissions);
+          // FIXED: Better response validation
+          if (!response) {
+            throw new Error('No response received from server');
+          }
+
+          if (!response.data) {
+            throw new Error('Invalid response format - no data received');
+          }
+
+          if (response.data.success) {
+            console.log('User article created successfully with images:', response.data.data?._id);
+            console.log('User permissions:', response.data.userPermissions);
+            
+            // FIXED: Safe data extraction with fallbacks
+            const articleResult = response.data.data || {};
+            const userPermissions = response.data.userPermissions || {};
+            
+            return {
+              ...articleResult,
+              userPermissions: userPermissions,
+              canPublish: userPermissions.canPublish || false,
+              actualStatus: articleResult.status || 'draft'
+            };
+          } else {
+            // FIXED: Better error message extraction
+            const errorMessage = response.data.message || 
+                                response.data.error || 
+                                'Failed to create article';
+            throw new Error(errorMessage);
+          }
+        } catch (requestError) {
+          console.error('FormData request failed:', requestError);
           
-          // Return enhanced data with permission info
-          return {
-            ...response.data.data,
-            userPermissions: response.data.userPermissions,
-            canPublish: response.data.userPermissions?.canPublish || false,
-            actualStatus: response.data.data.status
-          };
-        } else {
-          throw new Error(response.data?.message || 'Failed to create article');
+          // FIXED: Enhanced error handling for different error types
+          if (requestError.code === 'ECONNABORTED') {
+            throw new Error('Request timed out. Please try again with smaller images.');
+          }
+          
+          if (requestError.response) {
+            const status = requestError.response.status;
+            const errorData = requestError.response.data;
+            
+            console.error('Server error response:', status, errorData);
+            
+            switch (status) {
+              case 401:
+                throw new Error('Authentication failed. Please log in again.');
+              case 403:
+                throw new Error('You do not have permission to create articles.');
+              case 413:
+                throw new Error('File too large. Please use smaller images.');
+              case 422:
+                throw new Error(errorData?.message || 'Invalid article data provided.');
+              case 500:
+                throw new Error('Server error. Please try again later.');
+              default:
+                throw new Error(errorData?.message || `Server error (${status}). Please try again.`);
+            }
+          }
+          
+          if (requestError.request) {
+            throw new Error('Unable to connect to server. Please check your internet connection.');
+          }
+          
+          throw requestError;
         }
       } else {
         // Use JSON for text-only articles
@@ -516,27 +614,74 @@ class ArticleApiService {
         
         console.log('Creating article without images via JSON...');
 
-        const response = await this.axios.post('/news/user', cleanData, {
-          headers: this.getAuthHeaders()
-        });
+        try {
+          const response = await this.axios.post('/news/user', cleanData, {
+            headers: this.getAuthHeaders(),
+            timeout: 30000 // 30 seconds for JSON requests
+          });
 
-        if (response.data?.success) {
-          console.log('User article created successfully (text only):', response.data.data._id);
-          console.log('User permissions:', response.data.userPermissions);
+          // FIXED: Same response validation as above
+          if (!response || !response.data) {
+            throw new Error('Invalid response received from server');
+          }
+
+          if (response.data.success) {
+            console.log('User article created successfully (text only):', response.data.data?._id);
+            console.log('User permissions:', response.data.userPermissions);
+            
+            const articleResult = response.data.data || {};
+            const userPermissions = response.data.userPermissions || {};
+            
+            return {
+              ...articleResult,
+              userPermissions: userPermissions,
+              canPublish: userPermissions.canPublish || false,
+              actualStatus: articleResult.status || 'draft'
+            };
+          } else {
+            const errorMessage = response.data.message || 
+                                response.data.error || 
+                                'Failed to create article';
+            throw new Error(errorMessage);
+          }
+        } catch (requestError) {
+          console.error('JSON request failed:', requestError);
           
-          return {
-            ...response.data.data,
-            userPermissions: response.data.userPermissions,
-            canPublish: response.data.userPermissions?.canPublish || false,
-            actualStatus: response.data.data.status
-          };
-        } else {
-          throw new Error(response.data?.message || 'Failed to create article');
+          // FIXED: Same error handling pattern as FormData request
+          if (requestError.response) {
+            const status = requestError.response.status;
+            const errorData = requestError.response.data;
+            
+            switch (status) {
+              case 401:
+                throw new Error('Authentication failed. Please log in again.');
+              case 403:
+                throw new Error('You do not have permission to create articles.');
+              case 422:
+                throw new Error(errorData?.message || 'Invalid article data provided.');
+              case 500:
+                throw new Error('Server error. Please try again later.');
+              default:
+                throw new Error(errorData?.message || `Server error (${status}). Please try again.`);
+            }
+          }
+          
+          if (requestError.request) {
+            throw new Error('Unable to connect to server. Please check your internet connection.');
+          }
+          
+          throw requestError;
         }
       }
     } catch (error) {
-      console.error('Error creating user article:', error.response?.data || error.message);
-      throw error;
+      console.error('Error creating user article:', error);
+      
+      // FIXED: Re-throw with enhanced error information
+      if (error.message) {
+        throw error; // Preserve the detailed error message
+      } else {
+        throw new Error('An unexpected error occurred while creating the article');
+      }
     }
   }
 

@@ -1,4 +1,4 @@
-// src/App.js - Enhanced with Complete Analytics Integration
+// src/App.js - Enhanced with Complete Analytics Integration and FIXED Error Boundary
 
 // React Core Imports
 import React, { Suspense, useState, useEffect } from 'react';
@@ -251,7 +251,7 @@ const AnalyticsWrapper = ({ children }) => {
   return children;
 };
 
-// Enhanced Error Boundary Component
+// FIXED: Enhanced Error Boundary Component with proper null checks
 class AppErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -270,53 +270,47 @@ class AppErrorBoundary extends React.Component {
       errorInfo: errorInfo
     });
     
-    // Track error with new analytics service (primary)
+    // FIXED: Safe error tracking with null checks
     try {
-      analyticsService.trackEvent({
+      const trackingData = {
         eventType: 'error',
         category: 'system',
         metadata: {
           errorType: 'ReactErrorBoundary',
-          errorMessage: error.message,
-          errorStack: error.stack,
-          componentStack: errorInfo.componentStack,
+          errorMessage: error?.message || 'Unknown error',
+          errorStack: error?.stack || 'No stack trace',
+          componentStack: errorInfo?.componentStack || 'No component stack', // FIXED: Added null check
           page: window.location.pathname,
           timestamp: new Date().toISOString(),
           userAgent: navigator.userAgent,
           url: window.location.href
         }
-      }).catch(console.warn);
-    } catch (analyticsError) {
-      console.error('Error tracking failed:', analyticsError);
-    }
-    
-    // Track with internal analytics as fallback
-    try {
-      if (internalAnalytics && typeof internalAnalytics.trackEvent === 'function') {
-        internalAnalytics.trackEvent('error', {
-          category: 'system',
-          metadata: {
-            errorType: 'ReactErrorBoundary',
-            errorMessage: error.message,
-            errorStack: error.stack,
-            componentStack: errorInfo.componentStack,
-            page: window.location.pathname,
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent,
-            url: window.location.href
-          }
-        });
+      };
+
+      // Track with analytics service (with error handling)
+      if (typeof analyticsService !== 'undefined' && analyticsService?.trackEvent) {
+        analyticsService.trackEvent(trackingData).catch(console.warn);
       }
       
-      // Track with Google Analytics
-      trackException(error.message, true);
+      // Track with internal analytics as fallback
+      if (typeof internalAnalytics !== 'undefined' && internalAnalytics?.trackEvent) {
+        internalAnalytics.trackEvent('error', trackingData);
+      }
+      
+      // Track with Google Analytics (safe)
+      safeTrackException(error?.message || 'Unknown error', true);
+      
     } catch (analyticsError) {
-      console.error('Fallback error tracking failed:', analyticsError);
+      console.error('Error tracking failed:', analyticsError);
     }
 
     // Report to external error service if configured
     if (this.props.onError) {
-      this.props.onError(error, errorInfo);
+      try {
+        this.props.onError(error, errorInfo);
+      } catch (callbackError) {
+        console.error('Error boundary callback failed:', callbackError);
+      }
     }
   }
 
@@ -327,12 +321,17 @@ class AppErrorBoundary extends React.Component {
           <div className="error-boundary-content">
             <h2>Something went wrong</h2>
             <p>We're sorry, but something unexpected happened.</p>
-            <details style={{ whiteSpace: 'pre-wrap', marginTop: '1rem' }}>
-              <summary>Error Details (Click to expand)</summary>
-              {this.state.error && this.state.error.toString()}
-              <br />
-              {this.state.errorInfo.componentStack}
-            </details>
+            
+            {/* FIXED: Added safe rendering with null checks */}
+            {process.env.NODE_ENV === 'development' && (
+              <details style={{ whiteSpace: 'pre-wrap', marginTop: '1rem' }}>
+                <summary>Error Details (Click to expand)</summary>
+                {this.state.error ? this.state.error.toString() : 'No error details available'}
+                <br />
+                {this.state.errorInfo?.componentStack || 'No component stack available'}
+              </details>
+            )}
+            
             <button 
               onClick={() => window.location.reload()} 
               style={{ 

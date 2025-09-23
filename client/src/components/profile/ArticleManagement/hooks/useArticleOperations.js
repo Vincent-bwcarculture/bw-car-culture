@@ -1,5 +1,5 @@
 // client/src/components/profile/ArticleManagement/hooks/useArticleOperations.js
-// FIXED VERSION - Using the same simple pattern as working UserCarListingForm
+// FIXED VERSION - Enhanced error handling and using the same simple pattern as working UserCarListingForm
 
 import { useState, useCallback } from 'react';
 import { defaultArticleForm, VIEWS } from '../utils/constants.js';
@@ -98,7 +98,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
     return errors;
   };
 
-  // Save article
+  // FIXED: Enhanced handleSave function with better error handling
   const handleSave = async (publishNow = false) => {
     try {
       setSaving(true);
@@ -125,7 +125,7 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
         articleData.featuredImageFile = featuredImageFile;
       }
 
-      // SIMPLIFIED: Add gallery images using same pattern as car listings
+      // Add gallery images using same pattern as car listings
       if (galleryImages.length > 0) {
         articleData.galleryImageFiles = galleryImages.map(img => img.file);
       }
@@ -137,37 +137,108 @@ export const useArticleOperations = ({ addArticle, updateArticle, deleteArticle,
       });
 
       let result;
-      if (editingArticle) {
-        result = await updateArticle(editingArticle._id || editingArticle.id, articleData);
-      } else {
-        result = await addArticle(articleData);
-      }
+      
+      // FIXED: Enhanced error handling with detailed logging
+      try {
+        if (editingArticle) {
+          console.log('Updating existing article:', editingArticle._id || editingArticle.id);
+          result = await updateArticle(editingArticle._id || editingArticle.id, articleData);
+        } else {
+          console.log('Creating new article...');
+          result = await addArticle(articleData);
+        }
 
-      setSaveStatus('success');
-      setFeaturedImageFile(null);
-      setGalleryImages([]);
-      
-      const actionPastTense = publishNow ? 'published' : 'saved';
-      setTimeout(() => {
-        alert(`Article "${articleForm.title}" ${actionPastTense} successfully!`);
-      }, 500);
-      
-      setTimeout(() => {
-        setActiveView(VIEWS.LIST);
-      }, 1500);
+        // FIXED: Verify result before proceeding
+        if (!result) {
+          throw new Error('No response received from server');
+        }
+
+        console.log('Article operation successful:', result);
+        
+        setSaveStatus('success');
+        setFeaturedImageFile(null);
+        setGalleryImages([]);
+        
+        const actionPastTense = publishNow ? 'published' : 'saved';
+        
+        // FIXED: Better success notification
+        setTimeout(() => {
+          try {
+            alert(`Article "${articleForm.title}" ${actionPastTense} successfully!`);
+          } catch (alertError) {
+            console.warn('Alert failed, using console:', alertError);
+            console.log(`Article "${articleForm.title}" ${actionPastTense} successfully!`);
+          }
+        }, 500);
+        
+        // FIXED: Safe navigation with fallback
+        setTimeout(() => {
+          try {
+            setActiveView(VIEWS.LIST);
+          } catch (navigationError) {
+            console.error('Navigation failed:', navigationError);
+            // Force page refresh as fallback
+            window.location.reload();
+          }
+        }, 1500);
+        
+      } catch (apiError) {
+        console.error('API call failed:', apiError);
+        
+        // FIXED: Better error message handling
+        let errorMessage = 'Failed to save article. Please try again.';
+        
+        if (apiError?.message) {
+          errorMessage = apiError.message;
+        } else if (apiError?.response?.data?.message) {
+          errorMessage = apiError.response.data.message;
+        } else if (apiError?.response?.status) {
+          switch (apiError.response.status) {
+            case 401:
+              errorMessage = 'Authentication failed. Please log in again.';
+              break;
+            case 403:
+              errorMessage = 'You do not have permission to save articles.';
+              break;
+            case 413:
+              errorMessage = 'File too large. Please use smaller images.';
+              break;
+            case 500:
+              errorMessage = 'Server error. Please try again later.';
+              break;
+            default:
+              errorMessage = `Server error (${apiError.response.status}). Please try again.`;
+          }
+        }
+        
+        setFormErrors({ 
+          general: errorMessage
+        });
+        setSaveStatus('error');
+        
+        // FIXED: Safe error notification
+        try {
+          alert(`Error: ${errorMessage}`);
+        } catch (alertError) {
+          console.warn('Alert failed, using console:', alertError);
+          console.error('Save failed:', errorMessage);
+        }
+        
+        throw apiError; // Re-throw for parent component handling
+      }
       
     } catch (error) {
-      console.error('Failed to save article:', error);
-      setFormErrors({ 
-        general: error.message || 'Failed to save article. Please try again.' 
-      });
+      console.error('Failed to save article (outer catch):', error);
+      
+      // FIXED: Fallback error handling
+      if (!formErrors.general) {
+        setFormErrors({ 
+          general: 'An unexpected error occurred. Please try again.'
+        });
+      }
       setSaveStatus('error');
-      
-      setTimeout(() => {
-        alert(`Failed to save article: ${error.message}`);
-      }, 500);
-      
     } finally {
+      // FIXED: Always reset saving state
       setSaving(false);
     }
   };
