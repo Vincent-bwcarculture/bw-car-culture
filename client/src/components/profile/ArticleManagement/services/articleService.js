@@ -1,352 +1,420 @@
 // client/src/components/profile/ArticleManagement/services/articleService.js
-// COMPLETE FIXED VERSION - Routing issue resolved by reverting to own axios instance
+// COMPLETE FIXED VERSION - Based on working dealer service patterns
 
-import axios from 'axios'; // Import directly, not from config to avoid URL normalization
+import axios from 'axios';
 
 class ArticleApiService {
   constructor() {
+    // FIXED: Match the exact URL pattern that works for dealers
     this.baseURL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app/api';
-    this.endpoint = `${this.baseURL}/news`;
     
-    // FIXED: Create own axios instance with correct baseURL (includes /api)
+    // FIXED: Create dedicated axios instance following dealer service pattern
     this.axios = axios.create({
-      baseURL: this.baseURL, // This has /api suffix which is needed
-      timeout: 300000, // 5 mins timeout
+      baseURL: this.baseURL,
+      timeout: 300000, // 5 minutes
       headers: {
         'Content-Type': 'application/json'
       }
     });
     
-    // Setup auth interceptors for this instance
     this.setupAxiosInterceptors();
     
     this.cache = new Map();
-    this.cacheDuration = 5 * 60 * 1000; // 5 minutes
+    this.cacheDuration = 5 * 60 * 1000;
     this.pendingRequests = {};
-    
-    // Store user reference - will be set by components using AuthContext
     this.currentUser = null;
+    
+    // Debug configuration
+    console.log('🔧 ArticleService initialized:', {
+      baseURL: this.baseURL,
+      axiosBaseURL: this.axios.defaults.baseURL,
+      environment: process.env.NODE_ENV
+    });
   }
 
   /**
-   * Setup axios interceptors for authentication
+   * Setup axios interceptors - COPIED from working dealer service pattern
    */
   setupAxiosInterceptors() {
-    // Request interceptor to add auth token
+    // Request interceptor
     this.axios.interceptors.request.use(
       (config) => {
+        // Add auth token (same as dealers)
         const token = localStorage.getItem('token');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
         
-        // For FormData requests, remove Content-Type to let browser set boundary
+        // For FormData, remove Content-Type (same as dealers)
         if (config.data instanceof FormData) {
           delete config.headers['Content-Type'];
         }
         
+        // Debug logging (same as dealers)
+        console.log('📤 ArticleService Request:', {
+          method: config.method?.toUpperCase(),
+          url: config.url,
+          fullURL: `${config.baseURL}${config.url}`,
+          hasAuth: !!config.headers.Authorization,
+          contentType: config.headers['Content-Type'],
+          dataType: config.data ? (config.data instanceof FormData ? 'FormData' : typeof config.data) : 'none'
+        });
+        
         return config;
       },
       (error) => {
+        console.error('❌ Request interceptor error:', error);
         return Promise.reject(error);
       }
     );
 
-    // Response interceptor for error handling
+    // Response interceptor (same as dealers)
     this.axios.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        console.log('✅ ArticleService Response:', {
+          status: response.status,
+          url: response.config.url,
+          dataType: typeof response.data,
+          isSuccess: response.data?.success,
+          hasData: !!response.data?.data
+        });
+        return response;
+      },
       (error) => {
+        console.error('❌ ArticleService Error:', {
+          status: error.response?.status,
+          url: error.config?.url,
+          message: error.message,
+          responseData: error.response?.data
+        });
+        
+        // Auto-redirect on auth failure (same as dealers)
         if (error.response?.status === 401) {
+          console.warn('🔐 Authentication failed - redirecting to login');
           localStorage.removeItem('token');
-          window.location.href = '/login';
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 1000);
         }
         return Promise.reject(error);
       }
     );
   }
 
-  // Set current user from AuthContext - SAME PATTERN as working components
+  /**
+   * Set current user (same pattern as dealers)
+   */
   setCurrentUser(user) {
     this.currentUser = user;
-    console.log('Article service user set:', user?.role, 'ID:', user?.id);
+    console.log('👤 ArticleService user set:', {
+      role: user?.role,
+      id: user?.id,
+      name: user?.name
+    });
   }
 
   /**
-   * Get auth headers with JWT token
-   * @returns {Object} Headers with authorization
-   */
-  getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('ArticleService: No auth token found in localStorage');
-      throw new Error('Authentication token not found. Please log in again.');
-    }
-    
-    return {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    };
-  }
-
-  /**
-   * Get auth headers for FormData (multipart/form-data)
-   * @returns {Object} Headers with authorization (no content-type for FormData)
-   */
-  getFormDataHeaders() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('ArticleService: No auth token found for FormData');
-      throw new Error('Authentication token not found. Please log in again.');
-    }
-    
-    return {
-      'Authorization': `Bearer ${token}`
-    };
-  }
-
-  /**
-   * Get simple auth headers (no content-type)
-   */
-  getSimpleAuthHeaders() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('ArticleService: No auth token found for simple headers');
-      throw new Error('Authentication token not found. Please log in again.');
-    }
-    
-    return {
-      'Authorization': `Bearer ${token}`
-    };
-  }
-
-  /**
-   * Get user info - USES AUTHCONTEXT USER (not localStorage)
+   * User utility methods (same as dealers)
    */
   getUser() {
     return this.currentUser || null;
   }
 
-  /**
-   * Get user role
-   */
   getUserRole() {
     const user = this.getUser();
     return user?.role || 'user';
   }
 
-  /**
-   * Check if user is admin
-   */
   isAdmin() {
     return this.getUserRole() === 'admin';
   }
 
-  /**
-   * Check if user is journalist
-   */
   isJournalist() {
     const user = this.getUser();
     return user?.role === 'journalist' || 
            (user?.additionalRoles && user.additionalRoles.includes('journalist'));
   }
 
-  /**
-   * Check if user can publish directly
-   */
   canPublishDirectly() {
-    return this.isAdmin(); // Only admins can publish directly now
+    return this.isAdmin();
   }
 
   /**
-   * Clear cache
-   */
-  clearCache() {
-    this.cache.clear();
-    console.log('ArticleService: Cache cleared');
-  }
-
-  /**
-   * DEBUGGING: Test API endpoints to identify issues
-   */
-  async debugApiEndpoints() {
-    console.log('🔍 DEBUGGING API ENDPOINTS...');
-    console.log('🔍 Base URL:', this.baseURL);
-    
-    const endpoints = [
-      '/news/user',
-      '/news',
-      '/analytics/social-stats',
-      '/auth/me'
-    ];
-    
-    for (const endpoint of endpoints) {
-      try {
-        console.log(`Testing endpoint: ${this.baseURL}${endpoint}`);
-        
-        const response = await this.axios.get(endpoint, {
-          timeout: 5000,
-          validateStatus: () => true // Accept all status codes
-        });
-        
-        console.log(`✅ ${endpoint}: Status ${response.status}`);
-        console.log(`Response type: ${typeof response.data}`);
-        console.log(`Is HTML: ${typeof response.data === 'string' && response.data.includes('<!DOCTYPE')}`);
-        
-      } catch (error) {
-        console.error(`❌ ${endpoint}: ${error.message}`);
-      }
-    }
-  }
-
-  /**
-   * FIXED: Safe social stats fetching with comprehensive error handling
-   */
-  async getSocialStats() {
-    try {
-      const response = await this.axios.get('/analytics/social-stats', {
-        timeout: 10000, // 10 second timeout
-        validateStatus: function (status) {
-          return status === 200;
-        }
-      });
-
-      if (!response.data || typeof response.data !== 'object') {
-        console.warn('Social stats: Invalid response format, using defaults');
-        return this.getDefaultSocialStats();
-      }
-
-      if (response.data.success) {
-        return response.data.data || this.getDefaultSocialStats();
-      } else {
-        console.warn('Social stats: API returned success=false, using defaults');
-        return this.getDefaultSocialStats();
-      }
-    } catch (error) {
-      console.warn('Social stats fetch failed, using defaults:', error.message);
-      return this.getDefaultSocialStats();
-    }
-  }
-
-  /**
-   * FIXED: Provide default social stats to prevent errors
-   */
-  getDefaultSocialStats() {
-    return {
-      totalViews: 0,
-      totalLikes: 0,
-      totalShares: 0,
-      totalComments: 0,
-      engagementRate: 0,
-      topPerformingArticles: []
-    };
-  }
-
-  /**
-   * FIXED: Enhanced FormData creation with validation
-   * @param {Object} articleData - Article data with potential image files
-   * @returns {FormData} - Properly formatted form data
+   * Enhanced FormData creation - COPIED from working dealer service pattern
    */
   createFormData(articleData) {
     try {
       const formData = new FormData();
       
-      // Add text fields with validation
-      const textFields = ['title', 'subtitle', 'content', 'category', 'status', 'authorId', 'authorName'];
+      console.log('📋 Creating FormData from article data:', {
+        title: articleData.title,
+        hasContent: !!articleData.content,
+        contentLength: articleData.content?.length || 0,
+        hasFeaturedImage: !!articleData.featuredImageFile,
+        galleryImagesCount: articleData.galleryImageFiles?.length || 0
+      });
+      
+      // Add text fields (same as dealers)
+      const textFields = [
+        'title', 'subtitle', 'content', 'category', 'status', 
+        'metaTitle', 'metaDescription', 'metaKeywords'
+      ];
+      
       textFields.forEach(field => {
         if (articleData[field] !== undefined && articleData[field] !== null) {
-          formData.append(field, String(articleData[field]));
+          const value = String(articleData[field]).trim();
+          if (value) {
+            formData.append(field, value);
+            console.log(`📝 Added field ${field}:`, value.substring(0, 50) + (value.length > 50 ? '...' : ''));
+          }
         }
       });
       
-      // Add arrays (tags) with proper serialization
+      // Add arrays and objects (same as dealers)
       if (articleData.tags && Array.isArray(articleData.tags)) {
         formData.append('tags', JSON.stringify(articleData.tags));
+        console.log('📝 Added tags:', articleData.tags);
       }
       
-      // Add dates with proper formatting
+      // Add dates
       if (articleData.publishDate) {
         formData.append('publishDate', articleData.publishDate);
+        console.log('📝 Added publishDate:', articleData.publishDate);
       }
       
-      // Add boolean fields with explicit conversion
-      const booleanFields = ['isPremium', 'earningsEnabled', 'trackEngagement', 'allowComments', 'allowSharing'];
+      // Add boolean fields
+      const booleanFields = ['isPremium', 'earningsEnabled', 'allowComments', 'allowSharing'];
       booleanFields.forEach(field => {
         if (articleData[field] !== undefined) {
           formData.append(field, Boolean(articleData[field]).toString());
         }
       });
       
-      // FIXED: Add featured image with validation
-      if (articleData.featuredImageFile) {
-        if (articleData.featuredImageFile instanceof File) {
-          formData.append('featuredImage', articleData.featuredImageFile);
-          console.log('Added featured image:', articleData.featuredImageFile.name);
-        } else {
-          console.warn('Featured image is not a valid File object:', typeof articleData.featuredImageFile);
-        }
+      // FIXED: Add images properly (following dealer image upload pattern)
+      if (articleData.featuredImageFile && articleData.featuredImageFile instanceof File) {
+        formData.append('featuredImageFile', articleData.featuredImageFile);
+        console.log('🖼️ Added featured image:', {
+          name: articleData.featuredImageFile.name,
+          size: articleData.featuredImageFile.size,
+          type: articleData.featuredImageFile.type
+        });
       }
       
-      // FIXED: Add gallery images with validation
+      // Add gallery images
       if (articleData.galleryImageFiles && Array.isArray(articleData.galleryImageFiles)) {
         articleData.galleryImageFiles.forEach((file, index) => {
           if (file instanceof File) {
-            formData.append('gallery', file);
-            console.log(`Added gallery image ${index + 1}:`, file.name);
-          } else {
-            console.warn(`Gallery image ${index + 1} is not a valid File object:`, typeof file);
+            formData.append('galleryImageFiles', file);
+            console.log(`🖼️ Added gallery image ${index + 1}:`, {
+              name: file.name,
+              size: file.size,
+              type: file.type
+            });
           }
         });
       }
       
-      // FIXED: Log FormData contents for debugging
-      console.log('FormData created with fields:');
-      for (let [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          console.log(`${key}: [File] ${value.name} (${value.size} bytes)`);
-        } else {
-          console.log(`${key}:`, value);
-        }
-      }
-      
+      console.log('✅ FormData created successfully');
       return formData;
+      
     } catch (error) {
-      console.error('Error creating FormData:', error);
+      console.error('❌ Error creating FormData:', error);
       throw new Error('Failed to prepare article data for upload');
     }
   }
 
-  // ========================================
-  // SMART ROUTING METHODS (Choose endpoint based on user role)
-  // ========================================
-
   /**
-   * Get all user's articles (smart routing based on role)
-   * FIXED: Returns array directly for frontend compatibility
-   * @param {Object} filters - Filtering options
-   * @returns {Promise<Array>} User's articles
+   * FIXED: Create user article - Following exact dealer service pattern
    */
-  async getUserArticles(filters = {}) {
+  async createUserArticle(articleData) {
     try {
-      console.log('Getting user articles, role:', this.getUserRole());
-      if (this.isAdmin()) {
-        return await this.getAllArticles({...filters, status: filters.status || 'all'});
-      } else {
-        return await this.getMyOwnArticles(filters);
+      console.log('\n🚀 ===== CREATING USER ARTICLE =====');
+      console.log('📋 Request details:', {
+        title: articleData.title,
+        userRole: this.getUserRole(),
+        userId: this.currentUser?.id,
+        baseURL: this.baseURL,
+        hasAuth: !!localStorage.getItem('token')
+      });
+
+      // Validate required fields (same as dealers)
+      if (!articleData.title?.trim()) {
+        throw new Error('Article title is required');
       }
+      if (!articleData.content?.trim()) {
+        throw new Error('Article content is required'); 
+      }
+      if (!articleData.category) {
+        throw new Error('Article category is required');
+      }
+
+      // Check authentication (same as dealers)
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required. Please log in again.');
+      }
+
+      // FIXED: Use exact endpoint path from backend
+      const endpoint = '/news/user';
+      
+      console.log('📤 Making request to:', `${this.baseURL}${endpoint}`);
+
+      // Check for images (same as dealers)
+      const hasImages = articleData.featuredImageFile || 
+                       (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
+      
+      console.log('📊 Upload details:', {
+        hasImages,
+        featuredImage: !!articleData.featuredImageFile,
+        galleryImages: articleData.galleryImageFiles?.length || 0,
+        totalSize: hasImages ? 'Calculated...' : 0
+      });
+
+      let response;
+      
+      if (hasImages) {
+        // Use FormData for file uploads (same as dealers)
+        console.log('📎 Preparing FormData for image upload...');
+        const formData = this.createFormData(articleData);
+        
+        response = await this.axios.post(endpoint, formData, {
+          timeout: 300000, // 5 minutes for uploads
+          headers: {
+            // Let browser set Content-Type for FormData
+          }
+        });
+      } else {
+        // Use JSON for text-only (same as dealers)
+        console.log('📝 Preparing JSON for text-only request...');
+        const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
+        
+        response = await this.axios.post(endpoint, cleanData, {
+          timeout: 30000, // 30 seconds for JSON
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+
+      console.log('📨 Raw response received:', {
+        status: response.status,
+        success: response.data?.success,
+        hasData: !!response.data?.data,
+        message: response.data?.message
+      });
+
+      // Check for HTML response (indicates endpoint not found)
+      if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE')) {
+        console.error('🚨 Server returned HTML instead of JSON');
+        throw new Error('API endpoint not found. Server returned HTML page instead of JSON.');
+      }
+
+      // Validate successful response (same as dealers)
+      if (!response.data?.success) {
+        const errorMsg = response.data?.message || 'Article creation failed';
+        console.error('❌ API returned failure:', errorMsg);
+        throw new Error(errorMsg);
+      }
+
+      if (!response.data?.data) {
+        console.error('❌ API returned success but no data');
+        throw new Error('Article creation succeeded but no article data returned');
+      }
+
+      const createdArticle = response.data.data;
+      
+      // Validate article has required ID (same as dealers)
+      if (!createdArticle._id) {
+        console.error('❌ Created article missing ID');
+        throw new Error('Article created but missing database ID');
+      }
+
+      console.log('✅ Article created successfully!', {
+        id: createdArticle._id,
+        title: createdArticle.title,
+        status: createdArticle.status,
+        author: createdArticle.author
+      });
+      
+      console.log('🏁 ===== USER ARTICLE CREATION COMPLETED =====\n');
+      
+      return createdArticle;
+
     } catch (error) {
-      console.error('Error in getUserArticles router:', error);
-      return [];
+      console.error('\n❌ ===== USER ARTICLE CREATION FAILED =====');
+      console.error('Error details:', {
+        type: error.constructor.name,
+        message: error.message,
+        status: error.response?.status,
+        responseData: error.response?.data,
+        url: error.config?.url
+      });
+      
+      // Enhanced error messages (same as dealers)
+      if (error.response?.status === 404) {
+        throw new Error('Article creation endpoint not found on server. Please check server configuration.');
+      } else if (error.response?.status === 401) {
+        throw new Error('Authentication failed. Please log in again.');
+      } else if (error.response?.status === 403) {
+        throw new Error('Permission denied. Check if your account can create articles.');
+      } else if (error.response?.status === 500) {
+        throw new Error('Server error occurred. Please try again or contact support.');
+      } else if (error.code === 'ECONNABORTED') {
+        throw new Error('Request timeout. Server took too long to respond.');
+      } else if (error.message?.includes('Network Error')) {
+        throw new Error('Network error. Please check your connection and try again.');
+      }
+      
+      console.error('🏁 ===== ERROR PROCESSING COMPLETED =====\n');
+      throw error;
     }
   }
 
   /**
-   * FIXED: Create article (smart routing based on role) with FormData support
-   * @param {Object} articleData - Article data (may include image files)
-   * @returns {Promise<Object>} Created article
+   * FIXED: Create admin article (same pattern)
+   */
+  async createAdminArticle(articleData) {
+    try {
+      console.log('🔧 Creating article as admin:', articleData.title);
+      
+      if (!this.isAdmin()) {
+        throw new Error('Admin access required to create articles');
+      }
+      
+      const hasImages = articleData.featuredImageFile || 
+                       (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
+      
+      const endpoint = '/news'; // Admin endpoint
+      let response;
+      
+      if (hasImages) {
+        const formData = this.createFormData(articleData);
+        response = await this.axios.post(endpoint, formData, {
+          timeout: 300000
+        });
+      } else {
+        const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
+        response = await this.axios.post(endpoint, cleanData);
+      }
+
+      if (response.data?.success && response.data?.data?._id) {
+        console.log('✅ Admin article created:', response.data.data._id);
+        return response.data.data;
+      } else {
+        throw new Error(response.data?.message || 'Failed to create admin article');
+      }
+    } catch (error) {
+      console.error('❌ Admin article creation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Smart routing for article creation (same as dealers)
    */
   async createArticle(articleData) {
     try {
-      console.log('🚀 Creating article via smart routing, role:', this.getUserRole());
+      console.log('🎯 Smart routing article creation, user role:', this.getUserRole());
       
       if (this.isAdmin()) {
         return await this.createAdminArticle(articleData);
@@ -354,62 +422,48 @@ class ArticleApiService {
         return await this.createUserArticle(articleData);
       }
     } catch (error) {
-      console.error('❌ Error in createArticle router:', error);
+      console.error('❌ Smart routing creation failed:', error);
       throw error;
     }
   }
 
   /**
-   * Update article (smart routing based on role)
-   * @param {string} articleId - Article ID
-   * @param {Object} articleData - Updated article data
-   * @returns {Promise<Object>} Updated article
+   * Get user's articles (same pattern as dealers)
    */
-  async updateArticle(articleId, articleData) {
+  async getMyOwnArticles(filters = {}) {
     try {
-      if (this.isAdmin()) {
-        return await this.updateAdminArticle(articleId, articleData);
+      const params = new URLSearchParams({
+        page: filters.page || 1,
+        limit: filters.limit || 100,
+        status: filters.status || 'all'
+      });
+
+      const endpoint = `/news/user/my-articles?${params}`;
+      console.log('📋 Getting user articles from:', endpoint);
+      
+      const response = await this.axios.get(endpoint);
+
+      if (response.data?.success) {
+        const articles = response.data.data || [];
+        console.log(`✅ Loaded ${articles.length} user articles`);
+        return articles;
       } else {
-        return await this.updateUserArticle(articleId, articleData);
+        console.warn('No articles returned or request failed');
+        return [];
       }
     } catch (error) {
-      console.error('❌ Error in updateArticle router:', error);
-      throw error;
+      console.error('❌ Error fetching user articles:', error);
+      return [];
     }
   }
-
-  /**
-   * Delete article (smart routing based on role)
-   * @param {string} articleId - Article ID
-   * @returns {Promise<Object>} Deletion confirmation
-   */
-  async deleteArticle(articleId) {
-    try {
-      if (this.isAdmin()) {
-        return await this.deleteAdminArticle(articleId);
-      } else {
-        return await this.deleteUserArticle(articleId);
-      }
-    } catch (error) {
-      console.error('❌ Error in deleteArticle router:', error);
-      throw error;
-    }
-  }
-
-  // ========================================
-  // ADMIN ENDPOINTS (Full permissions)
-  // ========================================
 
   /**
    * Get all articles (admin only)
-   * FIXED: Returns array directly for frontend compatibility
-   * @param {Object} filters - Filtering options
-   * @returns {Promise<Array>} All articles
    */
   async getAllArticles(filters = {}) {
     try {
       if (!this.isAdmin()) {
-        throw new Error('Admin access required to view all articles');
+        throw new Error('Admin access required');
       }
 
       const params = new URLSearchParams({
@@ -422,276 +476,93 @@ class ArticleApiService {
       }
 
       const response = await this.axios.get(`/news?${params}`);
-
+      
       if (response.data?.success) {
-        console.log(`✅ Loaded ${response.data.data?.length || 0} articles (admin view)`);
+        console.log(`✅ Loaded ${response.data.data?.length || 0} articles (admin)`);
         return response.data.data || [];
       } else {
-        throw new Error(response.data?.message || 'Failed to fetch articles');
+        return [];
       }
     } catch (error) {
-      console.error('❌ Error fetching all articles:', error.response?.data || error.message);
-      
+      console.error('❌ Error fetching all articles:', error);
       if (error.response?.status === 403) {
         throw new Error('Admin access required');
-      } else if (error.response?.status === 401) {
-        throw new Error('Authentication failed. Please log in again.');
       }
-      
       throw error;
     }
   }
 
   /**
-   * Create article as admin
-   * @param {Object} articleData - Article data (may include image files)
-   * @returns {Promise<Object>} Created article
+   * Smart routing for getting articles
    */
-  async createAdminArticle(articleData) {
+  async getUserArticles(filters = {}) {
     try {
-      console.log('🚀 Creating article as admin:', articleData.title);
-      
-      if (!this.isAdmin()) {
-        throw new Error('Admin access required to create articles');
-      }
-      
-      const hasImages = articleData.featuredImageFile || 
-                       (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
-      
-      if (hasImages) {
-        const formData = this.createFormData(articleData);
-
-        const response = await this.axios.post('/news', formData);
-
-        if (response.data?.success) {
-          console.log('✅ Admin article created successfully with images:', response.data.data._id);
-          return response.data.data;
-        } else {
-          throw new Error(response.data?.message || 'Failed to create article');
-        }
+      if (this.isAdmin()) {
+        return await this.getAllArticles({...filters, status: filters.status || 'all'});
       } else {
-        const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
-        
-        const response = await this.axios.post('/news', cleanData);
-
-        if (response.data?.success) {
-          console.log('✅ Admin article created successfully (text only):', response.data.data._id);
-          return response.data.data;
-        } else {
-          throw new Error(response.data?.message || 'Failed to create article');
-        }
+        return await this.getMyOwnArticles(filters);
       }
     } catch (error) {
-      console.error('❌ Error creating admin article:', error.response?.data || error.message);
-      throw error;
-    }
-  }
-
-  // ========================================
-  // USER & JOURNALIST ENDPOINTS (Permission-based)
-  // ========================================
-
-  /**
-   * Get user's own articles
-   * FIXED: Returns array directly for frontend compatibility
-   * @param {Object} filters - Filtering options
-   * @returns {Promise<Array>} User's articles (returns array directly)
-   */
-  async getMyOwnArticles(filters = {}) {
-    try {
-      const params = new URLSearchParams({
-        page: filters.page || 1,
-        limit: filters.limit || 100,
-        status: filters.status || 'all'
-      });
-
-      console.log('🔍 Getting user articles from:', `/news/user/my-articles?${params}`);
-      
-      const response = await this.axios.get(`/news/user/my-articles?${params}`);
-
-      if (response.data?.success) {
-        console.log(`✅ Loaded ${response.data.data?.length || 0} user articles`);
-        return response.data.data || [];
-      } else {
-        throw new Error(response.data?.message || 'Failed to fetch user articles');
-      }
-    } catch (error) {
-      console.error('❌ Error fetching user articles:', error.response?.data || error.message);
+      console.error('❌ Error in getUserArticles router:', error);
       return [];
     }
   }
 
   /**
-   * FIXED: Enhanced createUserArticle with proper URL and debugging
-   * @param {Object} articleData - Article data (may include image files)
-   * @returns {Promise<Object>} Created article
+   * Update article
    */
-  async createUserArticle(articleData) {
+  async updateArticle(articleId, articleData) {
     try {
-      console.log('\n🚀 ===== CREATING USER ARTICLE =====');
-      console.log('📋 Article title:', articleData.title);
-      console.log('📋 User role:', this.getUserRole());
-      console.log('📋 Auth token present:', !!localStorage.getItem('token'));
-      console.log('📋 Service base URL:', this.baseURL);
-
-      // Validate input data
-      if (!articleData.title || !articleData.content || !articleData.category) {
-        throw new Error('Title, content, and category are required');
-      }
-
-      // Check if we have any image files
+      const endpoint = this.isAdmin() ? `/news/${articleId}` : `/news/user/${articleId}`;
+      
       const hasImages = articleData.featuredImageFile || 
                        (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
       
       let response;
-      const url = '/news/user'; // This will be combined with baseURL that has /api
-      
-      console.log('📤 Making request to:', this.baseURL + url);
-      console.log('📊 Request details:', {
-        hasImages,
-        featuredImage: !!articleData.featuredImageFile,
-        galleryImages: articleData.galleryImageFiles?.length || 0
-      });
       
       if (hasImages) {
         const formData = this.createFormData(articleData);
-        console.log('📎 Sending FormData request...');
-        
-        response = await this.axios.post(url, formData, {
-          timeout: 300000, // 5 minutes for large uploads
-        });
+        response = await this.axios.put(endpoint, formData);
       } else {
         const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
-        console.log('📝 Sending JSON request...');
-        
-        response = await this.axios.post(url, cleanData);
-      }
-
-      console.log('✅ Raw response status:', response.status);
-      console.log('✅ Raw response data:', response.data);
-
-      // Check if response is HTML (error page)
-      if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE')) {
-        throw new Error('Server returned HTML instead of JSON - API endpoint may not exist');
+        response = await this.axios.put(endpoint, cleanData);
       }
 
       if (response.data?.success && response.data?.data) {
-        console.log('✅ Article created successfully with ID:', response.data.data._id);
-        console.log('🏁 ===== USER ARTICLE CREATION COMPLETED =====\n');
+        console.log('✅ Article updated successfully');
         return response.data.data;
       } else {
-        throw new Error(response.data?.message || 'Article creation failed');
+        throw new Error(response.data?.message || 'Failed to update article');
       }
     } catch (error) {
-      console.error('\n❌ ===== USER ARTICLE CREATION FAILED =====');
-      console.error('Error type:', error.constructor.name);
-      console.error('Error message:', error.message);
-      console.error('Error response status:', error.response?.status);
-      console.error('Error response data:', error.response?.data);
-      console.error('Full error:', error);
-      console.error('🏁 ===== ERROR LOGGED =====\n');
-      
-      // Enhanced error handling
-      if (error.response?.status === 404) {
-        throw new Error('API endpoint not found. The /api/news/user route may not exist on the server.');
-      } else if (error.response?.status === 401) {
-        throw new Error('Authentication failed. Please log in again.');
-      } else if (error.response?.status === 403) {
-        throw new Error('Permission denied. Check user role permissions.');
-      } else if (error.message?.includes('HTML instead of JSON')) {
-        throw new Error('Server configuration error. API endpoint returning HTML instead of JSON.');
-      }
-      
+      console.error('❌ Article update failed:', error);
       throw error;
     }
   }
 
   /**
-   * Update user's own article
-   * @param {string} articleId - Article ID
-   * @param {Object} articleData - Updated article data
-   * @returns {Promise<Object>} Updated article
+   * Delete article
    */
-  async updateUserArticle(articleId, articleData) {
+  async deleteArticle(articleId) {
     try {
-      console.log('📝 Updating user article:', articleId);
-
-      const hasImages = articleData.featuredImageFile || 
-                       (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
+      const endpoint = this.isAdmin() ? `/news/${articleId}` : `/news/user/${articleId}`;
       
-      const url = `/news/user/${articleId}`;
+      const response = await this.axios.delete(endpoint);
       
-      if (hasImages) {
-        const formData = this.createFormData(articleData);
-        
-        const response = await this.axios.put(url, formData);
-
-        if (response.data?.success) {
-          console.log('✅ User article updated successfully with images');
-          return response.data.data;
-        } else {
-          throw new Error(response.data?.message || 'Failed to update article');
-        }
-      } else {
-        const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
-        
-        const response = await this.axios.put(url, cleanData);
-
-        if (response.data?.success) {
-          console.log('✅ User article updated successfully (text only)');
-          return response.data.data;
-        } else {
-          throw new Error(response.data?.message || 'Failed to update article');
-        }
-      }
-    } catch (error) {
-      console.error('❌ Error updating user article:', error.response?.data || error.message);
-      throw error;
-    }
-  }
-
-  /**
-   * Delete user's own article
-   * @param {string} articleId - Article ID to delete
-   * @returns {Promise<Object>} Deletion confirmation
-   */
-  async deleteUserArticle(articleId) {
-    try {
-      console.log('🗑️ Deleting user article:', articleId);
-      
-      const response = await this.axios.delete(`/news/user/${articleId}`);
-
       if (response.data?.success) {
-        console.log('✅ User article deleted successfully');
-        return response.data;
+        console.log('✅ Article deleted successfully');
+        return true;
       } else {
         throw new Error(response.data?.message || 'Failed to delete article');
       }
     } catch (error) {
-      console.error('❌ Error deleting user article:', error.response?.data || error.message);
+      console.error('❌ Article deletion failed:', error);
       throw error;
     }
   }
 
-  // ========================================
-  // PLACEHOLDER METHODS (To be implemented)
-  // ========================================
-
-  async updateAdminArticle(articleId, articleData) {
-    throw new Error('Admin article update not yet implemented');
-  }
-
-  async deleteAdminArticle(articleId) {
-    throw new Error('Admin article delete not yet implemented');
-  }
-
-  // ========================================
-  // UTILITY METHODS
-  // ========================================
-
   /**
-   * Get user's status options based on role
-   * @returns {Array} Available status options
+   * Utility methods
    */
   getStatusOptions() {
     if (this.isAdmin()) {
@@ -709,10 +580,6 @@ class ArticleApiService {
     }
   }
 
-  /**
-   * Get user permissions info
-   * @returns {Object} User permissions
-   */
   getUserPermissions() {
     return {
       canPublish: this.canPublishDirectly(),
@@ -723,22 +590,99 @@ class ArticleApiService {
     };
   }
 
-  // Error handling
-  handleError(message, error) {
-    console.error(message, error.response?.data || error.message);
-    if (error.response?.status === 429) {
-      console.warn('Rate limited. Please try again later.');
-      throw new Error('Too many requests. Please try again later.');
+  /**
+   * Debug and testing methods
+   */
+  async testEndpointConnectivity() {
+    console.log('🔍 Testing article endpoints connectivity...');
+    
+    const endpoints = [
+      { path: '/news/user/my-articles', method: 'GET', desc: 'Get user articles' },
+      { path: '/news', method: 'GET', desc: 'Get all articles (admin)' }
+    ];
+    
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`Testing ${endpoint.method} ${endpoint.path}...`);
+        
+        const response = await this.axios.request({
+          method: endpoint.method,
+          url: endpoint.path,
+          timeout: 5000,
+          validateStatus: () => true // Accept all status codes for testing
+        });
+        
+        console.log(`✅ ${endpoint.path}: Status ${response.status}`, {
+          success: response.data?.success,
+          dataType: typeof response.data,
+          isHTML: typeof response.data === 'string' && response.data.includes('<!DOCTYPE')
+        });
+        
+      } catch (error) {
+        console.error(`❌ ${endpoint.path}: ${error.message}`);
+      }
     }
-    throw error;
   }
 
-  // Cleanup
-  destroy() {
+  /**
+   * Get default social stats (fallback)
+   */
+  getDefaultSocialStats() {
+    return {
+      totalViews: 0,
+      totalLikes: 0, 
+      totalShares: 0,
+      totalComments: 0,
+      engagementRate: 0,
+      topPerformingArticles: []
+    };
+  }
+
+  /**
+   * Get social stats with error handling
+   */
+  async getSocialStats() {
+    try {
+      const response = await this.axios.get('/analytics/social-stats', {
+        timeout: 10000,
+        validateStatus: (status) => status === 200
+      });
+
+      if (response.data?.success) {
+        return response.data.data || this.getDefaultSocialStats();
+      } else {
+        console.warn('Social stats API returned success=false');
+        return this.getDefaultSocialStats();
+      }
+    } catch (error) {
+      console.warn('Social stats fetch failed:', error.message);
+      return this.getDefaultSocialStats();
+    }
+  }
+
+  /**
+   * Clear cache and cleanup
+   */
+  clearCache() {
     this.cache.clear();
+    console.log('🧹 ArticleService cache cleared');
+  }
+
+  destroy() {
+    this.clearCache();
+    this.currentUser = null;
+    console.log('🧹 ArticleService destroyed');
   }
 }
 
-// Create and export the service instance
-export const articleApiService = new ArticleApiService();
+// Create singleton instance (same as dealers)
+const articleApiService = new ArticleApiService();
+
+// Add debug methods to window for manual testing
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  window.articleApiService = articleApiService;
+  window.testArticleEndpoints = () => articleApiService.testEndpointConnectivity();
+}
+
+export { articleApiService };
 export default articleApiService;
