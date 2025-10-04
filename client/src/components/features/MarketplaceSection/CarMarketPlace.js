@@ -1025,6 +1025,11 @@ const CarMarketplace = () => {
                     ⤢
                   </button>
                   
+                  {/* Fullscreen tooltip hint */}
+                  <div className="fullscreen-tooltip">
+                    View full size
+                  </div>
+                  
                   {imageUrls.length > 1 && (
                     <>
                       <button className="gallery-nav prev" onClick={() => handleNavigation('prev')} aria-label="Previous image">❮</button>

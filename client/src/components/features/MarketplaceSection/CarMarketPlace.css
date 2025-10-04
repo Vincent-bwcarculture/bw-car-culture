@@ -1820,6 +1820,13 @@
     left: 0.6rem;
   }
 
+  .fullscreen-tooltip {
+    bottom: 0.9rem;
+    left: 52px;
+    font-size: 0.7rem;
+    padding: 0.35rem 0.6rem;
+  }
+
   .thumbnail-strip {
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 0.4rem;
@@ -2030,6 +2037,10 @@
     font-size: 1.1rem;
     bottom: 8px;
     left: 8px;
+  }
+
+  .fullscreen-tooltip {
+    display: none; /* Hide on very small screens to avoid clutter */
   }
 
   .dealer-stats {
