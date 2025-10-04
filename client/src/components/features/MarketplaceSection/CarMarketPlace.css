@@ -1,8 +1,8 @@
-/* CarMarketplace.css - Updated with Mobile Responsive Layout */
+/* CarMarketplace.css - Updated with TRUE ZOOM & Larger Image Viewing Area */
 .car-detail-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0.5rem;
+  padding: 0.3rem; /* REDUCED from 0.5rem */
 }
 
 .back-button {
@@ -12,7 +12,7 @@
   font-size: 1rem;
   cursor: pointer;
   padding: 0.4rem 0.8rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem; /* REDUCED from 1rem */
   transition: color 0.3s ease;
   display: flex;
   align-items: center;
@@ -26,16 +26,16 @@
 .marketplace-content {
   display: grid;
   grid-template-columns: 1fr 350px;
-  gap: 0.5rem;
+  gap: 0.3rem; /* REDUCED from 0.5rem */
 }
 
-.main-content{
+.main-content {
   border: 1px solid #2c2c2c;
   background: rgba(20, 20, 20, 0.95);
   border-radius: 12px;
 }
 
-/* Gallery Section with Optimized Savings Badge */
+/* Gallery Section with Optimized Savings Badge & INCREASED IMAGE HEIGHT */
 .car-gallery {
   padding: 0rem;
   margin-bottom: 0rem;
@@ -47,6 +47,8 @@
   border-radius: 8px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.2);
+  touch-action: none;
+  isolation: isolate;
 }
 
 .main-image-container:hover .gallery-nav {
@@ -56,7 +58,8 @@
 .main-image {
   position: relative;
   width: 100%;
-  aspect-ratio: 16/9;
+  aspect-ratio: 16/9; /* CHANGED from fixed height to aspect-ratio for better responsiveness */
+  min-height: 500px; /* INCREASED from implicit ~400px */
   overflow: hidden;
 }
 
@@ -65,10 +68,20 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
+  transform-origin: center center;
 }
 
 .main-image:hover img {
   transform: scale(1.02);
+}
+
+/* Disable hover transform when true zoom is active */
+.main-image img[style*="position: absolute"] {
+  /* Zoom active */
+}
+
+.main-image:hover img[style*="position: absolute"] {
+  transform: var(--image-transform, none) !important;
 }
 
 .cover-image {
@@ -76,6 +89,86 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+}
+
+/* TRUE ZOOM: Zoom Controls */
+.zoom-controls {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 20px;
+  padding: 0.4rem 0.8rem;
+  gap: 0.5rem;
+  z-index: 15;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.9rem;
+  user-select: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.zoom-controls.zoomed {
+  opacity: 1;
+  visibility: visible;
+}
+
+.zoom-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.zoom-btn:hover:not(:disabled) {
+  background: rgba(255, 51, 0, 0.8);
+  transform: scale(1.1);
+}
+
+.zoom-btn:active {
+  transform: scale(0.95);
+}
+
+.zoom-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.zoom-btn.zoom-in {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.zoom-btn.zoom-out {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.zoom-btn.zoom-reset {
+  font-size: 1rem;
+  width: 36px;
+}
+
+.zoom-level {
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-width: 40px;
+  text-align: center;
+  opacity: 0.9;
 }
 
 /* UPDATED: Desktop Savings Badge */
@@ -533,7 +626,7 @@
 
 /* UPDATED: Car Information with Mobile Responsive Header Layout */
 .car-info {
-  padding: 0.6rem 0.8rem;
+  padding: 0.5rem 0.7rem; /* REDUCED from 0.6rem 0.8rem */
   margin-top: 0rem;
 }
 
@@ -1452,7 +1545,7 @@
   }
 
   .car-detail-container {
-    padding: 0.8rem;
+    padding: 0.5rem; /* REDUCED from 0.8rem */
   }
 
   .carousel-slide {
@@ -1463,9 +1556,13 @@
     max-width: 300px;
   }
 
-  /* UPDATED: Better specs grid for tablet */
   .specs-grid {
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
+
+  /* INCREASED IMAGE HEIGHT for tablet */
+  .main-image {
+    min-height: 450px;
   }
 }
 
@@ -1479,9 +1576,13 @@
     max-width: 280px;
   }
 
-  /* UPDATED: Optimal specs grid for large screens */
   .specs-grid {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  /* INCREASED IMAGE HEIGHT for large desktop */
+  .main-image {
+    min-height: 550px;
   }
 }
 
@@ -1501,7 +1602,6 @@
     gap: 0.4rem;
   }
 
-  /* UPDATED: Mobile responsive header */
   .car-header {
     flex-direction: row;
     align-items: flex-start;
@@ -1541,7 +1641,6 @@
     flex: 0 0 33%;
   }
 
-  /* UPDATED: Better mobile savings badge positioning */
   .main-savings-badge {
     top: 10px;
     left: 10px;
@@ -1559,29 +1658,31 @@
     font-size: 0.7rem;
   }
 
-  /* UPDATED: Horizontal badges layout for tablet */
   .title-badges {
     gap: 0.4rem;
   }
 
-  /* UPDATED: Specs grid - 3 per row on tablet */
   .specs-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 0.6rem;
+  }
+
+  /* INCREASED IMAGE HEIGHT for tablet portrait */
+  .main-image {
+    min-height: 400px;
   }
 }
 
 /* Mobile Large */
 @media (max-width: 768px) {
   .car-detail-container {
-    padding: 0.6rem;
+    padding: 0.4rem; /* REDUCED from 0.6rem */
   }
 
   .marketplace-content {
-    gap: 0.8rem;
+    gap: 0.6rem; /* REDUCED from 0.8rem */
   }
 
-  /* UPDATED: Mobile header keeps side-by-side layout */
   .car-header {
     flex-direction: row;
     gap: 0.8rem;
@@ -1601,7 +1702,7 @@
   }
 
   .car-gallery {
-    padding: 0.5rem;
+    padding: 0.3rem; /* REDUCED from 0.5rem */
   }
 
   .gallery-nav {
@@ -1649,7 +1750,6 @@
     flex: 0 0 100%;
   }
 
-  /* UPDATED: Optimized mobile savings badge */
   .main-savings-badge {
     top: 8px;
     left: 8px;
@@ -1668,7 +1768,6 @@
     font-size: 0.65rem;
   }
 
-  /* UPDATED: Mobile badges - horizontal but compact */
   .title-badges {
     gap: 0.3rem;
     margin-top: 0.2rem;
@@ -1679,7 +1778,6 @@
     padding: 0.2rem 0.5rem;
   }
 
-  /* UPDATED: Mobile specs grid - 3 per row */
   .specs-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
@@ -1698,7 +1796,6 @@
     font-size: 0.8rem;
   }
 
-  /* Better mobile savings breakdown */
   .savings-breakdown {
     padding: 0.6rem;
   }
@@ -1719,12 +1816,36 @@
     font-size: 0.9rem;
     padding: 0.3rem 0.6rem;
   }
+
+  /* INCREASED IMAGE HEIGHT for mobile large */
+  .main-image {
+    min-height: 350px;
+  }
+
+  /* Mobile zoom controls */
+  .zoom-controls {
+    top: 10px;
+    right: 10px;
+    padding: 0.3rem 0.6rem;
+    gap: 0.4rem;
+  }
+
+  .zoom-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+
+  .zoom-level {
+    font-size: 0.75rem;
+    min-width: 35px;
+  }
 }
 
 /* Mobile Small */
 @media (max-width: 480px) {
   .car-detail-container {
-    padding: 0.4rem 0.3rem;
+    padding: 0.2rem; /* REDUCED from 0.4rem */
   }
 
   .main-content, .dealer-sidebar {
@@ -1732,10 +1853,9 @@
   }
 
   .car-info {
-    padding: 0.5rem;
+    padding: 0.4rem; /* REDUCED from 0.5rem */
   }
 
-  /* UPDATED: Small mobile header - still side by side but more compact */
   .car-header {
     gap: 0.6rem;
   }
@@ -1796,7 +1916,6 @@
     font-size: 0.85rem;
   }
 
-  /* UPDATED: Very compact mobile savings badge for small screens */
   .main-savings-badge {
     top: 6px;
     left: 6px;
@@ -1816,7 +1935,6 @@
     font-size: 0.6rem;
   }
 
-  /* UPDATED: Very compact badges on small screens */
   .title-badges {
     gap: 0.25rem;
     margin-top: 0.15rem;
@@ -1827,7 +1945,6 @@
     padding: 0.15rem 0.4rem;
   }
 
-  /* UPDATED: Small mobile specs grid - still 3 per row but more compact */
   .specs-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 0.4rem;
@@ -1846,7 +1963,6 @@
     font-size: 0.75rem;
   }
 
-  /* UPDATED: Stack mobile savings grid vertically on very small screens */
   .mobile-savings-grid {
     grid-template-columns: 1fr;
     gap: 0.6rem;
@@ -1886,11 +2002,34 @@
     font-size: 0.8rem;
     padding: 0.25rem 0.5rem;
   }
+
+  /* INCREASED IMAGE HEIGHT for mobile small */
+  .main-image {
+    min-height: 300px;
+  }
+
+  /* Smaller mobile zoom controls */
+  .zoom-controls {
+    top: 8px;
+    right: 8px;
+    padding: 0.25rem 0.5rem;
+    gap: 0.3rem;
+  }
+
+  .zoom-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 0.8rem;
+  }
+
+  .zoom-level {
+    font-size: 0.7rem;
+    min-width: 30px;
+  }
 }
 
 /* Extra Small Mobile */
 @media (max-width: 350px) {
-  /* UPDATED: Extra small mobile - horizontal specs but 2 per row */
   .specs-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.3rem;
@@ -1916,6 +2055,29 @@
     font-size: 0.65rem;
     min-width: 50px;
     max-width: 15%;
+  }
+
+  /* INCREASED IMAGE HEIGHT for extra small mobile */
+  .main-image {
+    min-height: 280px;
+  }
+
+  .zoom-controls {
+    top: 6px;
+    right: 6px;
+    padding: 0.2rem 0.4rem;
+    gap: 0.25rem;
+  }
+
+  .zoom-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 0.75rem;
+  }
+
+  .zoom-level {
+    font-size: 0.65rem;
+    min-width: 25px;
   }
 }
 
@@ -1945,6 +2107,16 @@
     background: #000000;
     border: 2px solid #ffffff;
   }
+
+  .zoom-controls {
+    background: #000000;
+    border: 2px solid #ffffff;
+  }
+
+  .zoom-btn {
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid #ffffff;
+  }
 }
 
 /* Reduced Motion */
@@ -1966,10 +2138,14 @@
     opacity: 1;
   }
 
-  /* Always show touch-friendly controls on touch devices */
   .main-savings-badge {
     min-height: 44px;
     min-width: 80px;
+  }
+
+  .zoom-btn {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
@@ -1979,7 +2155,8 @@
   .carousel-nav,
   .carousel-dots,
   .gallery-actions,
-  .main-savings-badge {
+  .main-savings-badge,
+  .zoom-controls {
     display: none;
   }
   
@@ -2138,4 +2315,30 @@
 
 .service-history-icon {
   font-size: 1.2rem;
+}
+
+/* Prevent text selection during drag operations */
+.main-image-container.dragging {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+/* Custom cursor for different zoom states */
+.main-image img {
+  cursor: pointer;
+}
+
+.main-image img[style*="object-fit: cover"] {
+  cursor: zoom-in;
+}
+
+.main-image img[style*="object-fit: contain"] {
+  cursor: move;
+}
+
+/* Ensure proper stacking context */
+.main-image {
+  isolation: isolate;
+  position: relative;
 }
