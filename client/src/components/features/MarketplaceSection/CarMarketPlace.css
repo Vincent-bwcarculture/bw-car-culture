@@ -32,23 +32,24 @@
 }
 
 .main-content {
-  border: 1px solid #2c2c2c;
+  border: none; /* REMOVED border to eliminate bezel effect */
   background: rgba(20, 20, 20, 0.95);
-  border-radius: 12px;
+  border-radius: 0; /* REMOVED border-radius for gallery area */
+  overflow: hidden; /* Ensure content stays within bounds */
 }
 
-/* UPDATED: Gallery Section - Minimal padding, maximum image area */
+/* UPDATED: Gallery Section - NO padding, NO borders for maximum image area */
 .car-gallery {
-  padding: 0; /* REMOVED padding */
+  padding: 0;
   margin-bottom: 0;
 }
 
 .main-image-container {
   position: relative;
   width: 100%;
-  border-radius: 8px 8px 0 0; /* Only top corners rounded */
+  border-radius: 0; /* NO border-radius to eliminate bezel effect */
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.2);
+  background: #000; /* Pure black background */
   touch-action: none;
   isolation: isolate;
 }
@@ -424,44 +425,44 @@
   background: #1ea952;
 }
 
-/* UPDATED: Gallery Actions - TOP LEFT for Save & Share */
+/* UPDATED: Gallery Actions - Properly positioned TOP LEFT with better visibility */
 .gallery-actions {
   position: absolute;
   display: flex;
-  gap: 0.75rem;
+  gap: 0.6rem; /* Reduced gap for tighter grouping */
   z-index: 11;
 }
 
 .gallery-actions.top-left {
-  top: 1rem;
-  left: 1rem;
+  top: 0.8rem; /* Slightly reduced from 1rem */
+  left: 0.8rem; /* Slightly reduced from 1rem */
 }
 
-/* UPDATED: Fullscreen Button - BOTTOM LEFT */
+/* UPDATED: Fullscreen Button - BOTTOM LEFT with improved styling */
 .fullscreen-button {
   position: absolute;
-  bottom: 1rem;
-  left: 1rem;
-  width: 40px;
-  height: 40px;
+  bottom: 0.8rem; /* Reduced from 1rem to match action buttons */
+  left: 0.8rem; /* Reduced from 1rem to match action buttons */
+  width: 42px; /* Slightly larger */
+  height: 42px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.85); /* Match action buttons */
+  border: 2px solid rgba(255, 255, 255, 0.3); /* Match action buttons */
   color: white;
-  font-size: 1.3rem;
+  font-size: 1.4rem; /* Larger icon */
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px); /* Match action buttons */
   z-index: 11;
 }
 
 .fullscreen-button:hover {
   background: rgba(255, 51, 0, 0.9);
   border-color: #ff3300;
-  transform: scale(1.1);
+  transform: scale(1.15);
 }
 
 .gallery-image {
@@ -472,25 +473,25 @@
 }
 
 .action-button {
-  width: 36px;
-  height: 36px;
+  width: 40px; /* Increased from 36px for better visibility */
+  height: 40px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.85); /* Slightly darker for better contrast */
+  border: 2px solid rgba(255, 255, 255, 0.3); /* Thicker border */
   color: white;
-  font-size: 1.2rem;
+  font-size: 1.3rem; /* Slightly larger icon */
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px); /* Increased blur */
 }
 
 .action-button:hover {
   background: rgba(255, 51, 0, 0.9);
   border-color: #ff3300;
-  transform: scale(1.1);
+  transform: scale(1.15); /* Slightly more pronounced hover */
 }
 
 .action-button.saved {
@@ -1803,15 +1804,17 @@
   }
 
   .action-button {
-    width: 36px;
-    height: 36px;
-    font-size: 1rem;
+    width: 38px; /* Slightly larger on mobile */
+    height: 38px;
+    font-size: 1.2rem;
   }
 
   .fullscreen-button {
-    width: 36px;
-    height: 36px;
-    font-size: 1.1rem;
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+    bottom: 0.6rem;
+    left: 0.6rem;
   }
 
   .thumbnail-strip {
@@ -2007,16 +2010,22 @@
   }
 
   .action-button {
-    width: 32px;
-    height: 32px;
+    width: 36px; /* Appropriate size for small mobile */
+    height: 36px;
+    font-size: 1.1rem;
   }
 
   .fullscreen-button {
-    width: 32px;
-    height: 32px;
-    font-size: 1rem;
-    bottom: 0.8rem;
-    left: 0.8rem;
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+    bottom: 0.5rem;
+    left: 0.5rem;
+  }
+
+  .gallery-actions.top-left {
+    top: 0.5rem;
+    left: 0.5rem;
   }
 
   .dealer-stats {
