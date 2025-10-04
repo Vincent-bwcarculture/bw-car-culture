@@ -997,7 +997,7 @@ const CarMarketplace = () => {
                   )}
                   
                   {/* UPDATED: Gallery actions - Save and Share moved to TOP LEFT */}
-                  <div className="gallery-actions top-left">
+                  <div className="gallery-actions-top-left">
                     <button 
                       className={`action-button ${isSaved ? 'saved' : ''}`} 
                       onClick={handleSaveCar} 

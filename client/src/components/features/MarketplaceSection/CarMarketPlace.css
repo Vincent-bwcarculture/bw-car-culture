@@ -425,17 +425,41 @@
   background: #1ea952;
 }
 
-/* UPDATED: Gallery Actions - Properly positioned TOP LEFT with better visibility */
-.gallery-actions {
+/* UPDATED: Gallery Actions - TOP LEFT for Save & Share - Fixed positioning */
+.gallery-actions-top-left {
   position: absolute;
+  top: 12px;
+  left: 12px;
   display: flex;
-  gap: 0.6rem; /* Reduced gap for tighter grouping */
-  z-index: 11;
+  gap: 8px;
+  z-index: 15;
 }
 
-.gallery-actions.top-left {
-  top: 0.8rem; /* Slightly reduced from 1rem */
-  left: 0.8rem; /* Slightly reduced from 1rem */
+.gallery-actions-top-left .action-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+.gallery-actions-top-left .action-button:hover {
+  background: rgba(255, 51, 0, 0.9);
+  border-color: #ff3300;
+  transform: scale(1.1);
+}
+
+.gallery-actions-top-left .action-button.saved {
+  background: #ff3300;
+  border-color: #ff3300;
 }
 
 /* UPDATED: Fullscreen Button - BOTTOM LEFT with improved styling */
@@ -470,33 +494,6 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
-}
-
-.action-button {
-  width: 40px; /* Increased from 36px for better visibility */
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.85); /* Slightly darker for better contrast */
-  border: 2px solid rgba(255, 255, 255, 0.3); /* Thicker border */
-  color: white;
-  font-size: 1.3rem; /* Slightly larger icon */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(8px); /* Increased blur */
-}
-
-.action-button:hover {
-  background: rgba(255, 51, 0, 0.9);
-  border-color: #ff3300;
-  transform: scale(1.15); /* Slightly more pronounced hover */
-}
-
-.action-button.saved {
-  background: #ff3300;
-  border-color: #ff3300;
 }
 
 /* UPDATED: Enhanced Fullscreen Gallery */
@@ -1803,10 +1800,16 @@
     font-size: 1rem;
   }
 
-  .action-button {
-    width: 38px; /* Slightly larger on mobile */
+  .gallery-actions-top-left .action-button {
+    width: 38px;
     height: 38px;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+  }
+
+  .gallery-actions-top-left {
+    top: 10px;
+    left: 10px;
+    gap: 6px;
   }
 
   .fullscreen-button {
@@ -2009,23 +2012,24 @@
     font-size: 0.8rem;
   }
 
-  .action-button {
-    width: 36px; /* Appropriate size for small mobile */
+  .gallery-actions-top-left .action-button {
+    width: 36px;
     height: 36px;
-    font-size: 1.1rem;
+    font-size: 1rem;
+  }
+
+  .gallery-actions-top-left {
+    top: 8px;
+    left: 8px;
+    gap: 6px;
   }
 
   .fullscreen-button {
     width: 36px;
     height: 36px;
     font-size: 1.1rem;
-    bottom: 0.5rem;
-    left: 0.5rem;
-  }
-
-  .gallery-actions.top-left {
-    top: 0.5rem;
-    left: 0.5rem;
+    bottom: 8px;
+    left: 8px;
   }
 
   .dealer-stats {
