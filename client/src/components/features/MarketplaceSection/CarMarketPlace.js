@@ -1,5 +1,5 @@
 // src/components/features/MarketplaceSection/CarMarketPlace.js
-// COMPLETE VERSION WITH ZOOM AND FULLSCREEN - Ready to use
+// COMPLETE VERSION WITH IMPROVED FULLSCREEN & BUTTON LAYOUT
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -996,11 +996,34 @@ const CarMarketplace = () => {
                     </div>
                   )}
                   
-                  <div className="gallery-actions">
-                    <button className={`action-button ${isSaved ? 'saved' : ''}`} onClick={handleSaveCar} aria-label={isSaved ? 'Remove from saved' : 'Save car'}>{isSaved ? '♥' : '♡'}</button>
-                    <button className="action-button" onClick={(e) => handleOpenFullscreen(e)} aria-label="View fullscreen" title="View fullscreen">⤢</button>
-                    <button ref={shareButtonRef} className="action-button" onClick={() => setShowShareModal(true)} aria-label="Share listing">↗</button>
+                  {/* UPDATED: Gallery actions - Save and Share moved to TOP LEFT */}
+                  <div className="gallery-actions top-left">
+                    <button 
+                      className={`action-button ${isSaved ? 'saved' : ''}`} 
+                      onClick={handleSaveCar} 
+                      aria-label={isSaved ? 'Remove from saved' : 'Save car'}
+                    >
+                      {isSaved ? '♥' : '♡'}
+                    </button>
+                    <button 
+                      ref={shareButtonRef} 
+                      className="action-button" 
+                      onClick={() => setShowShareModal(true)} 
+                      aria-label="Share listing"
+                    >
+                      ↗
+                    </button>
                   </div>
+
+                  {/* UPDATED: Fullscreen button moved to BOTTOM LEFT */}
+                  <button 
+                    className="fullscreen-button" 
+                    onClick={(e) => handleOpenFullscreen(e)} 
+                    aria-label="View fullscreen" 
+                    title="View fullscreen"
+                  >
+                    ⤢
+                  </button>
                   
                   {imageUrls.length > 1 && (
                     <>
@@ -1288,14 +1311,19 @@ const CarMarketplace = () => {
 
           {showShareModal && <ShareModal car={car} onClose={() => setShowShareModal(false)} buttonRef={shareButtonRef} />}
 
+          {/* UPDATED: Enhanced Fullscreen Gallery */}
           {showFullscreen && (
             <div className={`fullscreen-gallery ${showFullscreen ? 'active' : ''}`} onClick={handleCloseFullscreen}>
-              <button className="fullscreen-close" onClick={handleCloseFullscreen}>✕</button>
+              <button className="fullscreen-close" onClick={handleCloseFullscreen} aria-label="Close fullscreen">✕</button>
               <img src={imageUrls[fullscreenImageIndex]} alt={`${car.title} - Image ${fullscreenImageIndex + 1}`} className="fullscreen-image" onClick={(e) => e.stopPropagation()} onError={(e) => { e.target.src = '/images/placeholders/car.jpg'; }} />
               {imageUrls.length > 1 && (
                 <>
-                  <button className="fullscreen-nav prev" onClick={(e) => { e.stopPropagation(); handleFullscreenNavigation('prev'); }}>❮</button>
-                  <button className="fullscreen-nav next" onClick={(e) => { e.stopPropagation(); handleFullscreenNavigation('next'); }}>❯</button>
+                  <button className="fullscreen-nav prev" onClick={(e) => { e.stopPropagation(); handleFullscreenNavigation('prev'); }} aria-label="Previous image">
+                    <ChevronLeft size={32} />
+                  </button>
+                  <button className="fullscreen-nav next" onClick={(e) => { e.stopPropagation(); handleFullscreenNavigation('next'); }} aria-label="Next image">
+                    <ChevronRight size={32} />
+                  </button>
                   <div className="fullscreen-counter">{fullscreenImageIndex + 1} / {imageUrls.length}</div>
                 </>
               )}
