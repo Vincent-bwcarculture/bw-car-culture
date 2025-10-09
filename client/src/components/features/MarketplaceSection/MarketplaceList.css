@@ -1275,3 +1275,145 @@ body.section-transitioning * {
 .all-section .marketplace-grid-list {
   
 } */
+
+/* ===== PAGINATION STYLES ===== */
+.pagination-container {
+  margin: 40px auto 20px;
+  max-width: 1200px;
+  padding: 0 20px;
+}
+
+.pagination-info {
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination-numbers {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pagination-btn {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(30, 30, 30, 0.9);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.pagination-btn:hover:not(:disabled):not(.active) {
+  background: rgba(255, 51, 0, 0.2);
+  border-color: #ff3300;
+  transform: translateY(-2px);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: rgba(20, 20, 20, 0.9);
+}
+
+.pagination-btn.active {
+  background: #ff3300;
+  color: white;
+  border-color: #ff3300;
+  font-weight: 600;
+  cursor: default;
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.3);
+}
+
+.pagination-prev,
+.pagination-next {
+  min-width: 100px;
+  font-weight: 600;
+}
+
+.pagination-ellipsis {
+  padding: 0 8px;
+  color: #666;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Mobile Pagination Styles */
+@media (max-width: 768px) {
+  .pagination-container {
+    margin: 30px auto 15px;
+    padding: 0 10px;
+  }
+  
+  .pagination-controls {
+    gap: 4px;
+  }
+  
+  .pagination-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+    font-size: 13px;
+  }
+  
+  .pagination-prev,
+  .pagination-next {
+    min-width: 80px;
+    font-size: 12px;
+  }
+  
+  .pagination-info {
+    font-size: 12px;
+    margin-bottom: 15px;
+  }
+  
+  .pagination-numbers {
+    max-width: calc(100vw - 200px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination-container {
+    margin: 20px auto 10px;
+    padding: 0 8px;
+  }
+  
+  .pagination-btn {
+    min-width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+  
+  .pagination-prev,
+  .pagination-next {
+    min-width: 70px;
+    font-size: 11px;
+    padding: 0 6px;
+  }
+  
+  .pagination-info {
+    font-size: 11px;
+  }
+}

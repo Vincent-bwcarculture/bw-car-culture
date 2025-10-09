@@ -9,7 +9,7 @@ import CreateListingPromoCard from './CreateListingPromoCard.js';
 import MarketplaceFilters from './MarketplaceFilters.js';
 import './MarketplaceList.css';
 
-const CARS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 24;
 const PREMIUM_CARS_PER_SECTION = 9;
 const SAVINGS_CARS_PER_SECTION = 9;
 const PRIVATE_CARS_PER_SECTION = 12;
@@ -23,7 +23,6 @@ const MarketplaceList = () => {
   
   // Refs for performance optimization
   const containerRef = useRef(null);
-  const observerRef = useRef(null);
   const fetchTimeoutRef = useRef(null);
   const scrollTimeoutRef = useRef(null);
   const lastScrollY = useRef(0);
@@ -35,9 +34,9 @@ const MarketplaceList = () => {
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState('all');
   const [isRetrying, setIsRetrying] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Performance state
-  const [visibleItems, setVisibleItems] = useState(CARS_PER_PAGE);
   const [isScrolling, setIsScrolling] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= MOBILE_BREAKPOINT);
   
@@ -128,6 +127,7 @@ const MarketplaceList = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const sectionParam = searchParams.get('section');
+    const pageParam = parseInt(searchParams.get('page')) || 1;
     
     if (sectionParam && ['premium', 'savings', 'private', 'all'].includes(sectionParam)) {
       setActiveSection(sectionParam);
@@ -141,6 +141,8 @@ const MarketplaceList = () => {
         console.warn('Could not access sessionStorage:', e);
       }
     }
+    
+    setCurrentPage(pageParam);
   }, [location.search]);
 
   // Cache section preference
@@ -158,9 +160,6 @@ const MarketplaceList = () => {
       const newIsMobile = window.innerWidth <= MOBILE_BREAKPOINT;
       if (newIsMobile !== isMobile) {
         setIsMobile(newIsMobile);
-        if (newIsMobile) {
-          setVisibleItems(prev => Math.min(prev, 8));
-        }
       }
     }, 250),
     [isMobile]
@@ -430,7 +429,7 @@ const MarketplaceList = () => {
       .slice(0, limit);
   }, [getCarClassification, calculateListingScore]);
 
-  const getAllListings = useCallback((cars, limit = CARS_PER_PAGE) => {
+  const getAllListings = useCallback((cars) => {
     if (!Array.isArray(cars) || cars.length === 0) return [];
     
     const categorizedCars = {
@@ -472,16 +471,16 @@ const MarketplaceList = () => {
     const mixed = [];
     const maxLength = Math.max(...Object.values(categorizedCars).map(arr => arr.length));
     
-    for (let i = 0; i < maxLength && mixed.length < limit; i++) {
-      if (categorizedCars.privateSavings[i] && mixed.length < limit) mixed.push(categorizedCars.privateSavings[i]);
-      if (categorizedCars.savings[i] && mixed.length < limit) mixed.push(categorizedCars.savings[i]);
-      if (categorizedCars.privatePremium[i] && mixed.length < limit) mixed.push(categorizedCars.privatePremium[i]);
-      if (categorizedCars.premium[i] && mixed.length < limit) mixed.push(categorizedCars.premium[i]);
-      if (categorizedCars.private[i] && mixed.length < limit) mixed.push(categorizedCars.private[i]);
-      if (categorizedCars.regular[i] && mixed.length < limit) mixed.push(categorizedCars.regular[i]);
+    for (let i = 0; i < maxLength; i++) {
+      if (categorizedCars.privateSavings[i]) mixed.push(categorizedCars.privateSavings[i]);
+      if (categorizedCars.savings[i]) mixed.push(categorizedCars.savings[i]);
+      if (categorizedCars.privatePremium[i]) mixed.push(categorizedCars.privatePremium[i]);
+      if (categorizedCars.premium[i]) mixed.push(categorizedCars.premium[i]);
+      if (categorizedCars.private[i]) mixed.push(categorizedCars.private[i]);
+      if (categorizedCars.regular[i]) mixed.push(categorizedCars.regular[i]);
     }
     
-    return injectPromoCards(mixed.slice(0, limit));
+    return injectPromoCards(mixed);
   }, [getCarClassification, calculateListingScore, injectPromoCards]);
 
   // Enhanced total savings calculation including private sellers
@@ -558,9 +557,9 @@ const MarketplaceList = () => {
         return injectPromoCards(getPrivateSellerListings(realCars), 8);
       case 'all':
       default:
-        return getAllListings(allCars, visibleItems);
+        return getAllListings(allCars);
     }
-  }, [activeSection, allCars, getPremiumListings, getSavingsListings, getPrivateSellerListings, getAllListings, visibleItems, injectPromoCards]);
+  }, [activeSection, allCars, getPremiumListings, getSavingsListings, getPrivateSellerListings, getAllListings, injectPromoCards]);
 
   // Search filters
   const prepareSearchFilters = useCallback((searchParams) => {
@@ -737,7 +736,8 @@ const MarketplaceList = () => {
       };
       setLoadingText(loadingMessages[activeSection] || 'Loading vehicles...');
       
-      const response = await listingService.getListings(filters, page);
+      // Request with proper page and limit
+      const response = await listingService.getListings(filters, page, ITEMS_PER_PAGE);
       
       if (!response || !response.listings) {
         throw new Error('Invalid response from server');
@@ -753,13 +753,20 @@ const MarketplaceList = () => {
       
       setAllCars(cars);
       setPagination({
-        currentPage: response.pagination?.currentPage || 1,
-        totalPages: response.pagination?.totalPages || 1,
-        total: cars.filter(car => !car.isPromoCard).length
+        currentPage: response.currentPage || page,
+        totalPages: response.totalPages || Math.ceil((response.total || cars.length) / ITEMS_PER_PAGE),
+        total: response.total || cars.filter(car => !car.isPromoCard).length
       });
+      
+      setCurrentPage(page);
       
       if (isMobile && cars.length > 0) {
         generateSimilarCarsData(cars);
+      }
+      
+      // Scroll to top when page changes
+      if (page > 1) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       
       setError(null);
@@ -778,6 +785,36 @@ const MarketplaceList = () => {
     }
   }, [activeSection, applyTextSearch, applyOtherFilters, isMobile, generateSimilarCarsData]);
 
+  // NEW: Handle page change
+  const handlePageChange = useCallback(async (newPage) => {
+    if (newPage < 1 || newPage > pagination.totalPages) return;
+    if (newPage === currentPage) return;
+    if (loading || fetchInProgress.current) return;
+    
+    setLoading(true);
+    fetchInProgress.current = true;
+    
+    try {
+      const searchParams = new URLSearchParams(location.search);
+      const filters = prepareSearchFilters(searchParams);
+      
+      // Update URL with new page
+      searchParams.set('page', newPage.toString());
+      navigate({
+        pathname: location.pathname,
+        search: searchParams.toString()
+      }, { replace: true });
+      
+      await performSearch(filters, newPage);
+    } catch (error) {
+      console.error('Error changing page:', error);
+      setError('Failed to load page');
+    } finally {
+      setLoading(false);
+      fetchInProgress.current = false;
+    }
+  }, [pagination.totalPages, currentPage, loading, location, navigate, prepareSearchFilters, performSearch]);
+
   // Debounced search function
   const debouncedSearch = useMemo(
     () => debounce(async (searchParams) => {
@@ -789,7 +826,8 @@ const MarketplaceList = () => {
       
       try {
         const filters = prepareSearchFilters(searchParams);
-        await performSearch(filters, 1);
+        const page = parseInt(searchParams.get('page')) || 1;
+        await performSearch(filters, page);
       } catch (error) {
         console.error('Search error:', error);
         setError('Failed to search vehicles. Please try again.');
@@ -830,10 +868,11 @@ const MarketplaceList = () => {
     if (section === activeSection) return;
     
     setActiveSection(section);
+    setCurrentPage(1); // Reset to page 1
     
     const searchParams = new URLSearchParams(location.search);
     searchParams.set('section', section);
-    searchParams.delete('page');
+    searchParams.delete('page'); // Remove page param when changing sections
     
     navigate({
       pathname: location.pathname,
@@ -841,13 +880,6 @@ const MarketplaceList = () => {
     }, { replace: true });
     
   }, [activeSection, navigate, location]);
-
-  // Virtual scrolling for large datasets
-  const handleLoadMore = useCallback(() => {
-    if (allCars.filter(car => !car.isPromoCard).length > visibleItems) {
-      setVisibleItems(prev => Math.min(prev + 6, allCars.length));
-    }
-  }, [allCars, visibleItems]);
 
   // Retry handler with better UX
   const handleRetry = useCallback(async () => {
@@ -873,37 +905,6 @@ const MarketplaceList = () => {
       container.style.webkitOverflowScrolling = 'touch';
     });
   }, [isMobile, allCars.length]);
-
-  // Intersection Observer for infinite scrolling
-  useEffect(() => {
-    if (!containerRef.current || allCars.filter(car => !car.isPromoCard).length <= visibleItems) return;
-    
-    const options = {
-      rootMargin: '200px',
-      threshold: 0.1
-    };
-    
-    const currentObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          handleLoadMore();
-        }
-      });
-    }, options);
-    
-    observerRef.current = currentObserver;
-    
-    const sentinel = containerRef.current.querySelector('.load-more-sentinel');
-    if (sentinel) {
-      currentObserver.observe(sentinel);
-    }
-    
-    return () => {
-      if (currentObserver) {
-        currentObserver.disconnect();
-      }
-    };
-  }, [allCars.length, visibleItems, handleLoadMore]);
 
   // Smooth scroll handler for better UX
   const handleScrollOptimization = useMemo(
@@ -948,10 +949,10 @@ const MarketplaceList = () => {
     const stats = getSectionStatistics;
     
     return {
-      displayCars: displayCars.slice(0, visibleItems),
+      displayCars: displayCars,
       ...stats
     };
-  }, [getCurrentSectionCars, getSectionStatistics, visibleItems]);
+  }, [getCurrentSectionCars, getSectionStatistics]);
 
   // Mobile horizontal car row component with promo card support
   const MobileHorizontalCarRow = ({ mainCar, similarCars }) => {
@@ -972,6 +973,96 @@ const MarketplaceList = () => {
               )}
             </div>
           ))}
+        </div>
+      </div>
+    );
+  };
+
+  // NEW: Pagination Component
+  const PaginationControls = () => {
+    if (loading || pagination.totalPages <= 1) return null;
+    
+    const pages = [];
+    const maxPagesToShow = 7;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(pagination.totalPages, startPage + maxPagesToShow - 1);
+    
+    if (endPage - startPage < maxPagesToShow - 1) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+    
+    // Add first page
+    if (startPage > 1) {
+      pages.push(
+        <button 
+          key={1}
+          className="pagination-btn"
+          onClick={() => handlePageChange(1)}
+        >
+          1
+        </button>
+      );
+      if (startPage > 2) {
+        pages.push(<span key="ellipsis-start" className="pagination-ellipsis">...</span>);
+      }
+    }
+    
+    // Add page numbers
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          className={`pagination-btn ${i === currentPage ? 'active' : ''}`}
+          onClick={() => handlePageChange(i)}
+          disabled={i === currentPage}
+        >
+          {i}
+        </button>
+      );
+    }
+    
+    // Add last page
+    if (endPage < pagination.totalPages) {
+      if (endPage < pagination.totalPages - 1) {
+        pages.push(<span key="ellipsis-end" className="pagination-ellipsis">...</span>);
+      }
+      pages.push(
+        <button 
+          key={pagination.totalPages}
+          className="pagination-btn"
+          onClick={() => handlePageChange(pagination.totalPages)}
+        >
+          {pagination.totalPages}
+        </button>
+      );
+    }
+    
+    return (
+      <div className="pagination-container">
+        <div className="pagination-info">
+          Showing page {currentPage} of {pagination.totalPages} ({pagination.total} total vehicles)
+        </div>
+        
+        <div className="pagination-controls">
+          <button
+            className="pagination-btn pagination-prev"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            ← Previous
+          </button>
+          
+          <div className="pagination-numbers">
+            {pages}
+          </div>
+          
+          <button
+            className="pagination-btn pagination-next"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage >= pagination.totalPages}
+          >
+            Next →
+          </button>
         </div>
       </div>
     );
@@ -1268,18 +1359,8 @@ const MarketplaceList = () => {
                 )}
               </div>
               
-              {allCars.filter(car => !car.isPromoCard).length > visibleItems && (
-                <div className="load-more-container">
-                  <div className="load-more-sentinel"></div>
-                  <button 
-                    className="load-more-btn"
-                    onClick={handleLoadMore}
-                    disabled={isScrolling}
-                  >
-                    {isScrolling ? 'Loading...' : `Load More (${allCars.filter(car => !car.isPromoCard).length - visibleItems} remaining)`}
-                  </button>
-                </div>
-              )}
+              {/* NEW: Pagination Controls */}
+              <PaginationControls />
             </div>
           )}
         </div>
