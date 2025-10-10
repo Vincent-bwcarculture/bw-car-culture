@@ -978,9 +978,13 @@ const MarketplaceList = () => {
     );
   };
 
-  // NEW: Pagination Component
+  // ✅ UPDATED: Pagination Component - ALWAYS SHOW
   const PaginationControls = () => {
-    if (loading || pagination.totalPages <= 1) return null;
+    // ✅ REMOVED THE CONDITION - Now always renders
+    // if (loading || pagination.totalPages <= 1) return null;
+    
+    // Only hide when loading
+    if (loading) return null;
     
     const pages = [];
     const maxPagesToShow = 7;
@@ -1194,6 +1198,9 @@ const MarketplaceList = () => {
                   ))
                 )}
               </div>
+              
+              {/* ✅ PAGINATION ADDED HERE */}
+              <PaginationControls />
             </div>
           )}
 
@@ -1249,6 +1256,9 @@ const MarketplaceList = () => {
                   ))
                 )}
               </div>
+              
+              {/* ✅ PAGINATION ADDED HERE */}
+              <PaginationControls />
             </div>
           )}
 
@@ -1306,6 +1316,9 @@ const MarketplaceList = () => {
                   ))
                 )}
               </div>
+              
+              {/* ✅ PAGINATION ADDED HERE */}
+              <PaginationControls />
             </div>
           )}
 
@@ -1359,7 +1372,7 @@ const MarketplaceList = () => {
                 )}
               </div>
               
-              {/* NEW: Pagination Controls */}
+              {/* ✅ PAGINATION ALREADY HERE - NOW ALWAYS SHOWS */}
               <PaginationControls />
             </div>
           )}
