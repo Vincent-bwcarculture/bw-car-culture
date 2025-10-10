@@ -724,39 +724,49 @@ const MarketplaceList = () => {
   }, [carIsFromPrivateSeller]);
 
   // Enhanced search with better error handling and retry logic
-  const performSearch = useCallback(async (filters, page, retryCount = 0) => {
-    const maxRetries = 3;
+const performSearch = useCallback(async (filters, page, retryCount = 0) => {
+  const maxRetries = 3;
+  
+  try {
+    const loadingMessages = {
+      premium: 'Loading premium vehicles...',
+      savings: 'Finding the best savings...',
+      private: 'Loading private seller listings...',
+      all: 'Loading all vehicles...'
+    };
+    setLoadingText(loadingMessages[activeSection] || 'Loading vehicles...');
     
-    try {
-      const loadingMessages = {
-        premium: 'Loading premium vehicles...',
-        savings: 'Finding the best savings...',
-        private: 'Loading private seller listings...',
-        all: 'Loading all vehicles...'
-      };
-      setLoadingText(loadingMessages[activeSection] || 'Loading vehicles...');
-      
-      // Request with proper page and limit
-      const response = await listingService.getListings(filters, page, ITEMS_PER_PAGE);
-      
-      if (!response || !response.listings) {
-        throw new Error('Invalid response from server');
-      }
-      
-      let cars = response.listings;
-      
-      if (filters.search) {
-        cars = applyTextSearch(cars, filters.search);
-      }
-      
-      cars = applyOtherFilters(cars, filters);
-      
-      setAllCars(cars);
-      setPagination({
-        currentPage: response.currentPage || page,
-        totalPages: response.totalPages || Math.ceil((response.total || cars.length) / ITEMS_PER_PAGE),
-        total: response.total || cars.filter(car => !car.isPromoCard).length
-      });
+    // Request with proper page and limit
+    const response = await listingService.getListings(filters, page, ITEMS_PER_PAGE);
+    
+    console.log('Backend response:', {
+      listingsCount: response?.listings?.length,
+      currentPage: response?.currentPage || response?.pagination?.currentPage,
+      totalPages: response?.totalPages || response?.pagination?.totalPages,
+      total: response?.total || response?.pagination?.total,
+      fullPagination: response?.pagination
+    });
+    
+    if (!response || !response.listings && !response.data) {
+      throw new Error('Invalid response from server');
+    }
+    
+    // ✅ USE BACKEND DATA DIRECTLY - Don't modify the listings array
+    const cars = response.listings || response.data || [];
+    
+    // ✅ USE BACKEND PAGINATION DATA DIRECTLY - Don't recalculate
+    const paginationData = response.pagination || {
+      currentPage: response.currentPage || page,
+      totalPages: response.totalPages || Math.ceil((response.total || cars.length) / ITEMS_PER_PAGE),
+      total: response.total || cars.length
+    };
+    
+    setAllCars(cars);
+    setPagination({
+      currentPage: paginationData.currentPage,
+      totalPages: paginationData.totalPages,
+      total: paginationData.total
+    });
       
       setCurrentPage(page);
       
