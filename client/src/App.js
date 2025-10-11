@@ -739,7 +739,7 @@ const HomeContent = () => {
       <Advertisement />
       <BudgetSearch />
       <MarketplaceSection />
-      <CarCategories />
+      {/* <CarCategories /> */}
       <CarBrands />
       <VideoSection />
       <HomeRentalsSection />
