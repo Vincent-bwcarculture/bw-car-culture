@@ -47,8 +47,8 @@ class ListingService {
     return data;
   }
 
-  // Get listings
-  async getListings(filters = {}, page = 1, limit = 10) {
+  // ✅ FIXED: Get listings with proper pagination handling
+  async getListings(filters = {}, page = 1, limit = 24) {
     const requestKey = this.getRequestKey(filters, page);
 
     if (this.pendingRequests[requestKey]) {
@@ -72,15 +72,42 @@ class ListingService {
           headers: this.getHeaders()
         });
 
-        const listings = response.data?.data || [];
+        console.log('Raw backend response:', {
+          success: response.data?.success,
+          dataCount: response.data?.data?.length,
+          total: response.data?.total,
+          pagination: response.data?.pagination,
+          currentPage: response.data?.currentPage,
+          totalPages: response.data?.totalPages
+        });
+
+        // ✅ FIXED: Handle both response formats (nested pagination or root level)
+        const listings = response.data?.data || response.data?.listings || [];
+        const paginationData = response.data?.pagination || {};
+        
+        // ✅ Get pagination values from the right place
+        const total = paginationData.total || response.data?.total || 0;
+        const currentPage = paginationData.currentPage || response.data?.currentPage || page;
+        const totalPages = paginationData.totalPages || response.data?.totalPages || Math.ceil(total / limit);
+        
         console.log(`Successfully fetched ${listings.length} listings`);
+        console.log('Pagination:', { currentPage, totalPages, total, limit });
 
         const result = {
           listings,
-          total: response.data.total || 0,
-          currentPage: response.data.currentPage || page,
-          totalPages: response.data.totalPages || 1
+          total,
+          currentPage,
+          totalPages,
+          pagination: {
+            currentPage,
+            totalPages,
+            total,
+            limit,
+            hasNext: currentPage < totalPages,
+            hasPrev: currentPage > 1
+          }
         };
+        
         resolve(result);
       } catch (error) {
         console.error('Error fetching listings:', error.response?.data || error.message);
@@ -93,6 +120,14 @@ class ListingService {
             total: 0,
             currentPage: page,
             totalPages: 1,
+            pagination: {
+              currentPage: page,
+              totalPages: 1,
+              total: 0,
+              limit,
+              hasNext: false,
+              hasPrev: false
+            },
             error: error.message
           });
         }
