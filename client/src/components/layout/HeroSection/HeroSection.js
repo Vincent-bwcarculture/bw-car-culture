@@ -513,55 +513,39 @@ const HeroSection = () => {
             <h1>Sell Faster. Smarter. Nationwide.</h1>
             <p>Tap into Botswana's #1 automotive ecosystem. Get maximum exposure, real buyers, and support every step of the way.</p>
 
-            {/* Pricing Information Section */}
+            {/* UPDATED: Pricing Information Section - Single P100 One-Time Payment */}
             <div className="bcc-hero-sell-pricing-section">
               <div className="bcc-hero-sell-pricing-header">
-                <h3>Listing Prices for Private Sellers</h3>
-                <p>Choose the exposure level that gets your car sold, for the right value and fast.</p>
+                <h3>Simple, Transparent Pricing</h3>
+                <p>One price. Complete coverage. Maximum exposure for your vehicle.</p>
               </div>
               
               <div className="bcc-hero-sell-pricing-tiers">
-                <div className="bcc-hero-sell-pricing-tier">
-                  <div className="bcc-hero-sell-tier-header">
-                    <div className="bcc-hero-sell-tier-price">P50</div>
-                    <div className="bcc-hero-sell-tier-period">/month</div>
-                  </div>
-                  <div className="bcc-hero-sell-tier-value">Basic</div>
-                  <div className="bcc-hero-sell-tier-features">
-                    <span>✓ Multiple photos</span>
-                    <span>✓ Contact leads</span>
-                    <span>✓ Social Media Marketing</span>
-                  </div>
-                </div>
-                
-                <div className="bcc-hero-sell-pricing-tier bcc-hero-sell-tier-popular">
-                  <div className="bcc-hero-sell-tier-badge">Most Popular</div>
+                {/* Single Pricing Tier - One-Time Payment */}
+                <div className="bcc-hero-sell-pricing-tier bcc-hero-sell-tier-popular" style={{maxWidth: '420px', margin: '0 auto'}}>
+                  <div className="bcc-hero-sell-tier-badge">Best Value</div>
                   <div className="bcc-hero-sell-tier-header">
                     <div className="bcc-hero-sell-tier-price">P100</div>
-                    <div className="bcc-hero-sell-tier-period">/month</div>
+                    <div className="bcc-hero-sell-tier-period">one-time</div>
                   </div>
-                  <div className="bcc-hero-sell-tier-value">Standard</div>
+                  <div className="bcc-hero-sell-tier-value">Complete Package</div>
                   <div className="bcc-hero-sell-tier-features">
-                    <span>✓ 2x Social media marketing</span>
-                    <span>✓ Premium placement</span>
-                    <span>✓ Multiple photos</span>
-                    <span>✓ Priority support</span>
+                    <span>✓ Website listing with multiple photos</span>
+                    <span>✓ Instagram promotion & marketing</span>
+                    <span>✓ Facebook promotion & marketing</span>
+                    <span>✓ WhatsApp promotion & marketing</span>
+                    <span>✓ Direct contact with buyers</span>
+                    <span>✓ Professional listing support</span>
                   </div>
-                </div>
-                
-                <div className="bcc-hero-sell-pricing-tier">
-                  <div className="bcc-hero-sell-tier-header">
-                    <div className="bcc-hero-sell-tier-price">P200</div>
-                    <div className="bcc-hero-sell-tier-period">/month</div>
-                  </div>
-                  <div className="bcc-hero-sell-tier-value">Premium</div>
-                  <div className="bcc-hero-sell-tier-features">
-                    <span>✓ 4x Social media marketing</span>
-                    <span>✓ Premium priority placement</span>
-                    <span>✓ Multiple photos</span>
-                    <span>✓ Higher priority support</span>
-                    <span>✓ Featured placement</span>
-                    <span>✓ First access to new features</span>
+                  <div style={{
+                    marginTop: '1.5rem',
+                    paddingTop: '1.5rem',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+                    color: '#c9c9c9',
+                    fontSize: '0.85rem',
+                    textAlign: 'center'
+                  }}>
+                    Pay once, list until sold. No hidden fees.
                   </div>
                 </div>
               </div>
@@ -588,7 +572,7 @@ const HeroSection = () => {
             <div className="bcc-hero-sell-options">
               <div className="bcc-hero-sell-option">
                 <div className="bcc-hero-option-header">
-                  <span className="bcc-hero-option-icon"></span>
+                  <span className="bcc-hero-option-icon">📊</span>
                   <h3>Instant Valuation</h3>
                 </div>
                 <p>Get a guaranteed price and sell your car fast.</p>
@@ -598,7 +582,7 @@ const HeroSection = () => {
                   disabled={loading}
                   aria-label="Call for vehicle valuation"
                 >
-                  <span className="bcc-hero-button-icon"></span>
+                  <span className="bcc-hero-button-icon">📞</span>
                   {/* UPDATED: Dynamic button text based on auth */}
                   {isAuthenticated ? 'Get Valuation' : 'Login for Valuation'}
                 </button>
@@ -606,7 +590,7 @@ const HeroSection = () => {
 
               <div className="bcc-hero-sell-option">
                 <div className="bcc-hero-option-header">
-                  <span className="bcc-hero-option-icon"></span>
+                  <span className="bcc-hero-option-icon">🚗</span>
                   <h3>List and sell my Car</h3>
                 </div>
                 <p>Reach thousands of buyers and sell your car fast for a fair price.</p>
@@ -616,7 +600,7 @@ const HeroSection = () => {
                   disabled={loading}
                   aria-label="Get preparation guidelines for listing your vehicle"
                 >
-                  <span className="bcc-hero-button-icon"></span>
+                  <span className="bcc-hero-button-icon">📝</span>
                   {/* UPDATED: Dynamic button text based on auth */}
                   {isAuthenticated ? 'List My Car' : 'Login to List Car'}
                 </button>
@@ -634,7 +618,7 @@ const HeroSection = () => {
                   <div className="bcc-preparation-grid">
                     <div className="bcc-preparation-item">
                       <div className="bcc-prep-content">
-                        <h4>Quality Photos</h4>
+                        <h4>📸 Quality Photos</h4>
                         <ul>
                           <li>Multiple angles (front, back, sides, interior)</li>
                           <li>Engine bay and dashboard photos</li>
@@ -646,7 +630,7 @@ const HeroSection = () => {
                     
                     <div className="bcc-preparation-item">
                       <div className="bcc-prep-content">
-                        <h4>Vehicle Details</h4>
+                        <h4>📋 Vehicle Details</h4>
                         <ul>
                           <li>Registration documents</li>
                           <li>Service history records</li>
@@ -658,7 +642,7 @@ const HeroSection = () => {
                     
                     <div className="bcc-preparation-item">
                       <div className="bcc-prep-content">
-                        <h4>Vehicle Condition</h4>
+                        <h4>🔧 Vehicle Condition</h4>
                         <ul>
                           <li>Recent service information</li>
                           <li>Known issues or problems</li>
@@ -670,7 +654,7 @@ const HeroSection = () => {
                     
                     <div className="bcc-preparation-item">
                       <div className="bcc-prep-content">
-                        <h4>Pricing Research</h4>
+                        <h4>💰 Pricing Research</h4>
                         <ul>
                           <li>Check similar cars online</li>
                           <li>Consider your car's unique features</li>
@@ -683,7 +667,7 @@ const HeroSection = () => {
                   
                   <div className="bcc-preparation-tip">
                     <div className="bcc-tip-content">
-                      <strong>Pro Tip:</strong> Vehicles with complete information and quality photos sell 3x faster and for up to 15% more than incomplete listings!
+                      <strong>💡 Pro Tip:</strong> Vehicles with complete information and quality photos sell 3x faster and for up to 15% more than incomplete listings!
                     </div>
                   </div>
 
@@ -695,7 +679,7 @@ const HeroSection = () => {
                       disabled={loading}
                       aria-label="I'm ready - start listing process"
                     >
-                      <span className="bcc-prep-button-icon"></span>
+                      <span className="bcc-prep-button-icon">✓</span>
                       {/* UPDATED: Dynamic button text based on auth */}
                       {isAuthenticated ? "I'm Ready - Start Listing" : "I'm Ready - Login to List"}
                     </button>
