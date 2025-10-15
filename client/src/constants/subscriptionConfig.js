@@ -1,4 +1,4 @@
-// client/src/constants/subscriptionConfig.js - COMPLETE VERSION WITH RENTAL PROVIDERS & ADD-ONS
+// client/src/constants/subscriptionConfig.js - COMPLETE VERSION WITH UPDATED P100 ONE-TIME PRICING
 
 export const SUBSCRIPTION_TIERS = {
   BASIC: 'basic',
@@ -9,111 +9,47 @@ export const SUBSCRIPTION_TIERS = {
 export const SELLER_TYPES = {
   DEALERSHIP: 'dealership',
   PRIVATE: 'private',
-  RENTAL: 'rental' // NEW: Rental service providers
+  RENTAL: 'rental'
 };
 
 // === PRIVATE/INDIVIDUAL SELLER PRICING ===
+// UPDATED: Single P100 one-time payment model
 // Each subscription = 1 car listing, can subscribe multiple times
 export const PRIVATE_SELLER_PLANS = {
-  [SUBSCRIPTION_TIERS.BASIC]: {
-    id: 'basic',
-    name: 'Individual Basic',
-    price: 50,
-    currency: 'BWP',
-    billingCycle: 'monthly',
-    description: 'Perfect for selling your personal vehicle',
-    features: {
-      maxListings: 1,
-      maxPhotosPerListing: 8,
-      dashboardAccess: true,
-      socialMediaMarketing: 0,
-      basicAnalytics: true,
-      customerSupport: 'email',
-      allowPhotography: true,
-      allowReviews: false,
-      allowPodcasts: false,
-      allowVideos: false,
-      featuredListings: 0,
-      prioritySupport: false,
-      listingDuration: 30,
-      searchPlacement: 'basic',
-      allowAddons: true // NEW: Allow add-ons for private sellers
-    },
-    popular: false,
-    color: '#3b82f6',
-    targetUsers: 'Individual car owners selling personal vehicles',
-    subscriptionModel: 'per_car',
-    allowMultiple: true,
-    availableAddons: ['photography_management_private', 'sponsored_listing_private', 'car_review_private']
-  },
-  
   [SUBSCRIPTION_TIERS.STANDARD]: {
     id: 'standard', 
-    name: 'Individual Plus',
+    name: 'Complete Package',
     price: 100,
     currency: 'BWP',
-    billingCycle: 'monthly',
-    description: 'Enhanced visibility and buyer matching for your car',
-    features: {
-      maxListings: 1,
-      maxPhotosPerListing: 12,
-      dashboardAccess: true,
-      socialMediaMarketing: 2,
-      basicAnalytics: true,
-      customerSupport: 'email',
-      allowPhotography: true,
-      allowReviews: true,
-      allowPodcasts: false,
-      allowVideos: false,
-      featuredListings: 1,
-      prioritySupport: false,
-      listingDuration: 30,
-      searchPlacement: 'premium',
-      buyerMatching: true,
-      allowAddons: true
-    },
-    popular: true,
-    color: '#10b981',
-    badge: 'Most Popular',
-    targetUsers: 'Car enthusiasts wanting better visibility',
-    subscriptionModel: 'per_car',
-    allowMultiple: true,
-    availableAddons: ['photography_management_private', 'sponsored_listing_private', 'car_review_private']
-  },
-  
-  [SUBSCRIPTION_TIERS.PREMIUM]: {
-    id: 'premium',
-    name: 'Individual Pro',
-    price: 200,
-    currency: 'BWP',
-    billingCycle: 'monthly',
-    description: 'Maximum exposure and professional features',
+    billingCycle: 'one-time', // UPDATED: Changed from 'monthly' to 'one-time'
+    description: 'One price. Complete coverage. Maximum exposure.',
     features: {
       maxListings: 1,
       maxPhotosPerListing: 15,
       dashboardAccess: true,
-      socialMediaMarketing: 4,
+      socialMediaMarketing: 'unlimited', // UPDATED: Instagram, Facebook & WhatsApp
       basicAnalytics: true,
-      advancedAnalytics: true,
-      customerSupport: 'phone',
+      customerSupport: 'email',
       allowPhotography: true,
       allowReviews: true,
-      allowPodcasts: true,
-      allowVideos: true,
+      allowPodcasts: false,
+      allowVideos: false,
       featuredListings: 1,
       prioritySupport: true,
-      listingDuration: 45,
-      searchPlacement: 'priority',
+      listingDuration: 'until_sold', // UPDATED: List until sold
+      searchPlacement: 'premium',
       buyerMatching: true,
-      multipleListingFormats: true,
-      priorityCustomerService: true,
-      newFeatureAccess: true,
+      websiteListing: true,
+      instagramPromotion: true,
+      facebookPromotion: true,
+      whatsappPromotion: true,
+      professionalSupport: true,
       allowAddons: true
     },
-    popular: false,
-    color: '#8b5cf6',
-    badge: 'Max Features',
-    targetUsers: 'Serious individual sellers wanting maximum exposure',
+    popular: true,
+    color: '#10b981',
+    badge: 'Best Value',
+    targetUsers: 'Individual car owners selling personal vehicles',
     subscriptionModel: 'per_car',
     allowMultiple: true,
     availableAddons: ['photography_management_private', 'sponsored_listing_private', 'car_review_private']
@@ -232,7 +168,7 @@ export const DEALERSHIP_PLANS = {
   }
 };
 
-// === NEW: RENTAL SERVICE PROVIDER PRICING ===
+// === RENTAL SERVICE PROVIDER PRICING ===
 export const RENTAL_PROVIDER_PLANS = {
   [SUBSCRIPTION_TIERS.BASIC]: {
     id: 'basic',
@@ -463,25 +399,15 @@ export const ADDON_SERVICES = {
 
 // === WHATSAPP CONTACT INFO ===
 export const WHATSAPP_BOOKING = {
-  phoneNumber: '+26771234567', // Replace with actual WhatsApp business number
+  phoneNumber: '+26774122453', // Your actual WhatsApp business number
   defaultMessage: 'Hi! I would like to book a service for my car listing.',
   photographyMessage: 'Hi! I would like to book a photography session for my car listing.',
   reviewMessage: 'Hi! I would like to book a professional car review session.'
 };
 
-// Updated tier limits
+// UPDATED: Tier limits for private sellers
 export const TIER_LIMITS = {
   private: {
-    [SUBSCRIPTION_TIERS.BASIC]: {
-      maxListings: 1,
-      allowPhotography: true,
-      allowReviews: false,
-      allowPodcasts: false,
-      allowVideos: false,
-      price: 50,
-      canSubscribeMultiple: true,
-      allowAddons: true
-    },
     [SUBSCRIPTION_TIERS.STANDARD]: {
       maxListings: 1,
       allowPhotography: true,
@@ -489,16 +415,6 @@ export const TIER_LIMITS = {
       allowPodcasts: false,
       allowVideos: false,
       price: 100,
-      canSubscribeMultiple: true,
-      allowAddons: true
-    },
-    [SUBSCRIPTION_TIERS.PREMIUM]: {
-      maxListings: 1,
-      allowPhotography: true,
-      allowReviews: true,
-      allowPodcasts: true,
-      allowVideos: true,
-      price: 200,
       canSubscribeMultiple: true,
       allowAddons: true
     }
@@ -561,11 +477,10 @@ export const TIER_LIMITS = {
   }
 };
 
+// UPDATED: Tier prices
 export const TIER_PRICES = {
   private: {
-    [SUBSCRIPTION_TIERS.BASIC]: 50,
-    [SUBSCRIPTION_TIERS.STANDARD]: 100,
-    [SUBSCRIPTION_TIERS.PREMIUM]: 200
+    [SUBSCRIPTION_TIERS.STANDARD]: 100
   },
   dealership: {
     [SUBSCRIPTION_TIERS.BASIC]: 1000,
@@ -578,13 +493,11 @@ export const TIER_PRICES = {
   }
 };
 
-// Updated plan summary
+// UPDATED: Plan summary
 export const PLAN_SUMMARY = {
   private_seller: {
-    basic: 'P50 per car - 1 listing, 8 photos, basic features (30 days)',
-    standard: 'P100 per car - 1 listing, 12 photos, reviews + priority placement (30 days)',
-    premium: 'P200 per car - 1 listing, 15 photos, full features + extended duration (45 days)',
-    note: 'Subscribe multiple times to list multiple cars. Each subscription is for 1 car.',
+    standard: 'P100 one-time - Complete package: Website listing, Instagram, Facebook & WhatsApp promotion (until sold)',
+    note: 'Pay once, list until sold. Subscribe again for additional cars.',
     addons: 'Available: Photography + Management (P800), Sponsored Listing (P250), Car Review (P550)'
   },
   dealership: {
@@ -659,11 +572,12 @@ export const getSubscriptionModel = (sellerType) => {
   return {
     private: {
       model: 'per_car',
-      description: 'Each subscription allows you to list 1 car. Subscribe multiple times to list multiple cars.',
+      description: 'P100 one-time payment per car. List until sold. Subscribe multiple times for additional cars.',
       allowMultiple: true,
       maxPerSubscription: 1,
       addonsAvailable: true,
-      addonPaymentType: 'one_time'
+      addonPaymentType: 'one_time',
+      billingCycle: 'one-time'
     },
     dealership: {
       model: 'bulk_listings',
@@ -671,7 +585,8 @@ export const getSubscriptionModel = (sellerType) => {
       allowMultiple: false,
       maxPerSubscription: 'varies_by_plan',
       addonsAvailable: true,
-      addonPaymentType: 'monthly'
+      addonPaymentType: 'monthly',
+      billingCycle: 'monthly'
     },
     rental: {
       model: 'rental_fleet',
@@ -679,7 +594,8 @@ export const getSubscriptionModel = (sellerType) => {
       allowMultiple: false,
       maxPerSubscription: 'varies_by_plan',
       addonsAvailable: true,
-      addonPaymentType: 'monthly'
+      addonPaymentType: 'monthly',
+      billingCycle: 'monthly'
     }
   }[sellerType];
 };
