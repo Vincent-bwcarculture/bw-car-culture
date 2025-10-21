@@ -666,7 +666,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         city: car.location?.city || 'Unknown Location',
         state: car.location?.state || '',
         country: car.location?.country || ''
-      },
+        },
       verification: {
         isVerified: false
       },
@@ -1184,6 +1184,9 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           <div className="vc-title-section">
             <h4 className="vc-title">{car.title || 'Vehicle Listing'}</h4>
             <div className="vc-title-badges">
+              {car.priceOptions?.negotiable && (
+                <div className="vc-negotiable-badge">Negotiable</div>
+              )}
               {car.priceOptions?.financeAvailable && dealer?.sellerType === 'dealership' && (
                 <div className="vc-finance-badge">Finance Available</div>
               )}
