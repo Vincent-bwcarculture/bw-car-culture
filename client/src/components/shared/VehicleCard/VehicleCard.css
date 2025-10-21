@@ -1,5 +1,6 @@
 /* VehicleCard.css - Enhanced with Light/Dark Mode Support
    UPDATED: Added light mode theme support with dark mode as default
+   RESTORED: Rounded corners for modern, friendly aesthetic
 */
 
 /* === CSS CUSTOM PROPERTIES FOR THEMING === */
@@ -90,7 +91,7 @@
 .vc-card {
   background: var(--vc-bg-card);
   border: 1px solid var(--vc-border-color);
-  border-radius: 0;
+  border-radius: 12px;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
@@ -160,7 +161,7 @@
   display: flex;
   align-items: center;
   background: var(--vc-bg-overlay);
-  border-radius: 0;
+  border-radius: 20px;
   padding: 0.3rem 0.6rem;
   gap: 0.4rem;
   z-index: 5;
@@ -207,7 +208,7 @@
   width: 28px;
   height: 28px;
   border: none;
-  border-radius: 0;
+  border-radius: 50%;
   background: var(--vc-bg-button);
   color: var(--vc-text-primary);
   cursor: pointer;
@@ -296,7 +297,7 @@
 .vc-image-nav {
   width: 32px;
   height: 32px;
-  border-radius: 0;
+  border-radius: 50%;
   background: var(--vc-bg-overlay);
   border: 1px solid var(--vc-border-strong);
   color: var(--vc-text-primary);
@@ -337,7 +338,7 @@
   background: var(--vc-bg-overlay);
   color: var(--vc-text-primary);
   padding: 3px 8px;
-  border-radius: 0;
+  border-radius: 10px;
   font-size: 0.7rem;
   z-index: 3;
   transition: bottom 0.3s ease;
@@ -362,7 +363,7 @@
   background: linear-gradient(135deg, var(--vc-accent-primary), #ff6600);
   color: white;
   padding: 0.3rem 0.6rem;
-  border-radius: 0;
+  border-radius: 15px;
   font-size: 0.75rem;
   font-weight: 600;
   z-index: 3;
@@ -412,7 +413,7 @@
   background: var(--vc-bg-tooltip);
   color: var(--vc-text-primary);
   padding: 1rem 1.2rem;
-  border-radius: 0;
+  border-radius: 12px;
   font-size: 0.85rem;
   white-space: nowrap;
   margin-bottom: 12px;
@@ -492,7 +493,7 @@
   background: rgba(46, 213, 115, 0.9);
   color: white;
   padding: 0.25rem 0.5rem;
-  border-radius: 0;
+  border-radius: 4px;
   font-size: 0.75rem;
   backdrop-filter: blur(4px);
   z-index: 2;
@@ -599,7 +600,7 @@
 .vc-negotiable-badge {
   font-size: 0.75rem;
   padding: 3px 8px;
-  border-radius: 0;
+  border-radius: 10px;
   margin-top: 5px;
   white-space: nowrap;
   color: var(--vc-negotiable);
@@ -617,7 +618,7 @@
 .vc-lease-badge {
   font-size: 0.75rem;
   padding: 3px 8px;
-  border-radius: 0;
+  border-radius: 10px;
   margin-top: 5px;
   white-space: nowrap;
 }
@@ -697,7 +698,7 @@
 .vc-certified-badge {
   font-size: 0.7rem;
   padding: 2px 6px;
-  border-radius: 0;
+  border-radius: 4px;
   white-space: nowrap;
 }
 
@@ -790,7 +791,7 @@
   font-weight: 600;
   letter-spacing: 0.3px;
   padding: 0.1rem 0.3rem;
-  border-radius: 0;
+  border-radius: 3px;
   display: inline-block;
   white-space: nowrap;
 }
@@ -869,7 +870,7 @@
 .vc-verified-icon {
   background-color: var(--vc-verified);
   color: white;
-  border-radius: 0;
+  border-radius: 50%;
   width: 14px;
   height: 14px;
   display: flex;
@@ -883,7 +884,7 @@
 .vc-dealer-avatar {
   width: 48px;
   height: 48px;
-  border-radius: 0;
+  border-radius: 50%;
   object-fit: cover;
   border: 2px solid transparent;
   transition: border-color 0.2s ease;
@@ -897,7 +898,7 @@
 .vc-dealer-avatar-placeholder {
   width: 48px;
   height: 48px;
-  border-radius: 0;
+  border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
@@ -933,7 +934,7 @@
 
 .vc-condition-tag {
   padding: 0.25rem 0.6rem;
-  border-radius: 0;
+  border-radius: 15px;
   font-size: 0.75rem;
 }
 
@@ -993,7 +994,7 @@
   color: var(--vc-text-primary);
   border: 1px solid var(--vc-border-color);
   padding: 5px 8px;
-  border-radius: 0;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 0.75rem;
@@ -1009,7 +1010,7 @@
   color: white;
   border: none;
   padding: 5px 8px;
-  border-radius: 0;
+  border-radius: 4px;
   cursor: pointer;
   transition: background 0.3s ease;
   font-size: 0.75rem;
@@ -1024,7 +1025,7 @@
   color: white;
   border: none;
   padding: 5px 8px;
-  border-radius: 0;
+  border-radius: 4px;
   cursor: pointer;
   transition: background 0.3s ease;
   font-size: 0.75rem;
@@ -1047,7 +1048,7 @@
   align-items: center;
   justify-content: center;
   z-index: 10;
-  border-radius: 0;
+  border-radius: 12px;
   transition: all 0.3s ease;
 }
 
@@ -1060,7 +1061,7 @@
   background: linear-gradient(135deg, var(--vc-sold) 0%, #357abd 100%);
   color: white;
   padding: 1rem 1.5rem;
-  border-radius: 0;
+  border-radius: 12px;
   text-align: center;
   box-shadow: 
     0 8px 25px rgba(74, 144, 226, 0.4),
@@ -1181,7 +1182,7 @@
     padding: 0.2rem 0.4rem;
     gap: 0.25rem;
     font-size: 0.75rem;
-    border-radius: 0;
+    border-radius: 12px;
   }
   
   .vc-zoom-btn {
@@ -1315,7 +1316,7 @@
     padding: 0.15rem 0.3rem;
     gap: 0.2rem;
     font-size: 0.7rem;
-    border-radius: 0;
+    border-radius: 10px;
   }
   
   .vc-zoom-btn {
@@ -1344,7 +1345,7 @@
     background: var(--vc-bg-overlay);
     color: var(--vc-text-primary);
     padding: 4px 8px;
-    border-radius: 0;
+    border-radius: 12px;
     font-size: 0.6rem;
     opacity: 0;
     transition: opacity 0.3s ease;
