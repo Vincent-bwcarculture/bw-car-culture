@@ -3,13 +3,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, ShoppingBag, Store, Settings, User, LogIn, LogOut, 
-  UserCircle, Star, QrCode, Hash, X, UserPlus, Newspaper, MessageCircle
+  UserCircle, Star, QrCode, Hash, X, UserPlus, Newspaper, 
+  MessageCircle, Menu, Sun, Moon
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
 import EnhancedFABModal from './EnhancedFABModal.js';
 import './ResponsiveNavigation.css';
 
-// Updated navigation categories - News added for desktop, Profile kept for mobile
+// Updated navigation categories
 const categories = [
   {
     id: 'home',
@@ -40,7 +41,7 @@ const categories = [
     name: 'News',
     path: '/news',
     icon: <Newspaper size={20} />,
-    desktopOnly: true // Only show on bigger displays
+    desktopOnly: true
   },
   {
     id: 'profile',
@@ -50,10 +51,20 @@ const categories = [
   }
 ];
 
-// NEW: Breadcrumb Feedback Button Component
-const BreadcrumbFeedbackButton = ({ onFeedbackClick }) => {
+// NEW: Menu Button Component with Dropdown
+const NavigationMenu = ({ onFeedbackClick }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [theme, setTheme] = useState('dark'); // default dark mode
   const [showNotification, setShowNotification] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const menuRef = useRef(null);
+
+  // Load theme from localStorage on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }, []);
 
   // Check if user has interacted with feedback before
   useEffect(() => {
@@ -70,21 +81,53 @@ const BreadcrumbFeedbackButton = ({ onFeedbackClick }) => {
     }
   }, []);
 
-  // Randomly show notification for returning users (occasionally)
+  // Randomly show notification for returning users
   useEffect(() => {
     if (hasInteracted) {
       const shouldShowNotification = Math.random() < 0.1; // 10% chance
       if (shouldShowNotification) {
         const timer = setTimeout(() => {
           setShowNotification(true);
-        }, 60000); // Show after 1 minute for returning users
+        }, 60000); // Show after 1 minute
 
         return () => clearTimeout(timer);
       }
     }
   }, [hasInteracted]);
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  const handleMenuToggle = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const handleThemeToggle = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    setIsOpen(false);
+  };
+
   const handleFeedbackClick = () => {
+    setIsOpen(false);
     setShowNotification(false);
     setHasInteracted(true);
     localStorage.setItem('feedback_interacted', 'true');
@@ -97,35 +140,164 @@ const BreadcrumbFeedbackButton = ({ onFeedbackClick }) => {
   };
 
   return (
-    <div className="breadcrumb-feedback-container">
+    <div className="navigation-menu-container" ref={menuRef}>
       <button 
-        className="breadcrumb-feedback-button"
-        onClick={handleFeedbackClick}
-        aria-label="Go to feedback page"
+        className="navigation-menu-button"
+        onClick={handleMenuToggle}
+        aria-label="Open navigation menu"
+        aria-expanded={isOpen}
       >
-        <MessageCircle size={16} />
-        <span className="feedback-text">Feedback</span>
+        <Menu size={18} />
         
-        {/* Notification bubble */}
-        {showNotification && (
-          <div className="feedback-notification">
-            <div className="feedback-notification-content">
-              <span>Share your thoughts!</span>
-              <button 
-                className="notification-dismiss"
-                onClick={dismissNotification}
-                aria-label="Dismiss notification"
-              >
-                <X size={12} />
-              </button>
-            </div>
-            <div className="feedback-notification-arrow"></div>
+        {/* Notification bubble - only show when menu is closed */}
+        {showNotification && !isOpen && (
+          <div className="menu-notification-badge">
+            <span>!</span>
           </div>
         )}
+      </button>
+
+      {/* Dropdown Menu */}
+      {isOpen && (
+        <div className="navigation-dropdown-menu">
+          {/* Theme Toggle */}
+          <button 
+            className="menu-item theme-toggle-item"
+            onClick={handleThemeToggle}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            <span className="menu-item-icon">
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </span>
+            <span className="menu-item-text">
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </span>
+          </button>
+
+          {/* Divider */}
+          <div className="menu-divider"></div>
+
+          {/* Feedback Button */}
+          <button 
+            className="menu-item feedback-item"
+            onClick={handleFeedbackClick}
+            aria-label="Go to feedback page"
+          >
+            <span className="menu-item-icon">
+              <MessageCircle size={16} />
+            </span>
+            <span className="menu-item-text">
+              Feedback
+            </span>
+            {showNotification && (
+              <span className="menu-item-badge">New</span>
+            )}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Desktop User Menu Component
+const DesktopUserMenu = () => {
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  if (!isAuthenticated) {
+    return (
+      <div className="desktop-user-menu">
+        <button 
+          className="auth-button login-button"
+          onClick={() => navigate('/login')}
+          aria-label="Login"
+        >
+          <LogIn size={16} />
+          <span>Login</span>
+        </button>
+        <button 
+          className="auth-button signup-button"
+          onClick={() => navigate('/signup')}
+          aria-label="Sign up"
+        >
+          <UserPlus size={16} />
+          <span>Sign Up</span>
+        </button>
+      </div>
+    );
+  }
+
+  const getUserInitial = () => {
+    if (user?.name) return user.name.charAt(0).toUpperCase();
+    if (user?.email) return user.email.charAt(0).toUpperCase();
+    return 'U';
+  };
+
+  const getUserRole = () => {
+    if (user?.role === 'admin') return 'Admin';
+    if (user?.role === 'dealer') return 'Dealer';
+    if (user?.role === 'moderator') return 'Moderator';
+    return 'User';
+  };
+
+  return (
+    <div className="desktop-user-menu">
+      <Link to="/profile" className="user-profile-link">
+        {user?.profilePicture ? (
+          <img 
+            src={user.profilePicture} 
+            alt={user?.name || 'User'} 
+            className="user-profile-avatar"
+          />
+        ) : (
+          <div className="user-profile-avatar user-avatar-placeholder">
+            {getUserInitial()}
+          </div>
+        )}
+        <div className="user-profile-info">
+          <span className="user-profile-name">
+            {user?.name || user?.email || 'User'}
+          </span>
+          <span className="user-profile-role">{getUserRole()}</span>
+        </div>
+      </Link>
+      <button 
+        className="auth-button logout-button"
+        onClick={logout}
+        aria-label="Logout"
+      >
+        <LogOut size={16} />
       </button>
     </div>
   );
 };
+
+// Breadcrumb Component - UPDATED to use NavigationMenu
+const Breadcrumb = ({ paths, onFeedbackClick }) => (
+  <nav className="breadcrumb-container" aria-label="Breadcrumb">
+    <div className="breadcrumb-content">
+      <ol className="breadcrumb-list">
+        {paths.map((path, index) => (
+          <React.Fragment key={index}>
+            {index > 0 && <li className="breadcrumb-separator" aria-hidden="true">/</li>}
+            <li 
+              className="breadcrumb-item" 
+              aria-current={index === paths.length - 1 ? "page" : undefined}>
+              {path.url ? (
+                <Link to={path.url}>{path.label}</Link>
+              ) : (
+                <span>{path.label}</span>
+              )}
+            </li>
+          </React.Fragment>
+        ))}
+      </ol>
+      
+      {/* NEW: Navigation Menu (replaces feedback button) */}
+      <NavigationMenu onFeedbackClick={onFeedbackClick} />
+    </div>
+  </nav>
+);
 
 // Enhanced Review FAB Component 
 const ReviewFAB = () => {
@@ -170,293 +342,28 @@ const ReviewFAB = () => {
   const handleReviewSubmit = (reviewData) => {
     console.log('Review submitted:', reviewData);
     setShowReviewModal(false);
-    // Here you would typically send the review to your backend
   };
 
   return (
     <>
-      {/* Enhanced Review FAB */}
       <button 
         className={`review-fab ${isVisible ? 'visible' : 'hidden'}`}
         onClick={handleFABClick}
         aria-label="Leave a review"
       >
-        <Star size={24} fill="currentColor" />
+        <Star size={24} fill="white" />
       </button>
 
-      {/* Enhanced Review Modal */}
-      <EnhancedFABModal
-        showModal={showReviewModal}
+      <EnhancedFABModal 
+        isOpen={showReviewModal}
         onClose={() => setShowReviewModal(false)}
-        isAuthenticated={isAuthenticated}
-        onReviewSubmit={handleReviewSubmit}
+        onSubmit={handleReviewSubmit}
       />
     </>
   );
 };
 
-// Desktop User Menu Component
-const DesktopUserMenu = () => {
-  // FIXED: Use 'user' instead of 'currentUser' to match AuthContext
-  const { isAuthenticated, user, logout } = useAuth();
-  const [showDropdown, setShowDropdown] = useState(false);
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    setShowDropdown(false);
-    navigate('/');
-  };
-
-  const handleLogin = () => {
-    navigate('/login');
-  };
-
-  const handleRegister = () => {
-    navigate('/register');
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="desktop-user-menu">
-        <button className="user-auth-button login-button" onClick={handleLogin}>
-          <LogIn size={18} />
-          <span>Login</span>
-        </button>
-        <button className="user-auth-button register-button" onClick={handleRegister}>
-          <UserPlus size={18} />
-          <span>Register</span>
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="desktop-user-menu" onMouseLeave={() => setShowDropdown(false)}>
-      <UserProfileLink 
-        user={user} 
-        onMouseEnter={() => setShowDropdown(true)}
-        onClick={() => setShowDropdown(!showDropdown)}
-      />
-      
-      {showDropdown && (
-        <div className="user-dropdown">
-          <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
-            <User size={16} />
-            Profile
-          </Link>
-          <Link to="/profile/settings" className="dropdown-item" onClick={() => setShowDropdown(false)}>
-            <Settings size={16} />
-            Settings
-          </Link>
-          <button className="dropdown-item logout-item" onClick={handleLogout}>
-            <LogOut size={16} />
-            Logout
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ENHANCED: User Profile Link Component with improved avatar handling and fallback
-const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
-  const [imageError, setImageError] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
-
-  const getInitials = (name) => {
-    if (!name) return 'U';
-    return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2);
-  };
-
-  const getUserName = (user) => {
-    if (user?.name) return user.name;
-    if (user?.email) return user.email.split('@')[0];
-    return 'User';
-  };
-
-  const getAvatarUrl = (user) => {
-    if (!user) {
-      console.log('👤 UserProfileLink: No user data provided');
-      return null;
-    }
-
-    console.log('👤 UserProfileLink: Checking avatar for user:', {
-      userId: user.id,
-      userName: user.name,
-      userEmail: user.email,
-      hasAvatar: !!user.avatar,
-      avatar: user.avatar,
-      avatarType: typeof user.avatar,
-      avatarUrl: user.avatar?.url,
-      hasProfilePicture: !!user.profilePicture,
-      profilePicture: user.profilePicture
-    });
-
-    // Primary check: avatar.url (main field in your system)
-    if (user.avatar && typeof user.avatar === 'object' && user.avatar.url) {
-      console.log('👤 ✅ Using avatar.url:', user.avatar.url);
-      return user.avatar.url;
-    }
-    
-    // Fallback: avatar as string
-    if (user.avatar && typeof user.avatar === 'string' && user.avatar.startsWith('http')) {
-      console.log('👤 ✅ Using avatar string:', user.avatar);
-      return user.avatar;
-    }
-    
-    // Additional fallback: profilePicture.url
-    if (user.profilePicture && typeof user.profilePicture === 'object' && user.profilePicture.url) {
-      console.log('👤 ✅ Using profilePicture.url:', user.profilePicture.url);
-      return user.profilePicture.url;
-    }
-    
-    // Additional fallback: profilePicture as string
-    if (user.profilePicture && typeof user.profilePicture === 'string' && user.profilePicture.startsWith('http')) {
-      console.log('👤 ✅ Using profilePicture string:', user.profilePicture);
-      return user.profilePicture;
-    }
-
-    console.log('👤 ⚠️ No valid avatar URL found, using fallback');
-    return null;
-  };
-
-  const avatarUrl = getAvatarUrl(user);
-  const userName = getUserName(user);
-  const userInitials = getInitials(userName);
-
-  // Reset image states when user or avatarUrl changes
-  useEffect(() => {
-    if (avatarUrl) {
-      setImageError(false);
-      setImageLoading(true);
-    }
-  }, [user?.id, avatarUrl]);
-
-  // Enhanced error handling for avatar image
-  const handleImageError = (e) => {
-    console.error('👤 ❌ Profile image failed to load:', avatarUrl);
-    setImageError(true);
-    setImageLoading(false);
-  };
-
-  const handleImageLoad = () => {
-    console.log('👤 ✅ Profile image loaded successfully:', avatarUrl);
-    setImageError(false);
-    setImageLoading(false);
-  };
-
-  // Debug logging
-  useEffect(() => {
-    if (user) {
-      console.log('👤 UserProfileLink - Current state:', {
-        userName,
-        avatarUrl,
-        hasValidAvatarUrl: !!avatarUrl,
-        imageError,
-        imageLoading,
-        userInitials
-      });
-    }
-  }, [user, avatarUrl, imageError, imageLoading, userName, userInitials]);
-
-  return (
-    <Link 
-      to="/profile" 
-      className="user-profile-link"
-      onMouseEnter={onMouseEnter}
-      onClick={onClick}
-    >
-      <div className="user-profile-avatar">
-        {avatarUrl && !imageError ? (
-          <>
-            <img 
-              src={avatarUrl} 
-              alt={userName}
-              onError={handleImageError}
-              onLoad={handleImageLoad}
-              style={{ 
-                display: imageLoading ? 'none' : 'block',
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                borderRadius: '50%'
-              }}
-            />
-            {imageLoading && (
-              <div style={{ 
-                display: 'flex',
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                width: '100%', 
-                height: '100%', 
-                backgroundColor: 'var(--nav-accent, #007bff)', 
-                borderRadius: '50%', 
-                color: 'white', 
-                fontSize: '0.8rem', 
-                fontWeight: 'bold' 
-              }}>
-                {userInitials}
-              </div>
-            )}
-          </>
-        ) : (
-          // Fallback: Show initials or UserCircle icon
-          <div style={{ 
-            display: 'flex',
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            width: '100%', 
-            height: '100%', 
-            backgroundColor: 'var(--nav-accent, #007bff)', 
-            borderRadius: '50%', 
-            color: 'white', 
-            fontSize: '0.8rem', 
-            fontWeight: 'bold' 
-          }}>
-            {userName !== 'User' ? userInitials : <UserCircle size={24} />}
-          </div>
-        )}
-      </div>
-      <div className="user-profile-info">
-        <span className="user-profile-name">
-          {userName}
-        </span>
-        <span className="user-profile-role">{user?.role || 'Member'}</span>
-      </div>
-    </Link>
-  );
-};
-
-// Breadcrumb component - UPDATED to include feedback button
-const Breadcrumb = ({ paths, onFeedbackClick }) => (
-  <nav className="breadcrumb-container" aria-label="Breadcrumb">
-    <div className="breadcrumb-content">
-      <ol className="breadcrumb-list">
-        <li className="breadcrumb-item">
-          <Link to="/">Home</Link>
-        </li>
-        {paths.map((path, index) => (
-          <React.Fragment key={index}>
-            <span className="breadcrumb-separator" aria-hidden="true">›</span>
-            <li className="breadcrumb-item" aria-current={index === paths.length - 1 ? "page" : undefined}>
-              {path.url ? (
-                <Link to={path.url}>{path.label}</Link>
-              ) : (
-                <span>{path.label}</span>
-              )}
-            </li>
-          </React.Fragment>
-        ))}
-      </ol>
-      
-      {/* NEW: Feedback button in breadcrumb */}
-      <BreadcrumbFeedbackButton onFeedbackClick={onFeedbackClick} />
-    </div>
-  </nav>
-);
-
-// Main ResponsiveNavigation component - UPDATED to handle feedback modal
+// Main ResponsiveNavigation component
 const ResponsiveNavigation = () => {
   const [activePath, setActivePath] = useState([]);
   const [showScrollButtons, setShowScrollButtons] = useState(false);
@@ -521,17 +428,13 @@ const ResponsiveNavigation = () => {
   // Enhanced navigation handler with scroll fix
   const handleNavigation = (path) => {
     setIsNavigating(true);
-    
-    // Navigate to the path
     navigate(path);
-    
-    // Reset navigation state after a short delay
     setTimeout(() => {
       setIsNavigating(false);
     }, 300);
   };
 
-  // NEW: Handle feedback button click - Navigate to feedback page
+  // Handle feedback button click - Navigate to feedback page
   const handleFeedbackClick = () => {
     navigate('/feedback');
   };
@@ -548,7 +451,7 @@ const ResponsiveNavigation = () => {
     <>
       {/* Top Navigation */}
       <nav className="navigation-container" ref={navRef}>
-        {/* Breadcrumb with feedback button */}
+        {/* Breadcrumb with navigation menu */}
         <Breadcrumb paths={activePath} onFeedbackClick={handleFeedbackClick} />
         
         {/* Desktop Category Navigation with User Menu */}
@@ -603,15 +506,15 @@ const ResponsiveNavigation = () => {
             key={category.id}
             className={`mobile-nav-item ${isActive(category.path) ? 'active' : ''} ${isNavigating ? 'navigating' : ''}`}
             onClick={() => handleNavigation(category.path)}
-            disabled={isNavigating}
+            aria-label={category.name}
           >
-            <div className="mobile-nav-icon">{category.icon}</div>
-            <div className="mobile-nav-label">{category.name}</div>
+            <span className="mobile-nav-icon">{category.icon}</span>
+            <span className="mobile-nav-label">{category.name}</span>
           </button>
         ))}
       </nav>
 
-      {/* Enhanced Review FAB - Only show on mobile/tablet */}
+      {/* Enhanced Review FAB */}
       <ReviewFAB />
     </>
   );
