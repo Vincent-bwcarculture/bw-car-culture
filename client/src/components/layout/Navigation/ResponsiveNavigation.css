@@ -180,9 +180,9 @@
 
 /* Navigation Dropdown Menu */
 .navigation-dropdown-menu {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
+    position: fixed; /* FIXED: Changed from absolute to fixed */
+    top: auto; /* FIXED: Let JS handle positioning */
+    right: auto; /* FIXED: Let JS handle positioning */
     background-color: var(--dropdown-bg);
     border: 1px solid var(--nav-border);
     border-radius: 8px;
@@ -440,18 +440,23 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
-    padding: 0.4rem 0.8rem;
+    gap: 0.3rem; /* REDUCED: from 0.4rem */
+    padding: 0.25rem 0.5rem; /* REDUCED: from 0.4rem 0.8rem (50% smaller) */
     border: 1px solid var(--nav-border);
-    border-radius: 6px;
+    border-radius: 5px; /* REDUCED: from 6px */
     background-color: transparent;
     color: var(--nav-text);
-    font-size: 0.8rem;
+    font-size: 0.7rem; /* REDUCED: from 0.8rem */
     font-weight: 500;
     cursor: pointer;
     transition: all var(--animation-duration) ease;
     white-space: nowrap;
-    min-height: 32px;
+    min-height: 26px; /* REDUCED: from 32px (50% smaller) */
+}
+
+.auth-button svg {
+    width: 14px; /* REDUCED: from 18px */
+    height: 14px; /* REDUCED: from 18px */
 }
 
 .auth-button:hover {
