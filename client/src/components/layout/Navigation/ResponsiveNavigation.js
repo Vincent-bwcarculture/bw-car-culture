@@ -107,33 +107,30 @@ const NavigationMenu = () => {
     setIsMenuOpen(prev => !prev);
   };
 
-  // FIXED: Get button position for dropdown placement
-  const getButtonPosition = () => {
-    if (!menuRef.current) return { top: 0, right: 0 };
+  // Calculate dropdown position to appear ABOVE navigation
+  const getDropdownPosition = () => {
+    if (!menuRef.current) return { bottom: "auto", right: "8px" };
     const buttonRect = menuRef.current.getBoundingClientRect();
     return {
-      top: buttonRect.bottom + 8,
-      right: window.innerWidth - buttonRect.right
+      bottom: `${window.innerHeight - buttonRect.top + 8}px`,
+      right: `${window.innerWidth - buttonRect.right}px`
     };
   };
 
-  // Calculate dropdown position
-  const dropdownPosition = isMenuOpen ? getButtonPosition() : { top: 0, right: 0 };
+  const dropdownPosition = isMenuOpen ? getDropdownPosition() : { bottom: "auto", right: "8px" };
 
   return (
     <div className="navigation-menu-container" ref={menuRef} style={{ position: 'relative' }}>
       <button
         className="navigation-menu-button"
         onClick={handleMenuClick}
-        onPointerDown={(e) => e.stopPropagation()}
         type="button"
         aria-label="Open menu"
         aria-expanded={isMenuOpen}
         style={{ 
           position: 'relative',
-          zIndex: 1003,
-          cursor: 'pointer',
-          pointerEvents: 'auto'
+          zIndex: 1000,
+          cursor: 'pointer'
         }}
       >
         <Menu size={16} />
@@ -144,12 +141,11 @@ const NavigationMenu = () => {
         <div 
           className="navigation-dropdown-menu"
           style={{
-            position: 'fixed',
-            top: `${dropdownPosition.top}px`,
-            right: `${dropdownPosition.right}px`,
+            position: "fixed",
+            bottom: dropdownPosition.bottom,
+            right: dropdownPosition.right,
             display: 'block',
-            zIndex: 10000,
-            pointerEvents: 'auto'
+            zIndex: 10000
           }}
         >
           {/* Feedback Menu Item */}
@@ -159,7 +155,7 @@ const NavigationMenu = () => {
             type="button"
           >
             <span className="menu-item-icon">
-              <MessageCircle size={18} />
+              <MessageCircle size={12} />
             </span>
             <span className="menu-item-text">Feedback</span>
           </button>
@@ -174,7 +170,7 @@ const NavigationMenu = () => {
             type="button"
           >
             <span className="menu-item-icon">
-              {currentTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              {currentTheme === 'dark' ? <Sun size={12} /> : <Moon size={12} />}
             </span>
             <span className="menu-item-text">
               {currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
@@ -279,11 +275,11 @@ const DesktopUserMenu = () => {
     return (
       <div className="desktop-user-menu">
         <button className="auth-button login-button" onClick={handleLogin}>
-          <LogIn size={14} />
+          <LogIn size={12} />
           <span>Login</span>
         </button>
         <button className="auth-button register-button" onClick={handleRegister}>
-          <UserPlus size={14} />
+          <UserPlus size={12} />
           <span>Register</span>
         </button>
       </div>

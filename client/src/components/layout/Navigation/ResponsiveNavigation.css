@@ -123,8 +123,6 @@
 .navigation-menu-container {
     position: relative;
     flex-shrink: 0;
-    z-index: 1002;
-    pointer-events: auto;
 }
 
 .navigation-menu-button {
@@ -145,8 +143,6 @@
     min-height: 32px;
     font-weight: 500;
     position: relative;
-    z-index: 1003;
-    pointer-events: auto;
 }
 
 .navigation-menu-button:hover {
@@ -162,7 +158,7 @@
 
 /* Menu Notification Badge */
 .menu-notification-badge {
-    position: fixed;
+    position: absolute;
     top: -4px;
     right: -4px;
     background-color: var(--nav-accent);
@@ -180,20 +176,19 @@
 
 /* Navigation Dropdown Menu */
 .navigation-dropdown-menu {
-    position: fixed;
-    top: auto;
-    right: auto;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
     background-color: var(--dropdown-bg);
     border: 1px solid var(--nav-border);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 10000;
+    z-index: 1001;
     min-width: 200px;
     padding: 0.5rem 0;
     animation: menuFadeIn 0.2s ease;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    pointer-events: auto;
 }
 
 /* Light mode dropdown menu */
@@ -279,7 +274,7 @@
 /* Arrow for dropdown menu */
 .navigation-dropdown-menu::before {
     content: '';
-    position: fixed;
+    position: absolute;
     top: -6px;
     right: 12px;
     width: 0;
@@ -291,7 +286,7 @@
 
 .navigation-dropdown-menu::after {
     content: '';
-    position: fixed;
+    position: absolute;
     top: -5px;
     right: 12px;
     width: 0;
@@ -372,7 +367,7 @@
 
 .category-link.active::after {
     content: '';
-    position: fixed;
+    position: absolute;
     bottom: -0.5rem;
     left: 50%;
     transform: translateX(-50%);
@@ -395,7 +390,7 @@
 
 /* Navigation Scroll Buttons */
 .nav-scroll-button {
-    position: fixed;
+    position: absolute;
     top: 50%;
     transform: translateY(-50%);
     width: 32px;
@@ -440,21 +435,21 @@
 .auth-button {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 5px;
-    font-size: 0.7rem;
+    gap: 0.25rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.65rem;
     font-weight: 500;
     cursor: pointer;
     transition: all var(--animation-duration) ease;
     border: none;
     white-space: nowrap;
-    min-height: 26px;
+    min-height: 24px;
 }
 
 .auth-button svg {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
 }
 
 .login-button {
@@ -553,7 +548,7 @@
     position: fixed;
     bottom: 0;
     left: 0;
-    right: auto;
+    right: 0;
     height: calc(var(--bottom-nav-height) + var(--safe-area-bottom));
     background-color: var(--nav-bg);
     border-top: 1px solid var(--nav-border);
