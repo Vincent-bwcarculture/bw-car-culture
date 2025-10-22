@@ -115,8 +115,20 @@ const NavigationMenu = () => {
     console.log('Menu container:', menuRef.current);
   };
 
+  // Get button position for dropdown placement
+  const getButtonPosition = () => {
+    if (!menuRef.current) return { top: 0, right: 0 };
+    const buttonRect = menuRef.current.getBoundingClientRect();
+    return {
+      top: buttonRect.bottom + 8,
+      right: window.innerWidth - buttonRect.right
+    };
+  };
+
   // Debug log when component renders
   console.log('NavigationMenu rendered, isMenuOpen:', isMenuOpen);
+
+  const dropdownPosition = isMenuOpen ? getButtonPosition() : { top: 0, right: 0 };
 
   return (
     <div className="navigation-menu-container" ref={menuRef}>
@@ -142,9 +154,9 @@ const NavigationMenu = () => {
         <div 
           className="navigation-dropdown-menu"
           style={{
-            position: 'absolute',
-            top: 'calc(100% + 8px)',
-            right: 0,
+            position: 'fixed',
+            top: `${dropdownPosition.top}px`,
+            right: `${dropdownPosition.right}px`,
             display: 'block',
             zIndex: 10000,
             pointerEvents: 'auto'
@@ -277,11 +289,11 @@ const DesktopUserMenu = () => {
     return (
       <div className="desktop-user-menu">
         <button className="auth-button login-button" onClick={handleLogin}>
-          <LogIn size={18} />
+          <LogIn size={14} />
           <span>Login</span>
         </button>
         <button className="auth-button register-button" onClick={handleRegister}>
-          <UserPlus size={18} />
+          <UserPlus size={14} />
           <span>Register</span>
         </button>
       </div>
