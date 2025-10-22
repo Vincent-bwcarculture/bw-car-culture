@@ -51,7 +51,7 @@ const categories = [
   }
 ];
 
-// NEW: Navigation Menu Component with Feedback and Theme Toggle
+// NEW: Navigation Menu Component with Feedback and Theme Toggle (FIXED & DEBUGGED)
 const NavigationMenu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState('dark');
@@ -61,6 +61,7 @@ const NavigationMenu = () => {
   // Get current theme from localStorage or default to dark
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'dark';
+    console.log('🎨 Theme initialized:', savedTheme);
     setCurrentTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);
@@ -69,22 +70,21 @@ const NavigationMenu = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
+        console.log('🖱️ Clicked outside, closing menu');
         setIsMenuOpen(false);
       }
     };
 
     if (isMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
   }, [isMenuOpen]);
 
   // Toggle theme function
   const toggleTheme = () => {
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    console.log('🌓 Theme toggled from', currentTheme, 'to', newTheme);
     setCurrentTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
@@ -92,6 +92,7 @@ const NavigationMenu = () => {
 
   // Handle feedback click
   const handleFeedbackClick = () => {
+    console.log('💬 Feedback clicked, navigating to /feedback');
     setIsMenuOpen(false);
     navigate('/feedback');
   };
@@ -100,7 +101,11 @@ const NavigationMenu = () => {
     <div className="navigation-menu-container" ref={menuRef}>
       <button
         className="navigation-menu-button"
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        onClick={() => {
+          console.log('🔘 Menu button clicked! Current state:', isMenuOpen, '→ New state:', !isMenuOpen);
+          setIsMenuOpen(!isMenuOpen);
+        }}
+        type="button"
         aria-label="Open menu"
         aria-expanded={isMenuOpen}
       >
@@ -114,6 +119,7 @@ const NavigationMenu = () => {
           <button
             className="menu-item feedback-item"
             onClick={handleFeedbackClick}
+            type="button"
           >
             <span className="menu-item-icon">
               <MessageCircle size={18} />
@@ -128,6 +134,7 @@ const NavigationMenu = () => {
           <button
             className="menu-item theme-toggle-item"
             onClick={toggleTheme}
+            type="button"
           >
             <span className="menu-item-icon">
               {currentTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
