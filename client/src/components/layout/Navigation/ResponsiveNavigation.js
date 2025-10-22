@@ -51,7 +51,7 @@ const categories = [
   }
 ];
 
-// NEW: Navigation Menu Component with Feedback and Theme Toggle (FIXED VERSION)
+// NEW: Navigation Menu Component with Feedback and Theme Toggle (BULLETPROOF VERSION)
 const NavigationMenu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState('dark');
@@ -99,23 +99,15 @@ const NavigationMenu = () => {
     navigate('/feedback');
   };
 
-  // FIXED: Handle menu button click with proper event handling
+  // Handle menu button click with proper event handling
   const handleMenuClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    const newState = !isMenuOpen;
-    console.log('🔘 Menu button clicked! Current:', isMenuOpen, '→ New:', newState);
-    
-    // Force state update
-    setIsMenuOpen(newState);
-    
-    // Additional debug
-    console.log('Button element:', e.currentTarget);
-    console.log('Menu container:', menuRef.current);
+    console.log('🔘 Menu button clicked! Current:', isMenuOpen, '→ New:', !isMenuOpen);
+    setIsMenuOpen(prev => !prev);
   };
 
-  // Get button position for dropdown placement
+  // FIXED: Get button position for dropdown placement
   const getButtonPosition = () => {
     if (!menuRef.current) return { top: 0, right: 0 };
     const buttonRect = menuRef.current.getBoundingClientRect();
@@ -125,13 +117,11 @@ const NavigationMenu = () => {
     };
   };
 
-  // Debug log when component renders
-  console.log('NavigationMenu rendered, isMenuOpen:', isMenuOpen);
-
+  // Calculate dropdown position
   const dropdownPosition = isMenuOpen ? getButtonPosition() : { top: 0, right: 0 };
 
   return (
-    <div className="navigation-menu-container" ref={menuRef}>
+    <div className="navigation-menu-container" ref={menuRef} style={{ position: 'relative' }}>
       <button
         className="navigation-menu-button"
         onClick={handleMenuClick}
@@ -328,56 +318,100 @@ const DesktopUserMenu = () => {
   );
 };
 
-// User Profile Link Component with Avatar
+// ENHANCED: User Profile Link Component with improved avatar handling and fallback
 const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
-  const [avatarUrl, setAvatarUrl] = useState(null);
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
-  // Get user's name - try multiple fields
-  const userName = user?.name || user?.username || user?.email?.split('@')[0] || 'User';
-  
-  // Get user initials
-  const userInitials = userName
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2);
+  };
 
-  useEffect(() => {
-    // Set avatar URL if user has profile picture
-    if (user?.profilePicture) {
-      setAvatarUrl(user.profilePicture);
-      setImageLoading(true);
-      setImageError(false);
-    } else if (user?.avatar) {
-      setAvatarUrl(user.avatar);
-      setImageLoading(true);
-      setImageError(false);
-    } else {
-      setImageLoading(false);
+  const getUserName = (user) => {
+    if (user?.name) return user.name;
+    if (user?.email) return user.email.split('@')[0];
+    return 'User';
+  };
+
+  const getAvatarUrl = (user) => {
+    if (!user) {
+      console.log('👤 UserProfileLink: No user data provided');
+      return null;
     }
-  }, [user]);
 
-  const handleImageError = () => {
-    console.log('Avatar image failed to load');
+    console.log('👤 UserProfileLink: Checking avatar for user:', {
+      userId: user.id,
+      userName: user.name,
+      userEmail: user.email,
+      hasAvatar: !!user.avatar,
+      avatar: user.avatar,
+      avatarType: typeof user.avatar,
+      avatarUrl: user.avatar?.url,
+      hasProfilePicture: !!user.profilePicture,
+      profilePicture: user.profilePicture
+    });
+
+    // Primary check: avatar.url (main field in your system)
+    if (user.avatar && typeof user.avatar === 'object' && user.avatar.url) {
+      console.log('👤 ✅ Using avatar.url:', user.avatar.url);
+      return user.avatar.url;
+    }
+    
+    // Fallback: avatar as string
+    if (user.avatar && typeof user.avatar === 'string' && user.avatar.startsWith('http')) {
+      console.log('👤 ✅ Using avatar string:', user.avatar);
+      return user.avatar;
+    }
+    
+    // Additional fallback: profilePicture.url
+    if (user.profilePicture && typeof user.profilePicture === 'object' && user.profilePicture.url) {
+      console.log('👤 ✅ Using profilePicture.url:', user.profilePicture.url);
+      return user.profilePicture.url;
+    }
+    
+    // Additional fallback: profilePicture as string
+    if (user.profilePicture && typeof user.profilePicture === 'string' && user.profilePicture.startsWith('http')) {
+      console.log('👤 ✅ Using profilePicture string:', user.profilePicture);
+      return user.profilePicture;
+    }
+
+    console.log('👤 ⚠️ No valid avatar URL found, using fallback');
+    return null;
+  };
+
+  const avatarUrl = getAvatarUrl(user);
+  const userName = getUserName(user);
+  const userInitials = getInitials(userName);
+
+  // Reset image states when user or avatarUrl changes
+  useEffect(() => {
+    if (avatarUrl) {
+      setImageError(false);
+      setImageLoading(true);
+    }
+  }, [user?.id, avatarUrl]);
+
+  // Enhanced error handling for avatar image
+  const handleImageError = (e) => {
+    console.error('👤 ❌ Profile image failed to load:', avatarUrl);
     setImageError(true);
     setImageLoading(false);
   };
 
   const handleImageLoad = () => {
-    console.log('Avatar image loaded successfully');
+    console.log('👤 ✅ Profile image loaded successfully:', avatarUrl);
+    setImageError(false);
     setImageLoading(false);
   };
 
-  // Debug log
+  // Debug logging
   useEffect(() => {
     if (user) {
-      console.log('UserProfileLink - User data:', {
-        user,
+      console.log('👤 UserProfileLink - Current state:', {
         userName,
         avatarUrl,
+        hasValidAvatarUrl: !!avatarUrl,
         imageError,
         imageLoading,
         userInitials
