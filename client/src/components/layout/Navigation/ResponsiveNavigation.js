@@ -51,7 +51,7 @@ const categories = [
   }
 ];
 
-// NEW: Navigation Menu Component with Feedback and Theme Toggle (FIXED & DEBUGGED)
+// NEW: Navigation Menu Component with Feedback and Theme Toggle (BULLETPROOF VERSION)
 const NavigationMenu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState('dark');
@@ -82,7 +82,8 @@ const NavigationMenu = () => {
   }, [isMenuOpen]);
 
   // Toggle theme function
-  const toggleTheme = () => {
+  const toggleTheme = (e) => {
+    e.stopPropagation();
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     console.log('🌓 Theme toggled from', currentTheme, 'to', newTheme);
     setCurrentTheme(newTheme);
@@ -91,30 +92,50 @@ const NavigationMenu = () => {
   };
 
   // Handle feedback click
-  const handleFeedbackClick = () => {
+  const handleFeedbackClick = (e) => {
+    e.stopPropagation();
     console.log('💬 Feedback clicked, navigating to /feedback');
     setIsMenuOpen(false);
     navigate('/feedback');
   };
 
+  // Handle menu button click with proper event handling
+  const handleMenuClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('🔘 Menu button clicked! Current:', isMenuOpen, '→ New:', !isMenuOpen);
+    setIsMenuOpen(prev => !prev);
+  };
+
   return (
-    <div className="navigation-menu-container" ref={menuRef}>
+    <div className="navigation-menu-container" ref={menuRef} style={{ position: 'relative' }}>
       <button
         className="navigation-menu-button"
-        onClick={() => {
-          console.log('🔘 Menu button clicked! Current state:', isMenuOpen, '→ New state:', !isMenuOpen);
-          setIsMenuOpen(!isMenuOpen);
-        }}
+        onClick={handleMenuClick}
         type="button"
         aria-label="Open menu"
         aria-expanded={isMenuOpen}
+        style={{ 
+          position: 'relative',
+          zIndex: 1000,
+          cursor: 'pointer'
+        }}
       >
         <Menu size={16} />
         <span>Menu</span>
       </button>
 
       {isMenuOpen && (
-        <div className="navigation-dropdown-menu">
+        <div 
+          className="navigation-dropdown-menu"
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 8px)',
+            right: 0,
+            display: 'block',
+            zIndex: 10000
+          }}
+        >
           {/* Feedback Menu Item */}
           <button
             className="menu-item feedback-item"
