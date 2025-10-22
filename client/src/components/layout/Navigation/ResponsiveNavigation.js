@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, ShoppingBag, Store, Settings, User, LogIn, LogOut, 
-  UserCircle, Star, QrCode, Hash, X, UserPlus, Newspaper, MessageCircle
+  UserCircle, Star, QrCode, Hash, X, UserPlus, Newspaper, MessageCircle,
+  Menu, Sun, Moon  // ADDED: Menu, Sun, Moon for the new menu component
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
 import EnhancedFABModal from './EnhancedFABModal.js';
@@ -50,79 +51,93 @@ const categories = [
   }
 ];
 
-// NEW: Breadcrumb Feedback Button Component
-const BreadcrumbFeedbackButton = ({ onFeedbackClick }) => {
-  const [showNotification, setShowNotification] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
+// NEW: Navigation Menu Component with Feedback and Theme Toggle
+const NavigationMenu = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState('dark');
+  const menuRef = useRef(null);
+  const navigate = useNavigate();
 
-  // Check if user has interacted with feedback before
+  // Get current theme from localStorage or default to dark
   useEffect(() => {
-    const hasInteractedBefore = localStorage.getItem('feedback_interacted');
-    setHasInteracted(!!hasInteractedBefore);
-
-    // Show notification after some time if user hasn't interacted before
-    if (!hasInteractedBefore) {
-      const timer = setTimeout(() => {
-        setShowNotification(true);
-      }, 30000); // Show after 30 seconds
-
-      return () => clearTimeout(timer);
-    }
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setCurrentTheme(savedTheme);
+    document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);
 
-  // Randomly show notification for returning users (occasionally)
+  // Close menu when clicking outside
   useEffect(() => {
-    if (hasInteracted) {
-      const shouldShowNotification = Math.random() < 0.1; // 10% chance
-      if (shouldShowNotification) {
-        const timer = setTimeout(() => {
-          setShowNotification(true);
-        }, 60000); // Show after 1 minute for returning users
-
-        return () => clearTimeout(timer);
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
       }
-    }
-  }, [hasInteracted]);
+    };
 
-  const handleFeedbackClick = () => {
-    setShowNotification(false);
-    setHasInteracted(true);
-    localStorage.setItem('feedback_interacted', 'true');
-    onFeedbackClick();
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
+  // Toggle theme function
+  const toggleTheme = () => {
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setCurrentTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
   };
 
-  const dismissNotification = (e) => {
-    e.stopPropagation();
-    setShowNotification(false);
+  // Handle feedback click
+  const handleFeedbackClick = () => {
+    setIsMenuOpen(false);
+    navigate('/feedback');
   };
 
   return (
-    <div className="breadcrumb-feedback-container">
-      <button 
-        className="breadcrumb-feedback-button"
-        onClick={handleFeedbackClick}
-        aria-label="Go to feedback page"
+    <div className="navigation-menu-container" ref={menuRef}>
+      <button
+        className="navigation-menu-button"
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        aria-label="Open menu"
+        aria-expanded={isMenuOpen}
       >
-        <MessageCircle size={16} />
-        <span className="feedback-text">Feedback</span>
-        
-        {/* Notification bubble */}
-        {showNotification && (
-          <div className="feedback-notification">
-            <div className="feedback-notification-content">
-              <span>Share your thoughts!</span>
-              <button 
-                className="notification-dismiss"
-                onClick={dismissNotification}
-                aria-label="Dismiss notification"
-              >
-                <X size={12} />
-              </button>
-            </div>
-            <div className="feedback-notification-arrow"></div>
-          </div>
-        )}
+        <Menu size={16} />
+        <span>Menu</span>
       </button>
+
+      {isMenuOpen && (
+        <div className="navigation-dropdown-menu">
+          {/* Feedback Menu Item */}
+          <button
+            className="menu-item feedback-item"
+            onClick={handleFeedbackClick}
+          >
+            <span className="menu-item-icon">
+              <MessageCircle size={18} />
+            </span>
+            <span className="menu-item-text">Feedback</span>
+          </button>
+
+          {/* Menu Divider */}
+          <div className="menu-divider"></div>
+
+          {/* Theme Toggle Menu Item */}
+          <button
+            className="menu-item theme-toggle-item"
+            onClick={toggleTheme}
+          >
+            <span className="menu-item-icon">
+              {currentTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </span>
+            <span className="menu-item-text">
+              {currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -428,8 +443,8 @@ const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
   );
 };
 
-// Breadcrumb component - UPDATED to include feedback button
-const Breadcrumb = ({ paths, onFeedbackClick }) => (
+// UPDATED: Breadcrumb component - Now uses NavigationMenu instead of BreadcrumbFeedbackButton
+const Breadcrumb = ({ paths }) => (
   <nav className="breadcrumb-container" aria-label="Breadcrumb">
     <div className="breadcrumb-content">
       <ol className="breadcrumb-list">
@@ -450,13 +465,13 @@ const Breadcrumb = ({ paths, onFeedbackClick }) => (
         ))}
       </ol>
       
-      {/* NEW: Feedback button in breadcrumb */}
-      <BreadcrumbFeedbackButton onFeedbackClick={onFeedbackClick} />
+      {/* UPDATED: Navigation Menu replaces Feedback button */}
+      <NavigationMenu />
     </div>
   </nav>
 );
 
-// Main ResponsiveNavigation component - UPDATED to handle feedback modal
+// Main ResponsiveNavigation component
 const ResponsiveNavigation = () => {
   const [activePath, setActivePath] = useState([]);
   const [showScrollButtons, setShowScrollButtons] = useState(false);
@@ -531,11 +546,6 @@ const ResponsiveNavigation = () => {
     }, 300);
   };
 
-  // NEW: Handle feedback button click - Navigate to feedback page
-  const handleFeedbackClick = () => {
-    navigate('/feedback');
-  };
-
   // Check if a category is active
   const isActive = (path) => {
     if (path === '/' && location.pathname === '/') {
@@ -548,8 +558,8 @@ const ResponsiveNavigation = () => {
     <>
       {/* Top Navigation */}
       <nav className="navigation-container" ref={navRef}>
-        {/* Breadcrumb with feedback button */}
-        <Breadcrumb paths={activePath} onFeedbackClick={handleFeedbackClick} />
+        {/* Breadcrumb with menu */}
+        <Breadcrumb paths={activePath} />
         
         {/* Desktop Category Navigation with User Menu */}
         <div className="category-nav desktop-only">
