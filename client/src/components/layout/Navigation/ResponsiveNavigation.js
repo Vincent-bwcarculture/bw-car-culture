@@ -51,7 +51,7 @@ const categories = [
   }
 ];
 
-// NEW: Navigation Menu Component with Feedback and Theme Toggle (BULLETPROOF VERSION)
+// NEW: Navigation Menu Component with Feedback and Theme Toggle (FIXED VERSION)
 const NavigationMenu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState('dark');
@@ -99,26 +99,39 @@ const NavigationMenu = () => {
     navigate('/feedback');
   };
 
-  // Handle menu button click with proper event handling
+  // FIXED: Handle menu button click with proper event handling
   const handleMenuClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('🔘 Menu button clicked! Current:', isMenuOpen, '→ New:', !isMenuOpen);
-    setIsMenuOpen(prev => !prev);
+    
+    const newState = !isMenuOpen;
+    console.log('🔘 Menu button clicked! Current:', isMenuOpen, '→ New:', newState);
+    
+    // Force state update
+    setIsMenuOpen(newState);
+    
+    // Additional debug
+    console.log('Button element:', e.currentTarget);
+    console.log('Menu container:', menuRef.current);
   };
 
+  // Debug log when component renders
+  console.log('NavigationMenu rendered, isMenuOpen:', isMenuOpen);
+
   return (
-    <div className="navigation-menu-container" ref={menuRef} style={{ position: 'relative' }}>
+    <div className="navigation-menu-container" ref={menuRef}>
       <button
         className="navigation-menu-button"
         onClick={handleMenuClick}
+        onPointerDown={(e) => e.stopPropagation()}
         type="button"
         aria-label="Open menu"
         aria-expanded={isMenuOpen}
         style={{ 
           position: 'relative',
-          zIndex: 1000,
-          cursor: 'pointer'
+          zIndex: 1003,
+          cursor: 'pointer',
+          pointerEvents: 'auto'
         }}
       >
         <Menu size={16} />
@@ -133,7 +146,8 @@ const NavigationMenu = () => {
             top: 'calc(100% + 8px)',
             right: 0,
             display: 'block',
-            zIndex: 10000
+            zIndex: 10000,
+            pointerEvents: 'auto'
           }}
         >
           {/* Feedback Menu Item */}
@@ -262,11 +276,11 @@ const DesktopUserMenu = () => {
   if (!isAuthenticated) {
     return (
       <div className="desktop-user-menu">
-        <button className="user-auth-button login-button" onClick={handleLogin}>
+        <button className="auth-button login-button" onClick={handleLogin}>
           <LogIn size={18} />
           <span>Login</span>
         </button>
-        <button className="user-auth-button register-button" onClick={handleRegister}>
+        <button className="auth-button register-button" onClick={handleRegister}>
           <UserPlus size={18} />
           <span>Register</span>
         </button>
@@ -302,100 +316,56 @@ const DesktopUserMenu = () => {
   );
 };
 
-// ENHANCED: User Profile Link Component with improved avatar handling and fallback
+// User Profile Link Component with Avatar
 const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
+  const [avatarUrl, setAvatarUrl] = useState(null);
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
-  const getInitials = (name) => {
-    if (!name) return 'U';
-    return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().slice(0, 2);
-  };
+  // Get user's name - try multiple fields
+  const userName = user?.name || user?.username || user?.email?.split('@')[0] || 'User';
+  
+  // Get user initials
+  const userInitials = userName
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 
-  const getUserName = (user) => {
-    if (user?.name) return user.name;
-    if (user?.email) return user.email.split('@')[0];
-    return 'User';
-  };
-
-  const getAvatarUrl = (user) => {
-    if (!user) {
-      console.log('👤 UserProfileLink: No user data provided');
-      return null;
-    }
-
-    console.log('👤 UserProfileLink: Checking avatar for user:', {
-      userId: user.id,
-      userName: user.name,
-      userEmail: user.email,
-      hasAvatar: !!user.avatar,
-      avatar: user.avatar,
-      avatarType: typeof user.avatar,
-      avatarUrl: user.avatar?.url,
-      hasProfilePicture: !!user.profilePicture,
-      profilePicture: user.profilePicture
-    });
-
-    // Primary check: avatar.url (main field in your system)
-    if (user.avatar && typeof user.avatar === 'object' && user.avatar.url) {
-      console.log('👤 ✅ Using avatar.url:', user.avatar.url);
-      return user.avatar.url;
-    }
-    
-    // Fallback: avatar as string
-    if (user.avatar && typeof user.avatar === 'string' && user.avatar.startsWith('http')) {
-      console.log('👤 ✅ Using avatar string:', user.avatar);
-      return user.avatar;
-    }
-    
-    // Additional fallback: profilePicture.url
-    if (user.profilePicture && typeof user.profilePicture === 'object' && user.profilePicture.url) {
-      console.log('👤 ✅ Using profilePicture.url:', user.profilePicture.url);
-      return user.profilePicture.url;
-    }
-    
-    // Additional fallback: profilePicture as string
-    if (user.profilePicture && typeof user.profilePicture === 'string' && user.profilePicture.startsWith('http')) {
-      console.log('👤 ✅ Using profilePicture string:', user.profilePicture);
-      return user.profilePicture;
-    }
-
-    console.log('👤 ⚠️ No valid avatar URL found, using fallback');
-    return null;
-  };
-
-  const avatarUrl = getAvatarUrl(user);
-  const userName = getUserName(user);
-  const userInitials = getInitials(userName);
-
-  // Reset image states when user or avatarUrl changes
   useEffect(() => {
-    if (avatarUrl) {
-      setImageError(false);
+    // Set avatar URL if user has profile picture
+    if (user?.profilePicture) {
+      setAvatarUrl(user.profilePicture);
       setImageLoading(true);
+      setImageError(false);
+    } else if (user?.avatar) {
+      setAvatarUrl(user.avatar);
+      setImageLoading(true);
+      setImageError(false);
+    } else {
+      setImageLoading(false);
     }
-  }, [user?.id, avatarUrl]);
+  }, [user]);
 
-  // Enhanced error handling for avatar image
-  const handleImageError = (e) => {
-    console.error('👤 ❌ Profile image failed to load:', avatarUrl);
+  const handleImageError = () => {
+    console.log('Avatar image failed to load');
     setImageError(true);
     setImageLoading(false);
   };
 
   const handleImageLoad = () => {
-    console.log('👤 ✅ Profile image loaded successfully:', avatarUrl);
-    setImageError(false);
+    console.log('Avatar image loaded successfully');
     setImageLoading(false);
   };
 
-  // Debug logging
+  // Debug log
   useEffect(() => {
     if (user) {
-      console.log('👤 UserProfileLink - Current state:', {
+      console.log('UserProfileLink - User data:', {
+        user,
         userName,
         avatarUrl,
-        hasValidAvatarUrl: !!avatarUrl,
         imageError,
         imageLoading,
         userInitials
