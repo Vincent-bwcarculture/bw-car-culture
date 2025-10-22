@@ -123,6 +123,8 @@
 .navigation-menu-container {
     position: relative;
     flex-shrink: 0;
+    z-index: 9999;
+    pointer-events: auto;
 }
 
 .navigation-menu-button {
@@ -143,6 +145,8 @@
     min-height: 32px;
     font-weight: 500;
     position: relative;
+    z-index: 10000;
+    pointer-events: auto;
 }
 
 .navigation-menu-button:hover {
@@ -176,19 +180,20 @@
 
 /* Navigation Dropdown Menu */
 .navigation-dropdown-menu {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
+    position: fixed;
+    top: auto;
+    right: auto;
     background-color: var(--dropdown-bg);
     border: 1px solid var(--nav-border);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 1001;
+    z-index: 99999;
     min-width: 200px;
     padding: 0.5rem 0;
     animation: menuFadeIn 0.2s ease;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    pointer-events: auto;
 }
 
 /* Light mode dropdown menu */

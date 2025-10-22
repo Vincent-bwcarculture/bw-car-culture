@@ -145,7 +145,7 @@ const NavigationMenu = () => {
             bottom: dropdownPosition.bottom,
             right: dropdownPosition.right,
             display: 'block',
-            zIndex: 10000
+            zIndex: 99999
           }}
         >
           {/* Feedback Menu Item */}
