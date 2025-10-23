@@ -58,6 +58,7 @@ const NavigationMenu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState('dark');
   const menuRef = useRef(null);
+  const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
   // Get current theme from localStorage or default to dark
@@ -68,18 +69,22 @@ const NavigationMenu = () => {
     document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);
 
-  // Close menu when clicking outside
+  // Close menu when clicking outside (accounting for Portal)
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+      const isClickInsideMenu = menuRef.current?.contains(event.target);
+      const isClickInsideDropdown = dropdownRef.current?.contains(event.target);
+      
+      if (!isClickInsideMenu && !isClickInsideDropdown) {
         console.log('🖱️ Clicked outside, closing menu');
         setIsMenuOpen(false);
       }
     };
 
     if (isMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      // Use 'click' instead of 'mousedown' for better compatibility
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [isMenuOpen]);
 
@@ -111,6 +116,15 @@ const NavigationMenu = () => {
     console.log('📊 Market Overview clicked, navigating to /market-overview');
     setIsMenuOpen(false);
     navigate('/market-overview');
+  };
+
+  // Handle News click
+  const handleNewsClick = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    console.log('📰 News clicked, navigating to /news');
+    setIsMenuOpen(false);
+    navigate('/news');
   };
 
   // Handle menu button click with proper event handling
@@ -153,6 +167,7 @@ const NavigationMenu = () => {
 
       {isMenuOpen && ReactDOM.createPortal(
         <div 
+          ref={dropdownRef}
           className="navigation-dropdown-menu"
           style={{
             position: "fixed",
@@ -161,7 +176,6 @@ const NavigationMenu = () => {
             display: 'block',
             zIndex: 99999
           }}
-          onClick={(e) => e.stopPropagation()}
         >
           {/* Market Overview Menu Item */}
           <button
@@ -173,6 +187,21 @@ const NavigationMenu = () => {
               <BarChart3 size={12} />
             </span>
             <span className="menu-item-text">Market Overview</span>
+          </button>
+
+          {/* Menu Divider */}
+          <div className="menu-divider"></div>
+
+          {/* News Menu Item */}
+          <button
+            className="menu-item news-item"
+            onClick={handleNewsClick}
+            type="button"
+          >
+            <span className="menu-item-icon">
+              <Newspaper size={12} />
+            </span>
+            <span className="menu-item-text">News</span>
           </button>
 
           {/* Menu Divider */}
