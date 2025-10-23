@@ -88,7 +88,7 @@ const NavigationMenu = () => {
     }
   }, [isMenuOpen]);
 
-  // Toggle theme function
+  /* Theme toggle function - DISABLED FOR NOW
   const toggleTheme = (e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -99,6 +99,7 @@ const NavigationMenu = () => {
     document.documentElement.setAttribute('data-theme', newTheme);
     setIsMenuOpen(false);
   };
+  */
 
   // Handle feedback click
   const handleFeedbackClick = (e) => {
@@ -202,23 +203,6 @@ const NavigationMenu = () => {
               <Newspaper size={12} />
             </span>
             <span className="menu-item-text">News</span>
-          </button>
-
-          {/* Menu Divider */}
-          <div className="menu-divider"></div>
-
-          {/* Theme Toggle Menu Item */}
-          <button
-            className="menu-item theme-toggle-item"
-            onClick={toggleTheme}
-            type="button"
-          >
-            <span className="menu-item-icon">
-              {currentTheme === 'dark' ? <Sun size={12} /> : <Moon size={12} />}
-            </span>
-            <span className="menu-item-text">
-              {currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-            </span>
           </button>
 
           {/* Menu Divider */}
