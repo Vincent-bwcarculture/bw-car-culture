@@ -107,17 +107,17 @@ const NavigationMenu = () => {
     setIsMenuOpen(prev => !prev);
   };
 
-  // Calculate dropdown position to appear ABOVE navigation
+  // Calculate dropdown position to appear BELOW the menu button
   const getDropdownPosition = () => {
-    if (!menuRef.current) return { bottom: "auto", right: "8px" };
+    if (!menuRef.current) return { top: "auto", right: "8px" };
     const buttonRect = menuRef.current.getBoundingClientRect();
     return {
-      bottom: `${window.innerHeight - buttonRect.top + 8}px`,
+      top: `${buttonRect.bottom + 8}px`,
       right: `${window.innerWidth - buttonRect.right}px`
     };
   };
 
-  const dropdownPosition = isMenuOpen ? getDropdownPosition() : { bottom: "auto", right: "8px" };
+  const dropdownPosition = isMenuOpen ? getDropdownPosition() : { top: "auto", right: "8px" };
 
   return (
     <div className="navigation-menu-container" ref={menuRef} style={{ position: 'relative' }}>
@@ -142,7 +142,7 @@ const NavigationMenu = () => {
           className="navigation-dropdown-menu"
           style={{
             position: "fixed",
-            bottom: dropdownPosition.bottom,
+            top: dropdownPosition.top,
             right: dropdownPosition.right,
             display: 'block',
             zIndex: 99999
