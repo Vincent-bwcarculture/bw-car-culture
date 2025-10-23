@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, ShoppingBag, Store, Settings, User, LogIn, LogOut, 
   UserCircle, Star, QrCode, Hash, X, UserPlus, Newspaper, MessageCircle,
-  Menu, Sun, Moon  // ADDED: Menu, Sun, Moon for the new menu component
+  Menu, Sun, Moon, BarChart3  // ADDED: Menu, Sun, Moon for the new menu component
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
 import EnhancedFABModal from './EnhancedFABModal.js';
@@ -53,6 +53,7 @@ const categories = [
 ];
 
 // NEW: Navigation Menu Component with Feedback and Theme Toggle (BULLETPROOF VERSION)
+// NEW: Navigation Menu Component with Market Overview, Theme Toggle, and Feedback
 const NavigationMenu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState('dark');
@@ -85,26 +86,38 @@ const NavigationMenu = () => {
   // Toggle theme function
   const toggleTheme = (e) => {
     e.stopPropagation();
+    e.preventDefault();
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     console.log('🌓 Theme toggled from', currentTheme, 'to', newTheme);
     setCurrentTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
+    setIsMenuOpen(false);
   };
 
   // Handle feedback click
   const handleFeedbackClick = (e) => {
     e.stopPropagation();
+    e.preventDefault();
     console.log('💬 Feedback clicked, navigating to /feedback');
     setIsMenuOpen(false);
     navigate('/feedback');
+  };
+
+  // Handle Market Overview click
+  const handleMarketOverviewClick = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    console.log('📊 Market Overview clicked, navigating to /market-overview');
+    setIsMenuOpen(false);
+    navigate('/market-overview');
   };
 
   // Handle menu button click with proper event handling
   const handleMenuClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('🔘 Menu button clicked! Current:', isMenuOpen, '→ New:', !isMenuOpen);
+    console.log('🔘 Explore button clicked! Current:', isMenuOpen, '→ New:', !isMenuOpen);
     setIsMenuOpen(prev => !prev);
   };
 
@@ -126,7 +139,7 @@ const NavigationMenu = () => {
         className="navigation-menu-button"
         onClick={handleMenuClick}
         type="button"
-        aria-label="Open menu"
+        aria-label="Open explore menu"
         aria-expanded={isMenuOpen}
         style={{ 
           position: 'relative',
@@ -135,7 +148,7 @@ const NavigationMenu = () => {
         }}
       >
         <Menu size={16} />
-        <span>Menu</span>
+        <span>Explore</span>
       </button>
 
       {isMenuOpen && ReactDOM.createPortal(
@@ -148,17 +161,18 @@ const NavigationMenu = () => {
             display: 'block',
             zIndex: 99999
           }}
+          onClick={(e) => e.stopPropagation()}
         >
-          {/* Feedback Menu Item */}
+          {/* Market Overview Menu Item */}
           <button
-            className="menu-item feedback-item"
-            onClick={handleFeedbackClick}
+            className="menu-item market-overview-item"
+            onClick={handleMarketOverviewClick}
             type="button"
           >
             <span className="menu-item-icon">
-              <MessageCircle size={12} />
+              <BarChart3 size={12} />
             </span>
-            <span className="menu-item-text">Feedback</span>
+            <span className="menu-item-text">Market Overview</span>
           </button>
 
           {/* Menu Divider */}
@@ -176,6 +190,21 @@ const NavigationMenu = () => {
             <span className="menu-item-text">
               {currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
             </span>
+          </button>
+
+          {/* Menu Divider */}
+          <div className="menu-divider"></div>
+
+          {/* Feedback Menu Item */}
+          <button
+            className="menu-item feedback-item"
+            onClick={handleFeedbackClick}
+            type="button"
+          >
+            <span className="menu-item-icon">
+              <MessageCircle size={12} />
+            </span>
+            <span className="menu-item-text">Feedback</span>
           </button>
         </div>
         , document.body
