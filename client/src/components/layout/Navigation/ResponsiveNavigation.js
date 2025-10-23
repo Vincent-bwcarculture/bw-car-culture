@@ -1,5 +1,6 @@
 // src/components/layout/Navigation/ResponsiveNavigation.js
 import React, { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Home, ShoppingBag, Store, Settings, User, LogIn, LogOut, 
@@ -137,7 +138,7 @@ const NavigationMenu = () => {
         <span>Menu</span>
       </button>
 
-      {isMenuOpen && (
+      {isMenuOpen && ReactDOM.createPortal(
         <div 
           className="navigation-dropdown-menu"
           style={{
@@ -177,6 +178,7 @@ const NavigationMenu = () => {
             </span>
           </button>
         </div>
+        , document.body
       )}
     </div>
   );
