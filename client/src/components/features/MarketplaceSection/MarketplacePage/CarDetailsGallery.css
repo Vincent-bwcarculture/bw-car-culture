@@ -1,4 +1,5 @@
 /* CarDetailsGallery.css - COMPLETE UNIFIED with Similar Vehicles + TRUE ZOOM */
+/* UPDATED: Thumbnails reduced by 60% (from 100px x 75px to 40px x 30px) */
 
 .cdg-container {
   background: rgba(20, 20, 20, 0.9);
@@ -189,10 +190,10 @@
   background: rgba(59, 130, 246, 0.8);
 }
 
-/* Gallery Thumbnails */
+/* ===== GALLERY THUMBNAILS - UPDATED: 60% SMALLER ===== */
 .cdg-gallery-thumbnails {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.4rem; /* Reduced from 0.6rem for tighter spacing */
   margin-bottom: 1.5rem;
   overflow-x: auto;
   padding: 0.6rem 0;
@@ -216,9 +217,9 @@
 
 .cdg-thumbnail {
   flex-shrink: 0;
-  width: 100px;
-  height: 75px;
-  border-radius: 8px;
+  width: 40px;  /* UPDATED: Reduced from 100px - 60% smaller */
+  height: 30px; /* UPDATED: Reduced from 75px - 60% smaller */
+  border-radius: 6px; /* Slightly smaller to match new size */
   overflow: hidden;
   cursor: pointer;
   opacity: 0.6;
@@ -952,9 +953,10 @@
     padding: 0.8rem;
   }
   
+  /* UPDATED: Mobile thumbnails - 60% smaller (from 70px x 52px to 28px x 21px) */
   .cdg-thumbnail {
-    width: 70px;
-    height: 52px;
+    width: 28px;  /* UPDATED: 60% smaller than original 70px mobile size */
+    height: 21px; /* UPDATED: 60% smaller than original 52px mobile size */
   }
   
   .cdg-features-grid {
