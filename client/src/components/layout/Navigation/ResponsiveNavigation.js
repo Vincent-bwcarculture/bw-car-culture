@@ -318,11 +318,11 @@ const DesktopUserMenu = () => {
   if (!isAuthenticated) {
     return (
       <div className="desktop-user-menu">
-        <button className="auth-button login-button" onClick={handleLogin}>
+        <button className="nav-auth-btn nav-login-btn" onClick={handleLogin}>
           <LogIn size={10} />
           <span>Login</span>
         </button>
-        <button className="auth-button register-button" onClick={handleRegister}>
+        <button className="nav-auth-btn nav-register-btn" onClick={handleRegister}>
           <UserPlus size={10} />
           <span>Register</span>
         </button>
