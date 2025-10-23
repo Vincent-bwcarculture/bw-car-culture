@@ -198,6 +198,8 @@
 
 /* Light mode dropdown menu */
 [data-theme="light"] .navigation-dropdown-menu {
+    background-color: rgba(255, 255, 255, 0.98);
+    color: #1a1a1a;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     border: 1px solid var(--nav-border);
 }
@@ -230,6 +232,16 @@
     font-weight: 500;
 }
 
+/* Ensure text is visible in light mode */
+[data-theme="light"] .menu-item {
+    color: #1a1a1a;
+}
+
+/* Ensure text is visible in dark mode */
+[data-theme="dark"] .menu-item {
+    color: #ffffff;
+}
+
 .menu-item:hover {
     background-color: var(--hover-bg);
     color: var(--nav-accent);
@@ -244,6 +256,7 @@
 
 .menu-item-text {
     flex: 1;
+    color: inherit;
 }
 
 .menu-item-badge {
