@@ -1,39 +1,150 @@
 /* client/src/components/features/MarketOverview/MarketOverview.css */
+/* All classes prefixed with "mo-" (Market Overview) to avoid conflicts */
 
-.market-overview {
+.mo-container {
   min-height: 100vh;
   background: rgba(15, 15, 15, 0.95);
   padding: 2rem 1rem;
 }
 
-.market-overview-container {
-  max-width: 1200px;
+.mo-wrapper {
+  max-width: 1400px;
   margin: 0 auto;
 }
 
-/* Header */
-.market-header {
-  text-align: center;
+/* ========== HEADER ========== */
+.mo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2.5rem;
   padding-bottom: 1.5rem;
   border-bottom: 2px solid rgba(255, 51, 0, 0.3);
+  gap: 1.5rem;
 }
 
-.market-header h1 {
+.mo-header-content {
+  flex: 1;
+}
+
+.mo-title {
   font-size: 2rem;
   color: #ffffff;
   margin: 0 0 0.5rem 0;
   font-weight: 700;
 }
 
-.market-header p {
+.mo-subtitle {
   color: #888;
   font-size: 1rem;
   margin: 0;
 }
 
-/* Search Section */
-.search-section {
+.mo-view-toggle {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.3rem;
+  border-radius: 10px;
+  border: 1px solid #2c2c2c;
+}
+
+.mo-toggle-btn {
+  padding: 0.6rem 1.2rem;
+  background: transparent;
+  color: #888;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.mo-toggle-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mo-toggle-btn.mo-active {
+  background: linear-gradient(135deg, #ff3300 0%, #cc2900 100%);
+  color: #ffffff;
+}
+
+/* ========== LOADING ========== */
+.mo-loading {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #888;
+}
+
+.mo-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 51, 0, 0.1);
+  border-top-color: #ff3300;
+  border-radius: 50%;
+  animation: mo-spin 0.8s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes mo-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========== SUMMARY CARDS ========== */
+.mo-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.mo-summary-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #2c2c2c;
+  border-radius: 12px;
+  padding: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.2s ease;
+}
+
+.mo-summary-card:hover {
+  border-color: #ff3300;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.2);
+}
+
+.mo-summary-icon {
+  font-size: 2.5rem;
+  min-width: 50px;
+  text-align: center;
+}
+
+.mo-summary-content {
+  flex: 1;
+}
+
+.mo-summary-label {
+  color: #888;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.3rem;
+  display: block;
+}
+
+.mo-summary-value {
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* ========== CHART SECTION ========== */
+.mo-chart-section {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #2c2c2c;
   border-radius: 12px;
@@ -41,105 +152,242 @@
   margin-bottom: 2rem;
 }
 
-.search-section h2 {
-  color: #ffffff;
-  font-size: 1.3rem;
-  margin: 0 0 1.5rem 0;
-}
-
-.filters-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+.mo-section-header {
   margin-bottom: 1.5rem;
 }
 
-.filter-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.mo-section-title {
+  color: #ffffff;
+  font-size: 1.3rem;
+  margin: 0 0 0.3rem 0;
 }
 
-.filter-item label {
+.mo-section-desc {
+  color: #888;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.mo-chart-wrapper {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+
+.mo-chart-canvas {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  min-height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mo-line-chart {
+  width: 100%;
+  height: 300px;
+  display: flex;
+  gap: 1rem;
+}
+
+.mo-chart-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-right: 0.8rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 80px;
+}
+
+.mo-y-label {
+  color: #888;
+  font-size: 0.75rem;
+  text-align: right;
+  font-weight: 500;
+}
+
+.mo-chart-area {
+  flex: 1;
+  position: relative;
+}
+
+.mo-chart-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.mo-chart-point {
+  cursor: pointer;
+  transition: r 0.2s ease;
+}
+
+.mo-chart-point:hover {
+  r: 6;
+}
+
+.mo-chart-empty {
+  text-align: center;
+  color: #888;
+  padding: 3rem;
+}
+
+.mo-empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* ========== CHART LEGEND ========== */
+.mo-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2c2c2c;
+}
+
+.mo-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.6rem 1rem;
+  border-radius: 20px;
+  border: 1px solid #2c2c2c;
+  transition: all 0.2s ease;
+}
+
+.mo-legend-item:hover {
+  border-color: #ff3300;
+}
+
+.mo-legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.mo-legend-label {
   color: #ffffff;
   font-size: 0.85rem;
   font-weight: 500;
 }
 
-.filter-select {
-  padding: 0.7rem 0.9rem;
-  background: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
-  border: 1px solid #2c2c2c;
-  border-radius: 8px;
-  font-size: 0.9rem;
+.mo-legend-trend {
+  font-size: 1rem;
+  margin-left: 0.3rem;
+}
+
+.mo-legend-remove {
+  margin-left: auto;
+  padding: 0.2rem 0.6rem;
+  background: rgba(255, 51, 0, 0.2);
+  color: #ff3300;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
   transition: all 0.2s ease;
 }
 
-.filter-select:hover,
-.filter-select:focus {
+.mo-legend-remove:hover {
+  background: rgba(255, 51, 0, 0.3);
+  transform: scale(1.1);
+}
+
+/* ========== VEHICLE CARDS ========== */
+.mo-vehicles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.mo-vehicle-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #2c2c2c;
+  border-radius: 12px;
+  padding: 1.3rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mo-vehicle-card:hover {
   border-color: #ff3300;
-  background: rgba(255, 255, 255, 0.08);
-  outline: none;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.2);
 }
 
-.filter-select:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.search-actions {
+.mo-vehicle-header {
   display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
   gap: 0.8rem;
-  flex-wrap: wrap;
 }
 
-.btn-search,
-.btn-reset {
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
+.mo-vehicle-name {
+  color: #ffffff;
+  font-size: 1.1rem;
+  margin: 0;
+  flex: 1;
+}
+
+.mo-vehicle-trend {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.mo-vehicle-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.mo-stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mo-stat-item:last-child {
+  border-bottom: none;
+}
+
+.mo-stat-label {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.mo-stat-value {
+  color: #ffffff;
   font-size: 0.9rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-  flex: 1;
-  min-width: 140px;
 }
 
-.btn-search {
-  background: linear-gradient(135deg, #ff3300 0%, #cc2900 100%);
-  color: white;
+.mo-vehicle-color-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
 }
 
-.btn-search:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.4);
+/* ========== COMPARE SECTION ========== */
+.mo-compare-section {
+  animation: mo-fadeIn 0.3s ease;
 }
 
-.btn-search:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.btn-reset {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border: 1px solid #2c2c2c;
-}
-
-.btn-reset:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: #ff3300;
-}
-
-/* Results Section */
-.results-section {
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
+@keyframes mo-fadeIn {
   from {
     opacity: 0;
     transform: translateY(10px);
@@ -150,489 +398,379 @@
   }
 }
 
-/* Loading State */
-.loading-state {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #888;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid rgba(255, 51, 0, 0.1);
-  border-top-color: #ff3300;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Statistics Cards */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card {
+.mo-search-panel {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #2c2c2c;
   border-radius: 12px;
-  padding: 1.2rem;
-  display: flex;
-  align-items: center;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.mo-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
+  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.mo-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mo-filter-label {
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.mo-filter-select {
+  padding: 0.7rem 0.9rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.stat-card:hover {
+.mo-filter-select:hover,
+.mo-filter-select:focus {
   border-color: #ff3300;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  outline: none;
 }
 
-.stat-icon {
-  font-size: 2.5rem;
+.mo-filter-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.stat-content {
-  flex: 1;
+.mo-btn-search {
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  background: linear-gradient(135deg, #ff3300 0%, #cc2900 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.stat-label {
-  color: #888;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.3rem;
+.mo-btn-search:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.4);
 }
 
-.stat-value {
-  color: #ffffff;
-  font-size: 1.3rem;
-  font-weight: 700;
+.mo-btn-search:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* Vehicle Info */
-.vehicle-info {
-  background: rgba(255, 51, 0, 0.1);
-  border: 1px solid rgba(255, 51, 0, 0.3);
+/* ========== SELECTED VEHICLES ========== */
+.mo-selected-vehicles {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #2c2c2c;
   border-radius: 12px;
-  padding: 1.2rem;
-  margin-bottom: 2rem;
+  padding: 1.5rem;
+}
+
+.mo-selected-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.mo-selected-item {
   display: flex;
   align-items: center;
   gap: 1rem;
-}
-
-.vehicle-info h3 {
-  color: #ffffff;
-  font-size: 1.4rem;
-  margin: 0;
-  flex: 1;
-}
-
-.condition-tag {
-  display: inline-block;
-  padding: 0.4rem 0.9rem;
-  border-radius: 16px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.condition-tag.new {
-  background: rgba(46, 213, 115, 0.2);
-  color: #2ed573;
-}
-
-.condition-tag.used {
-  background: rgba(255, 193, 7, 0.2);
-  color: #ffc107;
-}
-
-.condition-tag.certified {
-  background: rgba(0, 123, 255, 0.2);
-  color: #007bff;
-}
-
-/* Price History */
-.price-history {
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid #2c2c2c;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.price-history h3 {
-  color: #ffffff;
-  font-size: 1.2rem;
-  margin: 0 0 1rem 0;
-}
-
-.price-table-wrapper {
-  overflow-x: auto;
-}
-
-.price-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px;
-}
-
-.price-table thead {
-  background: rgba(255, 51, 0, 0.1);
-}
-
-.price-table th {
-  padding: 0.9rem 1rem;
-  text-align: left;
-  color: #ff3300;
-  font-weight: 600;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid #2c2c2c;
-}
-
-.price-table tbody tr {
-  border-bottom: 1px solid #2c2c2c;
-  transition: background 0.2s ease;
-}
-
-.price-table tbody tr:hover {
-  background: rgba(255, 51, 0, 0.05);
-}
-
-.price-table td {
-  padding: 0.9rem 1rem;
-  color: #ffffff;
-  font-size: 0.9rem;
-}
-
-.price-cell {
-  font-weight: 600;
-  color: #2ed573;
-  font-size: 1rem;
-}
-
-/* Price Chart */
-.price-chart {
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid #2c2c2c;
-  border-radius: 12px;
-  padding: 1.5rem;
-}
-
-.price-chart h3 {
-  color: #ffffff;
-  font-size: 1.2rem;
-  margin: 0 0 1.5rem 0;
-}
-
-.chart-container {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 0.5rem;
-  height: 250px;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  overflow-x: auto;
-}
-
-.chart-bar-wrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 60px;
-  height: 100%;
-  justify-content: flex-end;
-}
-
-.chart-bar {
-  width: 100%;
-  background: linear-gradient(to top, #ff3300, #ff6633);
-  border-radius: 4px 4px 0 0;
-  transition: all 0.3s ease;
-  position: relative;
-  min-height: 20px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.chart-bar:hover {
-  background: linear-gradient(to top, #ff6633, #ff9966);
-  transform: scaleY(1.02);
-}
-
-.bar-label {
-  font-size: 0.7rem;
-  color: #ffffff;
-  font-weight: 600;
-  padding: 0.3rem;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 4px;
-  margin-top: 0.3rem;
-  white-space: nowrap;
-  display: none;
-}
-
-.chart-bar:hover .bar-label {
-  display: block;
-}
-
-.chart-label {
-  font-size: 0.7rem;
-  color: #888;
-  margin-top: 0.5rem;
-  text-align: center;
-  transform: rotate(-45deg);
-  white-space: nowrap;
-  transform-origin: center;
-}
-
-/* No Results */
-.no-results {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #888;
-}
-
-.no-results-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.no-results h3 {
-  color: #ffffff;
-  font-size: 1.5rem;
-  margin: 0 0 1rem 0;
-}
-
-.no-results p {
-  font-size: 1rem;
-  margin: 0.5rem 0;
-}
-
-/* Info Section */
-.info-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-top: 3rem;
-}
-
-.info-card {
-  background: rgba(0, 0, 0, 0.3);
   border: 1px solid #2c2c2c;
-  border-radius: 12px;
-  padding: 1.8rem;
-  text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
-.info-card:hover {
+.mo-selected-item:hover {
   border-color: #ff3300;
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(255, 51, 0, 0.2);
 }
 
-.info-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+.mo-selected-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.info-card h3 {
+.mo-selected-name {
+  flex: 1;
   color: #ffffff;
-  font-size: 1.2rem;
-  margin: 0 0 0.8rem 0;
-}
-
-.info-card p {
-  color: #888;
   font-size: 0.95rem;
-  margin: 0;
-  line-height: 1.6;
+  font-weight: 500;
 }
 
-/* MOBILE RESPONSIVE */
-@media (max-width: 768px) {
-  .market-overview {
-    padding: 1.5rem 0.8rem;
-  }
+.mo-selected-remove {
+  padding: 0.4rem 0.9rem;
+  background: rgba(255, 51, 0, 0.2);
+  color: #ff3300;
+  border: 1px solid rgba(255, 51, 0, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
 
-  .market-header h1 {
-    font-size: 1.6rem;
-  }
+.mo-selected-remove:hover {
+  background: rgba(255, 51, 0, 0.3);
+  border-color: #ff3300;
+}
 
-  .market-header p {
-    font-size: 0.9rem;
-  }
-
-  .search-section {
-    padding: 1.2rem;
-  }
-
-  .search-section h2 {
-    font-size: 1.1rem;
-  }
-
-  .filters-container {
-    grid-template-columns: 1fr;
-  }
-
-  .search-actions {
-    flex-direction: column;
-  }
-
-  .btn-search,
-  .btn-reset {
-    width: 100%;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .stat-card {
-    padding: 1rem;
-  }
-
-  .stat-icon {
-    font-size: 2rem;
-  }
-
-  .stat-value {
-    font-size: 1.1rem;
-  }
-
-  .vehicle-info {
+/* ========== MOBILE RESPONSIVE ========== */
+@media (max-width: 968px) {
+  .mo-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .vehicle-info h3 {
+  .mo-view-toggle {
+    width: 100%;
+  }
+
+  .mo-toggle-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .mo-container {
+    padding: 1.5rem 0.8rem;
+  }
+
+  .mo-title {
+    font-size: 1.6rem;
+  }
+
+  .mo-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .mo-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mo-summary-card {
+    padding: 1rem;
+  }
+
+  .mo-summary-icon {
+    font-size: 2rem;
+  }
+
+  .mo-summary-value {
     font-size: 1.2rem;
   }
 
-  .price-history,
-  .price-chart {
+  .mo-chart-section {
     padding: 1.2rem;
   }
 
-  .chart-container {
-    height: 200px;
-    padding: 0.8rem;
+  .mo-chart-wrapper {
+    padding: 1rem;
   }
 
-  .chart-bar-wrapper {
-    min-width: 40px;
+  .mo-chart-canvas {
+    padding: 1rem;
+    min-height: 280px;
   }
 
-  .chart-label {
-    font-size: 0.6rem;
+  .mo-line-chart {
+    height: 250px;
   }
 
-  .info-section {
+  .mo-chart-y-axis {
+    min-width: 65px;
+  }
+
+  .mo-y-label {
+    font-size: 0.7rem;
+  }
+
+  .mo-chart-legend {
+    gap: 0.6rem;
+  }
+
+  .mo-legend-item {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .mo-vehicles-grid {
     grid-template-columns: 1fr;
-    gap: 1rem;
   }
 
-  .info-card {
-    padding: 1.5rem;
+  .mo-filters-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mo-search-panel {
+    padding: 1.2rem;
   }
 }
 
 @media (max-width: 480px) {
-  .market-overview {
+  .mo-container {
     padding: 1rem 0.5rem;
   }
 
-  .market-header {
+  .mo-header {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
   }
 
-  .market-header h1 {
+  .mo-title {
     font-size: 1.4rem;
   }
 
-  .market-header p {
+  .mo-subtitle {
     font-size: 0.85rem;
   }
 
-  .search-section {
+  .mo-toggle-btn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .mo-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .mo-summary-card {
+    padding: 0.9rem;
+  }
+
+  .mo-summary-icon {
+    font-size: 1.8rem;
+    min-width: 40px;
+  }
+
+  .mo-summary-label {
+    font-size: 0.75rem;
+  }
+
+  .mo-summary-value {
+    font-size: 1.1rem;
+  }
+
+  .mo-chart-section {
     padding: 1rem;
   }
 
-  .filter-select {
+  .mo-section-title {
+    font-size: 1.1rem;
+  }
+
+  .mo-section-desc {
+    font-size: 0.85rem;
+  }
+
+  .mo-chart-wrapper {
+    padding: 0.8rem;
+  }
+
+  .mo-chart-canvas {
+    padding: 0.8rem;
+    min-height: 250px;
+  }
+
+  .mo-line-chart {
+    height: 220px;
+  }
+
+  .mo-chart-y-axis {
+    min-width: 60px;
+    padding-right: 0.5rem;
+  }
+
+  .mo-y-label {
+    font-size: 0.65rem;
+  }
+
+  .mo-chart-legend {
+    flex-direction: column;
+  }
+
+  .mo-legend-item {
+    padding: 0.5rem 0.8rem;
+  }
+
+  .mo-legend-label {
+    font-size: 0.8rem;
+  }
+
+  .mo-vehicle-card {
+    padding: 1rem;
+  }
+
+  .mo-vehicle-name {
+    font-size: 1rem;
+  }
+
+  .mo-vehicle-trend {
+    font-size: 0.8rem;
+  }
+
+  .mo-stat-label,
+  .mo-stat-value {
+    font-size: 0.85rem;
+  }
+
+  .mo-search-panel {
+    padding: 1rem;
+  }
+
+  .mo-filter-select {
     padding: 0.6rem 0.7rem;
     font-size: 0.85rem;
   }
 
-  .btn-search,
-  .btn-reset {
-    padding: 0.7rem 1.2rem;
-    font-size: 0.85rem;
+  .mo-btn-search {
+    padding: 0.8rem 1.2rem;
+    font-size: 0.9rem;
   }
 
-  .stat-card {
-    padding: 0.9rem;
+  .mo-selected-item {
+    padding: 0.8rem;
   }
 
-  .stat-icon {
-    font-size: 1.8rem;
+  .mo-selected-name {
+    font-size: 0.9rem;
   }
 
-  .stat-label {
-    font-size: 0.75rem;
-  }
-
-  .stat-value {
-    font-size: 1rem;
-  }
-
-  .vehicle-info h3 {
-    font-size: 1.1rem;
-  }
-
-  .condition-tag {
-    font-size: 0.75rem;
+  .mo-selected-remove {
     padding: 0.3rem 0.7rem;
-  }
-
-  .price-table th,
-  .price-table td {
-    padding: 0.7rem 0.6rem;
     font-size: 0.8rem;
   }
+}
 
-  .chart-container {
-    height: 180px;
+@media (max-width: 350px) {
+  .mo-summary-grid {
+    gap: 0.6rem;
   }
 
-  .info-icon {
-    font-size: 2.5rem;
+  .mo-chart-canvas {
+    min-height: 220px;
   }
 
-  .info-card h3 {
-    font-size: 1.1rem;
-  }
-
-  .info-card p {
-    font-size: 0.9rem;
+  .mo-line-chart {
+    height: 200px;
   }
 }

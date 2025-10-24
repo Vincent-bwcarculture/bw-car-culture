@@ -1,6 +1,7 @@
 /* client/src/components/admin/MarketOverview/AdminMarketOverview.css */
+/* All classes prefixed with "amo-" (Admin Market Overview) to avoid conflicts */
 
-.admin-market-overview {
+.amo-container {
   padding: 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
@@ -8,7 +9,8 @@
   min-height: 100vh;
 }
 
-.market-header {
+/* ========== HEADER ========== */
+.amo-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -17,19 +19,19 @@
   border-bottom: 2px solid rgba(255, 51, 0, 0.3);
 }
 
-.market-header h1 {
+.amo-header h1 {
   font-size: 1.8rem;
   color: #ffffff;
   margin: 0;
 }
 
-.header-actions {
+.amo-header-actions {
   display: flex;
   gap: 0.8rem;
 }
 
-.btn-primary,
-.btn-secondary {
+.amo-btn-primary,
+.amo-btn-secondary {
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
   border: none;
@@ -39,29 +41,29 @@
   transition: all 0.2s ease;
 }
 
-.btn-primary {
+.amo-btn-primary {
   background: linear-gradient(135deg, #ff3300 0%, #cc2900 100%);
   color: white;
 }
 
-.btn-primary:hover {
+.amo-btn-primary:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(255, 51, 0, 0.4);
 }
 
-.btn-secondary {
+.amo-btn-secondary {
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   border: 1px solid #2c2c2c;
 }
 
-.btn-secondary:hover {
+.amo-btn-secondary:hover {
   background: rgba(255, 255, 255, 0.15);
   border-color: #ff3300;
 }
 
-/* Filters */
-.market-filters {
+/* ========== FILTERS ========== */
+.amo-filters {
   background: rgba(0, 0, 0, 0.3);
   padding: 1rem;
   border-radius: 10px;
@@ -69,14 +71,14 @@
   border: 1px solid #2c2c2c;
 }
 
-.filter-group {
+.amo-filter-group {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 0.8rem;
   align-items: center;
 }
 
-.filter-select {
+.amo-filter-select {
   padding: 0.6rem 0.8rem;
   background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
@@ -87,14 +89,14 @@
   transition: all 0.2s ease;
 }
 
-.filter-select:hover,
-.filter-select:focus {
+.amo-filter-select:hover,
+.amo-filter-select:focus {
   border-color: #ff3300;
   background: rgba(255, 255, 255, 0.08);
   outline: none;
 }
 
-.btn-clear {
+.amo-btn-clear {
   padding: 0.6rem 1rem;
   background: rgba(255, 51, 0, 0.1);
   color: #ff3300;
@@ -105,34 +107,34 @@
   transition: all 0.2s ease;
 }
 
-.btn-clear:hover {
+.amo-btn-clear:hover {
   background: rgba(255, 51, 0, 0.2);
   border-color: #ff3300;
 }
 
-/* Market List/Table */
-.market-list {
+/* ========== TABLE ========== */
+.amo-list {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 10px;
   border: 1px solid #2c2c2c;
   overflow: hidden;
 }
 
-.market-table {
+.amo-table-wrapper {
   overflow-x: auto;
 }
 
-table {
+.amo-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-thead {
+.amo-table thead {
   background: rgba(255, 51, 0, 0.1);
   border-bottom: 2px solid #2c2c2c;
 }
 
-thead th {
+.amo-table th {
   padding: 0.9rem 1rem;
   text-align: left;
   color: #ff3300;
@@ -142,27 +144,27 @@ thead th {
   letter-spacing: 0.5px;
 }
 
-tbody tr {
+.amo-table tbody tr {
   border-bottom: 1px solid #2c2c2c;
   transition: background 0.2s ease;
 }
 
-tbody tr:hover {
+.amo-table tbody tr:hover {
   background: rgba(255, 51, 0, 0.05);
 }
 
-tbody td {
+.amo-table td {
   padding: 0.9rem 1rem;
   color: #ffffff;
   font-size: 0.9rem;
 }
 
-.price-cell {
+.amo-price-cell {
   font-weight: 600;
   color: #2ed573;
 }
 
-.condition-badge {
+.amo-condition-badge {
   display: inline-block;
   padding: 0.3rem 0.7rem;
   border-radius: 12px;
@@ -171,28 +173,28 @@ tbody td {
   text-transform: capitalize;
 }
 
-.condition-badge.new {
+.amo-condition-badge.new {
   background: rgba(46, 213, 115, 0.2);
   color: #2ed573;
 }
 
-.condition-badge.used {
+.amo-condition-badge.used {
   background: rgba(255, 193, 7, 0.2);
   color: #ffc107;
 }
 
-.condition-badge.certified {
+.amo-condition-badge.certified {
   background: rgba(0, 123, 255, 0.2);
   color: #007bff;
 }
 
-.action-buttons {
+.amo-action-buttons {
   display: flex;
   gap: 0.5rem;
 }
 
-.btn-edit,
-.btn-delete {
+.amo-btn-edit,
+.amo-btn-delete {
   padding: 0.4rem 0.7rem;
   border: 1px solid #2c2c2c;
   border-radius: 6px;
@@ -202,18 +204,18 @@ tbody td {
   font-size: 1rem;
 }
 
-.btn-edit:hover {
+.amo-btn-edit:hover {
   background: rgba(0, 123, 255, 0.2);
   border-color: #007bff;
 }
 
-.btn-delete:hover {
+.amo-btn-delete:hover {
   background: rgba(220, 53, 69, 0.2);
   border-color: #dc3545;
 }
 
-/* Pagination */
-.pagination {
+/* ========== PAGINATION ========== */
+.amo-pagination {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -223,7 +225,7 @@ tbody td {
   border-top: 1px solid #2c2c2c;
 }
 
-.page-btn {
+.amo-page-btn {
   padding: 0.5rem 1.2rem;
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
@@ -234,41 +236,41 @@ tbody td {
   transition: all 0.2s ease;
 }
 
-.page-btn:hover:not(:disabled) {
+.amo-page-btn:hover:not(:disabled) {
   background: rgba(255, 51, 0, 0.2);
   border-color: #ff3300;
 }
 
-.page-btn:disabled {
+.amo-page-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.page-info {
+.amo-page-info {
   color: #ffffff;
   font-size: 0.9rem;
 }
 
-.total-count {
+.amo-total-count {
   color: #888;
   font-size: 0.85rem;
 }
 
-/* Loading & No Data */
-.loading,
-.no-data {
+/* ========== LOADING & NO DATA ========== */
+.amo-loading,
+.amo-no-data {
   text-align: center;
   padding: 3rem;
   color: #888;
   font-size: 1rem;
 }
 
-.no-data p {
+.amo-no-data p {
   margin: 0;
 }
 
-/* Modal */
-.modal-overlay {
+/* ========== MODAL ========== */
+.amo-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -282,7 +284,7 @@ tbody td {
   padding: 1rem;
 }
 
-.modal-content {
+.amo-modal-content {
   background: rgba(20, 20, 20, 0.98);
   border: 1px solid #2c2c2c;
   border-radius: 12px;
@@ -293,11 +295,11 @@ tbody td {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
-.modal-content.modal-large {
+.amo-modal-content.amo-modal-large {
   max-width: 800px;
 }
 
-.modal-header {
+.amo-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -305,13 +307,13 @@ tbody td {
   border-bottom: 1px solid #2c2c2c;
 }
 
-.modal-header h2 {
+.amo-modal-header h2 {
   margin: 0;
   color: #ffffff;
   font-size: 1.4rem;
 }
 
-.modal-close {
+.amo-modal-close {
   background: none;
   border: none;
   color: #888;
@@ -326,40 +328,40 @@ tbody td {
   transition: all 0.2s ease;
 }
 
-.modal-close:hover {
+.amo-modal-close:hover {
   color: #ff3300;
   transform: scale(1.1);
 }
 
-/* Form */
-.price-form,
-.batch-form {
+/* ========== FORMS ========== */
+.amo-form,
+.amo-batch-form {
   padding: 1.5rem;
 }
 
-.form-row {
+.amo-form-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   margin-bottom: 1rem;
 }
 
-.form-group {
+.amo-form-group {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
   margin-bottom: 1rem;
 }
 
-.form-group label {
+.amo-form-group label {
   color: #ffffff;
   font-size: 0.85rem;
   font-weight: 500;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.amo-form-group input,
+.amo-form-group select,
+.amo-form-group textarea {
   padding: 0.7rem 0.9rem;
   background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
@@ -369,15 +371,15 @@ tbody td {
   transition: all 0.2s ease;
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.amo-form-group input:focus,
+.amo-form-group select:focus,
+.amo-form-group textarea:focus {
   border-color: #ff3300;
   background: rgba(255, 255, 255, 0.08);
   outline: none;
 }
 
-.batch-instructions {
+.amo-batch-instructions {
   background: rgba(255, 51, 0, 0.05);
   padding: 1rem;
   border-radius: 8px;
@@ -385,13 +387,13 @@ tbody td {
   margin-bottom: 1.5rem;
 }
 
-.batch-instructions p {
+.amo-batch-instructions p {
   color: #ffffff;
   margin: 0.5rem 0;
   font-size: 0.85rem;
 }
 
-.batch-instructions code {
+.amo-batch-instructions code {
   display: block;
   background: rgba(0, 0, 0, 0.3);
   padding: 0.6rem;
@@ -402,13 +404,13 @@ tbody td {
   overflow-x: auto;
 }
 
-.batch-textarea {
+.amo-batch-textarea {
   font-family: 'Courier New', monospace;
   min-height: 200px;
   resize: vertical;
 }
 
-.modal-actions {
+.amo-modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.8rem;
@@ -417,8 +419,8 @@ tbody td {
   border-top: 1px solid #2c2c2c;
 }
 
-.btn-cancel,
-.btn-submit {
+.amo-btn-cancel,
+.amo-btn-submit {
   padding: 0.7rem 1.5rem;
   border-radius: 6px;
   cursor: pointer;
@@ -427,138 +429,137 @@ tbody td {
   transition: all 0.2s ease;
 }
 
-.btn-cancel {
+.amo-btn-cancel {
   background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
   border: 1px solid #2c2c2c;
 }
 
-.btn-cancel:hover {
+.amo-btn-cancel:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.btn-submit {
+.amo-btn-submit {
   background: linear-gradient(135deg, #ff3300 0%, #cc2900 100%);
   color: white;
   border: none;
 }
 
-.btn-submit:hover {
+.amo-btn-submit:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(255, 51, 0, 0.4);
 }
 
-/* MOBILE RESPONSIVE */
+/* ========== MOBILE RESPONSIVE ========== */
 @media (max-width: 768px) {
-  .admin-market-overview {
+  .amo-container {
     padding: 1rem;
   }
 
-  .market-header {
+  .amo-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
 
-  .market-header h1 {
+  .amo-header h1 {
     font-size: 1.4rem;
   }
 
-  .header-actions {
+  .amo-header-actions {
     width: 100%;
     flex-direction: column;
   }
 
-  .btn-primary,
-  .btn-secondary {
+  .amo-btn-primary,
+  .amo-btn-secondary {
     width: 100%;
     text-align: center;
   }
 
-  .filter-group {
+  .amo-filter-group {
     grid-template-columns: 1fr;
   }
 
-  .form-row {
+  .amo-form-row {
     grid-template-columns: 1fr;
   }
 
-  /* Make table scrollable on mobile */
-  .market-table {
+  .amo-table-wrapper {
     overflow-x: scroll;
   }
 
-  table {
+  .amo-table {
     min-width: 800px;
   }
 
-  thead th,
-  tbody td {
+  .amo-table th,
+  .amo-table td {
     padding: 0.7rem 0.6rem;
     font-size: 0.8rem;
   }
 
-  .action-buttons {
+  .amo-action-buttons {
     flex-direction: column;
     gap: 0.3rem;
   }
 
-  .btn-edit,
-  .btn-delete {
+  .amo-btn-edit,
+  .amo-btn-delete {
     width: 100%;
   }
 
-  .pagination {
+  .amo-pagination {
     flex-direction: column;
     gap: 1rem;
     padding: 1rem;
   }
 
-  .page-btn {
+  .amo-page-btn {
     width: 100%;
   }
 
-  .modal-content {
+  .amo-modal-content {
     max-height: 85vh;
   }
 
-  .modal-header h2 {
+  .amo-modal-header h2 {
     font-size: 1.2rem;
   }
 
-  .modal-actions {
+  .amo-modal-actions {
     flex-direction: column;
   }
 
-  .btn-cancel,
-  .btn-submit {
+  .amo-btn-cancel,
+  .amo-btn-submit {
     width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .market-header h1 {
+  .amo-header h1 {
     font-size: 1.2rem;
   }
 
-  .btn-primary,
-  .btn-secondary {
+  .amo-btn-primary,
+  .amo-btn-secondary {
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
   }
 
-  .filter-select {
+  .amo-filter-select {
     padding: 0.5rem 0.6rem;
     font-size: 0.8rem;
   }
 
-  thead th,
-  tbody td {
+  .amo-table th,
+  .amo-table td {
     padding: 0.6rem 0.5rem;
     font-size: 0.75rem;
   }
 
-  .condition-badge {
+  .amo-condition-badge {
     font-size: 0.7rem;
     padding: 0.2rem 0.5rem;
   }

@@ -280,26 +280,26 @@ const AdminMarketOverview = () => {
   };
 
   return (
-    <div className="admin-market-overview">
-      <div className="market-header">
+    <div className="amo-container">
+      <div className="amo-header">
         <h1>Market Overview Management</h1>
-        <div className="header-actions">
-          <button className="btn-primary" onClick={() => setShowAddModal(true)}>
+        <div className="amo-header-actions">
+          <button className="amo-btn-primary" onClick={() => setShowAddModal(true)}>
             + Add Price
           </button>
-          <button className="btn-secondary" onClick={() => setShowBatchModal(true)}>
+          <button className="amo-btn-secondary" onClick={() => setShowBatchModal(true)}>
             📊 Batch Import
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="market-filters">
-        <div className="filter-group">
+      <div className="amo-filters">
+        <div className="amo-filter-group">
           <select
             value={filters.make}
             onChange={(e) => handleFilterChange('make', e.target.value)}
-            className="filter-select"
+            className="amo-filter-select"
           >
             <option value="">All Makes</option>
             {filterOptions.makes.map(make => (
@@ -310,7 +310,7 @@ const AdminMarketOverview = () => {
           <select
             value={filters.model}
             onChange={(e) => handleFilterChange('model', e.target.value)}
-            className="filter-select"
+            className="amo-filter-select"
           >
             <option value="">All Models</option>
             {filterOptions.models.map(model => (
@@ -321,7 +321,7 @@ const AdminMarketOverview = () => {
           <select
             value={filters.year}
             onChange={(e) => handleFilterChange('year', e.target.value)}
-            className="filter-select"
+            className="amo-filter-select"
           >
             <option value="">All Years</option>
             {filterOptions.years.map(year => (
@@ -332,7 +332,7 @@ const AdminMarketOverview = () => {
           <select
             value={filters.condition}
             onChange={(e) => handleFilterChange('condition', e.target.value)}
-            className="filter-select"
+            className="amo-filter-select"
           >
             <option value="">All Conditions</option>
             {filterOptions.conditions.map(condition => (
@@ -342,24 +342,24 @@ const AdminMarketOverview = () => {
             ))}
           </select>
 
-          <button className="btn-clear" onClick={clearFilters}>
+          <button className="amo-btn-clear" onClick={clearFilters}>
             Clear
           </button>
         </div>
       </div>
 
       {/* Price List */}
-      <div className="market-list">
+      <div className="amo-list">
         {loading ? (
-          <div className="loading">Loading market prices...</div>
+          <div className="amo-loading">Loading market prices...</div>
         ) : prices.length === 0 ? (
-          <div className="no-data">
+          <div className="amo-no-data">
             <p>No market prices found. Add some to get started!</p>
           </div>
         ) : (
           <>
-            <div className="market-table">
-              <table>
+            <div className="amo-table-wrapper">
+              <table className="amo-table">
                 <thead>
                   <tr>
                     <th>Vehicle</th>
@@ -380,25 +380,25 @@ const AdminMarketOverview = () => {
                       </td>
                       <td>{price.year}</td>
                       <td>
-                        <span className={`condition-badge ${price.condition}`}>
+                        <span className={`amo-condition-badge ${price.condition}`}>
                           {price.condition}
                         </span>
                       </td>
-                      <td className="price-cell">P{price.price.toLocaleString()}</td>
+                      <td className="amo-price-cell">P{price.price.toLocaleString()}</td>
                       <td>{price.mileage ? `${price.mileage.toLocaleString()} km` : 'N/A'}</td>
                       <td>{new Date(price.recordedDate).toLocaleDateString()}</td>
                       <td>{price.location}</td>
                       <td>
-                        <div className="action-buttons">
+                        <div className="amo-action-buttons">
                           <button
-                            className="btn-edit"
+                            className="amo-btn-edit"
                             onClick={() => openEditModal(price)}
                             title="Edit"
                           >
                             ✏️
                           </button>
                           <button
-                            className="btn-delete"
+                            className="amo-btn-delete"
                             onClick={() => handleDeletePrice(price._id)}
                             title="Delete"
                           >
@@ -414,20 +414,20 @@ const AdminMarketOverview = () => {
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <div className="pagination">
+              <div className="amo-pagination">
                 <button
-                  className="page-btn"
+                  className="amo-page-btn"
                   onClick={() => setPagination(prev => ({ ...prev, currentPage: prev.currentPage - 1 }))}
                   disabled={!pagination.hasPrev}
                 >
                   Previous
                 </button>
-                <span className="page-info">
+                <span className="amo-page-info">
                   Page {pagination.currentPage} of {pagination.totalPages}
-                  <span className="total-count"> ({pagination.total} total entries)</span>
+                  <span className="amo-total-count"> ({pagination.total} total entries)</span>
                 </span>
                 <button
-                  className="page-btn"
+                  className="amo-page-btn"
                   onClick={() => setPagination(prev => ({ ...prev, currentPage: prev.currentPage + 1 }))}
                   disabled={!pagination.hasNext}
                 >
@@ -441,15 +441,15 @@ const AdminMarketOverview = () => {
 
       {/* Add Modal */}
       {showAddModal && (
-        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className="amo-modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="amo-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="amo-modal-header">
               <h2>Add Market Price</h2>
-              <button className="modal-close" onClick={() => setShowAddModal(false)}>×</button>
+              <button className="amo-modal-close" onClick={() => setShowAddModal(false)}>×</button>
             </div>
-            <form onSubmit={handleAddPrice} className="price-form">
-              <div className="form-row">
-                <div className="form-group">
+            <form onSubmit={handleAddPrice} className="amo-form">
+              <div className="amo-form-row">
+                <div className="amo-form-group">
                   <label>Make *</label>
                   <input
                     type="text"
@@ -459,7 +459,7 @@ const AdminMarketOverview = () => {
                     placeholder="e.g., Toyota"
                   />
                 </div>
-                <div className="form-group">
+                <div className="amo-form-group">
                   <label>Model *</label>
                   <input
                     type="text"
@@ -471,8 +471,8 @@ const AdminMarketOverview = () => {
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
+              <div className="amo-form-row">
+                <div className="amo-form-group">
                   <label>Year *</label>
                   <input
                     type="number"
@@ -483,7 +483,7 @@ const AdminMarketOverview = () => {
                     max={new Date().getFullYear() + 1}
                   />
                 </div>
-                <div className="form-group">
+                <div className="amo-form-group">
                   <label>Condition *</label>
                   <select
                     value={formData.condition}
@@ -497,8 +497,8 @@ const AdminMarketOverview = () => {
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
+              <div className="amo-form-row">
+                <div className="amo-form-group">
                   <label>Price (BWP) *</label>
                   <input
                     type="number"
@@ -510,7 +510,7 @@ const AdminMarketOverview = () => {
                     placeholder="e.g., 150000"
                   />
                 </div>
-                <div className="form-group">
+                <div className="amo-form-group">
                   <label>Mileage (km)</label>
                   <input
                     type="number"
@@ -522,8 +522,8 @@ const AdminMarketOverview = () => {
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
+              <div className="amo-form-row">
+                <div className="amo-form-group">
                   <label>Location</label>
                   <input
                     type="text"
@@ -532,7 +532,7 @@ const AdminMarketOverview = () => {
                     placeholder="e.g., Gaborone"
                   />
                 </div>
-                <div className="form-group">
+                <div className="amo-form-group">
                   <label>Recorded Date *</label>
                   <input
                     type="date"
@@ -543,7 +543,7 @@ const AdminMarketOverview = () => {
                 </div>
               </div>
 
-              <div className="form-group">
+              <div className="amo-form-group">
                 <label>Notes</label>
                 <textarea
                   value={formData.notes}
@@ -553,11 +553,11 @@ const AdminMarketOverview = () => {
                 />
               </div>
 
-              <div className="modal-actions">
-                <button type="button" className="btn-cancel" onClick={() => setShowAddModal(false)}>
+              <div className="amo-modal-actions">
+                <button type="button" className="amo-btn-cancel" onClick={() => setShowAddModal(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn-submit">
+                <button type="submit" className="amo-btn-submit">
                   Add Price
                 </button>
               </div>
@@ -568,16 +568,15 @@ const AdminMarketOverview = () => {
 
       {/* Edit Modal */}
       {showEditModal && (
-        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className="amo-modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="amo-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="amo-modal-header">
               <h2>Edit Market Price</h2>
-              <button className="modal-close" onClick={() => setShowEditModal(false)}>×</button>
+              <button className="amo-modal-close" onClick={() => setShowEditModal(false)}>×</button>
             </div>
-            <form onSubmit={handleEditPrice} className="price-form">
-              {/* Same form fields as Add Modal */}
-              <div className="form-row">
-                <div className="form-group">
+            <form onSubmit={handleEditPrice} className="amo-form">
+              <div className="amo-form-row">
+                <div className="amo-form-group">
                   <label>Make *</label>
                   <input
                     type="text"
@@ -586,7 +585,7 @@ const AdminMarketOverview = () => {
                     required
                   />
                 </div>
-                <div className="form-group">
+                <div className="amo-form-group">
                   <label>Model *</label>
                   <input
                     type="text"
@@ -597,8 +596,8 @@ const AdminMarketOverview = () => {
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
+              <div className="amo-form-row">
+                <div className="amo-form-group">
                   <label>Year *</label>
                   <input
                     type="number"
@@ -609,7 +608,7 @@ const AdminMarketOverview = () => {
                     max={new Date().getFullYear() + 1}
                   />
                 </div>
-                <div className="form-group">
+                <div className="amo-form-group">
                   <label>Condition *</label>
                   <select
                     value={formData.condition}
@@ -623,8 +622,8 @@ const AdminMarketOverview = () => {
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
+              <div className="amo-form-row">
+                <div className="amo-form-group">
                   <label>Price (BWP) *</label>
                   <input
                     type="number"
@@ -635,7 +634,7 @@ const AdminMarketOverview = () => {
                     step="0.01"
                   />
                 </div>
-                <div className="form-group">
+                <div className="amo-form-group">
                   <label>Mileage (km)</label>
                   <input
                     type="number"
@@ -646,8 +645,8 @@ const AdminMarketOverview = () => {
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
+              <div className="amo-form-row">
+                <div className="amo-form-group">
                   <label>Location</label>
                   <input
                     type="text"
@@ -655,7 +654,7 @@ const AdminMarketOverview = () => {
                     onChange={(e) => setFormData({...formData, location: e.target.value})}
                   />
                 </div>
-                <div className="form-group">
+                <div className="amo-form-group">
                   <label>Recorded Date *</label>
                   <input
                     type="date"
@@ -666,7 +665,7 @@ const AdminMarketOverview = () => {
                 </div>
               </div>
 
-              <div className="form-group">
+              <div className="amo-form-group">
                 <label>Notes</label>
                 <textarea
                   value={formData.notes}
@@ -675,11 +674,11 @@ const AdminMarketOverview = () => {
                 />
               </div>
 
-              <div className="modal-actions">
-                <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>
+              <div className="amo-modal-actions">
+                <button type="button" className="amo-btn-cancel" onClick={() => setShowEditModal(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn-submit">
+                <button type="submit" className="amo-btn-submit">
                   Update Price
                 </button>
               </div>
@@ -690,21 +689,21 @@ const AdminMarketOverview = () => {
 
       {/* Batch Import Modal */}
       {showBatchModal && (
-        <div className="modal-overlay" onClick={() => setShowBatchModal(false)}>
-          <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className="amo-modal-overlay" onClick={() => setShowBatchModal(false)}>
+          <div className="amo-modal-content amo-modal-large" onClick={(e) => e.stopPropagation()}>
+            <div className="amo-modal-header">
               <h2>Batch Import Prices</h2>
-              <button className="modal-close" onClick={() => setShowBatchModal(false)}>×</button>
+              <button className="amo-modal-close" onClick={() => setShowBatchModal(false)}>×</button>
             </div>
-            <form onSubmit={handleBatchImport} className="batch-form">
-              <div className="batch-instructions">
+            <form onSubmit={handleBatchImport} className="amo-batch-form">
+              <div className="amo-batch-instructions">
                 <p><strong>CSV Format:</strong> Include header row</p>
                 <code>make,model,year,condition,price,mileage,location,recordedDate</code>
                 <p style={{marginTop: '10px'}}><strong>JSON Format:</strong> Array of objects</p>
                 <code>[{'{'}make:"Toyota",model:"Corolla",year:2020,condition:"used",price:150000{'}'}]</code>
               </div>
               
-              <div className="form-group">
+              <div className="amo-form-group">
                 <label>Paste CSV or JSON Data</label>
                 <textarea
                   value={batchData}
@@ -712,15 +711,15 @@ const AdminMarketOverview = () => {
                   rows="12"
                   required
                   placeholder="Paste your CSV or JSON data here..."
-                  className="batch-textarea"
+                  className="amo-batch-textarea"
                 />
               </div>
 
-              <div className="modal-actions">
-                <button type="button" className="btn-cancel" onClick={() => setShowBatchModal(false)}>
+              <div className="amo-modal-actions">
+                <button type="button" className="amo-btn-cancel" onClick={() => setShowBatchModal(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn-submit">
+                <button type="submit" className="amo-btn-submit">
                   Import Data
                 </button>
               </div>
