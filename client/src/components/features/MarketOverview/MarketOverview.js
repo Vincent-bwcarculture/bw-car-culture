@@ -1,5 +1,6 @@
 // client/src/components/features/MarketOverview/MarketOverview.js
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './MarketOverview.css';
 
 const MarketOverview = () => {
@@ -12,7 +13,11 @@ const MarketOverview = () => {
   const [allPrices, setAllPrices] = useState([]);
   const [selectedVehicles, setSelectedVehicles] = useState([]);
   const [comparisonData, setComparisonData] = useState([]);
+  const [relatedListings, setRelatedListings] = useState([]);
+  const [relatedArticles, setRelatedArticles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingListings, setLoadingListings] = useState(false);
+  const [loadingArticles, setLoadingArticles] = useState(false);
   const [viewMode, setViewMode] = useState('overview'); // 'overview' or 'compare'
   const [searchFilters, setSearchFilters] = useState({
     make: '',
@@ -25,6 +30,17 @@ const MarketOverview = () => {
     fetchFilterOptions();
     fetchMarketOverview();
   }, []);
+
+  // Fetch related listings and articles when vehicles change
+  useEffect(() => {
+    if (selectedVehicles.length > 0) {
+      fetchRelatedListings();
+      fetchRelatedArticles();
+    } else {
+      setRelatedListings([]);
+      setRelatedArticles([]);
+    }
+  }, [selectedVehicles]);
 
   const fetchFilterOptions = async () => {
     try {
@@ -62,6 +78,77 @@ const MarketOverview = () => {
     }
   };
 
+  const fetchRelatedListings = async () => {
+    try {
+      setLoadingListings(true);
+      const listings = [];
+
+      // Fetch listings for each selected vehicle
+      for (const vehicle of selectedVehicles) {
+        const params = new URLSearchParams({
+          make: vehicle.make,
+          model: vehicle.model,
+          limit: '3' // Get 3 listings per vehicle
+        });
+
+        if (vehicle.year) {
+          params.append('year', vehicle.year);
+        }
+
+        const response = await fetch(`/api/listings?${params.toString()}`);
+        const data = await response.json();
+
+        if (data.success && data.data) {
+          listings.push(...data.data);
+        }
+      }
+
+      // Remove duplicates and limit to 10 total
+      const uniqueListings = Array.from(
+        new Map(listings.map(item => [item._id, item])).values()
+      ).slice(0, 10);
+
+      setRelatedListings(uniqueListings);
+    } catch (error) {
+      console.error('Error fetching related listings:', error);
+      setRelatedListings([]);
+    } finally {
+      setLoadingListings(false);
+    }
+  };
+
+  const fetchRelatedArticles = async () => {
+    try {
+      setLoadingArticles(true);
+      const articles = [];
+
+      // Fetch articles related to each selected vehicle
+      for (const vehicle of selectedVehicles) {
+        // Create search query with vehicle make and model
+        const searchQuery = `${vehicle.make} ${vehicle.model}`;
+        
+        const response = await fetch(`/api/news?search=${encodeURIComponent(searchQuery)}&limit=2`);
+        const data = await response.json();
+
+        if (data.success && data.data) {
+          articles.push(...data.data);
+        }
+      }
+
+      // Remove duplicates and limit to 6 total
+      const uniqueArticles = Array.from(
+        new Map(articles.map(item => [item._id, item])).values()
+      ).slice(0, 6);
+
+      setRelatedArticles(uniqueArticles);
+    } catch (error) {
+      console.error('Error fetching related articles:', error);
+      setRelatedArticles([]);
+    } finally {
+      setLoadingArticles(false);
+    }
+  };
+
   // Auto-select similar vehicles based on popularity and similarity
   const autoSelectSimilarVehicles = (prices, maxCount) => {
     if (!prices || prices.length === 0) return [];
@@ -88,11 +175,6 @@ const MarketOverview = () => {
       .slice(0, maxCount);
 
     return vehicles;
-  };
-
-  const getTopVehicles = (prices, maxCount) => {
-    // Similar to autoSelectSimilarVehicles but kept for backwards compatibility
-    return autoSelectSimilarVehicles(prices, maxCount);
   };
 
   const updateComparisonData = (vehicles, allPricesData) => {
@@ -269,10 +351,6 @@ const MarketOverview = () => {
       yLabels.push(Math.round(value));
     }
 
-    // Chart dimensions
-    const chartWidth = 100; // percentage
-    const chartHeight = 300;
-
     return (
       <div className="mo-line-chart">
         {/* Y-Axis */}
@@ -417,7 +495,7 @@ const MarketOverview = () => {
               </div>
             </div>
 
-            {/* FILTER SECTION - MOVED HERE */}
+            {/* FILTER SECTION */}
             <div className="mo-search-panel">
               <h2 className="mo-section-title">Filter Vehicles</h2>
               <p className="mo-section-desc" style={{ marginBottom: '1rem', color: '#888' }}>
@@ -551,6 +629,124 @@ const MarketOverview = () => {
                 )}
               </div>
             </div>
+
+            {/* AVAILABLE LISTINGS SECTION */}
+            {selectedVehicles.length > 0 && (
+              <div className="mo-listings-section">
+                <div className="mo-section-header">
+                  <h2 className="mo-section-title">Available Listings</h2>
+                  <p className="mo-section-desc">
+                    Cars currently for sale matching your selected vehicles
+                  </p>
+                </div>
+
+                {loadingListings ? (
+                  <div className="mo-loading-inline">
+                    <div className="mo-spinner-small"></div>
+                    <p>Loading listings...</p>
+                  </div>
+                ) : relatedListings.length > 0 ? (
+                  <div className="mo-listings-grid">
+                    {relatedListings.map((listing) => (
+                      <Link
+                        key={listing._id}
+                        to={`/listing/${listing._id}`}
+                        className="mo-listing-card"
+                      >
+                        <div className="mo-listing-image">
+                          {listing.images && listing.images.length > 0 ? (
+                            <img 
+                              src={listing.images[0].url || listing.images[0]} 
+                              alt={listing.title}
+                              onError={(e) => {
+                                e.target.src = '/placeholder-car.jpg';
+                              }}
+                            />
+                          ) : (
+                            <div className="mo-listing-placeholder">No Image</div>
+                          )}
+                          {listing.condition && (
+                            <div className="mo-listing-badge">{listing.condition}</div>
+                          )}
+                        </div>
+                        <div className="mo-listing-content">
+                          <h3 className="mo-listing-title">{listing.title}</h3>
+                          <p className="mo-listing-specs">
+                            {listing.specifications?.year} • {listing.specifications?.mileage} km
+                          </p>
+                          <div className="mo-listing-price">
+                            {formatPrice(listing.price || listing.pricing?.price)}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mo-empty-state">
+                    <p>No listings found for the selected vehicles</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* RELATED ARTICLES SECTION */}
+            {selectedVehicles.length > 0 && (
+              <div className="mo-articles-section">
+                <div className="mo-section-header">
+                  <h2 className="mo-section-title">Related News & Articles</h2>
+                  <p className="mo-section-desc">
+                    Latest news about your selected vehicles
+                  </p>
+                </div>
+
+                {loadingArticles ? (
+                  <div className="mo-loading-inline">
+                    <div className="mo-spinner-small"></div>
+                    <p>Loading articles...</p>
+                  </div>
+                ) : relatedArticles.length > 0 ? (
+                  <div className="mo-articles-grid">
+                    {relatedArticles.map((article) => (
+                      <Link
+                        key={article._id}
+                        to={`/news/${article._id}`}
+                        className="mo-article-card"
+                      >
+                        {article.coverImage || (article.images && article.images.length > 0) ? (
+                          <div className="mo-article-image">
+                            <img 
+                              src={article.coverImage || article.images[0]?.url || article.images[0]} 
+                              alt={article.title}
+                              onError={(e) => {
+                                e.target.src = '/placeholder-news.jpg';
+                              }}
+                            />
+                          </div>
+                        ) : null}
+                        <div className="mo-article-content">
+                          {article.category && (
+                            <span className="mo-article-category">{article.category}</span>
+                          )}
+                          <h3 className="mo-article-title">{article.title}</h3>
+                          {article.summary && (
+                            <p className="mo-article-summary">{article.summary}</p>
+                          )}
+                          <div className="mo-article-meta">
+                            {article.publishedAt && (
+                              <span>{new Date(article.publishedAt).toLocaleDateString()}</span>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mo-empty-state">
+                    <p>No articles found for the selected vehicles</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Vehicle Details Cards */}
             {comparisonData.length > 0 && (

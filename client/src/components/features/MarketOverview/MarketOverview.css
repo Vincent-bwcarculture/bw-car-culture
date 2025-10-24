@@ -93,6 +93,22 @@
   to { transform: rotate(360deg); }
 }
 
+.mo-loading-inline {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+}
+
+.mo-spinner-small {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255, 51, 0, 0.1);
+  border-top-color: #ff3300;
+  border-radius: 50%;
+  animation: mo-spin 0.8s linear infinite;
+  margin: 0 auto 0.5rem;
+}
+
 /* ========== SUMMARY CARDS (NO EMOJIS) ========== */
 .mo-summary-grid {
   display: grid;
@@ -402,6 +418,213 @@
   font-weight: 500;
 }
 
+/* ========== LISTINGS SECTION ========== */
+.mo-listings-section {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #2c2c2c;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.mo-listings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.mo-listing-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #2c2c2c;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: block;
+}
+
+.mo-listing-card:hover {
+  border-color: #ff3300;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 51, 0, 0.2);
+}
+
+.mo-listing-image {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.mo-listing-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.mo-listing-card:hover .mo-listing-image img {
+  transform: scale(1.05);
+}
+
+.mo-listing-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.mo-listing-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 51, 0, 0.9);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mo-listing-content {
+  padding: 1.2rem;
+}
+
+.mo-listing-title {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mo-listing-specs {
+  color: #888;
+  font-size: 0.85rem;
+  margin: 0 0 0.8rem 0;
+}
+
+.mo-listing-price {
+  color: #ff3300;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+/* ========== ARTICLES SECTION ========== */
+.mo-articles-section {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #2c2c2c;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.mo-articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.mo-article-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #2c2c2c;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: block;
+}
+
+.mo-article-card:hover {
+  border-color: #ff3300;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 51, 0, 0.2);
+}
+
+.mo-article-image {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.mo-article-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.mo-article-card:hover .mo-article-image img {
+  transform: scale(1.05);
+}
+
+.mo-article-content {
+  padding: 1.2rem;
+}
+
+.mo-article-category {
+  display: inline-block;
+  background: rgba(255, 51, 0, 0.2);
+  color: #ff3300;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.8rem;
+}
+
+.mo-article-title {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.8rem 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mo-article-summary {
+  color: #888;
+  font-size: 0.85rem;
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mo-article-meta {
+  color: #666;
+  font-size: 0.75rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ========== EMPTY STATES ========== */
+.mo-empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #888;
+  font-size: 0.95rem;
+}
+
 /* ========== VEHICLES GRID ========== */
 .mo-vehicles-grid {
   display: grid;
@@ -516,6 +739,11 @@
     flex: 1;
     text-align: center;
   }
+
+  .mo-listings-grid,
+  .mo-articles-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
@@ -543,7 +771,9 @@
     font-size: 1.3rem;
   }
 
-  .mo-chart-section {
+  .mo-chart-section,
+  .mo-listings-section,
+  .mo-articles-section {
     padding: 1.2rem;
   }
 
@@ -577,7 +807,12 @@
     font-size: 0.8rem;
   }
 
-  .mo-vehicles-grid {
+  .mo-vehicles-grid,
+  .mo-listings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mo-articles-grid {
     grid-template-columns: 1fr;
   }
 
@@ -630,7 +865,9 @@
     font-size: 1.3rem;
   }
 
-  .mo-chart-section {
+  .mo-chart-section,
+  .mo-listings-section,
+  .mo-articles-section {
     padding: 1rem;
   }
 
@@ -676,7 +913,9 @@
     font-size: 0.8rem;
   }
 
-  .mo-vehicle-card {
+  .mo-vehicle-card,
+  .mo-listing-card,
+  .mo-article-card {
     padding: 1rem;
   }
 
@@ -719,6 +958,20 @@
     padding: 0.3rem 0.7rem;
     font-size: 0.8rem;
   }
+
+  .mo-listing-image,
+  .mo-article-image {
+    height: 160px;
+  }
+
+  .mo-listing-title,
+  .mo-article-title {
+    font-size: 1rem;
+  }
+
+  .mo-listing-price {
+    font-size: 1.1rem;
+  }
 }
 
 @media (max-width: 350px) {
@@ -732,5 +985,10 @@
 
   .mo-line-chart {
     height: 200px;
+  }
+
+  .mo-listings-grid,
+  .mo-articles-grid {
+    gap: 1rem;
   }
 }
