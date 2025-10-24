@@ -112,16 +112,16 @@
 /* ========== SUMMARY CARDS (NO EMOJIS) ========== */
 .mo-summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, 1fr); /* Always 2 columns for space efficiency */
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem; /* Tighter spacing */
 }
 
 .mo-summary-card {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #2c2c2c;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1.2rem; /* More compact padding */
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
@@ -140,16 +140,16 @@
 
 .mo-summary-label {
   color: #888;
-  font-size: 0.8rem;
+  font-size: 0.75rem; /* Slightly smaller for compactness */
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   display: block;
 }
 
 .mo-summary-value {
   color: #ffffff;
-  font-size: 1.6rem;
+  font-size: 1.4rem; /* Optimized size */
   font-weight: 700;
   display: block;
 }
@@ -760,11 +760,12 @@
   }
 
   .mo-summary-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr); /* Keep 2 columns on tablet */
+    gap: 0.8rem;
   }
 
   .mo-summary-card {
-    padding: 1rem;
+    padding: 1rem; /* More compact on tablet */
   }
 
   .mo-summary-value {
@@ -849,20 +850,20 @@
   }
 
   .mo-summary-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr); /* Keep 2 columns on mobile */
     gap: 0.8rem;
   }
 
   .mo-summary-card {
-    padding: 1.2rem;
+    padding: 1rem; /* Compact padding on mobile */
   }
 
   .mo-summary-label {
-    font-size: 0.75rem;
+    font-size: 0.7rem; /* Smaller on mobile */
   }
 
   .mo-summary-value {
-    font-size: 1.3rem;
+    font-size: 1.2rem; /* Smaller on mobile */
   }
 
   .mo-chart-section,
@@ -976,6 +977,7 @@
 
 @media (max-width: 350px) {
   .mo-summary-grid {
+    grid-template-columns: 1fr; /* Single column only on very small screens */
     gap: 0.6rem;
   }
 
