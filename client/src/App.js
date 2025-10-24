@@ -61,6 +61,8 @@ import HomeDealershipsSection from './components/features/HomeDealershipsSection
 import ConnectionTest from './components/shared/ConnectionTest.js';
 import NewsManager from './components/NewsManager/NewsManager.js';
 import AdminArticleManagement from './components/Admin/ArticleManagement.js';
+import AdminMarketOverview from './components/admin/MarketOverview/AdminMarketOvervieww.js';
+import MarketOverview from './components/features/MarketOverview/MarketOverview.js';
 
 // GION App and Related Components
 import GIONApp from './components/GION/GIONApp.js';
@@ -914,6 +916,12 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
+        <Route path="/admin/market-overview" element={
+<ProtectedRoute requiredRoles={['admin']}>
+              <AdminMarketOverview />
+          </ProtectedRoute>
+          } />
+
         <Route path="/admin/analytics" element={
           <ProtectedRoute requiredRoles={['admin']}>
             <AdminLayout>
@@ -1129,6 +1137,12 @@ const AppRoutes = () => {
             <FeedbackPage />
           </MainLayout>
         } />
+
+        <Route path="/market-overview" element={
+          <MainLayout>
+            <MarketOverview />
+          </MainLayout>
+          } />
         
      <Route path="/" element={
   <MainLayout>

@@ -19,6 +19,12 @@ const AdminSidebar = ({ collapsed }) => {
     path: '/admin/analytics',
     roles: ['admin']
   },
+      {
+    title: 'Market Overview', // NEW ITEM
+    icon: '📊',
+    path: '/admin/market-overview',
+    roles: ['admin']
+  },
   {
     title: 'Feedback Management', // NEW ITEM
     icon: '💬',
