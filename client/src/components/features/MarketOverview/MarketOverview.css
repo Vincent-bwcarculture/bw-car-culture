@@ -159,27 +159,27 @@
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #2c2c2c;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1.2rem; /* More compact */
   margin-bottom: 2rem;
 }
 
 .mo-filters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(2, 1fr); /* 2 columns for space efficiency */
   gap: 1rem;
-  margin-bottom: 1.5rem;
-  margin-top: 1rem;
+  margin-bottom: 1rem; /* Tighter spacing */
+  margin-top: 0.8rem; /* Tighter spacing */
 }
 
 .mo-filter-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem; /* Tighter spacing */
 }
 
 .mo-filter-label {
   color: #ffffff;
-  font-size: 0.85rem;
+  font-size: 0.8rem; /* Slightly smaller */
   font-weight: 500;
 }
 
@@ -818,7 +818,8 @@
   }
 
   .mo-filters-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr); /* Keep 2 columns on tablet */
+    gap: 0.8rem;
   }
 
   .mo-search-panel {
@@ -937,6 +938,11 @@
     padding: 1rem;
   }
 
+  .mo-filters-grid {
+    grid-template-columns: repeat(2, 1fr); /* Keep 2 columns on mobile */
+    gap: 0.8rem;
+  }
+
   .mo-filter-select {
     padding: 0.6rem 0.7rem;
     font-size: 0.85rem;
@@ -978,6 +984,11 @@
 @media (max-width: 350px) {
   .mo-summary-grid {
     grid-template-columns: 1fr; /* Single column only on very small screens */
+    gap: 0.6rem;
+  }
+
+  .mo-filters-grid {
+    grid-template-columns: 1fr; /* Single column filters on very small screens */
     gap: 0.6rem;
   }
 
