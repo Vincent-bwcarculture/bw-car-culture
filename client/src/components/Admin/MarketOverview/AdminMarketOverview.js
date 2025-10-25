@@ -2,7 +2,7 @@
 // FIXED VERSION - Using AuthContext like other admin components
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../context/AuthContext.js';
 import './AdminMarketOverview.css';
 
 const AdminMarketOverview = () => {
