@@ -1,301 +1,334 @@
-/* client/src/components/admin/MarketOverview/AdminMarketOverview.css */
-/* All classes prefixed with "amo-" (Admin Market Overview) to avoid conflicts */
+/* client/src/components/Admin/MarketOverview/AdminMarketOverview.css */
+/* COMPLETE STYLING FOR ADMIN MARKET OVERVIEW */
 
+/* ==================== CONTAINER ==================== */
 .amo-container {
-  padding: 1.5rem;
+  padding: 20px;
   max-width: 1400px;
   margin: 0 auto;
-  background: rgba(15, 15, 15, 0.95);
+  background: #f5f5f5;
   min-height: 100vh;
 }
 
-/* ========== HEADER ========== */
+/* ==================== HEADER ==================== */
 .amo-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid rgba(255, 51, 0, 0.3);
+  margin-bottom: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .amo-header h1 {
-  font-size: 1.8rem;
-  color: #ffffff;
   margin: 0;
+  font-size: 28px;
+  color: #333;
 }
 
 .amo-header-actions {
   display: flex;
-  gap: 0.8rem;
+  gap: 10px;
 }
 
+/* ==================== BUTTONS ==================== */
 .amo-btn-primary,
-.amo-btn-secondary {
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
+.amo-btn-secondary,
+.amo-btn-debug {
+  padding: 10px 20px;
   border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .amo-btn-primary {
-  background: linear-gradient(135deg, #ff3300 0%, #cc2900 100%);
+  background: #2196F3;
   color: white;
 }
 
 .amo-btn-primary:hover {
+  background: #1976D2;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.4);
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
 }
 
 .amo-btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border: 1px solid #2c2c2c;
+  background: #4CAF50;
+  color: white;
 }
 
 .amo-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: #ff3300;
+  background: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
 }
 
-/* ========== FILTERS ========== */
+.amo-btn-debug {
+  background: #FF9800;
+  color: white;
+}
+
+.amo-btn-debug:hover {
+  background: #F57C00;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
+}
+
+.amo-btn-clear {
+  padding: 8px 16px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.amo-btn-clear:hover {
+  background: #d32f2f;
+}
+
+/* ==================== WARNING BANNER ==================== */
+.amo-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+/* ==================== FILTERS ==================== */
 .amo-filters {
-  background: rgba(0, 0, 0, 0.3);
-  padding: 1rem;
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
-  border: 1px solid #2c2c2c;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .amo-filter-group {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 0.8rem;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
   align-items: center;
 }
 
 .amo-filter-select {
-  padding: 0.6rem 0.8rem;
-  background: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
-  border: 1px solid #2c2c2c;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  min-width: 180px;
+  background: white;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.3s ease;
 }
 
 .amo-filter-select:hover,
 .amo-filter-select:focus {
-  border-color: #ff3300;
-  background: rgba(255, 255, 255, 0.08);
+  border-color: #2196F3;
   outline: none;
 }
 
-.amo-btn-clear {
-  padding: 0.6rem 1rem;
-  background: rgba(255, 51, 0, 0.1);
-  color: #ff3300;
-  border: 1px solid rgba(255, 51, 0, 0.3);
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: all 0.2s ease;
-}
-
-.amo-btn-clear:hover {
-  background: rgba(255, 51, 0, 0.2);
-  border-color: #ff3300;
-}
-
-/* ========== TABLE ========== */
+/* ==================== LIST ==================== */
 .amo-list {
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-  border: 1px solid #2c2c2c;
-  overflow: hidden;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.amo-loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+.amo-no-data {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.amo-no-data p {
+  margin: 0;
+  font-size: 16px;
+}
+
+/* ==================== TABLE ==================== */
 .amo-table-wrapper {
   overflow-x: auto;
+  margin-bottom: 20px;
 }
 
 .amo-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 14px;
 }
 
 .amo-table thead {
-  background: rgba(255, 51, 0, 0.1);
-  border-bottom: 2px solid #2c2c2c;
+  background: #f8f9fa;
 }
 
 .amo-table th {
-  padding: 0.9rem 1rem;
+  padding: 12px 15px;
   text-align: left;
-  color: #ff3300;
   font-weight: 600;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.amo-table tbody tr {
-  border-bottom: 1px solid #2c2c2c;
-  transition: background 0.2s ease;
-}
-
-.amo-table tbody tr:hover {
-  background: rgba(255, 51, 0, 0.05);
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
 }
 
 .amo-table td {
-  padding: 0.9rem 1rem;
-  color: #ffffff;
-  font-size: 0.9rem;
+  padding: 12px 15px;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: middle;
+}
+
+.amo-table tbody tr:hover {
+  background: #f8f9fa;
 }
 
 .amo-price-cell {
   font-weight: 600;
-  color: #2ed573;
+  color: #2196F3;
 }
 
+/* ==================== CONDITION BADGES ==================== */
 .amo-condition-badge {
   display: inline-block;
-  padding: 0.3rem 0.7rem;
+  padding: 4px 12px;
   border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   text-transform: capitalize;
 }
 
 .amo-condition-badge.new {
-  background: rgba(46, 213, 115, 0.2);
-  color: #2ed573;
+  background: #e8f5e9;
+  color: #2e7d32;
 }
 
 .amo-condition-badge.used {
-  background: rgba(255, 193, 7, 0.2);
-  color: #ffc107;
+  background: #fff3e0;
+  color: #e65100;
 }
 
 .amo-condition-badge.certified {
-  background: rgba(0, 123, 255, 0.2);
-  color: #007bff;
+  background: #e3f2fd;
+  color: #1565c0;
 }
 
-.amo-action-buttons {
+/* ==================== ACTIONS ==================== */
+.amo-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .amo-btn-edit,
 .amo-btn-delete {
-  padding: 0.4rem 0.7rem;
-  border: 1px solid #2c2c2c;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.05);
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 1rem;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.amo-btn-edit {
+  background: #2196F3;
 }
 
 .amo-btn-edit:hover {
-  background: rgba(0, 123, 255, 0.2);
-  border-color: #007bff;
+  background: #1976D2;
+  transform: scale(1.1);
+}
+
+.amo-btn-delete {
+  background: #f44336;
 }
 
 .amo-btn-delete:hover {
-  background: rgba(220, 53, 69, 0.2);
-  border-color: #dc3545;
+  background: #d32f2f;
+  transform: scale(1.1);
 }
 
-/* ========== PAGINATION ========== */
+/* ==================== PAGINATION ==================== */
 .amo-pagination {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  background: rgba(0, 0, 0, 0.2);
-  border-top: 1px solid #2c2c2c;
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
 }
 
-.amo-page-btn {
-  padding: 0.5rem 1.2rem;
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border: 1px solid #2c2c2c;
-  border-radius: 6px;
+.amo-pagination-info {
+  color: #666;
+  font-size: 14px;
+}
+
+.amo-btn-pagination {
+  padding: 8px 16px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 0.85rem;
-  transition: all 0.2s ease;
+  font-size: 14px;
+  transition: all 0.3s ease;
 }
 
-.amo-page-btn:hover:not(:disabled) {
-  background: rgba(255, 51, 0, 0.2);
-  border-color: #ff3300;
+.amo-btn-pagination:hover:not(:disabled) {
+  background: #1976D2;
 }
 
-.amo-page-btn:disabled {
-  opacity: 0.4;
+.amo-btn-pagination:disabled {
+  background: #ccc;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
-.amo-page-info {
-  color: #ffffff;
-  font-size: 0.9rem;
-}
-
-.amo-total-count {
-  color: #888;
-  font-size: 0.85rem;
-}
-
-/* ========== LOADING & NO DATA ========== */
-.amo-loading,
-.amo-no-data {
-  text-align: center;
-  padding: 3rem;
-  color: #888;
-  font-size: 1rem;
-}
-
-.amo-no-data p {
-  margin: 0;
-}
-
-/* ========== MODAL ========== */
-.amo-modal-overlay {
+/* ==================== MODAL ==================== */
+.amo-modal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 1000;
-  padding: 1rem;
+  padding: 20px;
+  overflow-y: auto;
 }
 
 .amo-modal-content {
-  background: rgba(20, 20, 20, 0.98);
-  border: 1px solid #2c2c2c;
-  border-radius: 12px;
-  max-width: 600px;
+  background: white;
+  border-radius: 8px;
   width: 100%;
+  max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
-.amo-modal-content.amo-modal-large {
+.amo-modal-large {
   max-width: 800px;
 }
 
@@ -303,182 +336,188 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid #2c2c2c;
+  padding: 20px;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .amo-modal-header h2 {
   margin: 0;
-  color: #ffffff;
-  font-size: 1.4rem;
+  font-size: 24px;
+  color: #333;
 }
 
 .amo-modal-close {
   background: none;
   border: none;
-  color: #888;
-  font-size: 2rem;
+  font-size: 32px;
+  color: #999;
   cursor: pointer;
+  line-height: 1;
   padding: 0;
   width: 32px;
   height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
+  transition: color 0.3s ease;
 }
 
 .amo-modal-close:hover {
-  color: #ff3300;
-  transform: scale(1.1);
+  color: #333;
 }
 
-/* ========== FORMS ========== */
-.amo-form,
-.amo-batch-form {
-  padding: 1.5rem;
+/* ==================== FORM ==================== */
+.amo-form {
+  padding: 20px;
 }
 
 .amo-form-row {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 1rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
 }
 
 .amo-form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
+  margin-bottom: 15px;
 }
 
 .amo-form-group label {
-  color: #ffffff;
-  font-size: 0.85rem;
-  font-weight: 500;
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
 }
 
 .amo-form-group input,
 .amo-form-group select,
 .amo-form-group textarea {
-  padding: 0.7rem 0.9rem;
-  background: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
-  border: 1px solid #2c2c2c;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
 }
 
 .amo-form-group input:focus,
 .amo-form-group select:focus,
 .amo-form-group textarea:focus {
-  border-color: #ff3300;
-  background: rgba(255, 255, 255, 0.08);
+  border-color: #2196F3;
   outline: none;
 }
 
-.amo-batch-instructions {
-  background: rgba(255, 51, 0, 0.05);
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 51, 0, 0.2);
-  margin-bottom: 1.5rem;
-}
-
-.amo-batch-instructions p {
-  color: #ffffff;
-  margin: 0.5rem 0;
-  font-size: 0.85rem;
-}
-
-.amo-batch-instructions code {
-  display: block;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 0.6rem;
-  border-radius: 4px;
-  color: #2ed573;
-  font-size: 0.8rem;
-  margin: 0.5rem 0;
-  overflow-x: auto;
-}
-
-.amo-batch-textarea {
-  font-family: 'Courier New', monospace;
-  min-height: 200px;
+.amo-form-group textarea {
   resize: vertical;
+  min-height: 80px;
 }
 
-.amo-modal-actions {
+.amo-form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.8rem;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #2c2c2c;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
 }
 
 .amo-btn-cancel,
 .amo-btn-submit {
-  padding: 0.7rem 1.5rem;
-  border-radius: 6px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .amo-btn-cancel {
-  background: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
-  border: 1px solid #2c2c2c;
+  background: #e0e0e0;
+  color: #333;
 }
 
 .amo-btn-cancel:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: #d0d0d0;
 }
 
 .amo-btn-submit {
-  background: linear-gradient(135deg, #ff3300 0%, #cc2900 100%);
+  background: #2196F3;
   color: white;
-  border: none;
 }
 
 .amo-btn-submit:hover {
+  background: #1976D2;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 51, 0, 0.4);
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
 }
 
-/* ========== MOBILE RESPONSIVE ========== */
-@media (max-width: 768px) {
-  .amo-container {
-    padding: 1rem;
-  }
+/* ==================== BATCH IMPORT ==================== */
+.amo-batch-instructions {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  line-height: 1.6;
+}
 
+.amo-batch-instructions p {
+  margin: 0 0 10px 0;
+}
+
+.amo-batch-instructions p:last-child {
+  margin-bottom: 0;
+}
+
+.amo-batch-instructions pre {
+  background: #263238;
+  color: #aed581;
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 12px;
+  margin: 10px 0;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
   .amo-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .amo-header h1 {
-    font-size: 1.4rem;
+    gap: 15px;
   }
 
   .amo-header-actions {
     width: 100%;
+    justify-content: flex-start;
+  }
+
+  .amo-filter-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .amo-filter-select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .amo-container {
+    padding: 10px;
+  }
+
+  .amo-header h1 {
+    font-size: 22px;
+  }
+
+  .amo-header-actions {
     flex-direction: column;
   }
 
   .amo-btn-primary,
-  .amo-btn-secondary {
+  .amo-btn-secondary,
+  .amo-btn-debug {
     width: 100%;
-    text-align: center;
-  }
-
-  .amo-filter-group {
-    grid-template-columns: 1fr;
   }
 
   .amo-form-row {
@@ -490,77 +529,113 @@
   }
 
   .amo-table {
-    min-width: 800px;
+    font-size: 12px;
   }
 
   .amo-table th,
   .amo-table td {
-    padding: 0.7rem 0.6rem;
-    font-size: 0.8rem;
+    padding: 8px 10px;
   }
 
-  .amo-action-buttons {
+  .amo-pagination {
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 15px;
+  }
+
+  .amo-modal-content {
+    margin: 20px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .amo-header h1 {
+    font-size: 18px;
+  }
+
+  .amo-btn-primary,
+  .amo-btn-secondary,
+  .amo-btn-debug,
+  .amo-btn-clear {
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+
+  .amo-actions {
+    flex-direction: column;
   }
 
   .amo-btn-edit,
   .amo-btn-delete {
     width: 100%;
   }
+}
 
-  .amo-pagination {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
+/* ==================== DARK MODE SUPPORT (OPTIONAL) ==================== */
+@media (prefers-color-scheme: dark) {
+  .amo-container {
+    background: #1a1a1a;
   }
 
-  .amo-page-btn {
-    width: 100%;
-  }
-
+  .amo-header,
+  .amo-filters,
+  .amo-list,
   .amo-modal-content {
-    max-height: 85vh;
+    background: #2d2d2d;
+    color: #e0e0e0;
   }
 
-  .amo-modal-header h2 {
-    font-size: 1.2rem;
+  .amo-header h1,
+  .amo-modal-header h2,
+  .amo-form-group label {
+    color: #e0e0e0;
   }
 
-  .amo-modal-actions {
-    flex-direction: column;
+  .amo-table thead {
+    background: #1a1a1a;
   }
 
-  .amo-btn-cancel,
-  .amo-btn-submit {
-    width: 100%;
+  .amo-table th {
+    color: #e0e0e0;
+    border-bottom-color: #404040;
+  }
+
+  .amo-table td {
+    border-bottom-color: #404040;
+  }
+
+  .amo-table tbody tr:hover {
+    background: #353535;
+  }
+
+  .amo-form-group input,
+  .amo-form-group select,
+  .amo-form-group textarea,
+  .amo-filter-select {
+    background: #353535;
+    border-color: #404040;
+    color: #e0e0e0;
+  }
+
+  .amo-batch-instructions {
+    background: #1a1a1a;
+    color: #e0e0e0;
   }
 }
 
-@media (max-width: 480px) {
-  .amo-header h1 {
-    font-size: 1.2rem;
+/* ==================== PRINT STYLES ==================== */
+@media print {
+  .amo-header-actions,
+  .amo-filters,
+  .amo-actions,
+  .amo-pagination {
+    display: none;
   }
 
-  .amo-btn-primary,
-  .amo-btn-secondary {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
+  .amo-container {
+    background: white;
   }
 
-  .amo-filter-select {
-    padding: 0.5rem 0.6rem;
-    font-size: 0.8rem;
-  }
-
-  .amo-table th,
-  .amo-table td {
-    padding: 0.6rem 0.5rem;
-    font-size: 0.75rem;
-  }
-
-  .amo-condition-badge {
-    font-size: 0.7rem;
-    padding: 0.2rem 0.5rem;
+  .amo-table {
+    font-size: 10px;
   }
 }
