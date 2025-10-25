@@ -639,3 +639,100 @@
     font-size: 10px;
   }
 }
+
+/* ADD THESE STYLES TO YOUR AdminMarketOverview.css FILE */
+
+/* ==================== ERROR BANNER ==================== */
+.amo-error-banner {
+  background: #ffebee;
+  border: 1px solid #f44336;
+  color: #c62828;
+  padding: 15px 20px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  animation: slideDown 0.3s ease;
+}
+
+.amo-error-close {
+  background: none;
+  border: none;
+  color: #c62828;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  transition: color 0.3s ease;
+}
+
+.amo-error-close:hover {
+  color: #d32f2f;
+}
+
+/* ==================== USER INFO BANNER ==================== */
+.amo-user-info {
+  background: #e8f5e9;
+  border: 1px solid #4caf50;
+  color: #2e7d32;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  font-size: 13px;
+  animation: slideDown 0.3s ease;
+}
+
+.amo-user-info strong {
+  font-weight: 600;
+  color: #1b5e20;
+}
+
+/* ==================== ERROR STATE ==================== */
+.amo-error {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.amo-error p {
+  margin: 10px 0;
+  color: #f44336;
+  font-size: 16px;
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .amo-error-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .amo-error-close {
+    align-self: flex-end;
+    margin-top: -30px;
+  }
+
+  .amo-user-info {
+    font-size: 12px;
+  }
+}

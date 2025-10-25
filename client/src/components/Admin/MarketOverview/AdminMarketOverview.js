@@ -1,86 +1,22 @@
 // client/src/components/Admin/MarketOverview/AdminMarketOverview.js
-// COMPLETE VERSION WITH ALL FIXES INTEGRATED
+// FIXED VERSION - Using AuthContext like other admin components
 
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext.js'; // CRITICAL: Import useAuth
 import './AdminMarketOverview.css';
 
-// ==================== HELPER FUNCTIONS ====================
-
-// Get authentication token from localStorage (checks multiple locations)
-const getAuthToken = () => {
-  const token = localStorage.getItem('token') || 
-                localStorage.getItem('adminToken') || 
-                localStorage.getItem('authToken');
-  
-  if (!token) {
-    console.warn('⚠️ No authentication token found in localStorage');
-    console.log('Available localStorage keys:', Object.keys(localStorage));
-  } else {
-    console.log('✅ Token found:', token.substring(0, 20) + '...');
-  }
-  
-  return token;
-};
-
-// Check authentication status (debug helper)
-const checkAuthStatus = async () => {
-  const token = getAuthToken();
-  
-  if (!token) {
-    console.error('❌ No token found');
-    alert('Not logged in. Please login first.');
-    return { authenticated: false };
-  }
-
-  try {
-    const response = await fetch('/api/auth/me', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    
-    const data = await response.json();
-    console.log('👤 Current User:', data);
-    
-    if (data.success) {
-      console.log('✅ Logged in as:', data.data.email);
-      console.log('✅ Role:', data.data.role);
-      
-      if (data.data.role !== 'admin') {
-        console.warn(`⚠️ Your role is "${data.data.role}". Admin role required.`);
-        return { 
-          authenticated: true, 
-          isAdmin: false, 
-          user: data.data 
-        };
-      }
-      
-      return { 
-        authenticated: true, 
-        isAdmin: true, 
-        user: data.data 
-      };
-    } else {
-      console.error('❌ Auth check failed:', data.message);
-      return { authenticated: false };
-    }
-  } catch (error) {
-    console.error('❌ Auth check error:', error);
-    return { authenticated: false };
-  }
-};
-
-// ==================== MAIN COMPONENT ====================
-
 const AdminMarketOverview = () => {
+  // CRITICAL: Get user from AuthContext like other admin components
+  const { user, loading: authLoading } = useAuth();
+  
   // State management
   const [prices, setPrices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [selectedPrice, setSelectedPrice] = useState(null);
-  const [authStatus, setAuthStatus] = useState({ authenticated: false, isAdmin: false });
   
   // Filters state
   const [filters, setFilters] = useState({
@@ -123,29 +59,37 @@ const AdminMarketOverview = () => {
   // Batch import state
   const [batchData, setBatchData] = useState('');
 
-  // ==================== EFFECTS ====================
-
-  // Check auth on mount
+  // CRITICAL: Check admin authentication (same pattern as ArticleManagement)
   useEffect(() => {
-    const verifyAuth = async () => {
-      const status = await checkAuthStatus();
-      setAuthStatus(status);
-      
-      if (!status.authenticated) {
-        console.error('❌ User not authenticated');
-      } else if (!status.isAdmin) {
-        console.warn('⚠️ User is not an admin');
+    if (!authLoading && user) {
+      if (user.role !== 'admin') {
+        setError(`Access denied. Admin role required. Your role: ${user.role}`);
+        return;
       }
-    };
-    
-    verifyAuth();
-  }, []);
+      
+      // Verify token exists
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication token missing. Please log in again.');
+        return;
+      }
+      
+      console.log('✅ Admin authentication verified:', {
+        userRole: user.role,
+        isAdmin: user.role === 'admin',
+        hasToken: !!token,
+        userId: user.id
+      });
+    }
+  }, [user, authLoading]);
 
   // Fetch data when filters or pagination change
   useEffect(() => {
-    fetchPrices();
-    fetchFilterOptions();
-  }, [pagination.currentPage, filters]);
+    if (user && user.role === 'admin') {
+      fetchPrices();
+      fetchFilterOptions();
+    }
+  }, [pagination.currentPage, filters, user]);
 
   // ==================== API FUNCTIONS ====================
 
@@ -153,6 +97,8 @@ const AdminMarketOverview = () => {
   const fetchPrices = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
       const queryParams = new URLSearchParams({
         page: pagination.currentPage,
         limit: pagination.limit,
@@ -161,9 +107,15 @@ const AdminMarketOverview = () => {
 
       console.log('📤 Fetching prices with params:', queryParams.toString());
 
-      const response = await fetch(`/api/market-prices?${queryParams}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/market-prices?${queryParams}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
       const data = await response.json();
-
       console.log('📥 Prices response:', data);
 
       if (data.success) {
@@ -172,9 +124,11 @@ const AdminMarketOverview = () => {
         console.log(`✅ Loaded ${data.data.length} prices`);
       } else {
         console.error('❌ Failed to fetch prices:', data.message);
+        setError(data.message || 'Failed to fetch prices');
       }
     } catch (error) {
       console.error('❌ Error fetching prices:', error);
+      setError('Error loading prices. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -208,9 +162,9 @@ const AdminMarketOverview = () => {
   const handleAddPrice = async (e) => {
     e.preventDefault();
 
-    const token = getAuthToken();
+    const token = localStorage.getItem('token');
     if (!token) {
-      alert('Please login first. No authentication token found.');
+      setError('Please login first. No authentication token found.');
       return;
     }
 
@@ -239,10 +193,12 @@ const AdminMarketOverview = () => {
       } else {
         alert(data.message || 'Failed to add market price');
         console.error('❌ Error details:', data);
+        setError(data.message);
       }
     } catch (error) {
       console.error('❌ Error adding price:', error);
       alert(`Error adding market price: ${error.message}`);
+      setError(error.message);
     }
   };
 
@@ -250,9 +206,9 @@ const AdminMarketOverview = () => {
   const handleEditPrice = async (e) => {
     e.preventDefault();
 
-    const token = getAuthToken();
+    const token = localStorage.getItem('token');
     if (!token) {
-      alert('Please login first. No authentication token found.');
+      setError('Please login first. No authentication token found.');
       return;
     }
 
@@ -281,10 +237,12 @@ const AdminMarketOverview = () => {
       } else {
         alert(data.message || 'Failed to update market price');
         console.error('❌ Error details:', data);
+        setError(data.message);
       }
     } catch (error) {
       console.error('❌ Error updating price:', error);
       alert(`Error updating market price: ${error.message}`);
+      setError(error.message);
     }
   };
 
@@ -294,9 +252,9 @@ const AdminMarketOverview = () => {
       return;
     }
 
-    const token = getAuthToken();
+    const token = localStorage.getItem('token');
     if (!token) {
-      alert('Please login first. No authentication token found.');
+      setError('Please login first. No authentication token found.');
       return;
     }
 
@@ -320,10 +278,12 @@ const AdminMarketOverview = () => {
       } else {
         alert(data.message || 'Failed to delete market price');
         console.error('❌ Error details:', data);
+        setError(data.message);
       }
     } catch (error) {
       console.error('❌ Error deleting price:', error);
       alert(`Error deleting market price: ${error.message}`);
+      setError(error.message);
     }
   };
 
@@ -331,9 +291,9 @@ const AdminMarketOverview = () => {
   const handleBatchImport = async (e) => {
     e.preventDefault();
 
-    const token = getAuthToken();
+    const token = localStorage.getItem('token');
     if (!token) {
-      alert('Please login first. No authentication token found.');
+      setError('Please login first. No authentication token found.');
       return;
     }
 
@@ -382,10 +342,12 @@ const AdminMarketOverview = () => {
       } else {
         alert(data.message || 'Failed to batch import');
         console.error('❌ Error details:', data);
+        setError(data.message);
       }
     } catch (error) {
       console.error('❌ Error batch importing:', error);
       alert(`Error processing batch import: ${error.message}\nPlease check your data format.`);
+      setError(error.message);
     }
   };
 
@@ -446,20 +408,38 @@ const AdminMarketOverview = () => {
     setPagination(prev => ({ ...prev, currentPage: page }));
   };
 
-  // Manual auth check button handler
-  const handleAuthCheck = async () => {
-    const status = await checkAuthStatus();
-    
-    if (!status.authenticated) {
-      alert('❌ Not logged in. Please login first.');
-    } else if (!status.isAdmin) {
-      alert(`⚠️ You are logged in as: ${status.user.email}\nRole: ${status.user.role}\n\nAdmin role required for market price management.`);
-    } else {
-      alert(`✅ Authenticated as admin!\nEmail: ${status.user.email}\nRole: ${status.user.role}`);
-    }
-  };
-
   // ==================== RENDER ====================
+
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="amo-container">
+        <div className="amo-loading">Verifying authentication...</div>
+      </div>
+    );
+  }
+
+  // Show error if not authenticated or not admin
+  if (!user) {
+    return (
+      <div className="amo-container">
+        <div className="amo-error">
+          <p>❌ Not authenticated. Please login to continue.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user.role !== 'admin') {
+    return (
+      <div className="amo-container">
+        <div className="amo-error">
+          <p>❌ Access denied. Admin role required.</p>
+          <p>Your role: {user.role}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="amo-container">
@@ -467,13 +447,6 @@ const AdminMarketOverview = () => {
       <div className="amo-header">
         <h1>Market Overview Management</h1>
         <div className="amo-header-actions">
-          <button 
-            className="amo-btn-debug" 
-            onClick={handleAuthCheck}
-            title="Check authentication status"
-          >
-            🔐 Check Auth
-          </button>
           <button className="amo-btn-primary" onClick={() => setShowAddModal(true)}>
             + Add Price
           </button>
@@ -483,17 +456,18 @@ const AdminMarketOverview = () => {
         </div>
       </div>
 
-      {/* Auth Status Warning */}
-      {authStatus.authenticated && !authStatus.isAdmin && (
-        <div className="amo-warning">
-          ⚠️ Warning: You are logged in but don't have admin role. 
-          You need admin privileges to manage market prices.
+      {/* Error Display */}
+      {error && (
+        <div className="amo-error-banner">
+          ⚠️ {error}
+          <button onClick={() => setError(null)} className="amo-error-close">×</button>
         </div>
       )}
 
-      {!authStatus.authenticated && (
-        <div className="amo-warning">
-          ⚠️ Warning: Not authenticated. Please login to manage market prices.
+      {/* User Info (Debug) */}
+      {user && (
+        <div className="amo-user-info">
+          Logged in as: <strong>{user.email}</strong> (Role: <strong>{user.role}</strong>)
         </div>
       )}
 
@@ -786,6 +760,7 @@ const AdminMarketOverview = () => {
             </div>
             
             <form onSubmit={handleEditPrice} className="amo-form">
+              {/* Same form fields as Add Modal */}
               <div className="amo-form-row">
                 <div className="amo-form-group">
                   <label>Make *</label>
@@ -929,22 +904,12 @@ const AdminMarketOverview = () => {
     "price": 180000,
     "mileage": 45000,
     "location": "Gaborone"
-  },
-  {
-    "make": "BMW",
-    "model": "X5",
-    "year": 2019,
-    "condition": "used",
-    "price": 450000,
-    "mileage": 60000,
-    "location": "Francistown"
   }
 ]`}</pre>
 
                 <p><strong>CSV Format Example:</strong></p>
                 <pre>{`make,model,year,condition,price,mileage,location
-Toyota,Camry,2020,used,180000,45000,Gaborone
-BMW,X5,2019,used,450000,60000,Francistown`}</pre>
+Toyota,Camry,2020,used,180000,45000,Gaborone`}</pre>
               </div>
 
               <div className="amo-form-group">
