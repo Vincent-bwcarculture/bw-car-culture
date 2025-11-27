@@ -59,32 +59,38 @@ const Advertisement = ({
     try {
       setLoading(true);
       
-      // Fetch featured/premium listings for slides
+      // Fetch ONLY featured listings
       const featuredResponse = await listingService.getListings({
         status: 'active',
         featured: true,
-        limit: 5
+        limit: 20  // Fetch more to have a good pool for random selection
       }, 1);
 
-      // Fetch recent listings as backup
-      const recentResponse = await listingService.getListings({
-        status: 'active',
-        sort: '-createdAt',
-        limit: 5
-      }, 1);
-
-      // Combine and get unique listings
-      const allListings = [
-        ...(featuredResponse.listings || []),
-        ...(recentResponse.listings || [])
-      ];
+      const featuredListings = featuredResponse.listings || [];
       
-      // Remove duplicates by _id
-      const uniqueListings = allListings.filter((listing, index, self) =>
-        index === self.findIndex((l) => l._id === listing._id)
-      ).slice(0, 5);
+      console.log('📊 Total featured listings fetched:', featuredListings.length);
 
-      console.log('📊 Fetched listings for advertisement:', uniqueListings.length);
+      // Shuffle array to get random selection
+      const shuffleArray = (array) => {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+      };
+
+      // Get 5 random featured vehicles
+      const shuffledListings = shuffleArray(featuredListings);
+      const randomFeaturedVehicles = shuffledListings.slice(0, 5);
+
+      console.log('🎲 Selected random featured vehicles:', randomFeaturedVehicles.length);
+      console.log('🚗 Vehicle details:', randomFeaturedVehicles.map(v => ({
+        id: v._id,
+        make: v.make,
+        model: v.model,
+        featured: v.featured
+      })));
 
       // Create slides with actual car images
       const slides = [
@@ -102,8 +108,8 @@ const Advertisement = ({
             "Fast Listing Process",
             "Verified Buyers"
           ],
-          imageUrl: uniqueListings[0] ? getImageUrl(uniqueListings[0]) : '/images/placeholders/car.jpg',
-          listing: uniqueListings[0]
+          imageUrl: randomFeaturedVehicles[0] ? getImageUrl(randomFeaturedVehicles[0]) : '/images/placeholders/car.jpg',
+          listing: randomFeaturedVehicles[0]
         },
         {
           id: 2,
@@ -119,8 +125,8 @@ const Advertisement = ({
             "Direct Buyer Contact", 
             "Zero Hidden Costs"
           ],
-          imageUrl: uniqueListings[1] ? getImageUrl(uniqueListings[1]) : '/images/placeholders/car.jpg',
-          listing: uniqueListings[1]
+          imageUrl: randomFeaturedVehicles[1] ? getImageUrl(randomFeaturedVehicles[1]) : '/images/placeholders/car.jpg',
+          listing: randomFeaturedVehicles[1]
         },
         {
           id: 3,
@@ -136,8 +142,8 @@ const Advertisement = ({
             "Secure Transactions",
             "Professional Support"
           ],
-          imageUrl: uniqueListings[2] ? getImageUrl(uniqueListings[2]) : '/images/placeholders/car.jpg',
-          listing: uniqueListings[2]
+          imageUrl: randomFeaturedVehicles[2] ? getImageUrl(randomFeaturedVehicles[2]) : '/images/placeholders/car.jpg',
+          listing: randomFeaturedVehicles[2]
         },
         {
           id: 4,
@@ -154,8 +160,8 @@ const Advertisement = ({
             { platform: "Instagram", count: "14K", icon: "instagram" }
           ],
           showWhatsApp: true,
-          imageUrl: uniqueListings[3] ? getImageUrl(uniqueListings[3]) : '/images/placeholders/car.jpg',
-          listing: uniqueListings[3]
+          imageUrl: randomFeaturedVehicles[3] ? getImageUrl(randomFeaturedVehicles[3]) : '/images/placeholders/car.jpg',
+          listing: randomFeaturedVehicles[3]
         },
         {
           id: 5,
@@ -171,11 +177,12 @@ const Advertisement = ({
             "Wide Exposure",
             "Dedicated Support"
           ],
-          imageUrl: uniqueListings[4] ? getImageUrl(uniqueListings[4]) : '/images/placeholders/car.jpg',
-          listing: uniqueListings[4]
+          imageUrl: randomFeaturedVehicles[4] ? getImageUrl(randomFeaturedVehicles[4]) : '/images/placeholders/car.jpg',
+          listing: randomFeaturedVehicles[4]
         }
       ];
 
+      console.log('✅ Slides created with featured vehicles');
       setSlideData(slides);
     } catch (error) {
       console.error('❌ Error fetching slide data:', error);
@@ -191,6 +198,59 @@ const Advertisement = ({
           bgGradient: "linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)",
           textColor: "#ffffff",
           highlights: ["No Hidden Fees", "Fast Listing Process", "Verified Buyers"],
+          imageUrl: '/images/placeholders/car.jpg'
+        },
+        {
+          id: 2,
+          title: "Affordable Cars, Affordable Selling",
+          subtitle: "BEST VALUE GUARANTEE",
+          description: "Because selling through Bw Car Culture is affordable, cars sold here are affordable too. No extra expenses on your sale.",
+          ctaText: "Browse Vehicles",
+          ctaAction: () => navigate('/marketplace'),
+          bgGradient: "linear-gradient(135deg, #16213e 0%, #1a1a2e 100%)",
+          textColor: "#ffffff",
+          highlights: ["Lowest Commission", "Direct Buyer Contact", "Zero Hidden Costs"],
+          imageUrl: '/images/placeholders/car.jpg'
+        },
+        {
+          id: 3,
+          title: "Botswana's Leading Automotive Community",
+          subtitle: "TRUSTED & VERIFIED",
+          description: "Access thousands of verified listings from trusted sellers and dealerships across Botswana.",
+          ctaText: "View All Listings",
+          ctaAction: () => navigate('/marketplace'),
+          bgGradient: "linear-gradient(135deg, #0f3460 0%, #16213e 100%)",
+          textColor: "#ffffff",
+          highlights: ["Quality Verified", "Secure Transactions", "Professional Support"],
+          imageUrl: '/images/placeholders/car.jpg'
+        },
+        {
+          id: 4,
+          title: "Join Our Growing Community",
+          subtitle: "SOCIAL REACH",
+          description: "Sell your vehicle today. Fast and for value.",
+          ctaText: "Contact Us on WhatsApp",
+          ctaAction: () => window.open(`https://wa.me/${WHATSAPP_NUMBER}`, '_blank'),
+          bgGradient: "linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)",
+          textColor: "#ffffff",
+          socialStats: [
+            { platform: "Facebook", count: "640K", icon: "facebook" },
+            { platform: "TikTok", count: "33K", icon: "tiktok" },
+            { platform: "Instagram", count: "14K", icon: "instagram" }
+          ],
+          showWhatsApp: true,
+          imageUrl: '/images/placeholders/car.jpg'
+        },
+        {
+          id: 5,
+          title: "Fast, Secure & Value-Driven Sales",
+          subtitle: "PROVEN TRACK RECORD",
+          description: "List once, reach thousands. Our platform connects serious buyers with quality sellers instantly.",
+          ctaText: "Start Selling",
+          ctaAction: () => navigate('/marketplace/sell'),
+          bgGradient: "linear-gradient(135deg, #16213e 0%, #1a1a2e 100%)",
+          textColor: "#ffffff",
+          highlights: ["Quick Turnaround", "Wide Exposure", "Dedicated Support"],
           imageUrl: '/images/placeholders/car.jpg'
         }
       ]);
