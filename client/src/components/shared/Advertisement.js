@@ -24,97 +24,184 @@ const Advertisement = ({
   // WhatsApp contact number
   const WHATSAPP_NUMBER = "+26774122453";
 
-  // Professional slide data focused on car sales platform messaging
-  const getProfessionalSlides = () => [
-    {
-      id: 1,
-      title: "The #1 Car Sales Platform in Botswana",
-      subtitle: "TRUSTED MARKETPLACE",
-      description: "Join thousands of satisfied buyers and sellers. Most affordable way to sell your car with no huge commission charges.",
-      ctaText: "List Your Vehicle",
-      ctaAction: () => navigate('/marketplace/sell'),
-      bgGradient: "linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)",
-      textColor: "#ffffff",
-      highlights: [
-        "No Hidden Fees",
-        "Fast Listing Process",
-        "Verified Buyers"
-      ]
-    },
-    {
-      id: 2,
-      title: "Affordable Cars, Affordable Selling",
-      subtitle: "BEST VALUE GUARANTEE",
-      description: "Because selling through Bw Car Culture is affordable, cars sold here are affordable too. No extra expenses on your sale.",
-      ctaText: "Browse Vehicles",
-      ctaAction: () => navigate('/marketplace'),
-      bgGradient: "linear-gradient(135deg, #16213e 0%, #1a1a2e 100%)",
-      textColor: "#ffffff",
-      highlights: [
-        "Lowest Commission",
-        "Direct Buyer Contact", 
-        "Zero Hidden Costs"
-      ]
-    },
-    {
-      id: 3,
-      title: "Botswana's Leading Automotive Community",
-      subtitle: "TRUSTED & VERIFIED",
-      description: "Access thousands of verified listings from trusted sellers and dealerships across Botswana.",
-      ctaText: "View All Listings",
-      ctaAction: () => navigate('/marketplace'),
-      bgGradient: "linear-gradient(135deg, #0f3460 0%, #16213e 100%)",
-      textColor: "#ffffff",
-      highlights: [
-        "Quality Verified",
-        "Secure Transactions",
-        "Professional Support"
-      ]
-    },
-    {
-      id: 4,
-      title: "Join Our Growing Community",
-      subtitle: "SOCIAL REACH",
-      description: "Sell your vehicle today. Fast and for value.",
-      ctaText: "Contact Us on WhatsApp",
-      ctaAction: () => window.open(`https://wa.me/${WHATSAPP_NUMBER}`, '_blank'),
-      bgGradient: "linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)",
-      textColor: "#ffffff",
-      socialStats: [
-        { platform: "Facebook", count: "640K", icon: "facebook" },
-        { platform: "TikTok", count: "33K", icon: "tiktok" },
-        { platform: "Instagram", count: "14K", icon: "instagram" }
-      ],
-      showWhatsApp: true
-    },
-    {
-      id: 5,
-      title: "Fast, Secure & Value-Driven Sales",
-      subtitle: "PROVEN TRACK RECORD",
-      description: "List once, reach thousands. Our platform connects serious buyers with quality sellers instantly.",
-      ctaText: "Start Selling",
-      ctaAction: () => navigate('/marketplace/sell'),
-      bgGradient: "linear-gradient(135deg, #16213e 0%, #1a1a2e 100%)",
-      textColor: "#ffffff",
-      highlights: [
-        "Quick Turnaround",
-        "Wide Exposure",
-        "Dedicated Support"
-      ]
+  // Helper function to get image URL from listing
+  const getImageUrl = (listing) => {
+    if (!listing || !listing.images || listing.images.length === 0) {
+      return '/images/placeholders/car.jpg';
     }
-  ];
+
+    const primaryImage = listing.images.find(img => img.isPrimary) || listing.images[0];
+    
+    if (typeof primaryImage === 'string') {
+      return primaryImage.includes('/images/images/') 
+        ? primaryImage.replace(/\/images\/images\//g, '/images/')
+        : primaryImage;
+    }
+    
+    if (primaryImage && typeof primaryImage === 'object') {
+      const url = primaryImage.url || primaryImage.thumbnail || '';
+      if (url) {
+        return url.includes('/images/images/') 
+          ? url.replace(/\/images\/images\//g, '/images/')
+          : url;
+      }
+      
+      if (primaryImage.key) {
+        return `/api/images/s3-proxy/${primaryImage.key}`;
+      }
+    }
+    
+    return '/images/placeholders/car.jpg';
+  };
+
+  // Fetch real car listings and create slides
+  const fetchSlideData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch featured/premium listings for slides
+      const featuredResponse = await listingService.getListings({
+        status: 'active',
+        featured: true,
+        limit: 5
+      }, 1);
+
+      // Fetch recent listings as backup
+      const recentResponse = await listingService.getListings({
+        status: 'active',
+        sort: '-createdAt',
+        limit: 5
+      }, 1);
+
+      // Combine and get unique listings
+      const allListings = [
+        ...(featuredResponse.listings || []),
+        ...(recentResponse.listings || [])
+      ];
+      
+      // Remove duplicates by _id
+      const uniqueListings = allListings.filter((listing, index, self) =>
+        index === self.findIndex((l) => l._id === listing._id)
+      ).slice(0, 5);
+
+      console.log('📊 Fetched listings for advertisement:', uniqueListings.length);
+
+      // Create slides with actual car images
+      const slides = [
+        {
+          id: 1,
+          title: "The #1 Car Sales Platform in Botswana",
+          subtitle: "TRUSTED MARKETPLACE",
+          description: "Join thousands of satisfied buyers and sellers. Most affordable way to sell your car with no huge commission charges.",
+          ctaText: "List Your Vehicle",
+          ctaAction: () => navigate('/marketplace/sell'),
+          bgGradient: "linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)",
+          textColor: "#ffffff",
+          highlights: [
+            "No Hidden Fees",
+            "Fast Listing Process",
+            "Verified Buyers"
+          ],
+          imageUrl: uniqueListings[0] ? getImageUrl(uniqueListings[0]) : '/images/placeholders/car.jpg',
+          listing: uniqueListings[0]
+        },
+        {
+          id: 2,
+          title: "Affordable Cars, Affordable Selling",
+          subtitle: "BEST VALUE GUARANTEE",
+          description: "Because selling through Bw Car Culture is affordable, cars sold here are affordable too. No extra expenses on your sale.",
+          ctaText: "Browse Vehicles",
+          ctaAction: () => navigate('/marketplace'),
+          bgGradient: "linear-gradient(135deg, #16213e 0%, #1a1a2e 100%)",
+          textColor: "#ffffff",
+          highlights: [
+            "Lowest Commission",
+            "Direct Buyer Contact", 
+            "Zero Hidden Costs"
+          ],
+          imageUrl: uniqueListings[1] ? getImageUrl(uniqueListings[1]) : '/images/placeholders/car.jpg',
+          listing: uniqueListings[1]
+        },
+        {
+          id: 3,
+          title: "Botswana's Leading Automotive Community",
+          subtitle: "TRUSTED & VERIFIED",
+          description: "Access thousands of verified listings from trusted sellers and dealerships across Botswana.",
+          ctaText: "View All Listings",
+          ctaAction: () => navigate('/marketplace'),
+          bgGradient: "linear-gradient(135deg, #0f3460 0%, #16213e 100%)",
+          textColor: "#ffffff",
+          highlights: [
+            "Quality Verified",
+            "Secure Transactions",
+            "Professional Support"
+          ],
+          imageUrl: uniqueListings[2] ? getImageUrl(uniqueListings[2]) : '/images/placeholders/car.jpg',
+          listing: uniqueListings[2]
+        },
+        {
+          id: 4,
+          title: "Join Our Growing Community",
+          subtitle: "SOCIAL REACH",
+          description: "Sell your vehicle today. Fast and for value.",
+          ctaText: "Contact Us on WhatsApp",
+          ctaAction: () => window.open(`https://wa.me/${WHATSAPP_NUMBER}`, '_blank'),
+          bgGradient: "linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)",
+          textColor: "#ffffff",
+          socialStats: [
+            { platform: "Facebook", count: "640K", icon: "facebook" },
+            { platform: "TikTok", count: "33K", icon: "tiktok" },
+            { platform: "Instagram", count: "14K", icon: "instagram" }
+          ],
+          showWhatsApp: true,
+          imageUrl: uniqueListings[3] ? getImageUrl(uniqueListings[3]) : '/images/placeholders/car.jpg',
+          listing: uniqueListings[3]
+        },
+        {
+          id: 5,
+          title: "Fast, Secure & Value-Driven Sales",
+          subtitle: "PROVEN TRACK RECORD",
+          description: "List once, reach thousands. Our platform connects serious buyers with quality sellers instantly.",
+          ctaText: "Start Selling",
+          ctaAction: () => navigate('/marketplace/sell'),
+          bgGradient: "linear-gradient(135deg, #16213e 0%, #1a1a2e 100%)",
+          textColor: "#ffffff",
+          highlights: [
+            "Quick Turnaround",
+            "Wide Exposure",
+            "Dedicated Support"
+          ],
+          imageUrl: uniqueListings[4] ? getImageUrl(uniqueListings[4]) : '/images/placeholders/car.jpg',
+          listing: uniqueListings[4]
+        }
+      ];
+
+      setSlideData(slides);
+    } catch (error) {
+      console.error('❌ Error fetching slide data:', error);
+      // Fallback to slides without images
+      setSlideData([
+        {
+          id: 1,
+          title: "The #1 Car Sales Platform in Botswana",
+          subtitle: "TRUSTED MARKETPLACE",
+          description: "Join thousands of satisfied buyers and sellers. Most affordable way to sell your car with no huge commission charges.",
+          ctaText: "List Your Vehicle",
+          ctaAction: () => navigate('/marketplace/sell'),
+          bgGradient: "linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)",
+          textColor: "#ffffff",
+          highlights: ["No Hidden Fees", "Fast Listing Process", "Verified Buyers"],
+          imageUrl: '/images/placeholders/car.jpg'
+        }
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Initialize data
   useEffect(() => {
-    const initSlides = async () => {
-      setLoading(true);
-      // For now, use professional slides without dynamic content
-      // This ensures consistent sizing and professional messaging
-      setSlideData(getProfessionalSlides());
-      setLoading(false);
-    };
-    
-    initSlides();
+    fetchSlideData();
   }, []);
 
   // Auto-play
@@ -262,9 +349,35 @@ const Advertisement = ({
             </button>
           </div>
 
-          {/* Decorative element / Pattern instead of car image */}
+          {/* Car Image Display */}
           <div className="advertisement-visual">
-            <div className="visual-pattern"></div>
+            {currentSlideData?.imageUrl ? (
+              <div className="car-image-container">
+                <img 
+                  src={currentSlideData.imageUrl} 
+                  alt={currentSlideData.listing?.make || "Featured Vehicle"}
+                  className="car-image"
+                  onError={(e) => {
+                    console.log('Image failed to load, using placeholder');
+                    e.target.src = '/images/placeholders/car.jpg';
+                  }}
+                />
+                {currentSlideData.listing && (
+                  <div className="car-image-overlay">
+                    <div className="car-quick-info">
+                      {currentSlideData.listing.make && (
+                        <span className="car-make">{currentSlideData.listing.make}</span>
+                      )}
+                      {currentSlideData.listing.model && (
+                        <span className="car-model">{currentSlideData.listing.model}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="visual-pattern"></div>
+            )}
           </div>
         </div>
 
