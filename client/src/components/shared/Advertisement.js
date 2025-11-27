@@ -1,6 +1,6 @@
 // src/components/shared/Advertisement/Advertisement.js - Redesigned Professional Version
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronLeft, ChevronRight, ArrowRight, Facebook, Instagram, MessageCircle } from 'lucide-react';
+import { ChevronsLeft, ChevronsRight, ArrowRight, Facebook, Instagram, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { listingService } from '../../services/listingService.js';
 import './Advertisement.css';
@@ -449,14 +449,14 @@ const Advertisement = ({
               onClick={goToPrevious}
               aria-label="Previous slide"
             >
-              <ChevronLeft size={20} />
+              <ChevronsLeft size={16} />
             </button>
             <button 
               className="nav-arrow nav-arrow-right"
               onClick={goToNext}
               aria-label="Next slide"
             >
-              <ChevronRight size={20} />
+              <ChevronsRight size={16} />
             </button>
           </>
         )}

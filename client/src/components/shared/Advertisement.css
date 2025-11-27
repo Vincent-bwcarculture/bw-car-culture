@@ -317,11 +317,11 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  background: rgba(0, 0, 0, 0.5);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
   color: white;
   cursor: pointer;
   display: flex;
@@ -335,15 +335,15 @@
 .nav-arrow:hover {
   background: rgba(255, 51, 0, 0.9);
   border-color: rgba(255, 51, 0, 0.5);
-  transform: translateY(-50%) scale(1.1);
+  transform: translateY(-50%) scale(1.05);
 }
 
 .nav-arrow-left {
-  left: 1rem;
+  left: 0.8rem;
 }
 
 .nav-arrow-right {
-  right: 1rem;
+  right: 0.8rem;
 }
 
 /* Dots Indicator */
@@ -519,16 +519,16 @@
   }
 
   .nav-arrow {
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
   }
 
   .nav-arrow-left {
-    left: 0.5rem;
+    left: 0.6rem;
   }
 
   .nav-arrow-right {
-    right: 0.5rem;
+    right: 0.6rem;
   }
 }
 
@@ -605,8 +605,8 @@
   }
 
   .nav-arrow {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
   }
 
   .dots-container {
@@ -653,8 +653,8 @@
   }
 
   .nav-arrow {
-    min-height: 48px;
-    min-width: 48px;
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
