@@ -143,6 +143,7 @@ export const useArticleData = () => {
 
   /**
    * Calculate and update statistics based on current articles
+   * ENHANCED: Now with error handling to prevent breaking the app
    */
   const loadStats = async () => {
     try {
@@ -240,6 +241,28 @@ export const useArticleData = () => {
       console.error('\n❌ ===== STATS CALCULATION FAILED =====');
       console.error('Error:', error.message);
       console.error('🏁 ===== ERROR PROCESSING COMPLETE =====\n');
+      
+      // Set default stats instead of breaking the app
+      setStats({
+        totalArticles: articles.length,
+        publishedArticles: articles.filter(a => a.status === 'published').length,
+        draftArticles: articles.filter(a => a.status === 'draft').length,
+        totalViews: 0,
+        totalShares: 0,
+        totalLikes: 0,
+        totalComments: 0,
+        totalEarnings: 0,
+        thisMonthEarnings: 0,
+        pendingEarnings: 0,
+        averageEarningsPerView: 0,
+        topEarningArticle: null,
+        totalEngagement: 0,
+        thisMonthEngagement: 0,
+        averageEngagementPerArticle: 0,
+        engagementRate: 0,
+        topEngagementArticle: null,
+        projectedMonthlyEarnings: 0
+      });
     }
   };
 
@@ -482,11 +505,22 @@ export const useArticleData = () => {
     loadArticles();
   }, []);
 
-  // Update stats when articles change
+  // ENHANCED: Update stats when articles change - WITH ERROR HANDLING
+  // This prevents stats errors from breaking article creation
   useEffect(() => {
     if (!loading && articles.length >= 0) {
       console.log('📊 Articles changed, recalculating stats...');
-      loadStats();
+      
+      // Wrap in async IIFE to handle promise properly
+      (async () => {
+        try {
+          await loadStats();
+        } catch (statsError) {
+          console.warn('⚠️ Stats loading failed (non-critical):', statsError.message);
+          // Don't throw - stats failures shouldn't break article operations
+          // The error is already handled in loadStats() with default stats
+        }
+      })();
     }
   }, [articles, loading]);
 
