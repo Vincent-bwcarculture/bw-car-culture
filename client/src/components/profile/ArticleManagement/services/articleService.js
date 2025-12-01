@@ -1,5 +1,6 @@
 // client/src/components/profile/ArticleManagement/services/articleService.js
-// COMPLETE FIXED VERSION - Based on working dealer service patterns
+// COMPLETE FIXED VERSION - All improvements integrated
+// Based on working dealer service patterns with enhanced error handling
 
 import axios from 'axios';
 
@@ -11,7 +12,7 @@ class ArticleApiService {
     // FIXED: Create dedicated axios instance following dealer service pattern
     this.axios = axios.create({
       baseURL: this.baseURL,
-      timeout: 300000, // 5 minutes
+      timeout: 300000, // 5 minutes for large uploads
       headers: {
         'Content-Type': 'application/json'
       }
@@ -140,13 +141,15 @@ class ArticleApiService {
   }
 
   /**
-   * Enhanced FormData creation - COPIED from working dealer service pattern
+   * ENHANCED FormData creation with proper image handling
+   * CRITICAL FIX: Using 'galleryImages' (plural) for gallery upload field name
    */
   createFormData(articleData) {
     try {
+      console.log('\n📦 ===== CREATING FORMDATA =====');
       const formData = new FormData();
       
-      console.log('📋 Creating FormData from article data:', {
+      console.log('📋 Input article data:', {
         title: articleData.title,
         hasContent: !!articleData.content,
         contentLength: articleData.content?.length || 0,
@@ -154,10 +157,14 @@ class ArticleApiService {
         galleryImagesCount: articleData.galleryImageFiles?.length || 0
       });
       
-      // Add text fields (same as dealers)
+      // TEXT FIELDS - Add all required text fields first
       const textFields = [
-        'title', 'subtitle', 'content', 'category', 'status', 
-        'metaTitle', 'metaDescription', 'metaKeywords'
+        'title',
+        'subtitle', 
+        'content',
+        'category',
+        'status',
+        'authorNotes'
       ];
       
       textFields.forEach(field => {
@@ -165,56 +172,101 @@ class ArticleApiService {
           const value = String(articleData[field]).trim();
           if (value) {
             formData.append(field, value);
-            console.log(`📝 Added field ${field}:`, value.substring(0, 50) + (value.length > 50 ? '...' : ''));
+            console.log(`📝 Added ${field}:`, 
+              value.length > 50 ? `${value.substring(0, 50)}...` : value
+            );
           }
         }
       });
       
-      // Add arrays and objects (same as dealers)
+      // ARRAYS - Handle tags
       if (articleData.tags && Array.isArray(articleData.tags)) {
         formData.append('tags', JSON.stringify(articleData.tags));
         console.log('📝 Added tags:', articleData.tags);
       }
       
-      // Add dates
+      // DATES
       if (articleData.publishDate) {
         formData.append('publishDate', articleData.publishDate);
         console.log('📝 Added publishDate:', articleData.publishDate);
       }
       
-      // Add boolean fields
+      // BOOLEAN FIELDS
       const booleanFields = ['isPremium', 'earningsEnabled', 'allowComments', 'allowSharing'];
       booleanFields.forEach(field => {
         if (articleData[field] !== undefined) {
           formData.append(field, Boolean(articleData[field]).toString());
+          console.log(`📝 Added ${field}:`, articleData[field]);
         }
       });
       
-      // FIXED: Add images properly (following dealer image upload pattern)
+      // SEO FIELDS
+      if (articleData.metaTitle) {
+        formData.append('metaTitle', articleData.metaTitle);
+        console.log('📝 Added metaTitle');
+      }
+      if (articleData.metaDescription) {
+        formData.append('metaDescription', articleData.metaDescription);
+        console.log('📝 Added metaDescription');
+      }
+      if (articleData.metaKeywords) {
+        formData.append('metaKeywords', articleData.metaKeywords);
+        console.log('📝 Added metaKeywords');
+      }
+      
+      // FEATURED IMAGE - Using 'featuredImage' as field name
       if (articleData.featuredImageFile && articleData.featuredImageFile instanceof File) {
-        formData.append('featuredImageFile', articleData.featuredImageFile);
+        formData.append('featuredImage', articleData.featuredImageFile);
         console.log('🖼️ Added featured image:', {
           name: articleData.featuredImageFile.name,
-          size: articleData.featuredImageFile.size,
+          size: `${(articleData.featuredImageFile.size / 1024 / 1024).toFixed(2)}MB`,
           type: articleData.featuredImageFile.type
         });
       }
       
-      // Add gallery images
+      // GALLERY IMAGES - CRITICAL FIX: Using 'galleryImages' (plural) as field name
+      // Backend expects multiple files under the same 'galleryImages' field name
       if (articleData.galleryImageFiles && Array.isArray(articleData.galleryImageFiles)) {
+        console.log(`🖼️ Processing ${articleData.galleryImageFiles.length} gallery images...`);
+        
         articleData.galleryImageFiles.forEach((file, index) => {
           if (file instanceof File) {
-            formData.append('galleryImageFiles', file);
+            // IMPORTANT: Use 'galleryImages' (plural) as the field name
+            // This allows the backend to receive multiple files under one field name
+            formData.append('galleryImages', file);
             console.log(`🖼️ Added gallery image ${index + 1}:`, {
               name: file.name,
-              size: file.size,
+              size: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
               type: file.type
             });
           }
         });
       }
       
-      console.log('✅ FormData created successfully');
+      // LOG FINAL FORMDATA SUMMARY
+      console.log('\n✅ FormData created successfully');
+      console.log('📊 Summary:', {
+        textFields: textFields.filter(f => articleData[f]).length,
+        featuredImage: !!articleData.featuredImageFile,
+        galleryImages: articleData.galleryImageFiles?.length || 0,
+        totalFormDataEntries: Array.from(formData.keys()).length
+      });
+      
+      // Log all FormData entries for debugging
+      console.log('📋 FormData entries:');
+      for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(`  - ${key}: [File] ${value.name} (${(value.size / 1024).toFixed(1)}KB)`);
+        } else {
+          const displayValue = String(value).length > 50 
+            ? String(value).substring(0, 50) + '...' 
+            : value;
+          console.log(`  - ${key}: ${displayValue}`);
+        }
+      }
+      
+      console.log('🏁 ===== FORMDATA CREATION COMPLETE =====\n');
+      
       return formData;
       
     } catch (error) {
@@ -224,7 +276,7 @@ class ArticleApiService {
   }
 
   /**
-   * FIXED: Create user article - Following exact dealer service pattern
+   * ENHANCED: Create user article with comprehensive error handling
    */
   async createUserArticle(articleData) {
     try {
@@ -237,7 +289,7 @@ class ArticleApiService {
         hasAuth: !!localStorage.getItem('token')
       });
 
-      // Validate required fields (same as dealers)
+      // VALIDATION - Validate required fields
       if (!articleData.title?.trim()) {
         throw new Error('Article title is required');
       }
@@ -248,43 +300,42 @@ class ArticleApiService {
         throw new Error('Article category is required');
       }
 
-      // Check authentication (same as dealers)
+      // CHECK AUTHENTICATION
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('Authentication required. Please log in again.');
       }
 
-      // FIXED: Use exact endpoint path from backend
+      // ENDPOINT - Use exact endpoint path from backend
       const endpoint = '/news/user';
-      
-      console.log('📤 Making request to:', `${this.baseURL}${endpoint}`);
+      console.log('📤 Target endpoint:', `${this.baseURL}${endpoint}`);
 
-      // Check for images (same as dealers)
+      // CHECK FOR IMAGES
       const hasImages = articleData.featuredImageFile || 
                        (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
       
-      console.log('📊 Upload details:', {
-        hasImages,
-        featuredImage: !!articleData.featuredImageFile,
-        galleryImages: articleData.galleryImageFiles?.length || 0,
-        totalSize: hasImages ? 'Calculated...' : 0
-      });
+      console.log('📊 Upload type:', hasImages ? 'WITH IMAGES (FormData)' : 'TEXT ONLY (JSON)');
 
       let response;
       
       if (hasImages) {
-        // Use FormData for file uploads (same as dealers)
+        // FORMDATA FOR IMAGES
         console.log('📎 Preparing FormData for image upload...');
         const formData = this.createFormData(articleData);
         
         response = await this.axios.post(endpoint, formData, {
-          timeout: 300000, // 5 minutes for uploads
+          timeout: 300000, // 5 minutes for large uploads
           headers: {
-            // Let browser set Content-Type for FormData
+            // Let browser set Content-Type with boundary for FormData
+            // DO NOT manually set Content-Type for multipart
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log(`📤 Upload progress: ${percentCompleted}%`);
           }
         });
       } else {
-        // Use JSON for text-only (same as dealers)
+        // JSON FOR TEXT ONLY
         console.log('📝 Preparing JSON for text-only request...');
         const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
         
@@ -296,20 +347,21 @@ class ArticleApiService {
         });
       }
 
-      console.log('📨 Raw response received:', {
+      // VALIDATE RESPONSE
+      console.log('📨 Response received:', {
         status: response.status,
         success: response.data?.success,
         hasData: !!response.data?.data,
         message: response.data?.message
       });
-
-      // Check for HTML response (indicates endpoint not found)
+      
+      // Check for HTML response (indicates wrong endpoint)
       if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE')) {
         console.error('🚨 Server returned HTML instead of JSON');
-        throw new Error('API endpoint not found. Server returned HTML page instead of JSON.');
+        throw new Error('API endpoint not found or not properly configured');
       }
 
-      // Validate successful response (same as dealers)
+      // Validate successful response
       if (!response.data?.success) {
         const errorMsg = response.data?.message || 'Article creation failed';
         console.error('❌ API returned failure:', errorMsg);
@@ -323,7 +375,7 @@ class ArticleApiService {
 
       const createdArticle = response.data.data;
       
-      // Validate article has required ID (same as dealers)
+      // Validate article has required ID
       if (!createdArticle._id) {
         console.error('❌ Created article missing ID');
         throw new Error('Article created but missing database ID');
@@ -333,13 +385,13 @@ class ArticleApiService {
         id: createdArticle._id,
         title: createdArticle.title,
         status: createdArticle.status,
-        author: createdArticle.author
+        author: createdArticle.authorName || createdArticle.author
       });
       
       console.log('🏁 ===== USER ARTICLE CREATION COMPLETED =====\n');
       
       return createdArticle;
-
+      
     } catch (error) {
       console.error('\n❌ ===== USER ARTICLE CREATION FAILED =====');
       console.error('Error details:', {
@@ -350,19 +402,29 @@ class ArticleApiService {
         url: error.config?.url
       });
       
-      // Enhanced error messages (same as dealers)
-      if (error.response?.status === 404) {
-        throw new Error('Article creation endpoint not found on server. Please check server configuration.');
-      } else if (error.response?.status === 401) {
-        throw new Error('Authentication failed. Please log in again.');
-      } else if (error.response?.status === 403) {
-        throw new Error('Permission denied. Check if your account can create articles.');
-      } else if (error.response?.status === 500) {
-        throw new Error('Server error occurred. Please try again or contact support.');
+      // ENHANCED ERROR MESSAGES
+      if (error.response) {
+        console.error('Full response:', {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data
+        });
+        
+        if (error.response.status === 404) {
+          throw new Error('Article creation endpoint not found. Check server configuration.');
+        } else if (error.response.status === 401) {
+          throw new Error('Session expired. Please log in again.');
+        } else if (error.response.status === 403) {
+          throw new Error('Permission denied. Check your account permissions.');
+        } else if (error.response.status === 413) {
+          throw new Error('Files too large. Reduce image sizes and try again.');
+        } else if (error.response.status === 500) {
+          throw new Error(error.response.data?.message || 'Server error. Please try again.');
+        }
       } else if (error.code === 'ECONNABORTED') {
-        throw new Error('Request timeout. Server took too long to respond.');
+        throw new Error('Upload timeout. Files may be too large.');
       } else if (error.message?.includes('Network Error')) {
-        throw new Error('Network error. Please check your connection and try again.');
+        throw new Error('Network error. Check your connection.');
       }
       
       console.error('🏁 ===== ERROR PROCESSING COMPLETED =====\n');
@@ -371,11 +433,12 @@ class ArticleApiService {
   }
 
   /**
-   * FIXED: Create admin article (same pattern)
+   * FIXED: Create admin article (same pattern as user)
    */
   async createAdminArticle(articleData) {
     try {
-      console.log('🔧 Creating article as admin:', articleData.title);
+      console.log('\n🔧 ===== CREATING ADMIN ARTICLE =====');
+      console.log('Article title:', articleData.title);
       
       if (!this.isAdmin()) {
         throw new Error('Admin access required to create articles');
@@ -388,29 +451,37 @@ class ArticleApiService {
       let response;
       
       if (hasImages) {
+        console.log('📎 Creating article with images (FormData)');
         const formData = this.createFormData(articleData);
         response = await this.axios.post(endpoint, formData, {
-          timeout: 300000
+          timeout: 300000,
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log(`📤 Upload progress: ${percentCompleted}%`);
+          }
         });
       } else {
+        console.log('📝 Creating article without images (JSON)');
         const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
         response = await this.axios.post(endpoint, cleanData);
       }
 
       if (response.data?.success && response.data?.data?._id) {
         console.log('✅ Admin article created:', response.data.data._id);
+        console.log('🏁 ===== ADMIN ARTICLE CREATION COMPLETED =====\n');
         return response.data.data;
       } else {
         throw new Error(response.data?.message || 'Failed to create admin article');
       }
     } catch (error) {
       console.error('❌ Admin article creation failed:', error);
+      console.error('🏁 ===== ERROR PROCESSING COMPLETED =====\n');
       throw error;
     }
   }
 
   /**
-   * Smart routing for article creation (same as dealers)
+   * Smart routing for article creation (routes based on user role)
    */
   async createArticle(articleData) {
     try {
@@ -428,7 +499,7 @@ class ArticleApiService {
   }
 
   /**
-   * Get user's articles (same pattern as dealers)
+   * Get user's own articles
    */
   async getMyOwnArticles(filters = {}) {
     try {
@@ -493,7 +564,7 @@ class ArticleApiService {
   }
 
   /**
-   * Smart routing for getting articles
+   * Smart routing for getting articles (routes based on user role)
    */
   async getUserArticles(filters = {}) {
     try {
@@ -509,11 +580,17 @@ class ArticleApiService {
   }
 
   /**
-   * Update article
+   * Update article (supports both admin and user updates)
    */
   async updateArticle(articleId, articleData) {
     try {
-      const endpoint = this.isAdmin() ? `/news/${articleId}` : `/news/user/${articleId}`;
+      console.log('\n🔄 ===== UPDATING ARTICLE =====');
+      console.log('Article ID:', articleId);
+      
+      const endpoint = this.isAdmin() ? 
+        `/news/${articleId}` : `/news/user/${articleId}`;
+      
+      console.log('Update endpoint:', endpoint);
       
       const hasImages = articleData.featuredImageFile || 
                        (articleData.galleryImageFiles && articleData.galleryImageFiles.length > 0);
@@ -521,42 +598,60 @@ class ArticleApiService {
       let response;
       
       if (hasImages) {
+        console.log('📎 Updating with images (FormData)');
         const formData = this.createFormData(articleData);
-        response = await this.axios.put(endpoint, formData);
+        response = await this.axios.put(endpoint, formData, {
+          timeout: 300000,
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log(`📤 Upload progress: ${percentCompleted}%`);
+          }
+        });
       } else {
+        console.log('📝 Updating without images (JSON)');
         const { featuredImageFile, galleryImageFiles, ...cleanData } = articleData;
         response = await this.axios.put(endpoint, cleanData);
       }
 
       if (response.data?.success && response.data?.data) {
         console.log('✅ Article updated successfully');
+        console.log('🏁 ===== UPDATE COMPLETED =====\n');
         return response.data.data;
       } else {
         throw new Error(response.data?.message || 'Failed to update article');
       }
     } catch (error) {
       console.error('❌ Article update failed:', error);
+      console.error('🏁 ===== ERROR PROCESSING COMPLETED =====\n');
       throw error;
     }
   }
 
   /**
-   * Delete article
+   * Delete article (supports both admin and user deletion)
    */
   async deleteArticle(articleId) {
     try {
-      const endpoint = this.isAdmin() ? `/news/${articleId}` : `/news/user/${articleId}`;
+      console.log('\n🗑️ ===== DELETING ARTICLE =====');
+      console.log('Article ID:', articleId);
+      
+      const endpoint = this.isAdmin() ? 
+        `/news/${articleId}` : `/news/user/${articleId}`;
+      
+      console.log('Delete endpoint:', endpoint);
       
       const response = await this.axios.delete(endpoint);
       
       if (response.data?.success) {
         console.log('✅ Article deleted successfully');
+        console.log('🏁 ===== DELETION COMPLETED =====\n');
         return true;
       } else {
         throw new Error(response.data?.message || 'Failed to delete article');
       }
     } catch (error) {
       console.error('❌ Article deletion failed:', error);
+      console.error('🏁 ===== ERROR PROCESSING COMPLETED =====\n');
       throw error;
     }
   }
@@ -594,7 +689,7 @@ class ArticleApiService {
    * Debug and testing methods
    */
   async testEndpointConnectivity() {
-    console.log('🔍 Testing article endpoints connectivity...');
+    console.log('\n🔍 ===== TESTING ARTICLE ENDPOINTS =====');
     
     const endpoints = [
       { path: '/news/user/my-articles', method: 'GET', desc: 'Get user articles' },
@@ -603,7 +698,8 @@ class ArticleApiService {
     
     for (const endpoint of endpoints) {
       try {
-        console.log(`Testing ${endpoint.method} ${endpoint.path}...`);
+        console.log(`\nTesting ${endpoint.method} ${endpoint.path}...`);
+        console.log(`Description: ${endpoint.desc}`);
         
         const response = await this.axios.request({
           method: endpoint.method,
@@ -622,6 +718,8 @@ class ArticleApiService {
         console.error(`❌ ${endpoint.path}: ${error.message}`);
       }
     }
+    
+    console.log('\n🏁 ===== ENDPOINT TESTING COMPLETED =====\n');
   }
 
   /**
@@ -678,10 +776,13 @@ class ArticleApiService {
 // Create singleton instance (same as dealers)
 const articleApiService = new ArticleApiService();
 
-// Add debug methods to window for manual testing
+// Add debug methods to window for manual testing (development only)
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   window.articleApiService = articleApiService;
   window.testArticleEndpoints = () => articleApiService.testEndpointConnectivity();
+  console.log('🔧 ArticleService debug methods available:');
+  console.log('  - window.articleApiService');
+  console.log('  - window.testArticleEndpoints()');
 }
 
 export { articleApiService };
