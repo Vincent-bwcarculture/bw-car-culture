@@ -7,12 +7,15 @@ import axios from 'axios';
 
 class ArticleApiService {
   constructor() {
-    // FIXED: Match the exact URL pattern that works for dealers
-    this.baseURL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app/api';
+    // CRITICAL FIX: Hardcode base URL to ensure /api is always included
+    // The environment variable might not be set correctly, causing 404 errors
+    this.baseURL = 'https://bw-car-culture-api.vercel.app/api';
+    
+    console.log('🔧 ArticleService: Setting base URL to:', this.baseURL);
     
     // FIXED: Create dedicated axios instance following dealer service pattern
     this.axios = axios.create({
-      baseURL: this.baseURL,
+      baseURL: this.baseURL, // This ensures all requests use the correct base
       timeout: 300000, // 5 minutes for large uploads
       headers: {
         'Content-Type': 'application/json'
@@ -26,12 +29,23 @@ class ArticleApiService {
     this.pendingRequests = {};
     this.currentUser = null;
     
-    // Debug configuration
-    console.log('🔧 ArticleService initialized:', {
+    // Debug configuration - ENHANCED with full URL display
+    console.log('🔧 ArticleService initialized with configuration:', {
       baseURL: this.baseURL,
       axiosBaseURL: this.axios.defaults.baseURL,
-      environment: process.env.NODE_ENV
+      environment: process.env.NODE_ENV,
+      testEndpoint: '/news/user',
+      fullTestURL: `${this.baseURL}/news/user`
     });
+    
+    // Verify URLs are correct
+    if (!this.baseURL.includes('/api')) {
+      console.error('⚠️ WARNING: Base URL is missing /api - requests will fail!');
+      console.error('Current base URL:', this.baseURL);
+      console.error('Should be: https://bw-car-culture-api.vercel.app/api');
+    } else {
+      console.log('✅ Base URL is correct and includes /api');
+    }
   }
 
   /**
@@ -309,7 +323,25 @@ class ArticleApiService {
 
       // ENDPOINT - Use exact endpoint path from backend
       const endpoint = '/news/user';
-      console.log('📤 Target endpoint:', `${this.baseURL}${endpoint}`);
+      const fullURL = `${this.baseURL}${endpoint}`;
+      
+      console.log('📤 Request URL details:', {
+        baseURL: this.baseURL,
+        endpoint: endpoint,
+        fullURL: fullURL,
+        axiosBaseURL: this.axios.defaults.baseURL
+      });
+      
+      // CRITICAL: Verify URL has /api before making request
+      if (!fullURL.includes('/api/')) {
+        console.error('❌ CRITICAL ERROR: URL is missing /api!');
+        console.error('Full URL:', fullURL);
+        console.error('This will cause a 404 error!');
+        throw new Error(`Invalid URL constructed: ${fullURL}. URL must include /api/news/user`);
+      }
+      
+      console.log('✅ URL verification passed - /api is present');
+      console.log('📤 Will send request to:', fullURL);
 
       // CHECK FOR IMAGES
       const hasImages = articleData.featuredImageFile || 
@@ -408,11 +440,27 @@ class ArticleApiService {
         console.error('Full response:', {
           status: error.response.status,
           statusText: error.response.statusText,
-          data: error.response.data
+          data: error.response.data,
+          requestedURL: error.config?.url,
+          fullRequestURL: error.config?.baseURL ? `${error.config.baseURL}${error.config.url}` : error.config?.url
         });
         
         if (error.response.status === 404) {
-          throw new Error('Article creation endpoint not found. Check server configuration.');
+          const requestedURL = error.config?.url || 'unknown';
+          const fullURL = error.config?.baseURL ? `${error.config.baseURL}${error.config.url}` : requestedURL;
+          
+          console.error('❌ 404 ERROR DETAILS:', {
+            requestedURL: requestedURL,
+            fullURL: fullURL,
+            expectedURL: 'https://bw-car-culture-api.vercel.app/api/news/user',
+            missingAPI: !fullURL.includes('/api/')
+          });
+          
+          if (!fullURL.includes('/api/')) {
+            throw new Error(`URL is missing /api! Requested: ${fullURL}. Should be: https://bw-car-culture-api.vercel.app/api/news/user`);
+          }
+          
+          throw new Error(`Endpoint not found: ${fullURL}. Check server configuration.`);
         } else if (error.response.status === 401) {
           throw new Error('Session expired. Please log in again.');
         } else if (error.response.status === 403) {
