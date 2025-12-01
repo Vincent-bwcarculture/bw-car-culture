@@ -1,6 +1,7 @@
 // client/src/components/profile/ArticleManagement/services/articleService.js
 // COMPLETE FIXED VERSION - All improvements integrated
 // Based on working dealer service patterns with enhanced error handling
+// CRITICAL FIX: Forces user endpoint for all article creation (admin endpoint has issues)
 
 import axios from 'axios';
 
@@ -434,6 +435,8 @@ class ArticleApiService {
 
   /**
    * FIXED: Create admin article (same pattern as user)
+   * NOTE: Currently disabled - admin endpoint POST /news has issues
+   * Admin users will use user endpoint instead (articles go to pending status)
    */
   async createAdminArticle(articleData) {
     try {
@@ -481,17 +484,47 @@ class ArticleApiService {
   }
 
   /**
-   * Smart routing for article creation (routes based on user role)
+   * CRITICAL FIX: Smart routing for article creation
+   * TEMPORARILY FORCES USER ENDPOINT FOR ALL USERS (including admins)
+   * 
+   * REASON: The admin endpoint POST /news either:
+   * 1. Doesn't exist or isn't properly configured
+   * 2. Returns wrong response structure 
+   * 3. Is conflicting with GET /news endpoint
+   * 
+   * IMPACT: Admin-created articles will show status "pending" instead of "published"
+   * This is acceptable for now until backend admin endpoint is fixed
+   * 
+   * TO FIX PERMANENTLY: Add proper POST /news endpoint in api/index.js
    */
   async createArticle(articleData) {
     try {
-      console.log('🎯 Smart routing article creation, user role:', this.getUserRole());
+      const userRole = this.getUserRole();
+      console.log('\n🎯 ===== SMART ROUTING: ARTICLE CREATION =====');
+      console.log('User role:', userRole);
       
+      // CRITICAL FIX: Always use user endpoint for article creation
+      // The admin POST /news endpoint has issues and returns "Found X news articles" error
+      console.log('⚠️ TEMPORARY FIX: Forcing user endpoint for all article creation');
+      console.log('Note: Admin articles will be created as "pending" status');
+      console.log('This is a workaround until admin POST /news endpoint is fixed');
+      
+      // ALWAYS use user endpoint (works for both admin and regular users)
+      const result = await this.createUserArticle(articleData);
+      
+      console.log('✅ Article created successfully via user endpoint');
+      console.log('🏁 ===== SMART ROUTING COMPLETED =====\n');
+      
+      return result;
+      
+      /* ORIGINAL CODE - DISABLED UNTIL ADMIN ENDPOINT IS FIXED
       if (this.isAdmin()) {
         return await this.createAdminArticle(articleData);
       } else {
         return await this.createUserArticle(articleData);
       }
+      */
+      
     } catch (error) {
       console.error('❌ Smart routing creation failed:', error);
       throw error;
