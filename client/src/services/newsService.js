@@ -10,7 +10,7 @@ import {
 class NewsService {
   constructor() {
     // Base endpoint for all news requests
-    this.endpoint = '/news';
+    this.endpoint = '/api/news';
     // Local cache for articles to improve performance
     this.articlesCache = {
       all: null,
