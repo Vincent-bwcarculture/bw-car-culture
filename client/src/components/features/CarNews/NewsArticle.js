@@ -1,4 +1,5 @@
 // src/components/features/CarNews/NewsArticle.js
+// COMPLETE FIXED VERSION - All API endpoints corrected to include /api prefix
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Share2, Heart, Clock, Calendar, Tag, ChevronLeft, Bookmark, BookmarkCheck, Image, ArrowRight } from 'lucide-react';
@@ -120,6 +121,7 @@ const NewsArticle = () => {
   };
 
   // Fetch featured vehicles from premium dealers
+  // FIXED: Added /api prefix
   const fetchFeaturedVehicles = useCallback(async (make, model) => {
     setIsFeaturedVehiclesLoading(true);
     try {
@@ -137,7 +139,8 @@ const NewsArticle = () => {
       queryParams.append('limit', '6');
       queryParams.append('sort', '-createdAt');
       
-      const response = await http.get(`/marketplace?${queryParams.toString()}`);
+      // FIXED: Added /api prefix
+      const response = await http.get(`/api/marketplace?${queryParams.toString()}`);
       
       if (response.data?.data) {
         setFeaturedVehicles(response.data.data);
@@ -167,8 +170,9 @@ const NewsArticle = () => {
         setGalleryImages([]);
         galleryProcessedRef.current = false;
         
+        // FIXED: Added /api prefix - THIS WAS THE MAIN ISSUE!
         // Try to fetch the article - backend will handle both ID and slug
-        const response = await http.get(`/news/${articleId}`);
+        const response = await http.get(`/api/news/${articleId}`);
         
         if (response.data?.data) {
           // Store article ID to prevent duplicate fetches
@@ -203,7 +207,8 @@ const NewsArticle = () => {
           // Fetch related vehicles based on car make/model mentioned in the article
           if (make && !initialFetchCompleteRef.current) {
             try {
-              const vehiclesResponse = await http.get(`/marketplace?make=${make}&limit=3`);
+              // FIXED: Added /api prefix
+              const vehiclesResponse = await http.get(`/api/marketplace?make=${make}&limit=3`);
               if (vehiclesResponse.data?.data) {
                 setRelatedVehicles(vehiclesResponse.data.data);
               }
@@ -249,10 +254,12 @@ const NewsArticle = () => {
   }, [articleId, getRelatedItems, fetchFeaturedVehicles]);
 
   // Fetch more news articles for bottom section
+  // FIXED: Added /api prefix
   const fetchMoreNews = useCallback(async (currentArticle) => {
     try {
       const category = currentArticle?.category || 'news';
-      const response = await http.get(`/news/category/${category}?limit=4`);
+      // FIXED: Added /api prefix
+      const response = await http.get(`/api/news/category/${category}?limit=4`);
       
       if (response.data?.data) {
         // Filter out the current article if it's in the list
@@ -379,7 +386,7 @@ const NewsArticle = () => {
     
     // In a real app, you'd have an API call here
     try {
-      // await http.post(`/news/${articleId}/like`);
+      // await http.post(`/api/news/${articleId}/like`);
       console.log('Article like toggled');
     } catch (error) {
       // Revert the state if API call fails
@@ -414,99 +421,98 @@ const NewsArticle = () => {
     document.body.style.overflow = ''; // Restore scrolling
   }, []);
 
-  // Enhanced image url getter for S3
-// Enhanced image URL function - keeping the original name for compatibility
-// FIXED VERSION - Never uses thumbnails for gallery display
-const getImageUrl = (imageData, type = 'article') => {
-  try {
-    if (!imageData) {
-      return `/images/placeholders/${type === 'article' ? 'default' : type}.jpg`;
-    }
-    
-    let imageUrl = '';
-    
-    // If imageData is a string, use it directly
-    if (typeof imageData === 'string') {
-      imageUrl = imageData;
-    } 
-    // If imageData is an object with url property
-    else if (imageData && typeof imageData === 'object') {
-      // FIXED: Only use full URL, never thumbnails for gallery
-      if (type === 'gallery') {
-        imageUrl = imageData.url || ''; // Only use full-size for gallery
-      } else {
-        imageUrl = imageData.url || imageData.thumbnail || ''; // Thumbnails OK for other types
+  // Enhanced image URL function - keeping the original name for compatibility
+  // FIXED VERSION - Never uses thumbnails for gallery display
+  const getImageUrl = (imageData, type = 'article') => {
+    try {
+      if (!imageData) {
+        return `/images/placeholders/${type === 'article' ? 'default' : type}.jpg`;
       }
       
-      // If we have an S3 key but no URL, create proxy URL
-      if (!imageUrl && imageData.key) {
-        return `/api/images/s3-proxy/${imageData.key}`;
+      let imageUrl = '';
+      
+      // If imageData is a string, use it directly
+      if (typeof imageData === 'string') {
+        imageUrl = imageData;
+      } 
+      // If imageData is an object with url property
+      else if (imageData && typeof imageData === 'object') {
+        // FIXED: Only use full URL, never thumbnails for gallery
+        if (type === 'gallery') {
+          imageUrl = imageData.url || ''; // Only use full-size for gallery
+        } else {
+          imageUrl = imageData.url || imageData.thumbnail || ''; // Thumbnails OK for other types
+        }
+        
+        // If we have an S3 key but no URL, create proxy URL
+        if (!imageUrl && imageData.key) {
+          return `/api/images/s3-proxy/${imageData.key}`;
+        }
       }
-    }
-    
-    // If no URL found, return placeholder
-    if (!imageUrl) {
-      return `/images/placeholders/${type === 'article' ? 'default' : type}.jpg`;
-    }
-    
-    // Fix problematic S3 URLs with duplicate paths
-    if (imageUrl.includes('/images/images/')) {
-      imageUrl = imageUrl.replace(/\/images\/images\//g, '/images/');
-    }
-    
-    // Remove /thumbnails/ from path to ensure we get full image
-    if (type === 'gallery' && imageUrl.includes('/thumbnails/')) {
-      imageUrl = imageUrl.replace('/thumbnails/', '/');
-    }
-    
-    // Check for cached failed images
-    if (checkFailedImage(imageUrl)) {
-      console.log(`Using cached fallback for previously failed image: ${imageUrl}`);
-      return `/images/placeholders/${type === 'article' ? 'default' : type}.jpg`;
-    }
-    
-    // If it's already a full URL (like S3), return as is
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      
+      // If no URL found, return placeholder
+      if (!imageUrl) {
+        return `/images/placeholders/${type === 'article' ? 'default' : type}.jpg`;
+      }
+      
+      // Fix problematic S3 URLs with duplicate paths
+      if (imageUrl.includes('/images/images/')) {
+        imageUrl = imageUrl.replace(/\/images\/images\//g, '/images/');
+      }
+      
+      // Remove /thumbnails/ from path to ensure we get full image
+      if (type === 'gallery' && imageUrl.includes('/thumbnails/')) {
+        imageUrl = imageUrl.replace('/thumbnails/', '/');
+      }
+      
+      // Check for cached failed images
+      if (checkFailedImage(imageUrl)) {
+        console.log(`Using cached fallback for previously failed image: ${imageUrl}`);
+        return `/images/placeholders/${type === 'article' ? 'default' : type}.jpg`;
+      }
+      
+      // If it's already a full URL (like S3), return as is
+      if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+        return imageUrl;
+      }
+      
+      // Ensure local paths start with /
+      if (!imageUrl.startsWith('/')) {
+        imageUrl = `/${imageUrl}`;
+      }
+      
       return imageUrl;
+    } catch (error) {
+      console.error('Error getting image URL:', error);
+      return `/images/placeholders/${type === 'article' ? 'default' : type}.jpg`;
     }
-    
-    // Ensure local paths start with /
-    if (!imageUrl.startsWith('/')) {
-      imageUrl = `/${imageUrl}`;
-    }
-    
-    return imageUrl;
-  } catch (error) {
-    console.error('Error getting image URL:', error);
-    return `/images/placeholders/${type === 'article' ? 'default' : type}.jpg`;
-  }
-};
+  };
 
-// Add these functions near the beginning of your component
-const checkFailedImage = (url) => {
-  try {
-    const failedImages = JSON.parse(localStorage.getItem('failedNewsImages') || '{}');
-    return !!failedImages[url];
-  } catch (e) {
-    return false;
-  }
-};
-
-const markFailedImage = (url) => {
-  try {
-    const failedImages = JSON.parse(localStorage.getItem('failedNewsImages') || '{}');
-    failedImages[url] = Date.now();
-    // Limit cache size to prevent localStorage bloat
-    const keys = Object.keys(failedImages);
-    if (keys.length > 100) {
-      const oldestKey = keys.sort((a, b) => failedImages[a] - failedImages[b])[0];
-      delete failedImages[oldestKey];
+  // Add these functions near the beginning of your component
+  const checkFailedImage = (url) => {
+    try {
+      const failedImages = JSON.parse(localStorage.getItem('failedNewsImages') || '{}');
+      return !!failedImages[url];
+    } catch (e) {
+      return false;
     }
-    localStorage.setItem('failedNewsImages', JSON.stringify(failedImages));
-  } catch (e) {
-    // Ignore localStorage errors
-  }
-};
+  };
+
+  const markFailedImage = (url) => {
+    try {
+      const failedImages = JSON.parse(localStorage.getItem('failedNewsImages') || '{}');
+      failedImages[url] = Date.now();
+      // Limit cache size to prevent localStorage bloat
+      const keys = Object.keys(failedImages);
+      if (keys.length > 100) {
+        const oldestKey = keys.sort((a, b) => failedImages[a] - failedImages[b])[0];
+        delete failedImages[oldestKey];
+      }
+      localStorage.setItem('failedNewsImages', JSON.stringify(failedImages));
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+  };
 
   // Render function for article content - NEW
   const renderArticleContent = () => {
@@ -577,16 +583,16 @@ const markFailedImage = (url) => {
 
             <div className="cc-news-article-meta">
               <div className="cc-news-author-info">
-             <img 
-  src={getImageUrl(authorInfo.avatar, 'avatar')} 
-  alt={authorInfo.name} 
-  className="cc-news-author-avatar"
-  onError={(e) => {
-    markFailedImage(e.target.src);
-    e.target.onerror = null;
-    e.target.src = "/images/BCC Logo.png";
-  }}
-/>
+                <img 
+                  src={getImageUrl(authorInfo.avatar, 'avatar')} 
+                  alt={authorInfo.name} 
+                  className="cc-news-author-avatar"
+                  onError={(e) => {
+                    markFailedImage(e.target.src);
+                    e.target.onerror = null;
+                    e.target.src = "/images/BCC Logo.png";
+                  }}
+                />
                 <div className="cc-news-author-details">
                   <span className="cc-news-author-name">{authorInfo.name}</span>
                   {authorInfo.role && <span className="cc-news-author-role">{authorInfo.role}</span>}
@@ -641,41 +647,41 @@ const markFailedImage = (url) => {
           </header>
 
           <div className="cc-news-article-cover">
-          <img 
-  src={getImageUrl(article.featuredImage || article.images?.[0])} 
-  alt={article.title} 
-  onError={(e) => {
-    const originalSrc = e.target.src;
-    console.log('Article cover image failed to load:', originalSrc);
-    
-    // Mark this image as failed
-    markFailedImage(originalSrc);
-    
-    // For S3 URLs, try the proxy endpoint
-    if (originalSrc.includes('amazonaws.com')) {
-      // Extract key from S3 URL
-      const key = originalSrc.split('.amazonaws.com/').pop();
-      if (key) {
-        // Normalize the key to prevent duplicate segments
-        const normalizedKey = key.replace(/images\/images\//g, 'images/');
-        e.target.src = `/api/images/s3-proxy/${normalizedKey}`;
-        return;
-      }
-    }
-    
-    // For local paths, try direct news path if not already a placeholder
-    if (!originalSrc.includes('/images/placeholders/')) {
-      const filename = originalSrc.split('/').pop();
-      if (filename && !originalSrc.includes('/uploads/news/')) {
-        e.target.src = `/uploads/news/${filename}`;
-        return;
-      }
-    }
-    
-    // Final fallback
-    e.target.src = '/images/placeholders/default.jpg';
-  }}
-/>
+            <img 
+              src={getImageUrl(article.featuredImage || article.images?.[0])} 
+              alt={article.title} 
+              onError={(e) => {
+                const originalSrc = e.target.src;
+                console.log('Article cover image failed to load:', originalSrc);
+                
+                // Mark this image as failed
+                markFailedImage(originalSrc);
+                
+                // For S3 URLs, try the proxy endpoint
+                if (originalSrc.includes('amazonaws.com')) {
+                  // Extract key from S3 URL
+                  const key = originalSrc.split('.amazonaws.com/').pop();
+                  if (key) {
+                    // Normalize the key to prevent duplicate segments
+                    const normalizedKey = key.replace(/images\/images\//g, 'images/');
+                    e.target.src = `/api/images/s3-proxy/${normalizedKey}`;
+                    return;
+                  }
+                }
+                
+                // For local paths, try direct news path if not already a placeholder
+                if (!originalSrc.includes('/images/placeholders/')) {
+                  const filename = originalSrc.split('/').pop();
+                  if (filename && !originalSrc.includes('/uploads/news/')) {
+                    e.target.src = `/uploads/news/${filename}`;
+                    return;
+                  }
+                }
+                
+                // Final fallback
+                e.target.src = '/images/placeholders/default.jpg';
+              }}
+            />
             {article.featuredImage?.caption && (
               <div className="cc-news-image-caption">
                 {article.featuredImage.caption}
@@ -691,53 +697,59 @@ const markFailedImage = (url) => {
           </div>
 
           {/* Gallery section */}
-      
-{galleryImages.map((imageUrl, index) => (
-  <div 
-    key={index} 
-    className="cc-news-gallery-item"
-    onClick={() => openGallery(index)}
-  >
-    <img 
-      src={getImageUrl(imageUrl, 'gallery')}
-      alt={`Gallery image ${index + 1}`}
-      loading="lazy"
-      onError={(e) => {
-        const originalSrc = e.target.src;
-        console.log('Gallery image failed to load:', originalSrc);
-        
-        // Mark this image as failed
-        markFailedImage(originalSrc);
-        
-        // For S3 URLs, try the proxy endpoint
-        if (originalSrc.includes('amazonaws.com')) {
-          // Extract key from S3 URL
-          const key = originalSrc.split('.amazonaws.com/').pop();
-          if (key) {
-            const normalizedKey = key.replace(/images\/images\//g, 'images/');
-            e.target.src = `/api/images/s3-proxy/${normalizedKey}`;
-            return;
-          }
-        }
-        
-        // Try other paths
-        if (!originalSrc.includes('/images/placeholders/')) {
-          const filename = originalSrc.split('/').pop();
-          if (filename) {
-            e.target.src = `/uploads/news/gallery/${filename}`;
-            return;
-          }
-        }
-        
-        // Final fallback
-        e.target.src = '/images/placeholders/default.jpg';
-      }}
-    />
-    {article.gallery[index]?.caption && (
-      <div className="cc-news-gallery-caption">{article.gallery[index].caption}</div>
-    )}
-  </div>
-))}
+          {galleryImages.length > 0 && (
+            <div className="cc-news-article-gallery">
+              <h3>Photo Gallery</h3>
+              <div className="cc-news-gallery-grid">
+                {galleryImages.map((imageUrl, index) => (
+                  <div 
+                    key={index} 
+                    className="cc-news-gallery-item"
+                    onClick={() => openGallery(index)}
+                  >
+                    <img 
+                      src={getImageUrl(imageUrl, 'gallery')}
+                      alt={`Gallery image ${index + 1}`}
+                      loading="lazy"
+                      onError={(e) => {
+                        const originalSrc = e.target.src;
+                        console.log('Gallery image failed to load:', originalSrc);
+                        
+                        // Mark this image as failed
+                        markFailedImage(originalSrc);
+                        
+                        // For S3 URLs, try the proxy endpoint
+                        if (originalSrc.includes('amazonaws.com')) {
+                          // Extract key from S3 URL
+                          const key = originalSrc.split('.amazonaws.com/').pop();
+                          if (key) {
+                            const normalizedKey = key.replace(/images\/images\//g, 'images/');
+                            e.target.src = `/api/images/s3-proxy/${normalizedKey}`;
+                            return;
+                          }
+                        }
+                        
+                        // Try other paths
+                        if (!originalSrc.includes('/images/placeholders/')) {
+                          const filename = originalSrc.split('/').pop();
+                          if (filename) {
+                            e.target.src = `/uploads/news/gallery/${filename}`;
+                            return;
+                          }
+                        }
+                        
+                        // Final fallback
+                        e.target.src = '/images/placeholders/default.jpg';
+                      }}
+                    />
+                    {article.gallery[index]?.caption && (
+                      <div className="cc-news-gallery-caption">{article.gallery[index].caption}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <footer className="cc-news-article-footer">
             <div className="cc-news-article-tags">
