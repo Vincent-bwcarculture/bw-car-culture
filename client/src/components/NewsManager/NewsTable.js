@@ -1,4 +1,6 @@
-// src/components/admin/NewsManager/NewsTable.js
+// Fixed NewsTable Component - Shows Author Name Instead of ID
+// Location: client/src/components/NewsManager/NewsTable.js
+
 import React from 'react';
 import './NewsTable.css';
 
@@ -11,7 +13,7 @@ const NewsTable = ({ articles, loading, onEdit, onDelete }) => {
     );
   }
 
-  // Add this check to prevent the map error
+  // Check to prevent map error
   if (!articles || !Array.isArray(articles) || articles.length === 0) {
     return (
       <div className="no-articles">
@@ -21,6 +23,7 @@ const NewsTable = ({ articles, loading, onEdit, onDelete }) => {
   }
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'Not published';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -32,9 +35,36 @@ const NewsTable = ({ articles, loading, onEdit, onDelete }) => {
     const statusClasses = {
       published: 'status-published',
       draft: 'status-draft',
+      pending: 'status-pending',
       archived: 'status-archived'
     };
     return `status-badge ${statusClasses[status] || ''}`;
+  };
+
+  // Helper function to get author name from different possible structures
+  const getAuthorName = (article) => {
+    // Try different author structures
+    if (article.author) {
+      if (typeof article.author === 'string') {
+        return article.author;
+      }
+      if (article.author.name) {
+        return article.author.name;
+      }
+      if (article.author._id) {
+        // Fallback if only ID is available
+        return article.authorName || 'Unknown Author';
+      }
+    }
+    return article.authorName || 'Unknown Author';
+  };
+
+  // Helper function to get author avatar
+  const getAuthorAvatar = (article) => {
+    if (article.author && article.author.avatar) {
+      return article.author.avatar;
+    }
+    return null;
   };
 
   return (
@@ -53,7 +83,7 @@ const NewsTable = ({ articles, loading, onEdit, onDelete }) => {
         </thead>
         <tbody>
           {articles.map(article => (
-            <tr key={article.id}>
+            <tr key={article.id || article._id}>
               <td>
                 <div className="article-info">
                   {article.featuredImage && (
@@ -62,12 +92,21 @@ const NewsTable = ({ articles, loading, onEdit, onDelete }) => {
                         src={article.featuredImage} 
                         alt={article.title}
                         loading="lazy"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = '/images/placeholders/default.jpg';
+                        }}
                       />
                     </div>
                   )}
                   <div className="article-details">
                     <h4>{article.title}</h4>
-                    <span className="article-id">ID: {article.id}</span>
+                    {/* FIXED: Show subtitle or author name instead of ID */}
+                    {article.subtitle ? (
+                      <span className="article-subtitle">{article.subtitle}</span>
+                    ) : (
+                      <span className="article-author-small">By {getAuthorName(article)}</span>
+                    )}
                   </div>
                 </div>
               </td>
@@ -77,15 +116,20 @@ const NewsTable = ({ articles, loading, onEdit, onDelete }) => {
                 </span>
               </td>
               <td>
+                {/* FIXED: Better author display */}
                 <div className="author-info">
-                  {article.author.avatar && (
+                  {getAuthorAvatar(article) && (
                     <img 
-                      src={article.author.avatar} 
-                      alt={article.author.name}
+                      src={getAuthorAvatar(article)} 
+                      alt={getAuthorName(article)}
                       className="author-avatar"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/images/BCC Logo.png';
+                      }}
                     />
                   )}
-                  <span>{article.author.name}</span>
+                  <span>{getAuthorName(article)}</span>
                 </div>
               </td>
               <td>
@@ -93,23 +137,29 @@ const NewsTable = ({ articles, loading, onEdit, onDelete }) => {
                   {article.status}
                 </span>
               </td>
-              <td>{article.publishDate ? formatDate(article.publishDate) : '-'}</td>
-              <td>{article.views?.toLocaleString() || 0}</td>
+              <td>
+                {formatDate(article.publishDate || article.createdAt)}
+              </td>
+              <td>
+                <span className="views-count">
+                  {article.views || article.metadata?.views || 0}
+                </span>
+              </td>
               <td>
                 <div className="article-actions">
-                  <button
-                    className="action-btn edit"
+                  <button 
+                    className="action-btn edit-btn"
                     onClick={() => onEdit(article)}
                     title="Edit article"
                   >
-                    ✎
+                    Edit
                   </button>
-                  <button
-                    className="action-btn delete"
-                    onClick={() => onDelete(article.id)}
+                  <button 
+                    className="action-btn delete-btn"
+                    onClick={() => onDelete(article.id || article._id)}
                     title="Delete article"
                   >
-                    ×
+                    Delete
                   </button>
                 </div>
               </td>
