@@ -586,9 +586,9 @@ const MarketplaceList = () => {
       city: searchParams.get('city'),
       dealerId: searchParams.get('dealerId'),
       drivetrain: searchParams.get('drivetrain'),
-      availability: searchParams.get('availability'),
       minMileage: searchParams.get('minMileage'),
-      maxMileage: searchParams.get('maxMileage')
+      maxMileage: searchParams.get('maxMileage'),
+      sort: searchParams.get('sort')
     };
     
     Object.entries(filterMappings).forEach(([key, value]) => {
