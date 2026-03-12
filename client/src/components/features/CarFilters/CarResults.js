@@ -142,7 +142,7 @@ const CarResults = ({ filters = {}, hasSearched = false, onExpandFilter, onSearc
     }
     
     if (uiFilters.vehicleType && uiFilters.vehicleType !== 'All Types' && uiFilters.vehicleType !== '') {
-      apiFilters.bodyStyle = uiFilters.vehicleType;
+      apiFilters.category = uiFilters.vehicleType;
     }
     
     if (uiFilters.conditionType && uiFilters.conditionType !== 'All Conditions' && uiFilters.conditionType !== '') {

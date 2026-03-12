@@ -1,6 +1,6 @@
 // src/services/statsService.js - Fixed with proper error handling and fallbacks
 
-const BASE_URL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
+const BASE_URL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app/api';
 
 export const statsService = {
   async getWebsiteStats() {
@@ -8,7 +8,7 @@ export const statsService = {
       console.log('🔄 Fetching website statistics...');
       
       // First, try the main stats endpoint
-      const response = await fetch(`${BASE_URL}/api/stats`, {
+      const response = await fetch(`${BASE_URL}/stats/dashboard`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -50,10 +50,8 @@ export const statsService = {
   // Alternative method that tries multiple endpoints (fallback strategy)
   async getWebsiteStatsWithFallback() {
     const endpoints = [
-      '/api/stats/dashboard',    // Alternative dashboard endpoint
-      '/api/dashboard/stats',    // Another alternative
-      '/stats',                  // Simple stats endpoint
-      '/dashboard'               // General dashboard endpoint
+      '/stats/dashboard',    // Main stats endpoint
+      '/dashboard/stats',    // Dashboard stats fallback
     ];
 
     for (const endpoint of endpoints) {

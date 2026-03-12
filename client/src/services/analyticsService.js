@@ -1,10 +1,9 @@
 // src/services/analyticsService.js - Complete Fixed Version
-const BASE_URL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
+const BASE_URL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app/api';
 
 class AnalyticsService {
   constructor() {
-    // Updated to use /api/analytics for Vercel serverless functions
-    this.baseURL = `${BASE_URL}/api/analytics`;
+    this.baseURL = `${BASE_URL}/analytics`;
     this.cache = new Map();
     this.cacheExpiration = 5 * 60 * 1000; // 5 minutes
     this.isInitialized = false;

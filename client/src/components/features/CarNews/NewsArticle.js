@@ -54,32 +54,32 @@ const NewsArticle = () => {
     return cleaned;
   };
 
-  // Helper function to parse content
+  // Helper function to parse content - preserves HTML for rich rendering
   const parseArticleContent = (content) => {
     if (!content) return '';
-    
-    // If content is a JSON string
+
+    // If content is a JSON string (from some editors)
     if (typeof content === 'string' && (content.startsWith('{') || content.startsWith('['))) {
       try {
         const parsed = JSON.parse(content);
-        // If it's an object with blocks or similar structure
+        // If it's an object with blocks (Draft.js / EditorJS format)
         if (parsed.blocks) {
-          return parsed.blocks.map(block => block.text || '').join('\n\n');
+          return parsed.blocks.map(block => `<p>${block.text || ''}</p>`).join('');
         }
-        // If it's a simple object with content
+        // If it's a simple object with an HTML content property
         if (parsed.content) {
-          return cleanHtmlContent(parsed.content);
+          return parsed.content;
         }
-        // Otherwise try to extract text from the object
-        return Object.values(parsed).join('\n\n');
+        // Fallback: join values as paragraphs
+        return Object.values(parsed).map(v => `<p>${v}</p>`).join('');
       } catch (e) {
-        // If JSON parsing fails, treat it as regular content
-        return cleanHtmlContent(content);
+        // JSON parsing failed — treat as raw HTML/text
+        return content;
       }
     }
-    
-    // If it's already a string, just clean it
-    return cleanHtmlContent(content);
+
+    // Already an HTML string — return as-is
+    return content;
   };
 
   // Helper function to handle S3 image URLs
@@ -140,7 +140,7 @@ const NewsArticle = () => {
       queryParams.append('sort', '-createdAt');
       
       // FIXED: Added /api prefix
-      const response = await http.get(`/api/marketplace?${queryParams.toString()}`);
+      const response = await http.get(`/api/listings?${queryParams.toString()}`);
       
       if (response.data?.data) {
         setFeaturedVehicles(response.data.data);
@@ -200,15 +200,20 @@ const NewsArticle = () => {
           const category = fetchedArticle.category;
           const make = extractCarMake(fetchedArticle);
           
-          // Use the getRelatedItems from your context to get related articles
-          const related = getRelatedItems(fetchedArticle, 3);
-          setRelatedArticles(related);
+          // Use related articles from the API response first, fall back to context
+          const apiRelated = response.data.related;
+          if (Array.isArray(apiRelated) && apiRelated.length > 0) {
+            setRelatedArticles(apiRelated);
+          } else {
+            const related = getRelatedItems(fetchedArticle, 3);
+            setRelatedArticles(related);
+          }
           
           // Fetch related vehicles based on car make/model mentioned in the article
           if (make && !initialFetchCompleteRef.current) {
             try {
               // FIXED: Added /api prefix
-              const vehiclesResponse = await http.get(`/api/marketplace?make=${make}&limit=3`);
+              const vehiclesResponse = await http.get(`/api/listings?make=${make}&limit=3`);
               if (vehiclesResponse.data?.data) {
                 setRelatedVehicles(vehiclesResponse.data.data);
               }
@@ -518,17 +523,17 @@ const NewsArticle = () => {
   const renderArticleContent = () => {
     if (!article || !article.parsedContent) return null;
 
-    const paragraphs = article.parsedContent.split('\n\n').filter(p => p.trim());
-    
-    return paragraphs.map((paragraph, index) => {
-      // Check if paragraph is a subheading
-      if (paragraph.length < 100 && !paragraph.includes('.') && index > 0) {
-        return <h3 key={index}>{paragraph}</h3>;
-      }
-      
-      // Regular paragraph
-      return <p key={index}>{paragraph}</p>;
-    });
+    const content = article.parsedContent;
+
+    // If the content contains HTML tags, render it directly
+    if (/<[a-z][\s\S]*>/i.test(content)) {
+      return <div dangerouslySetInnerHTML={{ __html: content }} />;
+    }
+
+    // Plain text fallback — split on double newlines into paragraphs
+    return content.split('\n\n').filter(p => p.trim()).map((paragraph, index) => (
+      <p key={index}>{paragraph}</p>
+    ));
   };
 
   if (isLoading) {

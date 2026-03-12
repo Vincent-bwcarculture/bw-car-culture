@@ -486,15 +486,6 @@ class NewsService {
         return enhancedArticle;
       }
       
-      // If we have any real data, try to return the first article
-      if (this.hasRealData) {
-        const articles = await this.getDirectNews(1);
-        if (articles.length > 0) {
-          console.log('Using first article from collection as fallback');
-          return articles[0];
-        }
-      }
-      
       // Article not found
       console.log('Article not found');
       return null;

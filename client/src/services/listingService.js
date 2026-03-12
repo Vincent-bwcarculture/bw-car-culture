@@ -577,7 +577,7 @@ validateUpdateData(listingData) {
   async getPopularListings(limit = 5) {
     return this.getCachedData(`popular-${limit}`, async () => {
       try {
-        const response = await this.axios.get(`${this.endpoint}/popular`, {
+        const response = await this.axios.get(`${this.endpoint}/featured`, {
           params: { limit },
           headers: this.getHeaders()
         });
@@ -742,8 +742,7 @@ validateUpdateData(listingData) {
   try {
     console.log(`Updating listing ${id} status to: ${status}`);
     
-    // FIXED: Match backend URL format - status in path, not body
-    const response = await this.axios.patch(`${this.endpoint}/${id}/status/${status}`, {}, {
+    const response = await this.axios.patch(`${this.endpoint}/${id}/status`, { status }, {
       headers: this.getHeaders()
     });
     
@@ -771,7 +770,7 @@ validateUpdateData(listingData) {
 
   async batchDeleteListings(ids) {
     try {
-      const response = await this.axios.post(`${this.endpoint}/batch-delete`, { ids }, {
+      const response = await this.axios.post(`${this.endpoint}/bulk-delete`, { ids }, {
         headers: this.getHeaders()
       });
       this.cache.clear();
@@ -784,7 +783,7 @@ validateUpdateData(listingData) {
 
   async batchUpdateStatus(ids, status) {
     try {
-      const response = await this.axios.patch(`${this.endpoint}/batch-status`, { ids, status }, {
+      const response = await this.axios.patch(`${this.endpoint}/bulk-status`, { ids, status }, {
         headers: this.getHeaders()
       });
       this.cache.clear();
