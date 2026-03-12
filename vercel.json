@@ -1,16 +1,18 @@
 {
   "version": 2,
   "name": "bw-car-culture",
+  "build": {
+    "env": {
+      "DISABLE_ESLINT_PLUGIN": "true",
+      "CI": "false"
+    }
+  },
   "builds": [
     {
       "src": "client/package.json",
       "use": "@vercel/static-build",
       "config": {
         "distDir": "build"
-      },
-      "env": {
-        "DISABLE_ESLINT_PLUGIN": "true",
-        "CI": "false"
       }
     }
   ],
