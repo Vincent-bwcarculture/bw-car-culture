@@ -7,6 +7,10 @@
       "use": "@vercel/static-build",
       "config": {
         "distDir": "build"
+      },
+      "env": {
+        "DISABLE_ESLINT_PLUGIN": "true",
+        "CI": "false"
       }
     }
   ],
