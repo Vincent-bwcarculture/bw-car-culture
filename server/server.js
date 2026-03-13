@@ -110,6 +110,7 @@ import inventoryRoutes from './routes/inventoryRoutes.js';
 import providerRequestRoutes from './routes/providerRequestRoutes.js';
 import ministryRequestRoutes from './routes/ministryRequestRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
+import marketPriceRoutes from './routes/marketPriceRoutes.js';
 
 import { ensureUploadDirectories } from './utils/uploadDiagnostics.js';
 
@@ -757,6 +758,7 @@ app.use('/api/trailers', trailerListingRoutes);
 app.use('/api/transport', transportRouteRoutes);
 app.use('/api/provider-requests', providerRequestRoutes);
 app.use('/api/ministry-requests', ministryRequestRoutes);
+app.use('/api/market-prices', marketPriceRoutes);
 
 // ============================================
 // ANALYTICS ROUTES INTEGRATION - ADDED

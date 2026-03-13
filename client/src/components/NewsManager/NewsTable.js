@@ -88,8 +88,8 @@ const NewsTable = ({ articles, loading, onEdit, onDelete }) => {
                 <div className="article-info">
                   {article.featuredImage && (
                     <div className="article-thumbnail">
-                      <img 
-                        src={article.featuredImage} 
+                      <img
+                        src={article.featuredImage?.url || article.featuredImage}
                         alt={article.title}
                         loading="lazy"
                         onError={(e) => {

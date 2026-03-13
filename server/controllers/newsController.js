@@ -587,7 +587,7 @@ export const deleteArticle = asyncHandler(async (req, res, next) => {
     await Promise.all(deletePromises);
   }
 
-  await article.remove();
+  await News.findByIdAndDelete(article._id);
 
   res.status(200).json({
     success: true,
