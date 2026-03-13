@@ -1125,6 +1125,42 @@
   pointer-events: none;
 }
 
+/* Pending overlay */
+.vc-pending-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(1px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.vc-pending-badge {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4), 0 3px 10px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+}
+
+.vc-pending-text {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
 .vc-card[data-status="sold"] .vc-content {
   opacity: 0.8;
 }

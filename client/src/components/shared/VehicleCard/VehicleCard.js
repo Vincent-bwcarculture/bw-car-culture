@@ -1067,12 +1067,21 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
                 <span className="vc-sold-text">SOLD</span>
                 {car.sold?.date && (
                   <span className="vc-sold-date">
-                    {new Date(car.sold.date).toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric' 
+                    {new Date(car.sold.date).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric'
                     })}
                   </span>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* PENDING BADGE OVERLAY */}
+          {car.status === 'pending' && (
+            <div className="vc-pending-overlay">
+              <div className="vc-pending-badge">
+                <span className="vc-pending-text">PENDING</span>
               </div>
             </div>
           )}
@@ -1184,8 +1193,11 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           <div className="vc-title-section">
             <h4 className="vc-title">{car.title || 'Vehicle Listing'}</h4>
             <div className="vc-title-badges">
-              {car.priceOptions?.negotiable && (
+              {(car.priceType === 'negotiable') && (
                 <div className="vc-negotiable-badge">Negotiable</div>
+              )}
+              {(car.priceType === 'call') && (
+                <div className="vc-negotiable-badge">Call for Price</div>
               )}
               {car.priceOptions?.financeAvailable && dealer?.sellerType === 'dealership' && (
                 <div className="vc-finance-badge">Finance Available</div>
@@ -1200,7 +1212,11 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               <div className="vc-original-price">P{calculateSavings.originalPrice.toLocaleString()}</div>
             )}
             <div className="vc-price">
-              P{car.price?.toLocaleString() || '0'}
+              {(car.priceType === 'poa' || car.priceOptions?.showPriceAsPOA)
+                ? 'Price on Application'
+                : car.priceType === 'call'
+                ? 'Call for Price'
+                : `P${car.price?.toLocaleString() || '0'}`}
             </div>
             {calculateSavings && car.status !== 'sold' && (
               <div className="vc-savings-highlight">

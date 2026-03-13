@@ -640,6 +640,38 @@ const MarketplaceList = () => {
     });
   }, [carIsFromPrivateSeller]);
 
+  // Client-side sort to ensure correct order within current page results
+  const applySortOrder = useCallback((cars, sortParam) => {
+    if (!sortParam || !Array.isArray(cars) || cars.length === 0) return cars;
+
+    const isDesc = sortParam.startsWith('-');
+    const field = isDesc ? sortParam.slice(1) : sortParam;
+
+    const getNestedValue = (obj, path) => {
+      return path.split('.').reduce((acc, key) => acc?.[key], obj);
+    };
+
+    return [...cars].sort((a, b) => {
+      if (a.isPromoCard || b.isPromoCard) return 0;
+      const valA = getNestedValue(a, field);
+      const valB = getNestedValue(b, field);
+
+      if (valA == null && valB == null) return 0;
+      if (valA == null) return 1;
+      if (valB == null) return -1;
+
+      if (typeof valA === 'number' && typeof valB === 'number') {
+        return isDesc ? valB - valA : valA - valB;
+      }
+
+      const strA = String(valA).toLowerCase();
+      const strB = String(valB).toLowerCase();
+      if (strA < strB) return isDesc ? 1 : -1;
+      if (strA > strB) return isDesc ? -1 : 1;
+      return 0;
+    });
+  }, []);
+
   // Apply other filters with seller type support
   const applyOtherFilters = useCallback((cars, filters) => {
     if (!Array.isArray(cars)) return [];
@@ -790,7 +822,10 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
 
     // Apply client-side safety-net filters (drivetrain, mileage, sellerType etc.)
     // in case the backend didn't apply them (e.g. older deployment or missing data mapping)
-    const cars = applyOtherFilters(rawCars, filters);
+    const filteredCars = applyOtherFilters(rawCars, filters);
+
+    // Apply client-side sort to guarantee correct order within the current page
+    const cars = applySortOrder(filteredCars, filters.sort);
 
     // ✅ USE BACKEND PAGINATION DATA DIRECTLY - Don't recalculate
     const paginationData = response.pagination || {
@@ -831,7 +866,7 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
       setAllCars([]);
       setPagination({ currentPage: 1, totalPages: 1, total: 0 });
     }
-  }, [activeSection, applyTextSearch, applyOtherFilters, isMobile, generateSimilarCarsData]);
+  }, [activeSection, applyTextSearch, applyOtherFilters, applySortOrder, isMobile, generateSimilarCarsData]);
 
   // NEW: Handle page change
   const handlePageChange = useCallback(async (newPage) => {
