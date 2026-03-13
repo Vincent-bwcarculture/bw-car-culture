@@ -2,10 +2,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Home, ShoppingBag, Store, Settings, User, LogIn, LogOut, 
+import {
+  Home, ShoppingBag, Store, Settings, User, LogIn, LogOut,
   UserCircle, Star, QrCode, Hash, X, UserPlus, Newspaper, MessageCircle,
-  Menu, Sun, Moon, BarChart3  // ADDED: Menu, Sun, Moon for the new menu component
+  Menu, Sun, Moon, BarChart3, Info, Map
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
 import EnhancedFABModal from './EnhancedFABModal.js';
@@ -128,6 +128,22 @@ const NavigationMenu = () => {
     navigate('/news');
   };
 
+  // Handle About click
+  const handleAboutClick = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsMenuOpen(false);
+    navigate('/about');
+  };
+
+  // Handle Drive Map click
+  const handleDriveMapClick = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsMenuOpen(false);
+    navigate('/drive-map');
+  };
+
   // Handle menu button click with proper event handling
   const handleMenuClick = (e) => {
     e.preventDefault();
@@ -218,6 +234,36 @@ const NavigationMenu = () => {
               <MessageCircle size={12} />
             </span>
             <span className="menu-item-text">Feedback</span>
+          </button>
+
+          {/* Menu Divider */}
+          <div className="menu-divider"></div>
+
+          {/* Drive Map Menu Item */}
+          <button
+            className="menu-item drivemap-item"
+            onClick={handleDriveMapClick}
+            type="button"
+          >
+            <span className="menu-item-icon">
+              <Map size={12} />
+            </span>
+            <span className="menu-item-text">Drive Map</span>
+          </button>
+
+          {/* Menu Divider */}
+          <div className="menu-divider"></div>
+
+          {/* About Menu Item */}
+          <button
+            className="menu-item about-item"
+            onClick={handleAboutClick}
+            type="button"
+          >
+            <span className="menu-item-icon">
+              <Info size={12} />
+            </span>
+            <span className="menu-item-text">About</span>
           </button>
         </div>
         , document.body

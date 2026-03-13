@@ -5,6 +5,9 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 0.2rem; /* REDUCED from 0.3rem */
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .back-button {
@@ -1758,7 +1761,7 @@
   }
 
   .main-image {
-    min-height: 420px;
+    min-height: unset;
   }
 }
 
@@ -1928,7 +1931,7 @@
   }
 
   .main-image {
-    min-height: 350px;
+    min-height: unset;
   }
 
   .zoom-controls {

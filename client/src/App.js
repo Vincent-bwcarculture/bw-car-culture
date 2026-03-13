@@ -1143,6 +1143,18 @@ const AppRoutes = () => {
             <MarketOverview />
           </MainLayout>
           } />
+
+        <Route path="/about" element={
+          <MainLayout>
+            <PlaceholderPage title="About BW Car Culture" />
+          </MainLayout>
+        } />
+
+        <Route path="/drive-map" element={
+          <MainLayout>
+            <PlaceholderPage title="Drive Map" />
+          </MainLayout>
+        } />
         
      <Route path="/" element={
   <MainLayout>
