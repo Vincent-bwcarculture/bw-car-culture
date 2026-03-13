@@ -160,35 +160,34 @@ body.section-transitioning * {
   50% { opacity: 0.6; }
 }
 
-/* ===== SECTION HEADERS - HORIZONTAL LAYOUT FOR SPACE EFFICIENCY ===== */
+/* ===== SECTION HEADERS ===== */
 .section-header {
-  margin-bottom: 8px; /* REDUCED from 30px */
-  text-align: left; /* CHANGED from center */
+  margin-bottom: 6px;
+  text-align: left;
   position: relative;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 4px;
 }
 
 .section-header h2 {
-  font-size: 24px;
+  font-size: 18px;
   color: #ffffff;
   margin: 0;
   font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   flex-shrink: 0;
 }
 
 .section-header p {
-  color: #cccccc;
-  font-size: 14px;
+  color: #aaaaaa;
+  font-size: 12px;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.4;
   flex: 1;
-  text-align: right; /* POSITION TEXT TO THE RIGHT */
-  min-width: 200px;
+  text-align: right;
+  min-width: 160px;
 }
 
 .section-stats {
@@ -210,9 +209,9 @@ body.section-transitioning * {
 /* ===== MARKETPLACE GRID - COMPACT ===== */
 .marketplace-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px; /* REDUCED from 15px */
-  margin-bottom: 12px; /* REDUCED from 30px */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
   contain: layout;
 }
 
@@ -222,11 +221,11 @@ body.section-transitioning * {
 .private-section,
 .all-section {
   position: relative;
-  padding: 12px 10px; /* REDUCED from 30px 20px */
-  border-radius: 12px;
+  padding: 8px 8px;
+  border-radius: 10px;
   background: rgba(20, 20, 20, 0.8);
   border: 1px solid #2c2c2c;
-  margin-bottom: 12px; /* REDUCED from 40px */
+  margin-bottom: 8px;
   backdrop-filter: blur(10px);
 }
 
@@ -487,24 +486,24 @@ body.section-transitioning * {
 /* ===== RESPONSIVE DESIGN ===== */
 @media (min-width: 576px) {
   .marketplace-container {
-    padding: 20px;
+    padding: 12px;
   }
 
   .marketplace-header h1 {
-    font-size: 28px;
+    font-size: 22px;
   }
 
   .marketplace-stats {
-    font-size: 15px;
+    font-size: 13px;
   }
 
   .marketplace-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px; /* REDUCED from 18px */
+    gap: 10px;
   }
 
   .section-header h2 {
-    font-size: 26px;
+    font-size: 18px;
   }
 
   .section-header p {
@@ -520,7 +519,7 @@ body.section-transitioning * {
 
 @media (min-width: 768px) {
   .marketplace-container {
-    padding: 25px;
+    padding: 16px;
   }
 
   .header-content {
@@ -530,17 +529,17 @@ body.section-transitioning * {
   }
 
   .marketplace-header h1 {
-    font-size: 32px;
+    font-size: 22px;
   }
 
   .marketplace-stats {
-    font-size: 16px;
+    font-size: 13px;
     text-align: right;
   }
 
   .marketplace-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px; /* REDUCED from 20px */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
   }
 
   /* TABLET: Keep horizontal layout for section headers */
@@ -560,22 +559,22 @@ body.section-transitioning * {
 @media (min-width: 992px) {
   .marketplace-grid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 14px; /* REDUCED from 22px */
+    gap: 14px;
   }
 
   .section-header h2 {
-    font-size: 28px;
+    font-size: 20px;
   }
 }
 
 @media (min-width: 1200px) {
   .marketplace-container {
-    padding: 30px;
+    padding: 20px;
   }
 
   .marketplace-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px; /* REDUCED from 24px */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
   }
 
   .loading-container {
@@ -600,7 +599,7 @@ body.section-transitioning * {
 @media (min-width: 1400px) {
   .marketplace-grid {
     grid-template-columns: repeat(4, 1fr);
-    gap: 18px; /* REDUCED from 26px */
+    gap: 16px;
   }
 }
 
@@ -624,26 +623,33 @@ body.section-transitioning * {
   }
 
   .section-header {
-    margin-bottom: 6px; /* REDUCED from 20px */
-    flex-direction: column; /* STACK ON MOBILE */
-    text-align: left;
+    margin-bottom: 4px;
+    flex-direction: row;
+    align-items: center;
     gap: 4px;
   }
 
   .section-header h2 {
-    font-size: 20px;
+    font-size: 15px;
   }
 
   .section-header p {
-    font-size: 13px;
-    text-align: left; /* LEFT ALIGN ON MOBILE */
+    font-size: 11px;
+    text-align: right;
     max-width: none;
   }
 
+  .section-stats,
+  .premium-count,
+  .total-savings,
+  .private-seller-count {
+    display: none;
+  }
+
   .marketplace-grid {
-    grid-template-columns: 1fr;
-    gap: 6px; /* REDUCED from 12px */
-    margin-bottom: 10px; /* REDUCED from 25px */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
   }
 
   .premium-section,

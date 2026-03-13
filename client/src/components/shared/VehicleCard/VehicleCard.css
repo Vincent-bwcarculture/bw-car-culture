@@ -102,7 +102,7 @@
 }
 
 .vc-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-2px);
   box-shadow: var(--vc-shadow-hover);
   border-color: var(--vc-accent-primary);
 }
@@ -111,7 +111,7 @@
 .vc-image-container {
   position: relative;
   width: 100%;
-  height: 280px;
+  height: 200px;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.2);
   touch-action: none;
@@ -516,7 +516,7 @@
 
 /* Card Content */
 .vc-content {
-  padding: 0.5rem;
+  padding: 0.5rem 0.65rem;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -526,21 +526,21 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 0.4rem;
-  gap: 0.8rem;
+  margin-bottom: 0.3rem;
+  gap: 0.5rem;
 }
 
 .vc-title-section {
   flex: 1;
   min-width: 0;
-  max-width: 60%;
+  max-width: 58%;
 }
 
 .vc-title {
-  font-size: 1.2rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--vc-text-primary);
-  margin: 0 0 0.2rem 0;
+  margin: 0 0 0.15rem 0;
   line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -582,7 +582,7 @@
 }
 
 .vc-price {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: bold;
   color: var(--vc-accent-secondary);
   white-space: nowrap;
@@ -660,24 +660,27 @@
 
 /* Specifications */
 .vc-specs {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.4rem;
-  margin-bottom: 0.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.6rem;
+  margin-bottom: 0.35rem;
 }
 
 .vc-spec-item {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.2rem;
 }
 
 .vc-spec-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--vc-text-muted);
 }
 
 .vc-spec-value {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 500;
   color: var(--vc-text-primary);
 }
 
@@ -741,14 +744,14 @@
 /* Dealer info */
 .vc-dealer-info {
   display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  padding: 0.4rem;
-  margin-bottom: 0.4rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  margin-bottom: 0.3rem;
   border-bottom: 1px solid var(--vc-border-color);
   cursor: pointer;
   transition: background-color 0.2s ease;
-  min-height: 56px;
+  min-height: 36px;
 }
 
 .vc-dealer-info:hover {
@@ -882,8 +885,8 @@
 }
 
 .vc-dealer-avatar {
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid transparent;
@@ -896,8 +899,8 @@
 }
 
 .vc-dealer-avatar-placeholder {
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
@@ -905,7 +908,7 @@
   justify-content: center;
   color: white;
   font-weight: bold;
-  font-size: 18px;
+  font-size: 13px;
   text-transform: uppercase;
   border: 2px solid transparent;
   transition: border-color 0.2s ease;
@@ -1205,10 +1208,10 @@
   display: none;
 }
 
-/* Mobile adjustments - INCREASED HEIGHTS */
+/* Mobile adjustments */
 @media (max-width: 768px) {
   .vc-image-container {
-    height: 240px;
+    height: 170px;
     cursor: pointer;
   }
   
@@ -1271,7 +1274,7 @@
   }
   
   .vc-title {
-    font-size: 1.1rem;
+    font-size: 0.88rem;
     font-weight: 600;
     -webkit-line-clamp: 2;
   }
@@ -1288,14 +1291,14 @@
   }
   
   .vc-price {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: bold;
   }
   
   .vc-dealer-info {
-    padding: 0.3rem;
-    margin-bottom: 0.3rem;
-    min-height: 50px;
+    padding: 0.2rem 0;
+    margin-bottom: 0.2rem;
+    min-height: 32px;
   }
   
   .vc-dealer-name {
@@ -1324,9 +1327,9 @@
   
   .vc-dealer-avatar,
   .vc-dealer-avatar-placeholder {
-    width: 40px;
-    height: 40px;
-    font-size: 16px;
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
   }
 
   .vc-image {
@@ -1342,7 +1345,7 @@
 
 @media (max-width: 480px) {
   .vc-image-container {
-    height: 220px;
+    height: 140px;
     position: relative;
   }
   
