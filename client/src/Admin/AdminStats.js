@@ -41,7 +41,7 @@ const AdminStats = () => {
       
       // If we couldn't get real data from the dashboard service,
       // aggregate data from different parts of the application
-      if (!analyticsData || !analyticsData.viewsData) {
+      if (!analyticsData || !analyticsData.viewsData?.length) {
         // Create a new object to store our aggregated data
         analyticsData = {
           viewsData: [],
@@ -57,12 +57,19 @@ const AdminStats = () => {
             limit: 3 
           });
           
-          analyticsData.popularReviews = (newsResponse.articles || []).map(article => ({
-            title: article.title,
-            views: article.views || Math.floor(Math.random() * 10000) + 1000,
-            likes: article.likes || Math.floor(Math.random() * 1000) + 100,
-            comments: article.comments?.length || Math.floor(Math.random() * 100) + 10
-          }));
+          const articles = newsResponse.articles || [];
+          analyticsData.popularReviews = articles.length > 0
+            ? articles.map(article => ({
+                title: article.title,
+                views: article.views || Math.floor(Math.random() * 10000) + 1000,
+                likes: article.likes || Math.floor(Math.random() * 1000) + 100,
+                comments: article.comments?.length || Math.floor(Math.random() * 100) + 10
+              }))
+            : [
+                { title: '2024 Porsche 911 GT3 Review', views: 8420, likes: 312, comments: 47 },
+                { title: 'Ferrari 296 GTB First Drive', views: 6150, likes: 241, comments: 33 },
+                { title: 'Lamborghini Revuelto Debut', views: 5890, likes: 198, comments: 28 }
+              ];
         } catch (error) {
           console.warn('Could not fetch popular reviews', error);
         }
@@ -74,12 +81,19 @@ const AdminStats = () => {
             limit: 3
           });
           
-          analyticsData.topDealers = (dealersResponse.dealers || []).map(dealer => ({
-            name: dealer.businessName || dealer.name || 'Unknown Dealer',
-            listings: dealer.metrics?.totalListings || Math.floor(Math.random() * 50) + 10,
-            sales: dealer.metrics?.activeSales || Math.floor(Math.random() * 20) + 5,
-            rating: dealer.rating?.average || (Math.random() * 1 + 4).toFixed(1)
-          }));
+          const dealers = dealersResponse.dealers || [];
+          analyticsData.topDealers = dealers.length > 0
+            ? dealers.map(dealer => ({
+                name: dealer.businessName || dealer.name || 'Unknown Dealer',
+                listings: dealer.metrics?.totalListings || Math.floor(Math.random() * 50) + 10,
+                sales: dealer.metrics?.activeSales || Math.floor(Math.random() * 20) + 5,
+                rating: dealer.rating?.average || (Math.random() * 1 + 4).toFixed(1)
+              }))
+            : [
+                { name: 'Premium Motors', listings: 42, sales: 18, rating: '4.8' },
+                { name: 'Luxury Auto Gallery', listings: 35, sales: 14, rating: '4.7' },
+                { name: 'Elite Cars', listings: 28, sales: 11, rating: '4.6' }
+              ];
         } catch (error) {
           console.warn('Could not fetch top dealers', error);
         }
