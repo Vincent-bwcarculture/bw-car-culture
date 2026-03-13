@@ -237,7 +237,7 @@ const NewsArticle = () => {
       } catch (error) {
         console.error('Error fetching article:', error);
         // More detailed error logging
-        if (error.response?.status === 404) {
+        if (error.status === 404 || error.response?.status === 404) {
           setError('Article not found. It may have been removed or the link is incorrect.');
         } else {
           setError('Failed to load article. Please try again later.');
