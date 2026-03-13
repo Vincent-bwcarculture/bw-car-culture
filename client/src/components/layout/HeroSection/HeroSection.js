@@ -514,8 +514,7 @@ const HeroSection = () => {
               <div className="bcc-hero-savings-showcase">
                 <div className="bcc-savings-badge">
                   <div className="bcc-savings-badge-content">
-                    <div className="bcc-savings-icon">💰</div>
-                    <div className="bcc-savings-info">
+                      <div className="bcc-savings-info">
                       <div className="bcc-savings-label">Total Available Savings</div>
                       <div className="bcc-savings-amount">{formatPrice(savingsData.totalSavings)}</div>
                     </div>
@@ -538,24 +537,6 @@ const HeroSection = () => {
               </div>
             )}
 
-            <div className="bcc-hero-features">
-              <div className="bcc-hero-feature">
-                <span className="bcc-hero-feature-icon">✓</span>
-                <span>Compare prices from local dealers</span>
-              </div>
-              <div className="bcc-hero-feature">
-                <span className="bcc-hero-feature-icon">✓</span>
-                <span>100% verified listings</span>
-              </div>
-              <div className="bcc-hero-feature">
-                <span className="bcc-hero-feature-icon">✓</span>
-                <span>Professional car inspection and accurate reports</span>
-              </div>
-              <div className="bcc-hero-feature">
-                <span className="bcc-hero-feature-icon">✓</span>
-                <span>Free valuation service</span>
-              </div>
-            </div>
           </div>
         ) : activeTab === 'sell' ? (
           <div className="bcc-hero-sell">
@@ -621,36 +602,30 @@ const HeroSection = () => {
             <div className="bcc-hero-sell-options">
               <div className="bcc-hero-sell-option">
                 <div className="bcc-hero-option-header">
-                  <span className="bcc-hero-option-icon">📊</span>
                   <h3>Instant Valuation</h3>
                 </div>
                 <p>Get a guaranteed price and sell your car fast.</p>
-                <button 
+                <button
                   className="bcc-hero-option-button bcc-hero-call-button"
                   onClick={handleCallClick}
                   disabled={loading}
                   aria-label="Call for vehicle valuation"
                 >
-                  <span className="bcc-hero-button-icon">📞</span>
-                  {/* UPDATED: Dynamic button text based on auth */}
                   {isAuthenticated ? 'Get Valuation' : 'Login for Valuation'}
                 </button>
               </div>
 
               <div className="bcc-hero-sell-option">
                 <div className="bcc-hero-option-header">
-                  <span className="bcc-hero-option-icon">🚗</span>
-                  <h3>List and sell my Car</h3>
+                  <h3>List and Sell My Car</h3>
                 </div>
                 <p>Reach thousands of buyers and sell your car fast for a fair price.</p>
-                <button 
+                <button
                   className="bcc-hero-option-button bcc-hero-whatsapp-button"
                   onClick={handleShowPreparation}
                   disabled={loading}
                   aria-label="Get preparation guidelines for listing your vehicle"
                 >
-                  <span className="bcc-hero-button-icon">📝</span>
-                  {/* UPDATED: Dynamic button text based on auth */}
                   {isAuthenticated ? 'List My Car' : 'Login to List Car'}
                 </button>
               </div>
@@ -667,7 +642,7 @@ const HeroSection = () => {
                   <div className="bcc-preparation-grid">
                     <div className="bcc-preparation-item">
                       <div className="bcc-prep-content">
-                        <h4>📸 Quality Photos</h4>
+                        <h4>Quality Photos</h4>
                         <ul>
                           <li>Multiple angles (front, back, sides, interior)</li>
                           <li>Engine bay and dashboard photos</li>
@@ -679,7 +654,7 @@ const HeroSection = () => {
                     
                     <div className="bcc-preparation-item">
                       <div className="bcc-prep-content">
-                        <h4>📋 Vehicle Details</h4>
+                        <h4>Vehicle Details</h4>
                         <ul>
                           <li>Registration documents</li>
                           <li>Service history records</li>
@@ -691,7 +666,7 @@ const HeroSection = () => {
                     
                     <div className="bcc-preparation-item">
                       <div className="bcc-prep-content">
-                        <h4>🔧 Vehicle Condition</h4>
+                        <h4>Vehicle Condition</h4>
                         <ul>
                           <li>Recent service information</li>
                           <li>Known issues or problems</li>
@@ -703,7 +678,7 @@ const HeroSection = () => {
                     
                     <div className="bcc-preparation-item">
                       <div className="bcc-prep-content">
-                        <h4>💰 Pricing Research</h4>
+                        <h4>Pricing Research</h4>
                         <ul>
                           <li>Check similar cars online</li>
                           <li>Consider your car's unique features</li>
@@ -716,29 +691,26 @@ const HeroSection = () => {
                   
                   <div className="bcc-preparation-tip">
                     <div className="bcc-tip-content">
-                      <strong>💡 Pro Tip:</strong> Vehicles with complete information and quality photos sell 3x faster and for up to 15% more than incomplete listings!
+                      <strong>Pro Tip:</strong> Vehicles with complete information and quality photos sell 3x faster and for up to 15% more than incomplete listings!
                     </div>
                   </div>
 
                   {/* Action buttons for preparation section */}
                   <div className="bcc-preparation-actions">
-                    <button 
+                    <button
                       className="bcc-preparation-ready-button"
                       onClick={handleWhatsAppClick}
                       disabled={loading}
                       aria-label="I'm ready - start listing process"
                     >
-                      <span className="bcc-prep-button-icon">✓</span>
-                      {/* UPDATED: Dynamic button text based on auth */}
-                      {isAuthenticated ? "I'm Ready - Start Listing" : "I'm Ready - Login to List"}
+                      {isAuthenticated ? "I'm Ready — Start Listing" : "I'm Ready — Login to List"}
                     </button>
-                    <button 
+                    <button
                       className="bcc-preparation-back-button"
                       onClick={handleHidePreparation}
                       disabled={loading}
                       aria-label="Go back to options"
                     >
-                      <span className="bcc-prep-button-icon">←</span>
                       Go Back
                     </button>
                   </div>
