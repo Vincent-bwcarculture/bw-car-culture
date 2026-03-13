@@ -255,12 +255,13 @@ const QuickActions = ({ onActionSelected }) => {
   return (
     <ErrorBoundary>
       <div className="qa-quick-actions">
-        <button 
+        <p className="qa-section-title">Quick Actions</p>
+        <button
           className="qa-action-button"
           onClick={handleAddListingClick}
           disabled={loading}
         >
-          <span className="qa-icon">🚗</span>
+          <span className="qa-icon">◇</span>
           Add Listing
         </button>
 
@@ -269,7 +270,7 @@ const QuickActions = ({ onActionSelected }) => {
           onClick={handleReviewClick}
           disabled={loading}
         >
-          <span className="qa-icon">✍️</span>
+          <span className="qa-icon">◉</span>
           New Review
         </button>
 
@@ -279,7 +280,7 @@ const QuickActions = ({ onActionSelected }) => {
           onClick={handleVideoClick}
           disabled={loading}
         >
-          <span className="qa-icon">📺</span>
+          <span className="qa-icon">▶</span>
           Add YouTube Video
         </button>
 
@@ -289,7 +290,7 @@ const QuickActions = ({ onActionSelected }) => {
           onClick={handleInventoryClick}
           disabled={loading}
         >
-          <span className="qa-icon">📦</span>
+          <span className="qa-icon">◈</span>
           Add Inventory Item
         </button>
 
@@ -300,7 +301,7 @@ const QuickActions = ({ onActionSelected }) => {
               className="qa-action-button highlight-action"
               onClick={handleGIONDashboardClick}
             >
-              <span className="qa-icon">⭐</span>
+              <span className="qa-icon">◆</span>
               GION Dashboard
             </button>
             
@@ -308,7 +309,7 @@ const QuickActions = ({ onActionSelected }) => {
               className="qa-action-button"
               onClick={handleDealershipClick}
             >
-              <span className="qa-icon">🏢</span>
+              <span className="qa-icon">◎</span>
               Manage Dealerships
             </button>
 
@@ -316,7 +317,7 @@ const QuickActions = ({ onActionSelected }) => {
               className="qa-action-button"
               onClick={handleServiceProvidersClick}
             >
-              <span className="qa-icon">🏢</span>
+              <span className="qa-icon">◎</span>
               Manage Service Providers
             </button>
             
@@ -325,7 +326,7 @@ const QuickActions = ({ onActionSelected }) => {
               className="qa-action-button"
               onClick={handleInventoryManagerClick}
             >
-              <span className="qa-icon">🗃️</span>
+              <span className="qa-icon">▦</span>
               Inventory Manager
             </button>
             
@@ -333,7 +334,7 @@ const QuickActions = ({ onActionSelected }) => {
               className="qa-action-button"
               onClick={handleVideoManagerClick}
             >
-              <span className="qa-icon">📺</span>
+              <span className="qa-icon">▶</span>
               Video Manager
             </button>
             
@@ -341,7 +342,7 @@ const QuickActions = ({ onActionSelected }) => {
               className="qa-action-button"
               onClick={handleRentalVehiclesClick}
             >
-              <span className="qa-icon">🚙</span>
+              <span className="qa-icon">◇</span>
               Rental Vehicles
             </button>
             
@@ -349,7 +350,7 @@ const QuickActions = ({ onActionSelected }) => {
               className="qa-action-button"
               onClick={handleTrailersClick}
             >
-              <span className="qa-icon">🚚</span>
+              <span className="qa-icon">≈</span>
               Trailer Listings
             </button>
             
@@ -357,7 +358,7 @@ const QuickActions = ({ onActionSelected }) => {
               className="qa-action-button"
               onClick={handleTransportRoutesClick}
             >
-              <span className="qa-icon">🚌</span>
+              <span className="qa-icon">↑</span>
               Transport Routes
             </button>
           </>

@@ -300,9 +300,9 @@ const AdminStats = () => {
                 <div key={index} className="review-item">
                   <h4>{review.title}</h4>
                   <div className="review-stats">
-                    <span>👁️ {review.views.toLocaleString()}</span>
-                    <span>👍 {review.likes}</span>
-                    <span>💬 {review.comments}</span>
+                    <span>Views: {review.views.toLocaleString()}</span>
+                    <span>Likes: {review.likes}</span>
+                    <span>Comments: {review.comments}</span>
                   </div>
                 </div>
               ))
@@ -324,9 +324,9 @@ const AdminStats = () => {
                   <div className="dealer-info">
                     <h4>{dealer.name}</h4>
                     <div className="dealer-stats">
-                      <span>📊 {dealer.listings} listings</span>
-                      <span>💰 {dealer.sales} sales</span>
-                      <span>⭐ {dealer.rating}</span>
+                      <span>Listings: {dealer.listings}</span>
+                      <span>Sales: {dealer.sales}</span>
+                      <span>Rating: {dealer.rating}</span>
                     </div>
                   </div>
                 </div>
@@ -346,10 +346,10 @@ const AdminStats = () => {
             {statsData.recentActivity.length > 0 ? (
               statsData.recentActivity.map((activity, index) => (
                 <div key={index} className="activity-item">
-                  <span className="activity-icon">
-                    {activity.type === 'review' ? '📝' : 
-                     activity.type === 'listing' ? '🚗' : 
-                     activity.type === 'dealer' ? '🏢' : '👤'}
+                  <span className={`activity-icon activity-icon--${activity.type}`}>
+                    {activity.type === 'review' ? '◉' :
+                     activity.type === 'listing' ? '◇' :
+                     activity.type === 'dealer' ? '◎' : '◐'}
                   </span>
                   <div className="activity-details">
                     <p>{activity.text}</p>
