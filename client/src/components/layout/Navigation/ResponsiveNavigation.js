@@ -52,9 +52,13 @@ const categories = [
   }
 ];
 
+const BRANDS = ['Toyota', 'BMW', 'Mercedes-Benz', 'Honda', 'Ford', 'Volkswagen', 'Hyundai', 'Audi'];
+const LOCATIONS = ['Gaborone', 'Francistown', 'Maun', 'Kasane', 'Lobatse', 'Serowe'];
+
 const NavigationMenu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [vehicleType, setVehicleType] = useState('electric');
+  const [browseDropdown, setBrowseDropdown] = useState(null); // 'brand' | 'dealers' | 'location' | null
   const menuRef = useRef(null);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -182,7 +186,7 @@ const NavigationMenu = () => {
               onChange={(e) => setVehicleType(e.target.value)}
               onClick={(e) => e.stopPropagation()}
             >
-              <option value="electric">⚡ Electric Vehicles</option>
+              <option value="electric">🌿 Electric Vehicles</option>
               <option value="hybrid">🔋 Hybrid</option>
               <option value="SUV">🚙 SUV</option>
               <option value="sedan">🚗 Sedan</option>
@@ -204,19 +208,67 @@ const NavigationMenu = () => {
           <div className="menu-quick-browse">
             <span className="menu-browse-label">Browse by</span>
             <div className="menu-browse-links">
-              <button className="menu-browse-link" type="button"
-                onClick={() => { setIsMenuOpen(false); navigate('/marketplace'); }}>
-                <Tag size={11} /> Brand
+              <button
+                className={`menu-browse-link${browseDropdown === 'brand' ? ' active' : ''}`}
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setBrowseDropdown(browseDropdown === 'brand' ? null : 'brand'); }}
+              >
+                <Tag size={11} /> Brand {browseDropdown === 'brand' ? '▲' : '▼'}
               </button>
-              <button className="menu-browse-link" type="button"
-                onClick={() => { setIsMenuOpen(false); navigate('/dealerships'); }}>
-                <Store size={11} /> Dealers
+              <button
+                className={`menu-browse-link${browseDropdown === 'dealers' ? ' active' : ''}`}
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setBrowseDropdown(browseDropdown === 'dealers' ? null : 'dealers'); }}
+              >
+                <Store size={11} /> Dealers {browseDropdown === 'dealers' ? '▲' : '▼'}
               </button>
-              <button className="menu-browse-link" type="button"
-                onClick={() => { setIsMenuOpen(false); navigate('/marketplace'); }}>
-                <MapPin size={11} /> Location
+              <button
+                className={`menu-browse-link${browseDropdown === 'location' ? ' active' : ''}`}
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setBrowseDropdown(browseDropdown === 'location' ? null : 'location'); }}
+              >
+                <MapPin size={11} /> Location {browseDropdown === 'location' ? '▲' : '▼'}
               </button>
             </div>
+
+            {browseDropdown === 'brand' && (
+              <div className="menu-browse-dropdown">
+                {BRANDS.map(brand => (
+                  <button key={brand} className="menu-browse-dropdown-item" type="button"
+                    onClick={() => { setIsMenuOpen(false); setBrowseDropdown(null); navigate(`/marketplace?make=${encodeURIComponent(brand)}`); }}>
+                    {brand}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {browseDropdown === 'dealers' && (
+              <div className="menu-browse-dropdown">
+                <button className="menu-browse-dropdown-item" type="button"
+                  onClick={() => { setIsMenuOpen(false); setBrowseDropdown(null); navigate('/dealerships'); }}>
+                  All Dealerships
+                </button>
+                <button className="menu-browse-dropdown-item" type="button"
+                  onClick={() => { setIsMenuOpen(false); setBrowseDropdown(null); navigate('/marketplace?sellerType=dealer'); }}>
+                  Dealer Listings
+                </button>
+                <button className="menu-browse-dropdown-item" type="button"
+                  onClick={() => { setIsMenuOpen(false); setBrowseDropdown(null); navigate('/marketplace?sellerType=private'); }}>
+                  Private Sellers
+                </button>
+              </div>
+            )}
+
+            {browseDropdown === 'location' && (
+              <div className="menu-browse-dropdown">
+                {LOCATIONS.map(city => (
+                  <button key={city} className="menu-browse-dropdown-item" type="button"
+                    onClick={() => { setIsMenuOpen(false); setBrowseDropdown(null); navigate(`/marketplace?city=${encodeURIComponent(city)}`); }}>
+                    {city}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="menu-divider"></div>
