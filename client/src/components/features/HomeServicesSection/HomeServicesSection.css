@@ -377,3 +377,28 @@
     transition: none;
   }
 }
+
+/* ===== LIGHT MODE OVERRIDES ===== */
+[data-theme="light"] .home-services-section {
+  color: #1a1a1a;
+}
+
+[data-theme="light"] .home-services-header h2 {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .home-services-category-button {
+  color: #333 !important;
+  border-color: #d0d0d0 !important;
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+[data-theme="light"] .home-services-category-button:hover {
+  background: rgba(255, 51, 0, 0.08) !important;
+}
+
+[data-theme="light"] .carousel-nav {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: #d0d0d0 !important;
+  color: #333 !important;
+}

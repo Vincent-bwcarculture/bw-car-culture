@@ -176,55 +176,17 @@
   display: inline-block;
 }
 
-/* Split-button: left = country selector, right = action label */
+/* Split-button: left = action label (red), right = country selector (grey) */
 .bcc-import-button {
   display: flex;
   align-items: stretch;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.4);
-  border: 1.5px solid rgba(255, 51, 0, 0.6);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
 }
 
-/* Left side — country picker */
-.bcc-import-selector {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.65rem 1rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  background: rgba(255, 51, 0, 0.18);
-  color: #ffffff;
-  border: none;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.2s ease;
-  min-width: 140px;
-}
-
-.bcc-import-selector:hover {
-  background: rgba(255, 51, 0, 0.3);
-}
-
-.bcc-import-country {
-  flex: 1;
-  text-align: left;
-}
-
-.bcc-import-arrow {
-  font-size: 0.6rem;
-  opacity: 0.8;
-}
-
-/* Vertical divider */
-.bcc-import-divider {
-  width: 1px;
-  background: rgba(255, 255, 255, 0.25);
-  flex-shrink: 0;
-}
-
-/* Right side — action */
+/* Left side — action label */
 .bcc-import-action {
   display: flex;
   align-items: center;
@@ -242,6 +204,44 @@
 
 .bcc-import-action:hover {
   background: #e62e00;
+}
+
+/* Vertical divider */
+.bcc-import-divider {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.22);
+  flex-shrink: 0;
+}
+
+/* Right side — country picker (grey/white) */
+.bcc-import-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+  min-width: 130px;
+}
+
+.bcc-import-selector:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.bcc-import-country {
+  flex: 1;
+  text-align: left;
+}
+
+.bcc-import-arrow {
+  font-size: 0.6rem;
+  opacity: 0.7;
 }
 
 .bcc-import-dropdown {
@@ -1950,9 +1950,22 @@
   border-color: #ff3300;
 }
 
+[data-theme="light"] .bcc-import-button {
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
 [data-theme="light"] .bcc-import-selector {
-  background: rgba(255, 51, 0, 0.12);
+  background: rgba(0, 0, 0, 0.06);
   color: #1a1a1a;
+}
+
+[data-theme="light"] .bcc-import-selector:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .bcc-import-divider {
+  background: rgba(0, 0, 0, 0.15);
 }
 
 [data-theme="light"] .bcc-import-dropdown {
@@ -1969,10 +1982,6 @@
 [data-theme="light"] .bcc-import-option.selected {
   background: rgba(255, 51, 0, 0.1);
   color: #1a1a1a;
-}
-
-[data-theme="light"] .bcc-import-divider {
-  background: rgba(0, 0, 0, 0.15);
 }
 
 [data-theme="light"] .bcc-hero-stats {

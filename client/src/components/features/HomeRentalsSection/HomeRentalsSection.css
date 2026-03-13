@@ -268,3 +268,18 @@
       padding: 0 20px;
     }
   }
+
+/* ===== LIGHT MODE OVERRIDES ===== */
+[data-theme="light"] .home-rentals-section {
+  color: #1a1a1a;
+}
+
+[data-theme="light"] .home-rentals-header h2 {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .rental-carousel-nav {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: #d0d0d0 !important;
+  color: #333 !important;
+}

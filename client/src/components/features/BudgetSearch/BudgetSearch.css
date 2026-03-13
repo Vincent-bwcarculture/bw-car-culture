@@ -994,8 +994,67 @@
   .budget-action-button {
     transition: none;
   }
-  
+
   .budget-action-button:hover {
     transform: none;
   }
+}
+
+/* ===== LIGHT MODE OVERRIDES ===== */
+[data-theme="light"] .budget-search-section {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-color: #d0d0d0 !important;
+  color: #1a1a1a;
+}
+
+[data-theme="light"] .budget-calculator {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border-color: #d0d0d0 !important;
+}
+
+[data-theme="light"] .budget-section-header h2 {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .budget-section-header p {
+  color: #555 !important;
+}
+
+[data-theme="light"] .calculator-header {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .calculator-header h3,
+[data-theme="light"] .calculator-header span {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .budget-input-group label {
+  color: #555 !important;
+}
+
+[data-theme="light"] .budget-input-group input,
+[data-theme="light"] .budget-input-group select {
+  background: #ffffff !important;
+  border-color: #d0d0d0 !important;
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .budget-results-section,
+[data-theme="light"] .budget-listings-grid {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .budget-result-card {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-color: #d0d0d0 !important;
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .budget-result-label {
+  color: #555 !important;
+}
+
+[data-theme="light"] .budget-result-value {
+  color: #1a1a1a !important;
 }

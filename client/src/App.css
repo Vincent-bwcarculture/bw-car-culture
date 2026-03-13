@@ -178,6 +178,56 @@ body {
   border-color: var(--border-color) !important;
 }
 
+/* SVG icons — prevent white-on-white */
+[data-theme="light"] svg {
+  color: inherit;
+}
+
+/* Home section headings & cards */
+[data-theme="light"] .home-dealerships-section,
+[data-theme="light"] .home-services-section,
+[data-theme="light"] .home-rentals-section,
+[data-theme="light"] .home-inventory-section {
+  color: #1a1a1a;
+}
+
+[data-theme="light"] .home-dealerships-header h2,
+[data-theme="light"] .home-services-header h2,
+[data-theme="light"] .home-rentals-header h2 {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .bcc-business-card,
+[data-theme="light"] .service-card,
+[data-theme="light"] .rental-card,
+[data-theme="light"] .inventory-card {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .bcc-business-card h3,
+[data-theme="light"] .bcc-business-card p,
+[data-theme="light"] .bcc-business-card span,
+[data-theme="light"] .service-card h3,
+[data-theme="light"] .service-card p,
+[data-theme="light"] .rental-card h3,
+[data-theme="light"] .rental-card p {
+  color: inherit !important;
+}
+
+/* Vehicle listing cards on home */
+[data-theme="light"] .vehicle-card-title,
+[data-theme="light"] .vehicle-card-price,
+[data-theme="light"] .vehicle-card-spec {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .vehicle-card-muted,
+[data-theme="light"] .vehicle-card-dealer {
+  color: var(--text-muted) !important;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

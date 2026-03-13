@@ -420,7 +420,19 @@ const HeroSection = () => {
         <div className="bcc-import-wrapper">
           <div className="bcc-import-container">
             <div className="bcc-import-button">
-              {/* Left: country selector */}
+              {/* Left: action label */}
+              <button
+                className="bcc-import-action"
+                onClick={() => navigate(`/import-vehicles${selectedCountry !== 'Select country' ? `?from=${encodeURIComponent(selectedCountry)}` : ''}`)}
+                type="button"
+              >
+                Import a car from
+              </button>
+
+              {/* Divider */}
+              <span className="bcc-import-divider" />
+
+              {/* Right: country selector */}
               <button
                 className="bcc-import-selector"
                 onClick={() => setShowImportDropdown(prev => !prev)}
@@ -428,18 +440,6 @@ const HeroSection = () => {
               >
                 <span className="bcc-import-country">{selectedCountry}</span>
                 <span className="bcc-import-arrow">{showImportDropdown ? '▲' : '▼'}</span>
-              </button>
-
-              {/* Divider */}
-              <span className="bcc-import-divider" />
-
-              {/* Right: action label */}
-              <button
-                className="bcc-import-action"
-                onClick={() => navigate(`/import-vehicles${selectedCountry !== 'Select country' ? `?from=${encodeURIComponent(selectedCountry)}` : ''}`)}
-                type="button"
-              >
-                Import Vehicles
               </button>
             </div>
 

@@ -313,3 +313,38 @@
     height: 110px !important;
   }
 }
+
+/* ===== LIGHT MODE OVERRIDES ===== */
+[data-theme="light"] .car-brands-section {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: #d0d0d0 !important;
+}
+
+[data-theme="light"] .car-brands-section h2 {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .brand-card {
+  background: rgba(245, 245, 245, 0.97) !important;
+  border-color: #d0d0d0 !important;
+}
+
+[data-theme="light"] .brand-name {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .brand-count,
+[data-theme="light"] .brand-meta {
+  color: #555 !important;
+}
+
+[data-theme="light"] .brand-vehicle-placeholder {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: #555 !important;
+}
+
+[data-theme="light"] .brands-nav {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: #d0d0d0 !important;
+  color: #333 !important;
+}

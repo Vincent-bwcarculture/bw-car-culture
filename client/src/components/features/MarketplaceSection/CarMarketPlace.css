@@ -2633,3 +2633,31 @@
   background: rgba(0, 80, 0, 0.06) !important;
   border-color: rgba(0, 128, 0, 0.2) !important;
 }
+
+/* Mobile overflow containment */
+@media (max-width: 992px) {
+  .marketplace-content,
+  .main-content,
+  .car-gallery,
+  .car-info,
+  .car-details,
+  .car-header,
+  .title-section,
+  .features-grid,
+  .specs-grid,
+  .description-section,
+  .features-section,
+  .dealer-sidebar,
+  .related-listings-section,
+  .related-news-section {
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .thumbnail-strip {
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
+  }
+}

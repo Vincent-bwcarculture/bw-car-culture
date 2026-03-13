@@ -252,3 +252,30 @@
       padding: 0 20px;
     }
   }
+
+/* ===== LIGHT MODE OVERRIDES ===== */
+[data-theme="light"] .home-dealerships-section {
+  color: #1a1a1a;
+}
+
+[data-theme="light"] .home-dealerships-header h2 {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .pagination-info {
+  color: #555 !important;
+}
+
+[data-theme="light"] .pagination-dot {
+  background-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-theme="light"] .carousel-nav {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: #d0d0d0 !important;
+  color: #333 !important;
+}
+
+[data-theme="light"] .home-dealerships-loading {
+  color: #333 !important;
+}
