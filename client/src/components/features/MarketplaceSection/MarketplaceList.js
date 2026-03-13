@@ -429,8 +429,13 @@ const MarketplaceList = () => {
       .slice(0, limit);
   }, [getCarClassification, calculateListingScore]);
 
-  const getAllListings = useCallback((cars) => {
+  const getAllListings = useCallback((cars, preserveOrder = false) => {
     if (!Array.isArray(cars) || cars.length === 0) return [];
+
+    // When a sort is active, backend already sorted — preserve that order
+    if (preserveOrder) {
+      return injectPromoCards(cars.filter(car => !car.isPromoCard));
+    }
     
     const categorizedCars = {
       premium: [],
@@ -546,8 +551,10 @@ const MarketplaceList = () => {
 
   // Get current section's cars with memoization
   const getCurrentSectionCars = useCallback(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const hasSort = !!searchParams.get('sort');
     const realCars = allCars.filter(car => !car.isPromoCard);
-    
+
     switch (activeSection) {
       case 'premium':
         return injectPromoCards(getPremiumListings(realCars), 6);
@@ -557,9 +564,9 @@ const MarketplaceList = () => {
         return injectPromoCards(getPrivateSellerListings(realCars), 8);
       case 'all':
       default:
-        return getAllListings(allCars);
+        return getAllListings(allCars, hasSort);
     }
-  }, [activeSection, allCars, getPremiumListings, getSavingsListings, getPrivateSellerListings, getAllListings, injectPromoCards]);
+  }, [activeSection, allCars, location.search, getPremiumListings, getSavingsListings, getPrivateSellerListings, getAllListings, injectPromoCards]);
 
   // Search filters
   const prepareSearchFilters = useCallback((searchParams) => {
@@ -715,11 +722,38 @@ const MarketplaceList = () => {
         return city && city.toLowerCase().includes(cityLower);
       });
     }
-    
+
+    if (filters.drivetrain) {
+      const drivetrainLower = filters.drivetrain.toLowerCase();
+      filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
+        const dt = car.specifications?.drivetrain;
+        return dt && dt.toLowerCase() === drivetrainLower;
+      });
+    }
+
+    if (filters.minMileage) {
+      const minMileage = Number(filters.minMileage);
+      filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
+        const mileage = Number(car.specifications?.mileage);
+        return !isNaN(mileage) && mileage >= minMileage;
+      });
+    }
+
+    if (filters.maxMileage) {
+      const maxMileage = Number(filters.maxMileage);
+      filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
+        const mileage = Number(car.specifications?.mileage);
+        return !isNaN(mileage) && mileage <= maxMileage;
+      });
+    }
+
     for (const filterFn of filterFunctions) {
       filtered = filtered.filter(filterFn);
     }
-    
+
     return filtered;
   }, [carIsFromPrivateSeller]);
 
@@ -752,8 +786,12 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
     }
     
     // ✅ USE BACKEND DATA DIRECTLY - Don't modify the listings array
-    const cars = response.listings || response.data || [];
-    
+    const rawCars = response.listings || response.data || [];
+
+    // Apply client-side safety-net filters (drivetrain, mileage, sellerType etc.)
+    // in case the backend didn't apply them (e.g. older deployment or missing data mapping)
+    const cars = applyOtherFilters(rawCars, filters);
+
     // ✅ USE BACKEND PAGINATION DATA DIRECTLY - Don't recalculate
     const paginationData = response.pagination || {
       currentPage: response.currentPage || page,
