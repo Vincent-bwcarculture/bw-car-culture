@@ -187,13 +187,13 @@ const NavigationMenu = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <option value="electric">🌿 Electric Vehicles</option>
-              <option value="hybrid">🔋 Hybrid</option>
-              <option value="SUV">🚙 SUV</option>
-              <option value="sedan">🚗 Sedan</option>
-              <option value="family">👨‍👩‍👧 Family Cars</option>
-              <option value="4x4">🏔️ Off-road / 4x4</option>
-              <option value="pickup">🛻 Pickup / Bakkie</option>
-              <option value="luxury">💎 Luxury</option>
+              <option value="hybrid">Hybrid</option>
+              <option value="SUV">SUV</option>
+              <option value="sedan">Sedan</option>
+              <option value="family">Family Cars</option>
+              <option value="4x4">Off-road / 4x4</option>
+              <option value="pickup">Pickup / Bakkie</option>
+              <option value="luxury">Luxury</option>
             </select>
             <button
               className="menu-vehicle-search-btn"
