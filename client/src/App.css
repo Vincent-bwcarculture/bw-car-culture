@@ -1,3 +1,38 @@
+/* ===== GLOBAL THEME VARIABLES ===== */
+:root {
+  --app-bg: radial-gradient(#000000bb, rgba(0, 0, 0, 0.979));
+  --app-color: #ffffff;
+  --page-bg: rgba(20, 20, 20, 0.95);
+  --card-bg: rgba(20, 20, 20, 0.9);
+  --section-bg: rgba(15, 15, 15, 0.8);
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #888888;
+  --border-color: #2c2c2c;
+  --border-light: rgba(255, 255, 255, 0.1);
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.15);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --accent: #ff3300;
+}
+
+[data-theme="light"] {
+  --app-bg: radial-gradient(#f0f0f0, #e8e8e8);
+  --app-color: #1a1a1a;
+  --page-bg: rgba(245, 245, 245, 0.98);
+  --card-bg: rgba(255, 255, 255, 0.98);
+  --section-bg: rgba(240, 240, 240, 0.95);
+  --text-primary: #1a1a1a;
+  --text-secondary: #333333;
+  --text-muted: #666666;
+  --border-color: #d0d0d0;
+  --border-light: rgba(0, 0, 0, 0.1);
+  --input-bg: rgba(0, 0, 0, 0.04);
+  --input-border: rgba(0, 0, 0, 0.18);
+  --shadow-color: rgba(0, 0, 0, 0.12);
+  --accent: #ff3300;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -8,15 +43,139 @@
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
-  background: radial-gradient(#000000bb, rgba(0, 0, 0, 0.979));
-  color: #ffffff;
+  background: var(--app-bg);
+  color: var(--app-color);
   min-height: 100vh;
-  
 }
 
 .App {
   min-height: 100vh;
-  background: radial-gradient(#000000bb, rgba(0, 0, 0, 0.979));
+  background: var(--app-bg);
+}
+
+/* ===== LIGHT MODE: GLOBAL OVERRIDES FOR PUBLIC PAGES ===== */
+
+/* Sections & containers with hardcoded dark backgrounds */
+[data-theme="light"] .marketplace-section,
+[data-theme="light"] .marketplace-list-section,
+[data-theme="light"] .marketplace-grid-section,
+[data-theme="light"] .car-detail-container,
+[data-theme="light"] .main-content,
+[data-theme="light"] .dealer-sidebar,
+[data-theme="light"] .dealer-section,
+[data-theme="light"] .car-info,
+[data-theme="light"] .cdg-container,
+[data-theme="light"] .cdg-details,
+[data-theme="light"] .home-section,
+[data-theme="light"] .section-container {
+  background: var(--page-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Cards */
+[data-theme="light"] .car-card,
+[data-theme="light"] .vehicle-card,
+[data-theme="light"] .listing-card,
+[data-theme="light"] .news-card,
+[data-theme="light"] .dealer-card,
+[data-theme="light"] .service-card {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Text that would be white on white */
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] p,
+[data-theme="light"] span:not([class*="badge"]):not([class*="btn"]):not([class*="tag"]):not([class*="status"]) {
+  color: inherit;
+}
+
+/* Specific white text classes that would be invisible in light mode */
+[data-theme="light"] .title,
+[data-theme="light"] .car-price,
+[data-theme="light"] .spec-value,
+[data-theme="light"] .section-title,
+[data-theme="light"] .dealer-name,
+[data-theme="light"] .description-text {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .spec-label,
+[data-theme="light"] .text-muted,
+[data-theme="light"] .subtitle,
+[data-theme="light"] .meta-text,
+[data-theme="light"] .dealer-location {
+  color: var(--text-muted) !important;
+}
+
+/* Borders */
+[data-theme="light"] .car-header,
+[data-theme="light"] .dealer-header,
+[data-theme="light"] .dealer-header-compact,
+[data-theme="light"] .spec-item,
+[data-theme="light"] .features-section,
+[data-theme="light"] .description-section,
+[data-theme="light"] .menu-divider {
+  border-color: var(--border-color) !important;
+}
+
+/* Spec items & feature items */
+[data-theme="light"] .spec-item {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Inputs */
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+  background: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* Back button and nav text */
+[data-theme="light"] .back-button {
+  color: var(--text-primary) !important;
+}
+
+/* Gallery area stays dark for image contrast */
+[data-theme="light"] .car-gallery,
+[data-theme="light"] .main-image-container,
+[data-theme="light"] .main-image {
+  background: #1a1a1a !important;
+}
+
+/* Similar / related sections */
+[data-theme="light"] .similar-vehicles-section,
+[data-theme="light"] .related-section,
+[data-theme="light"] .carousel-section {
+  background: var(--section-bg) !important;
+}
+
+[data-theme="light"] .carousel-item,
+[data-theme="light"] .similar-item,
+[data-theme="light"] .cdg-similar-item {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Filter / search bars */
+[data-theme="light"] .filters-container,
+[data-theme="light"] .marketplace-filters,
+[data-theme="light"] .search-section {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
 }
 
 @keyframes fadeIn {

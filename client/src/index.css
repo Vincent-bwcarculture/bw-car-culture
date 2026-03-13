@@ -5,6 +5,11 @@ html, body {
   color: white;
 }
 
+[data-theme="light"] body,
+[data-theme="light"] {
+  color: #1a1a1a;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

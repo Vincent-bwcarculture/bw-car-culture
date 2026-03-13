@@ -1417,3 +1417,60 @@ body.section-transitioning * {
     font-size: 11px;
   }
 }
+/* ===== LIGHT MODE OVERRIDES ===== */
+[data-theme="light"] .marketplace-container {
+  background: transparent;
+  color: #1a1a1a;
+}
+
+[data-theme="light"] .marketplace-header h1,
+[data-theme="light"] .marketplace-header h2,
+[data-theme="light"] .section-header h2 {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .marketplace-header p,
+[data-theme="light"] .section-header p {
+  color: #555555 !important;
+}
+
+[data-theme="light"] .marketplace-header {
+  border-bottom-color: rgba(255, 51, 0, 0.25);
+}
+
+[data-theme="light"] .premium-section,
+[data-theme="light"] .savings-section,
+[data-theme="light"] .private-section,
+[data-theme="light"] .all-section {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: #d8d8d8 !important;
+}
+
+[data-theme="light"] .section-header {
+  background: transparent !important;
+  border-color: #d8d8d8 !important;
+}
+
+[data-theme="light"] .pagination-btn {
+  background: rgba(255, 255, 255, 0.8) !important;
+  color: #1a1a1a !important;
+  border-color: #d0d0d0 !important;
+}
+
+[data-theme="light"] .pagination-btn:disabled {
+  background: rgba(0, 0, 0, 0.06) !important;
+  color: #aaa !important;
+}
+
+[data-theme="light"] .sort-select,
+[data-theme="light"] .filter-select {
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+  border-color: #d0d0d0 !important;
+}
+
+[data-theme="light"] .no-results-message,
+[data-theme="light"] .loading-message,
+[data-theme="light"] .results-count {
+  color: #444444 !important;
+}

@@ -967,3 +967,41 @@
   contain: layout style;
   will-change: transform;
 }
+/* ===== LIGHT MODE OVERRIDES ===== */
+[data-theme="light"] .marketplace-filters,
+[data-theme="light"] .filters-container {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-color: #d8d8d8 !important;
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .filter-label,
+[data-theme="light"] .filter-title {
+  color: #333333 !important;
+}
+
+[data-theme="light"] .filter-select,
+[data-theme="light"] .filter-input,
+[data-theme="light"] .price-input {
+  background: #ffffff !important;
+  border-color: #d0d0d0 !important;
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .filter-button,
+[data-theme="light"] .apply-filters-btn {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: #333333 !important;
+  border-color: #d0d0d0 !important;
+}
+
+[data-theme="light"] .filter-button.active,
+[data-theme="light"] .filter-button:hover {
+  background: rgba(255, 51, 0, 0.1) !important;
+  color: #ff3300 !important;
+  border-color: #ff3300 !important;
+}
+
+[data-theme="light"] .clear-filters-btn {
+  color: #ff3300 !important;
+}

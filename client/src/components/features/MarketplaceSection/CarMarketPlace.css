@@ -2523,3 +2523,113 @@
   isolation: isolate;
   position: relative;
 }
+/* ===== LIGHT MODE OVERRIDES ===== */
+[data-theme="light"] .car-detail-container {
+  color: #1a1a1a;
+}
+
+[data-theme="light"] .main-content {
+  background: rgba(255, 255, 255, 0.97) !important;
+}
+
+[data-theme="light"] .dealer-sidebar .dealer-section {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-color: #d8d8d8 !important;
+}
+
+[data-theme="light"] .car-info,
+[data-theme="light"] .car-header,
+[data-theme="light"] .description-section,
+[data-theme="light"] .features-section {
+  background: rgba(255, 255, 255, 0.97) !important;
+  color: #1a1a1a !important;
+  border-color: #d8d8d8 !important;
+}
+
+[data-theme="light"] .title {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .car-price {
+  color: #ff3300 !important;
+}
+
+[data-theme="light"] .spec-item {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border-color: #ddd !important;
+}
+
+[data-theme="light"] .spec-label {
+  color: #666666 !important;
+}
+
+[data-theme="light"] .spec-value {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .back-button {
+  color: #333333 !important;
+}
+
+[data-theme="light"] .back-button:hover {
+  color: #ff3300 !important;
+}
+
+[data-theme="light"] .dealer-header h2,
+[data-theme="light"] .dealer-name-text {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .dealer-meta,
+[data-theme="light"] .dealer-location-text {
+  color: #666666 !important;
+}
+
+[data-theme="light"] .dealer-header,
+[data-theme="light"] .dealer-header-compact {
+  border-bottom-color: #d8d8d8 !important;
+}
+
+[data-theme="light"] .features-tabs {
+  background: transparent !important;
+}
+
+[data-theme="light"] .tab-button {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: #555 !important;
+  border-color: #d0d0d0 !important;
+}
+
+[data-theme="light"] .tab-button.active {
+  background: #ff3300 !important;
+  color: #ffffff !important;
+  border-color: #ff3300 !important;
+}
+
+[data-theme="light"] .feature-item {
+  background: rgba(0, 0, 0, 0.04) !important;
+  color: #1a1a1a !important;
+  border-color: #d8d8d8 !important;
+}
+
+[data-theme="light"] .description-text,
+[data-theme="light"] .description-section p {
+  color: #333333 !important;
+}
+
+[data-theme="light"] .similar-vehicles-section,
+[data-theme="light"] .cdg-similar-vehicles {
+  background: rgba(240, 240, 240, 0.95) !important;
+}
+
+[data-theme="light"] .similar-item,
+[data-theme="light"] .cdg-similar-item {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: #d8d8d8 !important;
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .savings-breakdown {
+  background: rgba(0, 80, 0, 0.06) !important;
+  border-color: rgba(0, 128, 0, 0.2) !important;
+}

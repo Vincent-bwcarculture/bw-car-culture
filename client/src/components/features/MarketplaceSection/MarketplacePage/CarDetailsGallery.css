@@ -1029,3 +1029,82 @@
 .cdg-gallery-main.dragging .cdg-main-image {
   cursor: move;
 }
+/* ===== LIGHT MODE OVERRIDES ===== */
+[data-theme="light"] .cdg-container {
+  background: rgba(245, 245, 245, 0.98);
+  color: #1a1a1a;
+}
+
+[data-theme="light"] .cdg-details {
+  background: rgba(255, 255, 255, 0.97) !important;
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .cdg-title {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .cdg-price {
+  color: #ff3300 !important;
+}
+
+[data-theme="light"] .cdg-spec-item {
+  background: rgba(0, 0, 0, 0.04) !important;
+  border-color: #ddd !important;
+}
+
+[data-theme="light"] .cdg-spec-label {
+  color: #666666 !important;
+}
+
+[data-theme="light"] .cdg-spec-value {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .cdg-specs-grid {
+  background: transparent !important;
+}
+
+[data-theme="light"] .cdg-dealer-info {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-color: #d8d8d8 !important;
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .cdg-dealer-name {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .cdg-dealer-meta {
+  color: #666666 !important;
+}
+
+[data-theme="light"] .cdg-header {
+  border-color: #d8d8d8 !important;
+}
+
+[data-theme="light"] .cdg-similar-vehicles {
+  background: rgba(240, 240, 240, 0.95) !important;
+}
+
+[data-theme="light"] .cdg-similar-header h3 {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .cdg-similar-item {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: #d8d8d8 !important;
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .cdg-vehicle-title {
+  color: #1a1a1a !important;
+}
+
+[data-theme="light"] .cdg-vehicle-meta {
+  color: #666666 !important;
+}
+
+[data-theme="light"] .cdg-vehicle-price {
+  color: #ff3300 !important;
+}

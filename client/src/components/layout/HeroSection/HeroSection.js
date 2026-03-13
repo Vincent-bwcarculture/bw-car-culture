@@ -15,6 +15,7 @@ const HeroSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [showImportDropdown, setShowImportDropdown] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState('Select country');
   const [showPreparation, setShowPreparation] = useState(false);
   const [stats, setStats] = useState({
     carListings: 0,
@@ -418,23 +419,39 @@ const HeroSection = () => {
         {/* Import Vehicles Button */}
         <div className="bcc-import-wrapper">
           <div className="bcc-import-container">
-            <button
-              className="bcc-import-button"
-              onClick={() => setShowImportDropdown(prev => !prev)}
-              type="button"
-            >
-              Import Vehicles from
-              <span className="bcc-import-arrow">{showImportDropdown ? '▲' : '▼'}</span>
-            </button>
+            <div className="bcc-import-button">
+              {/* Left: country selector */}
+              <button
+                className="bcc-import-selector"
+                onClick={() => setShowImportDropdown(prev => !prev)}
+                type="button"
+              >
+                <span className="bcc-import-country">{selectedCountry}</span>
+                <span className="bcc-import-arrow">{showImportDropdown ? '▲' : '▼'}</span>
+              </button>
+
+              {/* Divider */}
+              <span className="bcc-import-divider" />
+
+              {/* Right: action label */}
+              <button
+                className="bcc-import-action"
+                onClick={() => navigate(`/import-vehicles${selectedCountry !== 'Select country' ? `?from=${encodeURIComponent(selectedCountry)}` : ''}`)}
+                type="button"
+              >
+                Import Vehicles
+              </button>
+            </div>
+
             {showImportDropdown && (
               <div className="bcc-import-dropdown">
                 {['South Africa', 'Namibia', 'Zimbabwe', 'Zambia', 'Japan', 'China'].map(country => (
                   <button
                     key={country}
-                    className="bcc-import-option"
+                    className={`bcc-import-option${selectedCountry === country ? ' selected' : ''}`}
                     onClick={() => {
+                      setSelectedCountry(country);
                       setShowImportDropdown(false);
-                      navigate(`/import-vehicles?from=${encodeURIComponent(country)}`);
                     }}
                     type="button"
                   >
