@@ -1150,6 +1150,12 @@ const AppRoutes = () => {
           </MainLayout>
         } />
 
+        <Route path="/import-vehicles" element={
+          <MainLayout>
+            <PlaceholderPage title="Import Vehicles" />
+          </MainLayout>
+        } />
+
         <Route path="/drive-map" element={
           <MainLayout>
             <PlaceholderPage title="Drive Map" />

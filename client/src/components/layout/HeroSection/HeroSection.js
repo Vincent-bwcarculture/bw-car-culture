@@ -14,6 +14,7 @@ const HeroSection = () => {
   const [activeTab, setActiveTab] = useState('buy');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showImportDropdown, setShowImportDropdown] = useState(false);
   const [showPreparation, setShowPreparation] = useState(false);
   const [stats, setStats] = useState({
     carListings: 0,
@@ -405,13 +406,44 @@ const HeroSection = () => {
           >
             Car Rentals
           </button>
-          <button 
+          <button
             className="bcc-hero-tab-button"
             onClick={() => handleTabClick('transport')}
             disabled={loading}
           >
             Public Transport
           </button>
+        </div>
+
+        {/* Import Vehicles Button */}
+        <div className="bcc-import-wrapper">
+          <div className="bcc-import-container">
+            <button
+              className="bcc-import-button"
+              onClick={() => setShowImportDropdown(prev => !prev)}
+              type="button"
+            >
+              Import Vehicles from
+              <span className="bcc-import-arrow">{showImportDropdown ? '▲' : '▼'}</span>
+            </button>
+            {showImportDropdown && (
+              <div className="bcc-import-dropdown">
+                {['South Africa', 'Namibia', 'Zimbabwe', 'Zambia', 'Japan', 'China'].map(country => (
+                  <button
+                    key={country}
+                    className="bcc-import-option"
+                    onClick={() => {
+                      setShowImportDropdown(false);
+                      navigate(`/import-vehicles?from=${encodeURIComponent(country)}`);
+                    }}
+                    type="button"
+                  >
+                    {country}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {activeTab === 'buy' ? (

@@ -163,6 +163,94 @@
   box-shadow: 0 4px 20px rgba(255, 51, 0, 0.3);
 }
 
+/* Import Vehicles Button */
+.bcc-import-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: -1.5rem;
+  margin-bottom: 2rem;
+}
+
+.bcc-import-container {
+  position: relative;
+  display: inline-block;
+}
+
+.bcc-import-button {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  background: #ff3300;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.45);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.bcc-import-button:hover {
+  background: #e62e00;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 51, 0, 0.55);
+}
+
+.bcc-import-button:active {
+  transform: translateY(0);
+}
+
+.bcc-import-arrow {
+  font-size: 0.65rem;
+  opacity: 0.85;
+}
+
+.bcc-import-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 20, 20, 0.97);
+  border: 1px solid rgba(255, 51, 0, 0.35);
+  border-radius: 8px;
+  overflow: hidden;
+  min-width: 200px;
+  z-index: 500;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  animation: importDropdownIn 0.15s ease;
+}
+
+@keyframes importDropdownIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.bcc-import-option {
+  display: block;
+  width: 100%;
+  padding: 0.7rem 1.2rem;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.bcc-import-option:hover {
+  background: rgba(255, 51, 0, 0.15);
+  color: #ffffff;
+}
+
+.bcc-import-option + .bcc-import-option {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 /* Buy Section */
 .bcc-hero-buy h1,
 .bcc-hero-sell h1 {
