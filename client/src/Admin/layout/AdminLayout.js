@@ -1,4 +1,4 @@
-// src/components/admin/layout/AdminLayout.js
+// src/Admin/layout/AdminLayout.js
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import AdminSidebar from '../AdminSidebar.js';
@@ -9,66 +9,73 @@ import './AdminLayout.css';
 
 const AdminLayout = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const location = useLocation();
   const { isAuthenticated, loading, user } = useAuth();
   const navigate = useNavigate();
 
-  // Check authentication on mount and when route changes
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/login', { 
-          state: { from: location.pathname },
-          replace: true 
-        });
+        navigate('/login', { state: { from: location.pathname }, replace: true });
         return;
       }
-      
-      // Additional check for admin role if on admin route
       if (user && user.role !== 'admin') {
         navigate('/unauthorized', { replace: true });
       }
     };
-
-    if (!loading) {
-      checkAuth();
-    }
+    if (!loading) checkAuth();
   }, [isAuthenticated, loading, navigate, location.pathname, user]);
 
   useEffect(() => {
-    // Handle window resize
     const handleResize = () => {
       const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
-      if (!mobile && sidebarCollapsed) {
-        setSidebarCollapsed(false);
-      }
+      if (!mobile) setMobileSidebarOpen(false);
     };
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [sidebarCollapsed]);
+  }, []);
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [location.pathname]);
 
-  if (!isAuthenticated || (user && user.role !== 'admin')) {
-    return null; // Don't render anything while redirecting
-  }
+  const handleToggleSidebar = () => {
+    if (isMobile) {
+      setMobileSidebarOpen(prev => !prev);
+    } else {
+      setSidebarCollapsed(prev => !prev);
+    }
+  };
+
+  if (loading) return <LoadingScreen />;
+  if (!isAuthenticated || (user && user.role !== 'admin')) return null;
 
   return (
-    <div className={`admin-layout ${sidebarCollapsed ? 'collapsed' : ''}`}>
-      <AdminSidebar 
-        collapsed={sidebarCollapsed} 
+    <div className={`admin-layout ${sidebarCollapsed && !isMobile ? 'collapsed' : ''}`}>
+      {/* Mobile backdrop */}
+      {isMobile && mobileSidebarOpen && (
+        <div
+          className="admin-sidebar-backdrop"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
+
+      <AdminSidebar
+        collapsed={sidebarCollapsed}
         isMobile={isMobile}
+        mobileOpen={mobileSidebarOpen}
+        onClose={() => setMobileSidebarOpen(false)}
         user={user}
       />
-      <main className={`admin-main ${sidebarCollapsed ? 'collapsed' : ''}`}>
-        <AdminHeader 
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} 
+
+      <main className={`admin-main ${sidebarCollapsed && !isMobile ? 'collapsed' : ''}`}>
+        <AdminHeader
+          onToggleSidebar={handleToggleSidebar}
           isMobile={isMobile}
           user={user}
         />

@@ -1,233 +1,161 @@
 // AdminSidebar.js
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './AdminSidebar.css';
 
-const AdminSidebar = ({ collapsed }) => {
+const menuItems = [
+  { title: 'Dashboard',       icon: '▦',  path: '/admin' },
+  { title: 'Analytics',       icon: '↑',  path: '/admin/analytics' },
+  { title: 'Market Overview', icon: '≈',  path: '/admin/market-overview' },
+  { title: 'Feedback',        icon: '✉',  path: '/admin/feedback' },
+  {
+    title: 'Marketplace', icon: '◈',
+    submenu: [
+      { title: 'Listings',         path: '/admin/listings' },
+      { title: 'User Submissions', path: '/admin/user-submissions' },
+      { title: 'Requests',         path: '/admin/requests' },
+      { title: 'Auctions',         path: '/admin/auctions' },
+      { title: 'Inventory',        path: '/admin/inventory' },
+    ]
+  },
+  {
+    title: 'Content', icon: '◉',
+    submenu: [
+      { title: 'Articles', path: '/admin/articles' },
+      { title: 'News',     path: '/admin/news' },
+      { title: 'Editor',   path: '/admin/editor' },
+      { title: 'Videos',   path: '/admin/videos' },
+    ]
+  },
+  {
+    title: 'Services', icon: '◎',
+    submenu: [
+      { title: 'Rentals',           path: '/admin/rentals' },
+      { title: 'Trailers',          path: '/admin/trailers' },
+      { title: 'Transport Routes',  path: '/admin/transport' },
+      { title: 'Service Providers', path: '/admin/service-providers' },
+    ]
+  },
+  { title: 'Dealers',   icon: '◇', path: '/admin/dealer' },
+  {
+    title: 'Payments', icon: '◆',
+    submenu: [
+      { title: 'Overview',         path: '/admin/payments' },
+      { title: 'Manual Approvals', path: '/admin/payments/manual' },
+      { title: 'History',          path: '/admin/payments/history' },
+    ]
+  },
+  {
+    title: 'Roles', icon: '◐',
+    submenu: [
+      { title: 'All Requests',    path: '/admin/roles' },
+      { title: 'Pending Reviews', path: '/admin/role-requests' },
+    ]
+  },
+  { title: 'GION',     icon: '◉', path: '/admin/gion' },
+  { title: 'Settings', icon: '◌', path: '/admin/settings' },
+];
+
+const AdminSidebar = ({ collapsed, isMobile, mobileOpen, onClose, user }) => {
   const location = useLocation();
   const [expandedMenu, setExpandedMenu] = useState(null);
 
-  const menuItems = [
-    {
-      title: 'Dashboard',
-      icon: '📊',
-      path: '/admin'
-    },
-      {
-    title: 'Analytics', // NEW ITEM
-    icon: '📈',
-    path: '/admin/analytics',
-    roles: ['admin']
-  },
-      {
-    title: 'Market Overview', // NEW ITEM
-    icon: '📊',
-    path: '/admin/market-overview',
-    roles: ['admin']
-  },
-  {
-    title: 'Feedback Management', // NEW ITEM
-    icon: '💬',
-    path: '/admin/feedback',
-    roles: ['admin'],
-    badge: 'new' // Optional badge for new feedback
-  },
-  {
-  title: 'Article Management',
-  icon: '📝',
-  path: '/admin/articles',
-  roles: ['admin'],
-  submenu: [
-    { title: 'Pending Review', path: '/admin/articles?tab=pending' },
-    { title: 'All Articles', path: '/admin/articles?tab=all' },
-    { title: 'Published', path: '/admin/articles?status=published' },
-    { title: 'Rejected', path: '/admin/articles?status=rejected' }
-  ]
-},
-     {
-      title: 'Payments', // NEW PAYMENTS SECTION
-      icon: '💳',
-      path: '/admin/payments',
-      roles: ['admin'],
-      submenu: [
-        { title: 'Payment Dashboard', path: '/admin/payments' },
-        { title: 'Manual Approvals', path: '/admin/payments/manual' },
-        { title: 'Payment History', path: '/admin/payments/history' }
-      ]
-    },
-    {
-      path: '/admin/listings', // NEW
-      title: 'Listings',
-      label: 'Listings',
-      icon: '🚗'
-    },
-    {
-      title: 'Content',
-      icon: '📝',
-      submenu: [
-        { title: 'Car Reviews', path: '/news' },
-        { title: 'Featured Articles', path: '/admin/featured' },
-        { title: 'News', path: '/news' }
-      ]
-    },
-    {
-      title: 'Inventory',
-      icon: '📦', // Use an appropriate icon
-      path: '/admin/inventory',
-      roles: ['admin', 'provider', 'dealer'] // Allow admin, provider, and dealer roles
-    },
-    {
-      title: 'YouTube Videos',
-      icon: '📺',
-      path: '/admin/videos'
-    },
-    {
-      title: 'Marketplace',
-      icon: '🚗',
-      submenu: [
-        { title: 'Vehicle Listings', path: '/admin/listings' },
-        { title: 'User Submissions', path: '/admin/user-submissions' },
-        { title: 'Pending Listings', path: '/admin/pending-listings' },
-        { title: 'Featured Listings', path: '/admin/featured-listings' }
-      ]
-    },
-    {
-      title: 'Rental Services',
-      icon: '🚙',
-      submenu: [
-        { title: 'Rental Vehicles', path: '/admin/rental-vehicles' },
-        { title: 'Trailer Listings', path: '/admin/trailers' },
-        { title: 'Transport Routes', path: '/admin/transport-routes' }
-      ]
-    },
-    {
-      title: 'Service Providers',
-      icon: '🏢',
-      path: '/admin/service-providers'
-    },
-    {
-      title: 'Dealers',
-      icon: '🏪',
-      submenu: [
-        { title: 'Dealer Profiles', path: '/admin/dealerships' },
-        { title: 'Verification Requests', path: '/admin/dealer-verification' },
-        { title: 'Dealer Analytics', path: '/admin/dealer-analytics' }
-      ]
-    },
-    {
-      title: 'Users',
-      icon: '👥',
-      path: '/admin/users'
-    },
-    {
-    title: 'Role Management',
-    icon: '🔐',
-    path: '/admin/roles',
-    roles: ['admin'],
-    submenu: [
-      { title: 'All Requests', path: '/admin/roles' },
-      { title: 'Pending Reviews', path: '/admin/role-requests' },
-      { title: 'User Roles', path: '/admin/users' }
-    ]
-    },
-    {
-      title: 'Analytics',
-      icon: '📈',
-      path: '/admin/analytics'
-    },
-    {
-      title: 'Settings',
-      icon: '⚙️',
-      path: '/admin/settings'
-    },
-  ];
-
-
-  const handleMenuClick = (index) => {
-    setExpandedMenu(expandedMenu === index ? null : index);
+  const isActive = (path) => {
+    if (!path) return false;
+    if (path === '/admin') return location.pathname === '/admin';
+    return location.pathname.startsWith(path);
   };
 
+  const isGroupActive = (item) => {
+    if (item.path) return isActive(item.path);
+    if (item.submenu) return item.submenu.some(s => isActive(s.path));
+    return false;
+  };
+
+  const handleNavClick = () => {
+    if (isMobile && onClose) onClose();
+  };
+
+  const showFull = isMobile ? true : !collapsed;
+
   return (
-    <aside className={`admin-sidebar ${collapsed ? 'collapsed' : ''}`}>
+    <aside className={`admin-sidebar${collapsed && !isMobile ? ' collapsed' : ''}${isMobile && mobileOpen ? ' mobile-open' : ''}`}>
+      {/* Header */}
       <div className="sidebar-header">
-        <img 
-          src="https://i3wcarculture-images.s3.us-east-1.amazonaws.com/branding/bcc-logo.png" 
-          alt="Admin Logo" 
+        <img
+          src="https://i3wcarculture-images.s3.us-east-1.amazonaws.com/branding/bcc-logo.png"
+          alt="BCC Admin"
           className="admin-logo"
         />
-        {!collapsed && <h2>Admin Panel</h2>}
+        {showFull && <span className="sidebar-title">Admin Panel</span>}
       </div>
 
+      {/* Nav */}
       <nav className="sidebar-nav">
         {menuItems.map((item, index) => (
           <div key={index} className="nav-item-container">
-            {item.path ? (
-              <Link to={item.path} className="nav-link">
-                <div 
-                  className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
-                  onClick={() => item.submenu && handleMenuClick(index)}
-                >
-                  <span className="nav-icon">{item.icon}</span>
-                  {!collapsed && (
-                    <>
-                      <span className="nav-title">{item.title}</span>
-                      {item.submenu && (
-                        <span className={`submenu-arrow ${expandedMenu === index ? 'expanded' : ''}`}>
-                          ▾
-                        </span>
-                      )}
-                    </>
-                  )}
-                </div>
-              </Link>
-            ) : (
-              <div 
-                className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
-                onClick={() => item.submenu && handleMenuClick(index)}
+            {item.path && !item.submenu ? (
+              <Link
+                to={item.path}
+                className={`nav-item${isGroupActive(item) ? ' active' : ''}`}
+                onClick={handleNavClick}
+                title={!showFull ? item.title : undefined}
               >
                 <span className="nav-icon">{item.icon}</span>
-                {!collapsed && (
-                  <>
-                    <span className="nav-title">{item.title}</span>
-                    {item.submenu && (
-                      <span className={`submenu-arrow ${expandedMenu === index ? 'expanded' : ''}`}>
-                        ▾
-                      </span>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
+                {showFull && <span className="nav-title">{item.title}</span>}
+              </Link>
+            ) : (
+              <>
+                <button
+                  className={`nav-item nav-item-btn${isGroupActive(item) ? ' active' : ''}`}
+                  onClick={() => setExpandedMenu(expandedMenu === index ? null : index)}
+                  title={!showFull ? item.title : undefined}
+                  type="button"
+                >
+                  <span className="nav-icon">{item.icon}</span>
+                  {showFull && (
+                    <>
+                      <span className="nav-title">{item.title}</span>
+                      <span className={`submenu-arrow${expandedMenu === index ? ' expanded' : ''}`}>›</span>
+                    </>
+                  )}
+                </button>
 
-            {!collapsed && item.submenu && expandedMenu === index && (
-              <div className="submenu">
-                {item.submenu.map((subItem, subIndex) => (
-                  <Link
-                    key={subIndex}
-                    to={subItem.path}
-                    className={`submenu-item ${location.pathname === subItem.path ? 'active' : ''}`}
-                  >
-                    {subItem.title}
-                  </Link>
-                ))}
-              </div>
+                {showFull && expandedMenu === index && (
+                  <div className="submenu">
+                    {item.submenu.map((sub, si) => (
+                      <Link
+                        key={si}
+                        to={sub.path}
+                        className={`submenu-item${isActive(sub.path) ? ' active' : ''}`}
+                        onClick={handleNavClick}
+                      >
+                        {sub.title}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         ))}
       </nav>
 
+      {/* Footer */}
       <div className="sidebar-footer">
-        {!collapsed && (
-          <div className="admin-info">
-            <img 
-              src="/images/admin-avatar.jpg" 
-              alt="Admin" 
-              className="admin-avatar"
-            />
-            <div className="admin-details">
-              <span className="admin-name">Admin Name</span>
-              <span className="admin-role">Super Admin</span>
+        {showFull ? (
+          <div className="admin-user-info">
+            <div className="admin-user-avatar">
+              {user?.name?.charAt(0)?.toUpperCase() || 'A'}
             </div>
+            <div className="admin-user-details">
+              <span className="admin-user-name">{user?.name || 'Admin'}</span>
+              <span className="admin-user-role">{user?.role || 'Administrator'}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="admin-user-avatar admin-user-avatar--sm">
+            {user?.name?.charAt(0)?.toUpperCase() || 'A'}
           </div>
         )}
       </div>
