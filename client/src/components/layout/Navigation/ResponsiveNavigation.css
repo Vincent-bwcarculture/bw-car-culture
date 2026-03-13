@@ -329,13 +329,97 @@
     margin: 0.5rem 0;
 }
 
-/* Theme Toggle Specific Styling */
-.theme-toggle-item {
-    font-weight: 600;
+/* Vehicle Type Search */
+.menu-vehicle-search {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    align-items: center;
 }
 
-.theme-toggle-item:hover {
-    background-color: rgba(255, 193, 7, 0.1);
+.menu-vehicle-type-select {
+    flex: 1;
+    background: var(--dropdown-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 6px;
+    color: var(--nav-text);
+    font-size: 0.78rem;
+    padding: 0.35rem 0.5rem;
+    cursor: pointer;
+    outline: none;
+    min-width: 0;
+}
+
+.menu-vehicle-type-select:focus {
+    border-color: #ff3300;
+}
+
+.menu-vehicle-search-btn {
+    background: #ff3300;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.35rem 0.7rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+}
+
+.menu-vehicle-search-btn:hover {
+    background: #cc2900;
+}
+
+/* Quick Browse */
+.menu-quick-browse {
+    padding: 0.25rem 0.75rem 0.5rem;
+}
+
+.menu-browse-label {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--nav-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.3rem;
+}
+
+.menu-browse-links {
+    display: flex;
+    gap: 0.35rem;
+}
+
+.menu-browse-link {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--nav-border);
+    border-radius: 5px;
+    color: var(--nav-text);
+    font-size: 0.72rem;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.menu-browse-link:hover {
+    background: var(--hover-bg);
+    border-color: #ff3300;
+    color: #ff3300;
+}
+
+[data-theme="light"] .menu-vehicle-type-select {
+    background: #ffffff;
+    color: #1a1a1a;
+}
+
+[data-theme="light"] .menu-browse-link {
+    background: rgba(0, 0, 0, 0.04);
+    color: #333;
 }
 
 /* Feedback Item Specific Styling */

@@ -73,7 +73,7 @@ const SmallVehicleCard = ({
     if (onClick) {
       onClick(processedCar);
     } else if (processedCar?.id) {
-      navigate(`/marketplace/${processedCar.id}`);
+      navigate(`/marketplace/${processedCar.slug || processedCar.id}`);
     }
   }, [onClick, processedCar, navigate]);
 

@@ -326,7 +326,7 @@ const BudgetSearch = () => {
 
   // Handle vehicle card click
   const handleCardClick = (car) => {
-    navigate(`/marketplace/${car._id}`);
+    navigate(`/marketplace/${car.slug || car._id}`);
   };
 
   // Get primary image URL from car with S3 support

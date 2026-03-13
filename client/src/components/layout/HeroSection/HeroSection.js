@@ -350,16 +350,16 @@ const HeroSection = () => {
       suffix: '+'
     },
     {
-      key: 'happyCustomers',
-      value: stats.happyCustomers,
-      label: 'Service Providers',
+      key: 'verifiedDealers',
+      value: stats.verifiedDealers,
+      label: 'Verified Dealers',
       suffix: '+'
     },
     {
-      key: 'verifiedDealers',
-      value: 100,
-      label: 'Verified Dealers',
-      suffix: '%'
+      key: 'happyCustomers',
+      value: stats.happyCustomers,
+      label: 'Happy Customers',
+      suffix: '+'
     },
     {
       key: 'transportProviders',
@@ -746,16 +746,6 @@ const HeroSection = () => {
               </div>
             )}
 
-            <div className="bcc-hero-features">
-              <div className="bcc-hero-feature">
-                <span className="bcc-hero-feature-icon">✓</span>
-                <span>Access to thousands of growing local and international buyers</span>
-              </div>
-              <div className="bcc-hero-feature">
-                <span className="bcc-hero-feature-icon">✓</span>
-                <span>Dedicated and professional digital sales support</span>
-              </div>
-            </div>
           </div>
         ) : null}
       </div>

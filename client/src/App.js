@@ -54,6 +54,7 @@ import Advertisement from './components/shared/Advertisement.js';
 import NewsReviews from './components/features/NewsReviews/NewsReviews.js';
 import ProcessSection from './components/shared/Process/ProcessSection.js';
 import HeroSection from './components/layout/HeroSection/HeroSection.js';
+import EVSection from './components/features/EVSection/EVSection.js';
 import BudgetSearch from './components/features/BudgetSearch/BudgetSearch.js';
 import CarReviewsPage from './components/features/CarReviews/CarReviewsPage.js';
 import Chatbot from './components/shared/Chatbot/Chatbot.js';
@@ -728,7 +729,8 @@ const HomeContent = () => {
   return (
     <main className="main-content">
       <HeroSection />
-      <CarFilter 
+      <EVSection />
+      <CarFilter
         onFilterChange={handleFilterChange} 
         onSearchPerformed={handleSearchPerformed}
       />

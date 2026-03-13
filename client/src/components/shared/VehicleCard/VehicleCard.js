@@ -741,7 +741,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       console.warn('Analytics tracking failed:', error);
     }
 
-    navigate(`/marketplace/${car._id}`);
+    navigate(`/marketplace/${car.slug || car._id}`);
   }, [car, navigate, analytics, dealer]);
 
   // FIXED: Enhanced image container tap for mobile navigation reveal - WORKING VERSION

@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, ShoppingBag, Store, Settings, User, LogIn, LogOut,
   UserCircle, Star, QrCode, Hash, X, UserPlus, Newspaper, MessageCircle,
-  Menu, Sun, Moon, BarChart3, Info, Map
+  Menu, BarChart3, Info, Map, Zap, Tag, MapPin
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
 import EnhancedFABModal from './EnhancedFABModal.js';
@@ -52,49 +52,33 @@ const categories = [
   }
 ];
 
-// NEW: Navigation Menu Component with Feedback and Theme Toggle (BULLETPROOF VERSION)
-// NEW: Navigation Menu Component with Market Overview, Theme Toggle, and Feedback
 const NavigationMenu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState('dark');
+  const [vehicleType, setVehicleType] = useState('electric');
   const menuRef = useRef(null);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
-
-  // Get current theme from localStorage or default to dark
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    console.log('🎨 Theme initialized:', savedTheme);
-    setCurrentTheme(savedTheme);
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  }, []);
 
   // Close menu when clicking outside (accounting for Portal)
   useEffect(() => {
     const handleClickOutside = (event) => {
       const isClickInsideMenu = menuRef.current?.contains(event.target);
       const isClickInsideDropdown = dropdownRef.current?.contains(event.target);
-      
       if (!isClickInsideMenu && !isClickInsideDropdown) {
-        console.log('🖱️ Clicked outside, closing menu');
         setIsMenuOpen(false);
       }
     };
-
     if (isMenuOpen) {
-      // Use 'click' instead of 'mousedown' for better compatibility
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [isMenuOpen]);
 
-  const toggleTheme = (e) => {
+  const handleVehicleSearch = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    setCurrentTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
+    setIsMenuOpen(false);
+    navigate(`/marketplace?search=${encodeURIComponent(vehicleType)}`);
   };
 
   // Handle feedback click
@@ -179,7 +163,7 @@ const NavigationMenu = () => {
       </button>
 
       {isMenuOpen && ReactDOM.createPortal(
-        <div 
+        <div
           ref={dropdownRef}
           className="navigation-dropdown-menu"
           style={{
@@ -190,93 +174,89 @@ const NavigationMenu = () => {
             zIndex: 99999
           }}
         >
-          {/* Market Overview Menu Item */}
-          <button
-            className="menu-item market-overview-item"
-            onClick={handleMarketOverviewClick}
-            type="button"
-          >
-            <span className="menu-item-icon">
-              <BarChart3 size={12} />
-            </span>
+          {/* Vehicle Type Search */}
+          <div className="menu-vehicle-search">
+            <select
+              className="menu-vehicle-type-select"
+              value={vehicleType}
+              onChange={(e) => setVehicleType(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <option value="electric">⚡ Electric Vehicles</option>
+              <option value="hybrid">🔋 Hybrid</option>
+              <option value="SUV">🚙 SUV</option>
+              <option value="sedan">🚗 Sedan</option>
+              <option value="family">👨‍👩‍👧 Family Cars</option>
+              <option value="4x4">🏔️ Off-road / 4x4</option>
+              <option value="pickup">🛻 Pickup / Bakkie</option>
+              <option value="luxury">💎 Luxury</option>
+            </select>
+            <button
+              className="menu-vehicle-search-btn"
+              onClick={handleVehicleSearch}
+              type="button"
+            >
+              Browse
+            </button>
+          </div>
+
+          {/* Quick Browse */}
+          <div className="menu-quick-browse">
+            <span className="menu-browse-label">Browse by</span>
+            <div className="menu-browse-links">
+              <button className="menu-browse-link" type="button"
+                onClick={() => { setIsMenuOpen(false); navigate('/marketplace'); }}>
+                <Tag size={11} /> Brand
+              </button>
+              <button className="menu-browse-link" type="button"
+                onClick={() => { setIsMenuOpen(false); navigate('/dealerships'); }}>
+                <Store size={11} /> Dealers
+              </button>
+              <button className="menu-browse-link" type="button"
+                onClick={() => { setIsMenuOpen(false); navigate('/marketplace'); }}>
+                <MapPin size={11} /> Location
+              </button>
+            </div>
+          </div>
+
+          <div className="menu-divider"></div>
+
+          {/* Market Overview */}
+          <button className="menu-item market-overview-item" onClick={handleMarketOverviewClick} type="button">
+            <span className="menu-item-icon"><BarChart3 size={12} /></span>
             <span className="menu-item-text">Market Overview</span>
           </button>
 
-          {/* Menu Divider */}
           <div className="menu-divider"></div>
 
-          {/* News Menu Item */}
-          <button
-            className="menu-item news-item"
-            onClick={handleNewsClick}
-            type="button"
-          >
-            <span className="menu-item-icon">
-              <Newspaper size={12} />
-            </span>
+          {/* News */}
+          <button className="menu-item news-item" onClick={handleNewsClick} type="button">
+            <span className="menu-item-icon"><Newspaper size={12} /></span>
             <span className="menu-item-text">News</span>
           </button>
 
-          {/* Menu Divider */}
           <div className="menu-divider"></div>
 
-          {/* Feedback Menu Item */}
-          <button
-            className="menu-item feedback-item"
-            onClick={handleFeedbackClick}
-            type="button"
-          >
-            <span className="menu-item-icon">
-              <MessageCircle size={12} />
-            </span>
-            <span className="menu-item-text">Feedback</span>
-          </button>
-
-          {/* Menu Divider */}
-          <div className="menu-divider"></div>
-
-          {/* Drive Map Menu Item */}
-          <button
-            className="menu-item drivemap-item"
-            onClick={handleDriveMapClick}
-            type="button"
-          >
-            <span className="menu-item-icon">
-              <Map size={12} />
-            </span>
+          {/* Drive Map */}
+          <button className="menu-item drivemap-item" onClick={handleDriveMapClick} type="button">
+            <span className="menu-item-icon"><Map size={12} /></span>
             <span className="menu-item-text">Drive Map</span>
           </button>
 
-          {/* Menu Divider */}
           <div className="menu-divider"></div>
 
-          {/* About Menu Item */}
-          <button
-            className="menu-item about-item"
-            onClick={handleAboutClick}
-            type="button"
-          >
-            <span className="menu-item-icon">
-              <Info size={12} />
-            </span>
+          {/* About */}
+          <button className="menu-item about-item" onClick={handleAboutClick} type="button">
+            <span className="menu-item-icon"><Info size={12} /></span>
             <span className="menu-item-text">About</span>
           </button>
 
-          {/* Menu Divider */}
           <div className="menu-divider"></div>
 
-          {/* Theme Toggle */}
-          <button
-            className="menu-item theme-toggle-item"
-            onClick={toggleTheme}
-            type="button"
-          >
-            <span className="menu-item-icon">
-              {currentTheme === 'dark' ? <Sun size={12} /> : <Moon size={12} />}
-            </span>
-            <span className="menu-item-text">
-              {currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-            </span>
+          {/* Feedback — bottom */}
+          <button className="menu-item feedback-item" onClick={handleFeedbackClick} type="button">
+            <span className="menu-item-icon"><MessageCircle size={12} /></span>
+            <span className="menu-item-text">Feedback</span>
           </button>
         </div>
         , document.body

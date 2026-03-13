@@ -799,9 +799,20 @@ export const getListings = asyncHandler(async (req, res, next) => {
 // @access  Public
 export const getListing = asyncHandler(async (req, res, next) => {
   try {
-    const listing = await Listing.findById(req.params.id)
-      .populate('dealerId', 'businessName location contact verification profile');
-    
+    const { id } = req.params;
+    let listing;
+
+    // Try ObjectId lookup first, then fall back to slug
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      listing = await Listing.findById(id)
+        .populate('dealerId', 'businessName location contact verification profile');
+    }
+
+    if (!listing) {
+      listing = await Listing.findOne({ slug: id })
+        .populate('dealerId', 'businessName location contact verification profile');
+    }
+
     if (!listing) {
       return next(new ErrorResponse('Listing not found', 404));
     }
