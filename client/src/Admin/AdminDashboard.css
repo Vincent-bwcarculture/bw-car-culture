@@ -35,11 +35,6 @@
   margin: 0;
 }
 
-/* ── Dashboard Stats (full-width analytics section) ── */
-.dashboard-stats {
-  margin-bottom: 1.5rem;
-}
-
 /* ── Dashboard Content (quick actions + news side by side) ── */
 .dashboard-content {
   display: grid;

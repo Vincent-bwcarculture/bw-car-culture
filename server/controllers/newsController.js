@@ -4,6 +4,33 @@ import { ErrorResponse } from '../utils/errorResponse.js';
 import asyncHandler from '../middleware/async.js';
 import { uploadImage, deleteImage } from '../utils/imageUpload.js';
 
+/**
+ * Generate a URL-safe slug from a title and ensure it is unique in the DB.
+ * @param {string} title
+ * @param {string|null} excludeId - MongoDB _id to exclude (for updates)
+ */
+const generateUniqueSlug = async (title, excludeId = null) => {
+  const baseSlug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .substring(0, 150);
+
+  let finalSlug = baseSlug;
+  let counter = 0;
+
+  while (true) {
+    const query = { slug: finalSlug };
+    if (excludeId) query._id = { $ne: excludeId };
+    const existing = await News.findOne(query).select('_id').lean();
+    if (!existing) break;
+    counter++;
+    finalSlug = `${baseSlug}-${counter}`;
+  }
+
+  return finalSlug;
+};
+
 // @desc    Get single article
 // @route   GET /api/news/:id
 // @access  Public
@@ -245,14 +272,9 @@ export const createArticle = asyncHandler(async (req, res, next) => {
     req.body.author = req.user.id;
     req.body.authorName = req.user.name || "Car Culture News Desk";
 
-    // Generate slug from title if not provided
-    if (!req.body.slug && req.body.title) {
-      req.body.slug = req.body.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .substring(0, 150); // Limit slug length
-    }
+    // Slug is generated with uniqueness guarantee by the model's pre-save hook.
+    // Do not pre-set it here so the hook always runs.
+    delete req.body.slug;
 
     // Handle different content formats
     if (req.body.content) {
@@ -395,13 +417,9 @@ export const updateArticle = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Not authorized to update this article', 403));
   }
 
-  // Update slug if title changes
+  // Regenerate slug with uniqueness guarantee when title changes
   if (req.body.title && req.body.title !== article.title) {
-    req.body.slug = req.body.title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .substring(0, 150); // Limit slug length
+    req.body.slug = await generateUniqueSlug(req.body.title, req.params.id);
   }
 
   // Handle content format

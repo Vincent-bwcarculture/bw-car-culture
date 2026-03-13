@@ -1,7 +1,6 @@
 // src/Admin/AdminDashboard.js
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.js';
-import AdminStats from './AdminStats.js';
 import QuickActions from './QuickActions.js';
 import NewsManager from '../components/NewsManager/NewsManager.js';
 import DealershipManager from './DealershipManager/DealershipManager.js';
@@ -147,9 +146,6 @@ const AdminDashboard = () => {
       default:
         return (
           <>
-            <div className="dashboard-stats">
-              <AdminStats />
-            </div>
             <div className="dashboard-content">
               <QuickActions onActionSelected={setActiveSection} />
               <NewsManager />
