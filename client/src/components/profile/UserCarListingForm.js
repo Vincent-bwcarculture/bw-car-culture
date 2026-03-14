@@ -1671,7 +1671,8 @@ const handleFormSubmit = async (e) => {
                 <option value="diesel">Diesel</option>
                 <option value="electric">Electric</option>
                 <option value="hybrid">Hybrid</option>
-                <option value="plug-in-hybrid">Plug-in Hybrid</option>
+                <option value="plugin_hybrid">Plug-in Hybrid</option>
+                <option value="hydrogen">Hydrogen</option>
                 <option value="lpg">LPG</option>
               </select>
             </div>
