@@ -1,5 +1,5 @@
 // src/components/features/CarCategories/CarCategories.js
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { listingService } from '../../../services/listingService.js';
 import './CarCategories.css';
@@ -10,7 +10,7 @@ const CarCategories = () => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -139,53 +139,14 @@ const CarCategories = () => {
         // Sort categories by number of vehicles (most first)
         categorizedData.sort((a, b) => b.vehicleCount - a.vehicleCount);
         
-        // If no categories with listings were found, use default data
-        if (categorizedData.length === 0) {
-          throw new Error('No categories with listings found');
-        } else {
+        if (categorizedData.length > 0) {
           setCategories(categorizedData);
         }
         
         setLoading(false);
-      } catch (error) {
-        console.error('Error fetching category data:', error);
-        setError('Failed to load categories. Using defaults.');
-        
-        // Use default categories as fallback
-        setCategories([
-          {
-            id: 'sedans',
-            title: "Sedans",
-            image: "/images/placeholders/car.jpg",
-            vehicleCount: 12,
-            priceRange: "P 350,000 - P 850,000",
-            filter: "Sedan"
-          },
-          {
-            id: 'suvs',
-            title: "SUVs & Crossovers",
-            image: "/images/placeholders/car.jpg",
-            vehicleCount: 18,
-            priceRange: "P 450,000 - P 1,250,000",
-            filter: "SUV"
-          },
-          {
-            id: 'sports-cars',
-            title: "Sports Cars",
-            image: "/images/placeholders/car.jpg",
-            vehicleCount: 8,
-            priceRange: "P 850,000 - P 3,500,000",
-            filter: "Sports Car"
-          },
-          {
-            id: 'luxury',
-            title: "Luxury",
-            image: "/images/placeholders/car.jpg",
-            vehicleCount: 10,
-            priceRange: "P 950,000 - P 3,150,000",
-            filter: "Luxury"
-          }
-        ]);
+      } catch (err) {
+        console.error('Error fetching category data:', err);
+        setError(true);
         setLoading(false);
       }
     };
@@ -272,6 +233,19 @@ const CarCategories = () => {
         </div>
       </section>
     );
+  }
+
+  if (error && categories.length === 0) {
+    return (
+      <section className="car-categories-section">
+        <h2>Browse by Vehicle Type</h2>
+        <p className="no-data-message">Could not load categories. Please check your connection.</p>
+      </section>
+    );
+  }
+
+  if (!loading && categories.length === 0) {
+    return null; // No listings yet — hide section entirely
   }
 
   return (

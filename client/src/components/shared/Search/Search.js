@@ -1,41 +1,36 @@
 // Search.js
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search as SearchIcon } from 'lucide-react';
+import { listingService } from '../../../services/listingService.js';
 import './Search.css';
 
 const Search = () => {
-    const [query, setQuery] = useState('');
-    const [results, setResults] = useState([]);
+    const [query, setQuery]           = useState('');
+    const [results, setResults]       = useState([]);
     const [showResults, setShowResults] = useState(false);
-    const searchRef = useRef(null);
+    const [searching, setSearching]   = useState(false);
+    const searchRef  = useRef(null);
+    const debounceRef = useRef(null);
 
-    // Sample search data - replace with actual API call
-    const searchData = [
-        {
-            id: 1,
-            title: "2023 BMW M4 Competition",
-            price: 89900,
-            image: "/images/f80.jpg",
-            details: "503hp, Manual, 1,200 km"
-        },
-        {
-            id: 2,
-            title: "2024 Cadillac CT5-V Blackwing",
-            price: 98000,
-            image: "/images/ct5-v.jpg",
-            details: "668hp, Manual, 500 km"
+    const fetchResults = useCallback(async (value) => {
+        setSearching(true);
+        try {
+            const res = await listingService.getListings({ search: value }, 1, 5);
+            setResults(res?.listings || []);
+        } catch {
+            setResults([]);
+        } finally {
+            setSearching(false);
         }
-    ];
+    }, []);
 
     const handleSearch = (value) => {
         setQuery(value);
+        clearTimeout(debounceRef.current);
+
         if (value.length >= 2) {
-            // Filter search results
-            const filtered = searchData.filter(item =>
-                item.title.toLowerCase().includes(value.toLowerCase())
-            );
-            setResults(filtered);
             setShowResults(true);
+            debounceRef.current = setTimeout(() => fetchResults(value), 300);
         } else {
             setResults([]);
             setShowResults(false);
@@ -49,11 +44,8 @@ const Search = () => {
                 setShowResults(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     return (
@@ -71,23 +63,41 @@ const Search = () => {
             </div>
 
             <div className={`search-results ${showResults ? 'active' : ''}`}>
-                {results.map(result => (
-                    <div key={result.id} className="search-result-item">
-                        <img 
-                            src={result.image} 
-                            alt={result.title} 
-                            className="result-image"
-                        />
+                {searching ? (
+                    <div className="search-result-item">
                         <div className="result-info">
-                            <div className="result-title">{result.title}</div>
-                            <div className="result-details">{result.details}</div>
-                        </div>
-                        <div className="result-price">
-                            ${result.price.toLocaleString()}
+                            <div className="result-title">Searching...</div>
                         </div>
                     </div>
-                ))}
-                {results.length === 0 && query.length >= 2 && (
+                ) : results.length > 0 ? (
+                    results.map(result => {
+                        const image = result.images?.[0]?.url || result.images?.[0] || null;
+                        const make  = result.specifications?.make || result.make || '';
+                        const model = result.specifications?.model || result.model || '';
+                        const year  = result.specifications?.year || result.year || '';
+                        const title = result.title || `${year} ${make} ${model}`.trim();
+                        const price = result.price
+                            ? `P${result.price.toLocaleString()}`
+                            : null;
+
+                        return (
+                            <div key={result._id} className="search-result-item">
+                                {image && (
+                                    <img src={image} alt={title} className="result-image" />
+                                )}
+                                <div className="result-info">
+                                    <div className="result-title">{title}</div>
+                                    {result.specifications?.mileage && (
+                                        <div className="result-details">
+                                            {result.specifications.mileage.toLocaleString()} km
+                                        </div>
+                                    )}
+                                </div>
+                                {price && <div className="result-price">{price}</div>}
+                            </div>
+                        );
+                    })
+                ) : query.length >= 2 ? (
                     <div className="search-result-item">
                         <div className="result-info">
                             <div className="result-title">No results found</div>
@@ -96,7 +106,7 @@ const Search = () => {
                             </div>
                         </div>
                     </div>
-                )}
+                ) : null}
             </div>
         </div>
     );

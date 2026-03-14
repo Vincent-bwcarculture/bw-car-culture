@@ -1,5 +1,5 @@
 // components/GION/GIONMainScreen.js
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   QrCode, 
   ArrowRight, 
@@ -97,52 +97,12 @@ const GIONMainScreen = ({
     }
   };
 
-  // Simulated search function - in a real app, this would call an API
+  // Clear results when search term is too short
   useEffect(() => {
     if (businessSearchTerm.length < 3) {
       setSearchResults([]);
-      return;
     }
-    
-    // Mock search results - in a real app, this would be fetched from an API
-    const mockSearchResults = [
-      { 
-        id: 'T1234', 
-        name: 'SafeRide Taxi', 
-        category: 'taxi', 
-        rating: 4.9,
-        color: '#5f5fc4',
-        location: 'Gaborone'
-      },
-      { 
-        id: 'B421', 
-        name: 'Express Bus', 
-        category: 'bus', 
-        rating: 4.7,
-        color: '#119847',
-        location: 'Gaborone-Francistown'
-      },
-      { 
-        id: 'D567', 
-        name: 'Motors Dealership', 
-        category: 'dealership', 
-        rating: 4.8,
-        color: '#e74c3c',
-        location: 'Gaborone'
-      },
-      { 
-        id: 'R789', 
-        name: 'Premium Car Rental', 
-        category: 'rental', 
-        rating: 4.6,
-        color: '#f39c12',
-        location: 'Gaborone Airport'
-      }
-    ].filter(item => 
-      item.name.toLowerCase().includes(businessSearchTerm.toLowerCase())
-    );
-    
-    setSearchResults(mockSearchResults);
+    // TODO: replace with real API call when GION service search endpoint is available
   }, [businessSearchTerm]);
 
   // Handle business selection from search results

@@ -49,128 +49,10 @@ const GIONReviewsPage = ({ onBack }) => {
     { id: 'minibus', name: 'Minibuses', icon: '🚐' }
   ];
   
-  // Sample data for reviews page - enhanced for transportation
-  const reviewableServices = [
-    {
-      id: 'T1001',
-      name: 'SafeRide Taxi',
-      category: 'taxi',
-      rating: 4.9,
-      distance: 0.5,
-      color: '#5f5fc4',
-      address: 'Gaborone Main Mall',
-      lastReviewed: null,
-      verificationStatus: 'verified',
-      licensePlate: 'BWR 486 B',
-      safetyScore: 4.7
-    },
-    {
-      id: 'B2002',
-      name: 'Express Bus Service',
-      category: 'bus',
-      rating: 4.7,
-      distance: 1.2,
-      color: '#119847',
-      address: 'Gaborone Bus Station',
-      lastReviewed: null,
-      verificationStatus: 'verified',
-      routeNumber: 'R12',
-      safetyScore: 4.5
-    },
-    {
-      id: 'T3003',
-      name: 'City Cab',
-      category: 'taxi',
-      rating: 4.5,
-      distance: 0.8,
-      color: '#5f5fc4',
-      address: 'Airport Road',
-      lastReviewed: null,
-      verificationStatus: 'pending',
-      licensePlate: 'BWR 223 C',
-      safetyScore: 4.3
-    },
-    {
-      id: 'M4004',
-      name: 'Combi Line 8',
-      category: 'minibus',
-      rating: 4.3,
-      distance: 1.5,
-      color: '#ff9800',
-      address: 'Game City Route',
-      lastReviewed: null,
-      verificationStatus: 'verified',
-      routeNumber: '8',
-      safetyScore: 4.2
-    },
-    {
-      id: 'B5005',
-      name: 'Francistown Express',
-      category: 'bus',
-      rating: 4.6,
-      distance: 0.3,
-      color: '#119847',
-      address: 'Intercity Bus Terminal',
-      lastReviewed: null,
-      verificationStatus: 'verified',
-      routeNumber: 'IC2',
-      safetyScore: 4.8
-    }
-  ];
-  
-  // Data for recently reviewed
-  const recentlyReviewed = [
-    {
-      id: 'T9001',
-      name: 'FastTaxi',
-      category: 'taxi',
-      myRating: 5,
-      reviewDate: 'Yesterday',
-      color: '#5f5fc4',
-      review: 'Very clean taxi with a professional driver. Arrived on time.',
-      licensePlate: 'BWR 113 A',
-      photos: 1
-    },
-    {
-      id: 'B8002',
-      name: 'Northern Express Bus',
-      category: 'bus',
-      myRating: 4,
-      reviewDate: '3 days ago',
-      color: '#119847',
-      review: 'Comfortable bus with air conditioning. Slight delay on departure.',
-      routeNumber: 'B22',
-      photos: 0
-    }
-  ];
-  
-  // Sample popular routes
-  const popularRoutes = [
-    { 
-      id: 'route1', 
-      name: 'Gaborone - Francistown', 
-      type: 'bus', 
-      operators: 3, 
-      avgRating: 4.2,
-      topOperator: 'Northern Express' 
-    },
-    { 
-      id: 'route2', 
-      name: 'Airport - City Center', 
-      type: 'taxi', 
-      operators: 12, 
-      avgRating: 4.5,
-      topOperator: 'SafeRide Taxi' 
-    },
-    { 
-      id: 'route3', 
-      name: 'Game City - Main Mall', 
-      type: 'minibus', 
-      operators: 8, 
-      avgRating: 3.9,
-      topOperator: 'Combi Line 8' 
-    }
-  ];
+  // TODO: fetch from API when GION transport service endpoint is available
+  const reviewableServices = [];
+  const recentlyReviewed = [];
+  const popularRoutes = [];
   
   // Filter services by category
   const filteredServices = activeCategory === 'all' 
@@ -311,15 +193,17 @@ const GIONReviewsPage = ({ onBack }) => {
           </div>
           
           <div className="gion-review-items-list">
-            {filteredServices.map(service => (
+            {filteredServices.length === 0 ? (
+              <p className="no-data-message">No nearby transport services available yet.</p>
+            ) : filteredServices.map(service => (
               <div key={service.id} className="gion-review-item">
-                <div 
-                  className="gion-review-icon transport-icon" 
+                <div
+                  className="gion-review-icon transport-icon"
                   style={{ backgroundColor: service.color }}
                 >
-                  {service.category === 'taxi' ? '🚕' : 
-                   service.category === 'bus' ? '🚌' : 
-                   service.category === 'train' ? '🚆' : 
+                  {service.category === 'taxi' ? '🚕' :
+                   service.category === 'bus' ? '🚌' :
+                   service.category === 'train' ? '🚆' :
                    service.category === 'minibus' ? '🚐' : '🚗'}
                 </div>
                 <div className="gion-review-details">
@@ -363,7 +247,9 @@ const GIONReviewsPage = ({ onBack }) => {
           <h2 className="gion-section-title">Popular Routes</h2>
           
           <div className="routes-list">
-            {popularRoutes.map(route => (
+            {popularRoutes.length === 0 ? (
+              <p className="no-data-message">No routes available yet.</p>
+            ) : popularRoutes.map(route => (
               <div key={route.id} className="route-item">
                 <div className="route-info">
                   <div className="route-type-icon">
@@ -394,7 +280,7 @@ const GIONReviewsPage = ({ onBack }) => {
           </div>
         </div>
       )}
-      
+
       {/* Safety Reports */}
       {activeTab === 'safety' && (
         <div className="gion-section">

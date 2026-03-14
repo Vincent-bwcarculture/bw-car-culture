@@ -1,5 +1,5 @@
 // src/components/features/CarReviews/CarReviewsSummary.js
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { carReviewService } from '../../../services/carReviewService.js';
 import './CarReviewsSummary.css';
@@ -16,24 +16,14 @@ const CarReviewsSummary = () => {
       try {
         setLoading(true);
         
-        // Get top rated reviews for popular cars
-        const popularCars = [
-          { make: 'Toyota', model: 'Hilux' },
-          { make: 'Ford', model: 'Ranger' },
-          { make: 'Volkswagen', model: 'Polo' },
-          { make: 'Toyota', model: 'Fortuner' }
+        // Fetch top-rated recent reviews directly
+        const reviewPromises = [
+          carReviewService.getReviewsByCar('Toyota', 'Hilux'),
+          carReviewService.getReviewsByCar('Ford', 'Ranger'),
+          carReviewService.getReviewsByCar('Volkswagen', 'Polo'),
+          carReviewService.getReviewsByCar('Toyota', 'Fortuner')
         ];
-        
-        // Randomly select 2-3 cars to fetch reviews for
-        const selectedCars = popularCars
-          .sort(() => 0.5 - Math.random())
-          .slice(0, Math.floor(Math.random() * 2) + 2);
-        
-        // Fetch reviews for selected cars
-        const reviewPromises = selectedCars.map(car => 
-          carReviewService.getReviewsByCar(car.make, car.model)
-        );
-        
+
         const results = await Promise.all(reviewPromises);
         
         // Flatten results and get top reviews
@@ -56,40 +46,6 @@ const CarReviewsSummary = () => {
       } catch (err) {
         console.error('Error loading featured reviews:', err);
         setError('Failed to load featured reviews');
-        
-        // Fallback to sample data if API fails
-        setFeaturedReviews([
-          {
-            _id: 1,
-            carMake: 'Toyota',
-            carModel: 'Hilux',
-            carYear: '2018',
-            ownerName: 'John M.',
-            reviewText: 'The Hilux is an excellent pickup truck that has never let me down...',
-            averageRating: 4.2,
-            createdAt: '2023-10-15T00:00:00.000Z'
-          },
-          {
-            _id: 2,
-            carMake: 'Ford',
-            carModel: 'Ranger',
-            carYear: '2020',
-            ownerName: 'Michael D.',
-            reviewText: 'The Ranger provides excellent value for money with its comfortable interior...',
-            averageRating: 4.4,
-            createdAt: '2023-11-03T00:00:00.000Z'
-          },
-          {
-            _id: 3,
-            carMake: 'Volkswagen',
-            carModel: 'Polo',
-            carYear: '2019',
-            ownerName: 'Thabiso M.',
-            reviewText: 'The Polo offers excellent build quality and feels more premium than other hatchbacks...',
-            averageRating: 4.2,
-            createdAt: '2023-09-18T00:00:00.000Z'
-          }
-        ]);
       } finally {
         setLoading(false);
       }
@@ -147,7 +103,11 @@ const CarReviewsSummary = () => {
       </div>
 
       <div className="featured-reviews">
-        {featuredReviews.map(review => (
+        {featuredReviews.length === 0 ? (
+          <div className="no-data-message">
+            <p>{error ? 'Could not load reviews. Please try again later.' : 'No reviews yet. Be the first to share your experience!'}</p>
+          </div>
+        ) : featuredReviews.map(review => (
           <div 
             className="summary-review-card" 
             key={review._id} 

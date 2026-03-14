@@ -100,48 +100,11 @@ const CarFilter = ({ onFilterChange, onSearchPerformed, onToggleFilter }) => {
     }
     
     try {
-      console.log(`Attempting to fetch models for make: ${make}`);
-      // Try to fetch models from the API
       const models = await listingService.getModelsByMake(make);
-      console.log(`Received ${models?.length || 0} models from API`);
-      
-      if (models && models.length > 0) {
-        setFilterOptions(prev => ({ ...prev, models: models }));
-      } else {
-        console.warn(`API returned no models for make: ${make}, using fallback data`);
-        // Fallback data for common makes when API fails
-        const fallbackModels = {
-          'BMW': ['1 Series', '2 Series', '3 Series', '4 Series', '5 Series', '6 Series', '7 Series', 'X1', 'X3', 'X5', 'X6', 'M3', 'M4', 'M5'],
-          'Mercedes': ['A-Class', 'C-Class', 'E-Class', 'S-Class', 'GLA', 'GLC', 'GLE', 'GLS', 'AMG GT'],
-          'Toyota': ['Camry', 'Corolla', 'RAV4', 'Highlander', 'Tacoma', 'Tundra', 'Prius', '4Runner', 'Land Cruiser'],
-          'Ford': ['F-150', 'Mustang', 'Explorer', 'Escape', 'Edge', 'Ranger', 'Bronco', 'Focus', 'Fusion']
-        };
-        
-        // Use fallback data if available for this make
-        if (fallbackModels[make]) {
-          console.log(`Using fallback data for ${make}`);
-          setFilterOptions(prev => ({ ...prev, models: fallbackModels[make] }));
-        } else {
-          // If no fallback data, set empty array
-          setFilterOptions(prev => ({ ...prev, models: [] }));
-        }
-      }
-    } catch (error) {
-      console.error(`Error fetching models for make ${make}:`, error);
-      // Use the same fallback as above for errors
-      const fallbackModels = {
-        'BMW': ['1 Series', '2 Series', '3 Series', '4 Series', '5 Series', '6 Series', '7 Series', 'X1', 'X3', 'X5', 'X6', 'M3', 'M4', 'M5'],
-        'Mercedes': ['A-Class', 'C-Class', 'E-Class', 'S-Class', 'GLA', 'GLC', 'GLE', 'GLS', 'AMG GT'],
-        'Toyota': ['Camry', 'Corolla', 'RAV4', 'Highlander', 'Tacoma', 'Tundra', 'Prius', '4Runner', 'Land Cruiser'],
-        'Ford': ['F-150', 'Mustang', 'Explorer', 'Escape', 'Edge', 'Ranger', 'Bronco', 'Focus', 'Fusion']
-      };
-      
-      if (fallbackModels[make]) {
-        console.log(`Using fallback data for ${make} after API error`);
-        setFilterOptions(prev => ({ ...prev, models: fallbackModels[make] }));
-      } else {
-        setFilterOptions(prev => ({ ...prev, models: [] }));
-      }
+      setFilterOptions(prev => ({ ...prev, models: models?.length ? models : [] }));
+    } catch (err) {
+      console.error(`Error fetching models for make ${make}:`, err);
+      setFilterOptions(prev => ({ ...prev, models: [] }));
     }
   }, []);
 

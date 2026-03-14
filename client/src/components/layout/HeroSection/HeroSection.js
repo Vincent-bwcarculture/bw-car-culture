@@ -9,7 +9,7 @@ import './HeroSection.css';
 
 const HeroSection = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth(); // NEW: Added authentication context
+  const { isAuthenticated } = useAuth(); // NEW: Added authentication context
   
   const [activeTab, setActiveTab] = useState('buy');
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,7 +24,6 @@ const HeroSection = () => {
     transportProviders: 0
   });
   const [statsLoading, setStatsLoading] = useState(true);
-  const [statsError, setStatsError] = useState(false);
   
   // Savings data state with error handling
   const [savingsData, setSavingsData] = useState({
@@ -60,29 +59,18 @@ const HeroSection = () => {
     
     const fetchWebsiteStats = async () => {
       setStatsLoading(true);
-      setStatsError(false);
-      
+
       try {
         const data = await statsService.getWebsiteStats();
         setStats(data);
-        setStatsError(false);
       } catch (error) {
         console.error('Error fetching website statistics:', error);
-        
+
         if (retryCount < maxRetries) {
           retryCount++;
           setTimeout(fetchWebsiteStats, 2000 * retryCount);
           return;
         }
-        
-        // Fallback data for production
-        setStats({
-          carListings: 200,
-          happyCustomers: 450,
-          verifiedDealers: 20,
-          transportProviders: 10
-        });
-        setStatsError(true);
       } finally {
         setStatsLoading(false);
       }
@@ -476,7 +464,7 @@ const HeroSection = () => {
                   className="bcc-hero-search-input"
                   value={searchQuery}
                   onChange={handleSearchChange}
-                  onKeyPress={handleKeyPress}
+                  onKeyDown={handleKeyPress}
                   disabled={loading}
                   aria-label="Search for vehicles"
                 />

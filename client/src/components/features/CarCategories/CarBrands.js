@@ -1,5 +1,5 @@
 // src/components/features/CarCategories/CarBrands.js
-import React, { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { listingService } from '../../../services/listingService.js';
 import './CarBrands.css';
@@ -10,7 +10,7 @@ const CarBrands = () => {
   const [activeBrand, setActiveBrand] = useState(null);
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -106,58 +106,9 @@ const CarBrands = () => {
         }
         
         setLoading(false);
-      } catch (error) {
-        console.error('Error fetching brands data:', error);
-        setError('Failed to load brands. Using defaults.');
-        
-        // Use default brands as fallback
-        setBrands([
-          {
-            id: 'toyota',
-            name: 'Toyota',
-            image: '/images/placeholders/car.jpg',
-            modelCount: 12,
-            featured: 'GR Supra',
-            priceRange: 'P 350,000 - P 1,200,000',
-            filter: 'Toyota'
-          },
-          {
-            id: 'bmw',
-            name: 'BMW',
-            image: '/images/placeholders/car.jpg',
-            modelCount: 18,
-            featured: 'M4 Competition',
-            priceRange: 'P 850,000 - P 2,500,000',
-            filter: 'BMW'
-          },
-          {
-            id: 'mercedes-benz',
-            name: 'Mercedes-Benz',
-            image: '/images/placeholders/car.jpg',
-            modelCount: 15,
-            featured: 'AMG GT',
-            priceRange: 'P 900,000 - P 2,800,000',
-            filter: 'Mercedes-Benz'
-          },
-          {
-            id: 'audi',
-            name: 'Audi',
-            image: '/images/placeholders/car.jpg',
-            modelCount: 14,
-            featured: 'RS e-tron GT',
-            priceRange: 'P 750,000 - P 2,300,000',
-            filter: 'Audi'
-          },
-          {
-            id: 'ford',
-            name: 'Ford',
-            image: '/images/placeholders/car.jpg',
-            modelCount: 16,
-            featured: 'Mustang GT',
-            priceRange: 'P 450,000 - P 1,500,000',
-            filter: 'Ford'
-          }
-        ]);
+      } catch (err) {
+        console.error('Error fetching brands data:', err);
+        setError(true);
         setLoading(false);
       }
     };
@@ -280,6 +231,19 @@ const CarBrands = () => {
         </div>
       </section>
     );
+  }
+
+  if (error && brands.length === 0) {
+    return (
+      <section className="car-brands-section">
+        <h2>Explore by Brand</h2>
+        <p className="no-data-message">Could not load brands. Please check your connection.</p>
+      </section>
+    );
+  }
+
+  if (!loading && brands.length === 0) {
+    return null; // No listings yet — hide section entirely
   }
 
   return (

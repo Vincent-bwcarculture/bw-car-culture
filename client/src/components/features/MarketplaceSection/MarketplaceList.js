@@ -306,9 +306,7 @@ const MarketplaceList = () => {
     if (car.description && car.description.length > 100) score += 10;
     if (car.specifications && Object.keys(car.specifications).length > 5) score += 10;
     if (car.dealer?.verification?.isVerified) score += 20;
-    
-    score += Math.random() * 10;
-    
+
     if (carId) {
       listingScoreCache.current.set(carId, score);
     }

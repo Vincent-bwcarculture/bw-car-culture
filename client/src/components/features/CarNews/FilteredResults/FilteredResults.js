@@ -1,59 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { newsService } from '../../../../services/newsService.js';
 
 const FilteredResults = ({ filters }) => {
-  // Sample data - in production this would come from an API
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Simulate API call with filters
   useEffect(() => {
-    setLoading(true);
-    // Simulate API delay
-    setTimeout(() => {
-      // Sample filtered data
-      const filteredData = [
-        {
-          id: 1,
-          image: '/images/Revuelto.jpg',
-          title: 'Lamborghini Revuelto Review',
-          author: {
-            name: 'Car Culture News Desk',
-            avatar: '/images/kvr.jpg'
-          },
-          date: '2025-01-08',
-          category: 'reviews',
-          brand: 'lamborghini',
-          type: 'sports',
-          description: 'The new Lamborghini Revuelto showcases groundbreaking performance...'
-        },
-        {
-          id: 2,
-          image: '/images/GTR35.jpg',
-          title: '2024 Nissan GT-R Review',
-          author: {
-            name: 'Car Culture News Desk',
-            avatar: '/images/kvr.jpg'
-          },
-          date: '2025-01-07',
-          category: 'reviews',
-          brand: 'nissan',
-          type: 'sports',
-          description: 'Nissan reveals the latest iteration of their legendary GT-R...'
-        }
-      ];
+    let cancelled = false;
+    const fetchResults = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = { limit: 12 };
+        if (filters?.category && filters.category !== 'all') params.category = filters.category;
+        if (filters?.brand   && filters.brand   !== 'all') params.brand   = filters.brand;
+        if (filters?.type    && filters.type    !== 'all') params.type    = filters.type;
 
-      // Apply filters
-      const filtered = filteredData.filter(item => {
-        if (filters.category !== 'all' && item.category !== filters.category) return false;
-        if (filters.brand !== 'all' && item.brand !== filters.brand) return false;
-        if (filters.type !== 'all' && item.type !== filters.type) return false;
-        return true;
-      });
-
-      setResults(filtered);
-      setLoading(false);
-    }, 500);
-  }, [filters]);
+        const res = await newsService.getArticles(params);
+        if (!cancelled) setResults(res.articles || []);
+      } catch (err) {
+        if (!cancelled) setError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    fetchResults();
+    return () => { cancelled = true; };
+  }, [filters?.category, filters?.brand, filters?.type]);
 
   if (loading) {
     return (
@@ -63,11 +37,20 @@ const FilteredResults = ({ filters }) => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="no-results">
+        <h3>Could not load articles</h3>
+        <p>Please check your connection and try again.</p>
+      </div>
+    );
+  }
+
   if (results.length === 0) {
     return (
       <div className="no-results">
-        <h3>No reviews match your filters</h3>
-        <p>Try adjusting your filter criteria</p>
+        <h3>No articles match your filters</h3>
+        <p>Try adjusting your filter criteria.</p>
       </div>
     );
   }
@@ -75,27 +58,26 @@ const FilteredResults = ({ filters }) => {
   return (
     <div className="news-grid">
       {results.map(item => (
-        <article key={item.id} className="news-card">
+        <article key={item._id} className="news-card">
           <div className="news-card-image">
-            <img src={item.image} alt={item.title} />
+            <img src={item.featuredImage?.url || item.featuredImage} alt={item.title} />
           </div>
           <div className="news-card-content">
             <div>
               <h3>{item.title}</h3>
-              <p className="news-description">{item.description}</p>
+              <p className="news-description">{item.summary || item.excerpt}</p>
             </div>
             <div className="news-meta">
               <div className="author-info">
-                <div className="author-avatar">
-                  <img src={item.author.avatar} alt={item.author.name} />
-                </div>
-                <span className="author-name">{item.author.name}</span>
+                <span className="author-name">
+                  {typeof item.author === 'object'
+                    ? (item.author?.name || item.author?.username)
+                    : item.author}
+                </span>
               </div>
               <span className="news-date">
-                {new Date(item.date).toLocaleDateString('en-US', {
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric'
+                {new Date(item.publishedAt || item.createdAt).toLocaleDateString('en-US', {
+                  month: 'long', day: 'numeric', year: 'numeric'
                 })}
               </span>
             </div>

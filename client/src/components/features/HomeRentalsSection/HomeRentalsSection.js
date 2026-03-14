@@ -1,94 +1,10 @@
 // src/components/features/HomeRentalsSection/HomeRentalsSection.js
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { rentalVehicleService } from '../../../services/rentalVehicleService.js';
 import { serviceProviderService } from '../../../services/serviceProviderService.js';
 import RentalCard from '../../shared/RentalCard/RentalCard.js';
 import './HomeRentalsSection.css';
-
-// Mock data for initial development/fallback
-const MOCK_RENTAL_VEHICLES = [
-  {
-    id: 'rv1',
-    name: 'Mercedes-Benz E-Class',
-    category: 'Luxury Sedan',
-    image: '/images/rentals/mercedes-e.jpg',
-    provider: 'Luxury Wheels Rentals',
-    providerLogo: '/images/services/car-rental-logo1.jpg',
-    rates: {
-      daily: 850,
-      weekly: 5500,
-      monthly: 19500
-    },
-    features: ['Leather Interior', 'GPS Navigation', 'Automatic', 'Bluetooth'],
-    availability: 'Available',
-    location: 'Gaborone'
-  },
-  {
-    id: 'rv2',
-    name: 'BMW X5',
-    category: 'Luxury SUV',
-    image: '/images/rentals/bmw-x5.jpg',
-    provider: 'Luxury Wheels Rentals',
-    providerLogo: '/images/services/car-rental-logo1.jpg',
-    rates: {
-      daily: 950,
-      weekly: 6200,
-      monthly: 22000
-    },
-    features: ['Leather Interior', 'Panoramic Roof', 'All-Wheel Drive', '7 Seater'],
-    availability: 'Limited',
-    location: 'Gaborone'
-  },
-  {
-    id: 'rv8',
-    name: 'Toyota Land Cruiser',
-    category: 'Off-Road 4x4',
-    image: '/images/rentals/land-cruiser.jpg',
-    provider: 'Safari Vehicle Rentals',
-    providerLogo: '/images/services/car-rental-logo3.jpg',
-    rates: {
-      daily: 1100,
-      weekly: 7000,
-      monthly: 25000
-    },
-    features: ['4x4 Drive', 'Roof Tent', 'Camping Equipment', 'Satellite Phone'],
-    availability: 'Available',
-    location: 'Maun'
-  },
-  {
-    id: 'rv4',
-    name: 'Toyota Corolla',
-    category: 'Economy Sedan',
-    image: '/images/rentals/toyota-corolla.jpg',
-    provider: 'EcoDrive Rentals',
-    providerLogo: '/images/services/car-rental-logo2.jpg',
-    rates: {
-      daily: 350,
-      weekly: 2200,
-      monthly: 8500
-    },
-    features: ['Fuel Efficient', 'Bluetooth', 'Air Conditioning', 'USB Ports'],
-    availability: 'Available',
-    location: 'Gaborone'
-  },
-  {
-    id: 'rv9',
-    name: 'Ford Ranger 4x4',
-    category: 'Double Cab Pickup',
-    image: '/images/rentals/ford-ranger.jpg',
-    provider: 'Safari Vehicle Rentals',
-    providerLogo: '/images/services/car-rental-logo3.jpg',
-    rates: {
-      daily: 900,
-      weekly: 5800,
-      monthly: 20000
-    },
-    features: ['4x4 Capability', 'Roof Rack', 'Extended Range Fuel Tank', 'Bull Bar'],
-    availability: 'Limited',
-    location: 'Maun'
-  }
-];
 
 const HomeRentalsSection = () => {
   const [rentals, setRentals] = useState([]);
