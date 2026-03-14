@@ -181,6 +181,7 @@
 }
 .dm-marker--green  { background: #2ed573; }
 .dm-marker--orange { background: #ffa502; }
+.dm-marker--red    { background: #ff4757; }
 .dm-marker--teal   { background: #26de81; }
 .dm-marker--yellow { background: #ffd32a; }
 .dm-marker--blue   { background: #45aaf2; }
@@ -222,6 +223,7 @@
 }
 .dm-popup-badge--green  { background: rgba(46, 213, 115, 0.15); color: #2ed573; }
 .dm-popup-badge--orange { background: rgba(255, 165, 2, 0.15); color: #ffa502; }
+.dm-popup-badge--red    { background: rgba(255, 71, 87, 0.15); color: #ff4757; }
 .dm-popup-badge--teal   { background: rgba(38, 222, 129, 0.15); color: #26de81; }
 .dm-popup-badge--yellow { background: rgba(255, 211, 42, 0.15); color: #ffd32a; }
 .dm-popup-badge--blue   { background: rgba(69, 170, 242, 0.15); color: #45aaf2; }
@@ -244,33 +246,40 @@
 .dm-popup-status--busy      { color: #ffa502; }
 .dm-popup-status--offline   { color: #ff4757; }
 
-/* FAB button */
-.dm-fab-btn {
+/* FAB group */
+.dm-fab-group {
   position: absolute;
   bottom: 5rem;
   right: 1.2rem;
   z-index: 1000;
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+.dm-fab-btn {
+  display: flex;
   align-items: center;
-  gap: 0.2rem;
-  padding: 0.6rem 1rem;
-  background: #ffa502;
-  color: #000;
+  padding: 0.55rem 1rem;
   border: none;
   border-radius: 10px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(255, 165, 2, 0.35);
   transition: transform 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+  color: #000;
+}
+.dm-fab-btn--orange {
+  background: #ffa502;
+  box-shadow: 0 4px 14px rgba(255, 165, 2, 0.35);
+}
+.dm-fab-btn--red {
+  background: #ff4757;
+  box-shadow: 0 4px 14px rgba(255, 71, 87, 0.35);
 }
 .dm-fab-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 165, 2, 0.5);
-}
-.dm-fab-btn span:first-child {
-  font-size: 1.3rem;
 }
 
 /* Login hint */
@@ -359,6 +368,20 @@
 }
 .dm-contrib-form input:focus {
   border-color: #ffa502;
+}
+.dm-contrib-form select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #e0e0e0;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+}
+.dm-contrib-form select option {
+  background: #1a1a1a;
+  color: #e0e0e0;
 }
 .dm-submit-btn {
   margin-top: 0.4rem;
@@ -456,7 +479,7 @@
     width: auto;
     bottom: 1rem;
   }
-  .dm-fab-btn {
+  .dm-fab-group {
     bottom: 1rem;
     right: 0.8rem;
   }
