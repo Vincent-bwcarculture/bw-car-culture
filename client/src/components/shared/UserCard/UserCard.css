@@ -4,12 +4,67 @@
   background: var(--uprofile-bg-secondary);
   border: 1px solid var(--uprofile-border-color);
   border-radius: 12px;
-  padding: 20px;
+  padding: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* === COVER IMAGE === */
+.usercard-cover {
+  width: 100%;
+  height: 80px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--uprofile-bg-tertiary);
+  flex-shrink: 0;
+}
+
+.usercard-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #1e1e1e 100%);
+}
+
+/* Offset avatar to overlap cover */
+.usercard-container.grid .usercard-header {
+  padding: 0 16px 0 16px;
+  margin-top: -28px;
+}
+
+.usercard-container.grid .usercard-avatar-container {
+  margin-bottom: 4px;
+}
+
+.usercard-container.grid .usercard-avatar,
+.usercard-container.grid .usercard-avatar-wrapper,
+.usercard-container.grid .usercard-avatar-loading,
+.usercard-container.grid .usercard-avatar-fallback {
+  width: 56px;
+  height: 56px;
+  border: 3px solid var(--uprofile-bg-secondary);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.usercard-container.grid .usercard-bio,
+.usercard-container.grid .usercard-stats,
+.usercard-container.grid .usercard-actions {
+  padding: 0 16px;
+}
+
+.usercard-container.grid .usercard-stats {
+  padding-bottom: 4px;
+}
+
+.usercard-container.grid .usercard-actions {
+  padding-bottom: 16px;
+}
+
+/* List view stays flat (no cover) */
+.usercard-container.list {
+  padding: 16px 20px;
 }
 
 .usercard-container::before {

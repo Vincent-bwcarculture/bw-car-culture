@@ -1,30 +1,11 @@
 // client/src/components/profile/NetworkTab.js
-import React, { useState, useEffect } from 'react';
-import { 
-  Users, 
-  UserPlus, 
-  UserCheck, 
-  MapPin, 
-  Star,
-  Eye,
-  MessageCircle,
-  Heart,
-  Search,
-  Filter,
-  Grid,
-  List,
-  Car,
-  MoreHorizontal,
-  ExternalLink,
-  Mail,
-  Phone,
-  Shield
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Filter, Grid, List, Shield } from 'lucide-react';
 import axios from '../../config/axios.js';
 import UserCard from '../shared/UserCard/UserCard.js';
 import './NetworkTab.css';
 
-const NetworkTab = ({ profileData, refreshProfile }) => {
+const NetworkTab = ({ profileData }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -81,40 +62,42 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
         response = await axios.get(`/api/users/network?${params.toString()}`);
       } catch (networkError) {
         console.log('Network endpoint not available, trying fallback:', networkError.message);
-        
-        // Fallback to existing auth/users endpoint
         response = await axios.get('/auth/users');
       }
-      
+
       if (response.data.success) {
-        let users = response.data.data || response.data.available || [];
-        
+        let fetchedUsers = response.data.data || response.data.available || [];
+
         // Filter out current user
         const currentUserId = profileData?.id || profileData?._id;
-        users = users.filter(user => 
+        fetchedUsers = fetchedUsers.filter(user =>
           (user._id || user.id) !== currentUserId
         );
-        
+
         // Apply client-side filtering if using fallback endpoint
-        if (response.config.url.includes('/auth/users')) {
-          users = users.filter(user => {
-            const matchesSearch = !searchTerm || 
+        if (response.config?.url?.includes('/auth/users')) {
+          fetchedUsers = fetchedUsers.filter(user => {
+            const matchesSearch = !searchTerm ||
               user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
               user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
               user.role?.toLowerCase().includes(searchTerm.toLowerCase());
-
-            const matchesUserType = filters.userType === 'all' || 
-              user.role === filters.userType;
-
-            const matchesVerified = filters.verified === 'all' || 
+            const matchesUserType = filters.userType === 'all' || user.role === filters.userType;
+            const matchesVerified = filters.verified === 'all' ||
               (filters.verified === 'verified' && user.emailVerified) ||
               (filters.verified === 'unverified' && !user.emailVerified);
-
             return matchesSearch && matchesUserType && matchesVerified;
           });
         }
-        
-        setUsers(users);
+
+        setUsers(fetchedUsers);
+
+        // Seed following state from server-returned isFollowedByCurrentUser flag
+        const initialFollowing = new Set(
+          fetchedUsers
+            .filter(u => u.isFollowedByCurrentUser)
+            .map(u => (u._id || u.id).toString())
+        );
+        setFollowing(initialFollowing);
       } else {
         throw new Error(response.data.message || 'Failed to fetch users');
       }
@@ -147,22 +130,30 @@ const NetworkTab = ({ profileData, refreshProfile }) => {
     return matchesSearch;
   });
 
-  // Handle follow/unfollow (placeholder for now)
   const handleFollowToggle = async (userId) => {
+    const idStr = userId.toString();
+    // Optimistic update
+    setFollowing(prev => {
+      const next = new Set(prev);
+      next.has(idStr) ? next.delete(idStr) : next.add(idStr);
+      return next;
+    });
+    // Also update followerCount on the user in local state
+    setUsers(prev => prev.map(u => {
+      if ((u._id || u.id).toString() !== idStr) return u;
+      const wasFollowing = following.has(idStr);
+      return { ...u, followerCount: (u.followerCount ?? 0) + (wasFollowing ? -1 : 1) };
+    }));
     try {
-      if (following.has(userId)) {
-        // Unfollow logic will be implemented later
-        setFollowing(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(userId);
-          return newSet;
-        });
-      } else {
-        // Follow logic will be implemented later
-        setFollowing(prev => new Set(prev).add(userId));
-      }
+      await axios.post(`/api/users/${idStr}/follow`);
     } catch (error) {
       console.error('Follow toggle error:', error);
+      // Revert optimistic update on failure
+      setFollowing(prev => {
+        const next = new Set(prev);
+        next.has(idStr) ? next.delete(idStr) : next.add(idStr);
+        return next;
+      });
     }
   };
 

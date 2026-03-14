@@ -10,11 +10,9 @@ import {
   Car,
   Shield,
   Calendar,
-  Star,
   MoreHorizontal,
-  Mail,
-  Phone,
-  Award
+  Award,
+  Users
 } from 'lucide-react';
 import './UserCard.css';
 
@@ -200,11 +198,29 @@ const UserCard = ({
     onViewProfile?.(user);
   };
 
+  // Resolve cover picture URL
+  const getCoverUrl = () => {
+    if (user.coverPicture?.url) return user.coverPicture.url;
+    if (typeof user.coverPicture === 'string') return user.coverPicture;
+    return null;
+  };
+  const coverUrl = getCoverUrl();
+
   return (
-    <div 
+    <div
       className={`usercard-container ${viewMode} ${className}`}
       onClick={handleCardClick}
     >
+      {/* Cover Image */}
+      {viewMode === 'grid' && (
+        <div
+          className="usercard-cover"
+          style={coverUrl ? { backgroundImage: `url(${coverUrl})` } : {}}
+        >
+          {!coverUrl && <div className="usercard-cover-placeholder" />}
+        </div>
+      )}
+
       {/* Card Header */}
       <div className="usercard-header">
         <div className="usercard-avatar-container">
@@ -326,24 +342,27 @@ const UserCard = ({
 
       {/* Stats Section */}
       <div className="usercard-stats">
-        {user.totalListings && (
+        <div className="usercard-stat">
+          <Users size={14} />
+          <span>{user.followerCount ?? (user.followers?.length ?? 0)} followers</span>
+        </div>
+
+        <div className="usercard-stat">
+          <Users size={14} />
+          <span>{user.followingCount ?? (user.following?.length ?? 0)} following</span>
+        </div>
+
+        {user.totalListings > 0 && (
           <div className="usercard-stat">
             <Car size={14} />
             <span>{user.totalListings} listing{user.totalListings !== 1 ? 's' : ''}</span>
           </div>
         )}
-        
+
         <div className="usercard-stat">
           <Calendar size={14} />
           <span>{formatMemberSince(user.createdAt || user.memberSince)}</span>
         </div>
-
-        {user.rating && (
-          <div className="usercard-stat">
-            <Star size={14} />
-            <span>{user.rating.toFixed(1)}</span>
-          </div>
-        )}
       </div>
 
       {/* Action Buttons */}
