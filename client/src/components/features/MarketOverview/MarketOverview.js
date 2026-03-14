@@ -74,7 +74,7 @@ const MarketOverview = () => {
       if (data.success) {
         setAllPrices(data.data);
         // Auto-select similar vehicles for initial display
-        const autoSelected = autoSelectSimilarVehicles(data.data, 10);
+        const autoSelected = autoSelectSimilarVehicles(data.data, 4);
         setSelectedVehicles(autoSelected);
         updateComparisonData(autoSelected, data.data);
       }
@@ -302,7 +302,7 @@ const MarketOverview = () => {
       v.make === carValueQuery.make &&
       v.model === carValueQuery.model
     );
-    if (!exists && selectedVehicles.length < 10) {
+    if (!exists && selectedVehicles.length < 4) {
       const vehicle = {
         make: carValueQuery.make,
         model: carValueQuery.model,
@@ -353,12 +353,12 @@ const MarketOverview = () => {
       v.year === vehicle.year
     );
 
-    if (!exists && selectedVehicles.length < 10) {
+    if (!exists && selectedVehicles.length < 4) {
       const updated = [...selectedVehicles, vehicle];
       setSelectedVehicles(updated);
       updateComparisonData(updated, allPrices);
-    } else if (selectedVehicles.length >= 10) {
-      alert('Maximum 10 vehicles can be shown at once. Remove one first.');
+    } else if (selectedVehicles.length >= 4) {
+      alert('Maximum 4 vehicles can be shown at once. Remove one first.');
     }
   };
 
@@ -385,7 +385,7 @@ const MarketOverview = () => {
   };
 
   const getChartColor = (index) => {
-    const colors = ['#ff3300', '#2ed573', '#3498db', '#ffc107', '#e056fd', '#ff6b6b', '#1abc9c', '#f39c12', '#9b59b6', '#00d2d3'];
+    const colors = ['#ff3300', '#2ed573', '#3498db', '#ffc107'];
     return colors[index % colors.length];
   };
 
@@ -400,7 +400,7 @@ const MarketOverview = () => {
     });
   };
 
-  // Render the line chart with date X-axis and vehicle name labels
+  // Render the line chart with date X-axis and inline vehicle name labels
   const renderChart = () => {
     if (comparisonData.length === 0) {
       return (
@@ -417,7 +417,7 @@ const MarketOverview = () => {
     const allPriceValues = allPoints.map(p => p.price);
     const minPriceVal = Math.min(...allPriceValues);
     const maxPriceVal = Math.max(...allPriceValues);
-    const pad = (maxPriceVal - minPriceVal || 1) * 0.12;
+    const pad = (maxPriceVal - minPriceVal || 1) * 0.15;
     const yMin = Math.max(0, minPriceVal - pad);
     const yMax = maxPriceVal + pad;
 
@@ -439,12 +439,34 @@ const MarketOverview = () => {
       new Date(minDate + (dateRange / (xCount - 1)) * i)
     );
 
-    // Map date → SVG x (viewBox 1000 wide), price → SVG y (280 tall, top=0)
     const toX = (date) => {
       const t = new Date(date).getTime();
       return isNaN(t) ? 500 : ((t - minDate) / dateRange) * 1000;
     };
     const toY = (price) => 280 - ((price - yMin) / (yMax - yMin)) * 280;
+    // Y position as % from top (for HTML overlay)
+    const toYPct = (price) => ((price - yMin) / (yMax - yMin)) === 0
+      ? 100
+      : 100 - ((price - yMin) / (yMax - yMin)) * 100;
+
+    // Build label positions with collision avoidance
+    const rawLabels = comparisonData.map((vehicle, vIndex) => {
+      const sorted = [...vehicle.pricePoints]
+        .filter(p => !isNaN(new Date(p.date).getTime()))
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+      if (sorted.length === 0) return null;
+      const lastPrice = sorted[sorted.length - 1].price;
+      return { vIndex, yPct: toYPct(lastPrice), make: vehicle.make, model: vehicle.model };
+    }).filter(Boolean);
+
+    // Sort by Y and push overlapping labels apart (min 9% gap)
+    const sortedLabels = [...rawLabels].sort((a, b) => a.yPct - b.yPct);
+    for (let i = 1; i < sortedLabels.length; i++) {
+      if (sortedLabels[i].yPct - sortedLabels[i - 1].yPct < 9) {
+        sortedLabels[i].yPct = sortedLabels[i - 1].yPct + 9;
+      }
+    }
+    sortedLabels.forEach(l => { l.yPct = Math.max(3, Math.min(93, l.yPct)); });
 
     return (
       <div className="mo-line-chart">
@@ -458,42 +480,59 @@ const MarketOverview = () => {
         {/* Chart plot + X-axis */}
         <div className="mo-chart-area">
           <div className="mo-chart-plot">
-            <svg className="mo-chart-svg" viewBox="0 0 1000 280" preserveAspectRatio="none">
-              {/* Horizontal grid lines */}
-              {yLabels.map((_, i) => (
-                <line key={i} x1="0" y1={(i / 5) * 280} x2="1000" y2={(i / 5) * 280}
-                  stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+            {/* SVG wrapper */}
+            <div className="mo-chart-svg-wrapper">
+              <svg className="mo-chart-svg" viewBox="0 0 1000 280" preserveAspectRatio="none">
+                {/* Horizontal grid lines */}
+                {yLabels.map((_, i) => (
+                  <line key={i} x1="0" y1={(i / 5) * 280} x2="1000" y2={(i / 5) * 280}
+                    stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                ))}
+                {/* Vertical grid lines at date ticks */}
+                {xDates.map((_, i) => (
+                  <line key={i} x1={(i / (xCount - 1)) * 1000} y1="0"
+                    x2={(i / (xCount - 1)) * 1000} y2="280"
+                    stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+                ))}
+                {/* Vehicle lines */}
+                {comparisonData.map((vehicle, vIndex) => {
+                  const sorted = [...vehicle.pricePoints]
+                    .filter(p => !isNaN(new Date(p.date).getTime()))
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+                  if (sorted.length === 0) return null;
+                  const color = getChartColor(vIndex);
+                  const points = sorted.map(p => ({ x: toX(p.date), y: toY(p.price), price: p.price }));
+                  return (
+                    <g key={vIndex}>
+                      <polyline
+                        points={points.map(p => `${p.x},${p.y}`).join(' ')}
+                        fill="none" stroke={color} strokeWidth="2.5"
+                        strokeLinecap="round" strokeLinejoin="round"
+                      />
+                      {points.map((pt, pi) => (
+                        <circle key={pi} cx={pt.x} cy={pt.y} r="5" fill={color} className="mo-chart-point">
+                          <title>{`${vehicle.make} ${vehicle.model}: ${formatPrice(pt.price)}`}</title>
+                        </circle>
+                      ))}
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+
+            {/* Inline vehicle name labels — positioned at end of each line */}
+            <div className="mo-chart-end-labels">
+              {sortedLabels.map(label => (
+                <div
+                  key={label.vIndex}
+                  className="mo-chart-end-label"
+                  style={{ top: `${label.yPct}%`, color: getChartColor(label.vIndex) }}
+                >
+                  <span className="mo-chart-end-label-tick"></span>
+                  {label.make} {label.model}
+                </div>
               ))}
-              {/* Vertical grid lines at date ticks */}
-              {xDates.map((_, i) => (
-                <line key={i} x1={(i / (xCount - 1)) * 1000} y1="0"
-                  x2={(i / (xCount - 1)) * 1000} y2="280"
-                  stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
-              ))}
-              {/* Vehicle lines */}
-              {comparisonData.map((vehicle, vIndex) => {
-                const sorted = [...vehicle.pricePoints]
-                  .filter(p => !isNaN(new Date(p.date).getTime()))
-                  .sort((a, b) => new Date(a.date) - new Date(b.date));
-                if (sorted.length === 0) return null;
-                const color = getChartColor(vIndex);
-                const points = sorted.map(p => ({ x: toX(p.date), y: toY(p.price), price: p.price }));
-                return (
-                  <g key={vIndex}>
-                    <polyline
-                      points={points.map(p => `${p.x},${p.y}`).join(' ')}
-                      fill="none" stroke={color} strokeWidth="2.5"
-                      strokeLinecap="round" strokeLinejoin="round"
-                    />
-                    {points.map((pt, pi) => (
-                      <circle key={pi} cx={pt.x} cy={pt.y} r="4" fill={color} className="mo-chart-point">
-                        <title>{`${vehicle.make} ${vehicle.model}: ${formatPrice(pt.price)}`}</title>
-                      </circle>
-                    ))}
-                  </g>
-                );
-              })}
-            </svg>
+            </div>
           </div>
 
           {/* X-axis date labels */}
@@ -504,16 +543,6 @@ const MarketOverview = () => {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Vehicle name labels — right panel */}
-        <div className="mo-chart-line-labels">
-          {comparisonData.map((vehicle, vIndex) => (
-            <div key={vIndex} className="mo-chart-line-label">
-              <span className="mo-chart-line-dot" style={{ background: getChartColor(vIndex) }}></span>
-              {vehicle.make} {vehicle.model}
-            </div>
-          ))}
         </div>
       </div>
     );
@@ -791,7 +820,7 @@ const MarketOverview = () => {
                 onClick={handleSearch}
                 disabled={!searchFilters.make || !searchFilters.model}
               >
-                Add to Chart ({selectedVehicles.length}/10)
+                Add to Chart ({selectedVehicles.length}/4)
               </button>
 
               {/* Selected Vehicles */}
