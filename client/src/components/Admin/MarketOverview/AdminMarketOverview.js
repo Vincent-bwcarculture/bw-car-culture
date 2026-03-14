@@ -58,6 +58,7 @@ const AdminMarketOverview = () => {
 
   // Batch import state
   const [batchData, setBatchData] = useState('');
+  const [syncing, setSyncing] = useState(false);
 
   // CRITICAL: Check admin authentication (same pattern as ArticleManagement)
   useEffect(() => {
@@ -287,6 +288,31 @@ const AdminMarketOverview = () => {
     }
   };
 
+  // Sync all existing listings into market prices
+  const handleSyncListings = async () => {
+    if (!window.confirm('This will import all existing listing data into Market Prices. Continue?')) return;
+    const token = localStorage.getItem('token');
+    setSyncing(true);
+    try {
+      const response = await fetch('/api/market-prices/sync-listings', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(`Sync complete!\nSynced: ${data.synced}\nSkipped: ${data.skipped}\nTotal listings: ${data.total}`);
+        fetchPrices();
+        fetchFilterOptions();
+      } else {
+        alert(data.message || 'Sync failed');
+      }
+    } catch (err) {
+      alert(`Sync error: ${err.message}`);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   // Batch import prices
   const handleBatchImport = async (e) => {
     e.preventDefault();
@@ -452,6 +478,9 @@ const AdminMarketOverview = () => {
           </button>
           <button className="amo-btn-secondary" onClick={() => setShowBatchModal(true)}>
             📊 Batch Import
+          </button>
+          <button className="amo-btn-secondary" onClick={handleSyncListings} disabled={syncing}>
+            {syncing ? 'Syncing...' : '🔄 Sync from Listings'}
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 // server/controllers/marketPriceController.js
 import MarketPrice from '../models/MarketPrice.js';
+import Listing from '../models/Listing.js';
 import { ErrorResponse } from '../utils/errorResponse.js';
 import asyncHandler from '../middleware/async.js';
 
@@ -164,5 +165,69 @@ export const batchImportMarketPrices = asyncHandler(async (req, res, next) => {
     success: true,
     inserted: result.length,
     data: result
+  });
+});
+
+// ─────────────────────────────────────────────
+// @desc    Backfill market prices from all existing listings
+// @route   POST /api/market-prices/sync-listings
+// @access  Private/Admin
+// ─────────────────────────────────────────────
+export const syncFromListings = asyncHandler(async (req, res) => {
+  // Fetch all listings that have the minimum required fields
+  const listings = await Listing.find({
+    'specifications.make': { $exists: true, $ne: '' },
+    price: { $exists: true, $gt: 0 }
+  }).lean();
+
+  let synced = 0;
+  let skipped = 0;
+
+  for (const listing of listings) {
+    try {
+      const make  = listing.specifications?.make;
+      const price = listing.price;
+      if (!make || !price) { skipped++; continue; }
+
+      const location = [listing.location?.city, listing.location?.country]
+        .filter(Boolean).join(', ');
+
+      // Determine lifecycle status from the listing's own status
+      let listingStatus = 'active';
+      if (listing.status === 'sold')     listingStatus = 'sold';
+      if (listing.status === 'archived') listingStatus = 'archived';
+
+      await MarketPrice.findOneAndUpdate(
+        { listingId: listing._id },
+        {
+          make:          make,
+          model:         listing.specifications?.model || '',
+          year:          listing.specifications?.year,
+          condition:     listing.condition || 'used',
+          price:         price,
+          mileage:       listing.specifications?.mileage ?? null,
+          location,
+          recordedDate:  listing.createdAt || Date.now(),
+          source:        'listing',
+          notes:         listing.title || '',
+          createdBy:     req.user.id,
+          listingId:     listing._id,
+          listingStatus,
+          soldAt:        listingStatus === 'sold' ? (listing.updatedAt || Date.now()) : null
+        },
+        { upsert: true, new: true, runValidators: true }
+      );
+      synced++;
+    } catch (err) {
+      console.error(`syncFromListings: skipping listing ${listing._id}:`, err.message);
+      skipped++;
+    }
+  }
+
+  res.status(200).json({
+    success: true,
+    synced,
+    skipped,
+    total: listings.length
   });
 });

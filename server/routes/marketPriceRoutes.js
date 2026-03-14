@@ -7,7 +7,8 @@ import {
   createMarketPrice,
   updateMarketPrice,
   deleteMarketPrice,
-  batchImportMarketPrices
+  batchImportMarketPrices,
+  syncFromListings
 } from '../controllers/marketPriceController.js';
 import { protect, authorize } from '../middleware/auth.js';
 
@@ -22,8 +23,9 @@ router.get('/:id',      getMarketPrice);
 router.use(protect);
 router.use(authorize('admin'));
 
-router.post('/batch', batchImportMarketPrices);
-router.post('/',      createMarketPrice);
+router.post('/sync-listings', syncFromListings);
+router.post('/batch',         batchImportMarketPrices);
+router.post('/',              createMarketPrice);
 router.put('/:id',    updateMarketPrice);
 router.delete('/:id', deleteMarketPrice);
 
