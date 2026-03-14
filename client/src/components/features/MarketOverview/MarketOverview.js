@@ -156,32 +156,27 @@ const MarketOverview = () => {
     }
   };
 
-  // Auto-select similar vehicles based on popularity and similarity
+  // Auto-select vehicles randomly
   const autoSelectSimilarVehicles = (prices, maxCount) => {
     if (!prices || prices.length === 0) return [];
 
     // Group by make-model-year combination
     const vehicleGroups = {};
-    
     prices.forEach(price => {
       const key = `${price.make}-${price.model}-${price.year}`;
       if (!vehicleGroups[key]) {
-        vehicleGroups[key] = {
-          make: price.make,
-          model: price.model,
-          year: price.year,
-          prices: []
-        };
+        vehicleGroups[key] = { make: price.make, model: price.model, year: price.year, prices: [] };
       }
       vehicleGroups[key].prices.push(price);
     });
 
-    // Convert to array and sort by data points (more data = more popular)
-    const vehicles = Object.values(vehicleGroups)
-      .sort((a, b) => b.prices.length - a.prices.length)
-      .slice(0, maxCount);
-
-    return vehicles;
+    // Shuffle randomly
+    const vehicles = Object.values(vehicleGroups);
+    for (let i = vehicles.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [vehicles[i], vehicles[j]] = [vehicles[j], vehicles[i]];
+    }
+    return vehicles.slice(0, maxCount);
   };
 
   const updateComparisonData = (vehicles, allPricesData) => {
@@ -358,12 +353,12 @@ const MarketOverview = () => {
       v.year === vehicle.year
     );
 
-    if (!exists && selectedVehicles.length < 5) {
+    if (!exists && selectedVehicles.length < 10) {
       const updated = [...selectedVehicles, vehicle];
       setSelectedVehicles(updated);
       updateComparisonData(updated, allPrices);
-    } else if (selectedVehicles.length >= 5) {
-      alert('Maximum 5 vehicles can be compared at once. Remove one first.');
+    } else if (selectedVehicles.length >= 10) {
+      alert('Maximum 10 vehicles can be shown at once. Remove one first.');
     }
   };
 
@@ -405,106 +400,120 @@ const MarketOverview = () => {
     });
   };
 
-  // Render the line chart
+  // Render the line chart with date X-axis and vehicle name labels
   const renderChart = () => {
     if (comparisonData.length === 0) {
       return (
         <div className="mo-chart-empty">
           <div className="mo-empty-icon">📊</div>
-          <p>No vehicles selected for comparison</p>
-          <p style={{ fontSize: '0.85rem', marginTop: '0.5rem', color: '#666' }}>
-            Use the filters below to add vehicles
-          </p>
+          <p>No market data available yet</p>
         </div>
       );
     }
 
-    // Find min and max prices across all vehicles for Y-axis
-    const allPrices = comparisonData.flatMap(v => v.pricePoints.map(p => p.price));
-    const minPrice = Math.min(...allPrices);
-    const maxPrice = Math.max(...allPrices);
-    const priceRange = maxPrice - minPrice;
-    const padding = priceRange * 0.1;
-    const yMin = Math.max(0, minPrice - padding);
-    const yMax = maxPrice + padding;
+    const allPoints = comparisonData.flatMap(v => v.pricePoints);
 
-    // Generate Y-axis labels
+    // Price range
+    const allPriceValues = allPoints.map(p => p.price);
+    const minPriceVal = Math.min(...allPriceValues);
+    const maxPriceVal = Math.max(...allPriceValues);
+    const pad = (maxPriceVal - minPriceVal || 1) * 0.12;
+    const yMin = Math.max(0, minPriceVal - pad);
+    const yMax = maxPriceVal + pad;
+
+    // Date range
+    const timestamps = allPoints.map(p => new Date(p.date).getTime()).filter(t => !isNaN(t));
+    const minDate = timestamps.length > 0 ? Math.min(...timestamps) : Date.now() - 180 * 86400000;
+    const maxDate = timestamps.length > 0 ? Math.max(...timestamps) : Date.now();
+    const dateRange = maxDate - minDate || 1;
+
+    // Y-axis labels
     const yLabels = [];
-    const labelCount = 6;
-    for (let i = 0; i < labelCount; i++) {
-      const value = yMax - ((yMax - yMin) / (labelCount - 1)) * i;
-      yLabels.push(Math.round(value));
+    for (let i = 0; i < 6; i++) {
+      yLabels.push(Math.round(yMax - ((yMax - yMin) / 5) * i));
     }
+
+    // X-axis date labels (5 evenly spaced)
+    const xCount = 5;
+    const xDates = Array.from({ length: xCount }, (_, i) =>
+      new Date(minDate + (dateRange / (xCount - 1)) * i)
+    );
+
+    // Map date → SVG x (viewBox 1000 wide), price → SVG y (280 tall, top=0)
+    const toX = (date) => {
+      const t = new Date(date).getTime();
+      return isNaN(t) ? 500 : ((t - minDate) / dateRange) * 1000;
+    };
+    const toY = (price) => 280 - ((price - yMin) / (yMax - yMin)) * 280;
 
     return (
       <div className="mo-line-chart">
         {/* Y-Axis */}
         <div className="mo-chart-y-axis">
           {yLabels.map((label, i) => (
-            <div key={i} className="mo-y-label">
-              {formatPrice(label)}
-            </div>
+            <div key={i} className="mo-y-label">{formatPrice(label)}</div>
           ))}
         </div>
 
-        {/* Chart Area */}
+        {/* Chart plot + X-axis */}
         <div className="mo-chart-area">
-          <svg className="mo-chart-svg" viewBox="0 0 1000 300" preserveAspectRatio="none">
-            {/* Grid lines */}
-            {yLabels.map((_, i) => {
-              const y = (i / (yLabels.length - 1)) * 300;
-              return (
-                <line
-                  key={i}
-                  x1="0"
-                  y1={y}
-                  x2="1000"
-                  y2={y}
-                  stroke="rgba(255, 255, 255, 0.05)"
-                  strokeWidth="1"
-                />
-              );
-            })}
+          <div className="mo-chart-plot">
+            <svg className="mo-chart-svg" viewBox="0 0 1000 280" preserveAspectRatio="none">
+              {/* Horizontal grid lines */}
+              {yLabels.map((_, i) => (
+                <line key={i} x1="0" y1={(i / 5) * 280} x2="1000" y2={(i / 5) * 280}
+                  stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+              ))}
+              {/* Vertical grid lines at date ticks */}
+              {xDates.map((_, i) => (
+                <line key={i} x1={(i / (xCount - 1)) * 1000} y1="0"
+                  x2={(i / (xCount - 1)) * 1000} y2="280"
+                  stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+              ))}
+              {/* Vehicle lines */}
+              {comparisonData.map((vehicle, vIndex) => {
+                const sorted = [...vehicle.pricePoints]
+                  .filter(p => !isNaN(new Date(p.date).getTime()))
+                  .sort((a, b) => new Date(a.date) - new Date(b.date));
+                if (sorted.length === 0) return null;
+                const color = getChartColor(vIndex);
+                const points = sorted.map(p => ({ x: toX(p.date), y: toY(p.price), price: p.price }));
+                return (
+                  <g key={vIndex}>
+                    <polyline
+                      points={points.map(p => `${p.x},${p.y}`).join(' ')}
+                      fill="none" stroke={color} strokeWidth="2.5"
+                      strokeLinecap="round" strokeLinejoin="round"
+                    />
+                    {points.map((pt, pi) => (
+                      <circle key={pi} cx={pt.x} cy={pt.y} r="4" fill={color} className="mo-chart-point">
+                        <title>{`${vehicle.make} ${vehicle.model}: ${formatPrice(pt.price)}`}</title>
+                      </circle>
+                    ))}
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
 
-            {/* Plot lines for each vehicle */}
-            {comparisonData.map((vehicle, vIndex) => {
-              const points = vehicle.pricePoints.map((point, pIndex) => {
-                const x = (pIndex / (vehicle.pricePoints.length - 1)) * 1000;
-                const y = 300 - ((point.price - yMin) / (yMax - yMin)) * 300;
-                return { x, y, price: point.price };
-              });
+          {/* X-axis date labels */}
+          <div className="mo-x-axis">
+            {xDates.map((date, i) => (
+              <div key={i} className="mo-x-label">
+                {date.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' })}
+              </div>
+            ))}
+          </div>
+        </div>
 
-              const color = getChartColor(vIndex);
-
-              return (
-                <g key={vIndex}>
-                  {/* Line */}
-                  <polyline
-                    points={points.map(p => `${p.x},${p.y}`).join(' ')}
-                    fill="none"
-                    stroke={color}
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  
-                  {/* Points */}
-                  {points.map((point, pIndex) => (
-                    <circle
-                      key={pIndex}
-                      cx={point.x}
-                      cy={point.y}
-                      r="4"
-                      fill={color}
-                      className="mo-chart-point"
-                    >
-                      <title>{`${vehicle.make} ${vehicle.model}: ${formatPrice(point.price)}`}</title>
-                    </circle>
-                  ))}
-                </g>
-              );
-            })}
-          </svg>
+        {/* Vehicle name labels — right panel */}
+        <div className="mo-chart-line-labels">
+          {comparisonData.map((vehicle, vIndex) => (
+            <div key={vIndex} className="mo-chart-line-label">
+              <span className="mo-chart-line-dot" style={{ background: getChartColor(vIndex) }}></span>
+              {vehicle.make} {vehicle.model}
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -696,9 +705,9 @@ const MarketOverview = () => {
 
             {/* FILTER SECTION */}
             <div className="mo-search-panel">
-              <h2 className="mo-section-title">Filter Vehicles</h2>
+              <h2 className="mo-section-title">Explore Car Values</h2>
               <p className="mo-section-desc" style={{ marginBottom: '1rem', color: '#888' }}>
-                Add vehicles to comparison (up to 5)
+                Search any vehicle to see its market value and add it to the chart
               </p>
               
               <div className="mo-filters-grid">
@@ -782,14 +791,14 @@ const MarketOverview = () => {
                 onClick={handleSearch}
                 disabled={!searchFilters.make || !searchFilters.model}
               >
-                Add to Comparison ({selectedVehicles.length}/5)
+                Add to Chart ({selectedVehicles.length}/10)
               </button>
 
               {/* Selected Vehicles */}
               {selectedVehicles.length > 0 && (
                 <div className="mo-selected-vehicles" style={{ marginTop: '1.5rem' }}>
                   <h3 className="mo-section-title" style={{ fontSize: '1rem', marginBottom: '0.8rem' }}>
-                    Currently Comparing
+                    Vehicles on Chart
                   </h3>
                   <div className="mo-selected-list">
                     {selectedVehicles.map((vehicle, index) => (
@@ -814,34 +823,17 @@ const MarketOverview = () => {
               )}
             </div>
 
-            {/* Multi-Vehicle Trend Chart */}
+            {/* Price Trends Chart */}
             <div className="mo-chart-section">
               <div className="mo-section-header">
-                <h2 className="mo-section-title">Price Trends Comparison</h2>
-                <p className="mo-section-desc">Comparing {comparisonData.length} vehicle(s)</p>
+                <h2 className="mo-section-title">Market Price Trends</h2>
+                <p className="mo-section-desc">Showing {comparisonData.length} vehicle(s) — values over time</p>
               </div>
 
               <div className="mo-chart-wrapper">
                 <div className="mo-chart-canvas">
                   {renderChart()}
                 </div>
-
-                {/* Legend */}
-                {comparisonData.length > 0 && (
-                  <div className="mo-chart-legend">
-                    {comparisonData.map((vehicle, index) => (
-                      <div key={index} className="mo-legend-item">
-                        <div 
-                          className="mo-legend-color"
-                          style={{ backgroundColor: getChartColor(index) }}
-                        ></div>
-                        <span className="mo-legend-label">
-                          {vehicle.make} {vehicle.model} {vehicle.year}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
 
@@ -861,12 +853,13 @@ const MarketOverview = () => {
                     <p>Loading listings...</p>
                   </div>
                 ) : relatedListings.length > 0 ? (
-                  <div className="mo-listings-grid">
+                  <div className="mo-carousel">
+                    <div className="mo-carousel-track">
                     {relatedListings.map((listing) => (
                       <Link
                         key={listing._id}
                         to={`/listing/${listing._id}`}
-                        className="mo-listing-card"
+                        className="mo-carousel-item mo-listing-card"
                       >
                         <div className="mo-listing-image">
                           {listing.images && listing.images.length > 0 ? (
@@ -895,6 +888,7 @@ const MarketOverview = () => {
                         </div>
                       </Link>
                     ))}
+                    </div>
                   </div>
                 ) : (
                   <div className="mo-empty-state">
@@ -920,40 +914,40 @@ const MarketOverview = () => {
                     <p>Loading articles...</p>
                   </div>
                 ) : relatedArticles.length > 0 ? (
-                  <div className="mo-articles-grid">
-                    {relatedArticles.map((article) => (
-                      <Link
-                        key={article._id}
-                        to={`/news/${article._id}`}
-                        className="mo-article-card"
-                      >
-                        {article.coverImage || (article.images && article.images.length > 0) ? (
-                          <div className="mo-article-image">
-                            <img 
-                              src={article.coverImage || article.images[0]?.url || article.images[0]} 
-                              alt={article.title}
-                              onError={(e) => {
-                                e.target.src = '/placeholder-news.jpg';
-                              }}
-                            />
-                          </div>
-                        ) : null}
-                        <div className="mo-article-content">
-                          {article.category && (
-                            <span className="mo-article-category">{article.category}</span>
-                          )}
-                          <h3 className="mo-article-title">{article.title}</h3>
-                          {article.summary && (
-                            <p className="mo-article-summary">{article.summary}</p>
-                          )}
-                          <div className="mo-article-meta">
-                            {article.publishedAt && (
-                              <span>{new Date(article.publishedAt).toLocaleDateString()}</span>
+                  <div className="mo-carousel">
+                    <div className="mo-carousel-track">
+                      {relatedArticles.map((article) => (
+                        <Link
+                          key={article._id}
+                          to={`/news/${article._id}`}
+                          className="mo-carousel-item mo-article-card"
+                        >
+                          {article.coverImage || (article.images && article.images.length > 0) ? (
+                            <div className="mo-article-image">
+                              <img
+                                src={article.coverImage || article.images[0]?.url || article.images[0]}
+                                alt={article.title}
+                                onError={(e) => { e.target.src = '/placeholder-news.jpg'; }}
+                              />
+                            </div>
+                          ) : null}
+                          <div className="mo-article-content">
+                            {article.category && (
+                              <span className="mo-article-category">{article.category}</span>
                             )}
+                            <h3 className="mo-article-title">{article.title}</h3>
+                            {article.summary && (
+                              <p className="mo-article-summary">{article.summary}</p>
+                            )}
+                            <div className="mo-article-meta">
+                              {article.publishedAt && (
+                                <span>{new Date(article.publishedAt).toLocaleDateString()}</span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </Link>
-                    ))}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   <div className="mo-empty-state">
@@ -963,61 +957,63 @@ const MarketOverview = () => {
               </div>
             )}
 
-            {/* Vehicle Details Cards */}
+            {/* Vehicle Value Cards */}
             {comparisonData.length > 0 && (
-              <div className="mo-vehicles-grid">
-                {comparisonData.map((vehicle, index) => (
-                  <div key={index} className="mo-vehicle-card">
-                    <div 
-                      className="mo-vehicle-color-bar"
-                      style={{ backgroundColor: getChartColor(index) }}
-                    ></div>
-                    
-                    <h3 className="mo-vehicle-name">
-                      {vehicle.make} {vehicle.model}
-                    </h3>
-                    <p className="mo-vehicle-year">{vehicle.year}</p>
-                    
-                    <div 
-                      className="mo-vehicle-trend"
-                      style={{ color: getTrendColor(vehicle.trend) }}
-                    >
-                      {getTrendIcon(vehicle.trend)} {vehicle.trend.toUpperCase()}
-                    </div>
+              <div className="mo-carousel">
+                <div className="mo-carousel-track">
+                  {comparisonData.map((vehicle, index) => (
+                    <div key={index} className="mo-carousel-item mo-vehicle-card">
+                      <div
+                        className="mo-vehicle-color-bar"
+                        style={{ backgroundColor: getChartColor(index) }}
+                      ></div>
 
-                    <div className="mo-vehicle-stats">
-                      <div className="mo-stat-item">
-                        <span className="mo-stat-label">Average</span>
-                        <span className="mo-stat-value">{formatPrice(vehicle.avgPrice)}</span>
-                      </div>
-                      <div className="mo-stat-item">
-                        <span className="mo-stat-label">Min Price</span>
-                        <span className="mo-stat-value">{formatPrice(vehicle.minPrice)}</span>
-                      </div>
-                      <div className="mo-stat-item">
-                        <span className="mo-stat-label">Max Price</span>
-                        <span className="mo-stat-value">{formatPrice(vehicle.maxPrice)}</span>
-                      </div>
-                      <div className="mo-stat-item">
-                        <span className="mo-stat-label">Data Points</span>
-                        <span className="mo-stat-value">{vehicle.dataPoints}</span>
-                      </div>
-                    </div>
+                      <h3 className="mo-vehicle-name">
+                        {vehicle.make} {vehicle.model}
+                      </h3>
+                      <p className="mo-vehicle-year">{vehicle.year}</p>
 
-                    {vehicle.countryBreakdown && vehicle.countryBreakdown.length > 1 && (
-                      <div className="mo-country-breakdown">
-                        <div className="mo-country-breakdown-title">Price by Country</div>
-                        {vehicle.countryBreakdown.map(cb => (
-                          <div key={cb.country} className="mo-country-row">
-                            <span className="mo-country-name">{cb.country}</span>
-                            <span className="mo-country-price">{formatPrice(cb.avg)}</span>
-                            <span className="mo-country-count">{cb.count} listing{cb.count !== 1 ? 's' : ''}</span>
-                          </div>
-                        ))}
+                      <div
+                        className="mo-vehicle-trend"
+                        style={{ color: getTrendColor(vehicle.trend) }}
+                      >
+                        {getTrendIcon(vehicle.trend)} {vehicle.trend.toUpperCase()}
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      <div className="mo-vehicle-stats">
+                        <div className="mo-stat-item">
+                          <span className="mo-stat-label">Market Value</span>
+                          <span className="mo-stat-value">{formatPrice(vehicle.avgPrice)}</span>
+                        </div>
+                        <div className="mo-stat-item">
+                          <span className="mo-stat-label">Min</span>
+                          <span className="mo-stat-value">{formatPrice(vehicle.minPrice)}</span>
+                        </div>
+                        <div className="mo-stat-item">
+                          <span className="mo-stat-label">Max</span>
+                          <span className="mo-stat-value">{formatPrice(vehicle.maxPrice)}</span>
+                        </div>
+                        <div className="mo-stat-item">
+                          <span className="mo-stat-label">Data Points</span>
+                          <span className="mo-stat-value">{vehicle.dataPoints}</span>
+                        </div>
+                      </div>
+
+                      {vehicle.countryBreakdown && vehicle.countryBreakdown.length > 1 && (
+                        <div className="mo-country-breakdown">
+                          <div className="mo-country-breakdown-title">Price by Country</div>
+                          {vehicle.countryBreakdown.map(cb => (
+                            <div key={cb.country} className="mo-country-row">
+                              <span className="mo-country-name">{cb.country}</span>
+                              <span className="mo-country-price">{formatPrice(cb.avg)}</span>
+                              <span className="mo-country-count">{cb.count} listing{cb.count !== 1 ? 's' : ''}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </>
