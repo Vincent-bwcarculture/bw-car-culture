@@ -6,7 +6,9 @@ import axios from 'axios';
 import {
   VEHICLE_CATEGORIES,
   DRIVETRAIN_TYPES,
-  DRIVETRAIN_LABELS
+  DRIVETRAIN_LABELS,
+  FUEL_TYPES,
+  FUEL_LABELS
 } from '../../../constants/listingConstants.js';
 import './MarketplaceFilters.css';
 
@@ -44,11 +46,13 @@ const MarketplaceFilters = ({
     maxYear: '',
     category: '',
     drivetrain: '',
+    fuelType: '',
     availability: '',
     city: '',
+    country: '',
     minMileage: '',
     maxMileage: '',
-    sortBy: '' // ADDED: Sort by filter
+    sortBy: ''
   });
 
   // ENHANCED: Section configurations with better descriptions and features
@@ -150,14 +154,16 @@ const MarketplaceFilters = ({
       'maxYear': 'maxYear',
       'category': 'category',
       'drivetrain': 'drivetrain',
+      'fuelType': 'fuelType',
       'search': 'search',
       'availability': 'availability',
       'city': 'city',
+      'country': 'country',
       'minMileage': 'minMileage',
       'maxMileage': 'maxMileage',
       'dealerId': 'dealerId',
-      'sellerType': 'sellerType', // ENHANCED: Add seller type to URL params
-      'sort': 'sortBy' // ADDED: Map sort URL param to sortBy filter
+      'sellerType': 'sellerType',
+      'sort': 'sortBy'
     };
     
     let hasChanges = false;
@@ -333,11 +339,13 @@ const MarketplaceFilters = ({
       maxYear: '',
       category: '',
       drivetrain: '',
+      fuelType: '',
       availability: '',
       city: '',
+      country: '',
       minMileage: '',
       maxMileage: '',
-      sortBy: '' // ADDED: Reset sort by option
+      sortBy: ''
     };
     
     setFilters(resetFiltersObj);
@@ -476,6 +484,19 @@ const MarketplaceFilters = ({
 
             <div className="filter-control">
               <select
+                value={filters.fuelType}
+                onChange={(e) => handleFilterChange('fuelType', e.target.value)}
+                aria-label="Filter by fuel type"
+              >
+                <option value="">All Fuel Types</option>
+                {Object.values(FUEL_TYPES).map(value => (
+                  <option key={value} value={value}>{FUEL_LABELS[value]}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-control">
+              <select
                 value={filters.sortBy || ''}
                 onChange={(e) => handleFilterChange('sortBy', e.target.value)}
                 aria-label="Sort listings by"
@@ -586,7 +607,7 @@ const MarketplaceFilters = ({
                   onChange={(e) => handleFilterChange('drivetrain', e.target.value)}
                 >
                   <option value="">All Drivetrains</option>
-                  {Object.entries(DRIVETRAIN_TYPES).map(([key, value]) => (
+                  {Object.values(DRIVETRAIN_TYPES).map(value => (
                     <option key={value} value={value}>
                       {DRIVETRAIN_LABELS[value]}
                     </option>
@@ -611,16 +632,37 @@ const MarketplaceFilters = ({
               </div>
               
               <div className="filter-control">
-                <label htmlFor="city-select">Location</label>
+                <label htmlFor="city-select">City</label>
                 <select
                   id="city-select"
                   value={filters.city}
                   onChange={(e) => handleFilterChange('city', e.target.value)}
                 >
-                  <option value="">All Locations</option>
+                  <option value="">All Cities</option>
                   {filterOptions.cities.map(city => (
                     <option key={city} value={city}>{city}</option>
                   ))}
+                </select>
+              </div>
+
+              <div className="filter-control">
+                <label htmlFor="country-select">Country</label>
+                <select
+                  id="country-select"
+                  value={filters.country}
+                  onChange={(e) => handleFilterChange('country', e.target.value)}
+                >
+                  <option value="">All Countries</option>
+                  <option value="Botswana">Botswana</option>
+                  <option value="South Africa">South Africa</option>
+                  <option value="Zimbabwe">Zimbabwe</option>
+                  <option value="Namibia">Namibia</option>
+                  <option value="Zambia">Zambia</option>
+                  <option value="Japan">Japan</option>
+                  <option value="United Arab Emirates">UAE</option>
+                  <option value="United Kingdom">United Kingdom</option>
+                  <option value="Germany">Germany</option>
+                  <option value="United States">United States</option>
                 </select>
               </div>
               
