@@ -62,6 +62,13 @@ const marketPriceSchema = new mongoose.Schema(
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
+    },
+    // When auto-synced from a listing, this tracks the source listing
+    listingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Listing',
+      default: null,
+      index: true
     }
   },
   {

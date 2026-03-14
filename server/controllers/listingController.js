@@ -2,12 +2,46 @@
 import Listing from '../models/Listing.js';
 import User from '../models/User.js';
 import Dealer from '../models/Dealer.js';
+import MarketPrice from '../models/MarketPrice.js';
 import mongoose from 'mongoose';
 import { ErrorResponse } from '../utils/errorResponse.js';
 import { asyncHandler } from '../utils/errorHandler.js';
 import { uploadImage, deleteImage } from '../utils/imageUpload.js';
 import { uploadImageToS3, uploadMultipleImagesToS3 } from '../utils/s3Upload.js';
 import { s3Config, s3 } from '../config/s3.js';
+
+// Auto-sync an active listing's price into the MarketPrice collection.
+// Uses upsert by listingId so updates replace rather than duplicate.
+const syncMarketPriceFromListing = async (listing, userId) => {
+  try {
+    if (!listing || !listing.specifications?.make || !listing.price) return;
+
+    const location = [listing.location?.city, listing.location?.country]
+      .filter(Boolean).join(', ');
+
+    await MarketPrice.findOneAndUpdate(
+      { listingId: listing._id },
+      {
+        make:         listing.specifications.make,
+        model:        listing.specifications.model,
+        year:         listing.specifications.year,
+        condition:    listing.condition || 'used',
+        price:        listing.price,
+        mileage:      listing.specifications.mileage ?? null,
+        location,
+        recordedDate: Date.now(),
+        source:       'listing',
+        notes:        listing.title || '',
+        createdBy:    userId,
+        listingId:    listing._id
+      },
+      { upsert: true, new: true, runValidators: true }
+    );
+  } catch (err) {
+    // Non-fatal — log and continue
+    console.error('syncMarketPriceFromListing error:', err.message);
+  }
+};
 
 const updateDealerMetrics = async (dealerId) => {
   try {
@@ -461,6 +495,11 @@ export const createListing = asyncHandler(async (req, res, next) => {
     // Update dealer metrics
     if (dealer) {
       await updateDealerMetrics(listing.dealerId);
+    }
+
+    // Auto-sync to market prices when listing is active
+    if (listing.status === 'active') {
+      await syncMarketPriceFromListing(listing, req.user.id);
     }
 
     // Send response
@@ -1042,6 +1081,11 @@ export const updateListing = asyncHandler(async (req, res) => {
     // Update dealer metrics
     await updateDealerMetrics(listing.dealerId);
 
+    // Auto-sync price to market overview (active listings only)
+    if (listing.status === 'active') {
+      await syncMarketPriceFromListing(listing, req.user.id);
+    }
+
     res.status(200).json({
       success: true,
       data: listing
@@ -1617,6 +1661,14 @@ export const updateListingStatus = asyncHandler(async (req, res, next) => {
         dealer.metrics.activeSales += 1;
       }
       await dealer.save();
+    }
+
+    // Sync market price on status change
+    if (status === 'active') {
+      await syncMarketPriceFromListing(listing, req.user.id);
+    } else if (['sold', 'archived'].includes(status)) {
+      // Remove from market prices when sold/archived
+      await MarketPrice.deleteOne({ listingId: listing._id });
     }
   }
 
