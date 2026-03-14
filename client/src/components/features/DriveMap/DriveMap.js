@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -17,32 +17,24 @@ L.Icon.Default.mergeOptions({
 
 const API_BASE = 'https://bw-car-culture-api.vercel.app/api';
 
-// Custom marker icons
-const createIcon = (color, symbol) => L.divIcon({
+const createIcon = (color, letter) => L.divIcon({
   className: '',
-  html: `<div class="dm-marker dm-marker--${color}"><span>${symbol}</span></div>`,
+  html: `<div class="dm-marker dm-marker--${color}"><span>${letter}</span></div>`,
   iconSize: [36, 36],
   iconAnchor: [18, 36],
   popupAnchor: [0, -38],
 });
 
 const icons = {
-  charging: createIcon('green', '⚡'),
-  camera: createIcon('orange', '📷'),
-  national_park: createIcon('teal', '🌿'),
-  solar: createIcon('yellow', '☀️'),
-  recycling: createIcon('blue', '♻️'),
+  charging: createIcon('green', 'EV'),
+  camera: createIcon('orange', 'TC'),
 };
 
 const LAYERS = [
-  { key: 'charging', label: 'EV Charging', icon: '⚡', color: '#2ed573' },
-  { key: 'cameras', label: 'Traffic Cameras', icon: '📷', color: '#ffa502' },
-  { key: 'parks', label: 'National Parks', icon: '🌿', color: '#26de81' },
-  { key: 'solar', label: 'Solar Facilities', icon: '☀️', color: '#ffd32a' },
-  { key: 'recycling', label: 'Recycling Centres', icon: '♻️', color: '#45aaf2' },
+  { key: 'charging', label: 'EV Charging', color: '#2ed573' },
+  { key: 'cameras', label: 'Traffic Cameras', color: '#ffa502' },
 ];
 
-// Component that handles map click for camera placement
 function MapClickHandler({ active, onMapClick }) {
   useMapEvents({
     click: (e) => {
@@ -53,14 +45,12 @@ function MapClickHandler({ active, onMapClick }) {
 }
 
 export default function DriveMap() {
-  const [activeLayers, setActiveLayers] = useState({ charging: true, cameras: true, parks: true, solar: true, recycling: true });
+  const [activeLayers, setActiveLayers] = useState({ charging: true, cameras: true });
   const [chargingStations, setChargingStations] = useState([]);
   const [trafficCameras, setTrafficCameras] = useState([]);
-  const [ecoSpots, setEcoSpots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Camera contribution state
   const [placingCamera, setPlacingCamera] = useState(false);
   const [newCameraPos, setNewCameraPos] = useState(null);
   const [cameraForm, setCameraForm] = useState({ description: '', road: '', direction: '' });
@@ -68,28 +58,24 @@ export default function DriveMap() {
   const [submitting, setSubmitting] = useState(false);
   const [showContribPanel, setShowContribPanel] = useState(false);
 
-  // Auth check (look for token in localStorage)
   const token = localStorage.getItem('token');
   const isLoggedIn = !!token;
 
-  const mapCenter = [-22.0, 24.0]; // center of Botswana
+  const mapCenter = [-22.0, 24.0];
   const mapZoom = 6;
 
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const [csRes, tcRes, ecoRes] = await Promise.all([
+        const [csRes, tcRes] = await Promise.all([
           fetch(`${API_BASE}/drive-map/charging-stations`),
           fetch(`${API_BASE}/drive-map/traffic-cameras`),
-          fetch(`${API_BASE}/drive-map/eco-spots`),
         ]);
         const csData = await csRes.json();
         const tcData = await tcRes.json();
-        const ecoData = await ecoRes.json();
         if (csData.success) setChargingStations(csData.data);
         if (tcData.success) setTrafficCameras(tcData.data);
-        if (ecoData.success) setEcoSpots(ecoData.data);
       } catch (err) {
         setError('Failed to load map data. Please refresh.');
       } finally {
@@ -141,30 +127,14 @@ export default function DriveMap() {
     }
   };
 
-  const getEcoIcon = (type) => {
-    if (type === 'national_park') return icons.national_park;
-    if (type === 'solar') return icons.solar;
-    if (type === 'recycling') return icons.recycling;
-    return icons.national_park;
-  };
-
-  const getEcoLayerKey = (type) => {
-    if (type === 'national_park') return 'parks';
-    if (type === 'solar') return 'solar';
-    if (type === 'recycling') return 'recycling';
-    return 'parks';
-  };
-
   return (
     <div className="dm-page">
-      {/* Header */}
       <div className="dm-header">
         <div className="dm-header-inner">
           <div className="dm-title-row">
             <h1 className="dm-title">Drive Map</h1>
-            <p className="dm-subtitle">Explore Botswana's EV charging network, traffic cameras, and eco-friendly destinations</p>
+            <p className="dm-subtitle">Explore Botswana's EV charging network and traffic camera locations</p>
           </div>
-          {/* Layer toggles */}
           <div className="dm-layer-toggles">
             {LAYERS.map(layer => (
               <button
@@ -173,15 +143,13 @@ export default function DriveMap() {
                 style={activeLayers[layer.key] ? { borderColor: layer.color, color: layer.color } : {}}
                 onClick={() => toggleLayer(layer.key)}
               >
-                <span>{layer.icon}</span>
-                <span>{layer.label}</span>
+                {layer.label}
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Map container */}
       <div className="dm-map-wrapper">
         {loading && (
           <div className="dm-loading-overlay">
@@ -191,7 +159,6 @@ export default function DriveMap() {
         )}
         {error && <div className="dm-error-banner">{error}</div>}
 
-        {/* Placing camera hint */}
         {placingCamera && (
           <div className="dm-placing-hint">
             Click anywhere on the map to place the camera location
@@ -212,12 +179,11 @@ export default function DriveMap() {
           />
           <MapClickHandler active={placingCamera} onMapClick={handleMapClick} />
 
-          {/* EV Charging Stations */}
           {activeLayers.charging && chargingStations.map((s, i) => (
             <Marker key={`cs-${i}`} position={[s.lat, s.lng]} icon={icons.charging}>
               <Popup className="dm-popup">
                 <div className="dm-popup-inner">
-                  <div className="dm-popup-badge dm-popup-badge--green">⚡ EV Charging</div>
+                  <div className="dm-popup-badge dm-popup-badge--green">EV Charging</div>
                   <h3>{s.name}</h3>
                   <p className="dm-popup-addr">{s.address}</p>
                   <div className="dm-popup-details">
@@ -230,36 +196,19 @@ export default function DriveMap() {
             </Marker>
           ))}
 
-          {/* Traffic Cameras */}
           {activeLayers.cameras && trafficCameras.map((c, i) => (
             <Marker key={`tc-${i}`} position={[c.lat, c.lng]} icon={icons.camera}>
               <Popup className="dm-popup">
                 <div className="dm-popup-inner">
-                  <div className="dm-popup-badge dm-popup-badge--orange">📷 Traffic Camera</div>
+                  <div className="dm-popup-badge dm-popup-badge--orange">Traffic Camera</div>
                   <h3>{c.description}</h3>
-                  {c.road && <p className="dm-popup-addr">{c.road} {c.direction && `— ${c.direction}`}</p>}
+                  {c.road && <p className="dm-popup-addr">{c.road}{c.direction && ` — ${c.direction}`}</p>}
                   <p className="dm-popup-meta">Contributed by: {c.contributorName}</p>
                 </div>
               </Popup>
             </Marker>
           ))}
 
-          {/* Eco Spots (parks, solar, recycling) */}
-          {ecoSpots.filter(s => activeLayers[getEcoLayerKey(s.type)]).map((s, i) => (
-            <Marker key={`eco-${i}`} position={[s.lat, s.lng]} icon={getEcoIcon(s.type)}>
-              <Popup className="dm-popup">
-                <div className="dm-popup-inner">
-                  <div className={`dm-popup-badge dm-popup-badge--${s.type === 'solar' ? 'yellow' : s.type === 'recycling' ? 'blue' : 'teal'}`}>
-                    {s.type === 'national_park' ? '🌿 National Park' : s.type === 'solar' ? '☀️ Solar Facility' : '♻️ Recycling Centre'}
-                  </div>
-                  <h3>{s.name}</h3>
-                  <p>{s.description}</p>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-
-          {/* New camera placement marker */}
           {newCameraPos && (
             <Marker position={newCameraPos} icon={icons.camera}>
               <Popup>New camera location</Popup>
@@ -267,21 +216,21 @@ export default function DriveMap() {
           )}
         </MapContainer>
 
-        {/* Contribute camera button */}
         {isLoggedIn && !placingCamera && (
-          <button className="dm-fab-btn" title="Contribute a traffic camera location" onClick={() => { setPlacingCamera(true); setShowContribPanel(false); setNewCameraPos(null); }}>
-            <span>📷</span>
-            <span>Add Camera</span>
+          <button
+            className="dm-fab-btn"
+            title="Contribute a traffic camera location"
+            onClick={() => { setPlacingCamera(true); setShowContribPanel(false); setNewCameraPos(null); }}
+          >
+            + Add Camera
           </button>
         )}
         {!isLoggedIn && (
           <div className="dm-login-hint">
-            <span>📷</span>
-            <span>Sign in to contribute traffic camera locations</span>
+            Sign in to contribute traffic camera locations
           </div>
         )}
 
-        {/* Camera contribution form panel */}
         {showContribPanel && newCameraPos && (
           <div className="dm-contrib-panel">
             <div className="dm-contrib-header">
@@ -332,37 +281,19 @@ export default function DriveMap() {
         )}
       </div>
 
-      {/* Stats bar */}
       <div className="dm-stats-bar">
         <div className="dm-stat">
-          <span className="dm-stat-icon">⚡</span>
           <span className="dm-stat-count">{chargingStations.length}</span>
           <span className="dm-stat-label">Charging Stations</span>
         </div>
         <div className="dm-stat">
-          <span className="dm-stat-icon">📷</span>
           <span className="dm-stat-count">{trafficCameras.length}</span>
           <span className="dm-stat-label">Traffic Cameras</span>
-        </div>
-        <div className="dm-stat">
-          <span className="dm-stat-icon">🌿</span>
-          <span className="dm-stat-count">{ecoSpots.filter(s => s.type === 'national_park').length}</span>
-          <span className="dm-stat-label">National Parks</span>
-        </div>
-        <div className="dm-stat">
-          <span className="dm-stat-icon">☀️</span>
-          <span className="dm-stat-count">{ecoSpots.filter(s => s.type === 'solar').length}</span>
-          <span className="dm-stat-label">Solar Facilities</span>
-        </div>
-        <div className="dm-stat">
-          <span className="dm-stat-icon">♻️</span>
-          <span className="dm-stat-count">{ecoSpots.filter(s => s.type === 'recycling').length}</span>
-          <span className="dm-stat-label">Recycling Centres</span>
         </div>
       </div>
 
       <div className="dm-data-note">
-        Map data includes verified EV charging locations, user-contributed traffic camera reports (pending review), and eco-friendly points of interest sourced from public data. Camera contributions are reviewed before appearing on the map.
+        Map data includes verified EV charging locations and user-contributed traffic camera reports pending review. Camera contributions are reviewed before appearing on the map.
       </div>
     </div>
   );
