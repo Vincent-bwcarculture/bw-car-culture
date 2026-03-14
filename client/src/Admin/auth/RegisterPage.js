@@ -1,6 +1,7 @@
 // src/components/auth/RegisterPage.js
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import axios from '../../config/axios.js';
 import './Auth.css';
@@ -14,6 +15,8 @@ const RegisterPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -150,31 +153,51 @@ const RegisterPage = () => {
 
           <div className="form-group">
             <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              disabled={loading}
-              className={errors.password ? 'error' : ''}
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                disabled={loading}
+                className={errors.password ? 'error' : ''}
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(prev => !prev)}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
             {errors.password && <span className="error-message">{errors.password}</span>}
           </div>
 
           <div className="form-group">
             <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm your password"
-              disabled={loading}
-              className={errors.confirmPassword ? 'error' : ''}
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Confirm your password"
+                disabled={loading}
+                className={errors.confirmPassword ? 'error' : ''}
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowConfirmPassword(prev => !prev)}
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
             {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
           </div>
 
