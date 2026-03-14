@@ -64,7 +64,6 @@ import NewsManager from './components/NewsManager/NewsManager.js';
 import AdminArticleManagement from './components/Admin/ArticleManagement.js';
 import AdminMarketOverview from './components/Admin/MarketOverview/AdminMarketOverview.js';
 import MarketOverview from './components/features/MarketOverview/MarketOverview.js';
-const DriveMap = React.lazy(() => import('./components/features/DriveMap/DriveMap.js'));
 
 // GION App and Related Components
 import GIONApp from './components/GION/GIONApp.js';
@@ -109,6 +108,9 @@ import HomeServicesSection from './components/features/HomeServicesSection/HomeS
 import './App.css';
 import './styles/base.css';
 import './utils/imagePathDiagnostics.js';
+
+// Lazy-loaded components (must be after all imports)
+const DriveMap = React.lazy(() => import('./components/features/DriveMap/DriveMap.js'));
 
 // Lazy loaded components
 const CarNewsPage = React.lazy(() => import('./components/features/CarNews/CarNewsPage.js'));
