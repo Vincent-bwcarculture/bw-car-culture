@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext.js';
 import './AdminMarketOverview.css';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app/api';
+
 const AdminMarketOverview = () => {
   // CRITICAL: Get user from AuthContext like other admin components
   const { user, loading: authLoading } = useAuth();
@@ -109,7 +111,7 @@ const AdminMarketOverview = () => {
       console.log('📤 Fetching prices with params:', queryParams.toString());
 
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/market-prices?${queryParams}`, {
+      const response = await fetch(`${API_BASE}/market-prices?${queryParams}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Cache-Control': 'no-cache'
@@ -139,7 +141,7 @@ const AdminMarketOverview = () => {
   const fetchFilterOptions = async () => {
     try {
       console.log('📤 Fetching filter options...');
-      const response = await fetch('/api/market-prices/filters');
+      const response = await fetch(`${API_BASE}/market-prices/filters`);
       const data = await response.json();
 
       console.log('📥 Filter options response:', data);
@@ -172,7 +174,7 @@ const AdminMarketOverview = () => {
     try {
       console.log('📤 Creating price entry:', formData);
 
-      const response = await fetch('/api/market-prices', {
+      const response = await fetch(`${API_BASE}/market-prices`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -216,7 +218,7 @@ const AdminMarketOverview = () => {
     try {
       console.log('📤 Updating price entry:', selectedPrice._id, formData);
 
-      const response = await fetch(`/api/market-prices/${selectedPrice._id}`, {
+      const response = await fetch(`${API_BASE}/market-prices/${selectedPrice._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -262,7 +264,7 @@ const AdminMarketOverview = () => {
     try {
       console.log('📤 Deleting price entry:', priceId);
 
-      const response = await fetch(`/api/market-prices/${priceId}`, {
+      const response = await fetch(`${API_BASE}/market-prices/${priceId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -294,7 +296,7 @@ const AdminMarketOverview = () => {
     const token = localStorage.getItem('token');
     setSyncing(true);
     try {
-      const response = await fetch('/api/market-prices/sync-listings', {
+      const response = await fetch(`${API_BASE}/market-prices/sync-listings`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -346,7 +348,7 @@ const AdminMarketOverview = () => {
 
       console.log('📤 Batch importing:', prices.length, 'entries');
 
-      const response = await fetch('/api/market-prices/batch', {
+      const response = await fetch(`${API_BASE}/market-prices/batch`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
