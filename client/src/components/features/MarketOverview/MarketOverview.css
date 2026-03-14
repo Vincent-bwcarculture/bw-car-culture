@@ -691,6 +691,7 @@
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -702,6 +703,7 @@
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -826,6 +828,17 @@
   left: 0;
   right: 0;
   height: 4px;
+}
+
+/* ========== DATA DISCLAIMER NOTE ========== */
+.mo-data-note {
+  margin-top: 2.5rem;
+  padding: 1rem 1.2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  color: #555;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  text-align: center;
 }
 
 /* ========== COMPARE SECTION ========== */

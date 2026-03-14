@@ -1045,6 +1045,10 @@ const MarketOverview = () => {
                 </div>
               </div>
             )}
+            {/* Data disclaimer */}
+            <div className="mo-data-note">
+              Market valuations are based on real-time data aggregated from trusted partner dealerships, verified listings, and publicly available market sources across the region. Prices are indicative and may vary based on vehicle condition, mileage, and location.
+            </div>
           </>
         )}
 
