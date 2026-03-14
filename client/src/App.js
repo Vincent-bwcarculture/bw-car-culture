@@ -64,6 +64,7 @@ import NewsManager from './components/NewsManager/NewsManager.js';
 import AdminArticleManagement from './components/Admin/ArticleManagement.js';
 import AdminMarketOverview from './components/Admin/MarketOverview/AdminMarketOverview.js';
 import MarketOverview from './components/features/MarketOverview/MarketOverview.js';
+import DriveMap from './components/features/DriveMap/DriveMap.js';
 
 // GION App and Related Components
 import GIONApp from './components/GION/GIONApp.js';
@@ -1160,7 +1161,7 @@ const AppRoutes = () => {
 
         <Route path="/drive-map" element={
           <MainLayout>
-            <PlaceholderPage title="Drive Map" />
+            <DriveMap />
           </MainLayout>
         } />
         

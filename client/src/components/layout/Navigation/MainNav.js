@@ -33,6 +33,7 @@ export const MainNav = () => {
   const navigationItems = [
     { id: 'home', label: 'Home', href: '/' },
     { id: 'products', label: 'Products', href: '/products' },
+    { id: 'drive-map', label: 'Drive Map', href: '/drive-map' },
     { id: 'about', label: 'About', href: '/about' },
     { id: 'account', label: 'Account', href: '/AdminDashboard' }
   ];
