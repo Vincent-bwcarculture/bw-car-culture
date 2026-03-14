@@ -29,6 +29,8 @@ const MarketOverview = () => {
     condition: 'all',
     country: ''
   });
+  const [carValueQuery, setCarValueQuery] = useState({ make: '', model: '', year: '', condition: 'all' });
+  const [carValueResult, setCarValueResult] = useState(null);
 
   useEffect(() => {
     fetchFilterOptions();
@@ -72,7 +74,7 @@ const MarketOverview = () => {
       if (data.success) {
         setAllPrices(data.data);
         // Auto-select similar vehicles for initial display
-        const autoSelected = autoSelectSimilarVehicles(data.data, 5);
+        const autoSelected = autoSelectSimilarVehicles(data.data, 10);
         setSelectedVehicles(autoSelected);
         updateComparisonData(autoSelected, data.data);
       }
@@ -259,6 +261,65 @@ const MarketOverview = () => {
     setComparisonData(comparison);
   };
 
+  const handleCarValueCheck = () => {
+    if (!carValueQuery.make || !carValueQuery.model) {
+      alert('Please select at least a make and model');
+      return;
+    }
+
+    const filtered = allPrices.filter(p => {
+      const makeMatch = p.make.toLowerCase() === carValueQuery.make.toLowerCase();
+      const modelMatch = p.model.toLowerCase() === carValueQuery.model.toLowerCase();
+      const yearMatch = !carValueQuery.year || p.year === parseInt(carValueQuery.year);
+      const conditionMatch = carValueQuery.condition === 'all' || p.condition === carValueQuery.condition;
+      return makeMatch && modelMatch && yearMatch && conditionMatch;
+    });
+
+    if (filtered.length === 0) {
+      setCarValueResult({ notFound: true, make: carValueQuery.make, model: carValueQuery.model });
+      return;
+    }
+
+    const prices = filtered.map(p => p.price);
+    const avg = Math.round(prices.reduce((s, v) => s + v, 0) / prices.length);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+
+    const allMarketPrices = allPrices.map(p => p.price);
+    const marketAvg = Math.round(allMarketPrices.reduce((s, v) => s + v, 0) / allMarketPrices.length);
+    const vsMarket = avg - marketAvg;
+    const vsMarketPct = Math.round((vsMarket / marketAvg) * 100);
+
+    setCarValueResult({
+      make: carValueQuery.make,
+      model: carValueQuery.model,
+      year: carValueQuery.year,
+      condition: carValueQuery.condition,
+      avg, min, max,
+      dataPoints: filtered.length,
+      marketAvg,
+      vsMarket,
+      vsMarketPct
+    });
+
+    // Add to comparison chart if not already there
+    const exists = selectedVehicles.some(v =>
+      v.make === carValueQuery.make &&
+      v.model === carValueQuery.model
+    );
+    if (!exists && selectedVehicles.length < 10) {
+      const vehicle = {
+        make: carValueQuery.make,
+        model: carValueQuery.model,
+        year: carValueQuery.year || filtered[0].year,
+        prices: filtered
+      };
+      const updated = [...selectedVehicles, vehicle];
+      setSelectedVehicles(updated);
+      updateComparisonData(updated, allPrices);
+    }
+  };
+
   const handleSearch = () => {
     if (!searchFilters.make || !searchFilters.model) {
       alert('Please select at least a make and model');
@@ -329,7 +390,7 @@ const MarketOverview = () => {
   };
 
   const getChartColor = (index) => {
-    const colors = ['#ff3300', '#2ed573', '#3498db', '#ffc107', '#e056fd'];
+    const colors = ['#ff3300', '#2ed573', '#3498db', '#ffc107', '#e056fd', '#ff6b6b', '#1abc9c', '#f39c12', '#9b59b6', '#00d2d3'];
     return colors[index % colors.length];
   };
 
@@ -483,6 +544,120 @@ const MarketOverview = () => {
 
         {!loading && viewMode === 'overview' && (
           <>
+            {/* Check Your Car Value */}
+            <div className="mo-car-value-section">
+              <div className="mo-car-value-header">
+                <h2 className="mo-car-value-title">Check Your Car's Value</h2>
+                <p className="mo-car-value-desc">Enter your vehicle details to see its estimated market value and how it compares</p>
+              </div>
+              <div className="mo-car-value-inputs">
+                <div className="mo-filter-group">
+                  <label className="mo-filter-label">Make</label>
+                  <select
+                    value={carValueQuery.make}
+                    onChange={(e) => setCarValueQuery({ ...carValueQuery, make: e.target.value, model: '' })}
+                    className="mo-filter-select"
+                  >
+                    <option value="">Select Make</option>
+                    {filterOptions.makes.map(make => (
+                      <option key={make} value={make}>{make}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mo-filter-group">
+                  <label className="mo-filter-label">Model</label>
+                  <select
+                    value={carValueQuery.model}
+                    onChange={(e) => setCarValueQuery({ ...carValueQuery, model: e.target.value })}
+                    className="mo-filter-select"
+                    disabled={!carValueQuery.make}
+                  >
+                    <option value="">Select Model</option>
+                    {filterOptions.models.map(model => (
+                      <option key={model} value={model}>{model}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mo-filter-group">
+                  <label className="mo-filter-label">Year</label>
+                  <select
+                    value={carValueQuery.year}
+                    onChange={(e) => setCarValueQuery({ ...carValueQuery, year: e.target.value })}
+                    className="mo-filter-select"
+                  >
+                    <option value="">Any Year</option>
+                    {filterOptions.years.map(year => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mo-filter-group">
+                  <label className="mo-filter-label">Condition</label>
+                  <select
+                    value={carValueQuery.condition}
+                    onChange={(e) => setCarValueQuery({ ...carValueQuery, condition: e.target.value })}
+                    className="mo-filter-select"
+                  >
+                    {filterOptions.conditions.map(condition => (
+                      <option key={condition} value={condition}>
+                        {condition.charAt(0).toUpperCase() + condition.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  className="mo-btn-check-value"
+                  onClick={handleCarValueCheck}
+                  disabled={!carValueQuery.make || !carValueQuery.model}
+                >
+                  Check Value
+                </button>
+              </div>
+
+              {carValueResult && (
+                carValueResult.notFound ? (
+                  <div className="mo-car-value-result mo-car-value-not-found">
+                    <p>No market data found for {carValueResult.make} {carValueResult.model}. Try a different make or model.</p>
+                  </div>
+                ) : (
+                  <div className="mo-car-value-result">
+                    <div className="mo-car-value-main">
+                      <div className="mo-car-value-label">Estimated Market Value</div>
+                      <div className="mo-car-value-price">{formatPrice(carValueResult.avg)}</div>
+                      <div className="mo-car-value-vehicle">
+                        {carValueResult.make} {carValueResult.model}
+                        {carValueResult.year ? ` ${carValueResult.year}` : ''}
+                        {carValueResult.condition !== 'all' ? ` • ${carValueResult.condition}` : ''}
+                      </div>
+                    </div>
+                    <div className="mo-car-value-stats">
+                      <div className="mo-car-value-stat">
+                        <span className="mo-car-value-stat-label">Min</span>
+                        <span className="mo-car-value-stat-value">{formatPrice(carValueResult.min)}</span>
+                      </div>
+                      <div className="mo-car-value-stat">
+                        <span className="mo-car-value-stat-label">Max</span>
+                        <span className="mo-car-value-stat-value">{formatPrice(carValueResult.max)}</span>
+                      </div>
+                      <div className="mo-car-value-stat">
+                        <span className="mo-car-value-stat-label">Listings</span>
+                        <span className="mo-car-value-stat-value">{carValueResult.dataPoints}</span>
+                      </div>
+                      <div className="mo-car-value-stat">
+                        <span className="mo-car-value-stat-label">vs Market Avg</span>
+                        <span
+                          className="mo-car-value-stat-value"
+                          style={{ color: carValueResult.vsMarket > 0 ? '#ff3838' : '#2ed573' }}
+                        >
+                          {carValueResult.vsMarket > 0 ? '+' : ''}{carValueResult.vsMarketPct}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+
             {/* Market Summary - NO EMOJIS */}
             <div className="mo-summary-grid">
               <div className="mo-summary-card">

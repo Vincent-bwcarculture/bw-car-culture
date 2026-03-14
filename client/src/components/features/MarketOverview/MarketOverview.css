@@ -1029,3 +1029,171 @@
     gap: 1rem;
   }
 }
+
+/* ========== CHECK YOUR CAR VALUE SECTION ========== */
+.mo-car-value-section {
+  background: linear-gradient(135deg, rgba(255, 51, 0, 0.08) 0%, rgba(20, 20, 20, 0.95) 100%);
+  border: 1px solid rgba(255, 51, 0, 0.3);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.mo-car-value-header {
+  margin-bottom: 1.5rem;
+}
+
+.mo-car-value-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.4rem 0;
+}
+
+.mo-car-value-desc {
+  color: #888;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.mo-car-value-inputs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) auto;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.mo-btn-check-value {
+  background: #ff3300;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  height: 42px;
+}
+
+.mo-btn-check-value:hover:not(:disabled) {
+  background: #e62e00;
+  transform: translateY(-1px);
+}
+
+.mo-btn-check-value:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mo-car-value-result {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+
+.mo-car-value-not-found {
+  color: #ff3838;
+  font-size: 0.9rem;
+  padding: 1rem 1.5rem;
+}
+
+.mo-car-value-not-found p {
+  margin: 0;
+}
+
+.mo-car-value-main {
+  flex: 1;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding-right: 2rem;
+}
+
+.mo-car-value-label {
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4rem;
+}
+
+.mo-car-value-price {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ff3300;
+  margin-bottom: 0.3rem;
+}
+
+.mo-car-value-vehicle {
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.mo-car-value-stats {
+  display: flex;
+  gap: 2rem;
+}
+
+.mo-car-value-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.mo-car-value-stat-label {
+  font-size: 0.75rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mo-car-value-stat-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .mo-car-value-inputs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mo-btn-check-value {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .mo-car-value-result {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.2rem;
+  }
+
+  .mo-car-value-main {
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-right: 0;
+    padding-bottom: 1.2rem;
+    width: 100%;
+  }
+
+  .mo-car-value-stats {
+    flex-wrap: wrap;
+    gap: 1.2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .mo-car-value-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .mo-car-value-price {
+    font-size: 1.7rem;
+  }
+}
