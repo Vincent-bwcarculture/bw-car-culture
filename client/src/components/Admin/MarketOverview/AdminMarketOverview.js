@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext.js';
 import './AdminMarketOverview.css';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app/api';
+const API_BASE = 'https://bw-car-culture-api.vercel.app/api';
 
 const AdminMarketOverview = () => {
   // CRITICAL: Get user from AuthContext like other admin components
