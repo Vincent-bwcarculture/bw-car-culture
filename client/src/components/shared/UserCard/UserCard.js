@@ -120,22 +120,26 @@ const UserCard = ({
   };
 
   // Reset image state when user changes
+  // Resolve avatar URL once per user change
+  const avatarUrl =
+    user.avatar?.url ||
+    (typeof user.avatar === 'string' ? user.avatar : null) ||
+    user.profilePicture?.url ||
+    (typeof user.profilePicture === 'string' ? user.profilePicture : null) ||
+    null;
+
+  const fallbackUrl = `https://avatar.vercel.sh/${encodeURIComponent(user.name || 'User')}.svg?size=150`;
+
   React.useEffect(() => {
     setImageError(false);
-    setImageLoading(true);
     setRetryCount(0);
-
-    // Add timeout to prevent infinite loading
-    const timer = setTimeout(() => {
-      if (imageLoading) {
-        console.log('Image loading timeout for user:', user.name);
-        setImageLoading(false);
-        setImageError(true);
-      }
-    }, 5000); // 5 second timeout
-
-    return () => clearTimeout(timer);
-  }, [user._id, user.id]);
+    // If no real URL exists, skip loading state entirely
+    if (!avatarUrl) {
+      setImageLoading(false);
+    } else {
+      setImageLoading(true);
+    }
+  }, [user._id, user.id, avatarUrl]);
 
   // Get user type display name with better formatting
   const getUserTypeDisplay = (role) => {
@@ -156,65 +160,6 @@ const UserCard = ({
     return roleMap[role] || role || 'Community Member';
   };
 
-  // Enhanced avatar logic - matching the working vehicle card implementation
-  const getUserAvatar = () => {
-    // Debug: Log the user object exactly like vehicle cards do
-    console.log(`User ${user.name} avatar data:`, {
-      userId: user._id || user.id,
-      userName: user.name,
-      hasAvatar: !!user.avatar,
-      avatarUrl: user.avatar?.url,
-      avatarStructure: user.avatar,
-      hasProfilePicture: !!user.profilePicture,
-      profilePictureUrl: user.profilePicture?.url,
-      allKeys: Object.keys(user)
-    });
-
-    let userProfilePicture = null;
-
-    // Use the EXACT SAME logic as working vehicle cards
-    if (user.avatar && user.avatar.url) {
-      userProfilePicture = user.avatar.url;
-      console.log(`✅ Using user avatar.url for ${user.name}: ${userProfilePicture}`);
-    } 
-    // Fallback: check if avatar is a string directly
-    else if (user.avatar && typeof user.avatar === 'string') {
-      userProfilePicture = user.avatar;
-      console.log(`✅ Using user avatar string for ${user.name}: ${userProfilePicture}`);
-    }
-    // Additional fallback checks
-    else if (user.profilePicture?.url) {
-      userProfilePicture = user.profilePicture.url;
-      console.log(`✅ Using user profilePicture.url for ${user.name}: ${userProfilePicture}`);
-    }
-    else if (user.profilePicture && typeof user.profilePicture === 'string') {
-      userProfilePicture = user.profilePicture;
-      console.log(`✅ Using user profilePicture string for ${user.name}: ${userProfilePicture}`);
-    }
-    else {
-      console.log(`⚠️ No profile picture found for user ${user.name}, using default placeholder`);
-    }
-
-    // If we found a profile picture, return it
-    if (userProfilePicture) {
-      console.log(`Final avatar URL for ${user.name}:`, userProfilePicture);
-      return userProfilePicture;
-    }
-
-    // If we've had an error or no real image data, use fallback
-    if (imageError || !userProfilePicture) {
-      console.log('Using fallback avatar for:', user.name);
-      // Set error state to skip loading animation
-      setTimeout(() => {
-        setImageLoading(false);
-        setImageError(true);
-      }, 0);
-      return `https://avatar.vercel.sh/${encodeURIComponent(user.name || 'User')}.svg?size=150`;
-    }
-
-    return userProfilePicture;
-  };
-
   // Get role color for visual distinction (using theme colors)
   const getRoleColor = (role) => {
     const colorMap = {
@@ -233,18 +178,8 @@ const UserCard = ({
     return colorMap[role] || '#7f8c8d';
   };
 
-  // Handle image loading
-  const handleImageLoad = () => {
-    console.log('Image loaded successfully for user:', user.name);
-    setImageLoading(false);
-    setImageError(false);
-  };
-
-  const handleImageError = (e) => {
-    console.log('Image failed to load for user:', user.name, 'URL:', e.target.src);
-    setImageLoading(false);
-    setImageError(true);
-  };
+  const handleImageLoad = () => { setImageLoading(false); setImageError(false); };
+  const handleImageError = () => { setImageLoading(false); setImageError(true); };
 
   // Handle follow button click
   const handleFollowClick = (e) => {
@@ -299,59 +234,24 @@ const UserCard = ({
       <div className="usercard-header">
         <div className="usercard-avatar-container">
           <div className="usercard-avatar-wrapper">
-            {imageLoading && !imageError && (
+            {imageLoading && avatarUrl && (
               <div className="usercard-avatar-loading">
                 <div className="usercard-avatar-spinner"></div>
               </div>
             )}
-            <img 
-              src={getUserAvatar()} 
+            <img
+              key={`${user._id || user.id}-${retryCount}`}
+              src={(!imageError && avatarUrl) ? avatarUrl : fallbackUrl}
               alt={user.name}
-              className={`usercard-avatar ${imageLoading ? 'loading' : ''}`}
+              className="usercard-avatar"
               onLoad={handleImageLoad}
               onError={handleImageError}
-              style={{ 
-                display: imageLoading && !imageError ? 'none' : 'block',
-                opacity: imageLoading ? 0 : 1,
+              style={{
+                display: imageLoading ? 'none' : 'block',
+                opacity: 1,
                 transition: 'opacity 0.3s ease'
               }}
-              key={`${user._id || user.id}-${retryCount}`} // Force reload on retry
             />
-            {/* Fallback: If loading takes too long, show generated avatar */}
-            {!imageLoading && imageError && (
-              <img 
-                src={`https://avatar.vercel.sh/${encodeURIComponent(user.name || 'User')}.svg?size=150`}
-                alt={user.name}
-                className="usercard-avatar usercard-avatar-fallback"
-                style={{ display: 'block' }}
-              />
-            )}
-            {/* Debug info for development */}
-            {process.env.NODE_ENV === 'development' && imageError && (
-              <div 
-                className="usercard-avatar-debug" 
-                title="Click to retry loading image"
-                onClick={() => {
-                  setRetryCount(prev => prev + 1);
-                  setImageError(false);
-                  setImageLoading(true);
-                }}
-                style={{
-                  position: 'absolute',
-                  top: '-5px',
-                  left: '-5px',
-                  background: 'red',
-                  color: 'white',
-                  fontSize: '10px',
-                  padding: '2px 4px',
-                  borderRadius: '3px',
-                  cursor: 'pointer',
-                  zIndex: 10
-                }}
-              >
-                ❌
-              </div>
-            )}
           </div>
           {(user.isVerified || user.emailVerified) && (
             <div className="usercard-verified-badge" title="Verified User">
