@@ -8,7 +8,6 @@ import {
   ExternalLink,
   Car,
   Shield,
-  Calendar,
   Award,
   Users,
   MoreHorizontal,
@@ -234,25 +233,6 @@ const UserCard = ({
     return colorMap[role] || '#7f8c8d';
   };
 
-  // Format member since date
-  const formatMemberSince = (date) => {
-    if (!date) return 'Recently joined';
-    const memberDate = new Date(date);
-    const now = new Date();
-    const diffTime = Math.abs(now - memberDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 30) {
-      return 'New member';
-    } else if (diffDays < 365) {
-      const months = Math.floor(diffDays / 30);
-      return `${months} month${months > 1 ? 's' : ''} ago`;
-    } else {
-      const years = Math.floor(diffDays / 365);
-      return `${years} year${years > 1 ? 's' : ''} ago`;
-    }
-  };
-
   // Handle image loading
   const handleImageLoad = () => {
     console.log('Image loaded successfully for user:', user.name);
@@ -454,8 +434,8 @@ const UserCard = ({
         )}
 
         <div className="usercard-stat">
-          <Calendar size={14} />
-          <span>{formatMemberSince(user.createdAt || user.memberSince)}</span>
+          <Users size={14} />
+          <span>{((user.followerCount ?? (user.followers?.length ?? 0)) + (user.followingCount ?? (user.following?.length ?? 0)))} associates</span>
         </div>
       </div>
 
