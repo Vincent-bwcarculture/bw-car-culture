@@ -22,18 +22,19 @@ const syncMarketPriceFromListing = async (listing, userId) => {
     await MarketPrice.findOneAndUpdate(
       { listingId: listing._id },
       {
-        make:         listing.specifications.make,
-        model:        listing.specifications.model,
-        year:         listing.specifications.year,
-        condition:    listing.condition || 'used',
-        price:        listing.price,
-        mileage:      listing.specifications.mileage ?? null,
+        make:          listing.specifications.make,
+        model:         listing.specifications.model,
+        year:          listing.specifications.year,
+        condition:     listing.condition || 'used',
+        price:         listing.price,
+        mileage:       listing.specifications.mileage ?? null,
         location,
-        recordedDate: Date.now(),
-        source:       'listing',
-        notes:        listing.title || '',
-        createdBy:    userId,
-        listingId:    listing._id
+        recordedDate:  Date.now(),
+        source:        'listing',
+        notes:         listing.title || '',
+        createdBy:     userId,
+        listingId:     listing._id,
+        listingStatus: 'active'
       },
       { upsert: true, new: true, runValidators: true }
     );
@@ -1666,9 +1667,16 @@ export const updateListingStatus = asyncHandler(async (req, res, next) => {
     // Sync market price on status change
     if (status === 'active') {
       await syncMarketPriceFromListing(listing, req.user.id);
-    } else if (['sold', 'archived'].includes(status)) {
-      // Remove from market prices when sold/archived
-      await MarketPrice.deleteOne({ listingId: listing._id });
+    } else if (status === 'sold') {
+      await MarketPrice.findOneAndUpdate(
+        { listingId: listing._id },
+        { listingStatus: 'sold', soldAt: Date.now() }
+      );
+    } else if (status === 'archived') {
+      await MarketPrice.findOneAndUpdate(
+        { listingId: listing._id },
+        { listingStatus: 'archived' }
+      );
     }
   }
 

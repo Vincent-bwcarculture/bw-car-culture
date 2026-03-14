@@ -69,6 +69,16 @@ const marketPriceSchema = new mongoose.Schema(
       ref: 'Listing',
       default: null,
       index: true
+    },
+    // Tracks the lifecycle of the source listing (active → sold/archived)
+    listingStatus: {
+      type: String,
+      enum: ['active', 'sold', 'archived', 'manual'],
+      default: 'manual'
+    },
+    soldAt: {
+      type: Date,
+      default: null
     }
   },
   {
