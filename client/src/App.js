@@ -19,87 +19,19 @@ import SplashScreen from './components/SplashScreen.js';
 import { initializeGA, trackPageView, trackException, trackTiming } from './config/analytics.js';
 import { analyticsService } from './services/analyticsService.js';
 import { InternalAnalyticsProvider } from './components/shared/InternalAnalyticsProvider.js';
-import AnalyticsDashboard from './Admin/AnalyticsDashboard/AnalyticsDashboard.js';
 import internalAnalytics from './utils/internalAnalytics.js';
 
-// User Components
-import UserProfilePage from './pages/UserProfilePage.js';
-import AdminUserSubmissions from './Admin/components/AdminUserSubmissions.js';
-
-// Admin Components
-import AdminLayout from './Admin/layout/AdminLayout.js';
-import AuctionManager from './Admin/AuctionManager/AuctionManager.js';
-import LoginPage from './Admin/auth/LoginPage.js';
-import RegisterPage from './Admin/auth/RegisterPage.js';
-import AdminRegisterPage from './Admin/auth/AdminRegisterPage.js';
-import ForgotPasswordPage from './Admin/auth/ForgotPasswordPage.js';
-import ResetPasswordPage from './Admin/auth/ResetPasswordPage.js';
-import UnauthorizedPage from './Admin/auth/UnauthorizedPage.js';
-import AdminDashboard from './Admin/AdminDashboard.js';
-import ListingManager from './Admin/ListingManager/ListingManager.js';
-import RoleManager from './Admin/components/RoleRequests.js';
-import CreateArticle from './components/journalist/CreateArticle.js';
-
-// Main Site Components
-import FeaturedNews from './components/features/CarNews/FeaturedNews.js';
-import CarNewsSection from './components/features/CarNews/CarNewsSection.js';
+// Home page components (always needed — used in HomeContent)
 import CarFilter from './components/features/CarFilters/CarFilter.js';
 import CarResults from './components/features/CarFilters/CarResults.js';
-import CarCategories from './components/features/CarCategories/CarCategories.js';
 import CarBrands from './components/features/CarCategories/CarBrands.js';
 import MarketplaceSection from './components/features/MarketplaceSection/MarketplaceSection.js';
-import InventoryList from './components/features/InventorySection/InventoryList.js';
-import InventoryItemDetail from './components/features/InventorySection/InventoryItemDetail.js';
 import Advertisement from './components/shared/Advertisement.js';
 import NewsReviews from './components/features/NewsReviews/NewsReviews.js';
-import ProcessSection from './components/shared/Process/ProcessSection.js';
 import HeroSection from './components/layout/HeroSection/HeroSection.js';
 import EVSection from './components/features/EVSection/EVSection.js';
 import BudgetSearch from './components/features/BudgetSearch/BudgetSearch.js';
-import CarReviewsPage from './components/features/CarReviews/CarReviewsPage.js';
-import Chatbot from './components/shared/Chatbot/Chatbot.js';
 import HomeDealershipsSection from './components/features/HomeDealershipsSection/HomeDealershipsSection.js';
-import ConnectionTest from './components/shared/ConnectionTest.js';
-import NewsManager from './components/NewsManager/NewsManager.js';
-import AdminArticleManagement from './components/Admin/ArticleManagement.js';
-import AdminMarketOverview from './components/Admin/MarketOverview/AdminMarketOverview.js';
-import MarketOverview from './components/features/MarketOverview/MarketOverview.js';
-
-// GION App and Related Components
-import GIONApp from './components/GION/GIONApp.js';
-import GIONAdminDashboard from './components/GION/GIONAdminDashboard/GIONAdminDashboard.js';
-import MinistryDashboard from './components/GION/GorvDashboards/MinistryDashboard.js';
-import ServiceProviderDashboard from './components/GION/ServiceProviderDashboards/ServiceProviderDashboard.js';
-
-// Policy Pages
-import PrivacyPolicyPage from './components/pages/PolicyPages/PrivacyPolicyPage.js';
-import TermsOfServicePage from './components/pages/PolicyPages/TermsOfServicePage.js';
-import CookiesPolicyPage from './components/pages/PolicyPages/CookiesPolicyPage.js';
-import FeedbackPage from './components/pages/FeedbackPage/FeedbackPage.js';
-import FeedbackManager from './Admin/FeedbackManager/FeedbackManager.js';
-import InventoryManager from './Admin/InventoryManager/InventoryManager.js';
-import InventoryPage from './components/pages/InventoryPage/InventoryPage.js';
-
-// Service Manager Components
-import ServiceProviderManager from './Admin/ServiceProviderManager/ServiceProviderManager.js';
-import RentalVehicleManager from './Admin/RentalVehicleManager/RentalVehicleManager.js';
-import TrailerListingManager from './Admin/TrailerListingManager/TrailerListingManager.js';
-import TransportRouteManager from './Admin/TransportRouteManager/TransportRouteManager.js';
-
-// Request and Payment Components
-import RequestManager from './Admin/RequestManager/RequestManager.js';
-import ServiceProviderRequest from './Admin/auth/ServiceProviderRequest.js';
-import MinistryRequest from './Admin/auth/MinistryRequest.js';
-import AdminPaymentDashboard from './Admin/components/AdminPaymentDashboard.js';
-
-// Pages
-import ServicesPage from './components/pages/ServicesPage/ServicesPage.js';
-import DealershipsPage from './components/pages/DealershipsPage/DealershipsPage.js';
-import BusinessDetailPage from './components/pages/BusinessDetailPage/BusinessDetailPage.js';
-import PublicTransportPage from './components/features/PublicTransportSection/PublicTransportPage.js';
-import RentalVehicleDetail from './components/features/RentalSection/RentalVehicleDetail.js';
-import TransportRouteDetail from './components/features/TransportSection/TransportRouteDetail.js';
-import VideoManager from './Admin/VideoManager/VideoManager.js';
 import VideoSection from './components/features/VideoSection/VideoSection.js';
 import HomeRentalsSection from './components/features/HomeRentalsSection/HomeRentalsSection.js';
 import HomeServicesSection from './components/features/HomeServicesSection/HomeServicesSection.js';
@@ -109,16 +41,70 @@ import './App.css';
 import './styles/base.css';
 import './utils/imagePathDiagnostics.js';
 
-// Lazy-loaded components (must be after all imports)
-const DriveMap = React.lazy(() => import('./components/features/DriveMap/DriveMap.js'));
-
-// Lazy loaded components
-const CarNewsPage = React.lazy(() => import('./components/features/CarNews/CarNewsPage.js'));
-const NewsArticle = React.lazy(() => import('./components/features/CarNews/NewsArticle.js'));
-const MarketplaceList = React.lazy(() => import('./components/features/MarketplaceSection/MarketplaceList.js'));
-const CarMarketPlace = React.lazy(() => import('./components/features/MarketplaceSection/CarMarketPlace.js'));
+// Lazy-loaded components (only fetched when their route is first visited)
+// — Auth pages
+const LoginPage = React.lazy(() => import('./Admin/auth/LoginPage.js'));
+const RegisterPage = React.lazy(() => import('./Admin/auth/RegisterPage.js'));
+const AdminRegisterPage = React.lazy(() => import('./Admin/auth/AdminRegisterPage.js'));
+const ForgotPasswordPage = React.lazy(() => import('./Admin/auth/ForgotPasswordPage.js'));
+const ResetPasswordPage = React.lazy(() => import('./Admin/auth/ResetPasswordPage.js'));
+const UnauthorizedPage = React.lazy(() => import('./Admin/auth/UnauthorizedPage.js'));
+const ServiceProviderRequest = React.lazy(() => import('./Admin/auth/ServiceProviderRequest.js'));
+const MinistryRequest = React.lazy(() => import('./Admin/auth/MinistryRequest.js'));
+// — Admin layout + dashboards
+const AdminLayout = React.lazy(() => import('./Admin/layout/AdminLayout.js'));
+const AdminDashboard = React.lazy(() => import('./Admin/AdminDashboard.js'));
+const ListingManager = React.lazy(() => import('./Admin/ListingManager/ListingManager.js'));
+const AuctionManager = React.lazy(() => import('./Admin/AuctionManager/AuctionManager.js'));
+const RoleManager = React.lazy(() => import('./Admin/components/RoleRequests.js'));
+const AdminUserSubmissions = React.lazy(() => import('./Admin/components/AdminUserSubmissions.js'));
+const AdminPaymentDashboard = React.lazy(() => import('./Admin/components/AdminPaymentDashboard.js'));
+const AnalyticsDashboard = React.lazy(() => import('./Admin/AnalyticsDashboard/AnalyticsDashboard.js'));
+const AdminArticleManagement = React.lazy(() => import('./components/Admin/ArticleManagement.js'));
+const AdminMarketOverview = React.lazy(() => import('./components/Admin/MarketOverview/AdminMarketOverview.js'));
+const RequestManager = React.lazy(() => import('./Admin/RequestManager/RequestManager.js'));
+const NewsManager = React.lazy(() => import('./components/NewsManager/NewsManager.js'));
+const FeedbackManager = React.lazy(() => import('./Admin/FeedbackManager/FeedbackManager.js'));
+const InventoryManager = React.lazy(() => import('./Admin/InventoryManager/InventoryManager.js'));
+const VideoManager = React.lazy(() => import('./Admin/VideoManager/VideoManager.js'));
+const ServiceProviderManager = React.lazy(() => import('./Admin/ServiceProviderManager/ServiceProviderManager.js'));
+const RentalVehicleManager = React.lazy(() => import('./Admin/RentalVehicleManager/RentalVehicleManager.js'));
+const TrailerListingManager = React.lazy(() => import('./Admin/TrailerListingManager/TrailerListingManager.js'));
+const TransportRouteManager = React.lazy(() => import('./Admin/TransportRouteManager/TransportRouteManager.js'));
 const EditorDashboard = React.lazy(() => import('./Admin/dashboards/EditorDashboard.js'));
 const DealerDashboard = React.lazy(() => import('./Admin/dashboards/DealerDashboard.js'));
+// — Journalist
+const CreateArticle = React.lazy(() => import('./components/journalist/CreateArticle.js'));
+// — User pages
+const UserProfilePage = React.lazy(() => import('./pages/UserProfilePage.js'));
+// — Feature pages
+const CarNewsPage = React.lazy(() => import('./components/features/CarNews/CarNewsPage.js'));
+const NewsArticle = React.lazy(() => import('./components/features/CarNews/NewsArticle.js'));
+const CarReviewsPage = React.lazy(() => import('./components/features/CarReviews/CarReviewsPage.js'));
+const MarketplaceList = React.lazy(() => import('./components/features/MarketplaceSection/MarketplaceList.js'));
+const CarMarketPlace = React.lazy(() => import('./components/features/MarketplaceSection/CarMarketPlace.js'));
+const MarketOverview = React.lazy(() => import('./components/features/MarketOverview/MarketOverview.js'));
+const InventoryPage = React.lazy(() => import('./components/pages/InventoryPage/InventoryPage.js'));
+const InventoryItemDetail = React.lazy(() => import('./components/features/InventorySection/InventoryItemDetail.js'));
+const ServicesPage = React.lazy(() => import('./components/pages/ServicesPage/ServicesPage.js'));
+const DealershipsPage = React.lazy(() => import('./components/pages/DealershipsPage/DealershipsPage.js'));
+const BusinessDetailPage = React.lazy(() => import('./components/pages/BusinessDetailPage/BusinessDetailPage.js'));
+const PublicTransportPage = React.lazy(() => import('./components/features/PublicTransportSection/PublicTransportPage.js'));
+const RentalVehicleDetail = React.lazy(() => import('./components/features/RentalSection/RentalVehicleDetail.js'));
+const TransportRouteDetail = React.lazy(() => import('./components/features/TransportSection/TransportRouteDetail.js'));
+const DriveMap = React.lazy(() => import('./components/features/DriveMap/DriveMap.js'));
+// — Policy pages
+const PrivacyPolicyPage = React.lazy(() => import('./components/pages/PolicyPages/PrivacyPolicyPage.js'));
+const TermsOfServicePage = React.lazy(() => import('./components/pages/PolicyPages/TermsOfServicePage.js'));
+const CookiesPolicyPage = React.lazy(() => import('./components/pages/PolicyPages/CookiesPolicyPage.js'));
+const FeedbackPage = React.lazy(() => import('./components/pages/FeedbackPage/FeedbackPage.js'));
+// — Dev tools
+const ConnectionTest = React.lazy(() => import('./components/shared/ConnectionTest.js'));
+// — GION (specialized dashboards, rarely used)
+const GIONApp = React.lazy(() => import('./components/GION/GIONApp.js'));
+const GIONAdminDashboard = React.lazy(() => import('./components/GION/GIONAdminDashboard/GIONAdminDashboard.js'));
+const MinistryDashboard = React.lazy(() => import('./components/GION/GorvDashboards/MinistryDashboard.js'));
+const ServiceProviderDashboard = React.lazy(() => import('./components/GION/ServiceProviderDashboards/ServiceProviderDashboard.js'));
 
 // Create safe Google Analytics functions to prevent errors
 const safeTrackPageView = (page) => {
