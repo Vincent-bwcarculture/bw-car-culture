@@ -1,25 +1,31 @@
 // client/src/components/shared/UserCard/UserCard.js
-import React, { useState } from 'react';
-import { 
-  MapPin, 
-  UserCheck, 
-  UserPlus, 
-  MessageCircle, 
+import React, { useState, useRef } from 'react';
+import {
+  MapPin,
+  UserCheck,
+  UserPlus,
+  MessageCircle,
   ExternalLink,
-  Eye,
   Car,
   Shield,
   Calendar,
-  MoreHorizontal,
   Award,
-  Users
+  Users,
+  MoreHorizontal,
+  ThumbsUp,
+  Reply,
+  Send,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import './UserCard.css';
 
-const UserCard = ({ 
-  user, 
-  isFollowing, 
-  onFollowToggle, 
+const API_BASE = 'https://bw-car-culture-api.vercel.app/api';
+
+const UserCard = ({
+  user,
+  isFollowing,
+  onFollowToggle,
   viewMode = 'grid',
   onMessage,
   onViewProfile,
@@ -28,6 +34,91 @@ const UserCard = ({
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
+
+  // Engagement state
+  const [showEngagement, setShowEngagement] = useState(false);
+  const [engagements, setEngagements] = useState([]);
+  const [engLoading, setEngLoading] = useState(false);
+  const [newText, setNewText] = useState('');
+  const [posting, setPosting] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null); // engagement _id
+  const [replyText, setReplyText] = useState('');
+  const inputRef = useRef(null);
+
+  const token = localStorage.getItem('token');
+  const currentUser = (() => { try { const p = localStorage.getItem('user'); return p ? JSON.parse(p) : null; } catch { return null; } })();
+
+  const fetchEngagements = async () => {
+    if (engagements.length > 0) return; // already loaded
+    setEngLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/users/${user._id || user.id}/engagements`);
+      const data = await res.json();
+      if (data.success) setEngagements(data.data);
+    } catch {}
+    setEngLoading(false);
+  };
+
+  const handleToggleEngagement = () => {
+    if (!showEngagement) fetchEngagements();
+    setShowEngagement(prev => !prev);
+  };
+
+  const handlePost = async () => {
+    const text = newText.trim();
+    if (!text || !token) return;
+    setPosting(true);
+    try {
+      const res = await fetch(`${API_BASE}/users/${user._id || user.id}/engagements`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEngagements(prev => [data.data, ...prev]);
+        setNewText('');
+      }
+    } catch {}
+    setPosting(false);
+  };
+
+  const handleReply = async (engId) => {
+    const text = replyText.trim();
+    if (!text || !token) return;
+    setPosting(true);
+    try {
+      const res = await fetch(`${API_BASE}/users/${user._id || user.id}/engagements/${engId}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEngagements(prev => prev.map(e => e._id === engId ? data.data : e));
+        setReplyingTo(null);
+        setReplyText('');
+      }
+    } catch {}
+    setPosting(false);
+  };
+
+  const handleLike = async (engId) => {
+    if (!token) return;
+    const userId = currentUser?.id || currentUser?._id;
+    // Optimistic
+    setEngagements(prev => prev.map(e => {
+      if (e._id !== engId) return e;
+      const liked = (e.likes || []).includes(userId);
+      return { ...e, likes: liked ? e.likes.filter(id => id !== userId) : [...(e.likes || []), userId] };
+    }));
+    try {
+      await fetch(`${API_BASE}/users/${user._id || user.id}/engagements/${engId}/like`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+    } catch {}
+  };
 
   // Reset image state when user changes
   React.useEffect(() => {
@@ -206,9 +297,12 @@ const UserCard = ({
   };
   const coverUrl = getCoverUrl();
 
+  const myId = (currentUser?.id || currentUser?._id)?.toString();
+
   return (
+    <div className={`usercard-wrapper ${className}`}>
     <div
-      className={`usercard-container ${viewMode} ${className}`}
+      className={`usercard-container ${viewMode}`}
       onClick={handleCardClick}
     >
       {/* Cover Image */}
@@ -389,7 +483,7 @@ const UserCard = ({
           <span>Message</span>
         </button>
         
-        <button 
+        <button
           className="usercard-action-btn profile"
           onClick={handleViewProfileClick}
           title="View profile"
@@ -397,21 +491,124 @@ const UserCard = ({
           <ExternalLink size={16} />
           <span>Profile</span>
         </button>
-      </div>
 
-      {/* Hover Overlay (Grid view only) */}
-      {viewMode === 'grid' && (
-        <div className="usercard-overlay">
-          <div className="usercard-overlay-actions">
-            <button className="usercard-overlay-btn" title="View Profile">
-              <Eye size={20} />
-            </button>
-            <button className="usercard-overlay-btn" title="Send Message">
-              <MessageCircle size={20} />
+        <button
+          className={`usercard-action-btn engage ${showEngagement ? 'active' : ''}`}
+          onClick={e => { e.stopPropagation(); handleToggleEngagement(); }}
+          title="Engage"
+        >
+          <MessageCircle size={16} />
+          <span>Engage</span>
+          {showEngagement ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+        </button>
+      </div>
+    </div>
+
+    {/* ── Engagement thread ── */}
+    {showEngagement && (
+      <div className="uc-thread" onClick={e => e.stopPropagation()}>
+        {/* Input row */}
+        {token ? (
+          <div className="uc-thread-input-row">
+            <img
+              className="uc-thread-avatar"
+              src={currentUser?.avatar?.url || `https://avatar.vercel.sh/${encodeURIComponent(currentUser?.name || 'me')}.svg?size=40`}
+              alt="me"
+            />
+            <input
+              ref={inputRef}
+              className="uc-thread-input"
+              placeholder={`Say something to ${user.name}…`}
+              value={newText}
+              onChange={e => setNewText(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handlePost(); } }}
+            />
+            <button className="uc-thread-send" onClick={handlePost} disabled={posting || !newText.trim()}>
+              <Send size={15} />
             </button>
           </div>
-        </div>
-      )}
+        ) : (
+          <p className="uc-thread-login">Sign in to engage with {user.name}</p>
+        )}
+
+        {/* Engagements list */}
+        {engLoading ? (
+          <p className="uc-thread-loading">Loading…</p>
+        ) : engagements.length === 0 ? (
+          <p className="uc-thread-empty">No engagements yet. Be the first!</p>
+        ) : (
+          <div className="uc-thread-list">
+            {engagements.map(eng => {
+              const likedByMe = myId && (eng.likes || []).map(String).includes(myId);
+              return (
+                <div key={eng._id} className="uc-eng">
+                  <img
+                    className="uc-eng-avatar"
+                    src={eng.authorAvatar || `https://avatar.vercel.sh/${encodeURIComponent(eng.authorName || 'u')}.svg?size=36`}
+                    alt={eng.authorName}
+                  />
+                  <div className="uc-eng-body">
+                    <div className="uc-eng-meta">
+                      <span className="uc-eng-name">{eng.authorName}</span>
+                      <span className="uc-eng-time">{new Date(eng.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <p className="uc-eng-text">{eng.text}</p>
+                    <div className="uc-eng-actions">
+                      <button
+                        className={`uc-eng-btn ${likedByMe ? 'liked' : ''}`}
+                        onClick={() => handleLike(eng._id)}
+                      >
+                        <ThumbsUp size={13} />
+                        <span>{(eng.likes || []).length || ''}</span>
+                      </button>
+                      <button
+                        className="uc-eng-btn"
+                        onClick={() => { setReplyingTo(replyingTo === eng._id ? null : eng._id); setReplyText(''); }}
+                      >
+                        <Reply size={13} />
+                        <span>Reply</span>
+                      </button>
+                    </div>
+
+                    {/* Replies */}
+                    {(eng.replies || []).map((r, ri) => (
+                      <div key={ri} className="uc-reply">
+                        <img
+                          className="uc-reply-avatar"
+                          src={r.authorAvatar || `https://avatar.vercel.sh/${encodeURIComponent(r.authorName || 'u')}.svg?size=28`}
+                          alt={r.authorName}
+                        />
+                        <div className="uc-reply-body">
+                          <span className="uc-eng-name">{r.authorName}</span>
+                          <p className="uc-eng-text">{r.text}</p>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Reply input */}
+                    {replyingTo === eng._id && token && (
+                      <div className="uc-thread-input-row uc-reply-input-row">
+                        <input
+                          className="uc-thread-input"
+                          placeholder="Write a reply…"
+                          value={replyText}
+                          onChange={e => setReplyText(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleReply(eng._id); } }}
+                          autoFocus
+                        />
+                        <button className="uc-thread-send" onClick={() => handleReply(eng._id)} disabled={posting || !replyText.trim()}>
+                          <Send size={14} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    )}
     </div>
   );
 };

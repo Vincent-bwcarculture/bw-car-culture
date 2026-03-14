@@ -413,50 +413,183 @@
   box-shadow: 0 2px 6px rgba(39, 174, 96, 0.1);
 }
 
-/* === HOVER OVERLAY === */
-.usercard-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 51, 0, 0.95) 0%, rgba(231, 76, 60, 0.95) 100%);
+/* === ENGAGE BUTTON === */
+.usercard-action-btn.engage {
+  border-color: #3498db;
+  color: #3498db;
+}
+.usercard-action-btn.engage:hover,
+.usercard-action-btn.engage.active {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.25);
+}
+
+/* === WRAPPER (card + thread together) === */
+.usercard-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+/* === ENGAGEMENT THREAD === */
+.uc-thread {
+  background: var(--uprofile-bg-primary, #111);
+  border: 1px solid var(--uprofile-border-color, #2a2a2a);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  padding: 12px 14px 14px;
+}
+
+.uc-thread-input-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  border-radius: 12px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
-.usercard-container:hover .usercard-overlay {
-  opacity: 1;
-}
-
-.usercard-overlay-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.usercard-overlay-btn {
-  background: rgba(255, 255, 255, 0.15);
-  border: 2px solid white;
+.uc-thread-avatar {
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  width: 44px;
-  height: 44px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.uc-thread-input {
+  flex: 1;
+  background: var(--uprofile-bg-secondary, #1a1a1a);
+  border: 1px solid var(--uprofile-border-color, #2a2a2a);
+  border-radius: 20px;
+  padding: 7px 14px;
+  color: var(--uprofile-text-primary, #fff);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.uc-thread-input:focus { border-color: #3498db; }
+
+.uc-thread-send {
+  background: #3498db;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.uc-thread-send:hover { background: #2980b9; }
+.uc-thread-send:disabled { background: #2a2a2a; cursor: default; }
+
+.uc-thread-login,
+.uc-thread-loading,
+.uc-thread-empty {
+  color: var(--uprofile-text-muted, #555);
+  font-size: 12px;
+  text-align: center;
+  margin: 4px 0 8px;
 }
 
-.usercard-overlay-btn:hover {
-  background: white;
-  color: var(--uprofile-primary-accent);
-  transform: scale(1.1);
+.uc-thread-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Individual engagement */
+.uc-eng {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+}
+
+.uc-eng-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.uc-eng-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.uc-eng-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.uc-eng-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--uprofile-text-primary, #fff);
+}
+
+.uc-eng-time {
+  font-size: 11px;
+  color: var(--uprofile-text-muted, #555);
+}
+
+.uc-eng-text {
+  margin: 0 0 5px;
+  font-size: 13px;
+  color: var(--uprofile-text-secondary, #ccc);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.uc-eng-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.uc-eng-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--uprofile-text-muted, #555);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+.uc-eng-btn:hover { color: var(--uprofile-text-primary, #fff); background: rgba(255,255,255,0.05); }
+.uc-eng-btn.liked { color: #3498db; }
+
+/* Replies */
+.uc-reply {
+  display: flex;
+  gap: 7px;
+  margin-top: 8px;
+  padding-left: 8px;
+  border-left: 2px solid var(--uprofile-border-color, #2a2a2a);
+}
+
+.uc-reply-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.uc-reply-body { flex: 1; min-width: 0; }
+
+.uc-reply-input-row {
+  margin-top: 8px;
+  padding-left: 8px;
 }
 
 /* === RESPONSIVE DESIGN === */
