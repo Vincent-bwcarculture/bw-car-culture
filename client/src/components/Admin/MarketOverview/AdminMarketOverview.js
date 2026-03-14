@@ -53,6 +53,7 @@ const AdminMarketOverview = () => {
     price: '',
     mileage: '',
     location: 'Botswana',
+    country: 'Botswana',
     recordedDate: new Date().toISOString().split('T')[0],
     notes: '',
     source: 'manual'
@@ -409,6 +410,7 @@ const AdminMarketOverview = () => {
       price: '',
       mileage: '',
       location: 'Botswana',
+      country: 'Botswana',
       recordedDate: new Date().toISOString().split('T')[0],
       notes: '',
       source: 'manual'
@@ -737,7 +739,7 @@ const AdminMarketOverview = () => {
 
               <div className="amo-form-row">
                 <div className="amo-form-group">
-                  <label>Location</label>
+                  <label>Location (City)</label>
                   <input
                     type="text"
                     value={formData.location}
@@ -745,6 +747,18 @@ const AdminMarketOverview = () => {
                   />
                 </div>
 
+                <div className="amo-form-group">
+                  <label>Country</label>
+                  <input
+                    type="text"
+                    value={formData.country}
+                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                    placeholder="e.g. Botswana, South Africa, Japan"
+                  />
+                </div>
+              </div>
+
+              <div className="amo-form-row">
                 <div className="amo-form-group">
                   <label>Recorded Date *</label>
                   <input

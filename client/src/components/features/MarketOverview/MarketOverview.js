@@ -1,14 +1,17 @@
 // client/src/components/features/MarketOverview/MarketOverview.js
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './MarketOverview.css';
+
+const API_BASE = 'https://bw-car-culture-api.vercel.app/api';
 
 const MarketOverview = () => {
   const [filterOptions, setFilterOptions] = useState({
     makes: [],
     models: [],
     years: [],
-    conditions: ['all', 'new', 'used', 'certified']
+    conditions: ['all', 'new', 'used', 'certified'],
+    countries: []
   });
   const [allPrices, setAllPrices] = useState([]);
   const [selectedVehicles, setSelectedVehicles] = useState([]);
@@ -23,7 +26,8 @@ const MarketOverview = () => {
     make: '',
     model: '',
     year: '',
-    condition: 'all'
+    condition: 'all',
+    country: ''
   });
 
   useEffect(() => {
@@ -44,13 +48,14 @@ const MarketOverview = () => {
 
   const fetchFilterOptions = async () => {
     try {
-      const response = await fetch('/api/market-prices/filters');
+      const response = await fetch(`${API_BASE}/market-prices/filters`);
       const data = await response.json();
 
       if (data.success) {
         setFilterOptions({
           ...data.data,
-          conditions: ['all', ...data.data.conditions]
+          conditions: ['all', ...(data.data.conditions || [])],
+          countries: data.data.countries || []
         });
       }
     } catch (error) {
@@ -61,7 +66,7 @@ const MarketOverview = () => {
   const fetchMarketOverview = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/market-prices?limit=100');
+      const response = await fetch(`${API_BASE}/market-prices?limit=100`);
       const data = await response.json();
 
       if (data.success) {
@@ -95,7 +100,7 @@ const MarketOverview = () => {
           params.append('year', vehicle.year);
         }
 
-        const response = await fetch(`/api/listings?${params.toString()}`);
+        const response = await fetch(`${API_BASE}/listings?${params.toString()}`);
         const data = await response.json();
 
         if (data.success && data.data) {
@@ -127,7 +132,7 @@ const MarketOverview = () => {
         // Create search query with vehicle make and model
         const searchQuery = `${vehicle.make} ${vehicle.model}`;
         
-        const response = await fetch(`/api/news?search=${encodeURIComponent(searchQuery)}&limit=2`);
+        const response = await fetch(`${API_BASE}/news?search=${encodeURIComponent(searchQuery)}&limit=2`);
         const data = await response.json();
 
         if (data.success && data.data) {
@@ -218,6 +223,19 @@ const MarketOverview = () => {
         }
       }
 
+      // Group prices by country for breakdown
+      const byCountry = {};
+      vehiclePrices.forEach(p => {
+        const c = p.country || (p.location ? p.location.split(',').pop().trim() : 'Botswana');
+        if (!byCountry[c]) byCountry[c] = [];
+        byCountry[c].push(p.price);
+      });
+      const countryBreakdown = Object.entries(byCountry).map(([c, cPrices]) => ({
+        country: c,
+        avg: Math.round(cPrices.reduce((s, v) => s + v, 0) / cPrices.length),
+        count: cPrices.length
+      })).sort((a, b) => a.avg - b.avg);
+
       return {
         make: vehicle.make,
         model: vehicle.model,
@@ -225,13 +243,16 @@ const MarketOverview = () => {
         pricePoints: vehiclePrices.map(p => ({
           date: new Date(p.recordedDate),
           price: p.price,
-          condition: p.condition
+          condition: p.condition,
+          country: p.country || '',
+          location: p.location || ''
         })),
         avgPrice: Math.round(avgPrice),
         minPrice,
         maxPrice,
         trend,
-        dataPoints: prices.length
+        dataPoints: prices.length,
+        countryBreakdown
       };
     }).filter(Boolean);
 
@@ -249,8 +270,11 @@ const MarketOverview = () => {
       const modelMatch = price.model.toLowerCase() === searchFilters.model.toLowerCase();
       const yearMatch = !searchFilters.year || price.year === parseInt(searchFilters.year);
       const conditionMatch = searchFilters.condition === 'all' || price.condition === searchFilters.condition;
-      
-      return makeMatch && modelMatch && yearMatch && conditionMatch;
+      const countryMatch = !searchFilters.country ||
+        (price.country || '').toLowerCase() === searchFilters.country.toLowerCase() ||
+        (price.location || '').toLowerCase().includes(searchFilters.country.toLowerCase());
+
+      return makeMatch && modelMatch && yearMatch && conditionMatch && countryMatch;
     });
 
     if (filtered.length === 0) {
@@ -560,6 +584,22 @@ const MarketOverview = () => {
                     ))}
                   </select>
                 </div>
+
+                {filterOptions.countries.length > 0 && (
+                  <div className="mo-filter-group">
+                    <label className="mo-filter-label">Country</label>
+                    <select
+                      value={searchFilters.country}
+                      onChange={(e) => setSearchFilters({ ...searchFilters, country: e.target.value })}
+                      className="mo-filter-select"
+                    >
+                      <option value="">All Countries</option>
+                      {filterOptions.countries.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               <button
@@ -788,6 +828,19 @@ const MarketOverview = () => {
                         <span className="mo-stat-value">{vehicle.dataPoints}</span>
                       </div>
                     </div>
+
+                    {vehicle.countryBreakdown && vehicle.countryBreakdown.length > 1 && (
+                      <div className="mo-country-breakdown">
+                        <div className="mo-country-breakdown-title">Price by Country</div>
+                        {vehicle.countryBreakdown.map(cb => (
+                          <div key={cb.country} className="mo-country-row">
+                            <span className="mo-country-name">{cb.country}</span>
+                            <span className="mo-country-price">{formatPrice(cb.avg)}</span>
+                            <span className="mo-country-count">{cb.count} listing{cb.count !== 1 ? 's' : ''}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -858,6 +911,22 @@ const MarketOverview = () => {
                     ))}
                   </select>
                 </div>
+
+                {filterOptions.countries.length > 0 && (
+                  <div className="mo-filter-group">
+                    <label className="mo-filter-label">Country</label>
+                    <select
+                      value={searchFilters.country}
+                      onChange={(e) => setSearchFilters({ ...searchFilters, country: e.target.value })}
+                      className="mo-filter-select"
+                    >
+                      <option value="">All Countries</option>
+                      {filterOptions.countries.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               <button

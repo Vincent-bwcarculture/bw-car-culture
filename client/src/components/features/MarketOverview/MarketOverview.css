@@ -700,6 +700,30 @@
   font-weight: 600;
 }
 
+.mo-country-breakdown {
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.mo-country-breakdown-title {
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+.mo-country-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0;
+  font-size: 0.82rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.mo-country-name { color: #ccc; flex: 1; }
+.mo-country-price { color: #ff3300; font-weight: 600; margin: 0 0.5rem; }
+.mo-country-count { color: #666; font-size: 0.75rem; }
+
 .mo-vehicle-color-bar {
   position: absolute;
   bottom: 0;
