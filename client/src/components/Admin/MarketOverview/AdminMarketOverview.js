@@ -1,7 +1,7 @@
 // client/src/components/Admin/MarketOverview/AdminMarketOverview.js
 // FIXED VERSION - Using AuthContext like other admin components
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext.js';
 import './AdminMarketOverview.css';
 
@@ -326,7 +326,7 @@ const AdminMarketOverview = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ prices })
+        body: JSON.stringify({ entries: prices })
       });
 
       console.log('📥 Response status:', response.status);
@@ -334,7 +334,7 @@ const AdminMarketOverview = () => {
       console.log('📥 Response data:', data);
 
       if (data.success) {
-        alert(`Batch import complete!\nSuccess: ${data.data.success.length}\nFailed: ${data.data.failed.length}`);
+        alert(`Batch import complete!\nInserted: ${data.inserted}`);
         setShowBatchModal(false);
         setBatchData('');
         fetchPrices();
