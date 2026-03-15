@@ -67,6 +67,24 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
+    // Auto-reload once on ChunkLoadError (stale cache after new deployment)
+    const isChunkError = error.name === 'ChunkLoadError' ||
+      (error.message && error.message.includes('Loading chunk')) ||
+      (error.message && error.message.includes('Loading CSS chunk'));
+
+    if (isChunkError) {
+      const hasReloaded = sessionStorage.getItem('chunk_reload');
+      if (!hasReloaded) {
+        sessionStorage.setItem('chunk_reload', '1');
+        window.location.reload();
+        return;
+      }
+      // Already reloaded once — clear flag and show error UI
+      sessionStorage.removeItem('chunk_reload');
+    } else {
+      sessionStorage.removeItem('chunk_reload');
+    }
+
     // Increment error count
     this.setState(prevState => ({
       errorInfo,
@@ -78,7 +96,6 @@ class ErrorBoundary extends React.Component {
 
     // Handle specific error types
     if (error instanceof ApiError && error.status === 401) {
-      // Handle authentication errors
       localStorage.removeItem('token');
       if (window.location.pathname.startsWith('/admin')) {
         window.location.href = '/login';

@@ -18,6 +18,23 @@ class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, errorInfo) {
+    // Auto-reload once on ChunkLoadError (stale cache after new deployment)
+    const isChunkError = error.name === 'ChunkLoadError' ||
+      (error.message && error.message.includes('Loading chunk')) ||
+      (error.message && error.message.includes('Loading CSS chunk'));
+
+    if (isChunkError) {
+      const hasReloaded = sessionStorage.getItem('chunk_reload');
+      if (!hasReloaded) {
+        sessionStorage.setItem('chunk_reload', '1');
+        window.location.reload();
+        return;
+      }
+      sessionStorage.removeItem('chunk_reload');
+    } else {
+      sessionStorage.removeItem('chunk_reload');
+    }
+
     // Log the error to an error reporting service
     console.error('Error caught by ErrorBoundary:', error, errorInfo);
     this.setState({ errorInfo });
