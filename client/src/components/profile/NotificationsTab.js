@@ -2,6 +2,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Bell, X, CheckCircle, AlertCircle, Info, AlertTriangle, Settings, Car, Check } from 'lucide-react';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
+const authHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('token')}` });
+
 const NotificationsTab = ({ profileData }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -11,8 +14,8 @@ const NotificationsTab = ({ profileData }) => {
   const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/user/notifications', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      const response = await fetch(`${API_BASE}/user/notifications`, {
+        headers: authHeader()
       });
       if (response.ok) {
         const data = await response.json();
@@ -32,9 +35,9 @@ const NotificationsTab = ({ profileData }) => {
 
   const markAsRead = async (id) => {
     try {
-      const res = await fetch(`/api/user/notifications/${id}/read`, {
+      const res = await fetch(`${API_BASE}/user/notifications/${id}/read`, {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: authHeader()
       });
       if (res.ok) {
         setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
@@ -47,9 +50,9 @@ const NotificationsTab = ({ profileData }) => {
 
   const markAllAsRead = async () => {
     try {
-      const res = await fetch('/api/user/notifications/read-all', {
+      const res = await fetch(`${API_BASE}/user/notifications/read-all`, {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: authHeader()
       });
       if (res.ok) {
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
@@ -62,9 +65,9 @@ const NotificationsTab = ({ profileData }) => {
 
   const deleteNotification = async (id) => {
     try {
-      const res = await fetch(`/api/user/notifications/${id}`, {
+      const res = await fetch(`${API_BASE}/user/notifications/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: authHeader()
       });
       if (res.ok) {
         const notif = notifications.find(n => n._id === id);
@@ -79,6 +82,11 @@ const NotificationsTab = ({ profileData }) => {
   const getIcon = (type) => {
     const props = { size: 18 };
     switch (type) {
+      case 'new_follower':     return <CheckCircle {...props} style={{ color: '#a78bfa' }} />;
+      case 'new_comment':      return <AlertCircle {...props} style={{ color: '#60a5fa' }} />;
+      case 'comment_liked':    return <CheckCircle {...props} style={{ color: '#f472b6' }} />;
+      case 'comment_reply':    return <Info {...props} style={{ color: '#34d399' }} />;
+      case 'new_review':       return <CheckCircle {...props} style={{ color: '#fbbf24' }} />;
       case 'service_reminder': return <Settings {...props} style={{ color: '#ff9f40' }} />;
       case 'vehicle_expiry':   return <Car {...props} style={{ color: '#ff6b6b' }} />;
       case 'listing_update':   return <Info {...props} style={{ color: '#36a2eb' }} />;
