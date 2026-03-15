@@ -845,6 +845,259 @@
 /* ── Booking routes group ────────────────────────────────────────────────── */
 .ta-booking-routes { margin-bottom: 20px; }
 
+/* ── Fleet ───────────────────────────────────────────────────────────────── */
+.ta-fleet-panel {}
+
+.ta-fleet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.ta-vehicle-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.2s;
+}
+.ta-vehicle-card:hover { border-color: rgba(255,255,255,0.16); }
+
+.ta-vehicle-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ta-vehicle-reg {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  font-family: monospace;
+}
+
+.ta-vehicle-actions { display: flex; gap: 4px; }
+
+.ta-vehicle-type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(59,130,246,0.15);
+  border: 1px solid rgba(59,130,246,0.3);
+  color: #93c5fd;
+  width: fit-content;
+}
+
+.ta-vehicle-details {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.55);
+}
+
+.ta-vehicle-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
+
+.ta-vehicle-capacity,
+.ta-vehicle-reviews {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.4);
+}
+.ta-vehicle-reviews { color: #f59e0b; }
+
+/* ── Reviews Panel ───────────────────────────────────────────────────────── */
+.ta-reviews-panel {}
+
+.ta-ghost-count { color: rgba(255,200,100,0.7); }
+
+.ta-reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ta-reviews-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 4px;
+}
+.ta-reviews-divider span {
+  font-size: 0.78rem;
+  color: rgba(255,200,100,0.5);
+  white-space: nowrap;
+}
+.ta-reviews-divider::before,
+.ta-reviews-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,200,100,0.15);
+}
+
+.ta-review-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ta-review-card.ghost {
+  border-color: rgba(255,200,100,0.2);
+  background: rgba(255,200,100,0.03);
+}
+
+.ta-ghost-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255,200,100,0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ta-review-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ta-reviewer-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+.ta-review-date {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.35);
+  margin-top: 2px;
+}
+
+.ta-review-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.ta-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.ta-review-plate {
+  font-size: 0.72rem;
+  font-family: monospace;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.55);
+}
+
+.ta-review-comment {
+  margin: 0;
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.5;
+}
+
+.ta-review-reply {
+  background: rgba(255,255,255,0.04);
+  border-left: 2px solid rgba(59,130,246,0.5);
+  padding: 8px 12px;
+  border-radius: 0 6px 6px 0;
+}
+.ta-reply-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(59,130,246,0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.ta-reply-text {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.5;
+}
+
+.ta-reply-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ta-reply-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.875rem;
+  padding: 8px 12px;
+  resize: vertical;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+.ta-reply-input:focus { border-color: rgba(255,255,255,0.25); }
+.ta-reply-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+.ta-reply-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: rgba(255,255,255,0.45);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  align-self: flex-start;
+}
+.ta-reply-trigger:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.75); }
+
+.ta-btn-ghost.ta-sm,
+.ta-btn-primary.ta-sm {
+  padding: 5px 12px;
+  font-size: 0.8rem;
+}
+
+/* ── Vehicle Modal ────────────────────────────────────────────────────────── */
+.ta-vehicle-modal { max-width: 480px; }
+
+.ta-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ta-field label {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.55);
+  font-weight: 500;
+}
+.ta-field-full { grid-column: 1 / -1; }
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .ta-header { padding: 20px 20px 16px; flex-direction: column; }

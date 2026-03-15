@@ -7,7 +7,8 @@ import {
   MapPin, Clock, Star, TrendingUp, Users, Activity,
   CheckCircle, XCircle, AlertCircle, ChevronRight,
   Bus, Car, Truck, Navigation, DollarSign, BarChart2,
-  ToggleRight, ToggleLeft, X, Save, ChevronDown, ChevronUp
+  ToggleRight, ToggleLeft, X, Save, ChevronDown, ChevronUp,
+  Package, MessageSquare, Send
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
 import './TransportAdminDashboard.css';
@@ -23,6 +24,9 @@ const ROUTE_TYPES = ['Bus', 'Taxi', 'Shuttle', 'Train', 'Ferry', 'Other'];
 const SERVICE_TYPES = ['Regular', 'Express', 'Premium', 'Night'];
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const STATUSES = ['active', 'seasonal', 'suspended', 'discontinued'];
+const VEHICLE_TYPES = ['Bus', 'Minibus', 'Taxi', 'Shuttle', 'Train', 'Ferry', 'Truck', 'Other'];
+const COLORS = ['White', 'Black', 'Silver', 'Grey', 'Blue', 'Red', 'Green', 'Yellow', 'Orange', 'Brown', 'Other'];
+const emptyVehicle = () => ({ registration: '', make: '', model: '', year: '', color: '', vehicleType: 'Bus', capacity: '' });
 
 const statusColor = (s) => ({ active: '#22c55e', seasonal: '#f59e0b', suspended: '#ef4444', discontinued: '#6b7280' }[s] || '#6b7280');
 const statusLabel = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : 'Unknown';
@@ -243,6 +247,65 @@ const RouteRow = ({ route, onEdit, onDelete, onToggleStatus }) => {
   );
 };
 
+// ─── Vehicle Modal ─────────────────────────────────────────────────────────────
+const VehicleModal = ({ vehicle, onSave, onClose, saving }) => {
+  const [form, setForm] = useState(vehicle || emptyVehicle());
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+  return (
+    <div className="ta-modal-overlay">
+      <div className="ta-modal ta-vehicle-modal">
+        <div className="ta-modal-header">
+          <h3>{vehicle ? 'Edit Vehicle' : 'Add Vehicle'}</h3>
+          <button className="ta-icon-btn" onClick={onClose}><X size={18} /></button>
+        </div>
+        <div className="ta-modal-body">
+          <div className="ta-form-grid">
+            <div className="ta-field ta-field-full">
+              <label>Registration Number *</label>
+              <input value={form.registration} onChange={e => set('registration', e.target.value.toUpperCase())} placeholder="e.g. B 123 ABC" />
+            </div>
+            <div className="ta-field">
+              <label>Vehicle Type *</label>
+              <select value={form.vehicleType} onChange={e => set('vehicleType', e.target.value)}>
+                {VEHICLE_TYPES.map(t => <option key={t}>{t}</option>)}
+              </select>
+            </div>
+            <div className="ta-field">
+              <label>Color</label>
+              <select value={form.color} onChange={e => set('color', e.target.value)}>
+                <option value="">Select color</option>
+                {COLORS.map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="ta-field">
+              <label>Make</label>
+              <input value={form.make} onChange={e => set('make', e.target.value)} placeholder="e.g. Toyota" />
+            </div>
+            <div className="ta-field">
+              <label>Model</label>
+              <input value={form.model} onChange={e => set('model', e.target.value)} placeholder="e.g. Quantum" />
+            </div>
+            <div className="ta-field">
+              <label>Year</label>
+              <input type="number" value={form.year} onChange={e => set('year', e.target.value)} placeholder="e.g. 2020" min="1990" max="2030" />
+            </div>
+            <div className="ta-field">
+              <label>Passenger Capacity</label>
+              <input type="number" value={form.capacity} onChange={e => set('capacity', e.target.value)} placeholder="e.g. 16" min="1" />
+            </div>
+          </div>
+        </div>
+        <div className="ta-modal-footer">
+          <button className="ta-btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="ta-btn-primary" onClick={() => onSave(form)} disabled={saving || !form.registration || !form.vehicleType}>
+            <Save size={15} /> {saving ? 'Saving…' : (vehicle ? 'Update' : 'Add Vehicle')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 const TransportAdminDashboard = () => {
   const navigate = useNavigate();
@@ -256,6 +319,22 @@ const TransportAdminDashboard = () => {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+  // Fleet state
+  const [fleet, setFleet] = useState([]);
+  const [fleetLoading, setFleetLoading] = useState(false);
+  const [showVehicleModal, setShowVehicleModal] = useState(false);
+  const [editingVehicle, setEditingVehicle] = useState(null);
+  const [vehicleSaving, setVehicleSaving] = useState(false);
+  const [deleteVehicleConfirm, setDeleteVehicleConfirm] = useState(null);
+
+  // Reviews state
+  const [transportReviews, setTransportReviews] = useState([]);
+  const [ghostReviews, setGhostReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [replySubmitting, setReplySubmitting] = useState(false);
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -361,11 +440,106 @@ const TransportAdminDashboard = () => {
     } catch { showToast('Network error', 'error'); }
   };
 
+  // ── Fetch fleet ───────────────────────────────────────────────────────────
+  const fetchFleet = useCallback(async () => {
+    setFleetLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/transport/fleet`, { headers: authHeaders() });
+      const data = await res.json();
+      setFleet(data.data || []);
+    } catch (err) {
+      console.error('Failed to fetch fleet:', err);
+    } finally {
+      setFleetLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchFleet(); }, [fetchFleet]);
+
+  // ── Fetch transport reviews ────────────────────────────────────────────────
+  const fetchTransportReviews = useCallback(async () => {
+    setReviewsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/transport/reviews`, { headers: authHeaders() });
+      const data = await res.json();
+      setTransportReviews(data.data?.reviews || []);
+      setGhostReviews(data.data?.ghostReviews || []);
+    } catch (err) {
+      console.error('Failed to fetch reviews:', err);
+    } finally {
+      setReviewsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'reviews') fetchTransportReviews();
+  }, [activeTab, fetchTransportReviews]);
+
+  // ── Save vehicle ──────────────────────────────────────────────────────────
+  const handleSaveVehicle = async (form) => {
+    setVehicleSaving(true);
+    try {
+      const isEdit = editingVehicle?._id;
+      const url = isEdit ? `${API_BASE}/transport/fleet/${editingVehicle._id}` : `${API_BASE}/transport/fleet`;
+      const method = isEdit ? 'PUT' : 'POST';
+      const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(form) });
+      const result = await res.json();
+      if (res.ok && result.success !== false) {
+        showToast(isEdit ? 'Vehicle updated.' : 'Vehicle added.');
+        setShowVehicleModal(false);
+        setEditingVehicle(null);
+        fetchFleet();
+      } else {
+        showToast(result.message || 'Failed to save vehicle', 'error');
+      }
+    } catch { showToast('Network error', 'error'); }
+    finally { setVehicleSaving(false); }
+  };
+
+  // ── Delete vehicle ────────────────────────────────────────────────────────
+  const handleDeleteVehicle = async (vehicle) => {
+    try {
+      const res = await fetch(`${API_BASE}/transport/fleet/${vehicle._id}`, { method: 'DELETE', headers: authHeaders() });
+      if (res.ok) {
+        showToast('Vehicle removed.');
+        setDeleteVehicleConfirm(null);
+        fetchFleet();
+      } else {
+        showToast('Failed to delete vehicle', 'error');
+      }
+    } catch { showToast('Network error', 'error'); }
+  };
+
+  // ── Reply to review ───────────────────────────────────────────────────────
+  const handleReply = async (reviewId) => {
+    if (!replyText.trim()) return;
+    setReplySubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE}/transport/reviews/${reviewId}/reply`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ reply: replyText.trim() })
+      });
+      const result = await res.json();
+      if (res.ok && result.success !== false) {
+        showToast('Reply posted.');
+        setReplyingTo(null);
+        setReplyText('');
+        fetchTransportReviews();
+      } else {
+        showToast(result.message || 'Failed to post reply', 'error');
+      }
+    } catch { showToast('Network error', 'error'); }
+    finally { setReplySubmitting(false); }
+  };
+
   // ─── Tabs ─────────────────────────────────────────────────────────────────
   const tabs = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'routes',   label: 'Routes',   icon: Route,           badge: stats.total },
+    { id: 'fleet',    label: 'Fleet',    icon: Package,         badge: fleet.length || undefined },
     { id: 'bookings', label: 'Bookings', icon: Calendar,        badge: stats.totalBookings },
+    { id: 'reviews',  label: 'Reviews',  icon: Star },
     { id: 'payments', label: 'Payments', icon: CreditCard }
   ];
 
@@ -606,6 +780,176 @@ const TransportAdminDashboard = () => {
     </div>
   );
 
+  // ─── Render: Fleet ────────────────────────────────────────────────────────
+  const renderFleet = () => (
+    <div className="ta-fleet-panel">
+      <div className="ta-panel-toolbar">
+        <div className="ta-panel-info">
+          <span className="ta-count-badge">{fleet.length}</span>
+          <span>registered vehicle{fleet.length !== 1 ? 's' : ''}</span>
+        </div>
+        <button className="ta-btn-primary" onClick={() => { setEditingVehicle(null); setShowVehicleModal(true); }}>
+          <Plus size={16} /> Add Vehicle
+        </button>
+      </div>
+
+      {fleetLoading ? (
+        <div className="ta-loading"><RefreshCw size={24} className="ta-spin" /> Loading fleet...</div>
+      ) : fleet.length === 0 ? (
+        <div className="ta-empty-state">
+          <Package size={48} />
+          <h3>No vehicles registered</h3>
+          <p>Add your fleet vehicles so passengers can identify and review them by registration number.</p>
+          <button className="ta-btn-primary" onClick={() => { setEditingVehicle(null); setShowVehicleModal(true); }}>
+            <Plus size={16} /> Add First Vehicle
+          </button>
+        </div>
+      ) : (
+        <div className="ta-fleet-grid">
+          {fleet.map(v => (
+            <div key={v._id} className="ta-vehicle-card">
+              <div className="ta-vehicle-card-header">
+                <div className="ta-vehicle-reg">{v.registration}</div>
+                <div className="ta-vehicle-actions">
+                  <button className="ta-icon-btn" title="Edit" onClick={() => { setEditingVehicle(v); setShowVehicleModal(true); }}>
+                    <Edit2 size={15} />
+                  </button>
+                  <button className="ta-icon-btn danger" title="Remove" onClick={() => setDeleteVehicleConfirm(v)}>
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              </div>
+              <div className="ta-vehicle-type-badge">{v.vehicleType}</div>
+              <div className="ta-vehicle-details">
+                {v.color && <span className="ta-vehicle-color-dot" style={{ background: v.color.toLowerCase() === 'white' ? '#ddd' : v.color.toLowerCase() === 'silver' ? '#aaa' : v.color.toLowerCase() }}></span>}
+                <span>{[v.color, v.make, v.model, v.year].filter(Boolean).join(' · ')}</span>
+              </div>
+              {v.capacity && (
+                <div className="ta-vehicle-capacity">
+                  <Users size={13} /> {v.capacity} seats
+                </div>
+              )}
+              {v.reviewCount > 0 && (
+                <div className="ta-vehicle-reviews">
+                  <Star size={13} /> {v.reviewCount} review{v.reviewCount !== 1 ? 's' : ''}
+                  {v.averageRating ? ` · ${Number(v.averageRating).toFixed(1)}` : ''}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  // ─── Render: Reviews ──────────────────────────────────────────────────────
+  const renderStars = (rating) => {
+    const n = Math.round(rating || 0);
+    return (
+      <div className="ta-stars">
+        {[1,2,3,4,5].map(i => (
+          <Star key={i} size={14} fill={i <= n ? '#f59e0b' : 'none'} color={i <= n ? '#f59e0b' : 'rgba(255,255,255,0.2)'} />
+        ))}
+      </div>
+    );
+  };
+
+  const renderReviewCard = (review, isGhost = false) => {
+    const id = review._id;
+    const isReplying = replyingTo === id;
+    return (
+      <div key={id} className={`ta-review-card ${isGhost ? 'ghost' : ''}`}>
+        {isGhost && <div className="ta-ghost-badge">Unlinked · plate not in fleet</div>}
+        <div className="ta-review-card-header">
+          <div className="ta-review-meta">
+            <div className="ta-reviewer-name">{review.reviewerName || review.identifier || 'Anonymous'}</div>
+            <div className="ta-review-date">{review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ''}</div>
+          </div>
+          <div className="ta-review-right">
+            {renderStars(review.rating)}
+            {review.normalizedPlate && <span className="ta-review-plate">{review.normalizedPlate}</span>}
+          </div>
+        </div>
+        {review.comment && <p className="ta-review-comment">{review.comment}</p>}
+
+        {review.reply ? (
+          <div className="ta-review-reply">
+            <div className="ta-reply-label">Your reply</div>
+            <p className="ta-reply-text">{review.reply}</p>
+          </div>
+        ) : (
+          <>
+            {isReplying ? (
+              <div className="ta-reply-form">
+                <textarea
+                  className="ta-reply-input"
+                  rows={3}
+                  placeholder="Write a reply..."
+                  value={replyText}
+                  onChange={e => setReplyText(e.target.value)}
+                />
+                <div className="ta-reply-actions">
+                  <button className="ta-btn-ghost ta-sm" onClick={() => { setReplyingTo(null); setReplyText(''); }}>Cancel</button>
+                  <button className="ta-btn-primary ta-sm" disabled={replySubmitting || !replyText.trim()} onClick={() => handleReply(id)}>
+                    <Send size={13} /> {replySubmitting ? 'Posting…' : 'Post Reply'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              !isGhost && (
+                <button className="ta-reply-trigger" onClick={() => { setReplyingTo(id); setReplyText(''); }}>
+                  <MessageSquare size={13} /> Reply
+                </button>
+              )
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
+
+  const renderTransportReviews = () => {
+    const allReviews = [...transportReviews, ...ghostReviews];
+    return (
+      <div className="ta-reviews-panel">
+        <div className="ta-panel-toolbar">
+          <div className="ta-panel-info">
+            <span className="ta-count-badge">{transportReviews.length}</span>
+            <span>linked review{transportReviews.length !== 1 ? 's' : ''}</span>
+            {ghostReviews.length > 0 && (
+              <span className="ta-ghost-count"> · {ghostReviews.length} unlinked</span>
+            )}
+          </div>
+          <button className="ta-icon-text-btn" onClick={fetchTransportReviews} disabled={reviewsLoading}>
+            <RefreshCw size={15} className={reviewsLoading ? 'ta-spin' : ''} /> Refresh
+          </button>
+        </div>
+
+        {reviewsLoading ? (
+          <div className="ta-loading"><RefreshCw size={24} className="ta-spin" /> Loading reviews...</div>
+        ) : allReviews.length === 0 ? (
+          <div className="ta-empty-state">
+            <Star size={48} />
+            <h3>No reviews yet</h3>
+            <p>Reviews from passengers who identify your vehicles by plate number will appear here. Register your fleet to start linking reviews automatically.</p>
+          </div>
+        ) : (
+          <div className="ta-reviews-list">
+            {transportReviews.map(r => renderReviewCard(r, false))}
+            {ghostReviews.length > 0 && (
+              <>
+                <div className="ta-reviews-divider">
+                  <span>Unlinked Reviews — add these plates to your fleet to claim them</span>
+                </div>
+                {ghostReviews.map(r => renderReviewCard(r, true))}
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // ─── Main render ──────────────────────────────────────────────────────────
   return (
     <div className="ta-page">
@@ -654,7 +998,9 @@ const TransportAdminDashboard = () => {
       <div className="ta-content">
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'routes'   && renderRoutes()}
+        {activeTab === 'fleet'    && renderFleet()}
         {activeTab === 'bookings' && renderBookings()}
+        {activeTab === 'reviews'  && renderTransportReviews()}
         {activeTab === 'payments' && renderPayments()}
       </div>
 
@@ -678,6 +1024,31 @@ const TransportAdminDashboard = () => {
             <div className="ta-confirm-actions">
               <button className="ta-btn-ghost" onClick={() => setDeleteConfirm(null)}>Cancel</button>
               <button className="ta-btn-danger" onClick={() => handleDelete(deleteConfirm)}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Vehicle modal */}
+      {showVehicleModal && (
+        <VehicleModal
+          vehicle={editingVehicle}
+          onSave={handleSaveVehicle}
+          onClose={() => { setShowVehicleModal(false); setEditingVehicle(null); }}
+          saving={vehicleSaving}
+        />
+      )}
+
+      {/* Delete vehicle confirm */}
+      {deleteVehicleConfirm && (
+        <div className="ta-modal-overlay">
+          <div className="ta-confirm-modal">
+            <AlertCircle size={32} color="#ef4444" />
+            <h3>Remove Vehicle</h3>
+            <p>Remove <strong>{deleteVehicleConfirm.registration}</strong> from your fleet? Any linked reviews will remain but will be shown as unlinked.</p>
+            <div className="ta-confirm-actions">
+              <button className="ta-btn-ghost" onClick={() => setDeleteVehicleConfirm(null)}>Cancel</button>
+              <button className="ta-btn-danger" onClick={() => handleDeleteVehicle(deleteVehicleConfirm)}>Remove</button>
             </div>
           </div>
         </div>

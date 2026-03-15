@@ -666,3 +666,153 @@
     animation: none;
   }
 }
+
+/* ── Plate review flow additions ─────────────────────────────────────────── */
+.efab-plate-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.efab-plate-input {
+  flex: 1;
+  font-family: monospace;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.efab-lookup-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid rgba(var(--primary-rgb, 255,51,0), 0.4);
+  background: rgba(var(--primary-rgb, 255,51,0), 0.1);
+  color: #fca5a5;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.efab-lookup-btn:hover:not(:disabled) { background: rgba(255,51,0,0.2); }
+.efab-lookup-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.efab-loading-spinner.small {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+
+.efab-plate-hint {
+  font-size: 0.78rem;
+  color: rgba(var(--text-primary-rgb, 0,0,0), 0.4);
+  margin-top: -4px;
+}
+
+.efab-lookup-found,
+.efab-lookup-notfound {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+.efab-lookup-found {
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.25);
+}
+.efab-lookup-notfound {
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.25);
+}
+.efab-lookup-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.efab-lookup-sub {
+  font-size: 0.78rem;
+  opacity: 0.6;
+  margin-top: 1px;
+}
+
+.efab-star-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 4px 0 8px;
+}
+
+.efab-star-btn {
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  line-height: 0;
+  transition: transform 0.1s;
+}
+.efab-star-btn:hover { transform: scale(1.15); }
+
+.efab-star-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #f59e0b;
+  margin-left: 6px;
+}
+
+.efab-comment-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.efab-textarea {
+  width: 100%;
+  background: rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  padding: 8px 12px;
+  resize: vertical;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  color: inherit;
+  transition: border-color 0.2s;
+}
+.efab-textarea:focus { border-color: rgba(0,0,0,0.25); }
+
+.efab-char-count {
+  font-size: 0.72rem;
+  align-self: flex-end;
+  opacity: 0.35;
+  margin-top: -2px;
+}
+
+.efab-submit-error {
+  font-size: 0.82rem;
+  color: #ef4444;
+  padding: 6px 10px;
+  background: rgba(239,68,68,0.08);
+  border-radius: 6px;
+  border: 1px solid rgba(239,68,68,0.2);
+}
+
+.efab-done-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 20px 0;
+}
+.efab-done-section h4 { margin: 0; font-size: 1.1rem; }
+.efab-done-section p { margin: 0; opacity: 0.7; font-size: 0.875rem; line-height: 1.5; }
+
+.efab-ghost-note {
+  font-size: 0.8rem !important;
+  opacity: 0.55 !important;
+  font-style: italic;
+}
+
