@@ -8,6 +8,7 @@ import {
   Menu, BarChart3, Info, Map, Zap, Tag, MapPin
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
+import useUnreadNotifCount from '../../../hooks/useUnreadNotifCount.js';
 import EnhancedFABModal from './EnhancedFABModal.js';
 import './ResponsiveNavigation.css';
 
@@ -453,6 +454,8 @@ const DesktopUserMenu = () => {
 const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
+  const unreadCount = useUnreadNotifCount(isAuthenticated);
 
   const getInitials = (name) => {
     if (!name) return 'U';
@@ -551,13 +554,28 @@ const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
   }, [user, avatarUrl, imageError, imageLoading, userName, userInitials]);
 
   return (
-    <Link 
-      to="/profile" 
+    <Link
+      to="/profile"
       className="user-profile-link"
       onMouseEnter={onMouseEnter}
       onClick={onClick}
     >
-      <div className="user-profile-avatar">
+      <div className="user-profile-avatar" style={{ position: 'relative' }}>
+        {unreadCount > 0 && (
+          <span style={{
+            position: 'absolute',
+            top: '-2px',
+            right: '-2px',
+            width: '10px',
+            height: '10px',
+            borderRadius: '50%',
+            background: '#ff6a00',
+            border: '2px solid var(--nav-bg, #111)',
+            zIndex: 10,
+            display: 'block',
+            pointerEvents: 'none'
+          }} />
+        )}
         {avatarUrl && !imageError ? (
           <>
             <img 
@@ -654,6 +672,8 @@ const ResponsiveNavigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const navRef = useRef();
+  const { isAuthenticated } = useAuth();
+  const unreadNotifCount = useUnreadNotifCount(isAuthenticated);
 
   // Build breadcrumb from current path
   useEffect(() => {
@@ -790,7 +810,23 @@ const ResponsiveNavigation = () => {
             onClick={() => handleNavigation(category.path)}
             disabled={isNavigating}
           >
-            <div className="mobile-nav-icon">{category.icon}</div>
+            <div className="mobile-nav-icon" style={{ position: 'relative' }}>
+              {category.icon}
+              {category.id === 'profile' && unreadNotifCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-3px',
+                  right: '-3px',
+                  width: '9px',
+                  height: '9px',
+                  borderRadius: '50%',
+                  background: '#ff6a00',
+                  border: '1.5px solid #111',
+                  display: 'block',
+                  pointerEvents: 'none'
+                }} />
+              )}
+            </div>
             <div className="mobile-nav-label">{category.name}</div>
           </button>
         ))}
