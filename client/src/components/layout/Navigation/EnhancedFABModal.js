@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Star,
   X,
@@ -35,9 +35,9 @@ const EnhancedFABModal = ({
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
 
   // Plate review flow state
-  const [plateStep, setPlateStep] = useState('input'); // 'input' | 'form' | 'done'
+  const [plateStep, setPlateStep] = useState('input');
   const [searching, setSearching] = useState(false);
-  const [lookupResult, setLookupResult] = useState(null); // { found, provider, ghostId, normalizedPlate }
+  const [lookupResult, setLookupResult] = useState(null);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -47,10 +47,11 @@ const EnhancedFABModal = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (showModal) {
-      fetchTopServices();
-    }
+    if (showModal) fetchTopServices();
   }, [showModal]);
+
+  // Guard AFTER all hooks
+  if (!showModal) return null;
 
   const fetchTopServices = async () => {
     setLoadingLeaderboard(true);
