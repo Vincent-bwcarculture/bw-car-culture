@@ -1181,7 +1181,7 @@ body.section-transitioning * {
 /* Grid view specific */
 .marketplace-grid-grid {
   /* Optimize for detailed cards */
-  grid-auto-rows: minmax(400px, auto);
+  grid-auto-rows: minmax(300px, auto);
 }
 
 /* Compact view specific */

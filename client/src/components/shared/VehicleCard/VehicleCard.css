@@ -1523,6 +1523,10 @@
 }
 
 /* Compact mode adjustments */
+.vc-card.compact .vc-image-container {
+  height: 200px;
+}
+
 .vc-card.compact .vc-content {
   padding: 0.4rem;
 }

@@ -457,22 +457,21 @@
 .bcc-business-detail-contact-button,
 .bcc-business-detail-website-button,
 .bcc-business-detail-whatsapp-button {
-  padding: 0.8rem 1.6rem;
-  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
   white-space: nowrap;
-  font-size: 1rem;
-  min-height: 52px;
+  font-size: 0.875rem;
+  min-height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   border: none;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  /* backdrop-filter: blur(10px); */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   text-decoration: none;
   position: relative;
   overflow: hidden;
@@ -498,7 +497,7 @@
 
 .bcc-business-detail-contact-button:hover {
   background: linear-gradient(135deg, #e62d00, #ff4400);
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 .bcc-business-detail-contact-button:hover::before {
@@ -514,7 +513,7 @@
 .bcc-business-detail-website-button:hover {
   background: rgba(255, 255, 255, 0.2);
   border-color: var(--border-accent);
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 .bcc-business-detail-website-button:hover::before {
@@ -522,13 +521,13 @@
 }
 
 .bcc-business-detail-whatsapp-button {
-  background: linear-gradient(135deg, #25D366, #128C7E);
+  background: linear-gradient(135deg, #1a7a41, #145e31);
   color: white;
 }
 
 .bcc-business-detail-whatsapp-button:hover {
-  background: linear-gradient(135deg, #128C7E, #0d7a6b);
-  transform: translateY(-3px);
+  background: linear-gradient(135deg, #156334, #0f4d27);
+  transform: translateY(-2px);
 }
 
 .bcc-business-detail-whatsapp-button:hover::before {
@@ -1791,16 +1790,19 @@
   }
 
   .bcc-business-detail-actions {
-    max-width: 350px;
-    flex-direction: column;
+    max-width: 400px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
   .bcc-business-detail-contact-button,
   .bcc-business-detail-website-button,
   .bcc-business-detail-whatsapp-button {
-    width: 100%;
-    font-size: 0.85rem;
-    padding: 0.8rem 1rem;
+    flex: 1;
+    min-width: 90px;
+    font-size: 0.8rem;
+    padding: 0.45rem 0.75rem;
   }
 
   .bcc-business-detail-content {

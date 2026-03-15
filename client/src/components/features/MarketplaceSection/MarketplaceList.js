@@ -80,7 +80,7 @@ const MarketplaceList = () => {
         key,
         car,
         onShare: handleShare,
-        compact: isMobile,
+        compact: true,
         showSavings: true,
         showDealer: true,
         className: ''
@@ -94,11 +94,11 @@ const MarketplaceList = () => {
       
       const key = car?._id || car?.id || `error-${section}-${index}`;
       return (
-        <VehicleCard 
+        <VehicleCard
           key={key}
           car={car}
           onShare={handleShare}
-          compact={isMobile}
+          compact={true}
           showSavings={true}
           showDealer={true}
           className="error-fallback"
