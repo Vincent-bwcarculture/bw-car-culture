@@ -1203,12 +1203,39 @@
 /* Ensure consistent button heights */
 .pheader-edit-profile-button,
 .pheader-admin-dashboard-button,
-.pheader-create-article-button {
+.pheader-create-article-button,
+.pheader-transport-dashboard-button {
   min-height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
+/* === TRANSPORT DASHBOARD BUTTON === */
+.pheader-transport-dashboard-button {
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  border-radius: var(--uprofile-border-radius);
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--uprofile-transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--uprofile-shadow-sm);
+  font-family: inherit;
+}
+.pheader-transport-dashboard-button:hover {
+  background: #0b5ed7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13,110,253,0.35);
+}
+.pheader-transport-dashboard-button:active { transform: translateY(0); }
 
 /* Enhanced button group styling for better visual hierarchy */
 @media (min-width: 769px) {

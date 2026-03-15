@@ -2,13 +2,13 @@
 // COMPLETE VERSION - With Social Features + Admin Dashboard Access + Create Article Button for Journalists
 
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Camera, 
-  Edit2, 
-  MapPin, 
-  Phone, 
-  Calendar, 
-  User, 
+import {
+  Camera,
+  Edit2,
+  MapPin,
+  Phone,
+  Calendar,
+  User,
   CheckCircle,
   X,
   Upload,
@@ -17,9 +17,10 @@ import {
   Users,
   UserPlus,
   UserCheck,
-  Shield,  // Added for admin dashboard icon
-  Package, // Added for courier role icon
-  PenTool  // NEW: Added for Create Article button
+  Shield,   // Added for admin dashboard icon
+  Package,  // Added for courier role icon
+  PenTool,  // NEW: Added for Create Article button
+  Bus       // Added for transport admin dashboard button
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import { useNavigate } from 'react-router-dom';  // Added for navigation
@@ -223,10 +224,13 @@ const ProfileHeader = ({
   );
 
   // NEW: Check if user has admin role - COMPREHENSIVE ADMIN CHECK
-  const isAdmin = profileData?.role === 'admin' || 
+  const isAdmin = profileData?.role === 'admin' ||
                   profileData?.role === 'super_admin' ||
                   profileData?.role === 'ministry_official' ||
                   profileData?.role === 'government_admin';
+
+  // Check if user has transport_admin role (own dashboard)
+  const isTransportAdmin = profileData?.role === 'transport_admin';
 
   // NEW: Check if user has journalist role (primary OR additional)
   const isJournalist = profileData?.role === 'journalist' ||
@@ -685,6 +689,19 @@ const handleCreateArticleClick = () => {
                   >
                     <Shield size={16} />
                     Admin Dashboard
+                  </button>
+                )}
+
+                {/* Transport Admin Dashboard button */}
+                {isTransportAdmin && (
+                  <button
+                    className="pheader-transport-dashboard-button"
+                    onClick={() => navigate('/transport-admin/dashboard')}
+                    type="button"
+                    title="Open Transport Dashboard"
+                  >
+                    <Bus size={16} />
+                    Transport Dashboard
                   </button>
                 )}
 

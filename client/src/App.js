@@ -77,6 +77,7 @@ const DealerDashboard = React.lazy(() => import('./Admin/dashboards/DealerDashbo
 const CreateArticle = React.lazy(() => import('./components/journalist/CreateArticle.js'));
 // — User pages
 const UserProfilePage = React.lazy(() => import('./pages/UserProfilePage.js'));
+const TransportAdminDashboard = React.lazy(() => import('./pages/TransportAdminDashboard.js'));
 // — Feature pages
 const CarNewsPage = React.lazy(() => import('./components/features/CarNews/CarNewsPage.js'));
 const NewsArticle = React.lazy(() => import('./components/features/CarNews/NewsArticle.js'));
@@ -1198,6 +1199,13 @@ const AppRoutes = () => {
             <MainLayout>
               <CreateArticle />
             </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        {/* Transport Admin Dashboard */}
+        <Route path="/transport-admin/dashboard" element={
+          <ProtectedRoute requiredRoles={['transport_admin', 'admin']}>
+            <TransportAdminDashboard />
           </ProtectedRoute>
         } />
 
