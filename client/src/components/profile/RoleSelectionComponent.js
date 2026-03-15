@@ -16,6 +16,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pendingRequests, setPendingRequests] = useState([]);
+  const [showAccessCode, setShowAccessCode] = useState(false);
   const [formData, setFormData] = useState({
     // Business Details
     businessName: '',
@@ -73,6 +74,9 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     // Additional Information
     experience: '',
     description: '',
+
+    // Access code (bypass)
+    accessCode: '',
   });
 
   // API Configuration - Use environment variable or fallback
@@ -366,7 +370,9 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         associationRegistrationNumber: formData.associationRegistrationNumber,
         areaOfOperation: formData.areaOfOperation,
         memberCount: formData.memberCount,
-        associationDescription: formData.associationDescription
+        associationDescription: formData.associationDescription,
+        // Access code (bypass)
+        accessCode: formData.accessCode
       };
 
       console.log('Submitting role request:', {
@@ -413,24 +419,30 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
       }
       
       if (response.ok) {
-        alert('Role request submitted successfully! You will receive an email when it\'s reviewed.');
+        if (result.autoApproved) {
+          alert(`Access granted! Your "${availableRoles[selectedRole]?.title}" role has been activated.`);
+        } else {
+          alert('Role request submitted successfully! You will receive an email when it\'s reviewed.');
+        }
         setSelectedRole('');
+        setShowAccessCode(false);
         setFormData({
-          businessName: '', businessType: '', licenseNumber: '', taxId: '', 
-          registrationNumber: '', businessPhone: '', businessEmail: '', 
-          businessAddress: '', city: '', website: '', serviceType: '', 
-          dealershipType: '', transportRoutes: '', fleetSize: '', 
-          operatingAreas: '', employeeId: '', department: '', ministryName: '', 
+          businessName: '', businessType: '', licenseNumber: '', taxId: '',
+          registrationNumber: '', businessPhone: '', businessEmail: '',
+          businessAddress: '', city: '', website: '', serviceType: '',
+          dealershipType: '', transportRoutes: '', fleetSize: '',
+          operatingAreas: '', employeeId: '', department: '', ministryName: '',
           position: '', experience: '', description: '', specializations: '',
           // Reset courier fields
-          transportModes: [], deliveryCapacity: '', operatingSchedule: '', 
+          transportModes: [], deliveryCapacity: '', operatingSchedule: '',
           coverageAreas: '', courierExperience: '',
           // Reset journalist fields
           writingExperience: '', portfolio: '', motivation: '', socialMediaHandles: '',
           // Reset association fields
           associationName: '', associationType: '', associationRegistrationNumber: '',
           areaOfOperation: '', memberCount: '', associationDescription: '',
-          businessLicense: null, taxCertificate: null, idDocument: null, proofOfAddress: null
+          businessLicense: null, taxCertificate: null, idDocument: null, proofOfAddress: null,
+          accessCode: ''
         });
         setIsExpanded(false);
         fetchPendingRequests();
@@ -986,6 +998,27 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
               />
             </div>
           </div>
+        </div>
+
+        {/* Access Code */}
+        <div className="role-access-code-section">
+          <button
+            type="button"
+            className="role-access-code-toggle"
+            onClick={() => setShowAccessCode(prev => !prev)}
+          >
+            Have an access code?
+          </button>
+          {showAccessCode && (
+            <input
+              type="password"
+              className="role-access-code-input"
+              value={formData.accessCode}
+              onChange={(e) => handleInputChange('accessCode', e.target.value)}
+              placeholder="Enter access code"
+              autoComplete="off"
+            />
+          )}
         </div>
 
         <div className="role-form-actions">
