@@ -3,19 +3,21 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  Eye, 
-  Settings, 
-  Route, 
-  Car, 
+import {
+  Eye,
+  Settings,
+  Route,
+  Car,
   Gas,
   BarChart3,
-  BookOpen, 
+  BookOpen,
   Shield,
   UserCheck,
-  Users,  // Added Users icon for Network tab
-  PenTool  // NEW: Added for Articles tab
+  Users,
+  PenTool,
+  Bell
 } from 'lucide-react';
+// Bell used for Notifications tab
 import axios from '../config/axios.js';
 
 import ProfileHeader from '../components/profile/ProfileHeader.js';
@@ -27,7 +29,8 @@ import VehicleManagement from '../components/profile/VehicleManagement.js';
 import BusinessDashboard from '../components/profile/BusinessDashboard.js';
 import ProfileSettings from '../components/profile/ProfileSettings.js';
 import NetworkTab from '../components/profile/NetworkTab.js';
-import ArticleManagement from '../components/profile/ArticleManagement/index.js'; // NEW: Import ArticleManagement
+import ArticleManagement from '../components/profile/ArticleManagement/index.js';
+import NotificationsTab from '../components/profile/NotificationsTab.js';
 
 import CoordinatorManagement from '../components/profile/CoordinatorManagement.js';
 import RealTimeCoordinatorDashboard from '../components/profile/RealTimeCoordinatorDashboard.js';
@@ -66,7 +69,7 @@ const [articleAction, setArticleAction] = useState(null);
       if (tab === 'sell-car' || tab === 'sell_car') {
         setActiveTab('vehicles'); // Redirect to vehicles tab
         setUrlAction('sell'); // Set action to sell
-      } else if (['overview', 'services', 'routes', 'vehicles', 'articles', 'business', 'network', 'settings'].includes(tab)) {
+      } else if (['overview', 'notifications', 'services', 'routes', 'vehicles', 'articles', 'business', 'network', 'settings'].includes(tab)) {
         setActiveTab(tab);
       }
     }
@@ -205,11 +208,12 @@ const getProfileHints = (userType) => {
 
 const getAvailableTabs = () => {
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: Eye }
+    { id: 'overview', label: 'Overview', icon: Eye },
+    { id: 'notifications', label: 'Notifications', icon: Bell }
   ];
 
   // === UNIVERSAL TABS (Everyone gets these) ===
-  
+
   // Always show vehicles for anyone who might own a car
   tabs.push({ id: 'vehicles', label: 'Sell My Vehicle', icon: Car });
 
@@ -367,10 +371,14 @@ const getAvailableTabs = () => {
       {/* Enhanced Profile Content */}
       <div className="uprofile-content-container">
         {activeTab === 'overview' && (
-          <ProfileOverview 
+          <ProfileOverview
             profileData={displayData}
             refreshProfile={fetchUserProfile}
           />
+        )}
+
+        {activeTab === 'notifications' && (
+          <NotificationsTab profileData={displayData} />
         )}
 
         {activeTab === 'services' && (
