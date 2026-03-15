@@ -187,42 +187,40 @@ body {
 
 .uprofile-nav-tab {
   background: transparent;
-  border: none;
-  border-radius: var(--uprofile-border-radius-sm);
-  padding: 12px 20px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 6px 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 6px;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--uprofile-text-secondary);
-  transition: var(--uprofile-transition);
+  color: rgba(255,255,255,0.5);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
   white-space: nowrap;
   position: relative;
-  min-height: 44px;
+  min-height: 30px;
 }
 
 .uprofile-nav-tab:hover {
-  background: var(--uprofile-bg-secondary);
-  color: var(--uprofile-text-primary);
-  transform: translateY(-1px);
-  box-shadow: var(--uprofile-shadow-sm);
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.85);
 }
 
 .uprofile-nav-tab-active {
-  background: var(--uprofile-primary-accent) !important;
-  color: var(--uprofile-text-white) !important;
-  box-shadow: var(--uprofile-shadow-sm);
+  background: rgba(255,255,255,0.08) !important;
+  border-color: rgba(255,255,255,0.25) !important;
+  color: #fff !important;
 }
 
 .uprofile-nav-tab-active:hover {
-  background: var(--uprofile-primary-accent-dark) !important;
-  transform: translateY(-1px);
+  background: rgba(255,255,255,0.12) !important;
 }
 
 .uprofile-nav-tab-label {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -263,14 +261,14 @@ body {
   
   .uprofile-nav-tab {
     gap: 0;
-    padding: 12px 16px;
-    font-size: 13px;
+    padding: 6px 10px;
+    font-size: 11px;
   }
-  
+
   .uprofile-nav-tab-label {
     text-align: center;
     width: 100%;
-    font-size: 13px;
+    font-size: 11px;
   }
   
   .uprofile-error-container {

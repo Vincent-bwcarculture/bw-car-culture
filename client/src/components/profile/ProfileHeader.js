@@ -1,7 +1,7 @@
 // client/src/components/profile/ProfileHeader.js
 // COMPLETE VERSION - With Social Features + Admin Dashboard Access + Create Article Button for Journalists
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Camera,
   Edit2,
@@ -28,102 +28,40 @@ import './ProfileHeader.css';
 
 // === SOCIAL STATS SECTION COMPONENT ===
 const SocialStatsSection = ({ profileData, isOwnProfile = false, onFollowAction }) => {
-  const [socialStats, setSocialStats] = useState({
-    followers: 0,
-    following: 0,
-    associates: 0,
-    isFollowing: false
-  });
-  const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
 
-  // Fetch social stats on component mount
-  useEffect(() => {
-    fetchSocialStats();
-  }, [profileData]);
+  // Derive counts directly from profileData (already returned by /user/profile)
+  const followers = profileData?.followers || [];
+  const following = profileData?.following || [];
+  const followerCount = followers.length;
+  const followingCount = following.length;
 
-  const fetchSocialStats = async () => {
-    try {
-      setLoading(true);
-      
-      // Get social stats for current user or target user
-      let statsEndpoint = '/api/user/social-stats';
-      if (!isOwnProfile && profileData?._id) {
-        // If viewing another user's profile, we might want to fetch their stats too
-        // For now, we'll get current user's stats and follow status
-        statsEndpoint = '/api/user/social-stats';
-      }
+  // Associates = mutual follows (in both followers and following)
+  const followerIds = new Set(followers.map(id => id?.toString ? id.toString() : String(id)));
+  const associateCount = following.filter(id => followerIds.has(id?.toString ? id.toString() : String(id))).length;
 
-      const statsResponse = await fetch(statsEndpoint, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
-        setSocialStats(prev => ({
-          ...prev,
-          ...statsData.data
-        }));
-      }
-
-      // If viewing another user's profile, check follow status
-      if (!isOwnProfile && profileData?._id) {
-        const followStatusResponse = await fetch(`/api/user/follow-status/${profileData._id}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        
-        if (followStatusResponse.ok) {
-          const followData = await followStatusResponse.json();
-          setSocialStats(prev => ({
-            ...prev,
-            isFollowing: followData.data.isFollowing
-          }));
-        }
-      }
-
-    } catch (error) {
-      console.error('Error fetching social stats:', error);
-    } finally {
-      setLoading(false);
-    }
+  const formatCount = (count) => {
+    if (count >= 1000) return (count / 1000).toFixed(1) + 'k';
+    return String(count);
   };
 
   const handleFollowAction = async () => {
     if (!profileData?._id || isOwnProfile) return;
-
+    const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
     try {
       setActionLoading(true);
-      
-      const endpoint = socialStats.isFollowing ? '/api/user/unfollow' : '/api/user/follow';
-      const response = await fetch(endpoint, {
+      const response = await fetch(`${API_BASE}/users/${profileData._id}/follow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ targetUserId: profileData._id })
+        }
       });
-
       if (response.ok) {
         const result = await response.json();
-        
-        // Update local state
-        setSocialStats(prev => ({
-          ...prev,
-          isFollowing: !prev.isFollowing,
-          following: result.data.followingCount || prev.following
-        }));
-
-        // Refresh social stats to get updated counts
-        setTimeout(fetchSocialStats, 500);
-
-        if (onFollowAction) {
-          onFollowAction(!socialStats.isFollowing);
-        }
+        setIsFollowing(result.following);
+        if (onFollowAction) onFollowAction(result.following);
       }
     } catch (error) {
       console.error('Error following/unfollowing user:', error);
@@ -132,39 +70,25 @@ const SocialStatsSection = ({ profileData, isOwnProfile = false, onFollowAction 
     }
   };
 
-  const formatCount = (count) => {
-    if (count >= 1000) {
-      return (count / 1000).toFixed(1) + 'k';
-    }
-    return count.toString();
-  };
-
   return (
     <div className="pheader-social-section">
-      {/* Social Stats */}
       <div className="pheader-social-stats">
         <div className="pheader-stat-item">
-          <div className="pheader-stat-number">
-            {loading ? '...' : formatCount(socialStats.followers)}
-          </div>
+          <div className="pheader-stat-number">{formatCount(followerCount)}</div>
           <div className="pheader-stat-label">Followers</div>
         </div>
-        
+
         <div className="pheader-stat-divider"></div>
-        
+
         <div className="pheader-stat-item">
-          <div className="pheader-stat-number">
-            {loading ? '...' : formatCount(socialStats.following)}
-          </div>
+          <div className="pheader-stat-number">{formatCount(followingCount)}</div>
           <div className="pheader-stat-label">Following</div>
         </div>
-        
+
         <div className="pheader-stat-divider"></div>
-        
+
         <div className="pheader-stat-item pheader-stat-associates">
-          <div className="pheader-stat-number">
-            {loading ? '...' : formatCount(socialStats.associates)}
-          </div>
+          <div className="pheader-stat-number">{formatCount(associateCount)}</div>
           <div className="pheader-stat-label">Associates</div>
         </div>
       </div>
@@ -172,14 +96,14 @@ const SocialStatsSection = ({ profileData, isOwnProfile = false, onFollowAction 
       {/* Follow/Unfollow Button - Only show if not own profile */}
       {!isOwnProfile && profileData?._id && (
         <div className="pheader-follow-section">
-          <button 
-            className={`pheader-follow-btn ${socialStats.isFollowing ? 'following' : 'not-following'}`}
+          <button
+            className={`pheader-follow-btn ${isFollowing ? 'following' : 'not-following'}`}
             onClick={handleFollowAction}
             disabled={actionLoading}
           >
             {actionLoading ? (
               <Loader size={16} className="spin" />
-            ) : socialStats.isFollowing ? (
+            ) : isFollowing ? (
               <>
                 <UserCheck size={16} />
                 <span>Following</span>
