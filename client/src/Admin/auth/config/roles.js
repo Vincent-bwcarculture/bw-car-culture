@@ -8,7 +8,8 @@ export const ROLES = {
   DEALER: 'dealer',
   PROVIDER: 'provider',
   MINISTRY: 'ministry',
-  COURIER: 'courier',  // NEW: Courier role added
+  ASSOCIATION: 'association',
+  COURIER: 'courier',
   USER: 'user'
 };
   
@@ -33,6 +34,12 @@ export const PERMISSIONS = {
   MANAGE_MINISTRY_DASHBOARD: 'manage_ministry_dashboard',
   VIEW_TRANSPORT_DATA: 'view_transport_data',
   APPROVE_TRANSPORT_SERVICES: 'approve_transport_services',
+
+  // Association Management Permissions
+  MANAGE_ASSOCIATION_DASHBOARD: 'manage_association_dashboard',
+  OVERSEE_MEMBERS: 'oversee_members',
+  ASSOCIATION_REPORTING: 'association_reporting',
+  LIAISON_ACCESS: 'liaison_access',
 
   // NEW: Courier Management Permissions
   MANAGE_COURIER_TRIPS: 'manage_courier_trips',
@@ -88,7 +95,15 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.VIEW_ANALYTICS,
     PERMISSIONS.EXPORT_REPORTS
   ],
-  // NEW: Courier role permissions - Comprehensive courier functionality
+  [ROLES.ASSOCIATION]: [
+    PERMISSIONS.MANAGE_ASSOCIATION_DASHBOARD,
+    PERMISSIONS.OVERSEE_MEMBERS,
+    PERMISSIONS.ASSOCIATION_REPORTING,
+    PERMISSIONS.LIAISON_ACCESS,
+    PERMISSIONS.VIEW_TRANSPORT_DATA,
+    PERMISSIONS.VIEW_ANALYTICS
+  ],
+  // Courier role permissions - Comprehensive courier functionality
   [ROLES.COURIER]: [
     PERMISSIONS.MANAGE_COURIER_TRIPS,
     PERMISSIONS.MANAGE_COURIER_DELIVERIES,

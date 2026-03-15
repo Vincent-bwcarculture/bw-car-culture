@@ -2,16 +2,17 @@
 // ENHANCED VERSION - Better styling, more application details, unique classes
 
 import React, { useState, useEffect } from 'react';
-import { 
-  User, 
-  PenTool, 
-  Car, 
-  Package, 
+import {
+  User,
+  PenTool,
+  Car,
+  Package,
   Building2,
   Shield,
-  Clock, 
-  CheckCircle, 
-  XCircle, 
+  Network,
+  Clock,
+  CheckCircle,
+  XCircle,
   Eye,
   Search,
   Users,
@@ -92,6 +93,13 @@ const RoleManager = () => {
       color: '#34495e',
       bgColor: 'rgba(52, 73, 94, 0.1)',
       description: 'Government transport oversight'
+    },
+    association: {
+      title: 'Association',
+      icon: Network,
+      color: '#0f766e',
+      bgColor: 'rgba(15, 118, 110, 0.1)',
+      description: 'Transport or industry association oversight'
     }
   };
 
@@ -348,6 +356,47 @@ const RoleManager = () => {
                 <p className="bw-app-field__content">
                   {request.roleSpecificInfo.coverageAreas.substring(0, 100)}
                   {request.roleSpecificInfo.coverageAreas.length > 100 && '...'}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Association Preview */}
+        {request.requestType === 'association' && request.roleSpecificInfo && (
+          <div className="bw-app-preview bw-app-preview--association">
+            <h4 className="bw-app-preview__title">
+              <Network size={16} />
+              Association Application Summary
+            </h4>
+
+            {request.roleSpecificInfo.associationName && (
+              <div className="bw-app-field">
+                <strong className="bw-app-field__label">Association Name:</strong>
+                <p className="bw-app-field__content">{request.roleSpecificInfo.associationName}</p>
+              </div>
+            )}
+
+            {request.roleSpecificInfo.associationType && (
+              <div className="bw-app-field">
+                <strong className="bw-app-field__label">Type:</strong>
+                <p className="bw-app-field__content">{request.roleSpecificInfo.associationType.replace('_', ' ')}</p>
+              </div>
+            )}
+
+            {request.roleSpecificInfo.memberCount && (
+              <div className="bw-app-field">
+                <strong className="bw-app-field__label">Members:</strong>
+                <p className="bw-app-field__content">{request.roleSpecificInfo.memberCount}</p>
+              </div>
+            )}
+
+            {request.roleSpecificInfo.areaOfOperation && (
+              <div className="bw-app-field">
+                <strong className="bw-app-field__label">Area of Operation:</strong>
+                <p className="bw-app-field__content">
+                  {request.roleSpecificInfo.areaOfOperation.substring(0, 100)}
+                  {request.roleSpecificInfo.areaOfOperation.length > 100 && '...'}
                 </p>
               </div>
             )}
@@ -687,6 +736,70 @@ const RoleManager = () => {
               </div>
             )}
 
+            {/* Detailed Association Application */}
+            {selectedRequest.role === 'association' && selectedRequest.applicationData && (
+              <div className="bw-modal-section">
+                <h3 className="bw-modal-section__title">
+                  <Network size={20} />
+                  Association Details
+                </h3>
+
+                {selectedRequest.applicationData.associationName && (
+                  <div className="bw-detail-block">
+                    <h4 className="bw-detail-block__title">Association Name</h4>
+                    <div className="bw-detail-block__content">
+                      <p>{selectedRequest.applicationData.associationName}</p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedRequest.applicationData.associationType && (
+                  <div className="bw-detail-block">
+                    <h4 className="bw-detail-block__title">Association Type</h4>
+                    <div className="bw-detail-block__content">
+                      <p>{selectedRequest.applicationData.associationType.replace(/_/g, ' ')}</p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedRequest.applicationData.associationRegistrationNumber && (
+                  <div className="bw-detail-block">
+                    <h4 className="bw-detail-block__title">Registration Number</h4>
+                    <div className="bw-detail-block__content">
+                      <p className="bw-mono">{selectedRequest.applicationData.associationRegistrationNumber}</p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedRequest.applicationData.memberCount && (
+                  <div className="bw-detail-block">
+                    <h4 className="bw-detail-block__title">Number of Members</h4>
+                    <div className="bw-detail-block__content">
+                      <p>{selectedRequest.applicationData.memberCount}</p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedRequest.applicationData.areaOfOperation && (
+                  <div className="bw-detail-block">
+                    <h4 className="bw-detail-block__title">Area of Operation</h4>
+                    <div className="bw-detail-block__content">
+                      <p>{selectedRequest.applicationData.areaOfOperation}</p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedRequest.applicationData.associationDescription && (
+                  <div className="bw-detail-block">
+                    <h4 className="bw-detail-block__title">Association Description</h4>
+                    <div className="bw-detail-block__content">
+                      <p>{selectedRequest.applicationData.associationDescription}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Application Reason */}
             {selectedRequest.reason && (
               <div className="bw-modal-section">
@@ -803,6 +916,7 @@ const RoleManager = () => {
           <option value="transport_coordinator">Transport Coordinator</option>
           <option value="rental_admin">Rental Admin</option>
           <option value="ministry_official">Ministry Official</option>
+          <option value="association">Association</option>
         </select>
       </div>
 

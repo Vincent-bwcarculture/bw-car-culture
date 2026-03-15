@@ -2,11 +2,12 @@
 // COMPLETE VERSION - Fixed API calls to use correct API server
 
 import React, { useState, useEffect } from 'react';
-import { 
-  User, Users, Car, Truck, Building2, Shield, 
-  MapPin, Phone, Mail, FileText, Upload, 
+import {
+  User, Users, Car, Truck, Building2, Shield,
+  MapPin, Phone, Mail, FileText, Upload,
   Clock, CheckCircle, XCircle, AlertCircle,
-  ArrowRight, ChevronDown, ChevronUp, Package, PenTool  // Added PenTool icon for journalist
+  ArrowRight, ChevronDown, ChevronUp, Package, PenTool,
+  Network  // Network icon for Association role
 } from 'lucide-react';
 import './RoleSelectionComponent.css';
 
@@ -60,11 +61,18 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     specializations: [],
     motivation: '',
     socialMediaHandles: '',
-    
+
+    // Association-specific fields
+    associationName: '',
+    associationType: '',
+    associationRegistrationNumber: '',
+    areaOfOperation: '',
+    memberCount: '',
+    associationDescription: '',
+
     // Additional Information
     experience: '',
     description: '',
-    specializations: ''
   });
 
   // API Configuration - Use environment variable or fallback
@@ -204,6 +212,23 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
       ],
       requiredFields: [],
       requiredDocs: []
+    },
+    'association': {
+      id: 'association',
+      title: 'Association',
+      icon: Network,
+      color: '#0f766e',
+      description: 'Represent a transport or industry association (e.g. taxi associations)',
+      requiresApproval: true,
+      benefits: [
+        'Association management dashboard',
+        'Member oversight tools',
+        'Industry representation features',
+        'Regulatory liaison access',
+        'Collective reporting tools'
+      ],
+      requiredFields: [],
+      requiredDocs: []
     }
   };
 
@@ -334,7 +359,14 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         writingExperience: formData.writingExperience,
         portfolio: formData.portfolio,
         motivation: formData.motivation,
-        socialMediaHandles: formData.socialMediaHandles
+        socialMediaHandles: formData.socialMediaHandles,
+        // Association-specific data
+        associationName: formData.associationName,
+        associationType: formData.associationType,
+        associationRegistrationNumber: formData.associationRegistrationNumber,
+        areaOfOperation: formData.areaOfOperation,
+        memberCount: formData.memberCount,
+        associationDescription: formData.associationDescription
       };
 
       console.log('Submitting role request:', {
@@ -395,6 +427,9 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
           coverageAreas: '', courierExperience: '',
           // Reset journalist fields
           writingExperience: '', portfolio: '', motivation: '', socialMediaHandles: '',
+          // Reset association fields
+          associationName: '', associationType: '', associationRegistrationNumber: '',
+          areaOfOperation: '', memberCount: '', associationDescription: '',
           businessLicense: null, taxCertificate: null, idDocument: null, proofOfAddress: null
         });
         setIsExpanded(false);
@@ -543,7 +578,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                 />
               </div>
               
-              {(selectedRole === 'dealership_admin' || selectedRole === 'transport_admin' || selectedRole === 'rental_admin') && (
+              {(selectedRole === 'dealership_admin' || selectedRole === 'transport_admin' || selectedRole === 'rental_admin' || selectedRole === 'association') && (
                 <div className="role-form-field role-form-field-full">
                   <label>Business Address</label>
                   <textarea
@@ -738,6 +773,81 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                     onChange={(e) => handleInputChange('socialMediaHandles', e.target.value)}
                     placeholder="Share your social media handles, personal website, or any online presence that showcases your writing or automotive interests"
                     rows="3"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Association Details Section */}
+          {selectedRole === 'association' && (
+            <div className="role-form-section">
+              <h5>Association Details</h5>
+              <div className="role-form-grid">
+                <div className="role-form-field">
+                  <label>Association Name</label>
+                  <input
+                    type="text"
+                    value={formData.associationName}
+                    onChange={(e) => handleInputChange('associationName', e.target.value)}
+                    placeholder="e.g. Gaborone Taxi Operators Association"
+                  />
+                </div>
+
+                <div className="role-form-field">
+                  <label>Association Type</label>
+                  <select
+                    value={formData.associationType}
+                    onChange={(e) => handleInputChange('associationType', e.target.value)}
+                  >
+                    <option value="">Select association type</option>
+                    <option value="taxi_association">Taxi Association</option>
+                    <option value="transport_association">Transport Association</option>
+                    <option value="combi_association">Combi Association</option>
+                    <option value="bus_operators">Bus Operators Association</option>
+                    <option value="auto_industry">Auto Industry Association</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div className="role-form-field">
+                  <label>Registration Number</label>
+                  <input
+                    type="text"
+                    value={formData.associationRegistrationNumber}
+                    onChange={(e) => handleInputChange('associationRegistrationNumber', e.target.value)}
+                    placeholder="Official registration/permit number"
+                  />
+                </div>
+
+                <div className="role-form-field">
+                  <label>Number of Members</label>
+                  <input
+                    type="number"
+                    value={formData.memberCount}
+                    onChange={(e) => handleInputChange('memberCount', e.target.value)}
+                    placeholder="Approximate number of members"
+                    min="1"
+                  />
+                </div>
+
+                <div className="role-form-field role-form-field-full">
+                  <label>Area of Operation</label>
+                  <textarea
+                    value={formData.areaOfOperation}
+                    onChange={(e) => handleInputChange('areaOfOperation', e.target.value)}
+                    placeholder="Describe the geographic areas or routes your association covers"
+                    rows="3"
+                  />
+                </div>
+
+                <div className="role-form-field role-form-field-full">
+                  <label>Association Description</label>
+                  <textarea
+                    value={formData.associationDescription}
+                    onChange={(e) => handleInputChange('associationDescription', e.target.value)}
+                    placeholder="Describe your association's purpose, goals, and how you oversee your members"
+                    rows="4"
                   />
                 </div>
               </div>
