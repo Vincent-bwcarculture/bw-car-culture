@@ -4,22 +4,28 @@
   }
   
   .bcc-share-button {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background-color: rgba(255, 51, 0, 0.2);
-    border: 1px solid rgba(255, 51, 0, 0.3);
-    color: #ffffff;
+    width: auto;
+    height: auto;
+    padding: 6px 12px;
+    border-radius: 7px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.6);
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 5px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
   }
-  
+
   .bcc-share-button:hover {
-    background-color: rgba(255, 51, 0, 0.4);
-    transform: scale(1.1);
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.3);
+    color: #ffffff;
+    transform: none;
   }
   
   .bcc-share-icon {

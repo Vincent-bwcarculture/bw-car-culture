@@ -1,10 +1,10 @@
 // client/src/components/profile/BusinessDashboard.js
-import React, { useState, useEffect } from 'react';
-import { 
-  BarChart3, TrendingUp, Users, DollarSign, Star, 
-  Eye, MessageSquare, Settings, ExternalLink, 
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  BarChart3, TrendingUp, Users, DollarSign, Star,
+  Eye, MessageSquare, Settings, ExternalLink,
   Calendar, FileText, Award, AlertCircle, CheckCircle,
-  Activity, Clock, Phone, MapPin, Shield, Target
+  Activity, Clock, Phone, MapPin, Shield, Target, Send, X
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import './BusinessDashboard.css';
@@ -14,6 +14,13 @@ const BusinessDashboard = ({ profileData, refreshProfile }) => {
   const [loading, setLoading] = useState(false);
   const [activeView, setActiveView] = useState('overview');
   const [message, setMessage] = useState({ type: '', text: '' });
+
+  // Reviews state
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [replySubmitting, setReplySubmitting] = useState(false);
 
   // Get user's business services
   const verifiedServices = profileData?.businessProfile?.services?.filter(s => s.isVerified) || [];
@@ -25,6 +32,53 @@ const BusinessDashboard = ({ profileData, refreshProfile }) => {
       fetchDashboardData();
     }
   }, [profileData]);
+
+  const fetchReviews = useCallback(async () => {
+    setReviewsLoading(true);
+    try {
+      const results = [];
+      if (hasDealer?._id) {
+        const res = await axios.get(`/reviews/dealer/${hasDealer._id}`);
+        const items = res.data?.data?.reviews || res.data?.reviews || [];
+        items.forEach(r => results.push({ ...r, _source: 'dealer', _sourceName: hasDealer.businessName || 'Dealership' }));
+      }
+      for (const svc of verifiedServices) {
+        if (svc._id) {
+          try {
+            const res = await axios.get(`/reviews/service/${svc._id}`);
+            const items = res.data?.data?.reviews || res.data?.reviews || [];
+            items.forEach(r => results.push({ ...r, _source: 'service', _sourceName: svc.serviceName }));
+          } catch (_) {}
+        }
+      }
+      results.sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+      setReviews(results);
+    } catch (err) {
+      console.error('Error fetching reviews:', err);
+    } finally {
+      setReviewsLoading(false);
+    }
+  }, [hasDealer, verifiedServices]);
+
+  useEffect(() => {
+    if (activeView === 'reviews') fetchReviews();
+  }, [activeView, fetchReviews]);
+
+  const submitReply = async (reviewId) => {
+    if (!replyText.trim()) return;
+    setReplySubmitting(true);
+    try {
+      await axios.post(`/reviews/${reviewId}/reply`, { reply: replyText.trim() });
+      setReviews(prev => prev.map(r => r._id === reviewId ? { ...r, reply: replyText.trim() } : r));
+      setReplyingTo(null);
+      setReplyText('');
+      showMessage('success', 'Reply posted successfully');
+    } catch (err) {
+      showMessage('error', 'Failed to post reply');
+    } finally {
+      setReplySubmitting(false);
+    }
+  };
 
   const showMessage = (type, text) => {
     setMessage({ type, text });
@@ -95,6 +149,7 @@ const BusinessDashboard = ({ profileData, refreshProfile }) => {
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'services', label: 'Services', icon: Settings },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+    { id: 'reviews', label: 'Reviews', icon: Star },
     { id: 'admin', label: 'Admin Tools', icon: Shield, adminOnly: true }
   ];
 
@@ -438,6 +493,102 @@ const BusinessDashboard = ({ profileData, refreshProfile }) => {
               Full Admin Dashboard
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Reviews Section */}
+      {activeView === 'reviews' && (
+        <div className="bdash-reviews-section">
+          <h3 className="bdash-section-title">
+            <Star size={20} />
+            Customer Reviews
+          </h3>
+
+          {reviewsLoading ? (
+            <div className="bdash-loading-container">
+              <div className="bdash-loading-spinner"></div>
+              <p>Loading reviews...</p>
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className="bdash-empty-state">
+              <Star size={40} />
+              <p>No reviews yet</p>
+            </div>
+          ) : (
+            <div className="bdash-reviews-list">
+              {reviews.map(review => (
+                <div key={review._id} className="bdash-review-card">
+                  <div className="bdash-review-header">
+                    <div className="bdash-review-meta">
+                      <div className="bdash-reviewer-avatar">
+                        {(review.reviewer?.name || review.fromUserId?.name)?.charAt(0)?.toUpperCase() || '?'}
+                      </div>
+                      <div>
+                        <div className="bdash-reviewer-name">{review.reviewer?.name || review.fromUserId?.name || 'Anonymous'}</div>
+                        <div className="bdash-review-source">{review._sourceName}</div>
+                      </div>
+                    </div>
+                    <div className="bdash-review-right">
+                      <div className="bdash-review-stars">
+                        {[1,2,3,4,5].map(n => (
+                          <Star key={n} size={14} fill={n <= review.rating ? '#fbbf24' : 'none'} stroke={n <= review.rating ? '#fbbf24' : '#555'} />
+                        ))}
+                      </div>
+                      <div className="bdash-review-date">
+                        {new Date(review.date || review.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="bdash-review-comment">{review.review || review.comment}</p>
+
+                  {/* Existing reply */}
+                  {review.reply && (
+                    <div className="bdash-review-reply">
+                      <div className="bdash-reply-label">Your reply</div>
+                      <p>{review.reply}</p>
+                    </div>
+                  )}
+
+                  {/* Reply form */}
+                  {!review.reply && replyingTo === review._id ? (
+                    <div className="bdash-reply-form">
+                      <textarea
+                        className="bdash-reply-input"
+                        placeholder="Write your reply..."
+                        value={replyText}
+                        onChange={e => setReplyText(e.target.value)}
+                        rows={3}
+                      />
+                      <div className="bdash-reply-actions">
+                        <button
+                          className="bdash-reply-submit-btn"
+                          onClick={() => submitReply(review._id)}
+                          disabled={replySubmitting || !replyText.trim()}
+                        >
+                          <Send size={13} />
+                          {replySubmitting ? 'Posting...' : 'Post Reply'}
+                        </button>
+                        <button
+                          className="bdash-reply-cancel-btn"
+                          onClick={() => { setReplyingTo(null); setReplyText(''); }}
+                        >
+                          <X size={13} /> Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : !review.reply && (
+                    <button
+                      className="bdash-reply-btn"
+                      onClick={() => { setReplyingTo(review._id); setReplyText(''); }}
+                    >
+                      <MessageSquare size={13} /> Reply
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

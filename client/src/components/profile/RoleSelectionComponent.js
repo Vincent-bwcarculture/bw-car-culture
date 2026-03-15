@@ -77,7 +77,15 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
 
     // Access code (bypass)
     accessCode: '',
+    // Existing business claim
+    claimedBusinessId: '',
   });
+
+  // Business search state
+  const [bizSearchQuery, setBizSearchQuery] = useState('');
+  const [bizSearchResults, setBizSearchResults] = useState([]);
+  const [bizSearching, setBizSearching] = useState(false);
+  const [selectedBiz, setSelectedBiz] = useState(null);
 
   // API Configuration - Use environment variable or fallback
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
@@ -274,6 +282,44 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     }
   };
 
+  const searchBusinesses = async (query) => {
+    if (!query || query.length < 2) { setBizSearchResults([]); return; }
+    setBizSearching(true);
+    try {
+      let url = '';
+      if (selectedRole === 'dealership_admin') {
+        url = `${API_BASE_URL}/dealers?search=${encodeURIComponent(query)}&limit=8`;
+      } else if (selectedRole === 'transport_admin') {
+        url = `${API_BASE_URL}/services?search=${encodeURIComponent(query)}&providerType=public_transport&limit=8`;
+      } else if (selectedRole === 'rental_admin') {
+        url = `${API_BASE_URL}/services?search=${encodeURIComponent(query)}&providerType=car_rental&limit=8`;
+      } else {
+        setBizSearching(false);
+        return;
+      }
+      const res = await fetch(url);
+      const data = await res.json();
+      const items = data.dealers || data.data || [];
+      setBizSearchResults(items);
+    } catch (_) {
+      setBizSearchResults([]);
+    } finally {
+      setBizSearching(false);
+    }
+  };
+
+  const selectBusiness = (biz) => {
+    setSelectedBiz(biz);
+    handleInputChange('claimedBusinessId', biz._id);
+    setBizSearchQuery('');
+    setBizSearchResults([]);
+  };
+
+  const clearSelectedBiz = () => {
+    setSelectedBiz(null);
+    handleInputChange('claimedBusinessId', '');
+  };
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -372,7 +418,9 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         memberCount: formData.memberCount,
         associationDescription: formData.associationDescription,
         // Access code (bypass)
-        accessCode: formData.accessCode
+        accessCode: formData.accessCode,
+        // Existing business claim
+        claimedBusinessId: formData.claimedBusinessId || undefined
       };
 
       console.log('Submitting role request:', {
@@ -442,8 +490,12 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
           associationName: '', associationType: '', associationRegistrationNumber: '',
           areaOfOperation: '', memberCount: '', associationDescription: '',
           businessLicense: null, taxCertificate: null, idDocument: null, proofOfAddress: null,
-          accessCode: ''
+          accessCode: '',
+          claimedBusinessId: ''
         });
+        setSelectedBiz(null);
+        setBizSearchQuery('');
+        setBizSearchResults([]);
         setIsExpanded(false);
         fetchPendingRequests();
         if (refreshProfile) refreshProfile();
@@ -510,6 +562,61 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         </div>
 
         <div className="role-form-sections">
+
+          {/* Claim Existing Business */}
+          {(selectedRole === 'dealership_admin' || selectedRole === 'transport_admin' || selectedRole === 'rental_admin') && (
+            <div className="role-form-section">
+              <h5>Claim Existing Business <span style={{ fontWeight: 400, color: 'rgba(255,255,255,0.4)', fontSize: '0.8em' }}>(optional)</span></h5>
+              <p style={{ margin: '0 0 0.75rem', fontSize: '0.83rem', color: 'rgba(255,255,255,0.45)', lineHeight: 1.4 }}>
+                If your business already exists on the platform, search and select it to link it to your account upon approval.
+              </p>
+              {selectedBiz ? (
+                <div className="rsc-selected-biz">
+                  <div className="rsc-selected-biz-name">
+                    <CheckCircle size={15} style={{ color: '#6ee7b7', flexShrink: 0 }} />
+                    {selectedBiz.businessName}
+                  </div>
+                  <button className="rsc-clear-biz-btn" onClick={clearSelectedBiz} type="button">
+                    <XCircle size={14} /> Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="rsc-biz-search-wrapper">
+                  <div className="rsc-biz-search-input-row">
+                    <input
+                      type="text"
+                      className="rsc-biz-search-input"
+                      placeholder="Search by business name or city..."
+                      value={bizSearchQuery}
+                      onChange={(e) => {
+                        setBizSearchQuery(e.target.value);
+                        searchBusinesses(e.target.value);
+                      }}
+                    />
+                    {bizSearching && <span className="rsc-biz-searching">Searching…</span>}
+                  </div>
+                  {bizSearchResults.length > 0 && (
+                    <div className="rsc-biz-results">
+                      {bizSearchResults.map(biz => (
+                        <button
+                          key={biz._id}
+                          type="button"
+                          className="rsc-biz-result-item"
+                          onClick={() => selectBusiness(biz)}
+                        >
+                          <span className="rsc-biz-result-name">{biz.businessName}</span>
+                          {(biz.location?.city || biz.contact?.city) && (
+                            <span className="rsc-biz-result-city">{biz.location?.city || biz.contact?.city}</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Business Information Section */}
           <div className="role-form-section">
             <h5>Business Information</h5>

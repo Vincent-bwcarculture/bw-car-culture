@@ -5,88 +5,68 @@
     margin-bottom: 1.5rem;
     position: relative;
   }
-  
+
   .tabs {
     display: flex;
     flex-wrap: wrap;
-    border-bottom: 1px solid #ddd;
+    gap: 0.35rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 0.6rem;
     position: relative;
   }
-  
+
   .tab {
-    padding: 0.8rem 1.2rem;
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    margin-right: 0.5rem;
-    font-size: 0.95rem;
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    margin-right: 0;
+    font-size: 12px;
     font-weight: 500;
-    color: #666;
+    color: rgba(255,255,255,0.45);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
     white-space: nowrap;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
   }
-  
+
   .tab:hover {
-    color: #333;
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.75);
   }
-  
+
   .tab.active {
-    color: #ff3300;
-    border-bottom-color: #ff3300;
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.25);
+    color: #ffffff;
   }
-  
+
   /* Responsive styles */
   @media (max-width: 768px) {
     .tabs {
       overflow-x: auto;
-      white-space: nowrap;
+      flex-wrap: nowrap;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: 0.2rem;
+      padding-bottom: 0.5rem;
     }
-    
+
     .tabs::-webkit-scrollbar {
       height: 2px;
     }
-    
+
     .tabs::-webkit-scrollbar-track {
-      background: #f1f1f1;
+      background: rgba(255,255,255,0.04);
     }
-    
+
     .tabs::-webkit-scrollbar-thumb {
-      background: #888;
+      background: rgba(255,255,255,0.2);
     }
-    
+
     .tab {
-      padding: 0.6rem 1rem;
-      font-size: 0.9rem;
-    }
-  }
-  
-  /* Dark mode styles */
-  @media (prefers-color-scheme: dark) {
-    .tabs {
-      border-bottom-color: #444;
-    }
-    
-    .tab {
-      color: #aaa;
-    }
-    
-    .tab:hover {
-      color: #f2f2f2;
-    }
-    
-    .tab.active {
-      color: #ff3300;
-      border-bottom-color: #ff3300;
-    }
-    
-    .tabs::-webkit-scrollbar-track {
-      background: #333;
-    }
-    
-    .tabs::-webkit-scrollbar-thumb {
-      background: #666;
+      padding: 6px 10px;
+      font-size: 11px;
     }
   }
