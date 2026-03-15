@@ -77,7 +77,7 @@ const DealershipCard = ({ dealer, onAction, compact = false }) => {
     if (onAction) {
       onAction(dealer);
     } else if (dealer._id) {
-      navigate(`/dealerships/${dealer._id}`);
+      navigate(`/dealerships/${dealer.slug || dealer._id}`);
     }
   };
 
