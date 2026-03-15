@@ -7,7 +7,7 @@ import {
   MapPin, Clock, Star, TrendingUp, Users, Activity,
   CheckCircle, XCircle, AlertCircle, ChevronRight,
   Bus, Car, Truck, Navigation, DollarSign, BarChart2,
-  Toggle, ToggleLeft, X, Save, ChevronDown, ChevronUp
+  ToggleRight, ToggleLeft, X, Save, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
 import './TransportAdminDashboard.css';
@@ -234,7 +234,7 @@ const RouteRow = ({ route, onEdit, onDelete, onToggleStatus }) => {
       </div>
       <div className="ta-route-row-actions">
         <button className="ta-icon-btn" title={active ? 'Suspend' : 'Activate'} onClick={() => onToggleStatus(route)}>
-          {active ? <ToggleLeft size={18} /> : <Toggle size={18} />}
+          {active ? <ToggleLeft size={18} /> : <ToggleRight size={18} />}
         </button>
         <button className="ta-icon-btn" title="Edit" onClick={() => onEdit(route)}><Edit2 size={16} /></button>
         <button className="ta-icon-btn danger" title="Delete" onClick={() => onDelete(route)}><Trash2 size={16} /></button>
