@@ -627,6 +627,15 @@ const TransportAdminDashboard = () => {
           <button className="ta-btn-primary" onClick={() => { setEditingRoute(null); setShowModal(true); }}>
             <Plus size={16} /> Add Route
           </button>
+          <button className="ta-profile-btn" onClick={() => navigate('/profile')} title="My Profile">
+            <div className="ta-profile-avatar">
+              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
+            <div className="ta-profile-info">
+              <span className="ta-profile-name">{user?.name || 'My Profile'}</span>
+              <span className="ta-profile-role">Transport Operator</span>
+            </div>
+          </button>
         </div>
       </div>
 

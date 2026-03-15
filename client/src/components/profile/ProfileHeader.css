@@ -381,78 +381,64 @@
   font-weight: 500;
 }
 
-/* === ACTION BUTTONS SECTION - NEW === */
+/* === ACTION BUTTONS SECTION === */
 .pheader-action-buttons {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 8px;
+  margin-top: 10px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .pheader-edit-profile-button {
-  background: var(--uprofile-primary-accent);
-  color: var(--uprofile-text-white);
-  border: none;
-  border-radius: var(--uprofile-border-radius);
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 600;
+  background: transparent;
+  color: rgba(255,255,255,0.75);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  transition: var(--uprofile-transition);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  white-space: nowrap;
 }
 
 .pheader-edit-profile-button:hover {
-  background: var(--uprofile-primary-accent-dark);
-  transform: translateY(-2px);
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.4);
+  color: #fff;
 }
 
-/* === ADMIN DASHBOARD BUTTON - NEW === */
+/* === ADMIN DASHBOARD BUTTON === */
 .pheader-admin-dashboard-button {
-  background: var(--pheader-admin-color);
-  color: var(--uprofile-text-white);
-  border: none;
-  border-radius: var(--uprofile-border-radius);
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 600;
+  background: transparent;
+  color: #f87171;
+  border: 1px solid rgba(248,113,113,0.35);
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  transition: var(--uprofile-transition);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
   display: flex;
   align-items: center;
-  gap: 6px;
-  position: relative;
-  overflow: hidden;
+  gap: 5px;
+  white-space: nowrap;
 }
 
 .pheader-admin-dashboard-button:hover {
-  background: var(--pheader-admin-color-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+  background: rgba(248,113,113,0.1);
+  border-color: rgba(248,113,113,0.6);
+  color: #fca5a5;
 }
 
 .pheader-admin-dashboard-button:active {
-  transform: translateY(0);
-}
-
-/* Admin button special styling */
-.pheader-admin-dashboard-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.pheader-admin-dashboard-button:hover::before {
-  left: 100%;
+  background: rgba(248,113,113,0.15);
 }
 
 /* === SOCIAL STATS SECTION === */
@@ -699,7 +685,7 @@
 
   .pheader-edit-profile-button,
   .pheader-admin-dashboard-button {
-    padding: 10px 20px;
+    padding: 6px 12px;
   }
 
   .pheader-social-stats {
@@ -794,16 +780,10 @@
   }
 
   .pheader-action-buttons {
-    flex-direction: column;
-    width: 100%;
-    gap: 8px;
-  }
-
-  .pheader-edit-profile-button,
-  .pheader-admin-dashboard-button {
-    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
-    padding: 10px 16px;
+    gap: 6px;
   }
 
   .pheader-social-stats {
@@ -1124,80 +1104,61 @@
 }
 
 
-/* === CREATE ARTICLE BUTTON STYLES (ADD TO END OF ProfileHeader.css) === */
-
+/* === CREATE ARTICLE BUTTON === */
 .pheader-create-article-button {
-  background: var(--uprofile-success-green);
-  color: var(--uprofile-text-white);
-  border: none;
-  border-radius: var(--uprofile-border-radius);
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 600;
+  background: transparent;
+  color: #6ee7b7;
+  border: 1px solid rgba(110,231,183,0.35);
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  transition: var(--uprofile-transition);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
   display: flex;
   align-items: center;
-  gap: 6px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--uprofile-shadow-sm);
+  gap: 5px;
+  white-space: nowrap;
   font-family: inherit;
 }
 
 .pheader-create-article-button:hover {
-  background: #218838; /* Darker green on hover */
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+  background: rgba(110,231,183,0.1);
+  border-color: rgba(110,231,183,0.6);
+  color: #a7f3d0;
 }
 
-.pheader-create-article-button:active {
-  transform: translateY(0);
-}
-
-/* Create Article button special styling - Animated underline */
-.pheader-create-article-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.pheader-create-article-button:hover::before {
-  left: 100%;
-}
-
-/* Focus states for accessibility */
-.pheader-create-article-button:focus {
-  outline: 2px solid var(--uprofile-success-green);
-  outline-offset: 2px;
-}
-
-/* Loading state for the Create Article button */
 .pheader-create-article-button:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
 }
 
-.pheader-create-article-button:disabled:hover {
-  background: var(--uprofile-success-green);
-  transform: none;
-  box-shadow: var(--uprofile-shadow-sm);
+/* === TRANSPORT DASHBOARD BUTTON === */
+.pheader-transport-dashboard-button {
+  background: transparent;
+  color: #93c5fd;
+  border: 1px solid rgba(147,197,253,0.35);
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  font-family: inherit;
 }
 
-/* Icon styling within the button */
-.pheader-create-article-button svg {
-  flex-shrink: 0;
-  transition: var(--uprofile-transition);
+.pheader-transport-dashboard-button:hover {
+  background: rgba(147,197,253,0.1);
+  border-color: rgba(147,197,253,0.6);
+  color: #bfdbfe;
 }
 
-.pheader-create-article-button:hover svg {
-  transform: scale(1.1);
+.pheader-transport-dashboard-button:active {
+  background: rgba(147,197,253,0.15);
 }
 
 /* Ensure consistent button heights */
@@ -1205,98 +1166,5 @@
 .pheader-admin-dashboard-button,
 .pheader-create-article-button,
 .pheader-transport-dashboard-button {
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* === TRANSPORT DASHBOARD BUTTON === */
-.pheader-transport-dashboard-button {
-  background: #0d6efd;
-  color: #fff;
-  border: none;
-  border-radius: var(--uprofile-border-radius);
-  padding: 8px 16px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--uprofile-transition);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: var(--uprofile-shadow-sm);
-  font-family: inherit;
-}
-.pheader-transport-dashboard-button:hover {
-  background: #0b5ed7;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(13,110,253,0.35);
-}
-.pheader-transport-dashboard-button:active { transform: translateY(0); }
-
-/* Enhanced button group styling for better visual hierarchy */
-@media (min-width: 769px) {
-  .pheader-action-buttons {
-    justify-content: center;
-    max-width: 500px; /* Slightly wider to accommodate 3 buttons */
-    margin: 12px auto 0;
-  }
-
-  /* Add subtle animations */
-  .pheader-create-article-button {
-    animation: fadeInScale 0.3s ease-out;
-  }
-}
-
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Mobile responsive updates for the new button */
-@media (max-width: 768px) {
-  .pheader-action-buttons {
-    flex-direction: column;
-    width: 100%;
-    gap: 8px;
-  }
-
-  .pheader-edit-profile-button,
-  .pheader-admin-dashboard-button,
-  .pheader-create-article-button {
-    width: 100%;
-    justify-content: center;
-    padding: 10px 16px;
-  }
-}
-
-/* Dark theme support for the new button */
-@media (prefers-color-scheme: dark) {
-  .pheader-create-article-button:hover {
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .pheader-create-article-button {
-    animation: none;
-  }
-  
-  .pheader-create-article-button::before {
-    transition: none;
-  }
-  
-  .pheader-create-article-button:hover svg {
-    transform: none;
-  }
+  min-height: 30px;
 }

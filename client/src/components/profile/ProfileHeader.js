@@ -229,8 +229,10 @@ const ProfileHeader = ({
                   profileData?.role === 'ministry_official' ||
                   profileData?.role === 'government_admin';
 
-  // Check if user has transport_admin role (own dashboard)
-  const isTransportAdmin = profileData?.role === 'transport_admin';
+  // Check if user has transport_admin role (primary OR additional)
+  const isTransportAdmin = profileData?.role === 'transport_admin' ||
+                           (profileData?.additionalRoles &&
+                            profileData.additionalRoles.includes('transport_admin'));
 
   // NEW: Check if user has journalist role (primary OR additional)
   const isJournalist = profileData?.role === 'journalist' ||
