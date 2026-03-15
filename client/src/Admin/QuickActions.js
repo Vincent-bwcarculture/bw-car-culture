@@ -354,12 +354,20 @@ const QuickActions = ({ onActionSelected }) => {
               Trailer Listings
             </button>
             
-            <button 
+            <button
               className="qa-action-button"
               onClick={handleTransportRoutesClick}
             >
               <span className="qa-icon">↑</span>
               Transport Routes
+            </button>
+
+            <button
+              className="qa-action-button highlight-action"
+              onClick={() => onActionSelected && onActionSelected('broadcast')}
+            >
+              <span className="qa-icon">📢</span>
+              Broadcast Notification
             </button>
           </>
         )}

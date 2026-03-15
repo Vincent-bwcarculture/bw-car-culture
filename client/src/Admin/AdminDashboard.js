@@ -8,7 +8,8 @@ import RentalVehicleManager from './RentalVehicleManager/RentalVehicleManager.js
 import TrailerListingManager from './TrailerListingManager/TrailerListingManager.js';
 import TransportRouteManager from './TransportRouteManager/TransportRouteManager.js';
 import ServiceProviderManager from './ServiceProviderManager/ServiceProviderManager.js';
-import GIONAdminDashboard from '../components/GION/GIONAdminDashboard/GIONAdminDashboard.js'; 
+import GIONAdminDashboard from '../components/GION/GIONAdminDashboard/GIONAdminDashboard.js';
+import BroadcastNotification from './BroadcastNotification/BroadcastNotification.js';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -131,7 +132,7 @@ const AdminDashboard = () => {
           <>
             <div className="section-header">
               <h2>Video Management</h2>
-              <button 
+              <button
                 className="back-button"
                 onClick={() => setActiveSection('dashboard')}
               >
@@ -141,6 +142,21 @@ const AdminDashboard = () => {
             <div className="video-manager-container">
               <p>Video Management interface loading...</p>
             </div>
+          </>
+        );
+      case 'broadcast':
+        return (
+          <>
+            <div className="section-header">
+              <h2>Broadcast Notification</h2>
+              <button
+                className="back-button"
+                onClick={() => setActiveSection('dashboard')}
+              >
+                ← Back to Dashboard
+              </button>
+            </div>
+            <BroadcastNotification />
           </>
         );
       default:
