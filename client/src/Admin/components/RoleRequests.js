@@ -651,9 +651,7 @@ const RoleManager = () => {
 
                 {selectedRequest.applicationData.motivation && (
                   <div className="bw-detail-block">
-                    <h4 className="bw-detail-block__title">
-                      💭 Motivation & Content Vision
-                    </h4>
+                    <h4 className="bw-detail-block__title">Motivation &amp; Content Vision</h4>
                     <div className="bw-detail-block__content">
                       <p>{selectedRequest.applicationData.motivation}</p>
                     </div>
@@ -662,9 +660,7 @@ const RoleManager = () => {
 
                 {selectedRequest.applicationData.socialMediaHandles && (
                   <div className="bw-detail-block">
-                    <h4 className="bw-detail-block__title">
-                      🌐 Social Media & Online Presence
-                    </h4>
+                    <h4 className="bw-detail-block__title">Social Media &amp; Online Presence</h4>
                     <div className="bw-detail-block__content">
                       <p>{selectedRequest.applicationData.socialMediaHandles}</p>
                     </div>
@@ -683,9 +679,7 @@ const RoleManager = () => {
                 
                 {selectedRequest.applicationData.transportModes?.length > 0 && (
                   <div className="bw-detail-block">
-                    <h4 className="bw-detail-block__title">
-                      🚗 Available Transport Modes
-                    </h4>
+                    <h4 className="bw-detail-block__title">Available Transport Modes</h4>
                     <div className="bw-detail-block__content">
                       <div className="bw-tags bw-tags--large">
                         {selectedRequest.applicationData.transportModes.map((mode, index) => (
@@ -700,7 +694,7 @@ const RoleManager = () => {
 
                 {selectedRequest.applicationData.deliveryCapacity && (
                   <div className="bw-detail-block">
-                    <h4 className="bw-detail-block__title">📦 Delivery Capacity</h4>
+                    <h4 className="bw-detail-block__title">Delivery Capacity</h4>
                     <div className="bw-detail-block__content">
                       <p>{selectedRequest.applicationData.deliveryCapacity}</p>
                     </div>
@@ -709,7 +703,7 @@ const RoleManager = () => {
 
                 {selectedRequest.applicationData.operatingSchedule && (
                   <div className="bw-detail-block">
-                    <h4 className="bw-detail-block__title">⏰ Operating Schedule</h4>
+                    <h4 className="bw-detail-block__title">Operating Schedule</h4>
                     <div className="bw-detail-block__content">
                       <p>{selectedRequest.applicationData.operatingSchedule}</p>
                     </div>
@@ -718,7 +712,7 @@ const RoleManager = () => {
 
                 {selectedRequest.applicationData.coverageAreas && (
                   <div className="bw-detail-block">
-                    <h4 className="bw-detail-block__title">📍 Coverage Areas</h4>
+                    <h4 className="bw-detail-block__title">Coverage Areas</h4>
                     <div className="bw-detail-block__content">
                       <p>{selectedRequest.applicationData.coverageAreas}</p>
                     </div>
@@ -727,7 +721,7 @@ const RoleManager = () => {
 
                 {selectedRequest.applicationData.courierExperience && (
                   <div className="bw-detail-block">
-                    <h4 className="bw-detail-block__title">📋 Courier Experience</h4>
+                    <h4 className="bw-detail-block__title">Courier Experience</h4>
                     <div className="bw-detail-block__content">
                       <p>{selectedRequest.applicationData.courierExperience}</p>
                     </div>
@@ -816,7 +810,7 @@ const RoleManager = () => {
             {/* Admin Review Notes */}
             {(selectedRequest.adminNotes || selectedRequest.reviewNotes) && (
               <div className="bw-modal-section bw-modal-section--admin">
-                <h3 className="bw-modal-section__title">📋 Admin Review Notes</h3>
+                <h3 className="bw-modal-section__title">Admin Review Notes</h3>
                 <div className="bw-detail-block__content">
                   <p>{selectedRequest.adminNotes || selectedRequest.reviewNotes}</p>
                   {selectedRequest.reviewedByName && (
@@ -860,7 +854,7 @@ const RoleManager = () => {
     <div className="bw-role-manager">
       <div className="bw-page-header">
         <div className="bw-page-header__content">
-          <h1 className="bw-page-header__title">🔐 Role Management Dashboard</h1>
+          <h1 className="bw-page-header__title">Role Management Dashboard</h1>
           <p className="bw-page-header__subtitle">Review and manage user role applications</p>
         </div>
         <div className="bw-page-header__stats">
