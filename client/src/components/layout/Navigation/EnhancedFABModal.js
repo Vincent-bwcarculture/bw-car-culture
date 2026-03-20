@@ -24,8 +24,7 @@ const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.ve
 const EnhancedFABModal = ({
   showModal,
   onClose,
-  isAuthenticated,
-  onReviewSubmit
+  isAuthenticated
 }) => {
   const [reviewMethod, setReviewMethod] = useState(null);
   const [showQRScanner, setShowQRScanner] = useState(false);
@@ -44,14 +43,19 @@ const EnhancedFABModal = ({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
+  // QR & service code flow state
+  const [qrStep, setQrStep] = useState('scanning');
+  const [qrData, setQrData] = useState('');
+  const [serviceStep, setServiceStep] = useState('input');
+
+  // General review flow state
+  const [generalStep, setGeneralStep] = useState('search');
+  const [businessSearch, setBusinessSearch] = useState('');
+  const [businessResults, setBusinessResults] = useState([]);
+  const [selectedBusiness, setSelectedBusiness] = useState(null);
+  const [loadingBusinesses, setLoadingBusinesses] = useState(false);
+
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (showModal) fetchTopServices();
-  }, [showModal]);
-
-  // Guard AFTER all hooks
-  if (!showModal) return null;
 
   const fetchTopServices = async () => {
     setLoadingLeaderboard(true);
@@ -68,6 +72,12 @@ const EnhancedFABModal = ({
     }
   };
 
+  useEffect(() => {
+    if (showModal) fetchTopServices();
+  }, [showModal]);
+
+  if (!showModal) return null;
+
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) handleCloseAll();
   };
@@ -83,6 +93,13 @@ const EnhancedFABModal = ({
     setHoverRating(0);
     setComment('');
     setSubmitError('');
+    setQrStep('scanning');
+    setQrData('');
+    setServiceStep('input');
+    setGeneralStep('search');
+    setBusinessSearch('');
+    setBusinessResults([]);
+    setSelectedBusiness(null);
     onClose();
   };
 
@@ -108,14 +125,67 @@ const EnhancedFABModal = ({
 
   const handleQRScanResult = (result) => {
     setShowQRScanner(false);
-    if (onReviewSubmit) onReviewSubmit('qr', { qrData: result });
-    handleCloseAll();
+    setQrData(result);
+    setQrStep('form');
   };
 
   const handleServiceCodeSubmit = () => {
     if (serviceCode.trim().length >= 4) {
-      if (onReviewSubmit) onReviewSubmit('service_code', { serviceCode: serviceCode.trim() });
-      handleCloseAll();
+      setServiceStep('form');
+    }
+  };
+
+  // ── Submit QR review ───────────────────────────────────────────────────────
+  const handleSubmitQRReview = async () => {
+    if (!rating) { setSubmitError('Please select a star rating.'); return; }
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      const res = await fetch(`${API_BASE}/reviews/qr-scan`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ qrData, rating, review: comment.trim() })
+      });
+      const result = await res.json();
+      if (res.ok && result.success !== false) {
+        setQrStep('done');
+      } else {
+        setSubmitError(result.message || 'Failed to submit review. Please try again.');
+      }
+    } catch {
+      setSubmitError('Network error. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // ── Submit service code review ─────────────────────────────────────────────
+  const handleSubmitServiceCodeReview = async () => {
+    if (!rating) { setSubmitError('Please select a star rating.'); return; }
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      const res = await fetch(`${API_BASE}/reviews/service-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ serviceCode: serviceCode.trim(), rating, review: comment.trim() })
+      });
+      const result = await res.json();
+      if (res.ok && result.success !== false) {
+        setServiceStep('done');
+      } else {
+        setSubmitError(result.message || 'Failed to submit review. Please try again.');
+      }
+    } catch {
+      setSubmitError('Network error. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -130,7 +200,7 @@ const EnhancedFABModal = ({
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await res.json();
-      setLookupResult(data.data || { found: false, normalizedPlate: plate.toUpperCase().replace(/\s+/g,'') });
+      setLookupResult(data || { found: false, normalizedPlate: plate.toUpperCase().replace(/\s+/g,'') });
       setPlateStep('form');
     } catch (err) {
       setLookupResult({ found: false, normalizedPlate: plate.toUpperCase().replace(/\s+/g,'') });
@@ -147,7 +217,7 @@ const EnhancedFABModal = ({
     setSubmitError('');
     try {
       const body = {
-        identifier: lookupResult?.normalizedPlate || plateNumber.trim().toUpperCase().replace(/\s+/g,''),
+        identifier: lookupResult?.normalizedPlate || lookupResult?.vehicle?.registration || plateNumber.trim().toUpperCase().replace(/\s+/g,''),
         identifierType: 'plate',
         rating,
         comment: comment.trim()
@@ -174,6 +244,159 @@ const EnhancedFABModal = ({
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // ── General review helpers ─────────────────────────────────────────────────
+  const handleBusinessSearch = async () => {
+    const q = businessSearch.trim();
+    if (q.length < 2) return;
+    setLoadingBusinesses(true);
+    try {
+      const res = await fetch(`${API_BASE}/providers/page?search=${encodeURIComponent(q)}&limit=5`);
+      if (res.ok) {
+        const data = await res.json();
+        setBusinessResults(data.data || []);
+      }
+    } catch {
+      setBusinessResults([]);
+    } finally {
+      setLoadingBusinesses(false);
+    }
+  };
+
+  const handleSubmitGeneralReview = async () => {
+    if (!rating) { setSubmitError('Please select a star rating.'); return; }
+    if (!comment.trim()) { setSubmitError('Please write a review.'); return; }
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      const res = await fetch(`${API_BASE}/reviews/general`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          businessId: selectedBusiness._id,
+          rating,
+          review: comment.trim()
+        })
+      });
+      const result = await res.json();
+      if (res.ok && result.success !== false) {
+        setGeneralStep('done');
+      } else {
+        setSubmitError(result.message || 'Failed to submit review. Please try again.');
+      }
+    } catch {
+      setSubmitError('Network error. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const renderGeneralFlow = () => {
+    if (generalStep === 'done') {
+      return (
+        <div className="efab-input-section efab-done-section">
+          <CheckCircle size={40} color="#22c55e" />
+          <h4>Review Submitted!</h4>
+          <p>Thank you for reviewing <strong>{selectedBusiness?.businessName}</strong>.</p>
+          <button className="efab-continue-button" onClick={handleCloseAll}>Done</button>
+        </div>
+      );
+    }
+
+    if (generalStep === 'form') {
+      return (
+        <div className="efab-input-section">
+          <button className="efab-back-button" onClick={() => { setGeneralStep('search'); setRating(0); setComment(''); setSubmitError(''); }}>← Back</button>
+          <div className="efab-lookup-found">
+            <CheckCircle size={16} color="#22c55e" />
+            <div>
+              <div className="efab-lookup-name">{selectedBusiness?.businessName}</div>
+              <div className="efab-lookup-sub">{selectedBusiness?.providerType || selectedBusiness?.businessType || 'Service provider'}</div>
+            </div>
+          </div>
+          <h4>Rate your experience</h4>
+          {renderStarRow()}
+          <div className="efab-comment-field">
+            <textarea
+              className="efab-textarea"
+              rows={3}
+              placeholder="Describe your experience..."
+              value={comment}
+              onChange={e => setComment(e.target.value)}
+              maxLength={500}
+            />
+            <span className="efab-char-count">{comment.length}/500</span>
+          </div>
+          {submitError && <div className="efab-submit-error">{submitError}</div>}
+          <div className="efab-input-actions">
+            <button className="efab-cancel-button" onClick={() => setReviewMethod(null)}>Cancel</button>
+            <button
+              className="efab-continue-button"
+              onClick={handleSubmitGeneralReview}
+              disabled={submitting || !rating || !comment.trim()}
+            >
+              <Send size={15} />
+              {submitting ? 'Submitting…' : 'Submit Review'}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // generalStep === 'search'
+    return (
+      <div className="efab-input-section">
+        <button className="efab-back-button" onClick={() => setReviewMethod(null)}>← Back</button>
+        <h4>Find a Business</h4>
+        <p>Search for the business you'd like to review:</p>
+        <div className="efab-plate-input-row">
+          <input
+            type="text"
+            className="efab-input"
+            value={businessSearch}
+            onChange={e => setBusinessSearch(e.target.value)}
+            placeholder="e.g. ABC Auto Service"
+            onKeyDown={e => e.key === 'Enter' && businessSearch.trim().length >= 2 && handleBusinessSearch()}
+          />
+          <button
+            className="efab-lookup-btn"
+            onClick={handleBusinessSearch}
+            disabled={loadingBusinesses || businessSearch.trim().length < 2}
+          >
+            {loadingBusinesses ? <div className="efab-loading-spinner small" /> : <Search size={16} />}
+          </button>
+        </div>
+
+        {businessResults.length > 0 && (
+          <div className="efab-method-buttons">
+            {businessResults.map(b => (
+              <button
+                key={b._id}
+                className="efab-method-button"
+                onClick={() => { setSelectedBusiness(b); setGeneralStep('form'); }}
+              >
+                <div className="efab-method-icon"><Car size={20} /></div>
+                <div className="efab-method-info">
+                  <span className="efab-method-title">{b.businessName}</span>
+                  <span className="efab-method-desc">{b.providerType || b.businessType || 'Service provider'}</span>
+                </div>
+                <ChevronRight size={16} className="efab-method-arrow" />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {businessResults.length === 0 && businessSearch.trim().length >= 2 && !loadingBusinesses && (
+          <div className="efab-leaderboard-empty">
+            <span>No businesses found. Try a different name.</span>
+          </div>
+        )}
+      </div>
+    );
   };
 
   // ── Leaderboard ───────────────────────────────────────────────────────────
@@ -252,6 +475,144 @@ const EnhancedFABModal = ({
       )}
     </div>
   );
+
+  // ── QR flow ───────────────────────────────────────────────────────────────
+  const renderQRFlow = () => {
+    if (qrStep === 'done') {
+      return (
+        <div className="efab-input-section efab-done-section">
+          <CheckCircle size={40} color="#22c55e" />
+          <h4>Review Submitted!</h4>
+          <p>Thank you for your feedback via QR code.</p>
+          <button className="efab-continue-button" onClick={handleCloseAll}>Done</button>
+        </div>
+      );
+    }
+
+    if (qrStep === 'form') {
+      return (
+        <div className="efab-input-section">
+          <button className="efab-back-button" onClick={() => { setQrStep('scanning'); setShowQRScanner(true); setRating(0); setComment(''); setSubmitError(''); }}>← Scan Again</button>
+          <div className="efab-lookup-found">
+            <CheckCircle size={16} color="#22c55e" />
+            <div>
+              <div className="efab-lookup-name">QR Code Scanned</div>
+              <div className="efab-lookup-sub" style={{ wordBreak: 'break-all', fontSize: '11px' }}>{qrData}</div>
+            </div>
+          </div>
+          <h4>Rate your experience</h4>
+          {renderStarRow()}
+          <div className="efab-comment-field">
+            <textarea
+              className="efab-textarea"
+              rows={3}
+              placeholder="Describe your experience (optional)..."
+              value={comment}
+              onChange={e => setComment(e.target.value)}
+              maxLength={500}
+            />
+            <span className="efab-char-count">{comment.length}/500</span>
+          </div>
+          {submitError && <div className="efab-submit-error">{submitError}</div>}
+          <div className="efab-input-actions">
+            <button className="efab-cancel-button" onClick={() => setReviewMethod(null)}>Cancel</button>
+            <button
+              className="efab-continue-button"
+              onClick={handleSubmitQRReview}
+              disabled={submitting || !rating}
+            >
+              <Send size={15} />
+              {submitting ? 'Submitting…' : 'Submit Review'}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  // ── Service code flow ──────────────────────────────────────────────────────
+  const renderServiceCodeFlow = () => {
+    if (serviceStep === 'done') {
+      return (
+        <div className="efab-input-section efab-done-section">
+          <CheckCircle size={40} color="#22c55e" />
+          <h4>Review Submitted!</h4>
+          <p>Thank you for your feedback on service code <strong>{serviceCode}</strong>.</p>
+          <button className="efab-continue-button" onClick={handleCloseAll}>Done</button>
+        </div>
+      );
+    }
+
+    if (serviceStep === 'form') {
+      return (
+        <div className="efab-input-section">
+          <button className="efab-back-button" onClick={() => { setServiceStep('input'); setRating(0); setComment(''); setSubmitError(''); }}>← Back</button>
+          <div className="efab-lookup-found">
+            <CheckCircle size={16} color="#22c55e" />
+            <div>
+              <div className="efab-lookup-name">Service Code: {serviceCode}</div>
+              <div className="efab-lookup-sub">Rate your experience with this service</div>
+            </div>
+          </div>
+          <h4>Rate your experience</h4>
+          {renderStarRow()}
+          <div className="efab-comment-field">
+            <textarea
+              className="efab-textarea"
+              rows={3}
+              placeholder="Describe your experience (optional)..."
+              value={comment}
+              onChange={e => setComment(e.target.value)}
+              maxLength={500}
+            />
+            <span className="efab-char-count">{comment.length}/500</span>
+          </div>
+          {submitError && <div className="efab-submit-error">{submitError}</div>}
+          <div className="efab-input-actions">
+            <button className="efab-cancel-button" onClick={() => setReviewMethod(null)}>Cancel</button>
+            <button
+              className="efab-continue-button"
+              onClick={handleSubmitServiceCodeReview}
+              disabled={submitting || !rating}
+            >
+              <Send size={15} />
+              {submitting ? 'Submitting…' : 'Submit Review'}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // serviceStep === 'input'
+    return (
+      <div className="efab-input-section">
+        <button className="efab-back-button" onClick={() => setReviewMethod(null)}>← Back</button>
+        <h4>Enter Service Code</h4>
+        <p>Enter the service code from your receipt or service card:</p>
+        <input
+          type="text"
+          className="efab-input"
+          value={serviceCode}
+          onChange={(e) => setServiceCode(e.target.value.toUpperCase())}
+          placeholder="e.g. SVC123"
+          maxLength={10}
+          onKeyDown={e => e.key === 'Enter' && serviceCode.trim().length >= 4 && handleServiceCodeSubmit()}
+        />
+        <div className="efab-input-actions">
+          <button className="efab-cancel-button" onClick={() => setReviewMethod(null)}>Cancel</button>
+          <button
+            className="efab-continue-button"
+            onClick={handleServiceCodeSubmit}
+            disabled={serviceCode.trim().length < 4}
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   // ── Plate method content ───────────────────────────────────────────────────
   const renderPlateFlow = () => {
@@ -364,8 +725,8 @@ const EnhancedFABModal = ({
       {showQRScanner && (
         <div className="efab-qr-scanner-container">
           <QRCodeScanner
-            onScanResult={handleQRScanResult}
-            onClose={() => setShowQRScanner(false)}
+            onResult={handleQRScanResult}
+            onCancel={() => { setShowQRScanner(false); setReviewMethod(null); }}
           />
         </div>
       )}
@@ -434,50 +795,17 @@ const EnhancedFABModal = ({
             </>
           )}
 
-          {/* Service Code */}
-          {reviewMethod === 'service_code' && (
-            <div className="efab-input-section">
-              <button className="efab-back-button" onClick={() => setReviewMethod(null)}>← Back</button>
-              <h4>Enter Service Code</h4>
-              <p>Enter the service code from your receipt or service card:</p>
-              <input
-                type="text"
-                className="efab-input"
-                value={serviceCode}
-                onChange={(e) => setServiceCode(e.target.value.toUpperCase())}
-                placeholder="e.g. SVC123"
-                maxLength={10}
-              />
-              <div className="efab-input-actions">
-                <button className="efab-cancel-button" onClick={() => setReviewMethod(null)}>Cancel</button>
-                <button
-                  className="efab-continue-button"
-                  onClick={handleServiceCodeSubmit}
-                  disabled={serviceCode.trim().length < 4}
-                >
-                  Continue
-                </button>
-              </div>
-            </div>
-          )}
+          {/* QR Code — multi-step */}
+          {reviewMethod === 'qr' && !showQRScanner && renderQRFlow()}
+
+          {/* Service Code — multi-step */}
+          {reviewMethod === 'service_code' && renderServiceCodeFlow()}
 
           {/* Plate Number — multi-step */}
           {reviewMethod === 'plate_number' && renderPlateFlow()}
 
           {/* General Review */}
-          {reviewMethod === 'general' && (
-            <div className="efab-input-section">
-              <button className="efab-back-button" onClick={() => setReviewMethod(null)}>← Back</button>
-              <h4>General Review</h4>
-              <p>Share your general experience with a business or service.</p>
-              <div className="efab-input-actions">
-                <button className="efab-cancel-button" onClick={() => setReviewMethod(null)}>Cancel</button>
-                <button className="efab-continue-button" onClick={() => { if (onReviewSubmit) onReviewSubmit('general', {}); handleCloseAll(); }}>
-                  Continue
-                </button>
-              </div>
-            </div>
-          )}
+          {reviewMethod === 'general' && renderGeneralFlow()}
         </div>
       )}
     </div>

@@ -358,16 +358,10 @@ const ReviewFAB = () => {
     }
   };
 
-  const handleReviewSubmit = (reviewData) => {
-    console.log('Review submitted:', reviewData);
-    setShowReviewModal(false);
-    // Here you would typically send the review to your backend
-  };
-
   return (
     <>
       {/* Enhanced Review FAB */}
-      <button 
+      <button
         className={`review-fab ${isVisible ? 'visible' : 'hidden'}`}
         onClick={handleFABClick}
         aria-label="Leave a review"
@@ -380,7 +374,6 @@ const ReviewFAB = () => {
         showModal={showReviewModal}
         onClose={() => setShowReviewModal(false)}
         isAuthenticated={isAuthenticated}
-        onReviewSubmit={handleReviewSubmit}
       />
     </>
   );
