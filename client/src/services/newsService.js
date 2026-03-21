@@ -243,8 +243,7 @@ class NewsService {
         if (response.length > 0) {
           allArticles = response;
         } else {
-          // Fallback to mock data if no real data is available
-          allArticles = this.getMockData().latestArticles.map(article => enhanceArticleMetadata(article));
+          allArticles = [];
         }
       }
       

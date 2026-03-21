@@ -5,45 +5,6 @@ import { http } from '../config/axios.js';
 // Create the context
 const NewsContext = createContext(null);
 
-// Sample fallback data if API fails
-const FALLBACK_NEWS = [
-  {
-    id: "lamborghini-1",
-    title: "Lamborghini Revuelto: The Next Evolution of the V12 Supercar",
-    description: "Experience the future of hybrid performance with Lamborghini's newest flagship",
-    image: "/images/Revuelto.jpg",
-    video: "https://www.youtube.com/watch?v=jgP3tV-cHF8",
-    author: { name: "Car Culture News Team" },
-    date: new Date().toISOString(),
-    premium: true,
-    category: "supercar",
-    tags: ["lamborghini", "hybrid", "v12", "supercar", "new model"],
-    metadata: { views: 12500, comments: 85 }
-  },
-  {
-    id: "nissan-gtr-1",
-    title: "2024 Nissan GT-R: Track Test Review",
-    description: "We take Nissan's iconic Godzilla to the track to see if it still dominates",
-    image: "/images/GTR35.jpg",
-    author: { name: "Michael Turner" },
-    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    category: "sports",
-    tags: ["nissan", "gtr", "track test", "sports car", "review"],
-    metadata: { views: 8720, comments: 42 }
-  },
-  {
-    id: "ferrari-1",
-    title: "Ferrari 296 GTB: A New Era of Hybrid Performance",
-    description: "Ferrari's latest hybrid supercar proves electrification enhances the driving experience",
-    image: "/images/Ferrari-296.jpg",
-    author: { name: "Sarah Johnson" },
-    date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    premium: false,
-    category: "supercar",
-    tags: ["ferrari", "hybrid", "sports car", "review"],
-    metadata: { views: 9340, comments: 63 }
-  }
-];
 
 export const NewsProvider = ({ children, autoplay = true, initialCategory = 'all' }) => {
   const [newsItems, setNewsItems] = useState([]);
@@ -158,25 +119,15 @@ export const NewsProvider = ({ children, autoplay = true, initialCategory = 'all
           // Mark that we've loaded initial data
           hasInitialLoadRef.current = true;
         } else {
-          // Use fallback data if API returns nothing
-          console.warn('Using fallback news data');
-          setFeaturedNews(FALLBACK_NEWS);
-          setNewsItems(FALLBACK_NEWS);
-          if (!selectedNewsItem) {
-            setSelectedNewsItem(FALLBACK_NEWS[0]);
-          }
+          setFeaturedNews([]);
+          setNewsItems([]);
           hasInitialLoadRef.current = true;
         }
       } catch (error) {
         console.error('Error loading news:', error);
         setError('Failed to load news content');
-        
-        // Use fallback data on error
-        setFeaturedNews(FALLBACK_NEWS);
-        setNewsItems(FALLBACK_NEWS);
-        if (!selectedNewsItem) {
-          setSelectedNewsItem(FALLBACK_NEWS[0]);
-        }
+        setFeaturedNews([]);
+        setNewsItems([]);
       } finally {
         setLoading(false);
       }

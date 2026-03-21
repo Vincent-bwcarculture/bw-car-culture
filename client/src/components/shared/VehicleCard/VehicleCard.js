@@ -1349,7 +1349,15 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               </span>
               <span className="vc-dealer-location">
                 {dealer?.location?.city || 'Unknown Location'}
-                {dealer?.location?.country ? `, ${dealer.location.country}` : ''}
+                {dealer?.location?.country && dealer.location.country !== 'Botswana' ? (
+                  <>
+                    {', '}
+                    <span className="vc-country-flag" title={dealer.location.country}>
+                      {({'South Africa':'🇿🇦','Zimbabwe':'🇿🇼','Namibia':'🇳🇦','Zambia':'🇿🇲','Japan':'🇯🇵','United Arab Emirates':'🇦🇪','UAE':'🇦🇪','United Kingdom':'🇬🇧','Germany':'🇩🇪','United States':'🇺🇸','USA':'🇺🇸'})[dealer.location.country] || '🌍'}
+                      {' '}{dealer.location.country}
+                    </span>
+                  </>
+                ) : null}
               </span>
             </div>
             
