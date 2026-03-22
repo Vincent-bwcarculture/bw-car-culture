@@ -102,8 +102,13 @@ const CarViewer = ({ color }) => {
         modelRef.current = car;
         scene.add(car);
 
-        // Turntable/platform keywords to hide
-        const HIDE_KEYWORDS = ['turntable', 'platform', 'disc', 'ground', 'floor', 'base', 'circle', 'ring', 'shadow', 'spoon', 'tire', 'tyre', 'wheel'];
+        // Safe keyword list — only non-car-part names
+        const HIDE_KEYWORDS = ['turntable', 'platform', 'ground', 'floor', 'shadow', 'spoon'];
+
+        // Measure the overall car bounding box so we can detect oversized flat meshes
+        const carBox = new THREE.Box3().setFromObject(car);
+        const carSize = new THREE.Vector3();
+        carBox.getSize(carSize);
 
         car.traverse((node) => {
           if (node.isMesh) {
@@ -112,8 +117,22 @@ const CarViewer = ({ color }) => {
             console.log('[3D] mesh:', node.name, '| mat:', matName);
             const matLower = matName.toLowerCase();
 
-            // Hide turntable/platform meshes
+            // Hide by safe keyword match
             if (HIDE_KEYWORDS.some(k => nameLower.includes(k) || matLower.includes(k))) {
+              node.visible = false;
+              return;
+            }
+
+            // Hide any large flat disc near ground level (turntable not caught by name)
+            const meshBox = new THREE.Box3().setFromObject(node);
+            const meshSize = new THREE.Vector3();
+            const meshCenter = new THREE.Vector3();
+            meshBox.getSize(meshSize);
+            meshBox.getCenter(meshCenter);
+            const isWide  = meshSize.x > carSize.x * 0.7 || meshSize.z > carSize.z * 0.7;
+            const isFlat  = meshSize.y < 0.25;
+            const isLow   = meshCenter.y < 0.15;
+            if (isWide && isFlat && isLow) {
               node.visible = false;
               return;
             }
