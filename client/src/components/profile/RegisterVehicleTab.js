@@ -8,6 +8,8 @@ import { Car, Save, Info, CheckCircle } from 'lucide-react';
 import axios from '../../config/axios.js';
 import './RegisterVehicleTab.css';
 
+// Model hosted on jsDelivr CDN (backed by the bw-car-culture-api GitHub repo)
+const MODEL_URL = 'https://cdn.jsdelivr.net/gh/Vincent-bwcarculture/bw-car-culture-api@master/models/golf_r_configurator.glb';
 const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
 
 const DEMO_COLORS = [
@@ -91,59 +93,35 @@ const CarViewer = ({ color }) => {
     controls.dampingFactor = 0.05;
     controls.update();
 
-    // Fetch model as ArrayBuffer with auth, then parse with GLTFLoader
-    const token = localStorage.getItem('token');
+    // Load model directly from jsDelivr CDN
     const loader = new GLTFLoader();
+    loader.load(
+      MODEL_URL,
+      (gltf) => {
+        const car = gltf.scene;
+        modelRef.current = car;
+        scene.add(car);
 
-    const loadModel = async () => {
-      try {
-        let arrayBuffer;
-
-        if (token) {
-          // Auth fetch from API
-          const res = await fetch(`${API_BASE}/user/model/golf-r`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          arrayBuffer = await res.arrayBuffer();
-        } else {
-          // Fallback: try public path
-          const res = await fetch('/models/golf_r_configurator.glb');
-          if (!res.ok) throw new Error('No model available');
-          arrayBuffer = await res.arrayBuffer();
-        }
-
-        loader.parse(arrayBuffer, '', (gltf) => {
-          const car = gltf.scene;
-          modelRef.current = car;
-          scene.add(car);
-
-          // Apply initial color
-          car.traverse((node) => {
-            if (node.isMesh) {
-              const mats = Array.isArray(node.material) ? node.material : [node.material];
-              mats.forEach(mat => {
-                if (mat.name === 'MAT_Body_Paint' || mat.name === 'CarPaint') {
-                  mat.color.set('#EBEBEB');
-                  mat.needsUpdate = true;
-                }
-              });
-            }
-          });
-
-          setStatus('ready');
-        }, (err) => {
-          console.error('GLTF parse error:', err);
-          setStatus('error');
+        car.traverse((node) => {
+          if (node.isMesh) {
+            const mats = Array.isArray(node.material) ? node.material : [node.material];
+            mats.forEach(mat => {
+              if (mat.name === 'MAT_Body_Paint' || mat.name === 'CarPaint') {
+                mat.color.set('#EBEBEB');
+                mat.needsUpdate = true;
+              }
+            });
+          }
         });
 
-      } catch (err) {
-        console.error('Model load error:', err);
+        setStatus('ready');
+      },
+      undefined,
+      (err) => {
+        console.error('GLTF load error:', err);
         setStatus('error');
       }
-    };
-
-    loadModel();
+    );
 
     // Animate
     const animate = () => {
