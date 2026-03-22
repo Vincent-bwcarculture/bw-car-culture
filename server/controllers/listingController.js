@@ -621,6 +621,23 @@ export const getListings = asyncHandler(async (req, res, next) => {
     delete filters.city;
   }
 
+  // Country-specific filtering
+  if (filters.country) {
+    const countryRegex = new RegExp(filters.country, 'i');
+    if (filters.$or) {
+      filters.$or.push(
+        { 'location.country': countryRegex },
+        { 'dealer.location.country': countryRegex }
+      );
+    } else {
+      filters.$or = [
+        { 'location.country': countryRegex },
+        { 'dealer.location.country': countryRegex }
+      ];
+    }
+    delete filters.country;
+  }
+
   // NEW: Savings-based filtering
   if (filters.hasSavings === 'true') {
     filters['priceOptions.showSavings'] = true;

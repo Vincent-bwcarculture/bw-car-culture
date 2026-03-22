@@ -411,7 +411,7 @@ const HeroSection = () => {
               {/* Left: action label */}
               <button
                 className="bcc-import-action"
-                onClick={() => navigate(`/import-vehicles${selectedCountry !== 'Select country' ? `?from=${encodeURIComponent(selectedCountry)}` : ''}`)}
+                onClick={() => navigate(`/marketplace${selectedCountry !== 'Select country' ? `?country=${encodeURIComponent(selectedCountry)}` : ''}`)}
                 type="button"
               >
                 Import a car from

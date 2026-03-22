@@ -8,7 +8,6 @@ import {
   Settings,
   Route,
   Car,
-  Gas,
   BarChart3,
   BookOpen,
   Shield,
@@ -31,6 +30,7 @@ import ProfileSettings from '../components/profile/ProfileSettings.js';
 import NetworkTab from '../components/profile/NetworkTab.js';
 import ArticleManagement from '../components/profile/ArticleManagement/index.js';
 import NotificationsTab from '../components/profile/NotificationsTab.js';
+import RegisterVehicleTab from '../components/profile/RegisterVehicleTab.js';
 
 import CoordinatorManagement from '../components/profile/CoordinatorManagement.js';
 import RealTimeCoordinatorDashboard from '../components/profile/RealTimeCoordinatorDashboard.js';
@@ -69,7 +69,7 @@ const [articleAction, setArticleAction] = useState(null);
       if (tab === 'sell-car' || tab === 'sell_car') {
         setActiveTab('vehicles'); // Redirect to vehicles tab
         setUrlAction('sell'); // Set action to sell
-      } else if (['overview', 'notifications', 'services', 'routes', 'vehicles', 'articles', 'business', 'network', 'settings'].includes(tab)) {
+      } else if (['register-vehicle', 'overview', 'notifications', 'services', 'routes', 'vehicles', 'articles', 'business', 'network', 'settings'].includes(tab)) {
         setActiveTab(tab);
       }
     }
@@ -208,6 +208,7 @@ const getProfileHints = (userType) => {
 
 const getAvailableTabs = () => {
   const tabs = [
+    { id: 'register-vehicle', label: 'Register Vehicle', icon: Car },
     { id: 'overview', label: 'Overview', icon: Eye },
     { id: 'notifications', label: 'Notifications', icon: Bell }
   ];
@@ -370,6 +371,13 @@ const getAvailableTabs = () => {
 
       {/* Enhanced Profile Content */}
       <div className="uprofile-content-container">
+        {activeTab === 'register-vehicle' && (
+          <RegisterVehicleTab
+            profileData={displayData}
+            refreshProfile={fetchUserProfile}
+          />
+        )}
+
         {activeTab === 'overview' && (
           <ProfileOverview
             profileData={displayData}
