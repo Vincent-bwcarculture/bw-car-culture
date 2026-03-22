@@ -49,8 +49,8 @@ const CarViewer = ({ color }) => {
     const height = container.clientHeight || 380;
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(width, height);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -72,7 +72,7 @@ const CarViewer = ({ color }) => {
     const key = new THREE.DirectionalLight(0xfff5e0, 4);
     key.position.set(4, 5, 4);
     key.castShadow = true;
-    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.mapSize.set(1024, 1024);
     scene.add(key);
     const fill = new THREE.DirectionalLight(0xe0eeff, 1.5);
     fill.position.set(-5, 3, 3);
@@ -102,8 +102,21 @@ const CarViewer = ({ color }) => {
         modelRef.current = car;
         scene.add(car);
 
+        // Turntable/platform keywords to hide
+        const HIDE_KEYWORDS = ['turntable', 'platform', 'disc', 'ground', 'floor', 'base', 'circle', 'ring', 'shadow'];
+
         car.traverse((node) => {
           if (node.isMesh) {
+            const nameLower = node.name.toLowerCase();
+            const matName = (Array.isArray(node.material) ? node.material[0]?.name : node.material?.name) || '';
+            const matLower = matName.toLowerCase();
+
+            // Hide turntable/platform meshes
+            if (HIDE_KEYWORDS.some(k => nameLower.includes(k) || matLower.includes(k))) {
+              node.visible = false;
+              return;
+            }
+
             const mats = Array.isArray(node.material) ? node.material : [node.material];
             mats.forEach(mat => {
               if (mat.name === 'MAT_Body_Paint' || mat.name === 'CarPaint') {
