@@ -102,8 +102,17 @@ const CarViewer = ({ color }) => {
         modelRef.current = car;
         scene.add(car);
 
-        // Safe keyword list — only non-car-part names
-        const HIDE_KEYWORDS = ['turntable', 'platform', 'ground', 'floor', 'shadow', 'spoon'];
+        // Safe keyword/substring list — non-car-part identifiers
+        const HIDE_KEYWORDS = [
+          'turntable', 'platform', 'ground', 'floor', 'shadow', 'spoon',
+          'highpoly', 'lowpoly',
+          '2262a6d3f82749',
+          'wheel.obj.cleaner.materialmerger.gles',
+        ];
+        // Object_2 … Object_10 (BBS mesh parts)
+        const HIDE_OBJECT_RE = /^object_([2-9]|10)$/i;
+        // RootNode.001 and beyond (download artifacts)
+        const HIDE_ROOTNODE_RE = /^rootnode\.\d{3,}$/i;
 
         // Measure the overall car bounding box so we can detect oversized flat meshes
         const carBox = new THREE.Box3().setFromObject(car);
@@ -117,8 +126,12 @@ const CarViewer = ({ color }) => {
             console.log('[3D] mesh:', node.name, '| mat:', matName);
             const matLower = matName.toLowerCase();
 
-            // Hide by safe keyword match
-            if (HIDE_KEYWORDS.some(k => nameLower.includes(k) || matLower.includes(k))) {
+            // Hide by safe keyword / regex match
+            if (
+              HIDE_KEYWORDS.some(k => nameLower.includes(k) || matLower.includes(k)) ||
+              HIDE_OBJECT_RE.test(node.name) ||
+              HIDE_ROOTNODE_RE.test(node.name)
+            ) {
               node.visible = false;
               return;
             }
