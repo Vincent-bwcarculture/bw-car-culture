@@ -58,6 +58,7 @@ const ListingManager = React.lazy(() => import('./Admin/ListingManager/ListingMa
 const AuctionManager = React.lazy(() => import('./Admin/AuctionManager/AuctionManager.js'));
 const RoleManager = React.lazy(() => import('./Admin/components/RoleRequests.js'));
 const AdminUserSubmissions = React.lazy(() => import('./Admin/components/AdminUserSubmissions.js'));
+const AdminVehicleRegistrations = React.lazy(() => import('./Admin/VehicleRegistrations/AdminVehicleRegistrations.js'));
 const AdminPaymentDashboard = React.lazy(() => import('./Admin/components/AdminPaymentDashboard.js'));
 const AnalyticsDashboard = React.lazy(() => import('./Admin/AnalyticsDashboard/AnalyticsDashboard.js'));
 const AdminArticleManagement = React.lazy(() => import('./components/Admin/ArticleManagement.js'));
@@ -962,15 +963,26 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        <Route 
-          path="/admin/user-submissions" 
+        <Route
+          path="/admin/user-submissions"
           element={
             <ProtectedRoute adminOnly={true}>
               <AdminLayout>
                 <AdminUserSubmissions />
               </AdminLayout>
             </ProtectedRoute>
-          } 
+          }
+        />
+
+        <Route
+          path="/admin/vehicle-registrations"
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <AdminLayout>
+                <AdminVehicleRegistrations />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
         />
 
  <Route path="/admin/roles" element={

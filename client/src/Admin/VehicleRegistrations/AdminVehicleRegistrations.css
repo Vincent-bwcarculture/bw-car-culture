@@ -1,0 +1,287 @@
+/* AdminVehicleRegistrations.css */
+
+.avr-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Toolbar */
+.avr-toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.avr-search-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.avr-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+  pointer-events: none;
+}
+
+.avr-search {
+  width: 100%;
+  background: #1a1a1a;
+  border: 1px solid #2e2e2e;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.875rem;
+  padding: 9px 12px 9px 36px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.avr-search:focus { border-color: #e63946; }
+.avr-search::placeholder { color: #555; }
+
+.avr-refresh-btn {
+  background: #1a1a1a;
+  border: 1px solid #2e2e2e;
+  border-radius: 8px;
+  color: #aaa;
+  padding: 9px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s, border-color 0.2s;
+}
+.avr-refresh-btn:hover { color: #fff; border-color: #555; }
+
+/* Filters */
+.avr-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.avr-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #2e2e2e;
+  background: #1a1a1a;
+  color: #aaa;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.avr-filter-btn:hover { border-color: #555; color: #fff; }
+
+.avr-filter-btn.active.avr-filter--pending  { border-color: #f59e0b; color: #f59e0b; background: rgba(245,158,11,0.08); }
+.avr-filter-btn.active.avr-filter--approved { border-color: #22c55e; color: #22c55e; background: rgba(34,197,94,0.08); }
+.avr-filter-btn.active.avr-filter--rejected { border-color: #e63946; color: #e63946; background: rgba(230,57,70,0.08); }
+.avr-filter-btn.active.avr-filter--all      { border-color: #555; color: #fff; }
+
+.avr-filter-count {
+  background: #2a2a2a;
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 0.72rem;
+}
+
+/* States */
+.avr-loading, .avr-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px;
+  color: #555;
+  font-size: 0.875rem;
+}
+
+.avr-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: #e63946;
+  border-radius: 50%;
+  animation: avr-spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes avr-spin { to { transform: rotate(360deg); } }
+
+/* Table */
+.avr-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #2a2a2a;
+}
+
+.avr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.avr-table thead th {
+  background: #111;
+  color: #666;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.avr-table tbody tr {
+  border-top: 1px solid #1e1e1e;
+  transition: background 0.15s;
+}
+
+.avr-table tbody tr:hover { background: #161616; }
+
+.avr-table td {
+  padding: 12px 14px;
+  color: #ddd;
+  vertical-align: middle;
+}
+
+.avr-row--pending  { border-left: 3px solid #f59e0b; }
+.avr-row--approved { border-left: 3px solid #22c55e; }
+.avr-row--rejected { border-left: 3px solid #e63946; opacity: 0.75; }
+
+/* Cells */
+.avr-vehicle-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avr-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.avr-vehicle-cell em { color: #666; font-style: normal; font-size: 0.8rem; }
+
+.avr-vin { font-size: 0.72rem; color: #555; margin-top: 3px; font-family: monospace; }
+
+.avr-plate {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #e63946;
+  letter-spacing: 0.07em;
+}
+
+.avr-owner { font-weight: 600; color: #fff; }
+.avr-email { font-size: 0.78rem; color: #666; }
+
+.avr-none { color: #444; }
+
+.avr-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.avr-admin-note {
+  font-size: 0.72rem;
+  color: #666;
+  font-style: italic;
+  margin-top: 3px;
+}
+
+/* Action buttons */
+.avr-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.avr-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.avr-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.avr-btn:not(:disabled):hover { opacity: 0.85; }
+
+.avr-btn--approve { background: rgba(34,197,94,0.15);  color: #22c55e;  border: 1px solid rgba(34,197,94,0.3); }
+.avr-btn--reject  { background: rgba(230,57,70,0.15);  color: #e63946;  border: 1px solid rgba(230,57,70,0.3); }
+.avr-btn--reset   { background: rgba(245,158,11,0.12); color: #f59e0b;  border: 1px solid rgba(245,158,11,0.3); }
+.avr-btn--cancel  { background: #1a1a1a; color: #aaa; border: 1px solid #2e2e2e; }
+
+/* Modal */
+.avr-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.avr-modal {
+  background: #1a1a1a;
+  border: 1px solid #2e2e2e;
+  border-radius: 14px;
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.avr-modal h3 {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.avr-note-input {
+  background: #111;
+  border: 1px solid #2e2e2e;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.875rem;
+  padding: 10px 12px;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+.avr-note-input:focus { border-color: #e63946; }
+.avr-note-input::placeholder { color: #555; }
+
+.avr-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}

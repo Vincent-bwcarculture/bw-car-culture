@@ -103,7 +103,7 @@ const CarViewer = ({ color }) => {
         scene.add(car);
 
         // Turntable/platform keywords to hide
-        const HIDE_KEYWORDS = ['turntable', 'platform', 'disc', 'ground', 'floor', 'base', 'circle', 'ring', 'shadow', 'spoon'];
+        const HIDE_KEYWORDS = ['turntable', 'platform', 'disc', 'ground', 'floor', 'base', 'circle', 'ring', 'shadow', 'spoon', 'tire', 'tyre', 'wheel'];
 
         car.traverse((node) => {
           if (node.isMesh) {
@@ -260,6 +260,22 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
       </div>
 
       <div className="rvt-body">
+        {/* 3D Viewer */}
+        <div className="rvt-viewer-panel">
+          <div className="rvt-viewer-badge">
+            {hasRegistered ? 'Your Digital Twin' : 'Demo — VW Golf R'}
+          </div>
+          <CarViewer color={form.color} />
+          <div className="rvt-viewer-note">
+            <Info size={13} />
+            <span>
+              {hasRegistered
+                ? 'Your vehicle digital twin — track service history and more.'
+                : 'Register your vehicle to order your digital twin or get personalised service tracking.'}
+            </span>
+          </div>
+        </div>
+
         {/* Form */}
         <div className="rvt-form-panel">
           {saved && <div className="rvt-success-banner"><CheckCircle size={16} /> Vehicle registered successfully!</div>}
@@ -344,21 +360,6 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
           )}
         </div>
 
-        {/* 3D Viewer */}
-        <div className="rvt-viewer-panel">
-          <div className="rvt-viewer-badge">
-            {hasRegistered ? 'Your Digital Twin' : 'Demo — VW Golf R'}
-          </div>
-          <CarViewer color={form.color} />
-          <div className="rvt-viewer-note">
-            <Info size={13} />
-            <span>
-              {hasRegistered
-                ? 'Model reflects your registered vehicle color.'
-                : 'Register your vehicle above to personalise this model.'}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );

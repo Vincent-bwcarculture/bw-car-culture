@@ -11,11 +11,12 @@ const menuItems = [
   {
     title: 'Marketplace', icon: '◈',
     submenu: [
-      { title: 'Listings',         path: '/admin/listings' },
-      { title: 'User Submissions', path: '/admin/user-submissions' },
-      { title: 'Requests',         path: '/admin/requests' },
-      { title: 'Auctions',         path: '/admin/auctions' },
-      { title: 'Inventory',        path: '/admin/inventory' },
+      { title: 'Listings',              path: '/admin/listings' },
+      { title: 'User Submissions',      path: '/admin/user-submissions' },
+      { title: 'Vehicle Registrations', path: '/admin/vehicle-registrations' },
+      { title: 'Requests',              path: '/admin/requests' },
+      { title: 'Auctions',              path: '/admin/auctions' },
+      { title: 'Inventory',             path: '/admin/inventory' },
     ]
   },
   {
