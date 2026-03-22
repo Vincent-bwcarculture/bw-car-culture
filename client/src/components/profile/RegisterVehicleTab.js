@@ -8,8 +8,8 @@ import { Car, Save, Info, CheckCircle } from 'lucide-react';
 import axios from '../../config/axios.js';
 import './RegisterVehicleTab.css';
 
-// Model hosted on jsDelivr CDN (backed by the bw-car-culture-api GitHub repo)
-const MODEL_URL = 'https://cdn.jsdelivr.net/gh/Vincent-bwcarculture/bw-car-culture-api@master/models/golf_r_configurator.glb';
+// Model hosted on S3
+const MODEL_URL = 'https://i3wcarculture-images.s3.amazonaws.com/models/golf_r_configurator.glb';
 const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
 
 const DEMO_COLORS = [
