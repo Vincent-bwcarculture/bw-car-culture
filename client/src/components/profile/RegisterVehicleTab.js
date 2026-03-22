@@ -1,12 +1,9 @@
 // client/src/components/profile/RegisterVehicleTab.js
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Car, Save, RotateCcw, Info, CheckCircle } from 'lucide-react';
+import { Car, Save, Info, CheckCircle } from 'lucide-react';
 import axios from '../../config/axios.js';
 import './RegisterVehicleTab.css';
-
-const WHEEL_SETS = ['bbs', 'stock', 'spoon'];
-const WHEEL_LABELS = { bbs: 'BBS RS', stock: 'Stock 19"', spoon: 'Spoon SW388' };
 
 const DEMO_COLORS = [
   { label: 'Pearl White',   hex: '#EBEBEB' },
@@ -36,7 +33,6 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
   const [registeredVehicles, setRegisteredVehicles] = useState([]);
-  const [activeWheelSet, setActiveWheelSet] = useState('bbs');
   const [modelColor, setModelColor] = useState('#EBEBEB');
   const [modelSrc, setModelSrc] = useState(null);
   const [modelLoading, setModelLoading] = useState(true);
@@ -122,10 +118,7 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
     }
     try {
       setSaving(true);
-      const response = await axios.post('/user/register-vehicle', {
-        ...form,
-        wheelSet: activeWheelSet,
-      });
+      const response = await axios.post('/user/register-vehicle', { ...form });
       if (response.data.success) {
         setSaved(true);
         setRegisteredVehicles(prev => [...prev, response.data.data]);
@@ -338,21 +331,6 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
                 <span style={{ color: '#555', fontSize: '0.85rem' }}>Sign in to view 3D model</span>
               </div>
             )}
-          </div>
-
-          {/* Wheel set selector */}
-          <div className="rvt-wheel-selector">
-            <span className="rvt-wheel-label">Wheels</span>
-            {WHEEL_SETS.map(ws => (
-              <button
-                key={ws}
-                type="button"
-                className={`rvt-wheel-btn ${activeWheelSet === ws ? 'rvt-wheel-btn-active' : ''}`}
-                onClick={() => setActiveWheelSet(ws)}
-              >
-                {WHEEL_LABELS[ws]}
-              </button>
-            ))}
           </div>
 
           <div className="rvt-viewer-note">
