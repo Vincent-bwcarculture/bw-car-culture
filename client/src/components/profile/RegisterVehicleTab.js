@@ -17,6 +17,7 @@ const DEMO_COLORS = [
   { label: 'Reflex Silver', hex: '#b0b0b0' },
 ];
 
+const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
 const CURRENT_YEAR = new Date().getFullYear();
 
 const emptyForm = {
@@ -37,7 +38,10 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
   const [registeredVehicles, setRegisteredVehicles] = useState([]);
   const [activeWheelSet, setActiveWheelSet] = useState('bbs');
   const [modelColor, setModelColor] = useState('#EBEBEB');
+  const [modelSrc, setModelSrc] = useState(null);
+  const [modelLoading, setModelLoading] = useState(true);
   const modelViewerRef = useRef(null);
+  const blobUrlRef = useRef(null);
 
   // Load any already-registered vehicles from profile
   useEffect(() => {
@@ -45,6 +49,32 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
       setRegisteredVehicles(profileData.registeredVehicles);
     }
   }, [profileData]);
+
+  // Fetch model as blob URL (authenticated, not directly downloadable)
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) { setModelLoading(false); return; }
+
+    setModelLoading(true);
+    fetch(`${API_BASE}/user/model/golf-r`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Model fetch failed');
+        return res.blob();
+      })
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        blobUrlRef.current = url;
+        setModelSrc(url);
+      })
+      .catch(() => setModelSrc(null))
+      .finally(() => setModelLoading(false));
+
+    return () => {
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    };
+  }, []);
 
   // Sync color picker with model viewer
   useEffect(() => {
@@ -280,21 +310,34 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
           </div>
 
           <div className="rvt-viewer-wrapper">
-            <model-viewer
-              ref={modelViewerRef}
-              src="/models/golf_r_configurator.glb"
-              alt="VW Golf R 3D Model"
-              camera-controls
-              auto-rotate
-              auto-rotate-delay="1000"
-              rotation-per-second="20deg"
-              exposure="1.2"
-              shadow-intensity="1"
-              camera-orbit="45deg 75deg 6m"
-              min-camera-orbit="auto auto 2m"
-              max-camera-orbit="auto auto 12m"
-              style={{ width: '100%', height: '100%', background: 'transparent' }}
-            />
+            {modelLoading && (
+              <div className="rvt-model-loading">
+                <span className="rvt-spinner" />
+                <span>Loading model...</span>
+              </div>
+            )}
+            {!modelLoading && modelSrc && (
+              <model-viewer
+                ref={modelViewerRef}
+                src={modelSrc}
+                alt="VW Golf R 3D Model"
+                camera-controls
+                auto-rotate
+                auto-rotate-delay="1000"
+                rotation-per-second="20deg"
+                exposure="1.2"
+                shadow-intensity="1"
+                camera-orbit="45deg 75deg 6m"
+                min-camera-orbit="auto auto 2m"
+                max-camera-orbit="auto auto 12m"
+                style={{ width: '100%', height: '100%', background: 'transparent' }}
+              />
+            )}
+            {!modelLoading && !modelSrc && (
+              <div className="rvt-model-loading">
+                <span style={{ color: '#555', fontSize: '0.85rem' }}>Sign in to view 3D model</span>
+              </div>
+            )}
           </div>
 
           {/* Wheel set selector */}
