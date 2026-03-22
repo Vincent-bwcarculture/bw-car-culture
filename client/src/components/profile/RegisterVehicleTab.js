@@ -103,12 +103,13 @@ const CarViewer = ({ color }) => {
         scene.add(car);
 
         // Turntable/platform keywords to hide
-        const HIDE_KEYWORDS = ['turntable', 'platform', 'disc', 'ground', 'floor', 'base', 'circle', 'ring', 'shadow'];
+        const HIDE_KEYWORDS = ['turntable', 'platform', 'disc', 'ground', 'floor', 'base', 'circle', 'ring', 'shadow', 'spoon'];
 
         car.traverse((node) => {
           if (node.isMesh) {
             const nameLower = node.name.toLowerCase();
             const matName = (Array.isArray(node.material) ? node.material[0]?.name : node.material?.name) || '';
+            console.log('[3D] mesh:', node.name, '| mat:', matName);
             const matLower = matName.toLowerCase();
 
             // Hide turntable/platform meshes
