@@ -17,6 +17,7 @@ import SplashScreen from './components/SplashScreen.js';
 
 // Analytics Imports
 import { initializeGA, trackPageView, trackException, trackTiming } from './config/analytics.js';
+import { preloadCarModel } from './utils/modelCache.js';
 import { analyticsService } from './services/analyticsService.js';
 import { InternalAnalyticsProvider } from './components/shared/InternalAnalyticsProvider.js';
 import internalAnalytics from './utils/internalAnalytics.js';
@@ -1434,6 +1435,12 @@ function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [analyticsInitialized, setAnalyticsInitialized] = useState(false);
   const appStartTime = React.useRef(Date.now());
+
+  // Preload 3D car model in the background after the app settles
+  useEffect(() => {
+    const t = setTimeout(preloadCarModel, 4000);
+    return () => clearTimeout(t);
+  }, []);
 
   // Enhanced analytics initialization with error prevention
   useEffect(() => {

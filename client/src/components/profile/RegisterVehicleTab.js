@@ -2,14 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Car, Save, Info, CheckCircle } from 'lucide-react';
 import axios from '../../config/axios.js';
+import { loadCarModel } from '../../utils/modelCache.js';
 import './RegisterVehicleTab.css';
-
-// Model hosted on S3
-const MODEL_URL = 'https://i3wcarculture-images.s3.amazonaws.com/models/golf_r_configurator.glb';
 const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
 
 const DEMO_COLORS = [
@@ -39,7 +36,8 @@ const CarViewer = ({ color }) => {
   const modelRef = useRef(null);
   const rendererRef = useRef(null);
   const animFrameRef = useRef(null);
-  const [status, setStatus] = useState('loading'); // 'loading' | 'ready' | 'error'
+  const [status, setStatus]   = useState('loading'); // 'loading' | 'ready' | 'error'
+  const [progress, setProgress] = useState(0); // 0–100
 
   useEffect(() => {
     const container = mountRef.current;
@@ -93,11 +91,9 @@ const CarViewer = ({ color }) => {
     controls.dampingFactor = 0.05;
     controls.update();
 
-    // Load model directly from jsDelivr CDN
-    const loader = new GLTFLoader();
-    loader.load(
-      MODEL_URL,
-      (gltf) => {
+    // Load model (uses in-memory cache if already fetched)
+    loadCarModel(({ percent }) => setProgress(percent))
+      .then((gltf) => {
         const car = gltf.scene;
         modelRef.current = car;
         scene.add(car);
@@ -161,13 +157,11 @@ const CarViewer = ({ color }) => {
         });
 
         setStatus('ready');
-      },
-      undefined,
-      (err) => {
+      })
+      .catch((err) => {
         console.error('GLTF load error:', err);
         setStatus('error');
-      }
-    );
+      });
 
     // Animate
     const animate = () => {
@@ -219,7 +213,12 @@ const CarViewer = ({ color }) => {
       {status === 'loading' && (
         <div className="rvt-model-overlay">
           <span className="rvt-spinner" />
-          <span>Loading model...</span>
+          <span>{progress > 0 ? `Loading model… ${progress}%` : 'Loading model…'}</span>
+          {progress > 0 && (
+            <div className="rvt-progress-bar">
+              <div className="rvt-progress-fill" style={{ width: `${progress}%` }} />
+            </div>
+          )}
         </div>
       )}
       {status === 'error' && (
