@@ -8,34 +8,20 @@
 
 /* Header */
 .rvt-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
   margin-bottom: 28px;
 }
 
-.rvt-header-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #e63946, #c1121f);
-  color: #fff;
-  flex-shrink: 0;
-}
-
 .rvt-title {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0 0 2px 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #e8e8e8;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.01em;
 }
 
 .rvt-subtitle {
-  font-size: 0.85rem;
-  color: #888;
+  font-size: 0.8rem;
+  color: #666;
   margin: 0;
 }
 
@@ -285,17 +271,14 @@
 
 .rvt-viewer-badge {
   position: absolute;
-  top: 14px;
+  top: 12px;
   left: 14px;
   z-index: 10;
-  background: rgba(230, 57, 70, 0.9);
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 700;
+  color: #555;
+  font-size: 0.68rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 4px 10px;
-  border-radius: 6px;
+  letter-spacing: 0.1em;
 }
 
 .rvt-viewer-wrapper {

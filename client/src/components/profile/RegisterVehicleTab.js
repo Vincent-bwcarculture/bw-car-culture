@@ -283,11 +283,8 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
   return (
     <div className="rvt-container">
       <div className="rvt-header">
-        <div className="rvt-header-icon"><Car size={22} /></div>
-        <div>
-          <h2 className="rvt-title">Register Your Vehicle</h2>
-          <p className="rvt-subtitle">Create a digital twin of your car — track service history and more.</p>
-        </div>
+        <h2 className="rvt-title">Register Your Vehicle</h2>
+        <p className="rvt-subtitle">Create a digital twin of your car — track service history and more.</p>
       </div>
 
       <div className="rvt-body">
