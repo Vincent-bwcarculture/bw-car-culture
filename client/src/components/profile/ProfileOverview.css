@@ -8,7 +8,7 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 12px;
   transition: var(--uprofile-transition);
 }
 
@@ -17,19 +17,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 8px;
 }
 
 .poverview-section-title {
-  font-size: 1.4rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--uprofile-text-primary);
+  color: var(--uprofile-text-muted);
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   transition: var(--uprofile-transition);
 }
 
@@ -41,7 +43,7 @@
 .poverview-suggestions-section {
   background: var(--uprofile-bg-primary);
   border-radius: var(--uprofile-border-radius);
-  padding: 25px;
+  padding: 14px 16px;
   border: 1px solid var(--uprofile-border-color);
   transition: var(--uprofile-transition);
 }
@@ -253,15 +255,15 @@
 
 .poverview-info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .poverview-info-item {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 15px;
+  gap: 8px;
+  padding: 10px;
   background: var(--uprofile-bg-secondary);
   border-radius: var(--uprofile-border-radius);
   border: 1px solid var(--uprofile-border-color);
@@ -282,7 +284,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  min-width: 0;
 }
 
 .poverview-info-label {
@@ -405,61 +408,53 @@
 
 /* === SUGGESTED ACTIONS === */
 .poverview-toggle-suggestions {
-  background: var(--uprofile-primary-accent);
-  color: var(--uprofile-text-white);
-  border: none;
-  padding: 8px 16px;
+  background: transparent;
+  color: var(--uprofile-text-muted);
+  border: 1px solid var(--uprofile-border-color);
+  padding: 4px 10px;
   border-radius: var(--uprofile-border-radius-sm);
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   transition: var(--uprofile-transition);
 }
 
 .poverview-toggle-suggestions:hover {
-  background: var(--uprofile-primary-accent-dark);
+  border-color: var(--uprofile-primary-accent);
+  color: var(--uprofile-primary-accent);
 }
 
-.poverview-suggestions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-top: 15px;
+.poverview-suggestions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .poverview-suggestion-item {
   display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 20px;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px;
   background: var(--uprofile-bg-secondary);
-  border-radius: var(--uprofile-border-radius);
+  border-radius: 8px;
   border: 1px solid var(--uprofile-border-color);
   transition: var(--uprofile-transition);
 }
 
 .poverview-suggestion-item:hover {
-  background: var(--uprofile-bg-tertiary);
-  transform: translateX(5px);
-}
-
-.poverview-priority-high {
-  border-left: 4px solid var(--uprofile-secondary-red);
-}
-
-.poverview-priority-medium {
-  border-left: 4px solid var(--uprofile-warning-orange);
+  border-color: var(--uprofile-primary-accent);
 }
 
 .poverview-suggestion-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--uprofile-primary-accent) 0%, var(--uprofile-primary-accent-dark) 100%);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--uprofile-bg-tertiary);
+  border: 1px solid var(--uprofile-border-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--uprofile-text-white);
+  color: var(--uprofile-text-muted);
   flex-shrink: 0;
 }
 
@@ -467,41 +462,41 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  min-width: 0;
 }
 
-.poverview-suggestion-title {
-  font-size: 16px;
+.poverview-suggestion-content h4 {
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--uprofile-text-primary);
+  margin: 0;
 }
 
-.poverview-suggestion-description {
-  font-size: 14px;
-  color: var(--uprofile-text-secondary);
-  line-height: 1.4;
+.poverview-suggestion-content p {
+  font-size: 0.7rem;
+  color: var(--uprofile-text-muted);
+  margin: 0;
+  line-height: 1.3;
 }
 
 .poverview-suggestion-action {
-  background: var(--uprofile-primary-accent);
-  color: var(--uprofile-text-white);
+  background: transparent;
+  color: var(--uprofile-primary-accent);
   border: none;
-  padding: 10px 16px;
-  border-radius: var(--uprofile-border-radius-sm);
-  font-size: 14px;
-  font-weight: 500;
+  padding: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: var(--uprofile-transition);
   display: flex;
   align-items: center;
-  gap: 8px;
-  white-space: nowrap;
+  gap: 3px;
+  margin-top: 4px;
+  transition: opacity 0.15s;
 }
 
 .poverview-suggestion-action:hover {
-  background: var(--uprofile-primary-accent-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--uprofile-shadow-sm);
+  opacity: 0.7;
 }
 
 /* === RESPONSIVE DESIGN === */
@@ -511,12 +506,7 @@
   .poverview-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
   .poverview-badges-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .poverview-info-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -526,18 +516,8 @@
   .poverview-stats-grid {
     grid-template-columns: repeat(4, 1fr);
   }
-  
   .poverview-badges-grid {
     grid-template-columns: repeat(3, 1fr);
-  }
-  
-  .poverview-strength-section,
-  .poverview-stats-section,
-  .poverview-badges-section,
-  .poverview-account-section,
-  .poverview-activity-section,
-  .poverview-suggestions-section {
-    padding: 30px;
   }
 }
 

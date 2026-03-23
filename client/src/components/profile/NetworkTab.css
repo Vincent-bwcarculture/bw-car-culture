@@ -229,7 +229,7 @@
 }
 
 .network-users.grid {
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
 .network-users.list {
@@ -368,8 +368,8 @@
   }
 
   .network-users.grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 }
 
@@ -388,20 +388,20 @@
   }
 
   .network-users.grid {
-    gap: 16px;
+    gap: 8px;
   }
 }
 
 /* Tablet */
 @media (min-width: 768px) and (max-width: 1023px) {
   .network-users.grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   }
 }
 
 /* Desktop */
 @media (min-width: 1024px) {
   .network-users.grid {
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   }
 }

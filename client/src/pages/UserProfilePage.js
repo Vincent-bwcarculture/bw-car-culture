@@ -208,8 +208,8 @@ const getProfileHints = (userType) => {
 
 const getAvailableTabs = () => {
   const tabs = [
-    { id: 'register-vehicle', label: 'Register Vehicle', icon: Car },
     { id: 'overview', label: 'Overview', icon: Eye },
+    { id: 'register-vehicle', label: 'Register Vehicle', icon: Car },
     { id: 'notifications', label: 'Notifications', icon: Bell }
   ];
 

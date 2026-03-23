@@ -15,7 +15,7 @@
 /* === COVER IMAGE === */
 .usercard-cover {
   width: 100%;
-  height: 80px;
+  height: 48px;
   background-size: cover;
   background-position: center;
   background-color: var(--uprofile-bg-tertiary);
@@ -30,28 +30,29 @@
 
 /* Offset avatar to overlap cover */
 .usercard-container.grid .usercard-header {
-  padding: 0 16px 0 16px;
-  margin-top: -28px;
+  padding: 0 10px 0 10px;
+  margin-top: -20px;
+  gap: 8px;
 }
 
 .usercard-container.grid .usercard-avatar-container {
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .usercard-container.grid .usercard-avatar,
 .usercard-container.grid .usercard-avatar-wrapper,
 .usercard-container.grid .usercard-avatar-loading,
 .usercard-container.grid .usercard-avatar-fallback {
-  width: 56px;
-  height: 56px;
-  border: 3px solid var(--uprofile-bg-secondary);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--uprofile-bg-secondary);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
 .usercard-container.grid .usercard-bio,
 .usercard-container.grid .usercard-stats,
 .usercard-container.grid .usercard-actions {
-  padding: 0 16px;
+  padding: 0 10px;
 }
 
 .usercard-container.grid .usercard-stats {
@@ -59,7 +60,7 @@
 }
 
 .usercard-container.grid .usercard-actions {
-  padding-bottom: 16px;
+  padding-bottom: 10px;
 }
 
 /* List view stays flat (no cover) */
@@ -230,7 +231,7 @@
 
 .usercard-name {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--uprofile-text-primary);
   display: flex;
@@ -267,8 +268,8 @@
 }
 
 .usercard-role {
-  margin: 0 0 6px 0;
-  font-size: 13px;
+  margin: 0 0 3px 0;
+  font-size: 11px;
   font-weight: 500;
   text-transform: capitalize;
   letter-spacing: 0.3px;
@@ -345,10 +346,10 @@
 /* === STATS === */
 .usercard-stats {
   display: flex;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 8px;
   flex-wrap: wrap;
-  padding: 10px 0;
+  padding: 6px 0;
   border-top: 1px solid var(--uprofile-border-color);
   border-bottom: 1px solid var(--uprofile-border-color);
 }
@@ -356,8 +357,8 @@
 .usercard-stat {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  gap: 3px;
+  font-size: 10px;
   color: var(--uprofile-text-muted);
   font-weight: 500;
   transition: color 0.2s ease;
@@ -382,15 +383,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 8px 10px;
+  gap: 3px;
+  padding: 5px 6px;
   border: 1px solid var(--uprofile-border-color);
-  border-radius: 6px;
+  border-radius: 5px;
   background: var(--uprofile-bg-primary);
   color: var(--uprofile-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 500;
 }
 

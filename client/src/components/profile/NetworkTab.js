@@ -1,6 +1,6 @@
 // client/src/components/profile/NetworkTab.js
 import { useState, useEffect } from 'react';
-import { Search, Filter, Grid, List, Shield } from 'lucide-react';
+import { Search, Filter, Grid, List } from 'lucide-react';
 import axios from '../../config/axios.js';
 import UserCard from '../shared/UserCard/UserCard.js';
 import './NetworkTab.css';
@@ -191,16 +191,12 @@ const NetworkTab = ({ profileData }) => {
         <div className="network-title-section">
           <h2>Network</h2>
           <p>Connect with automotive professionals and enthusiasts</p>
-          <p className="network-privacy-note">
-            <Shield size={14} />
-            Currently showing only admin users (while privacy features are being developed)
-          </p>
         </div>
-        
+
         <div className="network-stats">
           <div className="network-stat">
             <span className="network-stat-number">{users.length}</span>
-            <span className="network-stat-label">Admin Users</span>
+            <span className="network-stat-label">Members</span>
           </div>
           <div className="network-stat">
             <span className="network-stat-number">{following.size}</span>
@@ -256,8 +252,9 @@ const NetworkTab = ({ profileData }) => {
               value={filters.userType} 
               onChange={(e) => setFilters({...filters, userType: e.target.value})}
             >
-              <option value="all">All Admin Users</option>
+              <option value="all">All Users</option>
               <option value="admin">Admin</option>
+              <option value="user">Members</option>
             </select>
           </div>
 
@@ -284,19 +281,15 @@ const NetworkTab = ({ profileData }) => {
 
       {/* Results Header */}
       <div className="network-results-header">
-        <span>{filteredUsers.length} users found</span>
+        <span>{filteredUsers.length} member{filteredUsers.length !== 1 ? 's' : ''}</span>
       </div>
 
       {/* Users Grid/List */}
       <div className={`network-users ${viewMode}`}>
         {filteredUsers.length === 0 ? (
           <div className="network-empty">
-            <Shield size={48} />
-            <h3>No admin users found</h3>
-            <p>No users with admin role match your current search criteria.</p>
-            <p className="network-empty-hint">
-              Currently showing only users with "admin" role while privacy features are being developed.
-            </p>
+            <h3>No users found</h3>
+            <p>No members match your current search criteria.</p>
           </div>
         ) : (
           filteredUsers.map(user => (
