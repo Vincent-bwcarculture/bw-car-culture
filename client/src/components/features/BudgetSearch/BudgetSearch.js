@@ -557,23 +557,45 @@ const BudgetSearch = () => {
           
           {!loading && !error && searchResults.length === 0 && !hasSearched && (
             <div className="budget-promo">
+              {/* Full-panel background image */}
+              <div className="budget-promo-image">
+                {promoLoading ? (
+                  <div className="promo-image-placeholder">
+                    <div className="loader"></div>
+                  </div>
+                ) : (
+                  <img
+                    src={mostExpensiveCar ? getCarImageUrl(mostExpensiveCar) : '/images/placeholders/luxury-car.jpg'}
+                    alt={mostExpensiveCar
+                      ? `${mostExpensiveCar.make} ${mostExpensiveCar.model} - Premium vehicle`
+                      : 'Premium vehicles in our marketplace'}
+                    onError={(e) => {
+                      if (e.target.src.includes('amazonaws.com')) {
+                        e.target.src = '/images/placeholders/luxury-car.jpg';
+                      } else if (!e.target.src.includes('unsplash.com')) {
+                        e.target.src = 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&auto=format&fit=crop';
+                      }
+                    }}
+                  />
+                )}
+              </div>
+
+              {/* Overlay content pinned to bottom */}
               <div className="budget-promo-content">
                 <div className="promo-text-section">
                   <h3>Dream Car, Real Budget</h3>
-                  <p className="promo-tagline">
-                    Discover luxury within your reach
-                  </p>
+                  <p className="promo-tagline">Discover luxury within your reach</p>
                   <p className="promo-description">
-                    Our smart calculator analyzes your finances to show 
-                    you exactly what you can afford from our extensive inventory.
+                    Enter your monthly budget and let our calculator show you
+                    exactly what you can afford from our marketplace.
                   </p>
-                  
+
                   {mostExpensiveCar && !promoLoading && (
                     <div className="promo-car-highlight">
                       <div className="promo-car-info">
-                        <span className="promo-car-label">Featured Premium Vehicle:</span>
+                        <span className="promo-car-label">Featured vehicle</span>
                         <span className="promo-car-name">
-                          {mostExpensiveCar.make} {mostExpensiveCar.model} {mostExpensiveCar.year}
+                          {mostExpensiveCar.year} {mostExpensiveCar.make} {mostExpensiveCar.model}
                         </span>
                         <span className="promo-car-price">
                           {formatCurrency(mostExpensiveCar.price)}
@@ -582,64 +604,26 @@ const BudgetSearch = () => {
                     </div>
                   )}
                 </div>
-                
-                <div className="promo-image-section">
-                  {promoLoading ? (
-                    <div className="promo-image-placeholder">
-                      <div className="loader"></div>
-                    </div>
-                  ) : (
-                    <div className="budget-promo-image">
-                      <img 
-                        src={mostExpensiveCar ? getCarImageUrl(mostExpensiveCar) : '/images/placeholders/luxury-car.jpg'} 
-                        alt={mostExpensiveCar ? 
-                          `${mostExpensiveCar.make} ${mostExpensiveCar.model} - Premium vehicle in our inventory` : 
-                          "Premium vehicles available in our marketplace"
-                        }
-                        onError={(e) => {
-                          if (e.target.src.includes('amazonaws.com')) {
-                            e.target.src = '/images/placeholders/luxury-car.jpg';
-                          } else if (!e.target.src.includes('unsplash.com')) {
-                            e.target.src = 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&auto=format&fit=crop';
-                          }
-                        }}
-                      />
-                      <div className="promo-image-overlay">
-                        {websiteStats.error && (
-                          <div className="stats-disclaimer">
-                            <span>* Estimated numbers</span>
-                          </div>
-                        )}
-                        
-                        {!websiteStats.loading && !websiteStats.error && (
-                          <div className="stats-disclaimer">
-                            <span>* Live marketplace data</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
+
                 <div className="budget-action-buttons">
-                  <button 
+                  <button
                     className="budget-action-button primary"
                     onClick={scrollToBudgetCalculator}
                   >
                     Calculate My Budget
                   </button>
-                  <button 
+                  <button
                     className="budget-action-button secondary"
                     onClick={() => navigate('/marketplace')}
                   >
                     Browse All Cars
                   </button>
                   {mostExpensiveCar && (
-                    <button 
+                    <button
                       className="budget-action-button premium"
                       onClick={() => navigate(`/marketplace/${mostExpensiveCar._id}`)}
                     >
-                      View Premium Car
+                      View Featured Car
                     </button>
                   )}
                 </div>
