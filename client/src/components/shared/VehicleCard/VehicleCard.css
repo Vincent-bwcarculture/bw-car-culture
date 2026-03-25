@@ -515,6 +515,11 @@
 }
 
 /* Location badge — bottom of card image */
+.vc-location-delivery {
+  opacity: 0.8;
+  font-weight: 400;
+}
+
 .vc-location-badge {
   position: absolute;
   bottom: 0;

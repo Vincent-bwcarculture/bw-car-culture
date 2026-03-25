@@ -1195,13 +1195,19 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               'NA': 'Namibia', 'NAM': 'Namibia', 'Namibia': 'Namibia',
               'ZM': 'Zambia', 'ZMB': 'Zambia', 'Zambia': 'Zambia',
               'MZ': 'Mozambique', 'MOZ': 'Mozambique', 'Mozambique': 'Mozambique',
+              'JP': 'Japan', 'JPN': 'Japan', 'Japan': 'Japan',
+            };
+            const deliveryDays = {
+              'South Africa': '3–5 day delivery',
+              'Japan': '60–70 day delivery',
             };
             const raw = dealer?.location?.country || car?.location?.country || '';
             const countryName = countryMap[raw] || raw;
             if (!countryName) return null;
+            const delivery = deliveryDays[countryName];
             return (
               <div className="vc-location-badge">
-                Vehicle in {countryName}
+                Vehicle in {countryName}{delivery ? <span className="vc-location-delivery"> · {delivery}</span> : null}
               </div>
             );
           })()}
