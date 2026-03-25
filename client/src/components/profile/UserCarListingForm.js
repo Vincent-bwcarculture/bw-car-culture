@@ -245,6 +245,11 @@ const UserCarListingForm = ({
   // Angle photos: front, back, side
   const [angleFiles, setAngleFiles] = useState({ front: null, back: null, side: null });
   const [anglePreviews, setAnglePreviews] = useState({ front: null, back: null, side: null });
+
+  // Social media boost (BWP 300)
+  const [wantsBoost, setWantsBoost] = useState(false);
+  const [boostProofFile, setBoostProofFile] = useState(null);
+  const [boostProofPreview, setBoostProofPreview] = useState(null);
   
   // Auto-fill states
   const [autoFillLoading, setAutoFillLoading] = useState(false);
@@ -594,103 +599,49 @@ const UserCarListingForm = ({
     }
   }, [loadUserProfileData, isEdit, autoFillData]);
 
-  // Enhanced pricing validation
-  const validatePricing = () => {
-    const errors = {};
-    
-    // Parse prices as numbers for comparison
-    const currentPrice = parseFloat(formData.price);
-    const originalPrice = formData.priceOptions?.originalPrice ? parseFloat(formData.priceOptions.originalPrice) : null;
-    const savingsAmount = formData.priceOptions?.savingsAmount ? parseFloat(formData.priceOptions.savingsAmount) : null;
-    
-    // Validate current price
-    if (!currentPrice || currentPrice <= 0) {
-      errors.price = 'Current price is required and must be greater than 0';
-    }
-    
-    // If showing savings, validate original price
-    if (formData.priceOptions?.showSavings) {
-      if (!originalPrice || originalPrice <= 0) {
-        errors['priceOptions.originalPrice'] = 'Original price is required when showing savings';
-      } else if (originalPrice <= currentPrice) {
-        errors['priceOptions.originalPrice'] = `Original price (${originalPrice.toLocaleString()}) must be higher than current price (${currentPrice.toLocaleString()})`;
-      }
-      
-      // Validate savings amount if provided
-      if (savingsAmount) {
-        const calculatedSavings = originalPrice - currentPrice;
-        if (Math.abs(savingsAmount - calculatedSavings) > 0.01) {
-          errors['priceOptions.savingsAmount'] = `Savings amount should be ${calculatedSavings.toLocaleString()}`;
-        }
-      }
-    }
-    
-    return errors;
-  };
-  
-  // Form validation - COMPLETE
+  // Form validation — only truly required fields
   const validateForm = () => {
     const errors = {};
-    
-    // Basic validation
-    if (!formData.title.trim() || formData.title.length < 10) {
-      errors.title = 'Title must be at least 10 characters long';
-    }
-    
-    if (!formData.description.trim() || formData.description.length < 20) {
-      errors.description = 'Description must be at least 20 characters long';
-    }
-    
-    // Use the enhanced pricing validation
-    const pricingErrors = validatePricing();
-    Object.assign(errors, pricingErrors);
-    
-    // Specifications validation (check both individual fields and nested specs)
+
     const make = formData.make || formData.specifications?.make;
     const model = formData.model || formData.specifications?.model;
     const year = formData.year || formData.specifications?.year;
-    
-    if (!make?.trim()) {
-      errors['specifications.make'] = 'Make is required';
-    }
-    
-    if (!model?.trim()) {
-      errors['specifications.model'] = 'Model is required';
-    }
-    
+    const price = parseFloat(formData.price);
+
+    if (!make?.trim()) errors['specifications.make'] = 'Make is required';
+    if (!model?.trim()) errors['specifications.model'] = 'Model is required';
     if (!year || year < 1900 || year > new Date().getFullYear() + 2) {
       errors['specifications.year'] = 'Valid year is required';
     }
-    
-    // Contact validation
+    if (!price || price <= 0) errors.price = 'Asking price is required';
+
+    if (!formData.title?.trim() || formData.title.length < 5) {
+      errors.title = 'Title must be at least 5 characters';
+    }
+    if (!formData.description?.trim() || formData.description.length < 10) {
+      errors.description = 'Description must be at least 10 characters';
+    }
     if (!formData.contact?.sellerName?.trim()) {
       errors['contact.sellerName'] = 'Seller name is required';
     }
-    
     if (!formData.contact?.phone?.trim()) {
       errors['contact.phone'] = 'Phone number is required';
     }
-    
-    // Private seller validation
+
     if (formData.sellerType === 'private') {
       if (!formData.privateSeller?.firstName?.trim()) {
-        errors['privateSeller.firstName'] = 'First name is required for private sellers';
+        errors['privateSeller.firstName'] = 'First name is required';
       }
       if (!formData.privateSeller?.lastName?.trim()) {
-        errors['privateSeller.lastName'] = 'Last name is required for private sellers';
+        errors['privateSeller.lastName'] = 'Last name is required';
       }
     }
-    
-    // Business validation
     if (formData.sellerType === 'dealership') {
       if (!formData.businessInfo?.businessName?.trim()) {
-        errors['businessInfo.businessName'] = 'Business name is required for dealerships';
-      }
-      if (!formData.businessInfo?.businessType?.trim()) {
-        errors['businessInfo.businessType'] = 'Business type is required for dealerships';
+        errors['businessInfo.businessName'] = 'Business name is required';
       }
     }
-    
+
     return errors;
   };
 
@@ -734,28 +685,11 @@ const UserCarListingForm = ({
     }
   };
 
-  // Enhanced price change handler
+  // Price change handler — clears error on valid input
   const handlePriceChange = (e) => {
-    const { name, value } = e.target;
-    
-    // Update the form data
     handleInputChange(e);
-    
-    // Real-time validation for pricing fields
-    if (name === 'price' || name === 'priceOptions.originalPrice') {
-      setTimeout(() => {
-        const pricingErrors = validatePricing();
-        setErrors(prev => ({
-          ...prev,
-          ...pricingErrors,
-          // Clear pricing errors if validation passes
-          ...(Object.keys(pricingErrors).length === 0 && {
-            price: undefined,
-            'priceOptions.originalPrice': undefined,
-            'priceOptions.savingsAmount': undefined
-          })
-        }));
-      }, 100);
+    if (e.target.name === 'price' && parseFloat(e.target.value) > 0) {
+      setErrors(prev => { const n = { ...prev }; delete n.price; return n; });
     }
   };
 
@@ -941,6 +875,31 @@ const removeImage = (index) => {
     setAnglePreviews(prev => ({ ...prev, [angle]: null }));
   };
 
+  // ===== BOOST PROOF OF PAYMENT =====
+  const handleBoostProofUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const maxSize = 10 * 1024 * 1024;
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+    if (file.size > maxSize) { showMessage('error', 'File too large. Maximum 10MB.'); return; }
+    if (!validTypes.includes(file.type.toLowerCase())) { showMessage('error', 'Use PDF, JPEG, or PNG.'); return; }
+    setBoostProofFile(file);
+    if (file.type === 'application/pdf') {
+      setBoostProofPreview({ type: 'pdf', name: file.name, size: file.size });
+    } else {
+      setBoostProofPreview({ type: 'image', url: URL.createObjectURL(file), name: file.name, size: file.size });
+    }
+    showMessage('success', `Proof of payment selected: ${file.name}`);
+  };
+
+  const removeBoostProof = () => {
+    if (boostProofPreview?.type === 'image' && boostProofPreview.url) {
+      URL.revokeObjectURL(boostProofPreview.url);
+    }
+    setBoostProofFile(null);
+    setBoostProofPreview(null);
+  };
+
   // ===== ENHANCED FORM SUBMISSION WITH DYNAMIC TIER SUPPORT =====
 const handleFormSubmit = async (e) => {
   e.preventDefault();
@@ -1100,6 +1059,34 @@ const handleFormSubmit = async (e) => {
         } catch (angleError) {
           console.warn(`${angle} photo upload error (non-blocking):`, angleError.message);
         }
+      }
+    }
+
+    // ========================================
+    // STEP 1d: Upload boost proof of payment (if provided)
+    // ========================================
+    let boostProofUrl = null;
+    if (wantsBoost && boostProofFile) {
+      showMessage('info', 'Uploading proof of payment...');
+      try {
+        const boostFormData = new FormData();
+        boostFormData.append('image0', boostProofFile);
+        boostFormData.append('folder', 'boost-payment-proofs');
+        const boostRes = await fetch('https://bw-car-culture-api.vercel.app/api/user/upload-images', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+          body: boostFormData
+        });
+        if (boostRes.ok) {
+          const boostResult = await boostRes.json();
+          if (boostResult.success && boostResult.images?.[0]) {
+            boostProofUrl = boostResult.images[0].url;
+          }
+        } else {
+          console.warn('Boost proof upload failed, continuing without it');
+        }
+      } catch (boostErr) {
+        console.warn('Boost proof upload error (non-blocking):', boostErr.message);
       }
     }
 
@@ -1278,6 +1265,16 @@ const handleFormSubmit = async (e) => {
       // Proof of ownership document
       proofOfOwnership: proofOfOwnershipUrl,
 
+      // Social media boost request
+      featuredBoost: wantsBoost ? {
+        requested: true,
+        amount: 300,
+        currency: 'BWP',
+        proofUrl: boostProofUrl,
+        status: boostProofUrl ? 'pending_verification' : 'awaiting_proof',
+        requestedAt: new Date().toISOString()
+      } : null,
+
       // Structured angle photos
       vehiclePhotos: Object.keys(vehiclePhotoUrls).length > 0 ? vehiclePhotoUrls : undefined,
 
@@ -1426,11 +1423,13 @@ const handleFormSubmit = async (e) => {
 
     console.log('✅ Listing submitted successfully!');
     
-    // Show success message based on tier
-    if (isFreeTier) {
-      showMessage('success', '🎉 FREE listing submitted for review! No payment required - we\'ll contact you within 24-48 hours.');
+    // Success message
+    if (wantsBoost && boostProofUrl) {
+      showMessage('success', '🎉 Listing submitted! Your proof of payment has been received — once verified, your vehicle will be featured across all our social media platforms.');
+    } else if (wantsBoost) {
+      showMessage('success', '🎉 Listing submitted! Please upload your proof of payment on the Promote tab to complete your social media feature request.');
     } else {
-      showMessage('success', `🎉 ${calculatedPricingDetails.name} submitted for review! Total cost: P${calculatedPricingDetails.totalCost.toLocaleString()}`);
+      showMessage('success', '🎉 Listing submitted for review! We\'ll get it live on the website shortly.');
     }
     
     // Save to profile for future listings
@@ -1465,7 +1464,19 @@ const handleFormSubmit = async (e) => {
     setImageFiles([]);
     setImagePreviews([]);
     setPrimaryImageIndex(0);
-    
+
+    // Clear proof & boost state
+    if (proofPreview?.type === 'image' && proofPreview?.url) URL.revokeObjectURL(proofPreview.url);
+    setProofFile(null);
+    setProofPreview(null);
+    Object.values(anglePreviews).forEach(p => { if (p?.url) URL.revokeObjectURL(p.url); });
+    setAngleFiles({ front: null, back: null, side: null });
+    setAnglePreviews({ front: null, back: null, side: null });
+    if (boostProofPreview?.type === 'image' && boostProofPreview?.url) URL.revokeObjectURL(boostProofPreview.url);
+    setBoostProofFile(null);
+    setBoostProofPreview(null);
+    setWantsBoost(false);
+
     // Reset form data to initial state
     setFormData(defaultFormData);
     
@@ -1475,15 +1486,15 @@ const handleFormSubmit = async (e) => {
     console.log(`🔄 Form reset to initial state`);
   };
 
-  // Tab configuration
+  // Tab configuration — critical fields first for fast listing
   const tabs = [
-    { id: 'basic', label: 'Basic Info', icon: '📝' },
-    { id: 'specs', label: 'Specifications', icon: '⚙️' },
-    { id: 'features', label: 'Features', icon: '✨' },
-    { id: 'contact', label: 'Contact', icon: '📞' },
-    { id: 'images', label: 'Images', icon: '📸' },
-    { id: 'pricing', label: 'Pricing', icon: '💰' },
-    { id: 'additional', label: 'Additional', icon: '📋' }
+    { id: 'basic',      label: 'Vehicle Info', icon: '🚗' },
+    { id: 'contact',    label: 'Contact',      icon: '📞' },
+    { id: 'images',     label: 'Photos',       icon: '📸' },
+    { id: 'specs',      label: 'Details',      icon: '⚙️' },
+    { id: 'features',   label: 'Features',     icon: '✨' },
+    { id: 'additional', label: 'More Info',    icon: '📋' },
+    { id: 'promote',    label: 'Promote',      icon: '🚀' },
   ];
 
   return (
@@ -1634,54 +1645,71 @@ const handleFormSubmit = async (e) => {
 
       {/* Form content */}
       <form onSubmit={handleFormSubmit}>
-        {/* Basic Info Tab */}
+        {/* ── Vehicle Info Tab (critical fields — fill these to list fast) ── */}
         <div className={`ulisting-form-section ${currentTab === 'basic' ? 'active' : ''}`}>
-          <h4>Basic Information</h4>
-          
+          <h4>Vehicle Information</h4>
+          <p className="ulisting-section-hint">Fill in these essential details to create your listing.</p>
+
           <div className="ulisting-form-grid">
-            <div className="ulisting-form-group full-width">
-              <label htmlFor="title">Car Title *</label>
+            {/* Row 1: Make / Model / Year */}
+            <div className="ulisting-form-group">
+              <label htmlFor="make">Make *</label>
               <input
                 type="text"
-                id="title"
-                name="title"
-                value={formData.title}
+                id="make"
+                name="make"
+                value={formData.make || formData.specifications?.make || ''}
                 onChange={handleInputChange}
-                placeholder="e.g., 2020 Toyota Camry XLE - Low Mileage, Excellent Condition"
-                className={errors.title ? 'error' : ''}
+                placeholder="e.g., Toyota"
+                className={errors['specifications.make'] ? 'error' : ''}
               />
-              {errors.title && <span className="ulisting-error-message">{errors.title}</span>}
-            </div>
-
-            <div className="ulisting-form-group full-width">
-              <label htmlFor="description">Description *</label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Describe your car's condition, features, maintenance history, and any additional details that would interest potential buyers..."
-                rows="5"
-                className={errors.description ? 'error' : ''}
-              />
-              {errors.description && <span className="ulisting-error-message">{errors.description}</span>}
+              {errors['specifications.make'] && <span className="ulisting-error-message">{errors['specifications.make']}</span>}
             </div>
 
             <div className="ulisting-form-group">
-              <label htmlFor="category">Category *</label>
-              <select
-                id="category"
-                name="category"
-                value={formData.category}
+              <label htmlFor="model">Model *</label>
+              <input
+                type="text"
+                id="model"
+                name="model"
+                value={formData.model || formData.specifications?.model || ''}
                 onChange={handleInputChange}
-                className={errors.category ? 'error' : ''}
-              >
-                <option value="">Select category</option>
-                {vehicleCategories.map(cat => (
-                  <option key={cat.value} value={cat.value}>{cat.label}</option>
-                ))}
-              </select>
-              {errors.category && <span className="ulisting-error-message">{errors.category}</span>}
+                placeholder="e.g., Camry"
+                className={errors['specifications.model'] ? 'error' : ''}
+              />
+              {errors['specifications.model'] && <span className="ulisting-error-message">{errors['specifications.model']}</span>}
+            </div>
+
+            <div className="ulisting-form-group">
+              <label htmlFor="year">Year *</label>
+              <input
+                type="number"
+                id="year"
+                name="year"
+                value={formData.year || formData.specifications?.year || ''}
+                onChange={handleInputChange}
+                placeholder="e.g., 2020"
+                min="1900"
+                max="2027"
+                className={errors['specifications.year'] ? 'error' : ''}
+              />
+              {errors['specifications.year'] && <span className="ulisting-error-message">{errors['specifications.year']}</span>}
+            </div>
+
+            {/* Row 2: Price / Condition / Mileage */}
+            <div className="ulisting-form-group">
+              <label htmlFor="price">Asking Price (BWP) *</label>
+              <input
+                type="number"
+                id="price"
+                name="price"
+                value={formData.price}
+                onChange={handleInputChange}
+                placeholder="e.g., 150000"
+                min="0"
+                className={errors.price ? 'error' : ''}
+              />
+              {errors.price && <span className="ulisting-error-message">{errors.price}</span>}
             </div>
 
             <div className="ulisting-form-group">
@@ -1704,88 +1732,25 @@ const handleFormSubmit = async (e) => {
             </div>
 
             <div className="ulisting-form-group">
-              <label htmlFor="sellerType">Seller Type *</label>
-              <select
-                id="sellerType"
-                name="sellerType"
-                value={formData.sellerType}
-                onChange={handleInputChange}
-              >
-                <option value="private">Private Seller</option>
-                <option value="dealership">Dealership</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Specifications Tab */}
-        <div className={`ulisting-form-section ${currentTab === 'specs' ? 'active' : ''}`}>
-          <h4>Vehicle Specifications</h4>
-          
-          <div className="ulisting-form-grid">
-            <div className="ulisting-form-group">
-              <label htmlFor="make">Make *</label>
-              <input
-                type="text"
-                id="make"
-                name="make"
-                value={formData.make || formData.specifications?.make}
-                onChange={handleInputChange}
-                placeholder="e.g., Toyota"
-                className={errors['specifications.make'] ? 'error' : ''}
-              />
-              {errors['specifications.make'] && <span className="ulisting-error-message">{errors['specifications.make']}</span>}
-            </div>
-
-            <div className="ulisting-form-group">
-              <label htmlFor="model">Model *</label>
-              <input
-                type="text"
-                id="model"
-                name="model"
-                value={formData.model || formData.specifications?.model}
-                onChange={handleInputChange}
-                placeholder="e.g., Camry"
-                className={errors['specifications.model'] ? 'error' : ''}
-              />
-              {errors['specifications.model'] && <span className="ulisting-error-message">{errors['specifications.model']}</span>}
-            </div>
-
-            <div className="ulisting-form-group">
-              <label htmlFor="year">Year *</label>
-              <input
-                type="number"
-                id="year"
-                name="year"
-                value={formData.year || formData.specifications?.year}
-                onChange={handleInputChange}
-                placeholder="e.g., 2020"
-                min="1900"
-                max="2025"
-                className={errors['specifications.year'] ? 'error' : ''}
-              />
-              {errors['specifications.year'] && <span className="ulisting-error-message">{errors['specifications.year']}</span>}
-            </div>
-
-            <div className="ulisting-form-group">
-              <label htmlFor="mileage">Mileage (km) *</label>
+              <label htmlFor="mileage">Mileage (km)</label>
               <input
                 type="number"
                 id="mileage"
                 name="mileage"
-                value={formData.mileage || formData.specifications?.mileage}
+                value={formData.mileage || formData.specifications?.mileage || ''}
                 onChange={handleInputChange}
                 placeholder="e.g., 50000"
                 min="0"
               />
             </div>
 
+            {/* Row 3: Transmission / Fuel Type */}
             <div className="ulisting-form-group">
-              <label htmlFor="transmission">Transmission *</label>
+              <label htmlFor="transmission">Transmission</label>
               <select
                 id="transmission"
                 name="transmission"
-                value={formData.transmission || formData.specifications?.transmission}
+                value={formData.transmission || formData.specifications?.transmission || ''}
                 onChange={handleInputChange}
               >
                 <option value="">Select transmission</option>
@@ -1797,11 +1762,11 @@ const handleFormSubmit = async (e) => {
             </div>
 
             <div className="ulisting-form-group">
-              <label htmlFor="fuelType">Fuel Type *</label>
+              <label htmlFor="fuelType">Fuel Type</label>
               <select
                 id="fuelType"
                 name="fuelType"
-                value={formData.fuelType || formData.specifications?.fuelType}
+                value={formData.fuelType || formData.specifications?.fuelType || ''}
                 onChange={handleInputChange}
               >
                 <option value="">Select fuel type</option>
@@ -1816,27 +1781,108 @@ const handleFormSubmit = async (e) => {
             </div>
 
             <div className="ulisting-form-group">
+              <label htmlFor="sellerType">Seller Type</label>
+              <select
+                id="sellerType"
+                name="sellerType"
+                value={formData.sellerType}
+                onChange={handleInputChange}
+              >
+                <option value="private">Private Seller</option>
+                <option value="dealership">Dealership</option>
+              </select>
+            </div>
+
+            {/* Title & Description */}
+            <div className="ulisting-form-group full-width">
+              <label htmlFor="title">Listing Title *</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                placeholder="e.g., 2020 Toyota Camry XLE – Low Mileage, Excellent Condition"
+                className={errors.title ? 'error' : ''}
+              />
+              {errors.title && <span className="ulisting-error-message">{errors.title}</span>}
+            </div>
+
+            <div className="ulisting-form-group full-width">
+              <label htmlFor="description">Description *</label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Describe your car's condition, features, service history, and anything else buyers should know…"
+                rows="4"
+                className={errors.description ? 'error' : ''}
+              />
+              {errors.description && <span className="ulisting-error-message">{errors.description}</span>}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Details Tab (non-critical specs) ── */}
+        <div className={`ulisting-form-section ${currentTab === 'specs' ? 'active' : ''}`}>
+          <h4>Additional Details</h4>
+          <p className="ulisting-section-hint">Optional — add more detail to attract serious buyers.</p>
+
+          <div className="ulisting-form-grid">
+            <div className="ulisting-form-group">
+              <label htmlFor="category">Body Category</label>
+              <select
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleInputChange}
+              >
+                <option value="">Select category</option>
+                {vehicleCategories.map(cat => (
+                  <option key={cat.value} value={cat.value}>{cat.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="ulisting-form-group">
+              <label htmlFor="exteriorColor">Exterior Colour</label>
+              <input
+                type="text"
+                id="exteriorColor"
+                name="exteriorColor"
+                value={formData.exteriorColor || formData.specifications?.color || ''}
+                onChange={handleInputChange}
+                placeholder="e.g., Silver, Black, White"
+              />
+            </div>
+
+            <div className="ulisting-form-group">
               <label htmlFor="engineType">Engine</label>
               <input
                 type="text"
                 id="engineType"
                 name="engineType"
-                value={formData.engineType || formData.specifications?.engine}
+                value={formData.engineType || formData.specifications?.engine || ''}
                 onChange={handleInputChange}
                 placeholder="e.g., 2.4L I4, 3.5L V6"
               />
             </div>
 
             <div className="ulisting-form-group">
-              <label htmlFor="exteriorColor">Color</label>
-              <input
-                type="text"
-                id="exteriorColor"
-                name="exteriorColor"
-                value={formData.exteriorColor || formData.specifications?.color}
+              <label htmlFor="drivetrain">Drivetrain</label>
+              <select
+                id="drivetrain"
+                name="drivetrain"
+                value={formData.drivetrain || formData.specifications?.drivetrain || ''}
                 onChange={handleInputChange}
-                placeholder="e.g., Silver, Black, White"
-              />
+              >
+                <option value="">Select drivetrain</option>
+                <option value="fwd">Front-wheel drive</option>
+                <option value="rwd">Rear-wheel drive</option>
+                <option value="awd">All-wheel drive</option>
+                <option value="4wd">4-wheel drive</option>
+              </select>
             </div>
 
             <div className="ulisting-form-group">
@@ -1844,7 +1890,7 @@ const handleFormSubmit = async (e) => {
               <select
                 id="numberOfDoors"
                 name="numberOfDoors"
-                value={formData.numberOfDoors || formData.specifications?.doors}
+                value={formData.numberOfDoors || formData.specifications?.doors || ''}
                 onChange={handleInputChange}
               >
                 <option value="">Select doors</option>
@@ -1860,7 +1906,7 @@ const handleFormSubmit = async (e) => {
               <select
                 id="numberOfSeats"
                 name="numberOfSeats"
-                value={formData.numberOfSeats || formData.specifications?.seats}
+                value={formData.numberOfSeats || formData.specifications?.seats || ''}
                 onChange={handleInputChange}
               >
                 <option value="">Select seats</option>
@@ -1869,22 +1915,6 @@ const handleFormSubmit = async (e) => {
                 <option value="5">5 seats</option>
                 <option value="7">7 seats</option>
                 <option value="8">8+ seats</option>
-              </select>
-            </div>
-
-            <div className="ulisting-form-group">
-              <label htmlFor="drivetrain">Drivetrain</label>
-              <select
-                id="drivetrain"
-                name="drivetrain"
-                value={formData.drivetrain || formData.specifications?.drivetrain}
-                onChange={handleInputChange}
-              >
-                <option value="">Select drivetrain</option>
-                <option value="fwd">Front-wheel drive</option>
-                <option value="rwd">Rear-wheel drive</option>
-                <option value="awd">All-wheel drive</option>
-                <option value="4wd">4-wheel drive</option>
               </select>
             </div>
 
@@ -1898,6 +1928,18 @@ const handleFormSubmit = async (e) => {
                 onChange={handleInputChange}
                 placeholder="Vehicle Identification Number"
                 maxLength="17"
+              />
+            </div>
+
+            <div className="ulisting-form-group">
+              <label htmlFor="additionalInfo.previousOwners">Previous Owners</label>
+              <input
+                type="text"
+                id="additionalInfo.previousOwners"
+                name="additionalInfo.previousOwners"
+                value={formData.additionalInfo?.previousOwners || ''}
+                onChange={handleInputChange}
+                placeholder="e.g., 1, 2"
               />
             </div>
           </div>
@@ -2238,43 +2280,38 @@ const handleFormSubmit = async (e) => {
           <div className="ulisting-angle-section">
             <h5>Vehicle Angle Photos</h5>
             <p className="ulisting-form-help">
-              Upload a clear photo of each angle. These help buyers assess the vehicle condition.
+              Upload a clear photo from each angle — helps buyers assess condition at a glance.
             </p>
             <div className="ulisting-angle-grid">
               {[
-                { key: 'front', label: 'Front View', icon: '▲' },
-                { key: 'back',  label: 'Rear View',  icon: '▼' },
-                { key: 'side',  label: 'Side View',  icon: '◀▶' }
+                { key: 'front', label: 'Front View',  icon: '▲' },
+                { key: 'back',  label: 'Rear View',   icon: '▼' },
+                { key: 'side',  label: 'Side View',   icon: '◀▶' }
               ].map(({ key, label, icon }) => (
                 <div key={key} className="ulisting-angle-slot">
-                  <div className="ulisting-angle-label">
-                    <span className="ulisting-angle-icon">{icon}</span>
-                    <span>{label}</span>
-                  </div>
                   {anglePreviews[key] ? (
+                    /* Preview state */
                     <div className="ulisting-angle-preview">
                       <img src={anglePreviews[key].url} alt={label} />
+                      <span className="ulisting-angle-badge">{label}</span>
                       <button
                         type="button"
-                        className="ulisting-remove-btn"
+                        className="ulisting-angle-remove"
                         onClick={() => removeAnglePhoto(key)}
                       >✕</button>
-                      <div className="ulisting-image-info">
-                        <span>{(anglePreviews[key].size / 1024 / 1024).toFixed(1)}MB</span>
-                      </div>
                     </div>
                   ) : (
-                    <label className="ulisting-angle-upload">
+                    /* Upload state — full slot is the label */
+                    <label className="ulisting-angle-label">
                       <input
                         type="file"
                         accept="image/*"
                         onChange={handleAnglePhotoUpload(key)}
                         style={{ display: 'none' }}
                       />
-                      <span className="ulisting-angle-placeholder">
-                        <span style={{ fontSize: '1.6rem', opacity: 0.4 }}>+</span>
-                        <span style={{ fontSize: '0.75rem', color: '#666' }}>Upload {label}</span>
-                      </span>
+                      <span className="ulisting-angle-icon">{icon}</span>
+                      <span className="ulisting-angle-upload">{label}</span>
+                      <span className="ulisting-angle-placeholder">+ Add photo</span>
                     </label>
                   )}
                 </div>
@@ -2320,110 +2357,140 @@ const handleFormSubmit = async (e) => {
 
         </div>
 
-        {/* Pricing Tab - COMPLETE */}
-        <div className={`ulisting-form-section ${currentTab === 'pricing' ? 'active' : ''}`}>
-          <h4>Pricing Information</h4>
-          
-          <div className="ulisting-form-grid">
-            <div className="ulisting-form-group">
-              <label htmlFor="price">Price (BWP) *</label>
-              <input
-                type="number"
-                id="price"
-                name="price"
-                value={formData.price}
-                onChange={handlePriceChange}
-                placeholder="e.g., 150000"
-                step="0.01"
-                min="0"
-                className={errors.price ? 'error' : ''}
-              />
-              {errors.price && <span className="ulisting-error-message">{errors.price}</span>}
-            </div>
+        {/* ── Promote Tab ── */}
+        <div className={`ulisting-form-section ${currentTab === 'promote' ? 'active' : ''}`}>
+          <h4>Promote Your Listing</h4>
 
-            <div className="ulisting-form-group">
-              <label htmlFor="priceOptions.originalPrice">Original Price (if on sale)</label>
-              <input
-                type="number"
-                id="priceOptions.originalPrice"
-                name="priceOptions.originalPrice"
-                value={formData.priceOptions?.originalPrice || ''}
-                onChange={handlePriceChange}
-                placeholder="e.g., 180000"
-                step="0.01"
-                min="0"
-                className={errors['priceOptions.originalPrice'] ? 'error' : ''}
-              />
-              {errors['priceOptions.originalPrice'] && <span className="ulisting-error-message">{errors['priceOptions.originalPrice']}</span>}
+          {/* Free listing status */}
+          <div className="ulisting-free-listing-card">
+            <div className="ulisting-free-listing-icon">✅</div>
+            <div className="ulisting-free-listing-info">
+              <strong>Your listing is FREE</strong>
+              <p>Once submitted, our team will review and publish your listing on the I3W Car Culture website at no charge.</p>
             </div>
+          </div>
 
-            <div className="ulisting-form-group">
-              <label htmlFor="priceOptions.dealerDiscount">Dealer Discount (%)</label>
-              <input
-                type="number"
-                id="priceOptions.dealerDiscount"
-                name="priceOptions.dealerDiscount"
-                value={formData.priceOptions?.dealerDiscount || ''}
-                onChange={handleInputChange}
-                placeholder="e.g., 10"
-                min="0"
-                max="100"
-              />
-            </div>
-
-            <div className="ulisting-form-group">
-              <label htmlFor="priceOptions.priceValidUntil">Price Valid Until</label>
-              <input
-                type="date"
-                id="priceOptions.priceValidUntil"
-                name="priceOptions.priceValidUntil"
-                value={formData.priceOptions?.priceValidUntil || ''}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div className="ulisting-form-group full-width">
-              <div className="ulisting-checkbox-group">
-                <label className="ulisting-checkbox-label">
+          {/* Boost option */}
+          <div className={`ulisting-boost-card ${wantsBoost ? 'selected' : ''}`}>
+            <div className="ulisting-boost-header">
+              <div className="ulisting-boost-title-row">
+                <span className="ulisting-boost-icon">🚀</span>
+                <div>
+                  <strong className="ulisting-boost-title">Social Media Feature – BWP 300</strong>
+                  <p className="ulisting-boost-subtitle">Get your vehicle posted across all our platforms</p>
+                </div>
+                <label className="ulisting-boost-toggle">
                   <input
                     type="checkbox"
-                    name="priceOptions.negotiable"
-                    checked={formData.priceOptions?.negotiable || false}
-                    onChange={handleInputChange}
+                    checked={wantsBoost}
+                    onChange={e => setWantsBoost(e.target.checked)}
                   />
-                  <span>Price is negotiable</span>
-                </label>
-
-                <label className="ulisting-checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="priceOptions.exclusiveDeal"
-                    checked={formData.priceOptions?.exclusiveDeal || false}
-                    onChange={handleInputChange}
-                  />
-                  <span>Exclusive deal</span>
-                </label>
-
-                <label className="ulisting-checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="additionalInfo.financing"
-                    checked={formData.additionalInfo?.financing || false}
-                    onChange={handleInputChange}
-                  />
-                  <span>Financing available</span>
-                </label>
-
-                <label className="ulisting-checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="additionalInfo.tradeIn"
-                    checked={formData.additionalInfo?.tradeIn || false}
-                    onChange={handleInputChange}
-                  />
-                  <span>Trade-in accepted</span>
+                  <span className="ulisting-toggle-slider"></span>
                 </label>
               </div>
+
+              <div className="ulisting-boost-platforms">
+                <span className="ulisting-platform-pill">📘 Facebook — 685,000 followers</span>
+                <span className="ulisting-platform-pill">📸 Instagram — 15,000+ followers</span>
+                <span className="ulisting-platform-pill">💬 WhatsApp Channel — 10,000+ followers</span>
+                <span className="ulisting-platform-pill">🎵 TikTok — 35,000+ followers</span>
+              </div>
+            </div>
+
+            {/* Payment details — shown only when boost is selected */}
+            {wantsBoost && (
+              <div className="ulisting-boost-payment">
+                <h5>Payment Details</h5>
+                <p className="ulisting-boost-payment-note">
+                  Send BWP 300 to one of the accounts below, then upload your proof of payment.
+                  Once payment is verified by our team, your vehicle will be featured on all platforms and automatically added to the Featured section on the website.
+                </p>
+
+                <div className="ulisting-payment-methods">
+                  <div className="ulisting-payment-method">
+                    <span className="ulisting-payment-method-label">💳 PayToCell</span>
+                    <div className="ulisting-payment-detail">
+                      <span className="ulisting-payment-field">Number</span>
+                      <span className="ulisting-payment-value">+267 72 573 475</span>
+                    </div>
+                    <div className="ulisting-payment-detail">
+                      <span className="ulisting-payment-field">Amount</span>
+                      <span className="ulisting-payment-value ulisting-payment-amount">BWP 300</span>
+                    </div>
+                  </div>
+
+                  <div className="ulisting-payment-method">
+                    <span className="ulisting-payment-method-label">🟠 Orange Money</span>
+                    <div className="ulisting-payment-detail">
+                      <span className="ulisting-payment-field">Number</span>
+                      <span className="ulisting-payment-value">+267 72 573 475</span>
+                    </div>
+                    <div className="ulisting-payment-detail">
+                      <span className="ulisting-payment-field">Amount</span>
+                      <span className="ulisting-payment-value ulisting-payment-amount">BWP 310 <span className="ulisting-payment-surcharge">(+BWP10 Orange Money fee)</span></span>
+                    </div>
+                  </div>
+
+                  <div className="ulisting-payment-method ulisting-payment-bank">
+                    <span className="ulisting-payment-method-label">🏦 Bank Transfer</span>
+                    <div className="ulisting-payment-detail">
+                      <span className="ulisting-payment-field">Account</span>
+                      <span className="ulisting-payment-value ulisting-payment-tbd">Account details coming soon</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Proof of payment upload */}
+                <div className="ulisting-boost-proof-section">
+                  <h5>Upload Proof of Payment *</h5>
+                  <p className="ulisting-form-help">Screenshot or PDF of your payment confirmation. Accepted: JPEG, PNG, PDF (max 10MB).</p>
+
+                  {boostProofPreview ? (
+                    <div className="ulisting-proof-preview">
+                      {boostProofPreview.type === 'pdf' ? (
+                        <div className="ulisting-proof-pdf">
+                          <span className="ulisting-proof-pdf-icon">📄</span>
+                          <div className="ulisting-proof-pdf-info">
+                            <span className="ulisting-proof-filename">{boostProofPreview.name}</span>
+                            <span className="ulisting-proof-size">{(boostProofPreview.size / 1024 / 1024).toFixed(1)} MB</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <img src={boostProofPreview.url} alt="Proof of payment" className="ulisting-proof-img" />
+                      )}
+                      <button type="button" className="ulisting-proof-remove" onClick={removeBoostProof}>✕</button>
+                    </div>
+                  ) : (
+                    <label className="ulisting-proof-upload-label">
+                      📎 Choose file
+                      <input
+                        type="file"
+                        accept="image/*,.pdf,application/pdf"
+                        onChange={handleBoostProofUpload}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Negotiable + trade-in checkboxes (moved from old Pricing tab) */}
+          <div className="ulisting-form-group" style={{ marginTop: '1.5rem' }}>
+            <div className="ulisting-checkbox-group">
+              <label className="ulisting-checkbox-label">
+                <input type="checkbox" name="priceOptions.negotiable" checked={formData.priceOptions?.negotiable || false} onChange={handleInputChange} />
+                <span>Price is negotiable</span>
+              </label>
+              <label className="ulisting-checkbox-label">
+                <input type="checkbox" name="additionalInfo.financing" checked={formData.additionalInfo?.financing || false} onChange={handleInputChange} />
+                <span>Financing available</span>
+              </label>
+              <label className="ulisting-checkbox-label">
+                <input type="checkbox" name="additionalInfo.tradeIn" checked={formData.additionalInfo?.tradeIn || false} onChange={handleInputChange} />
+                <span>Trade-in accepted</span>
+              </label>
             </div>
           </div>
         </div>
@@ -2590,18 +2657,6 @@ const handleFormSubmit = async (e) => {
             </div>
 
             <div className="ulisting-form-group">
-              <label htmlFor="additionalInfo.previousOwners">Previous Owners</label>
-              <input
-                type="text"
-                id="additionalInfo.previousOwners"
-                name="additionalInfo.previousOwners"
-                value={formData.additionalInfo?.previousOwners || ''}
-                onChange={handleInputChange}
-                placeholder="How many previous owners?"
-              />
-            </div>
-
-            <div className="ulisting-form-group">
               <label htmlFor="additionalInfo.registrationStatus">Registration Status</label>
               <select
                 id="additionalInfo.registrationStatus"
@@ -2644,60 +2699,46 @@ const handleFormSubmit = async (e) => {
             <div className="ulisting-form-summary">
               <h5>Form Summary</h5>
               <div className="ulisting-summary-items">
-                <span>✓ Basic Info: {formData.title ? 'Complete' : 'Missing'}</span>
-                <span>✓ Specifications: {(formData.make || formData.specifications?.make) && (formData.model || formData.specifications?.model) ? 'Complete' : 'Missing'}</span>
-                <span>✓ Contact: {formData.contact?.sellerName && formData.contact?.phone ? 'Complete' : 'Missing'}</span>
-                <span>✓ Images: {imageFiles.length > 0 || formData.images?.length > 0 ? `${imageFiles.length || formData.images?.length} uploaded` : 'Missing'}</span>
-                <span>✓ Pricing: {formData.price ? 'Complete' : 'Missing'}</span>
+                <span className={(formData.make || formData.specifications?.make) && (formData.model || formData.specifications?.model) && formData.year ? 'complete' : 'incomplete'}>
+                  {(formData.make || formData.specifications?.make) && (formData.model || formData.specifications?.model) ? '✅' : '⭕'} Vehicle: {(formData.make || formData.specifications?.make) || 'Make missing'}
+                </span>
+                <span className={formData.price ? 'complete' : 'incomplete'}>
+                  {formData.price ? '✅' : '⭕'} Price: {formData.price ? `P${Number(formData.price).toLocaleString()}` : 'Missing'}
+                </span>
+                <span className={formData.contact?.sellerName && formData.contact?.phone ? 'complete' : 'incomplete'}>
+                  {formData.contact?.sellerName && formData.contact?.phone ? '✅' : '⭕'} Contact: {formData.contact?.sellerName || 'Missing'}
+                </span>
+                <span className={imageFiles.length > 0 ? 'complete' : 'incomplete'}>
+                  {imageFiles.length > 0 ? '✅' : '⭕'} Photos: {imageFiles.length > 0 ? `${imageFiles.length} selected` : 'None yet'}
+                </span>
+                {wantsBoost && (
+                  <span className={boostProofFile ? 'complete' : 'incomplete'}>
+                    {boostProofFile ? '✅' : '⭕'} Boost proof: {boostProofFile ? 'Uploaded' : 'Missing — go to Promote tab'}
+                  </span>
+                )}
               </div>
             </div>
-            
-            {/* Dynamic plan summary */}
-            {selectedPlan && (
-              <div className="ulisting-plan-summary">
-                <h5>Selected Plan: {selectedPlan.toUpperCase()}</h5>
-                {selectedAddons.length > 0 && (
-                  <div className="ulisting-selected-addons">
-                    <span>Add-ons: {selectedAddons.join(', ')}</span>
-                  </div>
-                )}
-                {selectedPlan === 'free' && (
-                  <div className="ulisting-free-notice">
-                    🎉 No payment required! Your listing will go live after admin approval.
-                  </div>
-                )}
-                {selectedPlan !== 'free' && pricingData && (
-                  <div className="ulisting-paid-notice">
-                    💳 Payment required after admin approval. Total: P{calculatePricingDetails(selectedPlan, selectedAddons, pricingData).totalCost.toLocaleString()}
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* Progress indicator */}
-            <div className="ulisting-progress-indicator">
-              <div className="ulisting-progress-bar">
-                <div 
-                  className="ulisting-progress-fill" 
-                  style={{ width: `${Math.min(100, (
-                    (formData.title ? 20 : 0) +
-                    ((formData.make || formData.specifications?.make) && (formData.model || formData.specifications?.model) ? 20 : 0) +
-                    (formData.contact?.sellerName && formData.contact?.phone ? 20 : 0) +
-                    (imageFiles.length > 0 ? 20 : 0) +
-                    (formData.price ? 20 : 0)
-                  ))}%` }}
-                ></div>
-              </div>
-              <span className="ulisting-progress-text">
-                {Math.min(100, (
-                  (formData.title ? 20 : 0) +
-                  ((formData.make || formData.specifications?.make) && (formData.model || formData.specifications?.model) ? 20 : 0) +
-                  (formData.contact?.sellerName && formData.contact?.phone ? 20 : 0) +
-                  (imageFiles.length > 0 ? 20 : 0) +
-                  (formData.price ? 20 : 0)
-                ))}% Complete
-              </span>
-            </div>
+            {(() => {
+              const hasMakeModel = !!(formData.make || formData.specifications?.make) && !!(formData.model || formData.specifications?.model);
+              const steps = [
+                hasMakeModel && !!formData.year,
+                !!formData.price,
+                !!(formData.contact?.sellerName && formData.contact?.phone),
+                imageFiles.length > 0,
+                !!formData.title && formData.title.length >= 5
+              ];
+              const pct = Math.round((steps.filter(Boolean).length / steps.length) * 100);
+              return (
+                <div className="ulisting-progress-indicator">
+                  <div className="ulisting-progress-bar">
+                    <div className="ulisting-progress-fill" style={{ width: `${pct}%` }}></div>
+                  </div>
+                  <span className="ulisting-progress-text">{pct}% Complete</span>
+                </div>
+              );
+            })()}
           </div>
           
           <div className="ulisting-form-actions">
@@ -2711,7 +2752,7 @@ const handleFormSubmit = async (e) => {
                   {isEdit ? 'Updating...' : 'Submitting...'}
                 </>
               ) : (
-                isEdit ? 'Update Listing' : (selectedPlan === 'free' ? 'Submit for FREE Review' : 'Submit Listing')
+                isEdit ? 'Update Listing' : (wantsBoost ? 'Submit + Request Feature' : 'Submit Listing')
               )}
             </button>
           </div>
