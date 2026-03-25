@@ -1686,6 +1686,121 @@
   opacity: 0.7;
 }
 
+/* ===== PHOTO QUALITY TIP ===== */
+.ulisting-photo-quality-tip {
+  background: rgba(255, 193, 7, 0.08);
+  border-left: 3px solid #f0b429;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  color: var(--uprofile-text-primary);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+/* ===== PROMOTE TEASER (on Vehicle Info tab) ===== */
+.ulisting-promote-teaser {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: rgba(255, 107, 0, 0.07);
+  border: 1px solid rgba(255, 107, 0, 0.25);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-top: 20px;
+}
+
+.ulisting-promote-teaser-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ulisting-promote-teaser-text strong {
+  font-size: 0.9rem;
+  color: var(--uprofile-text-primary);
+}
+
+.ulisting-promote-teaser-text span {
+  font-size: 0.82rem;
+  color: var(--uprofile-text-secondary);
+}
+
+.ulisting-promote-teaser-btn {
+  flex-shrink: 0;
+  background: #ff6b00;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.ulisting-promote-teaser-btn:hover {
+  background: #e05e00;
+}
+
+/* ===== BOOST REMINDER (near submit) ===== */
+.ulisting-boost-reminder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: rgba(255, 107, 0, 0.06);
+  border: 1px dashed rgba(255, 107, 0, 0.35);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+
+.ulisting-boost-reminder-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ulisting-boost-reminder-text strong {
+  font-size: 0.88rem;
+  color: var(--uprofile-text-primary);
+}
+
+.ulisting-boost-reminder-text span {
+  font-size: 0.8rem;
+  color: var(--uprofile-text-secondary);
+}
+
+.ulisting-boost-reminder-btn {
+  flex-shrink: 0;
+  background: transparent;
+  color: #ff6b00;
+  border: 1px solid #ff6b00;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+}
+
+.ulisting-boost-reminder-btn:hover {
+  background: #ff6b00;
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .ulisting-promote-teaser,
+  .ulisting-boost-reminder {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 /* Boost proof upload section */
 .ulisting-boost-proof-section h5 {
   font-size: 0.88rem;

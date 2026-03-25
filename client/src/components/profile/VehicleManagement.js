@@ -29,7 +29,7 @@ const VehicleManagement = () => {
   const [editingVehicle, setEditingVehicle] = useState(null);
   
   // === LISTING STATE ===
-  const [listingStep, setListingStep] = useState('pricing');
+  const [listingStep, setListingStep] = useState('form');
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedAddons, setSelectedAddons] = useState([]);
   const [pendingListingData, setPendingListingData] = useState(null);

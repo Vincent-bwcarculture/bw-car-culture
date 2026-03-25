@@ -531,48 +531,63 @@ const HeroSection = () => {
             <h1>Sell Faster. Smarter. Nationwide.</h1>
             <p>Tap into Botswana's #1 automotive ecosystem. Get maximum exposure, real buyers, and support every step of the way.</p>
 
-            {/* UPDATED: Pricing Information Section - Single P100 One-Time Payment */}
+            {/* Pricing Information Section */}
             <div className="bcc-hero-sell-pricing-section">
               <div className="bcc-hero-sell-pricing-header">
                 <h3>Simple, Transparent Pricing</h3>
-                <p>One price. Complete coverage. Maximum exposure for your vehicle.</p>
+                <p>List for free. Boost when you're ready.</p>
               </div>
-              
+
               <div className="bcc-hero-sell-pricing-tiers">
-                {/* Single Pricing Tier - One-Time Payment */}
-                <div className="bcc-hero-sell-pricing-tier bcc-hero-sell-tier-popular" style={{maxWidth: '420px', margin: '0 auto'}}>
-                  <div className="bcc-hero-sell-tier-badge">Best Value</div>
+                {/* Free Tier */}
+                <div className="bcc-hero-sell-pricing-tier">
                   <div className="bcc-hero-sell-tier-header">
-                    <div className="bcc-hero-sell-tier-price">P100</div>
-                    <div className="bcc-hero-sell-tier-period">one-time</div>
+                    <div className="bcc-hero-sell-tier-price">FREE</div>
+                    <div className="bcc-hero-sell-tier-period">always</div>
                   </div>
-                  <div className="bcc-hero-sell-tier-value">Complete Package</div>
+                  <div className="bcc-hero-sell-tier-value">Standard Listing</div>
                   <div className="bcc-hero-sell-tier-features">
                     <span>✓ Website listing with multiple photos</span>
-                    <span>✓ Instagram promotion & marketing</span>
-                    <span>✓ Facebook promotion & marketing</span>
-                    <span>✓ WhatsApp promotion & marketing</span>
                     <span>✓ Direct contact with buyers</span>
-                    <span>✓ Professional listing support</span>
+                    <span>✓ Searchable across Botswana</span>
+                    <span>✓ Listed until sold</span>
+                  </div>
+                </div>
+
+                {/* Boost Tier */}
+                <div className="bcc-hero-sell-pricing-tier bcc-hero-sell-tier-popular">
+                  <div className="bcc-hero-sell-tier-badge">More Exposure</div>
+                  <div className="bcc-hero-sell-tier-header">
+                    <div className="bcc-hero-sell-tier-price">BWP 300</div>
+                    <div className="bcc-hero-sell-tier-period">one-time</div>
+                  </div>
+                  <div className="bcc-hero-sell-tier-value">Social Media Boost</div>
+                  <div className="bcc-hero-sell-tier-features">
+                    <span>✓ Everything in the free listing</span>
+                    <span>✓ Facebook — 685,000 followers</span>
+                    <span>✓ Instagram — 15,000+ followers</span>
+                    <span>✓ WhatsApp Channel — 10,000+ followers</span>
+                    <span>✓ TikTok — 35,000+ followers</span>
+                    <span>✓ Featured section on website</span>
                   </div>
                   <div style={{
                     marginTop: '1.5rem',
                     paddingTop: '1.5rem',
                     borderTop: '1px solid rgba(255, 255, 255, 0.1)',
                     color: '#c9c9c9',
-                    fontSize: '0.85rem',
+                    fontSize: '0.82rem',
                     textAlign: 'center'
                   }}>
-                    Pay once, list until sold. No hidden fees.
+                    Pay via PayToCell or Orange Money — +267 72 573 475
                   </div>
                 </div>
               </div>
-              
+
               <div className="bcc-hero-sell-pricing-dealer-note">
                 <div className="bcc-hero-sell-dealer-notice">
                   <strong>Are you a dealer?</strong>
                   <p>Custom packages are available for dealerships. Contact us for special rates and premium features.</p>
-                  <button 
+                  <button
                     className="bcc-hero-sell-dealer-contact-btn"
                     onClick={() => {
                       const whatsappNumber = '+26774122453';

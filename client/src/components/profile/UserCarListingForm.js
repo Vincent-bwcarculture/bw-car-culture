@@ -81,12 +81,8 @@ const UserCarListingForm = ({
     },
     
     features: {
-      safetyFeatures: [],
-      comfortFeatures: [],
-      entertainmentFeatures: [],
-      exteriorFeatures: [],
-      comfort: [],
       safety: [],
+      comfort: [],
       technology: [],
       performance: [],
       exterior: [],
@@ -187,65 +183,35 @@ const UserCarListingForm = ({
   const [showAutoFillPrompt, setShowAutoFillPrompt] = useState(false);
   const [profileCompletion, setProfileCompletion] = useState(null);
 
-  // Feature options - COMPLETE with all categories
   const featureOptions = {
-    safetyFeatures: [
+    safety: [
       'ABS (Anti-lock Braking)', 'Electronic Stability Control', 'Traction Control',
       'Airbags (Front)', 'Airbags (Side)', 'Airbags (Curtain)', 'Knee Airbags',
       'Blind Spot Monitoring', 'Lane Departure Warning', 'Lane Keep Assist',
-      'Forward Collision Warning', 'Automatic Emergency Braking',
+      'Forward Collision Warning', 'Automatic Emergency Braking', 'Adaptive Cruise Control',
       'Parking Sensors (Front)', 'Parking Sensors (Rear)', 'Backup Camera',
       '360 Degree Camera', 'Cross Traffic Alert', 'Driver Attention Monitor',
-      'Adaptive Headlights', 'Automatic High Beams', 'Night Vision'
+      'Adaptive Headlights', 'Automatic High Beams', 'Night Vision',
+      'Hill Start Assist', 'Tire Pressure Monitoring', 'Security System', 'Immobilizer'
     ],
-    comfortFeatures: [
-      'Air Conditioning', 'Climate Control', 'Dual Zone Climate',
+    comfort: [
+      'Air Conditioning', 'Climate Control', 'Dual Zone Climate', 'Rear AC',
       'Leather Seats', 'Heated Seats', 'Cooled Seats', 'Power Seats',
       'Memory Seats', 'Lumbar Support', 'Massage Seats',
+      'Heated Steering Wheel', 'Adjustable Pedals',
       'Sunroof', 'Panoramic Sunroof', 'Moonroof',
       'Power Windows', 'Tinted Windows', 'Rain Sensing Wipers',
-      'Cruise Control', 'Adaptive Cruise Control',
-      'Keyless Entry', 'Push Button Start', 'Remote Start'
-    ],
-    entertainmentFeatures: [
-      'Navigation System', 'GPS', 'Satellite Radio',
-      'Bluetooth Connectivity', 'Wi-Fi Hotspot', 'Wireless Charging',
-      'Touch Screen Display', 'Digital Instrument Cluster', 'Head-Up Display',
-      'Apple CarPlay', 'Android Auto', 'Voice Control',
-      'USB Ports', 'USB-C Ports', '12V Outlets', 'Wireless Phone Charger',
-      'Premium Sound System', 'Surround Sound', 'Subwoofer',
-      'DVD Player', 'Rear Entertainment System', 'Gaming Console Ready'
-    ],
-    exteriorFeatures: [
-      'Alloy Wheels', 'Performance Wheels', 'Run Flat Tires',
-      'LED Headlights', 'HID Headlights', 'Xenon Headlights',
-      'LED Daytime Running Lights', 'Fog Lights', 'Cornering Lights',
-      'Power Mirrors', 'Heated Mirrors', 'Auto-Dimming Mirrors',
-      'Side Steps', 'Running Boards', 'Roof Rails', 'Roof Rack',
-      'Tow Hook', 'Trailer Hitch', 'Bed Liner', 'Tonneau Cover',
-      'Spoiler', 'Body Kit', 'Chrome Trim', 'Black Trim'
-    ],
-    // Additional feature categories for compatibility
-    comfort: [
-      'Air Conditioning', 'Climate Control', 'Heated Seats', 'Cooled Seats',
-      'Leather Seats', 'Power Seats', 'Memory Seats', 'Massage Seats',
-      'Sunroof', 'Panoramic Roof', 'Dual Zone Climate', 'Rear AC',
-      'Lumbar Support', 'Heated Steering Wheel', 'Adjustable Pedals'
-    ],
-    safety: [
-      'ABS', 'ESP', 'Airbags', 'Side Airbags', 'Curtain Airbags',
-      'Backup Camera', 'Parking Sensors', 'Blind Spot Monitoring',
-      'Lane Departure Warning', 'Lane Keep Assist', 'Collision Warning',
-      'Automatic Emergency Braking', 'Adaptive Cruise Control',
-      'Stability Control', 'Traction Control', 'Hill Start Assist',
-      'Tire Pressure Monitoring', 'Security System', 'Immobilizer'
+      'Cruise Control', 'Keyless Entry', 'Push Button Start', 'Remote Start'
     ],
     technology: [
-      'Bluetooth', 'Apple CarPlay', 'Android Auto', 'WiFi Hotspot',
-      'Navigation System', 'GPS', 'Touch Screen', 'Voice Control',
-      'Premium Sound System', 'Wireless Charging', 'USB Ports',
-      'Aux Input', 'CD Player', 'Digital Dashboard', 'HUD Display',
-      'Keyless Entry', 'Keyless Start', 'Remote Start', 'Smart Key'
+      'Navigation System', 'GPS', 'Satellite Radio',
+      'Bluetooth', 'Wi-Fi Hotspot', 'Wireless Charging',
+      'Touch Screen Display', 'Digital Instrument Cluster', 'Head-Up Display',
+      'Apple CarPlay', 'Android Auto', 'Voice Control',
+      'USB Ports', 'USB-C Ports', '12V Outlets', 'Aux Input',
+      'Premium Sound System', 'Surround Sound', 'Subwoofer',
+      'DVD Player', 'Rear Entertainment System', 'CD Player',
+      'Smart Key', 'Keyless Start'
     ],
     performance: [
       'Turbo', 'Supercharged', 'Sport Mode', 'Eco Mode',
@@ -254,11 +220,13 @@ const UserCarListingForm = ({
       'Performance Tires', 'Brembo Brakes', 'Sport Exhaust'
     ],
     exterior: [
-      'Alloy Wheels', 'Chrome Trim', 'Roof Rails', 'Running Boards',
-      'Fog Lights', 'LED Headlights', 'Xenon Headlights', 'DRL',
-      'Tinted Windows', 'Power Windows', 'Electric Mirrors',
-      'Heated Mirrors', 'Folding Mirrors', 'Spoiler', 'Body Kit',
-      'Mud Flaps', 'Tow Hook', 'Spare Tire'
+      'Alloy Wheels', 'Performance Wheels', 'Run Flat Tires',
+      'LED Headlights', 'HID Headlights', 'Xenon Headlights',
+      'LED Daytime Running Lights', 'Fog Lights', 'Cornering Lights',
+      'Power Mirrors', 'Heated Mirrors', 'Auto-Dimming Mirrors', 'Folding Mirrors',
+      'Side Steps', 'Running Boards', 'Roof Rails', 'Roof Rack',
+      'Tow Hook', 'Trailer Hitch', 'Bed Liner', 'Tonneau Cover',
+      'Spoiler', 'Body Kit', 'Chrome Trim', 'Black Trim', 'Mud Flaps', 'Spare Tire'
     ],
     interior: [
       'Wood Trim', 'Carbon Fiber Trim', 'Ambient Lighting',
@@ -1160,6 +1128,21 @@ const handleFormSubmit = async (e) => {
     { id: 'promote',    label: 'Promote'      },
   ];
 
+  const renderTabNav = () => (
+    <div className="ulisting-form-tab-navigation">
+      {tabs.map(tab => (
+        <button
+          key={tab.id}
+          type="button"
+          className={`ulisting-form-tab-button ${currentTab === tab.id ? 'active' : ''}`}
+          onClick={() => setCurrentTab(tab.id)}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <div className="ulisting-form-container">
       {/* Auto-fill loading indicator */}
@@ -1274,25 +1257,13 @@ const handleFormSubmit = async (e) => {
         </div>
       )}
 
-      {/* Tab navigation */}
-      <div className="ulisting-form-tab-navigation">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            type="button"
-            className={`ulisting-form-tab-button ${currentTab === tab.id ? 'active' : ''}`}
-            onClick={() => setCurrentTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {/* Tab navigation — top */}
+      {renderTabNav()}
 
       {/* Form content */}
       <form onSubmit={handleFormSubmit}>
         {/* ── Vehicle Info Tab (critical fields — fill these to list fast) ── */}
         <div className={`ulisting-form-section ${currentTab === 'basic' ? 'active' : ''}`}>
-          <h4>Vehicle Information</h4>
           <p className="ulisting-section-hint">Fill in these essential details to create your listing.</p>
 
           <div className="ulisting-form-grid">
@@ -1467,11 +1438,23 @@ const handleFormSubmit = async (e) => {
               {errors.description && <span className="ulisting-error-message">{errors.description}</span>}
             </div>
           </div>
+
+          {/* Compact promote teaser */}
+          {!wantsBoost && (
+            <div className="ulisting-promote-teaser">
+              <div className="ulisting-promote-teaser-text">
+                <strong>Want more exposure?</strong>
+                <span>Feature your listing across Facebook (685K), Instagram (15K+), WhatsApp (10K+) &amp; TikTok (35K+) for just BWP 300.</span>
+              </div>
+              <button type="button" className="ulisting-promote-teaser-btn" onClick={() => setCurrentTab('promote')}>
+                See Boost Option
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── Details Tab (non-critical specs) ── */}
         <div className={`ulisting-form-section ${currentTab === 'specs' ? 'active' : ''}`}>
-          <h4>Additional Details</h4>
           <p className="ulisting-section-hint">Optional — add more detail to attract serious buyers.</p>
 
           <div className="ulisting-form-grid">
@@ -1590,10 +1573,9 @@ const handleFormSubmit = async (e) => {
           </div>
         </div>
 
-        {/* Features Tab - COMPLETE */}
+        {/* Features Tab */}
         <div className={`ulisting-form-section ${currentTab === 'features' ? 'active' : ''}`}>
-          <h4>Vehicle Features</h4>
-          
+          <p className="ulisting-section-hint">Select all features and extras fitted to the vehicle.</p>
           <div className="ulisting-features-container">
             {Object.keys(featureOptions).map(category => (
               <div key={category} className="ulisting-feature-category">
@@ -1615,10 +1597,8 @@ const handleFormSubmit = async (e) => {
           </div>
         </div>
 
-        {/* Contact Tab - COMPLETE */}
+        {/* Contact Tab */}
         <div className={`ulisting-form-section ${currentTab === 'contact' ? 'active' : ''}`}>
-          <h4>Contact Information</h4>
-          
           <div className="ulisting-form-grid">
             {/* Private Seller Fields */}
             {formData.sellerType === 'private' && (
@@ -1809,12 +1789,14 @@ const handleFormSubmit = async (e) => {
           </div>
         </div>
 
-        {/* Images Tab - COMPLETE */}
+        {/* Images Tab */}
         <div className={`ulisting-form-section ${currentTab === 'images' ? 'active' : ''}`}>
-          <h4>Vehicle Images</h4>
-          
+          <div className="ulisting-photo-quality-tip">
+            Great photos sell cars faster. Upload clear, well-lit images from multiple angles — exterior front, back, sides, interior, dashboard, and engine bay. Aim for at least 6 photos. Avoid blurry, dark, or heavily filtered shots.
+          </div>
+
           <div className="ulisting-form-group">
-  <label htmlFor="images">Upload Images (Max 15 images, 8MB per image) *</label>
+  <label htmlFor="images">Upload Images (Max 15, 8MB per image) *</label>
   <input
     type="file"
     id="images"
@@ -1879,8 +1861,6 @@ const handleFormSubmit = async (e) => {
 
         {/* ── Promote Tab ── */}
         <div className={`ulisting-form-section ${currentTab === 'promote' ? 'active' : ''}`}>
-          <h4>Promote Your Listing</h4>
-
           {/* Free listing status */}
           <div className="ulisting-free-listing-card">
             <div className="ulisting-free-listing-info">
@@ -1950,10 +1930,14 @@ const handleFormSubmit = async (e) => {
                   </div>
 
                   <div className="ulisting-payment-method ulisting-payment-bank">
-                    <span className="ulisting-payment-method-label">Bank Transfer</span>
+                    <span className="ulisting-payment-method-label">FNB Bank Transfer</span>
                     <div className="ulisting-payment-detail">
-                      <span className="ulisting-payment-field">Account</span>
-                      <span className="ulisting-payment-value ulisting-payment-tbd">Account details coming soon</span>
+                      <span className="ulisting-payment-field">Account Number</span>
+                      <span className="ulisting-payment-value">62918382300</span>
+                    </div>
+                    <div className="ulisting-payment-detail">
+                      <span className="ulisting-payment-field">Amount</span>
+                      <span className="ulisting-payment-value ulisting-payment-amount">BWP 300</span>
                     </div>
                   </div>
                 </div>
@@ -2013,10 +1997,8 @@ const handleFormSubmit = async (e) => {
           </div>
         </div>
 
-        {/* Additional Information Tab - COMPLETE */}
+        {/* Additional Information Tab */}
         <div className={`ulisting-form-section ${currentTab === 'additional' ? 'active' : ''}`}>
-          <h4>Additional Information</h4>
-          
           <div className="ulisting-form-grid">
             <div className="ulisting-form-group full-width">
               <label htmlFor="additionalInfo.serviceHistory">Service History</label>
@@ -2205,6 +2187,9 @@ const handleFormSubmit = async (e) => {
           </div>
         </div>
 
+        {/* Tab navigation — bottom */}
+        {renderTabNav()}
+
         {/* Submit section */}
         <div className="ulisting-form-submit-section">
           <div className="ulisting-submit-info">
@@ -2259,6 +2244,18 @@ const handleFormSubmit = async (e) => {
             })()}
           </div>
           
+          {!wantsBoost && (
+            <div className="ulisting-boost-reminder">
+              <div className="ulisting-boost-reminder-text">
+                <strong>Boost your listing — BWP 300</strong>
+                <span>Get featured on Facebook, Instagram, WhatsApp &amp; TikTok before you submit.</span>
+              </div>
+              <button type="button" className="ulisting-boost-reminder-btn" onClick={() => setCurrentTab('promote')}>
+                Add Boost
+              </button>
+            </div>
+          )}
+
           <div className="ulisting-form-actions">
             <button type="button" className="ulisting-form-cancel-btn" onClick={onCancel} disabled={isSubmitting}>
               Cancel
