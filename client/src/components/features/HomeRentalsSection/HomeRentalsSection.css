@@ -74,10 +74,10 @@
   }
   
   .rental-carousel-item {
-    flex: 0 0 auto;
-    width: calc(25% - 15px); /* Reduced from 33.333% to 25% to show 4 items instead of 3 */
+    flex: 0 0 260px;
+    width: 260px;
     transition: all 0.3s ease;
-    margin-bottom: 1.5rem; /* Add some bottom margin for spacing */
+    margin-bottom: 1.5rem;
   }
   
   /* Add a subtle scale effect for active slide */
@@ -220,28 +220,13 @@
     }
   }
   
-  /* Responsive styles */
-  @media (max-width: 1200px) {
-    .rental-carousel-item {
-      width: calc(33.333% - 13px); /* 3 items per row on medium screens */
-    }
-  }
-  
   @media (max-width: 992px) {
-    .rental-carousel-item {
-      width: calc(50% - 10px); /* 2 items per row on smaller screens */
-    }
-    
     .home-rentals-header h2 {
       font-size: 1.8rem;
     }
   }
-  
-  @media (max-width: 768px) {
-    .rental-carousel-item {
-      width: calc(100% - 10px); /* 1 item per row */
-    }
 
+  @media (max-width: 768px) {
     .home-rentals-section {
       margin: 3rem 0;
       padding: 0;
@@ -258,14 +243,14 @@
       font-size: 1.5rem;
     }
   }
-  
+
   @media (max-width: 576px) {
     .rental-carousel-nav {
       width: 30px;
       height: 30px;
       font-size: 1rem;
     }
-    
+
     .home-rentals-carousel-container {
       padding: 0 20px;
     }

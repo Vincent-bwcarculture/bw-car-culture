@@ -338,18 +338,33 @@ const Advertisement = ({
   return (
     <div className={`advertisement-container ${className}`}>
       
-      <div 
+      <div
         className="advertisement-slider"
-        style={{ 
-          background: currentSlideData?.bgGradient,
-          color: currentSlideData?.textColor 
-        }}
+        style={{ color: currentSlideData?.textColor }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onMouseEnter={() => setIsPlaying(false)}
         onMouseLeave={() => setIsPlaying(autoPlay)}
       >
+        {/* Full-panel background */}
+        <div className="advertisement-bg">
+          {currentSlideData?.imageUrl ? (
+            <img
+              src={currentSlideData.imageUrl}
+              alt=""
+              className="advertisement-bg-img"
+              onError={(e) => { e.target.src = '/images/placeholders/car.jpg'; }}
+            />
+          ) : (
+            <div className="visual-pattern"></div>
+          )}
+          <div
+            className="advertisement-bg-gradient"
+            style={{ background: currentSlideData?.bgGradient }}
+          ></div>
+        </div>
+
         <div className="advertisement-content">
           <div className="advertisement-text">
             <div className="advertisement-header">
@@ -397,7 +412,7 @@ const Advertisement = ({
             )}
 
             {/* CTA Button */}
-            <button 
+            <button
               className="advertisement-cta"
               onClick={currentSlideData?.ctaAction}
             >
@@ -407,37 +422,6 @@ const Advertisement = ({
               <span>{currentSlideData?.ctaText}</span>
               <ArrowRight size={18} />
             </button>
-          </div>
-
-          {/* Car Image Display */}
-          <div className="advertisement-visual">
-            {currentSlideData?.imageUrl ? (
-              <div className="car-image-container">
-                <img 
-                  src={currentSlideData.imageUrl} 
-                  alt={currentSlideData.listing?.make || "Featured Vehicle"}
-                  className="car-image"
-                  onError={(e) => {
-                    console.log('Image failed to load, using placeholder');
-                    e.target.src = '/images/placeholders/car.jpg';
-                  }}
-                />
-                {currentSlideData.listing && (
-                  <div className="car-image-overlay">
-                    <div className="car-quick-info">
-                      {currentSlideData.listing.make && (
-                        <span className="car-make">{currentSlideData.listing.make}</span>
-                      )}
-                      {currentSlideData.listing.model && (
-                        <span className="car-model">{currentSlideData.listing.model}</span>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="visual-pattern"></div>
-            )}
           </div>
         </div>
 

@@ -68,7 +68,7 @@
 }
 
 .vehicle-card-wrapper {
-  flex: 0 0 330px;
+  flex: 0 0 260px;
   scroll-snap-align: start;
   height: 100%;
 }
@@ -139,10 +139,6 @@
   .marketplace-section {
     padding: 15px;
   }
-
-  .vehicle-card-wrapper {
-    flex: 0 0 300px;
-  }
 }
 
 @media (max-width: 768px) {
@@ -160,10 +156,6 @@
     width: 100%;
     justify-content: space-between;
   }
-
-  .vehicle-card-wrapper {
-    flex: 0 0 270px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -175,10 +167,6 @@
     font-size: 18px;
   }
 
-  .vehicle-card-wrapper {
-    flex: 0 0 260px;
-  }
-  
   .scroll-button {
     width: 36px;
     height: 36px;

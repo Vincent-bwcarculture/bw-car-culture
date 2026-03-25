@@ -114,8 +114,8 @@
 }
 
 .carousel-item {
-  flex: 0 0 auto;
-  width: calc(35% - 14px); /* Responsive width */
+  flex: 0 0 260px;
+  width: 260px;
   transition: all 0.3s ease;
   margin-bottom: 1.5rem;
 }
@@ -253,12 +253,6 @@
 }
 
 /* Responsive styles */
-@media (max-width: 1200px) {
-  .carousel-item {
-    width: calc(45% - 10px); /* Fewer cards on medium screens */
-  }
-}
-
 @media (max-width: 992px) {
   .home-services-header h2 {
     font-size: 1.8rem;
@@ -275,10 +269,6 @@
 }
 
 @media (max-width: 768px) {
-  .carousel-item {
-    width: calc(100% - 10px); /* 1 item per row on mobile */
-  }
-
   .home-services-section {
     margin: 3rem 0;
     padding: 0;

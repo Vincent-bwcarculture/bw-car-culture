@@ -819,7 +819,7 @@
   }
 
   .budget-search-form {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
   }
 
@@ -829,15 +829,6 @@
 
   .budget-promo-content h3 {
     font-size: 1.4rem;
-  }
-
-  .budget-action-buttons {
-    flex-direction: column;
-  }
-
-  .budget-action-button {
-    width: 100%;
-    text-align: center;
   }
 
   .vehicle-card-wrapper {

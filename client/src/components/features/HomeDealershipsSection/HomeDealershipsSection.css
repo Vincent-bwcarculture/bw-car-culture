@@ -73,13 +73,11 @@
     display: none;
   }
   
-  /* UPDATED: Fixed width cards to match dealerships page size */
   .carousel-item {
-    flex: 0 0 auto;
-    width: 340px; /* Fixed width instead of percentage */
-    max-width: 340px; /* Prevent cards from getting wider */
+    flex: 0 0 260px;
+    width: 260px;
     transition: all 0.3s ease;
-    margin-bottom: 1.5rem; /* Add some bottom margin for spacing */
+    margin-bottom: 1.5rem;
   }
   
   /* Ensure BusinessCard doesn't override the width */
@@ -196,31 +194,13 @@
     }
   }
   
-  /* UPDATED: Responsive styles with fixed widths */
-  @media (max-width: 1200px) {
-    .carousel-item {
-      width: 320px; /* Fixed width instead of percentage */
-      max-width: 320px;
-    }
-  }
-  
   @media (max-width: 992px) {
     .home-dealerships-header h2 {
       font-size: 1.8rem;
     }
-    
-    .carousel-item {
-      width: 300px; /* Slightly smaller for medium screens */
-      max-width: 300px;
-    }
   }
-  
-  @media (max-width: 768px) {
-    .carousel-item {
-      width: 280px; /* Smaller cards for tablets */
-      max-width: 280px;
-    }
 
+  @media (max-width: 768px) {
     .home-dealerships-section {
       margin: 3rem 0;
       padding: 0;
@@ -237,19 +217,14 @@
       font-size: 1.5rem;
     }
   }
-  
+
   @media (max-width: 576px) {
-    .carousel-item {
-      width: calc(100% - 20px); /* Full width on mobile */
-      max-width: none;
-    }
-    
     .carousel-nav {
       width: 30px;
       height: 30px;
       font-size: 1rem;
     }
-    
+
     .home-dealerships-carousel-container {
       padding: 0 20px;
     }
