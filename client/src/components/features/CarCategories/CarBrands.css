@@ -300,6 +300,10 @@
 }
 
 @media (max-width: 480px) {
+  .car-brands-section {
+    padding: 0.75rem;
+  }
+
   .car-brands-section h2 {
     font-size: 1.4rem;
   }

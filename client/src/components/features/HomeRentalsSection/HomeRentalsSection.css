@@ -241,19 +241,21 @@
     .rental-carousel-item {
       width: calc(100% - 10px); /* 1 item per row */
     }
-    
+
+    .home-rentals-section {
+      margin: 3rem 0;
+      padding: 0;
+    }
+
     .home-rentals-header {
       flex-direction: column;
       align-items: flex-start;
       gap: 1rem;
+      padding: 0 0.75rem;
     }
-    
+
     .home-rentals-header h2 {
       font-size: 1.5rem;
-    }
-    
-    .home-rentals-section {
-      margin: 3rem 0;
     }
   }
   

@@ -220,19 +220,21 @@
       width: 280px; /* Smaller cards for tablets */
       max-width: 280px;
     }
-    
+
+    .home-dealerships-section {
+      margin: 3rem 0;
+      padding: 0;
+    }
+
     .home-dealerships-header {
       flex-direction: column;
       align-items: flex-start;
       gap: 1rem;
+      padding: 0 0.75rem;
     }
-    
+
     .home-dealerships-header h2 {
       font-size: 1.5rem;
-    }
-    
-    .home-dealerships-section {
-      margin: 3rem 0;
     }
   }
   
