@@ -1185,6 +1185,26 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               ✓ Verified
             </div>
           )}
+
+          {/* Vehicle location badge */}
+          {(() => {
+            const countryMap = {
+              'BW': 'Botswana', 'BWA': 'Botswana', 'Botswana': 'Botswana',
+              'ZA': 'South Africa', 'RSA': 'South Africa', 'SA': 'South Africa', 'S. Africa': 'South Africa', 'South Africa': 'South Africa',
+              'ZW': 'Zimbabwe', 'ZWE': 'Zimbabwe', 'Zimbabwe': 'Zimbabwe',
+              'NA': 'Namibia', 'NAM': 'Namibia', 'Namibia': 'Namibia',
+              'ZM': 'Zambia', 'ZMB': 'Zambia', 'Zambia': 'Zambia',
+              'MZ': 'Mozambique', 'MOZ': 'Mozambique', 'Mozambique': 'Mozambique',
+            };
+            const raw = dealer?.location?.country || car?.location?.country || '';
+            const countryName = countryMap[raw] || raw;
+            if (!countryName) return null;
+            return (
+              <div className="vc-location-badge">
+                Vehicle in {countryName}
+              </div>
+            );
+          })()}
         </div>
       </div>
       

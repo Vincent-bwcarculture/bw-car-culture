@@ -410,9 +410,16 @@
 /* ===== OPTIMIZED FORM GRID - MOBILE-FIRST HORIZONTAL LAYOUT ===== */
 .ulisting-form-grid {
   display: grid;
-  grid-template-columns: 1fr; /* Mobile: Single column */
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(2, 1fr); /* 2-col from the start */
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 480px) {
+  .ulisting-form-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }
 
 /* ===== FORM GROUPS ===== */

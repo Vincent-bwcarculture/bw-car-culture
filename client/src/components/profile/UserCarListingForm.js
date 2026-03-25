@@ -1446,8 +1446,8 @@ const handleFormSubmit = async (e) => {
                 <strong>Want more exposure?</strong>
                 <span>Feature your listing across Facebook (685K), Instagram (15K+), WhatsApp (10K+) &amp; TikTok (35K+) for just BWP 300.</span>
               </div>
-              <button type="button" className="ulisting-promote-teaser-btn" onClick={() => setCurrentTab('promote')}>
-                See Boost Option
+              <button type="button" className="ulisting-promote-teaser-btn" onClick={() => { setWantsBoost(true); setCurrentTab('promote'); }}>
+                Add Boost — BWP 300
               </button>
             </div>
           )}
@@ -2250,8 +2250,8 @@ const handleFormSubmit = async (e) => {
                 <strong>Boost your listing — BWP 300</strong>
                 <span>Get featured on Facebook, Instagram, WhatsApp &amp; TikTok before you submit.</span>
               </div>
-              <button type="button" className="ulisting-boost-reminder-btn" onClick={() => setCurrentTab('promote')}>
-                Add Boost
+              <button type="button" className="ulisting-boost-reminder-btn" onClick={() => { setWantsBoost(true); setCurrentTab('promote'); }}>
+                Add Boost — BWP 300
               </button>
             </div>
           )}
