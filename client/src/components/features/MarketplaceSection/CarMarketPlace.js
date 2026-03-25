@@ -1054,6 +1054,32 @@ const CarMarketplace = () => {
               )}
             </div>
 
+            {/* Import notice for non-Botswana vehicles */}
+            {(() => {
+              const countryMap = {
+                'BW': 'Botswana', 'BWA': 'Botswana', 'Botswana': 'Botswana',
+                'ZA': 'South Africa', 'RSA': 'South Africa', 'SA': 'South Africa', 'S. Africa': 'South Africa', 'South Africa': 'South Africa',
+                'ZW': 'Zimbabwe', 'ZWE': 'Zimbabwe', 'Zimbabwe': 'Zimbabwe',
+                'NA': 'Namibia', 'NAM': 'Namibia', 'Namibia': 'Namibia',
+                'ZM': 'Zambia', 'ZMB': 'Zambia', 'Zambia': 'Zambia',
+                'MZ': 'Mozambique', 'MOZ': 'Mozambique', 'Mozambique': 'Mozambique',
+                'JP': 'Japan', 'JPN': 'Japan', 'Japan': 'Japan',
+              };
+              const botswana = new Set(['Botswana', 'BW', 'BWA']);
+              const raw = car.location?.country || car.dealer?.location?.country || '';
+              if (!raw || botswana.has(raw)) return null;
+              const countryName = countryMap[raw] || raw;
+              return (
+                <div className="mp-import-notice">
+                  <div className="mp-import-notice-icon">🌍</div>
+                  <div className="mp-import-notice-body">
+                    <strong>This vehicle is located in {countryName}</strong>
+                    <p>Bw Car Culture assists you with clearance, registration and logistics to get your vehicle delivered to Botswana.</p>
+                  </div>
+                </div>
+              );
+            })()}
+
             <div className="car-info">
               <div className="car-header">
                 <div className="title-section">

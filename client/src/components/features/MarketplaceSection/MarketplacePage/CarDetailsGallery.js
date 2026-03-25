@@ -570,7 +570,6 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
               <strong>This vehicle is located in {countryName}</strong>
               <p>
                 Bw Car Culture assists you with clearance, registration and logistics to get your vehicle delivered to Botswana.
-                We guide you through every step of the process.
               </p>
             </div>
           </div>

@@ -731,6 +731,48 @@
   border-color: #ff3300;
 }
 
+/* Import notice for non-Botswana vehicles */
+.mp-import-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.1), rgba(255, 160, 0, 0.06));
+  border: 1px solid rgba(255, 107, 0, 0.3);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 12px 0 4px;
+}
+
+.mp-import-notice-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.mp-import-notice-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mp-import-notice-body strong {
+  font-size: 0.9rem;
+  color: #ff8c00;
+  font-weight: 600;
+}
+
+.mp-import-notice-body p {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
+  margin: 0;
+}
+
+[data-theme="light"] .mp-import-notice-body p {
+  color: rgba(0, 0, 0, 0.65);
+}
+
 /* Car Information */
 .car-info {
   padding: 0.4rem 0.6rem; /* REDUCED from 0.5rem 0.7rem */
@@ -794,7 +836,7 @@
 .pula-price {
   color: rgb(0, 120, 255);
   font-weight: bold;
-  font-size: 1.4rem;
+  font-size: 1.8rem;
 }
 
 .savings-highlight {
@@ -2551,7 +2593,7 @@
 }
 
 [data-theme="light"] .car-price {
-  color: #ff3300 !important;
+  color: #0051ff !important;
 }
 
 [data-theme="light"] .spec-item {
