@@ -1093,7 +1093,7 @@ const CarMarketplace = () => {
                 </div>
                 <div className="price-container">
                   {calculateSavings && <div className="original-price">Original Price: P {calculateSavings.originalPrice.toLocaleString()}</div>}
-                  <div className="car-price pula-price">{car.priceOptions && car.priceOptions.showPriceAsPOA ? 'POA' : `P ${car.price.toLocaleString()}`}</div>
+                  <div className="mp-detail-price">{car.priceOptions && car.priceOptions.showPriceAsPOA ? 'POA' : `P ${car.price.toLocaleString()}`}</div>
                   {calculateSavings && <div className="savings-highlight">Save: P {calculateSavings.amount.toLocaleString()}</div>}
                   {car.priceOptions?.monthlyPayment && !car.priceOptions?.showPriceAsPOA && !isPrivateSeller && <div className="monthly-payment">P {car.priceOptions.monthlyPayment.toLocaleString()} p/m</div>}
                   {car.priceOptions?.includesVAT && <span className="vat-info">Price includes VAT</span>}

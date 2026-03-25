@@ -13,6 +13,8 @@ const ListingManager = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedListing, setSelectedListing] = useState(null);
+  const [showRecordsModal, setShowRecordsModal] = useState(false);
+  const [recordsListing, setRecordsListing] = useState(null);
   const [filters, setFilters] = useState({
     status: 'all',
     category: 'all',
@@ -519,7 +521,7 @@ const ListingManager = () => {
                   </div>
                   
                   <div className="listing-actions">
-                    <button 
+                    <button
                       className="action-btn edit"
                       onClick={() => {
                         setSelectedListing(listing);
@@ -529,14 +531,21 @@ const ListingManager = () => {
                     >
                       Edit
                     </button>
-                    <button 
+                    <button
+                      className="action-btn records"
+                      onClick={() => { setRecordsListing(listing); setShowRecordsModal(true); }}
+                      title="View private records"
+                    >
+                      🔒 Records
+                    </button>
+                    <button
                       className="action-btn featured"
                       onClick={() => handleToggleFeatured(listing._id)}
                       title={listing.featured ? "Remove from featured" : "Make featured"}
                     >
                       {listing.featured ? "Unfeature" : "Feature"}
                     </button>
-                    <button 
+                    <button
                       className="action-btn delete"
                       onClick={() => handleDeleteListing(listing._id)}
                       title="Delete listing"
@@ -645,12 +654,19 @@ const ListingManager = () => {
                       >
                         ✎
                       </button>
-                      <button 
+                      <button
                         className="action-btn view"
                         onClick={() => window.open(`/marketplace/${listing._id}`, '_blank')}
                         title="View listing"
                       >
                         👁
+                      </button>
+                      <button
+                        className="action-btn records"
+                        onClick={() => { setRecordsListing(listing); setShowRecordsModal(true); }}
+                        title="View private records"
+                      >
+                        🔒
                       </button>
                       <button 
                         className={`action-btn featured ${listing.featured ? 'active' : ''}`}
@@ -749,6 +765,76 @@ const ListingManager = () => {
           onSubmit={handleUpdateListing}
           initialData={selectedListing}
         />
+      )}
+
+      {showRecordsModal && recordsListing && (
+        <div className="records-modal-overlay" onClick={() => setShowRecordsModal(false)}>
+          <div className="records-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="records-modal-header">
+              <h3>🔒 Private Records</h3>
+              <p className="records-modal-subtitle">{recordsListing.title}</p>
+              <button className="records-modal-close" onClick={() => setShowRecordsModal(false)}>✕</button>
+            </div>
+            <div className="records-modal-body">
+              {recordsListing.adminNotes?.supplierName && (
+                <div className="records-row">
+                  <span className="records-label">Supplier / Source</span>
+                  <span className="records-value">{recordsListing.adminNotes.supplierName}</span>
+                </div>
+              )}
+              {recordsListing.adminNotes?.purchaseDate && (
+                <div className="records-row">
+                  <span className="records-label">Purchase Date</span>
+                  <span className="records-value">{new Date(recordsListing.adminNotes.purchaseDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                </div>
+              )}
+              {recordsListing.adminNotes?.supplierPrice && (
+                <div className="records-row">
+                  <span className="records-label">Supplier Price</span>
+                  <span className="records-value records-value-money">P {Number(recordsListing.adminNotes.supplierPrice).toLocaleString()}</span>
+                </div>
+              )}
+              {recordsListing.adminNotes?.margin && (
+                <div className="records-row">
+                  <span className="records-label">Margin / Markup</span>
+                  <span className="records-value records-value-money">P {Number(recordsListing.adminNotes.margin).toLocaleString()}</span>
+                </div>
+              )}
+              {recordsListing.adminNotes?.supplierPrice && recordsListing.adminNotes?.margin && (
+                <div className="records-row records-row-total">
+                  <span className="records-label">Total Cost (Supplier + Margin)</span>
+                  <span className="records-value records-value-money">P {(Number(recordsListing.adminNotes.supplierPrice) + Number(recordsListing.adminNotes.margin)).toLocaleString()}</span>
+                </div>
+              )}
+              {recordsListing.price && (
+                <div className="records-row">
+                  <span className="records-label">Listed Price</span>
+                  <span className="records-value records-value-money">P {Number(recordsListing.price).toLocaleString()}</span>
+                </div>
+              )}
+              {recordsListing.specifications?.vin && (
+                <div className="records-row">
+                  <span className="records-label">VIN</span>
+                  <span className="records-value records-value-mono">{recordsListing.specifications.vin}</span>
+                </div>
+              )}
+              {recordsListing.adminNotes?.notes && (
+                <div className="records-row records-row-notes">
+                  <span className="records-label">Private Notes</span>
+                  <span className="records-value">{recordsListing.adminNotes.notes}</span>
+                </div>
+              )}
+              {!recordsListing.adminNotes?.supplierName && !recordsListing.adminNotes?.supplierPrice && !recordsListing.adminNotes?.notes && !recordsListing.specifications?.vin && (
+                <p className="records-empty">No private records saved for this listing. Edit the listing and fill in the Records tab.</p>
+              )}
+            </div>
+            <div className="records-modal-footer">
+              <button className="records-edit-btn" onClick={() => { setSelectedListing(recordsListing); setShowUpdateModal(true); setShowRecordsModal(false); }}>
+                Open in Editor (Records tab)
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

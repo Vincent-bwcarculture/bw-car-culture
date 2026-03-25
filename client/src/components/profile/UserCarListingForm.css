@@ -59,8 +59,11 @@
 /* ===== MAIN CONTAINER ===== */
 .ulisting-form-container {
   max-width: 1200px;
+  width: 100%;
+  box-sizing: border-box;
   margin: 0 auto;
-  padding: 20px;
+  padding: 16px;
+  overflow-x: hidden;
   background: var(--uprofile-bg-primary);
   border-radius: var(--uprofile-radius-lg);
   box-shadow: var(--uprofile-shadow-lg);
@@ -410,15 +413,17 @@
 /* ===== OPTIMIZED FORM GRID - MOBILE-FIRST HORIZONTAL LAYOUT ===== */
 .ulisting-form-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2-col from the start */
-  gap: 14px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 12px;
+  margin-bottom: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @media (max-width: 300px) {
   .ulisting-form-grid {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 8px;
   }
 }
 
@@ -426,10 +431,13 @@
 .ulisting-form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
 }
 
-.ulisting-form-group.full-width {
+.ulisting-form-group.full-width,
+.ulisting-full-width {
   grid-column: 1 / -1;
 }
 
@@ -438,21 +446,22 @@
 }
 
 .ulisting-form-group label {
-  font-size: 0.95rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--uprofile-text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .ulisting-form-group input,
 .ulisting-form-group select,
 .ulisting-form-group textarea {
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: 2px solid var(--uprofile-border-color);
   border-radius: var(--uprofile-radius-md);
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   background: var(--uprofile-bg-primary);
   color: var(--uprofile-text-primary);
   transition: var(--uprofile-transition);

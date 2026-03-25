@@ -881,6 +881,18 @@
   font-size: 1.8rem;
 }
 
+/* Detail page price — isolated class to avoid global .pula-price conflicts */
+.mp-detail-price {
+  color: #0051ff;
+  font-size: 1.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+[data-theme="light"] .mp-detail-price {
+  color: #0051ff;
+}
+
 .savings-highlight {
   font-size: 1rem;
   color: #2ed573;
