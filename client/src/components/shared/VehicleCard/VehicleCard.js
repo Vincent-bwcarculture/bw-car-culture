@@ -1231,6 +1231,12 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               {car.priceOptions?.leaseAvailable && dealer?.sellerType === 'dealership' && (
                 <div className="vc-lease-badge">Lease Available</div>
               )}
+              {car.priceOptions?.excludesClearance && (
+                <div className="vc-excl-badge">Excl. Clearance</div>
+              )}
+              {car.priceOptions?.excludesRegistration && (
+                <div className="vc-excl-badge">Excl. Registration</div>
+              )}
             </div>
           </div>
           <div className="vc-price-container">

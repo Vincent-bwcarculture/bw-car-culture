@@ -560,6 +560,12 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
               {car.priceOptions?.leaseAvailable && (
                 <div className="cdg-finance-badge cdg-lease-badge">Lease Available</div>
               )}
+              {car.priceOptions?.excludesClearance && (
+                <div className="cdg-excl-badge">Excl. Clearance</div>
+              )}
+              {car.priceOptions?.excludesRegistration && (
+                <div className="cdg-excl-badge">Excl. Registration</div>
+              )}
             </div>
           </div>
           

@@ -311,6 +311,17 @@
   border: 1px solid rgba(54, 162, 235, 0.3);
 }
 
+.cdg-excl-badge {
+  font-size: 0.85rem;
+  padding: 0.4rem 1rem;
+  border-radius: 15px;
+  white-space: nowrap;
+  color: #f0b429;
+  background-color: rgba(240, 180, 41, 0.12);
+  border: 1px solid rgba(240, 180, 41, 0.35);
+  font-weight: 500;
+}
+
 /* Price Container */
 .cdg-price-container {
   display: flex;

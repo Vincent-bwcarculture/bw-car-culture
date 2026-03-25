@@ -1693,6 +1693,20 @@
   opacity: 0.7;
 }
 
+/* ===== PRICE EXCLUSION CHECKBOXES ===== */
+.ulisting-price-exclusions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.ulisting-exclusion-check {
+  font-size: 0.8rem !important;
+  color: var(--uprofile-text-secondary);
+  gap: 5px !important;
+}
+
 /* ===== PHOTO QUALITY TIP ===== */
 .ulisting-photo-quality-tip {
   background: rgba(255, 193, 7, 0.08);

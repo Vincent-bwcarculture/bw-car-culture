@@ -122,6 +122,8 @@ const UserCarListingForm = ({
     
     priceOptions: {
       negotiable: false,
+      excludesClearance: false,
+      excludesRegistration: false,
       showSavings: false,
       originalPrice: '',
       savingsAmount: '',
@@ -1326,6 +1328,26 @@ const handleFormSubmit = async (e) => {
                 className={errors.price ? 'error' : ''}
               />
               {errors.price && <span className="ulisting-error-message">{errors.price}</span>}
+              <div className="ulisting-price-exclusions">
+                <label className="ulisting-checkbox-label ulisting-exclusion-check">
+                  <input
+                    type="checkbox"
+                    name="priceOptions.excludesClearance"
+                    checked={formData.priceOptions?.excludesClearance || false}
+                    onChange={handleInputChange}
+                  />
+                  <span>Price excl. clearance</span>
+                </label>
+                <label className="ulisting-checkbox-label ulisting-exclusion-check">
+                  <input
+                    type="checkbox"
+                    name="priceOptions.excludesRegistration"
+                    checked={formData.priceOptions?.excludesRegistration || false}
+                    onChange={handleInputChange}
+                  />
+                  <span>Price excl. registration</span>
+                </label>
+              </div>
             </div>
 
             <div className="ulisting-form-group">
