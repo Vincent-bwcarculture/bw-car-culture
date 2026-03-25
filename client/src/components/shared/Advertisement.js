@@ -349,23 +349,24 @@ const Advertisement = ({
       >
         {/* Full-panel background */}
         <div className="advertisement-bg">
-          {currentSlideData?.imageUrl ? (
-            <img
-              src={currentSlideData.imageUrl}
-              alt=""
-              className="advertisement-bg-img"
-              onError={(e) => { e.target.src = '/images/placeholders/car.jpg'; }}
-            />
-          ) : (
-            <div className="visual-pattern"></div>
-          )}
+          <img
+            src={currentSlideData?.imageUrl || '/images/placeholders/car.jpg'}
+            alt=""
+            className="advertisement-bg-img"
+            onError={(e) => { e.target.src = '/images/placeholders/car.jpg'; }}
+          />
+          {/* Subtle colour tint from slide theme */}
           <div
-            className="advertisement-bg-gradient"
+            className="advertisement-bg-tint"
             style={{ background: currentSlideData?.bgGradient }}
           ></div>
+          {/* Directional mask: dark left (text), clear right (car) */}
+          <div className="advertisement-bg-mask"></div>
+          <div className="advertisement-bg-bottom"></div>
         </div>
 
         <div className="advertisement-content">
+          {/* Left: promotional text */}
           <div className="advertisement-text">
             <div className="advertisement-header">
               <span className="advertisement-subtitle">
@@ -380,7 +381,7 @@ const Advertisement = ({
               {currentSlideData?.description}
             </p>
 
-            {/* Highlights or Stats */}
+            {/* Highlights as pills */}
             {currentSlideData?.highlights && (
               <div className="advertisement-highlights">
                 {currentSlideData.highlights.map((highlight, index) => (
@@ -411,18 +412,42 @@ const Advertisement = ({
               </div>
             )}
 
-            {/* CTA Button */}
+            {/* CTA */}
             <button
               className="advertisement-cta"
               onClick={currentSlideData?.ctaAction}
             >
-              {currentSlideData?.showWhatsApp && (
-                <MessageCircle size={18} />
-              )}
+              {currentSlideData?.showWhatsApp && <MessageCircle size={18} />}
               <span>{currentSlideData?.ctaText}</span>
-              <ArrowRight size={18} />
+              <ArrowRight size={16} />
             </button>
           </div>
+
+          {/* Right: vehicle name badge over the visible car image */}
+          {currentSlideData?.listing && (
+            <div className="ad-vehicle-badge">
+              <span className="ad-vehicle-label">Featured Vehicle</span>
+              <span className="ad-vehicle-name">
+                {currentSlideData.listing.make} {currentSlideData.listing.model}
+              </span>
+              <div className="ad-vehicle-meta">
+                {currentSlideData.listing.year && (
+                  <span className="ad-vehicle-year">{currentSlideData.listing.year}</span>
+                )}
+                {currentSlideData.listing.price && (
+                  <span className="ad-vehicle-price">
+                    P{Number(currentSlideData.listing.price).toLocaleString()}
+                  </span>
+                )}
+              </div>
+              <button
+                className="ad-vehicle-view"
+                onClick={currentSlideData.ctaAction}
+              >
+                View listing <ArrowRight size={12} />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Navigation Arrows */}

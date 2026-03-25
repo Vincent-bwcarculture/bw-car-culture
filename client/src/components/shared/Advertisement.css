@@ -42,9 +42,10 @@
 .advertisement-slider {
   position: relative;
   width: 100%;
-  height: 380px;
+  height: 440px;
   cursor: grab;
   overflow: hidden;
+  background: #0a0a12;
 }
 
 .advertisement-slider:active {
@@ -62,91 +63,195 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
-  opacity: 0.35;
-  transition: transform 0.5s ease;
+  object-position: center 30%;
+  opacity: 0.78;
+  transition: transform 6s ease, opacity 0.4s ease;
 }
 
-.advertisement-bg-gradient {
+.advertisement-slider:hover .advertisement-bg-img {
+  transform: scale(1.04);
+}
+
+/* Subtle hue tint from slide bgGradient */
+.advertisement-bg-tint {
   position: absolute;
   inset: 0;
-  opacity: 0.82;
+  opacity: 0.28;
+  mix-blend-mode: multiply;
 }
 
-/* Content overlay */
+/* Directional mask: dark on left for text, transparent on right for car */
+.advertisement-bg-mask {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    rgba(0, 0, 0, 0.92) 0%,
+    rgba(0, 0, 0, 0.72) 32%,
+    rgba(0, 0, 0, 0.28) 58%,
+    rgba(0, 0, 0, 0.06) 100%
+  );
+}
+
+/* Bottom vignette for badge legibility */
+.advertisement-bg-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, transparent 100%);
+}
+
+/* Content layout: text left, vehicle badge right, both pinned to bottom */
 .advertisement-content {
   position: relative;
   z-index: 1;
-  display: flex;
-  align-items: center;
-  padding: 3rem;
   height: 100%;
+  padding: 2.5rem 3rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: flex-end;
+  gap: 2rem;
 }
 
 .advertisement-text {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
-  justify-content: center;
-  max-width: 620px;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
 }
 
 .advertisement-header {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .advertisement-subtitle {
-  display: block;
-  font-size: 0.75rem;
-  opacity: 0.85;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 0.8rem;
+  letter-spacing: 2.5px;
+  margin-bottom: 0.75rem;
   color: #ff3300;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid rgba(255, 51, 0, 0.35);
+  border-radius: 20px;
+  background: rgba(255, 51, 0, 0.1);
+  backdrop-filter: blur(8px);
 }
 
 .advertisement-title {
-  font-size: 2.2rem;
+  font-size: 2.4rem;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.15;
   margin: 0;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+  letter-spacing: -0.02em;
 }
 
 .advertisement-description {
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.6;
   margin: 0;
-  opacity: 0.95;
+  opacity: 0.82;
+  max-width: 420px;
+}
+
+/* Vehicle info badge — overlaid on the visible car area */
+.ad-vehicle-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  padding-bottom: 0.5rem;
+}
+
+.ad-vehicle-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.ad-vehicle-name {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.7);
+  letter-spacing: -0.02em;
+  text-align: right;
+  line-height: 1.1;
+}
+
+.ad-vehicle-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ad-vehicle-year {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+.ad-vehicle-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ff3300;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+.ad-vehicle-view {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+  margin-top: 0.3rem;
+}
+
+.ad-vehicle-view:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
 /* Highlights Section */
 .advertisement-highlights {
   display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  margin: 0.5rem 0;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .highlight-item {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.8rem;
-  font-size: 0.95rem;
+  gap: 0.4rem;
+  font-size: 0.8rem;
   font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 0.3rem 0.7rem;
+  backdrop-filter: blur(8px);
 }
 
 .highlight-bullet {
-  width: 24px;
-  height: 24px;
-  background: rgba(255, 51, 0, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: #ff3300;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   flex-shrink: 0;
 }
 
@@ -207,26 +312,26 @@
 .advertisement-cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.7rem;
   background: #ff3300;
   color: #ffffff;
-  padding: 1rem 2rem;
-  border-radius: 10px;
+  padding: 0.85rem 1.75rem;
+  border-radius: 8px;
   text-decoration: none;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   max-width: fit-content;
-  margin-top: 0.5rem;
-  box-shadow: 0 4px 16px rgba(255, 51, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(255, 51, 0, 0.4);
+  letter-spacing: 0.02em;
 }
 
 .advertisement-cta:hover {
-  background: #cc2900;
+  background: #e02d00;
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(255, 51, 0, 0.4);
+  box-shadow: 0 8px 28px rgba(255, 51, 0, 0.5);
 }
 
 .advertisement-cta:active {
@@ -313,36 +418,45 @@
 /* Large Tablets and Small Laptops */
 @media (max-width: 1200px) {
   .advertisement-slider {
-    height: 350px;
+    height: 400px;
   }
 
   .advertisement-content {
-    padding: 2.5rem;
-    gap: 2rem;
+    padding: 2rem 2.5rem;
   }
 
   .advertisement-title {
     font-size: 2rem;
   }
 
-  .advertisement-description {
-    font-size: 0.95rem;
-  }
-
-  .visual-pattern {
-    width: 240px;
-    height: 240px;
+  .ad-vehicle-name {
+    font-size: 1.35rem;
   }
 }
 
-/* Tablets */
-@media (max-width: 992px) {
+/* Tablets — collapse to single column, vehicle badge below */
+@media (max-width: 900px) {
   .advertisement-slider {
-    height: 360px;
+    height: 380px;
+  }
+
+  .advertisement-bg-mask {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.2) 0%,
+      rgba(0, 0, 0, 0.75) 55%,
+      rgba(0, 0, 0, 0.92) 100%
+    );
   }
 
   .advertisement-content {
+    grid-template-columns: 1fr;
     padding: 2rem;
+    align-items: flex-end;
+  }
+
+  .ad-vehicle-badge {
+    display: none;
   }
 
   .advertisement-title {
@@ -350,7 +464,7 @@
   }
 }
 
-/* Mobile Phones */
+/* Mobile */
 @media (max-width: 768px) {
   .advertisement-container {
     margin: 1.5rem auto;
@@ -362,7 +476,7 @@
   }
 
   .advertisement-content {
-    padding: 2rem 1.5rem;
+    padding: 1.75rem 1.5rem;
   }
 
   .advertisement-title {
@@ -370,30 +484,21 @@
   }
 
   .advertisement-description {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
+    max-width: 100%;
   }
 
   .advertisement-social-stats {
-    gap: 1rem;
+    gap: 0.75rem;
   }
 
   .social-stat-item {
-    padding: 0.5rem 0.8rem;
-  }
-
-  .social-icon {
-    width: 28px;
-    height: 28px;
-  }
-
-  .social-count {
-    font-size: 1rem;
+    padding: 0.45rem 0.75rem;
   }
 
   .advertisement-cta {
     width: 100%;
     justify-content: center;
-    padding: 0.9rem 1.5rem;
   }
 
   .nav-arrow {
@@ -410,7 +515,7 @@
   }
 }
 
-/* Small Mobile Phones */
+/* Small Mobile */
 @media (max-width: 480px) {
   .advertisement-slider {
     height: 340px;
@@ -418,7 +523,6 @@
 
   .advertisement-content {
     padding: 1.5rem 1rem;
-    gap: 1rem;
   }
 
   .advertisement-title {
@@ -429,36 +533,9 @@
     font-size: 0.85rem;
   }
 
-  .advertisement-subtitle {
-    font-size: 0.7rem;
-    letter-spacing: 1.5px;
-  }
-
   .advertisement-social-stats {
-    flex-direction: column;
-    gap: 0.8rem;
-    width: 100%;
-  }
-
-  .social-stat-item {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .highlight-item {
-    font-size: 0.9rem;
-  }
-
-  .highlight-bullet {
-    width: 20px;
-    height: 20px;
-    font-size: 0.75rem;
-  }
-
-  .advertisement-cta {
-    padding: 0.8rem 1.2rem;
-    font-size: 0.9rem;
-    gap: 0.6rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
   .nav-arrow {
