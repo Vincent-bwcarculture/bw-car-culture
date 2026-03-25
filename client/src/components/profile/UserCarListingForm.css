@@ -447,14 +447,17 @@
 .ulisting-form-group input,
 .ulisting-form-group select,
 .ulisting-form-group textarea {
-  padding: 12px 16px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
   border: 2px solid var(--uprofile-border-color);
   border-radius: var(--uprofile-radius-md);
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   background: var(--uprofile-bg-primary);
   color: var(--uprofile-text-primary);
   transition: var(--uprofile-transition);
   font-family: inherit;
+  min-width: 0;
 }
 
 .ulisting-form-group input:focus,
