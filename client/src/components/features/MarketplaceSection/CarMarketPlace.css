@@ -731,6 +731,48 @@
   border-color: #ff3300;
 }
 
+/* Transit status banner */
+.mp-transit-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(0, 80, 200, 0.12), rgba(0, 120, 255, 0.07));
+  border: 1px solid rgba(0, 100, 255, 0.3);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 1rem;
+}
+
+.mp-transit-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.mp-transit-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mp-transit-body strong {
+  font-size: 0.92rem;
+  color: #5aacff;
+  font-weight: 600;
+}
+
+.mp-transit-eta {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+[data-theme="light"] .mp-transit-body strong {
+  color: #0055cc;
+}
+
+[data-theme="light"] .mp-transit-eta {
+  color: rgba(0, 0, 0, 0.55);
+}
+
 /* Import notice for non-Botswana vehicles */
 .mp-import-notice {
   display: flex;

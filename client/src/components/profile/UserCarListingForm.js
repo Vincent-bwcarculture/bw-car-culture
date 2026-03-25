@@ -159,6 +159,12 @@ const UserCarListingForm = ({
       pickupLocation: '',
       showroomAddress: '',
       appointmentRequired: false
+    },
+
+    transit: {
+      isInTransit: false,
+      destinationCountry: 'Botswana',
+      eta: ''
     }
   };
 
@@ -1349,6 +1355,29 @@ const handleFormSubmit = async (e) => {
                 </label>
               </div>
             </div>
+
+            <div className="ulisting-form-group ulisting-full-width">
+              <label className="ulisting-checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={formData.transit?.isInTransit || false}
+                  onChange={(e) => setFormData(prev => ({ ...prev, transit: { ...prev.transit, isInTransit: e.target.checked } }))}
+                />
+                <span>Vehicle is currently in transit to Botswana</span>
+              </label>
+            </div>
+
+            {formData.transit?.isInTransit && (
+              <div className="ulisting-form-group">
+                <label htmlFor="transitEta">Estimated Arrival (ETA)</label>
+                <input
+                  type="date"
+                  id="transitEta"
+                  value={formData.transit?.eta || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, transit: { ...prev.transit, eta: e.target.value } }))}
+                />
+              </div>
+            )}
 
             <div className="ulisting-form-group">
               <label htmlFor="condition">Condition *</label>

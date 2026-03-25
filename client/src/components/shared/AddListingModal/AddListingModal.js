@@ -116,6 +116,22 @@ const AddListingModal = ({ isOpen, onClose, onSubmit }) => {
     serviceHistory: {
       hasServiceHistory: false,
       records: []
+    },
+
+    // Transit status
+    transit: {
+      isInTransit: false,
+      destinationCountry: 'BW',
+      eta: ''
+    },
+
+    // Admin-only private records
+    adminNotes: {
+      supplierName: '',
+      supplierPrice: '',
+      margin: '',
+      purchaseDate: '',
+      notes: ''
     }
   };
 
@@ -146,7 +162,8 @@ const AddListingModal = ({ isOpen, onClose, onSubmit }) => {
     { id: 'pricing', label: 'Pricing', icon: '💰' },
     { id: 'savings', label: 'I3W Savings', icon: '🎯' }, // NEW
     { id: 'location', label: 'Location', icon: '📍' },
-    { id: 'seo', label: 'SEO', icon: '🔍' }
+    { id: 'seo', label: 'SEO', icon: '🔍' },
+    { id: 'records', label: 'Records', icon: '🔒' }
   ];
 
   // NEW: Calculate savings automatically
@@ -757,7 +774,21 @@ const handleSubmit = async (e) => {
         hasServiceHistory: false,
         records: []
       },
-      
+
+      transit: {
+        isInTransit: Boolean(formData.transit?.isInTransit),
+        destinationCountry: formData.transit?.destinationCountry || '',
+        eta: formData.transit?.eta ? new Date(formData.transit.eta) : null
+      },
+
+      adminNotes: {
+        supplierName: formData.adminNotes?.supplierName || '',
+        supplierPrice: formData.adminNotes?.supplierPrice ? Number(formData.adminNotes.supplierPrice) : null,
+        margin: formData.adminNotes?.margin ? Number(formData.adminNotes.margin) : null,
+        purchaseDate: formData.adminNotes?.purchaseDate ? new Date(formData.adminNotes.purchaseDate) : null,
+        notes: formData.adminNotes?.notes || ''
+      },
+
       // Add images and primary image index
       images: images,
       primaryImageIndex: primaryImageIndex
@@ -1765,6 +1796,48 @@ const handleSubmit = async (e) => {
                   disabled={isSubmitting}
                 />
               </div>
+
+              <div className="form-group full-width">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={formData.transit?.isInTransit || false}
+                    onChange={(e) => setFormData(prev => ({ ...prev, transit: { ...prev.transit, isInTransit: e.target.checked } }))}
+                    disabled={isSubmitting}
+                  />
+                  <span>Vehicle is currently in transit</span>
+                </label>
+              </div>
+
+              {formData.transit?.isInTransit && (
+                <>
+                  <div className="form-group">
+                    <label htmlFor="transitDestination">Destination Country</label>
+                    <select
+                      id="transitDestination"
+                      name="transit.destinationCountry"
+                      value={formData.transit?.destinationCountry || 'BW'}
+                      onChange={handleNestedChange}
+                      disabled={isSubmitting}
+                    >
+                      {COUNTRIES.map(country => (
+                        <option key={country.code} value={country.code}>{country.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="transitEta">Estimated Arrival (ETA)</label>
+                    <input
+                      type="date"
+                      id="transitEta"
+                      name="transit.eta"
+                      value={formData.transit?.eta || ''}
+                      onChange={handleNestedChange}
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </section>
 
@@ -1830,11 +1903,85 @@ const handleSubmit = async (e) => {
             </div>
           </section>
 
+          {/* Records Section — Admin Only */}
+          <section className={`form-section ${activeTab === 'records' ? 'active' : ''}`}>
+            <div className="records-private-banner">🔒 Private — visible to admins only</div>
+            <div className="form-grid">
+              <div className="form-group">
+                <label htmlFor="supplierName">Supplier / Source</label>
+                <input
+                  type="text"
+                  id="supplierName"
+                  name="adminNotes.supplierName"
+                  value={formData.adminNotes?.supplierName || ''}
+                  onChange={handleNestedChange}
+                  placeholder="e.g. USS Tokyo Auction"
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="purchaseDate">Purchase Date</label>
+                <input
+                  type="date"
+                  id="purchaseDate"
+                  name="adminNotes.purchaseDate"
+                  value={formData.adminNotes?.purchaseDate || ''}
+                  onChange={handleNestedChange}
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="supplierPrice">Supplier Price (BWP)</label>
+                <input
+                  type="number"
+                  id="supplierPrice"
+                  name="adminNotes.supplierPrice"
+                  value={formData.adminNotes?.supplierPrice || ''}
+                  onChange={handleNestedChange}
+                  placeholder="0"
+                  min="0"
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="margin">Margin / Markup (BWP)</label>
+                <input
+                  type="number"
+                  id="margin"
+                  name="adminNotes.margin"
+                  value={formData.adminNotes?.margin || ''}
+                  onChange={handleNestedChange}
+                  placeholder="0"
+                  min="0"
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="form-group full-width">
+                <label htmlFor="adminNotes">Private Notes</label>
+                <textarea
+                  id="adminNotes"
+                  name="adminNotes.notes"
+                  value={formData.adminNotes?.notes || ''}
+                  onChange={handleNestedChange}
+                  rows={4}
+                  placeholder="Internal notes about this vehicle (condition details, history, logistics, etc.)..."
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="form-group full-width">
+                <p className="records-vin-note">
+                  VIN can be entered in the{' '}
+                  <button type="button" className="records-tab-link" onClick={() => setActiveTab('specs')}>Specifications tab</button>.
+                </p>
+              </div>
+            </div>
+          </section>
+
           {/* Form Actions */}
           <div className="form-actions">
-            <button 
-              type="button" 
-              className="cancel-button" 
+            <button
+              type="button"
+              className="cancel-button"
               onClick={onClose}
               disabled={isSubmitting}
             >

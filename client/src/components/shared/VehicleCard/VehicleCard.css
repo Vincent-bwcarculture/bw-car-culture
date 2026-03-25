@@ -535,6 +535,11 @@
   z-index: 2;
 }
 
+.vc-transit-badge {
+  background: linear-gradient(transparent, rgba(0, 50, 120, 0.75));
+  color: #a8d4ff;
+}
+
 /* Card Content */
 .vc-content {
   padding: 0.5rem;

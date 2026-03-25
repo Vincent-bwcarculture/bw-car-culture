@@ -1128,6 +1128,30 @@ const CarMarketplace = () => {
                 {car.category && <div className="spec-item"><span className="spec-label">Category</span><span className="spec-value">{car.category}</span></div>}
               </div>
 
+              {car.transit?.isInTransit && (() => {
+                const destMap = {
+                  'BW': 'Botswana', 'BWA': 'Botswana', 'Botswana': 'Botswana',
+                  'ZA': 'South Africa', 'RSA': 'South Africa', 'SA': 'South Africa', 'South Africa': 'South Africa',
+                  'ZW': 'Zimbabwe', 'Zimbabwe': 'Zimbabwe',
+                  'NA': 'Namibia', 'Namibia': 'Namibia',
+                  'ZM': 'Zambia', 'Zambia': 'Zambia',
+                  'JP': 'Japan', 'JPN': 'Japan', 'Japan': 'Japan',
+                };
+                const destName = destMap[car.transit.destinationCountry] || car.transit.destinationCountry || 'Botswana';
+                const eta = car.transit.eta
+                  ? new Date(car.transit.eta).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                  : null;
+                return (
+                  <div className="mp-transit-status">
+                    <span className="mp-transit-icon">🚢</span>
+                    <div className="mp-transit-body">
+                      <strong>In Transit to {destName}</strong>
+                      {eta && <span className="mp-transit-eta">Estimated Arrival: {eta}</span>}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {car.description && (
                 <div className="description-section">
                   <h2>Description</h2>

@@ -1217,7 +1217,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             </div>
           )}
 
-          {/* Vehicle location badge */}
+          {/* Vehicle location / transit badge */}
           {(() => {
             const countryMap = {
               'BW': 'Botswana', 'BWA': 'Botswana', 'Botswana': 'Botswana',
@@ -1228,6 +1228,18 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               'MZ': 'Mozambique', 'MOZ': 'Mozambique', 'Mozambique': 'Mozambique',
               'JP': 'Japan', 'JPN': 'Japan', 'Japan': 'Japan',
             };
+            if (car.transit?.isInTransit) {
+              const destRaw = car.transit.destinationCountry || 'BW';
+              const destName = countryMap[destRaw] || destRaw;
+              const eta = car.transit.eta
+                ? new Date(car.transit.eta).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+                : null;
+              return (
+                <div className="vc-location-badge vc-transit-badge">
+                  🚢 In Transit to {destName}{eta ? <span className="vc-location-delivery"> · ETA {eta}</span> : null}
+                </div>
+              );
+            }
             const deliveryDays = {
               'South Africa': '3–5 day delivery',
               'Japan': '60–70 day delivery',
