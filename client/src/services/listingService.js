@@ -395,7 +395,13 @@ async updateListing(id, listingData, newImages = [], onProgress) {
       serviceHistory: listingData.serviceHistory,
       seo: listingData.seo,
       priceOptions: listingData.priceOptions,
-      
+
+      // Transit status
+      transit: listingData.transit,
+
+      // Admin-only private records
+      adminNotes: listingData.adminNotes,
+
       // Image data
       existingImages: listingData.existingImages || [],
       imagesToDelete: listingData.imagesToDelete || [],

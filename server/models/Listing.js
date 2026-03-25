@@ -319,6 +319,20 @@ const listingSchema = new mongoose.Schema({
       }]
     }]
   },
+  transit: {
+    isInTransit: { type: Boolean, default: false },
+    destinationCountry: { type: String, default: '' },
+    eta: { type: Date }
+  },
+
+  adminNotes: {
+    supplierName: { type: String, default: '' },
+    supplierPrice: { type: Number },
+    margin: { type: Number },
+    purchaseDate: { type: Date },
+    notes: { type: String, default: '' }
+  },
+
   views: {
     type: Number,
     default: 0
