@@ -589,8 +589,11 @@ const MarketplaceList = () => {
       maxYear: searchParams.get('maxYear'),
       category: searchParams.get('category'),
       city: searchParams.get('city'),
+      country: searchParams.get('country'),
       dealerId: searchParams.get('dealerId'),
       drivetrain: searchParams.get('drivetrain'),
+      fuelType: searchParams.get('fuelType'),
+      availability: searchParams.get('availability'),
       minMileage: searchParams.get('minMileage'),
       maxMileage: searchParams.get('maxMileage'),
       sort: searchParams.get('sort')
