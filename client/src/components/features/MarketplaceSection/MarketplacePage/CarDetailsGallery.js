@@ -548,6 +548,35 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
         </div>
       )}
 
+      {/* Import & delivery notice — shown when vehicle is outside Botswana */}
+      {(() => {
+        const countryMap = {
+          'BW': 'Botswana', 'BWA': 'Botswana', 'Botswana': 'Botswana',
+          'ZA': 'South Africa', 'RSA': 'South Africa', 'SA': 'South Africa', 'S. Africa': 'South Africa', 'South Africa': 'South Africa',
+          'ZW': 'Zimbabwe', 'ZWE': 'Zimbabwe', 'Zimbabwe': 'Zimbabwe',
+          'NA': 'Namibia', 'NAM': 'Namibia', 'Namibia': 'Namibia',
+          'ZM': 'Zambia', 'ZMB': 'Zambia', 'Zambia': 'Zambia',
+          'MZ': 'Mozambique', 'MOZ': 'Mozambique', 'Mozambique': 'Mozambique',
+          'JP': 'Japan', 'JPN': 'Japan', 'Japan': 'Japan',
+        };
+        const botswana = new Set(['Botswana', 'BW', 'BWA']);
+        const raw = car.location?.country || car.dealer?.location?.country || '';
+        if (!raw || botswana.has(raw)) return null;
+        const countryName = countryMap[raw] || raw;
+        return (
+          <div className="cdg-import-notice">
+            <div className="cdg-import-notice-icon">🌍</div>
+            <div className="cdg-import-notice-body">
+              <strong>This vehicle is located in {countryName}</strong>
+              <p>
+                Bw Car Culture handles everything — clearance, registration and delivery straight to your door in Botswana.
+                You simply buy, we bring it to you.
+              </p>
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="cdg-details">
         {/* Header */}
         <div className="cdg-header">
