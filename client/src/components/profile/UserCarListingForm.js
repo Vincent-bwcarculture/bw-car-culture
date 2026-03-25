@@ -5,74 +5,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { imageService } from '../../services/imageService.js';
 import './UserCarListingForm.css';
 
-const UserCarListingForm = ({ 
-  onSubmit, 
-  onCancel, 
-  initialData = null, 
-  isEdit = false,
-  // ✅ Dynamic tier support props
-  selectedPlan = 'free',        // Can be 'free', 'basic', 'premium', etc.
-  selectedAddons = [],          // Array of selected addon IDs
-  pricingData = null,           // Pricing data from parent component
-  mode = 'create'
+const UserCarListingForm = ({
+  onSubmit,
+  onCancel,
+  initialData = null,
+  isEdit = false
 }) => {
-  
-  // ===== DYNAMIC PRICING CALCULATION =====
-  const calculatePricingDetails = (planId, addons, pricingData) => {
-    // Default to free tier if no pricing data
-    if (!pricingData || !pricingData.loaded) {
-      return {
-        name: "Free Listing",
-        price: 0,
-        duration: 30,
-        addonCost: 0,
-        totalCost: 0,
-        addons: [],
-        hasAddons: false
-      };
-    }
-
-    // Get plan info
-    const planInfo = pricingData.tiers[planId] || pricingData.tiers['free'];
-    let addonCost = 0;
-    let addonDetails = [];
-
-    // Calculate addon costs
-    if (addons && Array.isArray(addons)) {
-      addons.forEach(addonId => {
-        if (pricingData.addons && pricingData.addons[addonId]) {
-          const addon = pricingData.addons[addonId];
-          addonCost += addon.price || 0;
-          addonDetails.push({
-            id: addonId,
-            name: addon.name,
-            price: addon.price || 0,
-            description: addon.description || ''
-          });
-        }
-      });
-    }
-
-    const totalCost = (planInfo.price || 0) + addonCost;
-
-    return {
-      name: planInfo.name || "Free Listing",
-      price: planInfo.price || 0,
-      duration: planInfo.duration || 30,
-      addonCost: addonCost,
-      totalCost: totalCost,
-      addons: addonDetails,
-      hasAddons: addonDetails.length > 0
-    };
-  };
-
-  // ===== DYNAMIC SUBMISSION TYPE =====
-  const getSubmissionType = (planId) => {
-    if (!planId || planId === 'free') {
-      return 'free_review';  // Changed from 'free_tier' to match working format
-    }
-    return 'paid_review';  // For basic, premium, etc.
-  };
 
   // Default form structure - COMPLETE with all fields
   const defaultFormData = {
@@ -237,14 +175,6 @@ const UserCarListingForm = ({
   const [messageType, setMessageType] = useState('');
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Proof of ownership
-  const [proofFile, setProofFile] = useState(null);
-  const [proofPreview, setProofPreview] = useState(null);
-
-  // Angle photos: front, back, side
-  const [angleFiles, setAngleFiles] = useState({ front: null, back: null, side: null });
-  const [anglePreviews, setAnglePreviews] = useState({ front: null, back: null, side: null });
 
   // Social media boost (BWP 300)
   const [wantsBoost, setWantsBoost] = useState(false);
@@ -621,25 +551,8 @@ const UserCarListingForm = ({
     if (!formData.description?.trim() || formData.description.length < 10) {
       errors.description = 'Description must be at least 10 characters';
     }
-    if (!formData.contact?.sellerName?.trim()) {
-      errors['contact.sellerName'] = 'Seller name is required';
-    }
     if (!formData.contact?.phone?.trim()) {
       errors['contact.phone'] = 'Phone number is required';
-    }
-
-    if (formData.sellerType === 'private') {
-      if (!formData.privateSeller?.firstName?.trim()) {
-        errors['privateSeller.firstName'] = 'First name is required';
-      }
-      if (!formData.privateSeller?.lastName?.trim()) {
-        errors['privateSeller.lastName'] = 'Last name is required';
-      }
-    }
-    if (formData.sellerType === 'dealership') {
-      if (!formData.businessInfo?.businessName?.trim()) {
-        errors['businessInfo.businessName'] = 'Business name is required';
-      }
     }
 
     return errors;
@@ -813,68 +726,6 @@ const removeImage = (index) => {
   }
 };
 
-  // ===== PROOF OF OWNERSHIP UPLOAD =====
-  const handleProofUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
-
-    if (file.size > maxSize) {
-      showMessage('error', 'File too large. Maximum 10MB allowed.');
-      return;
-    }
-    if (!validTypes.includes(file.type.toLowerCase())) {
-      showMessage('error', 'Invalid file type. Please use PDF, JPEG, PNG, or WebP.');
-      return;
-    }
-
-    setProofFile(file);
-    if (file.type === 'application/pdf') {
-      setProofPreview({ type: 'pdf', name: file.name, size: file.size });
-    } else {
-      setProofPreview({ type: 'image', url: URL.createObjectURL(file), name: file.name, size: file.size });
-    }
-    showMessage('success', `Proof of ownership selected: ${file.name}`);
-  };
-
-  const removeProof = () => {
-    if (proofPreview?.type === 'image' && proofPreview.url) {
-      URL.revokeObjectURL(proofPreview.url);
-    }
-    setProofFile(null);
-    setProofPreview(null);
-  };
-
-  // ===== ANGLE PHOTO UPLOADS =====
-  const handleAnglePhotoUpload = (angle) => (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const maxSize = 8 * 1024 * 1024;
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-
-    if (file.size > maxSize || !validTypes.includes(file.type.toLowerCase())) {
-      showMessage('error', 'Invalid file. Use JPEG/PNG/WebP under 8MB.');
-      return;
-    }
-
-    setAngleFiles(prev => ({ ...prev, [angle]: file }));
-    setAnglePreviews(prev => ({
-      ...prev,
-      [angle]: { url: URL.createObjectURL(file), name: file.name, size: file.size }
-    }));
-  };
-
-  const removeAnglePhoto = (angle) => {
-    if (anglePreviews[angle]?.url) {
-      URL.revokeObjectURL(anglePreviews[angle].url);
-    }
-    setAngleFiles(prev => ({ ...prev, [angle]: null }));
-    setAnglePreviews(prev => ({ ...prev, [angle]: null }));
-  };
-
   // ===== BOOST PROOF OF PAYMENT =====
   const handleBoostProofUpload = (e) => {
     const file = e.target.files[0];
@@ -1000,70 +851,7 @@ const handleFormSubmit = async (e) => {
     }
 
     // ========================================
-    // STEP 1b: Upload proof of ownership (if provided)
-    // ========================================
-    let proofOfOwnershipUrl = null;
-    if (proofFile) {
-      showMessage('info', 'Uploading proof of ownership...');
-      try {
-        const proofFormData = new FormData();
-        proofFormData.append('image0', proofFile);
-        proofFormData.append('folder', 'proof-of-ownership');
-
-        const proofResponse = await fetch('https://bw-car-culture-api.vercel.app/api/user/upload-images', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-          body: proofFormData
-        });
-
-        if (proofResponse.ok) {
-          const proofResult = await proofResponse.json();
-          if (proofResult.success && proofResult.images?.[0]) {
-            proofOfOwnershipUrl = proofResult.images[0].url;
-            console.log('✅ Proof of ownership uploaded:', proofOfOwnershipUrl);
-          }
-        } else {
-          console.warn('Proof of ownership upload failed, continuing without it');
-        }
-      } catch (proofError) {
-        console.warn('Proof upload error (non-blocking):', proofError.message);
-      }
-    }
-
-    // ========================================
-    // STEP 1c: Upload angle photos (front / back / side)
-    // ========================================
-    const vehiclePhotoUrls = {};
-    const angleEntries = Object.entries(angleFiles).filter(([, file]) => file != null);
-    if (angleEntries.length > 0) {
-      showMessage('info', 'Uploading vehicle angle photos...');
-      for (const [angle, file] of angleEntries) {
-        try {
-          const angleFormData = new FormData();
-          angleFormData.append('image0', file);
-          angleFormData.append('folder', 'vehicle-angle-photos');
-
-          const angleResponse = await fetch('https://bw-car-culture-api.vercel.app/api/user/upload-images', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-            body: angleFormData
-          });
-
-          if (angleResponse.ok) {
-            const angleResult = await angleResponse.json();
-            if (angleResult.success && angleResult.images?.[0]) {
-              vehiclePhotoUrls[angle] = angleResult.images[0].url;
-              console.log(`✅ ${angle} photo uploaded:`, vehiclePhotoUrls[angle]);
-            }
-          }
-        } catch (angleError) {
-          console.warn(`${angle} photo upload error (non-blocking):`, angleError.message);
-        }
-      }
-    }
-
-    // ========================================
-    // STEP 1d: Upload boost proof of payment (if provided)
+    // STEP 1b: Upload boost proof of payment (if provided)
     // ========================================
     let boostProofUrl = null;
     if (wantsBoost && boostProofFile) {
@@ -1091,24 +879,7 @@ const handleFormSubmit = async (e) => {
     }
 
     // ========================================
-    // STEP 2: Calculate dynamic pricing details
-    // ========================================
-    const calculatedPricingDetails = calculatePricingDetails(selectedPlan, selectedAddons, pricingData);
-    const dynamicSubmissionType = getSubmissionType(selectedPlan);
-    const isFreeTier = !selectedPlan || selectedPlan === 'free';
-
-    console.log('🔍 DYNAMIC TIER SUPPORT:', {
-      selectedPlan: selectedPlan,
-      selectedAddons: selectedAddons,
-      pricingDetails: calculatedPricingDetails,
-      submissionType: dynamicSubmissionType,
-      isFreeTier: isFreeTier,
-      totalCost: calculatedPricingDetails.totalCost,
-      planName: calculatedPricingDetails.name
-    });
-
-    // ========================================
-    // STEP 3: Prepare complete listing data with ALL fields
+    // STEP 2: Prepare complete listing data with ALL fields
     // ========================================
     const listingData = {
       // Basic Information
@@ -1262,9 +1033,6 @@ const handleFormSubmit = async (e) => {
       // Images with enhanced metadata - REORDERED with primary first
       images: uploadedImages || [],
 
-      // Proof of ownership document
-      proofOfOwnership: proofOfOwnershipUrl,
-
       // Social media boost request
       featuredBoost: wantsBoost ? {
         requested: true,
@@ -1274,9 +1042,6 @@ const handleFormSubmit = async (e) => {
         status: boostProofUrl ? 'pending_verification' : 'awaiting_proof',
         requestedAt: new Date().toISOString()
       } : null,
-
-      // Structured angle photos
-      vehiclePhotos: Object.keys(vehiclePhotoUrls).length > 0 ? vehiclePhotoUrls : undefined,
 
       // Enhanced image metadata
       imageFiles: imageFiles?.map((file, index) => ({
@@ -1290,109 +1055,13 @@ const handleFormSubmit = async (e) => {
       
       // Profile picture
       profilePicture: formData.profilePicture || '',
-      
-      // ===== 🎯 DYNAMIC PLAN DATA (CRITICAL FOR ADMIN INTERFACE) =====
-      selectedPlan: selectedPlan || 'free',
-      selectedAddons: selectedAddons || [],
-      pricingDetails: calculatedPricingDetails,
-      
-      // ===== 🎯 DYNAMIC SUBMISSION METADATA =====
+
       status: "pending_review",
-      submissionType: dynamicSubmissionType,
-      submissionSource: "user_form",
-      
-      // ===== 🎯 ORIGINAL SUBMISSION DATA (FOR ADMIN INTERFACE) =====
-      originalSubmissionData: {
-        title: formData.title || '',
-        description: formData.description || '',
-        category: formData.category || 'sedan',
-        condition: formData.condition || 'used',
-        sellerType: formData.sellerType || 'private',
-        pricing: {
-          price: parseFloat(formData.price) || 0,
-          currency: "BWP"
-        },
-        specifications: {
-          make: formData.make || formData.specifications?.make || '',
-          model: formData.model || formData.specifications?.model || '',
-          year: formData.year ? parseInt(formData.year) : (formData.specifications?.year ? parseInt(formData.specifications.year) : null)
-        },
-        contact: {
-          sellerName: formData.contact?.sellerName || '',
-          phone: formData.contact?.phone || '',
-          email: formData.contact?.email || ''
-        },
-        selectedPlan: selectedPlan || 'free',
-        selectedAddons: selectedAddons || [],
-        pricingDetails: calculatedPricingDetails,
-        status: "pending_review",
-        submissionType: dynamicSubmissionType,
-        submittedAt: new Date().toISOString()
-      }
+      submissionSource: "user_form"
     };
 
     // ========================================
-    // DEBUG: Log the complete data structure
-    // ========================================
-    console.log('🔍 DEBUGGING COMPLETE FORM DATA STRUCTURE:');
-    console.log('📋 Dynamic tier support:', {
-      selectedPlan: listingData.selectedPlan,
-      selectedAddons: listingData.selectedAddons,
-      pricingDetails: listingData.pricingDetails,
-      submissionType: listingData.submissionType,
-      isFreeTier: isFreeTier
-    });
-
-    console.log('📋 Prepared listingData structure:', {
-      title: listingData.title,
-      hasContact: !!listingData.contact,
-      contactSellerName: listingData.contact?.sellerName,
-      contactPhone: listingData.contact?.phone,
-      hasSpecifications: !!listingData.specifications,
-      specMake: listingData.specifications?.make,
-      specModel: listingData.specifications?.model,
-      hasPricing: !!listingData.pricing,
-      pricingPrice: listingData.pricing?.price,
-      imageCount: listingData.images?.length || 0,
-      hasOriginalSubmissionData: !!listingData.originalSubmissionData
-    });
-
-    // Check for common issues
-    const debugIssues = [];
-    if (!listingData.title || listingData.title.trim() === '') {
-      debugIssues.push('❌ Title is empty');
-    }
-    if (!listingData.contact?.sellerName || listingData.contact.sellerName.trim() === '') {
-      debugIssues.push('❌ contact.sellerName is empty');
-    }
-    if (!listingData.contact?.phone || listingData.contact.phone.trim() === '') {
-      debugIssues.push('❌ contact.phone is empty');
-    }
-    if (!listingData.specifications?.make || listingData.specifications.make.trim() === '') {
-      debugIssues.push('❌ specifications.make is empty');
-    }
-    if (!listingData.specifications?.model || listingData.specifications.model.trim() === '') {
-      debugIssues.push('❌ specifications.model is empty');
-    }
-    if (!listingData.pricing?.price || listingData.pricing.price <= 0) {
-      debugIssues.push('❌ pricing.price is empty or invalid');
-    }
-    if (!listingData.selectedPlan) {
-      debugIssues.push('❌ selectedPlan is missing');
-    }
-    if (!listingData.pricingDetails) {
-      debugIssues.push('❌ pricingDetails is missing');
-    }
-
-    if (debugIssues.length > 0) {
-      console.log('🚨 VALIDATION ISSUES FOUND:');
-      debugIssues.forEach(issue => console.log(issue));
-    } else {
-      console.log('✅ All required fields appear to be populated');
-    }
-
-    // ========================================
-    // STEP 4: Submit listing to backend
+    // STEP 3: Submit listing to backend
     // ========================================
     showMessage('info', 'Submitting your listing...');
     console.log('🔄 Submitting listing to /api/user/submit-listing...');
@@ -1425,11 +1094,11 @@ const handleFormSubmit = async (e) => {
     
     // Success message
     if (wantsBoost && boostProofUrl) {
-      showMessage('success', '🎉 Listing submitted! Your proof of payment has been received — once verified, your vehicle will be featured across all our social media platforms.');
+      showMessage('success', 'Listing submitted! Your proof of payment has been received — once verified, your vehicle will be featured across all our social media platforms.');
     } else if (wantsBoost) {
-      showMessage('success', '🎉 Listing submitted! Please upload your proof of payment on the Promote tab to complete your social media feature request.');
+      showMessage('success', 'Listing submitted! Please upload your proof of payment on the Promote tab to complete your social media feature request.');
     } else {
-      showMessage('success', '🎉 Listing submitted for review! We\'ll get it live on the website shortly.');
+      showMessage('success', "Listing submitted for review! We'll get it live on the website shortly.");
     }
     
     // Save to profile for future listings
@@ -1465,13 +1134,7 @@ const handleFormSubmit = async (e) => {
     setImagePreviews([]);
     setPrimaryImageIndex(0);
 
-    // Clear proof & boost state
-    if (proofPreview?.type === 'image' && proofPreview?.url) URL.revokeObjectURL(proofPreview.url);
-    setProofFile(null);
-    setProofPreview(null);
-    Object.values(anglePreviews).forEach(p => { if (p?.url) URL.revokeObjectURL(p.url); });
-    setAngleFiles({ front: null, back: null, side: null });
-    setAnglePreviews({ front: null, back: null, side: null });
+    // Clear boost state
     if (boostProofPreview?.type === 'image' && boostProofPreview?.url) URL.revokeObjectURL(boostProofPreview.url);
     setBoostProofFile(null);
     setBoostProofPreview(null);
@@ -1488,13 +1151,13 @@ const handleFormSubmit = async (e) => {
 
   // Tab configuration — critical fields first for fast listing
   const tabs = [
-    { id: 'basic',      label: 'Vehicle Info', icon: '🚗' },
-    { id: 'contact',    label: 'Contact',      icon: '📞' },
-    { id: 'images',     label: 'Photos',       icon: '📸' },
-    { id: 'specs',      label: 'Details',      icon: '⚙️' },
-    { id: 'features',   label: 'Features',     icon: '✨' },
-    { id: 'additional', label: 'More Info',    icon: '📋' },
-    { id: 'promote',    label: 'Promote',      icon: '🚀' },
+    { id: 'basic',      label: 'Vehicle Info' },
+    { id: 'contact',    label: 'Contact'      },
+    { id: 'images',     label: 'Photos'       },
+    { id: 'specs',      label: 'Details'      },
+    { id: 'features',   label: 'Features'     },
+    { id: 'additional', label: 'More Info'    },
+    { id: 'promote',    label: 'Promote'      },
   ];
 
   return (
@@ -1511,7 +1174,7 @@ const handleFormSubmit = async (e) => {
       {showAutoFillPrompt && autoFillData && (
         <div className="ulisting-auto-fill-prompt">
           <div className="ulisting-auto-fill-content">
-            <h4>🚀 Speed up your listing!</h4>
+            <h4>Speed up your listing!</h4>
             <p>We found information in your profile that can be used to fill this form:</p>
             
             <div className="ulisting-auto-fill-preview">
@@ -1574,16 +1237,16 @@ const handleFormSubmit = async (e) => {
           <h5>Profile Completion</h5>
           <div className="ulisting-completion-items">
             <span className={`ulisting-completion-item ${profileCompletion.basicInfo ? 'complete' : 'incomplete'}`}>
-              {profileCompletion.basicInfo ? '✅' : '⭕'} Basic Info
+              Basic Info
             </span>
             <span className={`ulisting-completion-item ${profileCompletion.contactInfo ? 'complete' : 'incomplete'}`}>
-              {profileCompletion.contactInfo ? '✅' : '⭕'} Contact
+              Contact
             </span>
             <span className={`ulisting-completion-item ${profileCompletion.locationInfo ? 'complete' : 'incomplete'}`}>
-              {profileCompletion.locationInfo ? '✅' : '⭕'} Location
+              Location
             </span>
             <span className={`ulisting-completion-item ${profileCompletion.profilePicture ? 'complete' : 'incomplete'}`}>
-              {profileCompletion.profilePicture ? '✅' : '⭕'} Picture
+              Picture
             </span>
           </div>
           {autoFillData && (
@@ -1598,27 +1261,10 @@ const handleFormSubmit = async (e) => {
         </div>
       )}
 
-      {/* Dynamic Tier Indicator */}
-      {selectedPlan && selectedPlan !== 'free' && (
-        <div className="ulisting-tier-indicator">
-          <div className="ulisting-tier-badge">
-            <span className="ulisting-tier-name">{selectedPlan.toUpperCase()} PLAN</span>
-            <span className="ulisting-tier-addons">
-              {selectedAddons.length > 0 ? `+ ${selectedAddons.length} addon(s)` : 'No addons'}
-            </span>
-          </div>
-        </div>
-      )}
-
       {/* Form header */}
       <div className="ulisting-form-header">
         <h3>{isEdit ? 'Edit Car Listing' : 'Create New Car Listing'}</h3>
         <p>Fill in the details below to {isEdit ? 'update' : 'create'} your car listing</p>
-        {selectedPlan === 'free' && (
-          <div className="ulisting-free-tier-notice">
-            🎉 You're creating a FREE listing! No payment required after admin approval.
-          </div>
-        )}
       </div>
 
       {/* Message display */}
@@ -1637,8 +1283,7 @@ const handleFormSubmit = async (e) => {
             className={`ulisting-form-tab-button ${currentTab === tab.id ? 'active' : ''}`}
             onClick={() => setCurrentTab(tab.id)}
           >
-            <span>{tab.icon}</span>
-            <span>{tab.label}</span>
+            {tab.label}
           </button>
         ))}
       </div>
@@ -1979,46 +1624,6 @@ const handleFormSubmit = async (e) => {
             {formData.sellerType === 'private' && (
               <>
                 <div className="ulisting-form-group">
-                  <label htmlFor="privateSeller.firstName">First Name *</label>
-                  <input
-                    type="text"
-                    id="privateSeller.firstName"
-                    name="privateSeller.firstName"
-                    value={formData.privateSeller?.firstName || ''}
-                    onChange={handleInputChange}
-                    placeholder="Your first name"
-                    className={errors['privateSeller.firstName'] ? 'error' : ''}
-                  />
-                  {errors['privateSeller.firstName'] && <span className="ulisting-error-message">{errors['privateSeller.firstName']}</span>}
-                </div>
-
-                <div className="ulisting-form-group">
-                  <label htmlFor="privateSeller.lastName">Last Name *</label>
-                  <input
-                    type="text"
-                    id="privateSeller.lastName"
-                    name="privateSeller.lastName"
-                    value={formData.privateSeller?.lastName || ''}
-                    onChange={handleInputChange}
-                    placeholder="Your last name"
-                    className={errors['privateSeller.lastName'] ? 'error' : ''}
-                  />
-                  {errors['privateSeller.lastName'] && <span className="ulisting-error-message">{errors['privateSeller.lastName']}</span>}
-                </div>
-
-                <div className="ulisting-form-group">
-                  <label htmlFor="privateSeller.idNumber">ID Number</label>
-                  <input
-                    type="text"
-                    id="privateSeller.idNumber"
-                    name="privateSeller.idNumber"
-                    value={formData.privateSeller?.idNumber || ''}
-                    onChange={handleInputChange}
-                    placeholder="Your ID number"
-                  />
-                </div>
-
-                <div className="ulisting-form-group">
                   <label htmlFor="privateSeller.preferredContactMethod">Preferred Contact Method</label>
                   <select
                     id="privateSeller.preferredContactMethod"
@@ -2039,7 +1644,7 @@ const handleFormSubmit = async (e) => {
             {formData.sellerType === 'dealership' && (
               <>
                 <div className="ulisting-form-group">
-                  <label htmlFor="businessInfo.businessName">Business Name *</label>
+                  <label htmlFor="businessInfo.businessName">Business Name</label>
                   <input
                     type="text"
                     id="businessInfo.businessName"
@@ -2047,19 +1652,16 @@ const handleFormSubmit = async (e) => {
                     value={formData.businessInfo?.businessName || ''}
                     onChange={handleInputChange}
                     placeholder="Your business name"
-                    className={errors['businessInfo.businessName'] ? 'error' : ''}
                   />
-                  {errors['businessInfo.businessName'] && <span className="ulisting-error-message">{errors['businessInfo.businessName']}</span>}
                 </div>
 
                 <div className="ulisting-form-group">
-                  <label htmlFor="businessInfo.businessType">Business Type *</label>
+                  <label htmlFor="businessInfo.businessType">Business Type</label>
                   <select
                     id="businessInfo.businessType"
                     name="businessInfo.businessType"
                     value={formData.businessInfo?.businessType || ''}
                     onChange={handleInputChange}
-                    className={errors['businessInfo.businessType'] ? 'error' : ''}
                   >
                     <option value="">Select business type</option>
                     <option value="independent">Independent Dealer</option>
@@ -2068,7 +1670,6 @@ const handleFormSubmit = async (e) => {
                     <option value="used">Used Car Dealer</option>
                     <option value="luxury">Luxury Car Dealer</option>
                   </select>
-                  {errors['businessInfo.businessType'] && <span className="ulisting-error-message">{errors['businessInfo.businessType']}</span>}
                 </div>
 
                 <div className="ulisting-form-group">
@@ -2099,17 +1700,15 @@ const handleFormSubmit = async (e) => {
 
             {/* Common Contact Fields */}
             <div className="ulisting-form-group">
-              <label htmlFor="contact.sellerName">Display Name *</label>
+              <label htmlFor="contact.sellerName">Display Name</label>
               <input
                 type="text"
                 id="contact.sellerName"
                 name="contact.sellerName"
                 value={formData.contact?.sellerName || ''}
                 onChange={handleInputChange}
-                placeholder="Name to display on listing"
-                className={errors['contact.sellerName'] ? 'error' : ''}
+                placeholder="Name to display on listing (auto-filled from profile)"
               />
-              {errors['contact.sellerName'] && <span className="ulisting-error-message">{errors['contact.sellerName']}</span>}
             </div>
 
             <div className="ulisting-form-group">
@@ -2254,7 +1853,7 @@ const handleFormSubmit = async (e) => {
               onClick={() => handlePrimaryImageSelect(index)}
               title="Set as primary image"
             >
-              {primaryImageIndex === index ? '⭐ Primary' : 'Set Primary'}
+              {primaryImageIndex === index ? 'Primary' : 'Set Primary'}
             </button>
             <button
               type="button"
@@ -2267,7 +1866,7 @@ const handleFormSubmit = async (e) => {
           </div>
           <div className="ulisting-image-info">
             <span>
-              {primaryImageIndex === index ? '★ Primary' : `#${index + 1}`} · {(previewObj.size / 1024 / 1024).toFixed(1)}MB
+              {primaryImageIndex === index ? 'Primary' : `#${index + 1}`} · {(previewObj.size / 1024 / 1024).toFixed(1)}MB
             </span>
           </div>
         </div>
@@ -2275,85 +1874,6 @@ const handleFormSubmit = async (e) => {
     </div>
   </div>
 )}
-
-          {/* ── Angle Photos ── */}
-          <div className="ulisting-angle-section">
-            <h5>Vehicle Angle Photos</h5>
-            <p className="ulisting-form-help">
-              Upload a clear photo from each angle — helps buyers assess condition at a glance.
-            </p>
-            <div className="ulisting-angle-grid">
-              {[
-                { key: 'front', label: 'Front View',  icon: '▲' },
-                { key: 'back',  label: 'Rear View',   icon: '▼' },
-                { key: 'side',  label: 'Side View',   icon: '◀▶' }
-              ].map(({ key, label, icon }) => (
-                <div key={key} className="ulisting-angle-slot">
-                  {anglePreviews[key] ? (
-                    /* Preview state */
-                    <div className="ulisting-angle-preview">
-                      <img src={anglePreviews[key].url} alt={label} />
-                      <span className="ulisting-angle-badge">{label}</span>
-                      <button
-                        type="button"
-                        className="ulisting-angle-remove"
-                        onClick={() => removeAnglePhoto(key)}
-                      >✕</button>
-                    </div>
-                  ) : (
-                    /* Upload state — full slot is the label */
-                    <label className="ulisting-angle-label">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleAnglePhotoUpload(key)}
-                        style={{ display: 'none' }}
-                      />
-                      <span className="ulisting-angle-icon">{icon}</span>
-                      <span className="ulisting-angle-upload">{label}</span>
-                      <span className="ulisting-angle-placeholder">+ Add photo</span>
-                    </label>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ── Proof of Ownership ── */}
-          <div className="ulisting-proof-section">
-            <h5>Proof of Ownership</h5>
-            <p className="ulisting-form-help">
-              Upload your vehicle title, registration certificate, or any document proving ownership.
-              Accepted formats: PDF, JPEG, PNG (max 10MB). This document is only visible to admins for verification.
-            </p>
-            {proofPreview ? (
-              <div className="ulisting-proof-preview">
-                {proofPreview.type === 'pdf' ? (
-                  <div className="ulisting-proof-pdf">
-                    <span className="ulisting-proof-pdf-icon">PDF</span>
-                    <div className="ulisting-proof-pdf-info">
-                      <span className="ulisting-proof-filename">{proofPreview.name}</span>
-                      <span className="ulisting-proof-size">{(proofPreview.size / 1024 / 1024).toFixed(1)} MB</span>
-                    </div>
-                  </div>
-                ) : (
-                  <img src={proofPreview.url} alt="Proof of ownership" className="ulisting-proof-img" />
-                )}
-                <button type="button" className="ulisting-remove-btn" onClick={removeProof}>
-                  ✕ Remove
-                </button>
-              </div>
-            ) : (
-              <div className="ulisting-form-group">
-                <input
-                  type="file"
-                  id="proofOfOwnership"
-                  accept="image/*,.pdf,application/pdf"
-                  onChange={handleProofUpload}
-                />
-              </div>
-            )}
-          </div>
 
         </div>
 
@@ -2363,7 +1883,6 @@ const handleFormSubmit = async (e) => {
 
           {/* Free listing status */}
           <div className="ulisting-free-listing-card">
-            <div className="ulisting-free-listing-icon">✅</div>
             <div className="ulisting-free-listing-info">
               <strong>Your listing is FREE</strong>
               <p>Once submitted, our team will review and publish your listing on the I3W Car Culture website at no charge.</p>
@@ -2374,7 +1893,6 @@ const handleFormSubmit = async (e) => {
           <div className={`ulisting-boost-card ${wantsBoost ? 'selected' : ''}`}>
             <div className="ulisting-boost-header">
               <div className="ulisting-boost-title-row">
-                <span className="ulisting-boost-icon">🚀</span>
                 <div>
                   <strong className="ulisting-boost-title">Social Media Feature – BWP 300</strong>
                   <p className="ulisting-boost-subtitle">Get your vehicle posted across all our platforms</p>
@@ -2390,10 +1908,10 @@ const handleFormSubmit = async (e) => {
               </div>
 
               <div className="ulisting-boost-platforms">
-                <span className="ulisting-platform-pill">📘 Facebook — 685,000 followers</span>
-                <span className="ulisting-platform-pill">📸 Instagram — 15,000+ followers</span>
-                <span className="ulisting-platform-pill">💬 WhatsApp Channel — 10,000+ followers</span>
-                <span className="ulisting-platform-pill">🎵 TikTok — 35,000+ followers</span>
+                <span className="ulisting-platform-pill">Facebook — 685,000 followers</span>
+                <span className="ulisting-platform-pill">Instagram — 15,000+ followers</span>
+                <span className="ulisting-platform-pill">WhatsApp Channel — 10,000+ followers</span>
+                <span className="ulisting-platform-pill">TikTok — 35,000+ followers</span>
               </div>
             </div>
 
@@ -2408,7 +1926,7 @@ const handleFormSubmit = async (e) => {
 
                 <div className="ulisting-payment-methods">
                   <div className="ulisting-payment-method">
-                    <span className="ulisting-payment-method-label">💳 PayToCell</span>
+                    <span className="ulisting-payment-method-label">PayToCell</span>
                     <div className="ulisting-payment-detail">
                       <span className="ulisting-payment-field">Number</span>
                       <span className="ulisting-payment-value">+267 72 573 475</span>
@@ -2420,7 +1938,7 @@ const handleFormSubmit = async (e) => {
                   </div>
 
                   <div className="ulisting-payment-method">
-                    <span className="ulisting-payment-method-label">🟠 Orange Money</span>
+                    <span className="ulisting-payment-method-label">Orange Money</span>
                     <div className="ulisting-payment-detail">
                       <span className="ulisting-payment-field">Number</span>
                       <span className="ulisting-payment-value">+267 72 573 475</span>
@@ -2432,7 +1950,7 @@ const handleFormSubmit = async (e) => {
                   </div>
 
                   <div className="ulisting-payment-method ulisting-payment-bank">
-                    <span className="ulisting-payment-method-label">🏦 Bank Transfer</span>
+                    <span className="ulisting-payment-method-label">Bank Transfer</span>
                     <div className="ulisting-payment-detail">
                       <span className="ulisting-payment-field">Account</span>
                       <span className="ulisting-payment-value ulisting-payment-tbd">Account details coming soon</span>
@@ -2449,7 +1967,7 @@ const handleFormSubmit = async (e) => {
                     <div className="ulisting-proof-preview">
                       {boostProofPreview.type === 'pdf' ? (
                         <div className="ulisting-proof-pdf">
-                          <span className="ulisting-proof-pdf-icon">📄</span>
+                          <span className="ulisting-proof-pdf-icon">PDF</span>
                           <div className="ulisting-proof-pdf-info">
                             <span className="ulisting-proof-filename">{boostProofPreview.name}</span>
                             <span className="ulisting-proof-size">{(boostProofPreview.size / 1024 / 1024).toFixed(1)} MB</span>
@@ -2462,7 +1980,7 @@ const handleFormSubmit = async (e) => {
                     </div>
                   ) : (
                     <label className="ulisting-proof-upload-label">
-                      📎 Choose file
+                      Choose file
                       <input
                         type="file"
                         accept="image/*,.pdf,application/pdf"
@@ -2692,7 +2210,7 @@ const handleFormSubmit = async (e) => {
           <div className="ulisting-submit-info">
             {autoFillData && (
               <p className="ulisting-auto-fill-info">
-                💡 Tip: Your profile information will be saved automatically for future listings
+                Tip: Your profile information will be saved automatically for future listings
               </p>
             )}
             
@@ -2700,20 +2218,20 @@ const handleFormSubmit = async (e) => {
               <h5>Form Summary</h5>
               <div className="ulisting-summary-items">
                 <span className={(formData.make || formData.specifications?.make) && (formData.model || formData.specifications?.model) && formData.year ? 'complete' : 'incomplete'}>
-                  {(formData.make || formData.specifications?.make) && (formData.model || formData.specifications?.model) ? '✅' : '⭕'} Vehicle: {(formData.make || formData.specifications?.make) || 'Make missing'}
+                  Vehicle: {(formData.make || formData.specifications?.make) || 'Make missing'}
                 </span>
                 <span className={formData.price ? 'complete' : 'incomplete'}>
-                  {formData.price ? '✅' : '⭕'} Price: {formData.price ? `P${Number(formData.price).toLocaleString()}` : 'Missing'}
+                  Price: {formData.price ? `P${Number(formData.price).toLocaleString()}` : 'Missing'}
                 </span>
-                <span className={formData.contact?.sellerName && formData.contact?.phone ? 'complete' : 'incomplete'}>
-                  {formData.contact?.sellerName && formData.contact?.phone ? '✅' : '⭕'} Contact: {formData.contact?.sellerName || 'Missing'}
+                <span className={formData.contact?.phone ? 'complete' : 'incomplete'}>
+                  Phone: {formData.contact?.phone || 'Missing'}
                 </span>
                 <span className={imageFiles.length > 0 ? 'complete' : 'incomplete'}>
-                  {imageFiles.length > 0 ? '✅' : '⭕'} Photos: {imageFiles.length > 0 ? `${imageFiles.length} selected` : 'None yet'}
+                  Photos: {imageFiles.length > 0 ? `${imageFiles.length} selected` : 'None yet'}
                 </span>
                 {wantsBoost && (
                   <span className={boostProofFile ? 'complete' : 'incomplete'}>
-                    {boostProofFile ? '✅' : '⭕'} Boost proof: {boostProofFile ? 'Uploaded' : 'Missing — go to Promote tab'}
+                    Boost proof: {boostProofFile ? 'Uploaded' : 'Missing — go to Promote tab'}
                   </span>
                 )}
               </div>
@@ -2765,22 +2283,13 @@ const handleFormSubmit = async (e) => {
                 <div className="ulisting-debug-content">
                   <h6>Form State:</h6>
                   <pre>{JSON.stringify({
-                    selectedPlan,
-                    selectedAddons,
                     formDataKeys: Object.keys(formData),
                     imageCount: imageFiles.length,
                     errorsCount: Object.keys(errors).length
                   }, null, 2)}</pre>
-                  
+
                   <h6>Validation Errors:</h6>
                   <pre>{JSON.stringify(errors, null, 2)}</pre>
-                  
-                  {pricingData && (
-                    <>
-                      <h6>Pricing Calculation:</h6>
-                      <pre>{JSON.stringify(calculatePricingDetails(selectedPlan, selectedAddons, pricingData), null, 2)}</pre>
-                    </>
-                  )}
 
                   <h6>Form Data Sample:</h6>
                   <pre>{JSON.stringify({
