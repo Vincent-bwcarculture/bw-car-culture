@@ -684,7 +684,7 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
                   {car.dealer.location?.city || car.dealer.city || 'Location not specified'}
                 </span>
                 <span className="cdg-dealer-contact">
-                  {car.dealer.phone || car.dealer.contactPhone || 'Contact available'}
+                  {car.contact?.phone || car.dealer?.contact?.phone || car.dealer?.phone || car.dealer?.contactPhone || 'Contact available'}
                 </span>
               </div>
             </div>
@@ -748,43 +748,72 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
         )}
 
         {/* Contact Section */}
-        {car.dealer && (
-          <div className="cdg-contact-section">
-            <h2 className="cdg-section-title">Contact Dealer</h2>
-            <div className="cdg-contact-actions">
-              <button 
-                className="cdg-contact-button cdg-whatsapp"
-                onClick={() => {
-                  const phone = car.dealer.phone || car.dealer.contactPhone || '';
-                  const message = `Hi, I'm interested in the ${car.title || 'vehicle'} listed for ${formatPrice(car.price)}.`;
-                  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
-                }}
-              >
-                📱 WhatsApp
-              </button>
-              <button 
-                className="cdg-contact-button cdg-call"
-                onClick={() => {
-                  const phone = car.dealer.phone || car.dealer.contactPhone || '';
-                  window.open(`tel:${phone}`, '_self');
-                }}
-              >
-                📞 Call
-              </button>
-              <button 
-                className="cdg-contact-button cdg-email"
-                onClick={() => {
-                  const email = car.dealer.email || car.dealer.contactEmail || '';
-                  const subject = `Inquiry about ${car.title || 'vehicle'}`;
-                  const body = `Hi, I'm interested in the ${car.title || 'vehicle'} listed for ${formatPrice(car.price)}. Please provide more details.`;
-                  window.open(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_self');
-                }}
-              >
-                ✉️ Email
-              </button>
+        {(() => {
+          // Resolve contact from all possible data locations
+          const rawPhone = car.contact?.phone
+            || car.dealer?.contact?.phone
+            || car.dealer?.phone
+            || car.dealer?.contactPhone
+            || null;
+          const rawWhatsapp = car.contact?.whatsapp
+            || car.contact?.phone
+            || car.dealer?.contact?.phone
+            || car.dealer?.phone
+            || car.dealer?.contactPhone
+            || null;
+          const rawEmail = car.contact?.email
+            || car.dealer?.contact?.email
+            || car.dealer?.email
+            || car.dealer?.contactEmail
+            || null;
+
+          const fmt = (n) => n
+            ? (n.startsWith('+') ? n.replace(/\s+/g, '') : `+267${n.replace(/\s+/g, '')}`)
+            : null;
+
+          const sellerLabel = car.sellerType === 'private' || isPrivateSeller
+            ? 'Contact Seller'
+            : 'Contact Dealer';
+
+          if (!rawPhone && !rawWhatsapp && !rawEmail) return null;
+
+          const message = `Hi, I'm interested in the ${car.title || 'vehicle'} listed for ${formatPrice(car.price)}. Please provide more details.`;
+
+          return (
+            <div className="cdg-contact-section">
+              <h2 className="cdg-section-title">{sellerLabel}</h2>
+              <div className="cdg-contact-actions">
+                {rawWhatsapp && (
+                  <button
+                    className="cdg-contact-button cdg-whatsapp"
+                    onClick={() => window.open(`https://wa.me/${fmt(rawWhatsapp)}?text=${encodeURIComponent(message)}`, '_blank')}
+                  >
+                    WhatsApp
+                  </button>
+                )}
+                {rawPhone && (
+                  <button
+                    className="cdg-contact-button cdg-call"
+                    onClick={() => window.open(`tel:${fmt(rawPhone)}`, '_self')}
+                  >
+                    Call
+                  </button>
+                )}
+                {rawEmail && (
+                  <button
+                    className="cdg-contact-button cdg-email"
+                    onClick={() => {
+                      const subject = `Inquiry about ${car.title || 'vehicle'}`;
+                      window.open(`mailto:${rawEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`, '_self');
+                    }}
+                  >
+                    Email
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* SIMILAR VEHICLES SECTION - INTEGRATED */}

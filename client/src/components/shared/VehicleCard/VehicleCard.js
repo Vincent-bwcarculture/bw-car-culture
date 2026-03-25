@@ -628,12 +628,12 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     
     if (car.dealerId) {
       const dealerId = safeGetStringId(car.dealerId);
-      
+
       return {
         id: dealerId,
-        name: 'Contact Seller',
-        businessName: 'Vehicle Seller',
-        sellerType: 'dealership',
+        name: car.contact?.sellerName || 'Contact Seller',
+        businessName: car.businessInfo?.businessName || 'Vehicle Seller',
+        sellerType: car.sellerType || 'dealership',
         sellerTypeLabel: 'Dealership',
         logo: '/images/placeholders/dealer-logo.jpg',
         location: {
@@ -645,40 +645,44 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           isVerified: false
         },
         contact: {
-          phone: null,
-          email: null,
-          website: null
+          phone: car.contact?.phone || car.contact?.whatsapp || null,
+          whatsapp: car.contact?.whatsapp || car.contact?.phone || null,
+          email: car.contact?.email || null,
+          website: null,
+          preferredContactMethod: car.contact?.preferredContactMethod || 'both'
         },
         privateSeller: null,
         businessType: null,
         workingHours: null
       };
     }
-    
+
     return {
       id: null,
-      name: 'Private Seller',
-      businessName: 'Private Seller',
-      sellerType: 'private',
+      name: car.contact?.sellerName || 'Private Seller',
+      businessName: car.contact?.sellerName || 'Private Seller',
+      sellerType: car.sellerType || 'private',
       sellerTypeLabel: 'Private Seller',
       logo: '/images/placeholders/private-seller-avatar.jpg',
       location: {
         city: car.location?.city || 'Unknown Location',
         state: car.location?.state || '',
         country: car.location?.country || ''
-        },
+      },
       verification: {
         isVerified: false
       },
       contact: {
-        phone: null,
-        email: null,
-        website: null
+        phone: car.contact?.phone || car.contact?.whatsapp || null,
+        whatsapp: car.contact?.whatsapp || car.contact?.phone || null,
+        email: car.contact?.email || null,
+        website: null,
+        preferredContactMethod: car.contact?.preferredContactMethod || 'both'
       },
       privateSeller: {
         firstName: null,
         lastName: null,
-        preferredContactMethod: 'both',
+        preferredContactMethod: car.contact?.preferredContactMethod || 'both',
         canShowContactInfo: true
       },
       businessType: null,
@@ -868,15 +872,42 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     
     const contactAction = dealer?.sellerType === 'private' ? 'contact this private seller' : 'reserve this vehicle';
     const message = `Hi! I'm interested in this vehicle from Bw Car Culture:\n\n${vehicleDetails}\n\nI'd like to ${contactAction}. Please provide more details.`;
-    
-    const phone = car.dealer?.contact?.phone || car.dealer?.phone || car.dealer?.contactPhone || dealer?.contact?.phone;
-    if (phone) {
-      const formattedPhone = phone.startsWith('+') ? phone.replace(/\s+/g, '') : `+267${phone.replace(/\s+/g, '')}`;
+
+    // Comprehensive phone lookup — user listings store contact at car.contact.*
+    const preferredMethod = dealer?.contact?.preferredContactMethod
+      || car.contact?.preferredContactMethod
+      || dealer?.privateSeller?.preferredContactMethod
+      || 'both';
+
+    const whatsappNum = dealer?.contact?.whatsapp
+      || car.contact?.whatsapp
+      || car.dealer?.contact?.phone
+      || car.dealer?.phone
+      || car.dealer?.contactPhone
+      || dealer?.contact?.phone
+      || car.contact?.phone;
+
+    const phoneNum = car.contact?.phone
+      || car.dealer?.contact?.phone
+      || car.dealer?.phone
+      || car.dealer?.contactPhone
+      || dealer?.contact?.phone
+      || whatsappNum;
+
+    const formatNumber = (n) => n
+      ? (n.startsWith('+') ? n.replace(/\s+/g, '') : `+267${n.replace(/\s+/g, '')}`)
+      : null;
+
+    if (preferredMethod === 'phone' && phoneNum) {
+      window.open(`tel:${formatNumber(phoneNum)}`, '_self');
+    } else if (whatsappNum) {
       const encodedMessage = encodeURIComponent(message);
-      window.open(`https://wa.me/${formattedPhone}?text=${encodedMessage}`, '_blank');
+      window.open(`https://wa.me/${formatNumber(whatsappNum)}?text=${encodedMessage}`, '_blank');
+    } else if (phoneNum) {
+      window.open(`tel:${formatNumber(phoneNum)}`, '_self');
     } else {
       const sellerTypeText = dealer?.sellerType === 'private' ? 'seller' : 'dealer';
-      alert(`${dealer?.sellerTypeLabel || 'Seller'} contact information is not available. Please view details to contact the ${sellerTypeText}.`);
+      alert(`Contact information is not available for this listing. Please view the full details to contact the ${sellerTypeText}.`);
     }
   }, [car, dealer, analytics]);
 
