@@ -237,6 +237,14 @@ const UserCarListingForm = ({
   const [messageType, setMessageType] = useState('');
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Proof of ownership
+  const [proofFile, setProofFile] = useState(null);
+  const [proofPreview, setProofPreview] = useState(null);
+
+  // Angle photos: front, back, side
+  const [angleFiles, setAngleFiles] = useState({ front: null, back: null, side: null });
+  const [anglePreviews, setAnglePreviews] = useState({ front: null, back: null, side: null });
   
   // Auto-fill states
   const [autoFillLoading, setAutoFillLoading] = useState(false);
@@ -871,6 +879,68 @@ const removeImage = (index) => {
   }
 };
 
+  // ===== PROOF OF OWNERSHIP UPLOAD =====
+  const handleProofUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
+
+    if (file.size > maxSize) {
+      showMessage('error', 'File too large. Maximum 10MB allowed.');
+      return;
+    }
+    if (!validTypes.includes(file.type.toLowerCase())) {
+      showMessage('error', 'Invalid file type. Please use PDF, JPEG, PNG, or WebP.');
+      return;
+    }
+
+    setProofFile(file);
+    if (file.type === 'application/pdf') {
+      setProofPreview({ type: 'pdf', name: file.name, size: file.size });
+    } else {
+      setProofPreview({ type: 'image', url: URL.createObjectURL(file), name: file.name, size: file.size });
+    }
+    showMessage('success', `Proof of ownership selected: ${file.name}`);
+  };
+
+  const removeProof = () => {
+    if (proofPreview?.type === 'image' && proofPreview.url) {
+      URL.revokeObjectURL(proofPreview.url);
+    }
+    setProofFile(null);
+    setProofPreview(null);
+  };
+
+  // ===== ANGLE PHOTO UPLOADS =====
+  const handleAnglePhotoUpload = (angle) => (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const maxSize = 8 * 1024 * 1024;
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+    if (file.size > maxSize || !validTypes.includes(file.type.toLowerCase())) {
+      showMessage('error', 'Invalid file. Use JPEG/PNG/WebP under 8MB.');
+      return;
+    }
+
+    setAngleFiles(prev => ({ ...prev, [angle]: file }));
+    setAnglePreviews(prev => ({
+      ...prev,
+      [angle]: { url: URL.createObjectURL(file), name: file.name, size: file.size }
+    }));
+  };
+
+  const removeAnglePhoto = (angle) => {
+    if (anglePreviews[angle]?.url) {
+      URL.revokeObjectURL(anglePreviews[angle].url);
+    }
+    setAngleFiles(prev => ({ ...prev, [angle]: null }));
+    setAnglePreviews(prev => ({ ...prev, [angle]: null }));
+  };
+
   // ===== ENHANCED FORM SUBMISSION WITH DYNAMIC TIER SUPPORT =====
 const handleFormSubmit = async (e) => {
   e.preventDefault();
@@ -961,13 +1031,75 @@ const handleFormSubmit = async (e) => {
 
         uploadedImages = reorderedImages;
         console.log(`✅ Images uploaded successfully: ${uploadedImages.length} images`);
-        console.log(`📋 Image order: Primary first, then others in original order`);
         showMessage('success', `${uploadedImages.length} images uploaded successfully!`);
-        
+
       } catch (uploadError) {
         console.error('📤 ❌ Image upload failed:', uploadError);
         showMessage('error', `Image upload failed: ${uploadError.message}`);
-        return; // Stop submission if image upload fails
+        return;
+      }
+    }
+
+    // ========================================
+    // STEP 1b: Upload proof of ownership (if provided)
+    // ========================================
+    let proofOfOwnershipUrl = null;
+    if (proofFile) {
+      showMessage('info', 'Uploading proof of ownership...');
+      try {
+        const proofFormData = new FormData();
+        proofFormData.append('image0', proofFile);
+        proofFormData.append('folder', 'proof-of-ownership');
+
+        const proofResponse = await fetch('https://bw-car-culture-api.vercel.app/api/user/upload-images', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+          body: proofFormData
+        });
+
+        if (proofResponse.ok) {
+          const proofResult = await proofResponse.json();
+          if (proofResult.success && proofResult.images?.[0]) {
+            proofOfOwnershipUrl = proofResult.images[0].url;
+            console.log('✅ Proof of ownership uploaded:', proofOfOwnershipUrl);
+          }
+        } else {
+          console.warn('Proof of ownership upload failed, continuing without it');
+        }
+      } catch (proofError) {
+        console.warn('Proof upload error (non-blocking):', proofError.message);
+      }
+    }
+
+    // ========================================
+    // STEP 1c: Upload angle photos (front / back / side)
+    // ========================================
+    const vehiclePhotoUrls = {};
+    const angleEntries = Object.entries(angleFiles).filter(([, file]) => file != null);
+    if (angleEntries.length > 0) {
+      showMessage('info', 'Uploading vehicle angle photos...');
+      for (const [angle, file] of angleEntries) {
+        try {
+          const angleFormData = new FormData();
+          angleFormData.append('image0', file);
+          angleFormData.append('folder', 'vehicle-angle-photos');
+
+          const angleResponse = await fetch('https://bw-car-culture-api.vercel.app/api/user/upload-images', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+            body: angleFormData
+          });
+
+          if (angleResponse.ok) {
+            const angleResult = await angleResponse.json();
+            if (angleResult.success && angleResult.images?.[0]) {
+              vehiclePhotoUrls[angle] = angleResult.images[0].url;
+              console.log(`✅ ${angle} photo uploaded:`, vehiclePhotoUrls[angle]);
+            }
+          }
+        } catch (angleError) {
+          console.warn(`${angle} photo upload error (non-blocking):`, angleError.message);
+        }
       }
     }
 
@@ -1142,7 +1274,13 @@ const handleFormSubmit = async (e) => {
       
       // Images with enhanced metadata - REORDERED with primary first
       images: uploadedImages || [],
-      
+
+      // Proof of ownership document
+      proofOfOwnership: proofOfOwnershipUrl,
+
+      // Structured angle photos
+      vehiclePhotos: Object.keys(vehiclePhotoUrls).length > 0 ? vehiclePhotoUrls : undefined,
+
       // Enhanced image metadata
       imageFiles: imageFiles?.map((file, index) => ({
         name: file.name,
@@ -2055,20 +2193,17 @@ const handleFormSubmit = async (e) => {
           {/* Image previews */}
 {imagePreviews.length > 0 && (
   <div className="ulisting-image-previews">
-    <h5>Selected Images ({imagePreviews.length}/15) - In selection order</h5>
+    <h5>Selected Images ({imagePreviews.length}/15) — first is primary</h5>
     <div className="ulisting-image-grid">
       {imagePreviews.map((previewObj, index) => (
-        <div 
+        <div
           key={previewObj.name + "_" + index}
           className={`ulisting-image-preview ${primaryImageIndex === index ? 'primary' : ''}`}
         >
-          <img 
-            src={previewObj.preview} 
+          <img
+            src={previewObj.preview}
             alt={`Preview ${index + 1}`}
-            onError={(e) => {
-              console.error(`Error loading preview ${index}`);
-              e.target.src = '/images/placeholders/car.jpg';
-            }}
+            onError={(e) => { e.target.src = '/images/placeholders/car.jpg'; }}
           />
           <div className="ulisting-image-overlay">
             <button
@@ -2090,8 +2225,7 @@ const handleFormSubmit = async (e) => {
           </div>
           <div className="ulisting-image-info">
             <span>
-              {primaryImageIndex === index ? '🏆 Primary (Main)' : `#${index + 1}`} • 
-              {(previewObj.size / 1024 / 1024).toFixed(1)}MB
+              {primaryImageIndex === index ? '★ Primary' : `#${index + 1}`} · {(previewObj.size / 1024 / 1024).toFixed(1)}MB
             </span>
           </div>
         </div>
@@ -2099,6 +2233,91 @@ const handleFormSubmit = async (e) => {
     </div>
   </div>
 )}
+
+          {/* ── Angle Photos ── */}
+          <div className="ulisting-angle-section">
+            <h5>Vehicle Angle Photos</h5>
+            <p className="ulisting-form-help">
+              Upload a clear photo of each angle. These help buyers assess the vehicle condition.
+            </p>
+            <div className="ulisting-angle-grid">
+              {[
+                { key: 'front', label: 'Front View', icon: '▲' },
+                { key: 'back',  label: 'Rear View',  icon: '▼' },
+                { key: 'side',  label: 'Side View',  icon: '◀▶' }
+              ].map(({ key, label, icon }) => (
+                <div key={key} className="ulisting-angle-slot">
+                  <div className="ulisting-angle-label">
+                    <span className="ulisting-angle-icon">{icon}</span>
+                    <span>{label}</span>
+                  </div>
+                  {anglePreviews[key] ? (
+                    <div className="ulisting-angle-preview">
+                      <img src={anglePreviews[key].url} alt={label} />
+                      <button
+                        type="button"
+                        className="ulisting-remove-btn"
+                        onClick={() => removeAnglePhoto(key)}
+                      >✕</button>
+                      <div className="ulisting-image-info">
+                        <span>{(anglePreviews[key].size / 1024 / 1024).toFixed(1)}MB</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="ulisting-angle-upload">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAnglePhotoUpload(key)}
+                        style={{ display: 'none' }}
+                      />
+                      <span className="ulisting-angle-placeholder">
+                        <span style={{ fontSize: '1.6rem', opacity: 0.4 }}>+</span>
+                        <span style={{ fontSize: '0.75rem', color: '#666' }}>Upload {label}</span>
+                      </span>
+                    </label>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Proof of Ownership ── */}
+          <div className="ulisting-proof-section">
+            <h5>Proof of Ownership</h5>
+            <p className="ulisting-form-help">
+              Upload your vehicle title, registration certificate, or any document proving ownership.
+              Accepted formats: PDF, JPEG, PNG (max 10MB). This document is only visible to admins for verification.
+            </p>
+            {proofPreview ? (
+              <div className="ulisting-proof-preview">
+                {proofPreview.type === 'pdf' ? (
+                  <div className="ulisting-proof-pdf">
+                    <span className="ulisting-proof-pdf-icon">PDF</span>
+                    <div className="ulisting-proof-pdf-info">
+                      <span className="ulisting-proof-filename">{proofPreview.name}</span>
+                      <span className="ulisting-proof-size">{(proofPreview.size / 1024 / 1024).toFixed(1)} MB</span>
+                    </div>
+                  </div>
+                ) : (
+                  <img src={proofPreview.url} alt="Proof of ownership" className="ulisting-proof-img" />
+                )}
+                <button type="button" className="ulisting-remove-btn" onClick={removeProof}>
+                  ✕ Remove
+                </button>
+              </div>
+            ) : (
+              <div className="ulisting-form-group">
+                <input
+                  type="file"
+                  id="proofOfOwnership"
+                  accept="image/*,.pdf,application/pdf"
+                  onChange={handleProofUpload}
+                />
+              </div>
+            )}
+          </div>
+
         </div>
 
         {/* Pricing Tab - COMPLETE */}

@@ -272,14 +272,11 @@ const CarBrands = () => {
               <div className="brand-info">
                 <h3>{brand.name}</h3>
                 <div className="brand-stats">
-                  <span>{brand.modelCount} models</span>
-                  <span className="featured-model">
-                    Featured: {brand.featured}
-                  </span>
+                  <span className="vehicle-count">{brand.modelCount} {brand.modelCount === 1 ? 'listing' : 'listings'}</span>
                   <span className="pula-price">{brand.priceRange}</span>
                 </div>
                 <button className="view-brand-btn">
-                  View Vehicles
+                  Explore →
                 </button>
               </div>
               {activeBrand === brand.filter && (

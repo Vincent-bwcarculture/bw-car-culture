@@ -1221,6 +1221,221 @@
   outline-offset: 2px;
 }
 
+/* ===== ANGLE PHOTOS ===== */
+.ulisting-angle-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--uprofile-border-color);
+}
+
+.ulisting-angle-section h5 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0 0 1rem;
+}
+
+.ulisting-angle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.ulisting-angle-slot {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--uprofile-input-bg);
+  border: 1.5px dashed var(--uprofile-border-color);
+  transition: border-color 0.2s ease;
+}
+
+.ulisting-angle-slot:hover {
+  border-color: var(--uprofile-primary-accent);
+}
+
+.ulisting-angle-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.ulisting-angle-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--uprofile-text-secondary);
+}
+
+.ulisting-angle-upload {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--uprofile-primary-accent);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.ulisting-angle-placeholder {
+  font-size: 0.65rem;
+  color: var(--uprofile-text-secondary);
+  text-align: center;
+}
+
+.ulisting-angle-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.ulisting-angle-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ulisting-angle-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.ulisting-angle-remove:hover {
+  background: var(--uprofile-primary-accent);
+}
+
+/* ===== PROOF OF OWNERSHIP ===== */
+.ulisting-proof-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--uprofile-border-color);
+}
+
+.ulisting-proof-section h5 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  margin: 0 0 0.4rem;
+}
+
+.ulisting-proof-section > p {
+  font-size: 0.78rem;
+  color: var(--uprofile-text-secondary);
+  margin: 0 0 1rem;
+}
+
+.ulisting-proof-upload-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--uprofile-input-bg);
+  border: 1.5px dashed var(--uprofile-border-color);
+  border-radius: 8px;
+  padding: 0.65rem 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--uprofile-primary-accent);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.ulisting-proof-upload-label:hover {
+  border-color: var(--uprofile-primary-accent);
+  background: rgba(255, 51, 0, 0.05);
+}
+
+.ulisting-proof-preview {
+  margin-top: 0.75rem;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--uprofile-border-color);
+  position: relative;
+  max-width: 320px;
+}
+
+.ulisting-proof-pdf {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--uprofile-input-bg);
+}
+
+.ulisting-proof-pdf-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.ulisting-proof-pdf-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.ulisting-proof-filename {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ulisting-proof-size {
+  font-size: 0.7rem;
+  color: var(--uprofile-text-secondary);
+}
+
+.ulisting-proof-img {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+}
+
+.ulisting-proof-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.ulisting-proof-remove:hover {
+  background: var(--uprofile-primary-accent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ulisting-checkbox-label,
   .ulisting-feature-category,

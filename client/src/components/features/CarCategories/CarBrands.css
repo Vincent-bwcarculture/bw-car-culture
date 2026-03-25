@@ -1,18 +1,15 @@
-/* Updated CarBrands.css to fix spacing issues */
+/* CarBrands.css — editorial full-bleed image cards */
+
 .car-brands-section {
   padding: 1.5rem;
   margin: 20px auto;
   width: 100%;
   max-width: 1200px;
-  background: rgba(15, 15, 15, 0.7);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .car-brands-section h2 {
   font-size: 1.8rem;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.4rem;
   color: #ffffff;
   font-weight: 700;
   position: relative;
@@ -26,25 +23,56 @@
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
+  width: 50px;
   height: 3px;
-  background: var(--primary-color, #ff3300);
+  background: #ff3300;
   border-radius: 3px;
 }
 
+/* Loading / error states */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3rem;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(255, 51, 0, 0.2);
+  border-top-color: #ff3300;
+  border-radius: 50%;
+  animation: brands-spin 0.8s linear infinite;
+}
+
+@keyframes brands-spin {
+  to { transform: rotate(360deg); }
+}
+
+.no-data-message {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+  font-size: 0.9rem;
+}
+
+/* ===== CAROUSEL ===== */
 .brands-container {
   position: relative;
   overflow: hidden;
-  padding: 0.5rem;
+  padding: 0.5rem 0;
 }
 
 .brands-wrapper {
   display: flex;
-  gap: 15px;
+  gap: 14px;
   overflow-x: auto;
   scroll-behavior: smooth;
-  padding: 1rem 0.5rem;
-  min-height: 280px;
+  padding: 0.5rem 0.25rem 1rem;
   scrollbar-width: none;
   -ms-overflow-style: none;
   align-items: stretch;
@@ -55,68 +83,68 @@
   display: none;
 }
 
+/* ===== CARD — full-bleed image hero ===== */
 .brand-card {
-  flex: 0 0 260px;
-  background: rgba(20, 20, 20, 0.9);
-  border: 1px solid #2c2c2c;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  height: 280px;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  flex: 0 0 220px;
+  height: 290px;
   position: relative;
   overflow: hidden;
+  border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: #111;
+  transition: transform 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.32s ease,
+              border-color 0.32s ease;
 }
 
 .brand-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-  border-color: var(--primary-color, #ff3300);
+  transform: translateY(-7px);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+  border-color: rgba(255, 51, 0, 0.45);
 }
 
-.brand-card::before {
+/* Gradient overlay via pseudo-element — sits above image, below info */
+.brand-card::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 0;
-  background: var(--primary-color, #ff3300);
-  transition: height 0.4s ease;
-  border-radius: 2px 0 0 2px;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.04) 0%,
+    rgba(0, 0, 0, 0.18) 38%,
+    rgba(0, 0, 0, 0.82) 72%,
+    rgba(0, 0, 0, 0.96) 100%
+  );
   z-index: 1;
+  pointer-events: none;
+  border-radius: 12px;
 }
 
-.brand-card:hover::before {
-  height: 100%;
+/* Selected state */
+.brand-card.brand-active {
+  border-color: #ff3300;
+  box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.25), 0 12px 36px rgba(255, 51, 0, 0.2);
 }
 
-/* FIX: Adjust the brand-logo to match car-category-image exactly */
+/* ===== IMAGE — fills entire card ===== */
 .brand-logo {
+  position: absolute !important;
+  inset: 0 !important;
   width: 100% !important;
-  height: 150px !important;
-  position: relative;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 0;
+  border-radius: 12px;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 10px 10px 0 0;
-  margin: 0 !important; /* Remove any margins */
-  padding: 0 !important; /* Remove any padding */
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .brand-logo::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  pointer-events: none;
+  display: none;
 }
 
-/* FIX: Ensure vehicle image takes the full size of the logo container */
 .brand-vehicle-image {
   width: 100% !important;
   height: 100% !important;
@@ -129,10 +157,11 @@
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
+  object-position: center 35% !important;
   display: block !important;
   margin: 0 !important;
   padding: 0 !important;
-  transition: transform 0.5s ease;
+  transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .brand-card:hover .brand-vehicle-image img {
@@ -145,157 +174,184 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(20, 20, 20, 0.5);
-  color: #ffffff;
-  font-size: 1rem;
-  text-align: center;
+  background: linear-gradient(135deg, rgba(20,20,20,0.9), rgba(40,40,40,0.9));
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
 }
 
-/* FIX: Adjust the brand-info to match car-category-content and remove gap */
+/* ===== INFO — pinned to bottom, above gradient ===== */
 .brand-info {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
   padding: 1rem !important;
-  flex-grow: 1;
+  z-index: 2;
+  background: transparent !important;
+  margin: 0 !important;
   display: flex !important;
   flex-direction: column !important;
-  justify-content: space-between !important;
-  position: relative;
-  margin: 0 !important;
-  background: transparent !important; /* Ensure no background affecting spacing */
+  gap: 0.45rem !important;
+  justify-content: flex-end !important;
 }
 
 .brand-info h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-top: 0 !important; /* Ensure no top margin causing gap */
-  margin-bottom: 0.5rem;
-  color: #ffffff;
-  transition: color 0.3s ease;
-}
-
-.brand-card:hover .brand-info h3 {
-  color: var(--primary-color, #ff3300);
+  font-size: 1.2rem !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  line-height: 1.2;
 }
 
 .brand-stats {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  color: #c9c9c9;
-  font-size: 0.85rem;
-  margin-bottom: 0.8rem;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin: 0 !important;
 }
 
-.featured-model,
 .vehicle-count {
-  color: #c9c9c9;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 0.18rem 0.55rem;
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
 }
 
 .pula-price {
-  color: #0051ff;
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  color: #ff6644 !important;
+  white-space: nowrap;
+  text-shadow: 0 0 14px rgba(255, 51, 0, 0.5);
 }
 
+/* featured-model hidden — replaced by pill stats */
+.featured-model {
+  display: none;
+}
+
+/* ===== EXPLORE BUTTON — appears on hover ===== */
 .view-brand-btn {
-  width: 100%;
-  background: var(--primary-color, #ff3300);
-  color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #ff3300;
+  color: #ffffff;
   border: none;
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
+  padding: 0.38rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  text-align: center;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.22s ease, transform 0.22s ease, background 0.2s ease;
+  pointer-events: none;
+  align-self: flex-start;
+  box-shadow: 0 3px 12px rgba(255, 51, 0, 0.4);
+}
+
+.brand-card:hover .view-brand-btn {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .view-brand-btn:hover {
-  background: #cc2900;
-  transform: translateY(-2px);
+  background: #e02d00;
 }
 
+/* ===== SELECTED BADGE ===== */
+.brand-selected-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ff3300;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  z-index: 5;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Hide the unused overlay text */
+.brand-overlay {
+  display: none !important;
+}
+
+/* ===== SCROLL BUTTONS ===== */
 .brand-scroll-button {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 10;
-  transition: all 0.3s ease;
-  font-size: 1.2rem;
-  color: #ffffff;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.25s ease;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(6px);
 }
 
 .brand-scroll-button:hover {
-  background: var(--primary-color, #ff3300);
-  border-color: var(--primary-color, #ff3300);
+  background: #ff3300;
+  border-color: #ff3300;
+  color: #ffffff;
   transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 6px 15px rgba(255, 51, 0, 0.3);
+  box-shadow: 0 6px 18px rgba(255, 51, 0, 0.35);
 }
 
 .brand-scroll-prev {
-  left: 0.5rem;
+  left: 0.4rem;
 }
 
 .brand-scroll-next {
-  right: 0.5rem;
+  right: 0.4rem;
 }
 
-.brand-selected-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: var(--primary-color, #ff3300);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  z-index: 5;
-}
-
-/* FIX: Hide any extra elements that could be causing spacing issues */
-.brand-overlay {
-  display: none !important;
-}
-
-/* FIX: Prevent extra spacing in the brand card */
-.brand-card * {
-  box-sizing: border-box !important;
-}
-
-/* FIX: Override any other brand-logo styles that might be causing the gap */
-.div.brand-logo {
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-/* Media queries for responsive design */
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .car-brands-section {
     padding: 1rem;
   }
-  
+
   .brand-card {
-    flex: 0 0 220px;
-    height: 260px;
+    flex: 0 0 180px;
+    height: 250px;
   }
-  
-  .brand-logo {
-    height: 130px !important;
-  }
-  
+
   .brand-info h3 {
-    font-size: 1.1rem;
+    font-size: 1.05rem !important;
+  }
+
+  /* Always show button on touch devices */
+  .view-brand-btn {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
   }
 }
 
@@ -307,48 +363,26 @@
   .car-brands-section h2 {
     font-size: 1.4rem;
   }
-  
+
   .brand-card {
-    flex: 0 0 180px;
-    height: 240px;
+    flex: 0 0 160px;
+    height: 230px;
   }
-  
-  .brand-logo {
-    height: 110px !important;
+
+  .brand-info h3 {
+    font-size: 0.95rem !important;
   }
 }
 
-/* ===== LIGHT MODE OVERRIDES ===== */
-[data-theme="light"] .car-brands-section {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-color: #d0d0d0 !important;
-}
-
+/* ===== LIGHT MODE ===== */
 [data-theme="light"] .car-brands-section h2 {
   color: #1a1a1a !important;
 }
 
 [data-theme="light"] .brand-card {
-  background: rgba(245, 245, 245, 0.97) !important;
-  border-color: #d0d0d0 !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
 }
 
-[data-theme="light"] .brand-name {
-  color: #1a1a1a !important;
-}
-
-[data-theme="light"] .brand-count,
-[data-theme="light"] .brand-meta {
-  color: #555 !important;
-}
-
-[data-theme="light"] .brand-vehicle-placeholder {
-  background: rgba(0, 0, 0, 0.05) !important;
-  color: #555 !important;
-}
-
-[data-theme="light"] .brands-nav {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border-color: #d0d0d0 !important;
-  color: #333 !important;
+[data-theme="light"] .brand-card:hover {
+  border-color: rgba(255, 51, 0, 0.5) !important;
 }
