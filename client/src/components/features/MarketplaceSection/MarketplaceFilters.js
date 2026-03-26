@@ -12,9 +12,10 @@ import {
 } from '../../../constants/listingConstants.js';
 import './MarketplaceFilters.css';
 
-const MarketplaceFilters = ({ 
-  activeSection = 'all', 
-  onSectionChange 
+const MarketplaceFilters = ({
+  activeSection = 'all',
+  onSectionChange,
+  sidebarMode = false
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -429,16 +430,18 @@ const MarketplaceFilters = ({
           </div>
         </div>
 
-        <div className="filters-header">
-          <button 
-            className="toggle-filters-btn"
-            onClick={() => setExpanded(!expanded)}
-            type="button"
-            aria-expanded={expanded}
-          >
-            {expanded ? 'Less Filters' : 'More Filters'}
-          </button>
-        </div>
+        {!sidebarMode && (
+          <div className="filters-header">
+            <button
+              className="toggle-filters-btn"
+              onClick={() => setExpanded(!expanded)}
+              type="button"
+              aria-expanded={expanded}
+            >
+              {expanded ? 'Less Filters' : 'More Filters'}
+            </button>
+          </div>
+        )}
         
         {/* UPDATED: Quick Search and Filters Row - Mobile Optimized */}
         <div className="filters-quick-row">
@@ -532,7 +535,7 @@ const MarketplaceFilters = ({
         </div>
         
         {/* Advanced Filters */}
-        {expanded && (
+        {(expanded || sidebarMode) && (
           <div className="advanced-filters">
             <div className="filters-row">
               {/* ENHANCED: Seller Type Filter */}

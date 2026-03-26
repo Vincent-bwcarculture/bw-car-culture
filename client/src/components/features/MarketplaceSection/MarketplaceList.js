@@ -1162,11 +1162,15 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
 
   return (
     <div className="marketplace-container" ref={containerRef}>
-      <MarketplaceFilters 
-        activeSection={activeSection}
-        onSectionChange={handleSectionChange}
-      />
-      
+      <div className="marketplace-layout">
+        <aside className="marketplace-sidebar">
+          <MarketplaceFilters
+            activeSection={activeSection}
+            onSectionChange={handleSectionChange}
+            sidebarMode={!isMobile}
+          />
+        </aside>
+        <div className="marketplace-main">
       <div className="marketplace-header">
         <div className="header-content">
           <div className="marketplace-stats">
@@ -1463,8 +1467,10 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
         </div>
       )}
 
+        </div>{/* marketplace-main */}
+      </div>{/* marketplace-layout */}
       {shareModalOpen && selectedCar && (
-        <ShareModal 
+        <ShareModal
           car={selectedCar}
           onClose={() => setShareModalOpen(false)}
           buttonRef={shareButtonRef}
