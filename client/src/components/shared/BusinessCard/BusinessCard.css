@@ -597,3 +597,32 @@
       text-align: center;
     }
   }
+
+  /* ===== GLOBAL DESKTOP COMPACT SIZE (1024px+) ===== */
+  @media (min-width: 1024px) {
+    .bcc-business-banner {
+      height: 95px;
+    }
+
+    .bcc-business-card.compact .bcc-business-banner {
+      height: 80px;
+    }
+
+    .bcc-business-logo {
+      width: 52px;
+      height: 52px;
+      margin-top: -18px;
+    }
+
+    .bcc-business-info h3 {
+      font-size: 0.95rem;
+    }
+
+    .bcc-business-content {
+      padding: 0 0.75rem 0.75rem;
+    }
+
+    .bcc-business-footer {
+      padding: 0.5rem 0.75rem;
+    }
+  }

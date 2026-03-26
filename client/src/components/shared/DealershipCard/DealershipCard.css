@@ -576,3 +576,32 @@
     text-align: center;
   }
 }
+
+/* ===== GLOBAL DESKTOP COMPACT SIZE (1024px+) ===== */
+@media (min-width: 1024px) {
+  .bcc-dealership-banner {
+    height: 80px;
+  }
+
+  .bcc-dealership-card.compact .bcc-dealership-banner {
+    height: 75px;
+  }
+
+  .bcc-dealership-logo {
+    width: 52px;
+    height: 52px;
+    margin-top: -18px;
+  }
+
+  .bcc-dealership-info h3 {
+    font-size: 0.95rem;
+  }
+
+  .bcc-dealership-content {
+    padding: 0 0.75rem 0.75rem;
+  }
+
+  .bcc-dealership-footer {
+    padding: 0.5rem 0.75rem;
+  }
+}

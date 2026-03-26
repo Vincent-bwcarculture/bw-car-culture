@@ -1789,3 +1789,26 @@
   outline: 2px solid var(--vc-accent-primary);
   outline-offset: 2px;
 }
+
+/* ===== GLOBAL DESKTOP COMPACT SIZE (1024px+) ===== */
+@media (min-width: 1024px) {
+  .vc-image-container {
+    height: 175px;
+  }
+
+  .vc-card.compact .vc-image-container {
+    height: 155px;
+  }
+
+  .vc-title {
+    font-size: 0.95rem;
+  }
+
+  .vc-price {
+    font-size: 1.05rem;
+  }
+
+  .vc-content {
+    padding: 0.4rem;
+  }
+}

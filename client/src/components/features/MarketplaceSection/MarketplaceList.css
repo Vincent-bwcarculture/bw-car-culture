@@ -1452,23 +1452,6 @@ body.section-transitioning * {
     border-radius: 4px;
   }
 
-  /* Smaller vehicle cards inside the main grid area */
-  .marketplace-main .vc-image-container {
-    height: 175px !important;
-  }
-
-  .marketplace-main .vc-title {
-    font-size: 0.95rem !important;
-  }
-
-  .marketplace-main .vc-price {
-    font-size: 1.05rem !important;
-  }
-
-  .marketplace-main .vc-content {
-    padding: 0.4rem !important;
-  }
-
   /* More columns since cards are smaller */
   .marketplace-main .marketplace-grid {
     grid-template-columns: repeat(3, 1fr);

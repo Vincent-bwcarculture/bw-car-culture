@@ -373,8 +373,32 @@
     border: 3px solid #ff3300;
     background: #000000;
   }
-  
+
   .clpc-create-button {
     border: 2px solid #ffffff;
+  }
+}
+
+/* ===== GLOBAL DESKTOP COMPACT SIZE (1024px+) ===== */
+@media (min-width: 1024px) {
+  .clpc-image-container {
+    height: 155px;
+  }
+
+  .clpc-cta-icon {
+    font-size: 2rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .clpc-cta-title {
+    font-size: 1.15rem;
+  }
+
+  .clpc-cta-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .clpc-content {
+    padding: 0.6rem;
   }
 }
