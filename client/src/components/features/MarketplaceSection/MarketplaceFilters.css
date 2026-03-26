@@ -526,6 +526,189 @@
   }
 }
 
+/* ===== DESKTOP SIDEBAR MODE (1024px+) ===== */
+@media (min-width: 1024px) {
+  /* Container: clean, no margin since it's in sidebar */
+  .marketplace-sidebar .marketplace-filters {
+    padding: 1rem;
+    margin-bottom: 0;
+    border-radius: 10px;
+  }
+
+  /* Section buttons: 2x2 grid so text isn't squeezed */
+  .marketplace-sidebar .section-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .marketplace-sidebar .section-btn {
+    font-size: 11px;
+    padding: 7px 6px;
+    min-height: 34px;
+  }
+
+  /* Section description: left-aligned, compact */
+  .marketplace-sidebar .section-description {
+    margin-top: 0.6rem;
+    text-align: left;
+    padding: 0.5rem 0.6rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
+    border-left: 2px solid rgba(255, 51, 0, 0.4);
+  }
+
+  .marketplace-sidebar .section-description p {
+    font-size: 0.75rem;
+    margin-bottom: 0;
+    line-height: 1.3;
+    color: #aaa;
+  }
+
+  .marketplace-sidebar .section-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .marketplace-sidebar .section-badge {
+    font-size: 9px;
+    padding: 2px 5px;
+  }
+
+  /* Quick filters: stacked single column */
+  .marketplace-sidebar .filters-quick-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .marketplace-sidebar .filters-horizontal-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .marketplace-sidebar .search-filter,
+  .marketplace-sidebar .filter-control {
+    width: 100%;
+    min-width: 0;
+    flex: none;
+  }
+
+  .marketplace-sidebar .filter-control input,
+  .marketplace-sidebar .filter-control select {
+    font-size: 0.82rem;
+    padding: 0.45rem 0.65rem;
+    min-height: 34px;
+    border-radius: 6px;
+  }
+
+  .marketplace-sidebar .filter-control select {
+    background-position: right 0.6rem center;
+    background-size: 0.75rem;
+    padding-right: 1.8rem;
+  }
+
+  .marketplace-sidebar .filter-control label {
+    font-size: 0.78rem;
+    margin-bottom: 0.3rem;
+    color: #bbb;
+  }
+
+  .marketplace-sidebar .quick-action-buttons {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .marketplace-sidebar .apply-filters-btn {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  /* Advanced filters: 2-column grid in sidebar */
+  .marketplace-sidebar .advanced-filters {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+  }
+
+  .marketplace-sidebar .filters-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .marketplace-sidebar .filter-control input,
+  .marketplace-sidebar .filter-control select,
+  .marketplace-sidebar .filter-group input,
+  .marketplace-sidebar .filter-group select {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.55rem;
+    min-height: 32px;
+    border-radius: 5px;
+  }
+
+  .marketplace-sidebar .filter-control label,
+  .marketplace-sidebar .filter-group label {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+    color: #bbb;
+  }
+
+  .marketplace-sidebar .filter-group select {
+    background-position: right 0.5rem center;
+    background-size: 0.65rem;
+    padding-right: 1.5rem;
+  }
+
+  /* Range inputs side by side within their grid cell */
+  .marketplace-sidebar .range-inputs {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+  }
+
+  .marketplace-sidebar .range-inputs input,
+  .marketplace-sidebar .range-inputs select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .marketplace-sidebar .range-inputs span {
+    display: block;
+    color: #666;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+  }
+
+  /* Action buttons: side by side */
+  .marketplace-sidebar .filters-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+  }
+
+  .marketplace-sidebar .apply-filters-btn,
+  .marketplace-sidebar .reset-filters-btn {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.2px;
+  }
+
+  /* Divider between sections */
+  .marketplace-sidebar .section-selector {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #2c2c2c;
+  }
+}
+
 /* ===== MOBILE SPACE OPTIMIZATION - HORIZONTAL FILTERS ===== */
 @media (max-width: 767px) {
   .marketplace-filters {
