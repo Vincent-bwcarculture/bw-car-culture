@@ -754,6 +754,109 @@
     color: var(--nav-text-muted);
 }
 
+/* ========== USER DROPDOWN MENU ========== */
+.desktop-user-menu {
+    position: relative;
+}
+
+.user-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background-color: var(--dropdown-bg, rgba(18, 18, 18, 0.98));
+    border: 1px solid var(--nav-border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    z-index: 9999;
+    min-width: 180px;
+    padding: 0.4rem 0;
+    animation: menuFadeIn 0.18s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.user-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 14px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid var(--nav-border);
+}
+
+.user-dropdown::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: 14px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid var(--dropdown-bg, rgba(18, 18, 18, 0.98));
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    color: var(--nav-text);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    white-space: nowrap;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+    color: #ffffff;
+}
+
+.dropdown-item svg {
+    flex-shrink: 0;
+    opacity: 0.75;
+}
+
+.logout-item {
+    border-top: 1px solid var(--nav-border);
+    margin-top: 0.25rem;
+    padding-top: 0.6rem;
+    color: #e06060;
+}
+
+.logout-item:hover {
+    background-color: rgba(220, 38, 38, 0.1);
+    color: #ff6b6b;
+}
+
+[data-theme="light"] .user-dropdown {
+    background-color: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .user-dropdown::after {
+    border-bottom-color: rgba(255, 255, 255, 0.98);
+}
+
+[data-theme="light"] .dropdown-item {
+    color: #1a1a1a;
+}
+
+[data-theme="light"] .dropdown-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #000;
+}
+
 /* ========== MOBILE BOTTOM NAVIGATION ========== */
 .mobile-bottom-nav {
     position: fixed;
