@@ -1189,8 +1189,11 @@ export const deleteListing = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`Listing not found with id ${req.params.id}`, 404));
   }
 
-  // Check ownership
-  if (listing.dealerId.toString() !== req.user.id && req.user.role !== 'admin') {
+  // Check ownership — handle null dealerId (dealer deleted) and populated Mongoose document
+  const dealerIdStr = listing.dealerId
+    ? (listing.dealerId._id || listing.dealerId).toString()
+    : null;
+  if (dealerIdStr !== req.user.id && req.user.role !== 'admin') {
     return next(new ErrorResponse('Not authorized to delete this listing', 403));
   }
 
@@ -1205,18 +1208,16 @@ export const deleteListing = asyncHandler(async (req, res, next) => {
             console.log(`Deleted image: ${image.key}`);
           } catch (err) {
             console.warn(`Error deleting image ${image.key}:`, err);
-            // Continue with next image even if deletion fails
           }
         }
       }
     } catch (err) {
       console.warn('Error deleting images during listing deletion:', err);
-      // Continue with deletion even if image removal fails
     }
   }
 
   // Update dealer metrics before removing the listing
-  if (listing.status === 'active') {
+  if (listing.status === 'active' && listing.dealerId) {
     const dealer = await Dealer.findById(listing.dealerId);
     if (dealer) {
       dealer.metrics.totalListings = Math.max(0, dealer.metrics.totalListings - 1);
@@ -1225,7 +1226,8 @@ export const deleteListing = asyncHandler(async (req, res, next) => {
     }
   }
 
-  await listing.remove();
+  // deleteOne() replaces the removed remove() in Mongoose 7
+  await listing.deleteOne();
 
   // Update dealer metrics
   await updateDealerMetrics(listing.dealerId);

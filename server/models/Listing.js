@@ -509,7 +509,7 @@ listingSchema.post('save', async function() {
   await this.constructor.updateDealerMetrics(this.dealerId);
 });
 
-listingSchema.post('remove', async function() {
+listingSchema.post('deleteOne', { document: true, query: false }, async function() {
   await this.constructor.updateDealerMetrics(this.dealerId);
 });
 
