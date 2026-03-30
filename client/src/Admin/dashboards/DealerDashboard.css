@@ -393,6 +393,13 @@
   border-radius: 20px;
 }
 
+.dd-tag-timing {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: rgba(255,255,255,0.35);
+}
+
 .dd-listing-price {
   font-size: 0.95rem;
   font-weight: 700;

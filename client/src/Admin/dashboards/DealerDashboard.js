@@ -2,12 +2,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Car, Star, User, BarChart2,
+  LayoutDashboard, Car, Star,
   Plus, Edit2, Trash2, Eye, ArrowLeft, RefreshCw,
-  MapPin, DollarSign, TrendingUp, Activity, CheckCircle,
+  MapPin, Activity, CheckCircle,
   XCircle, AlertCircle, X, Save, Send, MessageSquare,
-  Phone, Mail, Globe, Clock, Image, Tag, Gauge, Fuel,
-  Settings, Building2, ChevronRight, ToggleLeft, ToggleRight,
+  Phone, Mail, Globe, Clock,
+  Settings, Building2, ToggleLeft, ToggleRight,
   ExternalLink
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
@@ -19,6 +19,21 @@ const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.ve
 const fmt = (n) => (n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(n || 0));
 const currency = (n) => `P ${Number(n || 0).toLocaleString()}`;
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' });
+
+const daysBetween = (a, b) => Math.max(0, Math.floor((new Date(b) - new Date(a)) / 86400000));
+const shortDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+
+// Returns the number of days a listing was on the market before being sold/archived.
+// Falls back to updatedAt as a proxy for when status last changed.
+const daysOnMarket = (listing) => {
+  const start = listing.createdAt;
+  if (!start) return null;
+  if (listing.status === 'sold' || listing.status === 'archived') {
+    const end = listing.soldAt || listing.updatedAt;
+    return end ? daysBetween(start, end) : null;
+  }
+  return daysBetween(start, Date.now());
+};
 
 const CATEGORIES = ['Sedan', 'SUV', 'Sports Car', 'Luxury', 'Electric', 'Hybrid', 'Truck', 'Van', 'Wagon', 'Convertible', 'Classic'];
 const CONDITIONS = ['new', 'used', 'certified'];
@@ -73,7 +88,7 @@ const Stars = ({ rating, size = 14 }) => {
 };
 
 // ─── Listing Form Modal ───────────────────────────────────────────────────────
-const ListingModal = ({ listing, dealerInfo, userId, onSave, onClose, saving }) => {
+const ListingModal = ({ listing, onSave, onClose, saving }) => {
   const [form, setForm] = useState(listing ? {
     title: listing.title || '',
     description: listing.description || '',
@@ -290,12 +305,20 @@ const ListingModal = ({ listing, dealerInfo, userId, onSave, onClose, saving }) 
 };
 
 // ─── Listing Row ──────────────────────────────────────────────────────────────
-const ListingRow = ({ listing, onEdit, onDelete, onToggleStatus }) => {
+const ListingRow = ({ listing, onEdit, onDelete, onToggleStatus, canManage }) => {
   const isActive = listing.status === 'active';
   const make = listing.specifications?.make || '';
   const model = listing.specifications?.model || '';
   const year = listing.specifications?.year || '';
   const primaryImg = listing.images?.find(i => i.isPrimary) || listing.images?.[0];
+
+  const dom = daysOnMarket(listing);
+  const isSold = listing.status === 'sold';
+  const timingLabel = listing.createdAt
+    ? isSold
+      ? (dom !== null ? `Sold after ${dom}d` : `Sold · Listed ${shortDate(listing.createdAt)}`)
+      : `${dom}d on market · Listed ${shortDate(listing.createdAt)}`
+    : null;
 
   return (
     <div className="dd-listing-row">
@@ -318,6 +341,11 @@ const ListingRow = ({ listing, onEdit, onDelete, onToggleStatus }) => {
           </span>
           {listing.category && <span className="dd-tag-plain">{listing.category}</span>}
           {listing.condition && <span className="dd-tag-plain">{cap(listing.condition)}</span>}
+          {timingLabel && (
+            <span className="dd-tag-plain dd-tag-timing">
+              <Clock size={11} /> {timingLabel}
+            </span>
+          )}
         </div>
       </div>
       <div className="dd-listing-price">{currency(listing.price)}</div>
@@ -327,11 +355,17 @@ const ListingRow = ({ listing, onEdit, onDelete, onToggleStatus }) => {
         <div className="dd-listing-stat"><Star size={13} /> {listing.saves || 0}</div>
       </div>
       <div className="dd-listing-actions">
-        <button className="dd-icon-btn" title={isActive ? 'Pause' : 'Activate'} onClick={() => onToggleStatus(listing)}>
-          {isActive ? <ToggleLeft size={18} /> : <ToggleRight size={18} />}
-        </button>
-        <button className="dd-icon-btn" title="Edit" onClick={() => onEdit(listing)}><Edit2 size={16} /></button>
-        <button className="dd-icon-btn danger" title="Delete" onClick={() => onDelete(listing)}><Trash2 size={16} /></button>
+        {canManage ? (
+          <>
+            <button className="dd-icon-btn" title={isActive ? 'Pause' : 'Activate'} onClick={() => onToggleStatus(listing)}>
+              {isActive ? <ToggleLeft size={18} /> : <ToggleRight size={18} />}
+            </button>
+            <button className="dd-icon-btn" title="Edit" onClick={() => onEdit(listing)}><Edit2 size={16} /></button>
+            <button className="dd-icon-btn danger" title="Delete" onClick={() => onDelete(listing)}><Trash2 size={16} /></button>
+          </>
+        ) : (
+          <span className="dd-tag-plain" style={{ fontSize: '11px', opacity: 0.5 }}>View only</span>
+        )}
       </div>
     </div>
   );
@@ -552,13 +586,24 @@ const DealerDashboard = () => {
   };
 
   const userId = user?._id || user?.id;
+  const isAdmin = user?.role === 'admin';
+
+  // Ownership check — admin can manage any listing; dealers only their own
+  const canManageListing = (listing) => {
+    if (isAdmin) return true;
+    const lid = String(listing.dealerId?._id || listing.dealerId || '');
+    const did = String(listing.dealer?._id || listing.dealer?.id || '');
+    return lid === String(userId) || did === String(userId);
+  };
 
   // ── Fetch listings ─────────────────────────────────────────────────────────
   const fetchListings = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/listings?dealerId=${userId}&limit=100`, { headers: authHeaders() });
+      // Admins see all listings; dealers see only their own
+      const query = isAdmin ? `limit=200` : `dealerId=${userId}&limit=100`;
+      const res = await fetch(`${API_BASE}/listings?${query}`, { headers: authHeaders() });
       const data = await res.json();
       setListings(data.data || data.listings || []);
     } catch (err) {
@@ -567,7 +612,7 @@ const DealerDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, isAdmin]);
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
 
@@ -610,16 +655,23 @@ const DealerDashboard = () => {
   }, [activeTab, fetchReviews]);
 
   // ── Stats ──────────────────────────────────────────────────────────────────
+  const soldListings = listings.filter(l => l.status === 'sold');
+  const soldWithTiming = soldListings.filter(l => l.createdAt && (l.soldAt || l.updatedAt));
+  const avgDaysToSell = soldWithTiming.length
+    ? Math.round(soldWithTiming.reduce((s, l) => s + daysBetween(l.createdAt, l.soldAt || l.updatedAt), 0) / soldWithTiming.length)
+    : null;
+
   const stats = {
     total: listings.length,
     active: listings.filter(l => l.status === 'active').length,
-    sold: listings.filter(l => l.status === 'sold').length,
+    sold: soldListings.length,
     totalViews: listings.reduce((s, l) => s + (l.views || 0), 0),
     totalInquiries: listings.reduce((s, l) => s + (l.inquiries || 0), 0),
     avgRating: reviews.length
       ? (reviews.reduce((s, r) => s + (r.rating || r.ratings?.overall || 0), 0) / reviews.length).toFixed(1)
       : '—',
     reviewCount: reviews.length,
+    avgDaysToSell,
   };
 
   // ── Save listing ───────────────────────────────────────────────────────────
@@ -751,6 +803,9 @@ const DealerDashboard = () => {
           icon={Star} color="#f59e0b" />
         <StatCard label="Sold" value={stats.sold} sub="completed sales" icon={CheckCircle} color="#06b6d4" />
         <StatCard label="Inactive" value={stats.total - stats.active - stats.sold} sub="drafts & archived" icon={Activity} color="#ef4444" />
+        <StatCard label="Avg. Days to Sell" value={stats.avgDaysToSell !== null ? `${stats.avgDaysToSell}d` : '—'}
+          sub={stats.avgDaysToSell !== null ? `across ${soldWithTiming.length} sold listing${soldWithTiming.length !== 1 ? 's' : ''}` : 'No sold listings yet'}
+          icon={Clock} color="#a855f7" />
       </div>
 
       {/* Quick Actions */}
@@ -790,6 +845,7 @@ const DealerDashboard = () => {
           <div className="dd-listings-list">
             {[...listings].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5).map(l => (
               <ListingRow key={l._id} listing={l}
+                canManage={canManageListing(l)}
                 onEdit={li => { setEditingListing(li); setShowModal(true); }}
                 onDelete={li => setDeleteConfirm(li)}
                 onToggleStatus={handleToggleStatus}
@@ -849,6 +905,7 @@ const DealerDashboard = () => {
         <div className="dd-listings-list">
           {filteredListings.map(l => (
             <ListingRow key={l._id} listing={l}
+              canManage={canManageListing(l)}
               onEdit={li => { setEditingListing(li); setShowModal(true); }}
               onDelete={li => setDeleteConfirm(li)}
               onToggleStatus={handleToggleStatus}
@@ -1000,8 +1057,6 @@ const DealerDashboard = () => {
       {showModal && (
         <ListingModal
           listing={editingListing}
-          dealerInfo={dealerProfile}
-          userId={userId}
           onSave={handleSaveListing}
           onClose={() => { setShowModal(false); setEditingListing(null); }}
           saving={saving}
