@@ -611,9 +611,9 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           isVerified: !!car.dealer.verification?.isVerified || car.dealer.verification?.status === 'verified'
         },
         contact: {
-          phone: car.dealer.contact?.phone || car.dealer.phone || car.dealer.contactPhone || null,
-          email: car.dealer.contact?.email || car.dealer.email || car.dealer.contactEmail || null,
-          website: !isPrivateSeller ? (car.dealer.contact?.website || car.dealer.website) : null
+          phone: [car.dealer.contact?.phone, car.dealer.phone, car.dealer.contactPhone].find(v => v && v !== 'N/A' && v.trim() !== '') || null,
+          email: [car.dealer.contact?.email, car.dealer.email, car.dealer.contactEmail].find(v => v && v !== 'N/A' && v.trim() !== '') || null,
+          website: !isPrivateSeller ? ([car.dealer.contact?.website, car.dealer.website].find(v => v && v !== 'N/A' && v.trim() !== '') || null) : null
         },
         privateSeller: isPrivateSeller ? {
           firstName: car.dealer.privateSeller?.firstName || null,
@@ -879,20 +879,26 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       || dealer?.privateSeller?.preferredContactMethod
       || 'both';
 
-    const whatsappNum = dealer?.contact?.whatsapp
-      || car.contact?.whatsapp
-      || car.dealer?.contact?.phone
-      || car.dealer?.phone
-      || car.dealer?.contactPhone
-      || dealer?.contact?.phone
-      || car.contact?.phone;
+    const cleanVal = (v) => (v && v !== 'N/A' && v.trim() !== '') ? v : null;
 
-    const phoneNum = car.contact?.phone
-      || car.dealer?.contact?.phone
-      || car.dealer?.phone
-      || car.dealer?.contactPhone
-      || dealer?.contact?.phone
-      || whatsappNum;
+    const whatsappNum = [
+      dealer?.contact?.whatsapp,
+      car.contact?.whatsapp,
+      car.dealer?.contact?.phone,
+      car.dealer?.phone,
+      car.dealer?.contactPhone,
+      dealer?.contact?.phone,
+      car.contact?.phone
+    ].map(cleanVal).find(Boolean) || null;
+
+    const phoneNum = [
+      car.contact?.phone,
+      car.dealer?.contact?.phone,
+      car.dealer?.phone,
+      car.dealer?.contactPhone,
+      dealer?.contact?.phone,
+      whatsappNum
+    ].map(cleanVal).find(Boolean) || null;
 
     const formatNumber = (n) => n
       ? (n.startsWith('+') ? n.replace(/\s+/g, '') : `+267${n.replace(/\s+/g, '')}`)

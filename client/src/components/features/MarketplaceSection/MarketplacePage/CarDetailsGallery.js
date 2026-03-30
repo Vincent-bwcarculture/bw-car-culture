@@ -778,22 +778,26 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
         {/* Contact Section */}
         {(() => {
           // Resolve contact from all possible data locations
-          const rawPhone = car.contact?.phone
-            || car.dealer?.contact?.phone
-            || car.dealer?.phone
-            || car.dealer?.contactPhone
-            || null;
-          const rawWhatsapp = car.contact?.whatsapp
-            || car.contact?.phone
-            || car.dealer?.contact?.phone
-            || car.dealer?.phone
-            || car.dealer?.contactPhone
-            || null;
-          const rawEmail = car.contact?.email
-            || car.dealer?.contact?.email
-            || car.dealer?.email
-            || car.dealer?.contactEmail
-            || null;
+          const cleanContact = (v) => (v && v !== 'N/A' && v.trim() !== '') ? v : null;
+          const rawPhone = [
+            car.contact?.phone,
+            car.dealer?.contact?.phone,
+            car.dealer?.phone,
+            car.dealer?.contactPhone
+          ].map(cleanContact).find(Boolean) || null;
+          const rawWhatsapp = [
+            car.contact?.whatsapp,
+            car.contact?.phone,
+            car.dealer?.contact?.phone,
+            car.dealer?.phone,
+            car.dealer?.contactPhone
+          ].map(cleanContact).find(Boolean) || null;
+          const rawEmail = [
+            car.contact?.email,
+            car.dealer?.contact?.email,
+            car.dealer?.email,
+            car.dealer?.contactEmail
+          ].map(cleanContact).find(Boolean) || null;
 
           const fmt = (n) => n
             ? (n.startsWith('+') ? n.replace(/\s+/g, '') : `+267${n.replace(/\s+/g, '')}`)
