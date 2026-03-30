@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAnalytics } from '../../../hooks/useAnalytics.js';
+import { trackClick as trackPref } from '../../../utils/userPrefs.js';
 import './VehicleCard.css';
 
 const VehicleCard = ({ car, onShare, compact = false }) => {
@@ -745,6 +746,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       console.warn('Analytics tracking failed:', error);
     }
 
+    trackPref(car, 'listing');
     navigate(`/marketplace/${car.slug || car._id}`);
   }, [car, navigate, analytics, dealer]);
 

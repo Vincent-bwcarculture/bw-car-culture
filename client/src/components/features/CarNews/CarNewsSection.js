@@ -4,6 +4,7 @@ import { PlayCircle, Image, Bookmark, BookmarkCheck, Clock, RotateCw, PauseCircl
 import { useNavigate } from 'react-router-dom';
 import { useNews } from '../../../context/NewsContext.js';
 import { formatDate, hasVideo, hasGallery, formatCategoryName, getArticleIdentifier } from '../../../utils/newsHelpers.js';
+import { trackClick as trackPref } from '../../../utils/userPrefs.js';
 import './CarNews.css';
 
 const CarNewsSection = () => {
@@ -128,7 +129,13 @@ const CarNewsSection = () => {
   };
 
   const handleNewsClick = (item) => {
-    // Navigate to the article detail page using ID
+    // Track for personalisation — extract whatever car signals exist in the article
+    trackPref({
+      _id: item._id || item.id,
+      category: item.category || '',
+      specifications: { make: item.tags?.find(t => t) || '' },
+      price: 0
+    }, 'article');
     const identifier = item._id || item.id;
     if (identifier) {
       navigate(`/news/article/${identifier}`);

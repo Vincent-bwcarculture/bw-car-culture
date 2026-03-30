@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom';
 import { debounce, throttle } from 'lodash';
 import { listingService } from '../../../services/listingService.js';
+import { getPreferenceParams } from '../../../utils/userPrefs.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
 import ShareModal from '../../shared/ShareModal.js';
 import CreateListingPromoCard from './CreateListingPromoCard.js';
@@ -604,7 +605,13 @@ const MarketplaceList = () => {
         filters[key] = value.trim();
       }
     });
-    
+
+    // Inject user preference params when no explicit sort is active (default relevance feed)
+    if (!filters.sort) {
+      const prefParams = getPreferenceParams();
+      Object.assign(filters, prefParams);
+    }
+
     return filters;
   }, []);
 
