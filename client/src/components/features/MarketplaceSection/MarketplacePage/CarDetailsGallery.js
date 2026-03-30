@@ -787,6 +787,7 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
           ].map(cleanContact).find(Boolean) || null;
           const rawWhatsapp = [
             car.contact?.whatsapp,
+            car.dealer?.contact?.whatsapp,
             car.contact?.phone,
             car.dealer?.contact?.phone,
             car.dealer?.phone,
