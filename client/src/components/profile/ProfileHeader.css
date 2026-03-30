@@ -1161,10 +1161,35 @@
   background: rgba(147,197,253,0.15);
 }
 
+/* === DEALER DASHBOARD BUTTON === */
+.pheader-dealer-dashboard-button {
+  background: transparent;
+  color: #fcd34d;
+  border: 1px solid rgba(252,211,77,0.35);
+  border-radius: 7px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.pheader-dealer-dashboard-button:hover {
+  background: rgba(252,211,77,0.1);
+  border-color: rgba(252,211,77,0.6);
+  color: #fde68a;
+}
+.pheader-dealer-dashboard-button:active { background: rgba(252,211,77,0.15); }
+
 /* Ensure consistent button heights */
 .pheader-edit-profile-button,
 .pheader-admin-dashboard-button,
 .pheader-create-article-button,
-.pheader-transport-dashboard-button {
+.pheader-transport-dashboard-button,
+.pheader-dealer-dashboard-button {
   min-height: 30px;
 }

@@ -20,7 +20,8 @@ import {
   Shield,   // Added for admin dashboard icon
   Package,  // Added for courier role icon
   PenTool,  // NEW: Added for Create Article button
-  Bus       // Added for transport admin dashboard button
+  Bus,      // Added for transport admin dashboard button
+  Car       // Added for dealer dashboard button
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import { useNavigate } from 'react-router-dom';  // Added for navigation
@@ -157,6 +158,13 @@ const ProfileHeader = ({
   const isTransportAdmin = profileData?.role === 'transport_admin' ||
                            (profileData?.additionalRoles &&
                             profileData.additionalRoles.includes('transport_admin'));
+
+  // Check if user has dealer / dealership_admin role
+  const isDealer = profileData?.role === 'dealer' ||
+                   profileData?.role === 'dealership_admin' ||
+                   (profileData?.additionalRoles &&
+                    (profileData.additionalRoles.includes('dealer') ||
+                     profileData.additionalRoles.includes('dealership_admin')));
 
   // NEW: Check if user has journalist role (primary OR additional)
   const isJournalist = profileData?.role === 'journalist' ||
@@ -628,6 +636,19 @@ const handleCreateArticleClick = () => {
                   >
                     <Bus size={16} />
                     Transport Dashboard
+                  </button>
+                )}
+
+                {/* Dealer Dashboard button */}
+                {isDealer && (
+                  <button
+                    className="pheader-dealer-dashboard-button"
+                    onClick={() => navigate('/dealer/dashboard')}
+                    type="button"
+                    title="Open Dealer Dashboard"
+                  >
+                    <Car size={16} />
+                    Dealer Dashboard
                   </button>
                 )}
 

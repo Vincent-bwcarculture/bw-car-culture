@@ -1035,8 +1035,15 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
+        {/* Dealer Dashboard — accessible to approved dealers AND admins */}
+        <Route path="/dealer/dashboard" element={
+          <ProtectedRoute requiredRoles={['dealer', 'dealership_admin', 'admin']}>
+            <DealerDashboard />
+          </ProtectedRoute>
+        } />
+
         <Route path="/admin/dealer" element={
-          <ProtectedRoute requiredRoles={['admin']}>
+          <ProtectedRoute requiredRoles={['dealer', 'dealership_admin', 'admin']}>
             <AdminLayout>
               <DealerDashboard />
             </AdminLayout>
