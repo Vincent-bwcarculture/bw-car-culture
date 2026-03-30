@@ -8,6 +8,11 @@
       "type": "image/x-icon"
     },
     {
+      "src": "bcc-logo.png",
+      "type": "image/png",
+      "sizes": "531x403"
+    },
+    {
       "src": "logo192.png",
       "type": "image/png",
       "sizes": "192x192"

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">
+  <rect width="100" height="100" fill="#0a0a0a" rx="12"/>
+  <!-- 531x403 image centred and padded inside 100x100 square -->
+  <image href="bcc-logo.png" x="5" y="18" width="90" height="64" preserveAspectRatio="xMidYMid meet"/>
+</svg>
