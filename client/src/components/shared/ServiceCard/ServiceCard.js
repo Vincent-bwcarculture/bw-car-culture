@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { trackClick as trackPref } from '../../../utils/userPrefs.js';
 import './ServiceCard.css';
 
 const ServiceCard = ({ service, onAction, compact = false }) => {
@@ -81,6 +82,12 @@ const ServiceCard = ({ service, onAction, compact = false }) => {
 
   const handleActionClick = (e) => {
     e.preventDefault();
+    trackPref({
+      _id: service._id,
+      category: service.serviceType || service.providerType || '',
+      specifications: { make: service.businessType || '' },
+      price: 0
+    }, 'service');
     if (onAction) {
       onAction(service);
     } else if (service._id) {
