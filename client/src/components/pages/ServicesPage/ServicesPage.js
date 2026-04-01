@@ -132,6 +132,7 @@ const ServicesPage = () => {
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchInputRef = useRef(null);
+  const searchDebounceRef = useRef(null);
 
   // Initialize data with API calls
   useEffect(() => {
@@ -629,19 +630,42 @@ const ServicesPage = () => {
     }
   }, [listings, searchQuery, locationFilter, activeFilters, listingsPerPage, selectedCategory]);
 
+  // Push current text inputs into the URL (replace so history stays clean)
+  const applyTextFiltersToUrl = (search, loc) => {
+    const searchParams = new URLSearchParams(location.search);
+    if (search) searchParams.set('search', search); else searchParams.delete('search');
+    if (loc)    searchParams.set('location', loc);  else searchParams.delete('location');
+    searchParams.set('page', '1');
+    navigate({ pathname: location.pathname, search: searchParams.toString() }, { replace: true });
+  };
+
   const handleSearchChange = (e) => {
-    handleSearchInput(e.target.value);
+    const value = e.target.value;
+    handleSearchInput(value); // update state + suggestions immediately
+
+    // Debounce the API fetch — fires 400 ms after the user stops typing
+    clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      applyTextFiltersToUrl(value, locationFilter);
+    }, 400);
   };
 
   const handleSearchKeyPress = (e) => {
     if (e.key === 'Enter') {
+      clearTimeout(searchDebounceRef.current);
       setShowSuggestions(false);
-      handleSearchSubmit();
+      applyTextFiltersToUrl(searchQuery, locationFilter);
     }
   };
 
   const handleLocationChange = (e) => {
-    setLocationFilter(e.target.value);
+    const value = e.target.value;
+    setLocationFilter(value);
+
+    clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      applyTextFiltersToUrl(searchQuery, value);
+    }, 400);
   };
 
   const handleFilterChange = (name, value) => {
@@ -671,26 +695,8 @@ const ServicesPage = () => {
   };
 
   const handleSearchSubmit = () => {
-    const searchParams = new URLSearchParams(location.search);
-    
-    if (searchQuery) {
-      searchParams.set('search', searchQuery);
-    } else {
-      searchParams.delete('search');
-    }
-    
-    if (locationFilter) {
-      searchParams.set('location', locationFilter);
-    } else {
-      searchParams.delete('location');
-    }
-    
-    searchParams.set('page', '1');
-    
-    navigate({
-      pathname: location.pathname,
-      search: searchParams.toString()
-    });
+    clearTimeout(searchDebounceRef.current);
+    applyTextFiltersToUrl(searchQuery, locationFilter);
   };
 
   const handleCategorySelect = (categoryId) => {
