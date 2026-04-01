@@ -225,8 +225,11 @@ const MarketplaceList = () => {
     const premiumMakes = ['BMW', 'Mercedes-Benz', 'Audi', 'Lexus', 'Porsche', 'Ferrari', 'Lamborghini', 'Maserati'];
     const category = (car.category || '').toLowerCase();
     const make = (car.make || car.specifications?.make || '').toLowerCase();
-    
-    return price > 500000 || 
+    const quality = car.listingQuality || 0;
+
+    return car.featured ||
+           quality >= 60 ||
+           price > 500000 ||
            premiumCategories.some(cat => category.includes(cat)) ||
            premiumMakes.some(brand => make.includes(brand.toLowerCase()));
   }, [carHasSavings]);
@@ -287,10 +290,13 @@ const MarketplaceList = () => {
     }
     
     let score = 0;
-    
-    if (car.featured) score += 1000;
-    
-    const daysSincePosted = car.createdAt ? 
+
+    // Quality/featured boost — matches API exponential curve, scaled up for frontend sort dominance
+    const rawQ = Math.min(100, Math.max(0, car.listingQuality || 0));
+    const effectiveQ = car.featured ? Math.max(rawQ, 90) : rawQ;
+    if (effectiveQ > 0) score += Math.pow(effectiveQ / 100, 1.5) * 2000;
+
+    const daysSincePosted = car.createdAt ?
       (Date.now() - new Date(car.createdAt).getTime()) / (1000 * 60 * 60 * 24) : 999;
     if (daysSincePosted < 7) score += 100;
     if (daysSincePosted < 30) score += 50;
@@ -435,7 +441,15 @@ const MarketplaceList = () => {
     if (preserveOrder) {
       return injectPromoCards(cars.filter(car => !car.isPromoCard));
     }
-    
+
+    const realCars = cars.filter(car => !car.isPromoCard);
+
+    // Showcase = featured OR quality ≥ 85 — always rendered first, sorted by score
+    const isShowcase = (car) => car.featured || (car.listingQuality || 0) >= 85;
+    const showcaseCars = realCars.filter(isShowcase)
+      .sort((a, b) => calculateListingScore(b) - calculateListingScore(a));
+    const restCars = realCars.filter(car => !isShowcase(car));
+
     const categorizedCars = {
       premium: [],
       savings: [],
@@ -444,47 +458,37 @@ const MarketplaceList = () => {
       privatePremium: [],
       regular: []
     };
-    
-    cars.filter(car => !car.isPromoCard).forEach(car => {
+
+    restCars.forEach(car => {
       const classification = getCarClassification(car);
       switch (classification) {
-        case 'premium':
-          categorizedCars.premium.push(car);
-          break;
-        case 'savings':
-          categorizedCars.savings.push(car);
-          break;
-        case 'private':
-          categorizedCars.private.push(car);
-          break;
-        case 'private-savings':
-          categorizedCars.privateSavings.push(car);
-          break;
-        case 'private-premium':
-          categorizedCars.privatePremium.push(car);
-          break;
-        default:
-          categorizedCars.regular.push(car);
+        case 'premium':       categorizedCars.premium.push(car);        break;
+        case 'savings':       categorizedCars.savings.push(car);        break;
+        case 'private':       categorizedCars.private.push(car);        break;
+        case 'private-savings': categorizedCars.privateSavings.push(car); break;
+        case 'private-premium': categorizedCars.privatePremium.push(car); break;
+        default:              categorizedCars.regular.push(car);
       }
     });
-    
+
     Object.keys(categorizedCars).forEach(category => {
       categorizedCars[category].sort((a, b) => calculateListingScore(b) - calculateListingScore(a));
     });
-    
+
     const mixed = [];
     const maxLength = Math.max(...Object.values(categorizedCars).map(arr => arr.length));
-    
+
     for (let i = 0; i < maxLength; i++) {
       if (categorizedCars.privateSavings[i]) mixed.push(categorizedCars.privateSavings[i]);
-      if (categorizedCars.savings[i]) mixed.push(categorizedCars.savings[i]);
+      if (categorizedCars.savings[i])        mixed.push(categorizedCars.savings[i]);
       if (categorizedCars.privatePremium[i]) mixed.push(categorizedCars.privatePremium[i]);
-      if (categorizedCars.premium[i]) mixed.push(categorizedCars.premium[i]);
-      if (categorizedCars.private[i]) mixed.push(categorizedCars.private[i]);
-      if (categorizedCars.regular[i]) mixed.push(categorizedCars.regular[i]);
+      if (categorizedCars.premium[i])        mixed.push(categorizedCars.premium[i]);
+      if (categorizedCars.private[i])        mixed.push(categorizedCars.private[i]);
+      if (categorizedCars.regular[i])        mixed.push(categorizedCars.regular[i]);
     }
-    
-    return injectPromoCards(mixed);
+
+    // Showcase listings always lead the feed
+    return injectPromoCards([...showcaseCars, ...mixed]);
   }, [getCarClassification, calculateListingScore, injectPromoCards]);
 
   // Enhanced total savings calculation including private sellers
