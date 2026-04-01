@@ -51,6 +51,7 @@ const AddListingModal = ({ isOpen, onClose, onSubmit }) => {
     status: 'draft',
     bodyStyle: '',
     featured: false,
+    listingQuality: 50,
     dealer: '',
     category: '',
     
@@ -1573,6 +1574,38 @@ const handleSubmit = async (e) => {
                   />
                   <span>Lease Available</span>
                 </label>
+              </div>
+
+              {/* Listing Quality Boost */}
+              <div className="form-group lq-boost-group">
+                <label>Listing Quality Score</label>
+                {(() => {
+                  const q = formData.listingQuality ?? 50;
+                  const tier = q >= 85 ? { label: '⭐ Showcase', desc: 'Always near the top — for your very best cars', cls: 'lq-showcase' }
+                    : q >= 60 ? { label: '🔥 Premium', desc: 'Elevated placement in search results', cls: 'lq-premium' }
+                    : q >= 35 ? { label: '✅ Good', desc: 'Above-average visibility', cls: 'lq-good' }
+                    : { label: '📋 Standard', desc: 'Normal ranking — no boost', cls: 'lq-standard' };
+                  return (
+                    <div className={`lq-slider-wrap ${tier.cls}`}>
+                      <div className="lq-header">
+                        <span className="lq-tier-label">{tier.label}</span>
+                        <span className="lq-score">{q} / 100</span>
+                      </div>
+                      <input
+                        type="range"
+                        className="lq-range"
+                        min="0" max="100" step="5"
+                        value={q}
+                        onChange={(e) => setFormData(prev => ({ ...prev, listingQuality: parseInt(e.target.value) }))}
+                        disabled={isSubmitting}
+                      />
+                      <div className="lq-track-labels">
+                        <span>Standard</span><span>Good</span><span>Premium</span><span>Showcase</span>
+                      </div>
+                      <p className="lq-desc">{tier.desc}</p>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </section>
