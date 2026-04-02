@@ -16,6 +16,8 @@ const AdminPaymentDashboard = () => {
   // State management
   const [payments, setPayments] = useState([]);
   const [pendingSubmissions, setPendingSubmissions] = useState([]);
+  const [pendingMpho, setPendingMpho] = useState([]);
+  const [approvingMpho, setApprovingMpho] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedPayment, setSelectedPayment] = useState(null);
@@ -69,9 +71,10 @@ const AdminPaymentDashboard = () => {
       });
 
       // CORRECTED: Remove /api prefix to match admin endpoint pattern
-      const [paymentsResponse, pendingResponse] = await Promise.all([
-        axios.get(`/admin/payments/list?${params}`),     // ✅ No /api prefix
-        axios.get('/admin/payments/pending-manual')      // ✅ No /api prefix
+      const [paymentsResponse, pendingResponse, mphoResponse] = await Promise.all([
+        axios.get(`/admin/payments/list?${params}`),
+        axios.get('/admin/payments/pending-manual'),
+        axios.get('/admin/ai-subscriptions/pending').catch(() => ({ data: { success: false } }))
       ]);
 
       console.log('📊 Payments Response:', paymentsResponse.data);
@@ -86,6 +89,10 @@ const AdminPaymentDashboard = () => {
             total: paymentsResponse.data.pagination.total || 0
           }));
         }
+      }
+
+      if (mphoResponse.data.success) {
+        setPendingMpho(mphoResponse.data.submissions || []);
       }
 
       if (pendingResponse.data.success) {
@@ -366,6 +373,57 @@ const AdminPaymentDashboard = () => {
           />
         </div>
       </div>
+
+      {/* Mpho AI Subscription Approvals */}
+      {pendingMpho.length > 0 && (
+        <div className="pending-approvals-section" style={{ borderColor: 'rgba(249,115,22,0.3)', background: 'rgba(249,115,22,0.04)' }}>
+          <h2><AlertCircle size={20} />Pending Mpho Subscriptions ({pendingMpho.length})</h2>
+          <div className="pending-approvals-grid">
+            {pendingMpho.map((sub) => (
+              <div key={sub._id} className="pending-approval-card">
+                <div className="approval-card-header">
+                  <div className="user-info">
+                    <h4>{sub.userEmail || sub.userId}</h4>
+                    <p>Submitted: {sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : '—'}</p>
+                  </div>
+                  <div className="amount-badge" style={{ background: 'rgba(249,115,22,0.15)', color: '#fb923c' }}>
+                    P{sub.amount || 100}
+                  </div>
+                </div>
+                <div className="approval-card-body">
+                  <div className="submission-details">
+                    <span><strong>Plan:</strong> Mpho (AI Subscription)</span>
+                  </div>
+                  {sub.proofOfPayment?.url && (
+                    <a href={sub.proofOfPayment.url} target="_blank" rel="noreferrer" className="view-proof-btn">
+                      View Proof
+                    </a>
+                  )}
+                </div>
+                <div className="approval-card-actions">
+                  <button
+                    className="approve-btn"
+                    disabled={approvingMpho === sub._id}
+                    onClick={async () => {
+                      setApprovingMpho(sub._id);
+                      try {
+                        await axios.post('/admin/ai-subscriptions/approve', { submissionId: sub._id, months: 1 });
+                        setPendingMpho(prev => prev.filter(s => s._id !== sub._id));
+                      } catch (e) {
+                        alert(e.response?.data?.message || 'Approval failed');
+                      } finally {
+                        setApprovingMpho(null);
+                      }
+                    }}
+                  >
+                    {approvingMpho === sub._id ? 'Activating…' : '✓ Activate Mpho'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ENHANCED: Pending Approvals Section */}
       {pendingSubmissions.length > 0 && (

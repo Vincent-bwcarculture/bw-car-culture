@@ -17,12 +17,14 @@
   --kb-panel-h:     540px;
 }
 
-/* ── Wrapper — sits above the review FAB ── */
+/* ── Wrapper — sits horizontally beside the review FAB ── */
 .kb-wrapper {
   position: fixed;
-  bottom: calc(var(--bottom-nav-height, 60px) + var(--fab-offset, 15px) + var(--fab-size, 48px) + 10px + var(--safe-area-bottom, 0px));
-  right: var(--fab-offset, 15px);
-  z-index: 1100;
+  /* Match review FAB bottom exactly (mobile: above bottom nav) */
+  bottom: calc(var(--bottom-nav-height, 60px) + var(--fab-offset, 15px) + var(--safe-area-bottom, 0px));
+  /* Sit left of review FAB, overlapping by 8px */
+  right: calc(var(--fab-offset, 15px) + var(--fab-size, 48px) - 8px);
+  z-index: 1099; /* one below review FAB so review FAB is on top at overlap */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -30,7 +32,8 @@
 
 @media (min-width: 769px) {
   .kb-wrapper {
-    bottom: calc(var(--fab-offset, 15px) + var(--fab-size, 48px) + 10px + var(--safe-area-bottom, 0px));
+    /* Desktop: no bottom nav */
+    bottom: calc(var(--fab-offset, 15px) + var(--safe-area-bottom, 0px));
   }
 }
 
@@ -114,9 +117,8 @@
   .kb-panel {
     width: calc(100vw - 24px);
     height: 75vh;
-  }
-  .kb-wrapper {
-    right: 12px;
+    /* On small screens pin panel to right edge */
+    right: calc(-1 * (var(--fab-size, 48px) - 8px - var(--fab-offset, 15px)));
   }
 }
 

@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.js';
+import MphoSubscribeModal from './MphoSubscribeModal.js';
 import './Chatbot.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'https://api.i3wcarculture.com/api';
@@ -74,6 +75,7 @@ const Chatbot = () => {
   const [fbLoading, setFbLoading] = useState(false);
   const [usageInfo, setUsageInfo] = useState(null); // { used, limit, isPro }
   const [isPro, setIsPro] = useState(false);
+  const [showSubscribeModal, setShowSubscribeModal] = useState(false);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -223,7 +225,7 @@ const Chatbot = () => {
     if (msg.role === 'upsell') {
       return (
         <div key={idx} className="kb-upsell-card">
-          <div className="kb-upsell-title">✨ Karabo Pro — BWP 100/month</div>
+          <div className="kb-upsell-title">✨ Mpho — BWP 100/month</div>
           <ul className="kb-upsell-list">
             <li>50 messages/day (vs 12 free)</li>
             <li>AI fills your listing form for you</li>
@@ -231,8 +233,8 @@ const Chatbot = () => {
             <li>Market price insights & trends</li>
             <li>Priority admin review of your listings</li>
           </ul>
-          <button className="kb-upsell-btn" onClick={handleWhatsApp}>
-            💬 Contact us on WhatsApp to subscribe
+          <button className="kb-upsell-btn" onClick={() => setShowSubscribeModal(true)}>
+            ✨ Subscribe to Mpho — BWP 100/mo
           </button>
         </div>
       );
@@ -460,7 +462,7 @@ const Chatbot = () => {
                 <div className="kb-header-name">Karabo</div>
                 <div className="kb-header-status">
                   BW Car Culture AI · Online
-                  {isPro && <span className="kb-pro-badge">PRO</span>}
+                  {isPro && <span className="kb-pro-badge">MPHO</span>}
                 </div>
               </div>
             </div>
@@ -470,6 +472,11 @@ const Chatbot = () => {
           {view === 'chat' ? renderChat() : renderFeedback()}
         </div>
       )}
+
+      <MphoSubscribeModal
+        isOpen={showSubscribeModal}
+        onClose={() => setShowSubscribeModal(false)}
+      />
     </div>
   );
 };
