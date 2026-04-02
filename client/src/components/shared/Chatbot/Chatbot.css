@@ -561,3 +561,64 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ── Auth gate buttons ── */
+.kb-auth-btns {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.kb-auth-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: var(--kb-radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+  font-family: inherit;
+}
+
+.kb-auth-btn:hover { opacity: 0.88; }
+
+.kb-auth-login {
+  background: var(--kb-surface2);
+  border: 1px solid var(--kb-border);
+  color: var(--kb-text);
+}
+
+.kb-auth-register {
+  background: var(--kb-accent);
+  color: #fff;
+}
+
+/* ── Usage bar ── */
+.kb-usage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.kb-usage-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--kb-surface2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.kb-usage-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease, background 0.4s ease;
+}
+
+.kb-usage-text {
+  font-size: 10px;
+  color: var(--kb-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}

@@ -1,6 +1,7 @@
 // src/components/shared/Chatbot/Chatbot.js — Karabo AI Assistant
 import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext.js';
 import './Chatbot.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'https://api.i3wcarculture.com/api';
@@ -71,10 +72,12 @@ const Chatbot = () => {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState({ category: 'general', rating: 0, comment: '', email: '' });
   const [fbLoading, setFbLoading] = useState(false);
+  const [usageInfo, setUsageInfo] = useState(null); // { used, limit }
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -97,23 +100,42 @@ const Chatbot = () => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
+    // Gate: must be logged in
+    if (!isAuthenticated) {
+      appendMsg({ role: 'user', content: trimmed });
+      setInput('');
+      appendMsg({
+        role: 'assistant',
+        content: "To chat with me you'll need to **log in or create a free account** first 🔐\n\nIt only takes a minute!",
+        authGate: true
+      });
+      return;
+    }
+
     const userMsg = { role: 'user', content: trimmed };
     appendMsg(userMsg);
     setInput('');
     setLoading(true);
 
     const newHistory = [...history, userMsg];
+    const token = localStorage.getItem('token');
 
     try {
       const res = await fetch(`${API_BASE}/ai/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ messages: newHistory })
       });
 
       const data = await res.json();
 
-      if (!data.success) throw new Error('API error');
+      if (!data.success) throw new Error(data.reply || 'API error');
+
+      // Update usage display
+      if (data.usage) setUsageInfo(data.usage);
 
       const assistantMsg = { role: 'assistant', content: data.reply };
       appendMsg(assistantMsg);
@@ -144,7 +166,7 @@ const Chatbot = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, history, appendMsg, navigate]);
+  }, [loading, isAuthenticated, history, appendMsg, navigate]);
 
   const handleKeyDown = useCallback((e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -204,7 +226,15 @@ const Chatbot = () => {
     return (
       <div key={idx} className={`kb-msg ${isUser ? 'kb-msg-user' : 'kb-msg-bot'}`}>
         {!isUser && <div className="kb-avatar">K</div>}
-        <div className="kb-bubble">{renderText(msg.content)}</div>
+        <div className="kb-bubble">
+          {renderText(msg.content)}
+          {msg.authGate && (
+            <div className="kb-auth-btns">
+              <button className="kb-auth-btn kb-auth-login" onClick={() => handleNavigate('/login')}>Log In</button>
+              <button className="kb-auth-btn kb-auth-register" onClick={() => handleNavigate('/register')}>Register Free</button>
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -257,6 +287,18 @@ const Chatbot = () => {
             ➤
           </button>
         </div>
+        {usageInfo && (
+          <div className="kb-usage">
+            <div className="kb-usage-bar">
+              <div
+                className="kb-usage-fill"
+                style={{ width: `${Math.min(100, (usageInfo.used / usageInfo.limit) * 100)}%`,
+                         background: usageInfo.used >= usageInfo.limit ? '#ef4444' : usageInfo.used >= usageInfo.limit * 0.8 ? '#f97316' : '#4ade80' }}
+              />
+            </div>
+            <span className="kb-usage-text">{usageInfo.used}/{usageInfo.limit} messages today</span>
+          </div>
+        )}
         <div className="kb-footer-links">
           <button className="kb-footer-link" onClick={handleWhatsApp}>💬 WhatsApp</button>
           <button className="kb-footer-link" onClick={() => setView('feedback')}>📋 Feedback</button>
