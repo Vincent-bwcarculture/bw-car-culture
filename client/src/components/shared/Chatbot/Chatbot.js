@@ -72,12 +72,23 @@ const Chatbot = () => {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState({ category: 'general', rating: 0, comment: '', email: '' });
   const [fbLoading, setFbLoading] = useState(false);
-  const [usageInfo, setUsageInfo] = useState(null); // { used, limit }
+  const [usageInfo, setUsageInfo] = useState(null); // { used, limit, isPro }
+  const [isPro, setIsPro] = useState(false);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+
+  // Check Pro status when authenticated
+  useEffect(() => {
+    if (!isAuthenticated) { setIsPro(false); return; }
+    const token = localStorage.getItem('token');
+    fetch(`${API_BASE}/ai/subscription`, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then(r => r.json())
+      .then(d => { if (d.success) setIsPro(d.isPro); })
+      .catch(() => {});
+  }, [isAuthenticated]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -134,8 +145,11 @@ const Chatbot = () => {
 
       if (!data.success) throw new Error(data.reply || 'API error');
 
-      // Update usage display
-      if (data.usage) setUsageInfo(data.usage);
+      // Update usage + Pro status
+      if (data.usage) {
+        setUsageInfo(data.usage);
+        if (data.usage.isPro !== undefined) setIsPro(data.usage.isPro);
+      }
 
       const assistantMsg = { role: 'assistant', content: data.reply };
       appendMsg(assistantMsg);
@@ -153,6 +167,12 @@ const Chatbot = () => {
           } else if (action.type === 'prefill_article') {
             localStorage.setItem('ai_article_prefill', JSON.stringify(action.data));
             setTimeout(() => navigate('/admin/news'), 1200);
+          } else if (action.type === 'show_valuation') {
+            appendMsg({ role: 'valuation', data: action.valuation });
+          } else if (action.type === 'show_market_data') {
+            appendMsg({ role: 'market_data', data: action.data });
+          } else if (action.type === 'show_upsell') {
+            appendMsg({ role: 'upsell' });
           } else if (action.type === 'show_listings') {
             appendMsg({ role: 'listings', listings: action.listings });
           } else if (action.type === 'show_services') {
@@ -200,6 +220,70 @@ const Chatbot = () => {
   };
 
   const renderMessage = (msg, idx) => {
+    if (msg.role === 'upsell') {
+      return (
+        <div key={idx} className="kb-upsell-card">
+          <div className="kb-upsell-title">✨ Karabo Pro — BWP 100/month</div>
+          <ul className="kb-upsell-list">
+            <li>50 messages/day (vs 12 free)</li>
+            <li>AI fills your listing form for you</li>
+            <li>Vehicle valuations from real market data</li>
+            <li>Market price insights & trends</li>
+            <li>Priority admin review of your listings</li>
+          </ul>
+          <button className="kb-upsell-btn" onClick={handleWhatsApp}>
+            💬 Contact us on WhatsApp to subscribe
+          </button>
+        </div>
+      );
+    }
+    if (msg.role === 'valuation') {
+      const v = msg.data;
+      return (
+        <div key={idx} className="kb-valuation-card">
+          <div className="kb-val-title">📊 {v.year} {v.make} {v.model} — Market Valuation</div>
+          <div className="kb-val-estimate">{formatPrice(v.mileageAdjusted ? v.adjusted : v.avg)}</div>
+          <div className="kb-val-label">{v.mileageAdjusted ? 'Mileage-adjusted estimate' : 'Market average'}</div>
+          <div className="kb-val-range">
+            <span>Low: {formatPrice(v.low)}</span>
+            <span>Avg: {formatPrice(v.avg)}</span>
+            <span>High: {formatPrice(v.high)}</span>
+          </div>
+          <div className="kb-val-sample">Based on {v.sampleSize} similar listings on BW Car Culture</div>
+        </div>
+      );
+    }
+    if (msg.role === 'market_data') {
+      const d = msg.data;
+      return (
+        <div key={idx} className="kb-market-card">
+          <div className="kb-market-title">📈 Market Overview</div>
+          <div className="kb-market-stat">{d.recentListings} new listings in last 30 days</div>
+          {d.topMakes?.length > 0 && (
+            <div className="kb-market-section">
+              <div className="kb-market-label">Top Makes</div>
+              {d.topMakes.map((m, i) => (
+                <div key={i} className="kb-market-row">
+                  <span>{m.make}</span>
+                  <span>{m.count} listings · avg {formatPrice(m.avgPrice)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {d.categories?.length > 0 && (
+            <div className="kb-market-section">
+              <div className="kb-market-label">By Category</div>
+              {d.categories.filter(c => c.category).map((c, i) => (
+                <div key={i} className="kb-market-row">
+                  <span>{c.category}</span>
+                  <span>{c.count} listings · avg {formatPrice(c.avgPrice)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
     if (msg.role === 'listings') {
       return (
         <div key={idx} className="kb-action-cards">
@@ -374,7 +458,10 @@ const Chatbot = () => {
               <div className="kb-header-avatar">K</div>
               <div>
                 <div className="kb-header-name">Karabo</div>
-                <div className="kb-header-status">BW Car Culture AI · Online</div>
+                <div className="kb-header-status">
+                  BW Car Culture AI · Online
+                  {isPro && <span className="kb-pro-badge">PRO</span>}
+                </div>
               </div>
             </div>
             <button className="kb-close" onClick={() => setIsOpen(false)}>✕</button>

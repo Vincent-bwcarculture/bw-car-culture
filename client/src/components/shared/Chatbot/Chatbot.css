@@ -622,3 +622,170 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+/* ── Pro badge ── */
+.kb-pro-badge {
+  display: inline-block;
+  margin-left: 6px;
+  background: linear-gradient(135deg, #f97316, #facc15);
+  color: #000;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+/* ── Upsell card ── */
+.kb-upsell-card {
+  align-self: flex-start;
+  width: calc(100% - 31px);
+  margin-left: 31px;
+  background: linear-gradient(135deg, rgba(249,115,22,0.12), rgba(250,204,21,0.08));
+  border: 1px solid rgba(249,115,22,0.35);
+  border-radius: var(--kb-radius-sm);
+  padding: 12px 14px;
+}
+
+.kb-upsell-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fb923c;
+  margin-bottom: 8px;
+}
+
+.kb-upsell-list {
+  margin: 0 0 10px 0;
+  padding-left: 16px;
+  list-style: none;
+}
+
+.kb-upsell-list li {
+  font-size: 12px;
+  color: var(--kb-text);
+  line-height: 1.7;
+  position: relative;
+}
+
+.kb-upsell-list li::before {
+  content: '✓';
+  position: absolute;
+  left: -14px;
+  color: #4ade80;
+  font-weight: 700;
+}
+
+.kb-upsell-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #f97316, #facc15);
+  border: none;
+  color: #000;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 9px 12px;
+  border-radius: var(--kb-radius-sm);
+  cursor: pointer;
+  transition: opacity 0.15s;
+  font-family: inherit;
+}
+
+.kb-upsell-btn:hover { opacity: 0.88; }
+
+/* ── Valuation card ── */
+.kb-valuation-card {
+  align-self: flex-start;
+  width: calc(100% - 31px);
+  margin-left: 31px;
+  background: var(--kb-surface);
+  border: 1px solid rgba(74,222,128,0.25);
+  border-radius: var(--kb-radius-sm);
+  padding: 12px 14px;
+}
+
+.kb-val-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--kb-text-muted);
+  margin-bottom: 6px;
+}
+
+.kb-val-estimate {
+  font-size: 24px;
+  font-weight: 800;
+  color: #4ade80;
+  line-height: 1.1;
+}
+
+.kb-val-label {
+  font-size: 11px;
+  color: var(--kb-text-muted);
+  margin-bottom: 8px;
+}
+
+.kb-val-range {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--kb-text-muted);
+  background: var(--kb-surface2);
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+}
+
+.kb-val-sample {
+  font-size: 10px;
+  color: var(--kb-text-muted);
+}
+
+/* ── Market data card ── */
+.kb-market-card {
+  align-self: flex-start;
+  width: calc(100% - 31px);
+  margin-left: 31px;
+  background: var(--kb-surface);
+  border: 1px solid rgba(96,165,250,0.25);
+  border-radius: var(--kb-radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kb-market-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #60a5fa;
+}
+
+.kb-market-stat {
+  font-size: 12px;
+  color: var(--kb-text-muted);
+}
+
+.kb-market-section {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.kb-market-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--kb-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.kb-market-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--kb-text);
+  padding: 3px 0;
+  border-bottom: 1px solid var(--kb-border);
+}
+
+.kb-market-row:last-child { border-bottom: none; }
