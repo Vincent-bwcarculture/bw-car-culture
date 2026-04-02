@@ -150,6 +150,9 @@ const Chatbot = () => {
           } else if (action.type === 'prefill_listing') {
             localStorage.setItem('ai_listing_prefill', JSON.stringify(action.data));
             setTimeout(() => navigate('/marketplace?action=sell'), 1200);
+          } else if (action.type === 'prefill_article') {
+            localStorage.setItem('ai_article_prefill', JSON.stringify(action.data));
+            setTimeout(() => navigate('/admin/news'), 1200);
           } else if (action.type === 'show_listings') {
             appendMsg({ role: 'listings', listings: action.listings });
           } else if (action.type === 'show_services') {

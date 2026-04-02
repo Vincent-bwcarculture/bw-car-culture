@@ -24,6 +24,19 @@ const NewsManager = () => {
     fetchArticles();
   }, [filters]);
 
+  // Apply AI prefill if Karabo navigated here with article data
+  useEffect(() => {
+    const prefillRaw = localStorage.getItem('ai_article_prefill');
+    if (prefillRaw) {
+      try {
+        const data = JSON.parse(prefillRaw);
+        localStorage.removeItem('ai_article_prefill');
+        setSelectedArticle(data); // no _id → ReviewModal will POST (create)
+        setShowEditor(true);
+      } catch (_) {}
+    }
+  }, []);
+
   const fetchArticles = async () => {
     try {
       setLoading(true);
