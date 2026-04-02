@@ -1,4 +1,4 @@
-// src/components/shared/Chatbot/Chatbot.js — Karabo AI Assistant
+// src/components/shared/Chatbot/Chatbot.js — Mpho AI Assistant
 import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, X as CloseIcon } from 'lucide-react';
@@ -10,7 +10,7 @@ const API_BASE = process.env.REACT_APP_API_URL || 'https://api.i3wcarculture.com
 
 const WELCOME_MSG = {
   role: 'assistant',
-  content: "Hi! I'm **Karabo**, your BW Car Culture assistant 🚗\n\nI can help you:\n• Find cars on the marketplace\n• Discover workshops, rentals & transport\n• Create a listing through chat\n• Navigate the site\n\nWhat can I do for you today?"
+  content: "Hi! I'm **Mpho**, your BW Car Culture assistant 🚗\n\nI can help you:\n• Find cars on the marketplace\n• Discover workshops, rentals & transport\n• Create a listing through chat\n• Navigate the site\n\nWhat can I do for you today?"
 };
 
 const QUICK_REPLIES = [
@@ -412,7 +412,7 @@ const Chatbot = () => {
             ref={inputRef}
             className="kb-input"
             type="text"
-            placeholder={loading ? 'Karabo is thinking…' : 'Ask me anything…'}
+            placeholder={loading ? 'Mpho is thinking…' : 'Ask me anything…'}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -498,7 +498,7 @@ const Chatbot = () => {
       <button
         className={`kb-fab ${isOpen ? 'kb-fab-open' : ''}`}
         onClick={() => setIsOpen(o => !o)}
-        aria-label={isOpen ? 'Close Karabo' : 'Open Karabo AI Assistant'}
+        aria-label={isOpen ? 'Close Mpho' : 'Open Mpho AI Assistant'}
       >
         <span className="kb-fab-icon">
           {isOpen ? <CloseIcon size={18} strokeWidth={2.5} /> : <Sparkles size={20} />}
@@ -513,7 +513,7 @@ const Chatbot = () => {
             <div className="kb-header-info">
               <div className="kb-header-avatar">K</div>
               <div>
-                <div className="kb-header-name">Karabo</div>
+                <div className="kb-header-name">Mpho</div>
                 <div className="kb-header-status">
                   BW Car Culture AI · Online
                   {isPro && <span className="kb-pro-badge">MPHO</span>}

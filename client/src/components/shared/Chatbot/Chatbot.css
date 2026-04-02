@@ -1,4 +1,4 @@
-/* Chatbot.css — Karabo AI Assistant */
+/* Chatbot.css — Mpho AI Assistant */
 
 /* ── CSS Variables ── */
 :root {
@@ -51,8 +51,9 @@
   justify-content: center;
   box-shadow: 0 4px 20px rgba(230,48,0,0.55), 0 2px 8px rgba(0,0,0,0.3);
   position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
   flex-shrink: 0;
+  will-change: transform;
 }
 
 .kb-fab:hover {
@@ -95,17 +96,18 @@
   background: var(--kb-bg);
   border-radius: var(--kb-radius);
   border: 1px solid var(--kb-border);
-  box-shadow: var(--kb-shadow);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: kb-slide-in 0.22s cubic-bezier(0.34,1.56,0.64,1);
+  animation: kb-slide-in 0.18s ease-out;
   transform-origin: bottom right;
+  will-change: transform, opacity;
 }
 
 @keyframes kb-slide-in {
-  from { opacity: 0; transform: scale(0.85) translateY(12px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 420px) {
