@@ -11,6 +11,7 @@ import { useAuth } from './context/AuthContext.js';
 import { NewsProvider } from './context/NewsContext.js';
 
 // Layout Components
+import Chatbot from './components/shared/Chatbot/Chatbot.js';
 import MainLayout from './components/layout/MainLayout.js';
 import LoadingScreen from './components/shared/LoadingScreen/LoadingScreen.js';
 import SplashScreen from './components/SplashScreen.js';
@@ -1746,7 +1747,7 @@ function App() {
               <div className="App">
                 {process.env.NODE_ENV === 'development' && <ConnectionTest />}
                 <AppRoutes />
-                {/* <Chatbot /> */}
+                <Chatbot />
                 {false && (
                   <GIONApp withChatbot={false} />
                 )}

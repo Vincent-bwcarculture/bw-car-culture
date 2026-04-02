@@ -271,10 +271,35 @@ const fetchDealers = async () => {
     };
   }, [images]);
 
-  // Load dealers when modal opens
+  // Load dealers when modal opens; apply AI prefill if present
   useEffect(() => {
     if (isOpen) {
       fetchDealers();
+
+      const prefillRaw = localStorage.getItem('ai_listing_prefill');
+      if (prefillRaw) {
+        try {
+          const p = JSON.parse(prefillRaw);
+          localStorage.removeItem('ai_listing_prefill');
+          setFormData(prev => ({
+            ...prev,
+            ...(p.condition ? { condition: p.condition } : {}),
+            ...(p.price    ? { price: String(p.price) }   : {}),
+            ...(p.category ? { category: p.category }      : {}),
+            ...(p.description ? { description: p.description } : {}),
+            specifications: {
+              ...prev.specifications,
+              ...(p.make         ? { make: p.make }               : {}),
+              ...(p.model        ? { model: p.model }             : {}),
+              ...(p.year         ? { year: Number(p.year) }       : {}),
+              ...(p.mileage      ? { mileage: String(p.mileage) } : {}),
+              ...(p.fuelType     ? { fuelType: p.fuelType }       : {}),
+              ...(p.transmission ? { transmission: p.transmission } : {}),
+              ...(p.exteriorColor ? { exteriorColor: p.exteriorColor } : {})
+            }
+          }));
+        } catch (_) {}
+      }
     }
   }, [isOpen]);
 
