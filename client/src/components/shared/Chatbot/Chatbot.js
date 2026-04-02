@@ -1,6 +1,7 @@
 // src/components/shared/Chatbot/Chatbot.js — Karabo AI Assistant
 import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Sparkles, X as CloseIcon } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
 import MphoSubscribeModal from './MphoSubscribeModal.js';
 import './Chatbot.css';
@@ -18,6 +19,35 @@ const QUICK_REPLIES = [
   'I want to sell my car',
   'Take me to the marketplace',
 ];
+
+const EV_QUICK_REPLIES = [
+  { label: '⚡ Browse electric vehicles', msg: 'Show me electric vehicles' },
+  { label: '🔋 How EV charging works', msg: 'How does EV charging work?' },
+  { label: '💰 EV vs petrol costs', msg: 'EV vs petrol running costs' },
+  { label: '🔧 EV-friendly workshops', msg: 'Find EV-friendly workshops' },
+  { label: '🌍 Why go electric in BW?', msg: 'Why go electric in Botswana?' },
+];
+
+// Local EV responses — work without login (no API call)
+const EV_REPLIES = {
+  'Show me electric vehicles': {
+    text: "Taking you to the marketplace! 🔋⚡\n\nFilter by the **Electric** category to see all EV listings on BW Car Culture. Log in to get personalized recommendations from me!",
+    nav: '/marketplace'
+  },
+  'How does EV charging work?': {
+    text: "**EV Charging Explained** ⚡\n\n**Level 1** — Standard wall plug. Works overnight (8–20 hrs), no special install.\n**Level 2** — AC wall charger, most popular for homes (4–8 hrs).\n**DC Fast Charge** — Public stations. 80% charge in 30–60 mins.\n\nIn Botswana, home charging (Level 2) is most practical right now. Public chargers are expanding in Gaborone and major towns.\n\nLog in to chat about specific EV models!"
+  },
+  'EV vs petrol running costs': {
+    text: "**Running Cost Comparison** 💰\n\n⚡ **Electric:** ~P0.30–0.60 per km\n⛽ **Petrol:** ~P1.20–1.80 per km at current BW prices\n\n🔧 **Servicing:** EVs save ~40% — no oil changes, regenerative braking means fewer brake jobs too.\n\n📅 **Payback:** For drivers covering 1,500+ km/month, savings typically offset the higher purchase price in 3–5 years."
+  },
+  'Find EV-friendly workshops': {
+    text: "Looking for EV workshops! 🔧⚡\n\nEV servicing requires high-voltage system certification — not every mechanic is qualified. I'm taking you to our Services directory where you can look for workshops listing EV or hybrid specialization.",
+    nav: '/services'
+  },
+  'Why go electric in Botswana?': {
+    text: "**Why Go Electric in Botswana?** 🌍\n\n✅ Cheaper to run — electricity costs far less per km than petrol\n✅ Lower servicing costs — no engine oil, simpler drivetrain\n✅ Instant torque — smooth, quiet, responsive drive\n✅ Zero tailpipe emissions — cleaner air in cities\n✅ Infrastructure growing — more public chargers coming to Gaborone & major towns\n\n**Best for:** Daily commuters and city drivers with home charging access.\n\nLog in to explore specific EV models with me! 🚗"
+  }
+};
 
 const formatPrice = (p) =>
   p != null ? `P${Number(p).toLocaleString()}` : 'Price on request';
@@ -113,7 +143,17 @@ const Chatbot = () => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
-    // Gate: must be logged in
+    // EV quick replies work without login — serve local responses
+    const evReply = EV_REPLIES[trimmed];
+    if (evReply && !isAuthenticated) {
+      appendMsg({ role: 'user', content: trimmed });
+      setInput('');
+      appendMsg({ role: 'assistant', content: evReply.text });
+      if (evReply.nav) setTimeout(() => navigate(evReply.nav), 1400);
+      return;
+    }
+
+    // Gate: must be logged in for everything else
     if (!isAuthenticated) {
       appendMsg({ role: 'user', content: trimmed });
       setInput('');
@@ -343,15 +383,27 @@ const Chatbot = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Quick replies — only show when not loading and last msg is from bot */}
+      {/* Quick replies — only show on welcome screen */}
       {!loading && messages.length <= 1 && (
-        <div className="kb-quick-replies">
-          {QUICK_REPLIES.map((qr, i) => (
-            <button key={i} className="kb-qr-chip" onClick={() => sendMessage(qr)}>
-              {qr}
-            </button>
-          ))}
-        </div>
+        <>
+          <div className="kb-quick-replies">
+            {QUICK_REPLIES.map((qr, i) => (
+              <button key={i} className="kb-qr-chip" onClick={() => sendMessage(qr)}>
+                {qr}
+              </button>
+            ))}
+          </div>
+          <div className="kb-ev-section">
+            <div className="kb-ev-label">⚡ Electric Vehicles · free, no login needed</div>
+            <div className="kb-quick-replies">
+              {EV_QUICK_REPLIES.map((ev, i) => (
+                <button key={i} className="kb-qr-chip kb-ev-chip" onClick={() => sendMessage(ev.msg)}>
+                  {ev.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
       )}
 
       <div className="kb-footer">
@@ -448,7 +500,9 @@ const Chatbot = () => {
         onClick={() => setIsOpen(o => !o)}
         aria-label={isOpen ? 'Close Karabo' : 'Open Karabo AI Assistant'}
       >
-        <span className="kb-fab-icon">{isOpen ? '✕' : 'AI'}</span>
+        <span className="kb-fab-icon">
+          {isOpen ? <CloseIcon size={18} strokeWidth={2.5} /> : <Sparkles size={20} />}
+        </span>
         {!isOpen && <div className="kb-fab-pulse" />}
       </button>
 

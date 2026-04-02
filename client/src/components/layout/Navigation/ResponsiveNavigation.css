@@ -950,6 +950,20 @@
     }
 }
 
+.review-fab-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.review-fab-star {
+    position: absolute;
+    bottom: -3px;
+    right: -5px;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+
 .review-fab:hover {
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 6px 20px rgba(255, 51, 0, 0.5);

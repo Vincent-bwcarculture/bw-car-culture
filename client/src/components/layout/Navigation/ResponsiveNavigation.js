@@ -366,7 +366,10 @@ const ReviewFAB = () => {
         onClick={handleFABClick}
         aria-label="Leave a review"
       >
-        <Star size={24} fill="currentColor" />
+        <div className="review-fab-icon">
+          <MessageCircle size={22} strokeWidth={1.8} />
+          <Star size={11} fill="#fbbf24" color="#fbbf24" className="review-fab-star" />
+        </div>
       </button>
 
       {/* Enhanced Review Modal */}

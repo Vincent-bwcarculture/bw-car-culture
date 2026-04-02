@@ -63,16 +63,11 @@
 .kb-fab:active { transform: scale(0.94); }
 
 .kb-fab-icon {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
-}
-
-.kb-fab-open .kb-fab-icon {
-  font-size: 16px;
-  font-weight: 400;
+  color: #fff;
 }
 
 .kb-fab-pulse {
@@ -377,6 +372,33 @@
   background: rgba(230,48,0,0.12);
   border-color: var(--kb-accent);
   color: var(--kb-accent);
+}
+
+/* ── EV section ── */
+.kb-ev-section {
+  padding: 2px 12px 8px;
+  flex-shrink: 0;
+}
+
+.kb-ev-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #60a5fa;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 6px;
+}
+
+.kb-ev-chip {
+  border-color: rgba(59,130,246,0.3) !important;
+  color: #93c5fd !important;
+  background: rgba(59,130,246,0.06) !important;
+}
+
+.kb-ev-chip:hover {
+  border-color: rgba(59,130,246,0.6) !important;
+  background: rgba(59,130,246,0.14) !important;
+  color: #bfdbfe !important;
 }
 
 /* ── Footer ── */
