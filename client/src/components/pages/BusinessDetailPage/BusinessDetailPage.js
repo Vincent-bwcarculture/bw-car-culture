@@ -16,6 +16,7 @@ import QRCodeScanner from '../../QRScanner/QRCodeScanner.js';
 import InventoryCard from '../../shared/InventoryCard/InventoryCard.js';
 import ShareModal from '../../shared/ShareModal.js';
 import './BusinessDetailPage.css';
+import { buildHelmet, SITE_URL } from '../../../hooks/useSEO.js';
 
 const BusinessDetailPage = () => {
   const { id } = useParams();
@@ -971,8 +972,27 @@ const handleReviewSubmitted = (result) => {
     );
   }
 
+const bizDesc = [business.description, business.profile?.city, business.providerType].filter(Boolean).join(' · ');
+const bizImage = business.profile?.logo || business.profile?.banner || null;
+
 return (
   <div className="bcc-business-detail-page">
+    {buildHelmet({
+      title: business.businessName,
+      description: bizDesc || `View ${business.businessName} on BW Car Culture — Botswana's automotive services directory.`,
+      image: bizImage,
+      url: `${SITE_URL}/business/${business._id}`,
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'LocalBusiness',
+        name: business.businessName,
+        description: bizDesc,
+        image: bizImage,
+        url: `${SITE_URL}/business/${business._id}`,
+        telephone: business.contact?.phone,
+        address: business.profile?.city ? { '@type': 'PostalAddress', addressLocality: business.profile.city, addressCountry: 'BW' } : undefined
+      }
+    })}
     {/* FIXED: Banner section - only banner image and action buttons */}
     <div className="bcc-business-detail-banner">
       {business.profile?.banner && !imageErrors.banner ? (

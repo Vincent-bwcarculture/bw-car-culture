@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { http } from '../../../config/axios.js';
 import BusinessCard from '../../shared/BusinessCard/BusinessCard.js';
 import './DealershipsPage.css';
+import { buildHelmet } from '../../../hooks/useSEO.js';
 
 const DealershipsPage = () => {
   const [dealers, setDealers] = useState([]);
@@ -183,6 +184,10 @@ const DealershipsPage = () => {
 
   return (
     <div className="bcc-dealerships-page">
+      {buildHelmet({
+        title: 'Car Dealerships in Botswana',
+        description: 'Browse trusted car dealerships across Botswana. Find new and used vehicles from verified dealers in Gaborone, Francistown, Maun and beyond.'
+      })}
       {/* Enhanced Hero Section */}
       <div className="bcc-dealerships-hero">
         <div className="bcc-dealership-hero-content">

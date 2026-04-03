@@ -2,6 +2,7 @@
 
 // React Core Imports
 import React, { Suspense, useState, useEffect } from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import { Navigate, useLocation } from 'react-router-dom';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
@@ -1739,6 +1740,7 @@ function App() {
   }
 
   return (
+    <HelmetProvider>
     <AppErrorBoundary>
       <Router>
         <AuthProvider>
@@ -1757,6 +1759,7 @@ function App() {
         </AuthProvider>
       </Router>
     </AppErrorBoundary>
+    </HelmetProvider>
   );
 }
 

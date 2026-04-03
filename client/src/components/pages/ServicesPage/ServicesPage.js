@@ -6,6 +6,7 @@ import RentalCard from '../../shared/RentalCard/RentalCard.js';
 import PublicTransportCard from '../../shared/PublicTransportCard/PublicTransportCard.js';
 import { http } from '../../../config/axios.js';
 import './ServicesPage.css';
+import { buildHelmet } from '../../../hooks/useSEO.js';
 
 // Enhanced service categories with better transport search options
 const SERVICE_CATEGORIES = [
@@ -916,6 +917,10 @@ const ServicesPage = () => {
 
   return (
     <div className="bcc-services-page">
+      {buildHelmet({
+        title: 'Automotive Services',
+        description: 'Find trusted workshops, car rentals, and transport services across Botswana. Browse verified service providers in Gaborone, Francistown, Maun and more.'
+      })}
       {/* Professional Hero Section */}
       <div 
         className="bcc-services-hero"

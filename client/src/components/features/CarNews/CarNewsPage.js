@@ -5,6 +5,7 @@ import { Search, Filter, ChevronDown, Grid, List, Zap, Clock } from 'lucide-reac
 import { useNews } from '../../../context/NewsContext.js';
 import LoadingScreen from '../../shared/LoadingScreen/LoadingScreen.js';
 import { formatDate, formatCategoryName } from '../../../utils/newsHelpers.js';
+import { buildHelmet } from '../../../hooks/useSEO.js';
 import './CarNewsPage.css';
 
 const CarNewsPage = () => {
@@ -245,8 +246,14 @@ const markFailedImage = (url) => {
     return <LoadingScreen />;
   }
   
+  const categoryLabel = activeCategory === 'all' ? 'Car News & Reviews' : formatCategoryName(activeCategory);
+
   return (
     <div className="cc-newspage-container">
+      {buildHelmet({
+        title: categoryLabel,
+        description: `Read the latest ${categoryLabel.toLowerCase()} from Botswana and around the world. Stay up to date with automotive trends, new releases, and market insights.`
+      })}
       {/* Page header with search and filters */}
       <div className="cc-newspage-header">
         <h1 className="cc-newspage-title">

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import './CarMarketPlace.css';
+import { buildHelmet, SITE_URL } from '../../../hooks/useSEO.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
 import ShareModal from '../../shared/ShareModal.js';
 import { listingService } from '../../../services/listingService.js';
@@ -932,8 +933,32 @@ const CarMarketplace = () => {
 
   const imageUrls = extractImageUrls(car);
 
+  const carTitle = car.title || `${car.specifications?.year || ''} ${car.specifications?.make || ''} ${car.specifications?.model || ''}`.trim();
+  const carImage  = imageUrls?.[0] || null;
+  const carPrice  = car.price ? `P${Number(car.price).toLocaleString()}` : null;
+  const carDesc   = [carPrice, car.condition, car.location?.city, car.specifications?.mileage ? `${Number(car.specifications.mileage).toLocaleString()} km` : null]
+    .filter(Boolean).join(' · ');
+
   return (
     <ErrorBoundary showDetails={process.env.NODE_ENV !== 'production'}>
+      {buildHelmet({
+        title: carTitle,
+        description: carDesc || `View details for ${carTitle} on BW Car Culture — Botswana's car marketplace.`,
+        image: carImage,
+        url: `${SITE_URL}/marketplace/${car._id}`,
+        type: 'product',
+        jsonLd: {
+          '@context': 'https://schema.org',
+          '@type': 'Car',
+          name: carTitle,
+          description: carDesc,
+          image: carImage ? [carImage] : undefined,
+          offers: car.price ? { '@type': 'Offer', price: car.price, priceCurrency: 'BWP', availability: 'https://schema.org/InStock', url: `${SITE_URL}/marketplace/${car._id}` } : undefined,
+          vehicleModelDate: car.specifications?.year,
+          brand: car.specifications?.make ? { '@type': 'Brand', name: car.specifications.make } : undefined,
+          mileageFromOdometer: car.specifications?.mileage ? { '@type': 'QuantitativeValue', value: car.specifications.mileage, unitCode: 'KMT' } : undefined
+        }
+      })}
       <div className="car-detail-container">
         <button className="back-button" onClick={() => navigate('/marketplace')} aria-label="Back to listings">
           ← Back to Listings

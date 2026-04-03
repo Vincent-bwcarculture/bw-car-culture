@@ -4,11 +4,33 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#1a1a1a" />
-    <meta name="description" content="BW Car Culture — Botswana's premier car marketplace. Browse vehicles, check market values, find EV charging stations, and explore the latest automotive news." />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Primary meta -->
+    <meta name="description" content="BW Car Culture — Botswana's premier car marketplace. Browse vehicles for sale, find workshops and dealerships, explore EV charging stations, and read the latest automotive news." />
+    <meta name="keywords" content="cars for sale Botswana, car marketplace Botswana, buy car Gaborone, sell car Botswana, car dealerships Botswana, EV charging Botswana, automotive news Botswana, BW Car Culture" />
+    <link rel="canonical" href="https://www.i3wcarculture.com/" />
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="BW Car Culture" />
+    <meta property="og:title" content="BW Car Culture — Botswana's Premier Car Marketplace" />
+    <meta property="og:description" content="Buy, sell and discover cars in Botswana. Find dealerships, workshops, EV charging stations and the latest automotive news." />
+    <meta property="og:url" content="https://www.i3wcarculture.com/" />
+    <meta property="og:image" content="https://www.i3wcarculture.com/bcc-logo.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:locale" content="en_BW" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="BW Car Culture — Botswana's Premier Car Marketplace" />
+    <meta name="twitter:description" content="Buy, sell and discover cars in Botswana. Find dealerships, workshops, EV charging stations and the latest automotive news." />
+    <meta name="twitter:image" content="https://www.i3wcarculture.com/bcc-logo.png" />
 
     <!-- Preconnect to API and tile servers for faster first requests -->
-    <link rel="preconnect" href="https://bw-car-culture-api.vercel.app" />
-    <link rel="dns-prefetch" href="https://bw-car-culture-api.vercel.app" />
+    <link rel="preconnect" href="https://api.i3wcarculture.com" />
+    <link rel="dns-prefetch" href="https://api.i3wcarculture.com" />
     <link rel="dns-prefetch" href="https://tile.openstreetmap.org" />
 
     <!-- SVG favicon — modern browsers, scales crisply at any size -->
@@ -18,7 +40,49 @@
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/bcc-logo.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
-    <title>BW Car Culture</title>
+    <title>BW Car Culture — Botswana's Car Marketplace</title>
+
+    <!-- Organisation JSON-LD structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "BW Car Culture",
+      "alternateName": "I3w Car Culture",
+      "url": "https://www.i3wcarculture.com",
+      "logo": "https://www.i3wcarculture.com/bcc-logo.png",
+      "description": "Botswana's premier automotive marketplace — buy, sell and discover vehicles, find dealerships and workshops, explore EV charging, and read car news.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+26774122453",
+        "contactType": "customer service",
+        "availableLanguage": "English"
+      },
+      "sameAs": [],
+      "areaServed": {
+        "@type": "Country",
+        "name": "Botswana"
+      }
+    }
+    </script>
+
+    <!-- WebSite JSON-LD (enables Google Sitelinks Searchbox) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "BW Car Culture",
+      "url": "https://www.i3wcarculture.com",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://www.i3wcarculture.com/marketplace?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

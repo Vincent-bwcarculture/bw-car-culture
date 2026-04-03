@@ -11,6 +11,7 @@ import NewsGallery from './NewsGallery.js';
 import FeaturedNews from './FeaturedNews.js';
 import VideoSection from '../VideoSection/VideoSection.js';
 import { getNewsImageUrl, getGalleryImageUrls, formatDate, getAuthorInfo } from '../../../utils/newsHelpers.js';
+import { buildHelmet, SITE_URL } from '../../../hooks/useSEO.js';
 import './NewsArticle.css';
 
 const NewsArticle = () => {
@@ -554,8 +555,29 @@ const NewsArticle = () => {
 
   const authorInfo = getAuthorInfo(article);
 
+  const articleImage = article.featuredImage?.url || article.images?.[0]?.url || null;
+  const articleUrl   = `${SITE_URL}/news/${article.slug || article._id}`;
+
   return (
     <div className="cc-news-article-page">
+      {buildHelmet({
+        title: article.title,
+        description: article.seo?.metaDescription || article.subtitle || article.excerpt || article.title,
+        image: articleImage,
+        url: articleUrl,
+        type: 'article',
+        jsonLd: {
+          '@context': 'https://schema.org',
+          '@type': 'NewsArticle',
+          headline: article.title,
+          description: article.seo?.metaDescription || article.subtitle || '',
+          image: articleImage ? [articleImage] : undefined,
+          datePublished: article.publishDate || article.createdAt,
+          dateModified: article.updatedAt || article.publishDate,
+          url: articleUrl,
+          publisher: { '@type': 'Organization', name: 'BW Car Culture', url: SITE_URL }
+        }
+      })}
       {/* Full-screen gallery view */}
       {showGallery && (
         <NewsGallery 
