@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listingService } from '../../../services/listingService.js';
+import { http } from '../../../config/axios.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
 import './BudgetSearch.css';
 
@@ -98,33 +99,14 @@ const BudgetSearch = () => {
         limit: 1
       }, 1);
 
-      const dealersResponse = await fetch('/api/stats/dashboard', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
       let dealersData = { verifiedDealers: 0, transportProviders: 0 };
-      
-      if (dealersResponse.ok) {
-        dealersData = await dealersResponse.json();
-      } else {
-        try {
-          const providersResponse = await fetch('/api/providers?limit=1', {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
-          
-          if (providersResponse.ok) {
-            const providersData = await providersResponse.json();
-            dealersData.verifiedDealers = providersData.total || 0;
-          }
-        } catch (providerError) {
-          console.warn('Could not fetch provider count:', providerError);
+      try {
+        const dealersResponse = await http.get('/api/stats/dashboard');
+        if (dealersResponse.data) {
+          dealersData = dealersResponse.data;
         }
+      } catch (statsErr) {
+        console.warn('Could not fetch stats dashboard:', statsErr);
       }
 
       const totalVehicles = vehiclesResponse.total || vehiclesResponse.listings?.length || 0;

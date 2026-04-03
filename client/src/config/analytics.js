@@ -27,7 +27,13 @@ export const initializeGA = async () => {
     }
 
     // Initialize with proper configuration for react-ga4
-    ReactGA.initialize(GA_MEASUREMENT_ID, {
+    // Support both default export shapes across react-ga4 versions
+    const ga = ReactGA?.default || ReactGA;
+    if (typeof ga?.initialize !== 'function') {
+      console.warn('📊 Google Analytics: initialize not available, skipping');
+      return;
+    }
+    ga.initialize(GA_MEASUREMENT_ID, {
       testMode: process.env.NODE_ENV !== 'production',
       gaOptions: {
         anonymizeIp: true,
