@@ -10,7 +10,7 @@ const API_BASE = process.env.REACT_APP_API_URL || 'https://api.i3wcarculture.com
 
 const WELCOME_MSG = {
   role: 'assistant',
-  content: "Hi! I'm **Mpho AI**, your BW Car Culture assistant 🚗\n\nI can help you:\n• Find cars on the marketplace\n• Discover workshops, rentals & transport\n• Create a listing through chat\n• Navigate the site\n\nWhat can I do for you today?"
+  content: "Hi, I'm **Mpho AI** — your BW Car Culture assistant.\n\nI can help you:\n• Find cars on the marketplace\n• Discover workshops, rentals & transport\n• Create a listing through chat\n• Navigate the site\n\nWhat can I do for you today?"
 };
 
 const QUICK_REPLIES = [
@@ -21,31 +21,31 @@ const QUICK_REPLIES = [
 ];
 
 const EV_QUICK_REPLIES = [
-  { label: '⚡ Browse electric vehicles', msg: 'Show me electric vehicles' },
-  { label: '🔋 How EV charging works', msg: 'How does EV charging work?' },
-  { label: '💰 EV vs petrol costs', msg: 'EV vs petrol running costs' },
-  { label: '🔧 EV-friendly workshops', msg: 'Find EV-friendly workshops' },
-  { label: '🌍 Why go electric in BW?', msg: 'Why go electric in Botswana?' },
+  { label: 'Browse electric vehicles', msg: 'Show me electric vehicles' },
+  { label: 'How EV charging works', msg: 'How does EV charging work?' },
+  { label: 'EV vs petrol running costs', msg: 'EV vs petrol running costs' },
+  { label: 'EV-friendly workshops', msg: 'Find EV-friendly workshops' },
+  { label: 'Why go electric in Botswana?', msg: 'Why go electric in Botswana?' },
 ];
 
 // Local EV responses — work without login (no API call)
 const EV_REPLIES = {
   'Show me electric vehicles': {
-    text: "Taking you to the marketplace! 🔋⚡\n\nFilter by the **Electric** category to see all EV listings on BW Car Culture. Log in to get personalized recommendations from me!",
+    text: "Taking you to the marketplace.\n\nFilter by the **Electric** category to see all EV listings on BW Car Culture. Log in to get personalised recommendations.",
     nav: '/marketplace'
   },
   'How does EV charging work?': {
-    text: "**EV Charging Explained** ⚡\n\n**Level 1** — Standard wall plug. Works overnight (8–20 hrs), no special install.\n**Level 2** — AC wall charger, most popular for homes (4–8 hrs).\n**DC Fast Charge** — Public stations. 80% charge in 30–60 mins.\n\nIn Botswana, home charging (Level 2) is most practical right now. Public chargers are expanding in Gaborone and major towns.\n\nLog in to chat about specific EV models!"
+    text: "**EV Charging — How It Works**\n\n**Level 1** — Standard wall plug. Works overnight (8–20 hrs), no special install.\n**Level 2** — AC wall charger, most common for homes (4–8 hrs).\n**DC Fast Charge** — Public stations. 80% charge in 30–60 mins.\n\nIn Botswana, home charging (Level 2) is the most practical option right now. Public chargers are expanding in Gaborone and major towns.\n\nLog in to ask about specific EV models."
   },
   'EV vs petrol running costs': {
-    text: "**Running Cost Comparison** 💰\n\n⚡ **Electric:** ~P0.30–0.60 per km\n⛽ **Petrol:** ~P1.20–1.80 per km at current BW prices\n\n🔧 **Servicing:** EVs save ~40% — no oil changes, regenerative braking means fewer brake jobs too.\n\n📅 **Payback:** For drivers covering 1,500+ km/month, savings typically offset the higher purchase price in 3–5 years."
+    text: "**Running Cost Comparison**\n\n**Electric:** ~P0.30–0.60 per km\n**Petrol:** ~P1.20–1.80 per km at current BW prices\n\n**Servicing:** EVs save roughly 40% — no oil changes, and regenerative braking means fewer brake replacements.\n\n**Payback period:** For drivers covering 1,500+ km/month, the savings typically offset the higher purchase price within 3–5 years."
   },
   'Find EV-friendly workshops': {
-    text: "Looking for EV workshops! 🔧⚡\n\nEV servicing requires high-voltage system certification — not every mechanic is qualified. I'm taking you to our Services directory where you can look for workshops listing EV or hybrid specialization.",
+    text: "EV servicing requires high-voltage system certification — not every mechanic is qualified. I'm taking you to the Services directory where you can find workshops listing EV or hybrid specialisation.",
     nav: '/services'
   },
   'Why go electric in Botswana?': {
-    text: "**Why Go Electric in Botswana?** 🌍\n\n✅ Cheaper to run — electricity costs far less per km than petrol\n✅ Lower servicing costs — no engine oil, simpler drivetrain\n✅ Instant torque — smooth, quiet, responsive drive\n✅ Zero tailpipe emissions — cleaner air in cities\n✅ Infrastructure growing — more public chargers coming to Gaborone & major towns\n\n**Best for:** Daily commuters and city drivers with home charging access.\n\nLog in to explore specific EV models with me! 🚗"
+    text: "**Going Electric in Botswana**\n\n• Cheaper to run — electricity costs far less per km than petrol\n• Lower servicing costs — no engine oil, simpler drivetrain\n• Instant torque — smooth, quiet, responsive drive\n• Zero tailpipe emissions — cleaner air in cities\n• Infrastructure growing — more public chargers coming to Gaborone and major towns\n\n**Best suited for:** Daily commuters and city drivers with home charging access.\n\nLog in to explore specific EV models."
   }
 };
 
@@ -108,15 +108,14 @@ const ContactDraftCard = ({ draftMessage, onSent }) => {
   if (sent) {
     return (
       <div className="kb-draft-sent">
-        <span>✅</span>
-        <span>Enquiry sent to the BW Car Culture team! They'll connect you with the seller shortly.</span>
+        <span>Enquiry sent to the BW Car Culture team. They'll connect you with the seller shortly.</span>
       </div>
     );
   }
 
   return (
     <div className="kb-draft-card">
-      <div className="kb-draft-label">📋 Draft message — edit if you'd like:</div>
+      <div className="kb-draft-label">Draft message — edit if you'd like:</div>
       <textarea
         className="kb-draft-textarea"
         value={draft}
@@ -127,7 +126,7 @@ const ContactDraftCard = ({ draftMessage, onSent }) => {
       <div className="kb-draft-footer">
         <span className="kb-draft-chars">{draft.length}/1000</span>
         <button className="kb-draft-send" onClick={handleSend} disabled={!draft.trim()}>
-          💬 Send to WhatsApp
+          Send via WhatsApp
         </button>
       </div>
     </div>
@@ -178,7 +177,7 @@ const Chatbot = () => {
           .filter(m => m.role === 'user' || m.role === 'assistant')
           .map(m => ({ role: m.role, content: m.content }));
         if (restored.length) {
-          setMessages([WELCOME_MSG, { role: 'assistant', content: '↩️ **Welcome back!** Here\'s your recent conversation:', isResume: true }, ...restored]);
+          setMessages([WELCOME_MSG, { role: 'assistant', content: '**Welcome back.** Here\'s your recent conversation:', isResume: true }, ...restored]);
           setHistory(restored);
           setHasStoredHistory(true);
         }
@@ -231,7 +230,7 @@ const Chatbot = () => {
             ...prev,
             {
               role: 'assistant',
-              content: `I couldn't retrieve the seller's contact number for **${vehicleTitle || 'this vehicle'}** 🔍\n\nNo worries — I've drafted an enquiry message below that will go directly to the **BW Car Culture team**, who will forward it to the seller on your behalf.\n\nFeel free to edit it before sending! 👇`
+              content: `I wasn't able to retrieve the seller's contact number for **${vehicleTitle || 'this vehicle'}**.\n\nI've drafted an enquiry below that will go directly to the **BW Car Culture team**, who will forward it to the seller on your behalf. Feel free to edit it before sending.`
             },
             { role: 'contact_assist', draftMessage, vehicleTitle }
           ];
@@ -262,7 +261,7 @@ const Chatbot = () => {
       setInput('');
       appendMsg({
         role: 'assistant',
-        content: "To chat with me you'll need to **log in or create a free account** first 🔐\n\nIt only takes a minute!",
+        content: "To chat with Mpho AI you'll need to **log in or create a free account** first.\n\nIt only takes a minute.",
         authGate: true
       });
       return;
@@ -370,7 +369,7 @@ const Chatbot = () => {
         <div key={idx} className="kb-action-cards">
           <ContactDraftCard
             draftMessage={msg.draftMessage}
-            onSent={() => appendMsg({ role: 'assistant', content: "Your enquiry is on its way! 🚀 The BW Car Culture team will get back to you as soon as possible. You can also reach us directly at +26774122453." })}
+            onSent={() => appendMsg({ role: 'assistant', content: "Your enquiry has been sent. The BW Car Culture team will be in touch shortly. You can also reach us directly at +26774122453." })}
           />
         </div>
       );
@@ -378,7 +377,7 @@ const Chatbot = () => {
     if (msg.role === 'upsell') {
       return (
         <div key={idx} className="kb-upsell-card">
-          <div className="kb-upsell-title">✨ Mpho — BWP 100/month</div>
+          <div className="kb-upsell-title">Mpho — BWP 100/month</div>
           <ul className="kb-upsell-list">
             <li>50 messages/day (vs 12 free)</li>
             <li>AI fills your listing form for you</li>
@@ -387,7 +386,7 @@ const Chatbot = () => {
             <li>Priority admin review of your listings</li>
           </ul>
           <button className="kb-upsell-btn" onClick={() => setShowSubscribeModal(true)}>
-            ✨ Subscribe to Mpho — BWP 100/mo
+            Subscribe to Mpho — BWP 100/mo
           </button>
         </div>
       );
@@ -396,7 +395,7 @@ const Chatbot = () => {
       const v = msg.data;
       return (
         <div key={idx} className="kb-valuation-card">
-          <div className="kb-val-title">📊 {v.year} {v.make} {v.model} — Market Valuation</div>
+          <div className="kb-val-title">{v.year} {v.make} {v.model} — Market Valuation</div>
           <div className="kb-val-estimate">{formatPrice(v.mileageAdjusted ? v.adjusted : v.avg)}</div>
           <div className="kb-val-label">{v.mileageAdjusted ? 'Mileage-adjusted estimate' : 'Market average'}</div>
           <div className="kb-val-range">
@@ -412,7 +411,7 @@ const Chatbot = () => {
       const d = msg.data;
       return (
         <div key={idx} className="kb-market-card">
-          <div className="kb-market-title">📈 Market Overview</div>
+          <div className="kb-market-title">Market Overview</div>
           <div className="kb-market-stat">{d.recentListings} new listings in last 30 days</div>
           {d.topMakes?.length > 0 && (
             <div className="kb-market-section">
@@ -507,7 +506,7 @@ const Chatbot = () => {
             ))}
           </div>
           <div className="kb-ev-section">
-            <div className="kb-ev-label">⚡ Electric Vehicles · free, no login needed</div>
+            <div className="kb-ev-label">Electric Vehicles · no login needed</div>
             <div className="kb-quick-replies">
               {EV_QUICK_REPLIES.map((ev, i) => (
                 <button key={i} className="kb-qr-chip kb-ev-chip" onClick={() => sendMessage(ev.msg)}>
@@ -554,8 +553,8 @@ const Chatbot = () => {
           </div>
         )}
         <div className="kb-footer-links">
-          <button className="kb-footer-link" onClick={handleWhatsApp}>💬 WhatsApp</button>
-          <button className="kb-footer-link" onClick={() => setView('feedback')}>📋 Feedback</button>
+          <button className="kb-footer-link" onClick={handleWhatsApp}>WhatsApp</button>
+          <button className="kb-footer-link" onClick={() => setView('feedback')}>Feedback</button>
         </div>
       </div>
     </>
@@ -563,7 +562,7 @@ const Chatbot = () => {
 
   const renderFeedback = () => (
     <div className="kb-feedback-view">
-      <div className="kb-feedback-title">📋 Website Feedback</div>
+      <div className="kb-feedback-title">Website Feedback</div>
       <div className="kb-form-group">
         <label>Category</label>
         <select value={feedback.category} onChange={e => setFeedback(f => ({ ...f, category: e.target.value }))}>
