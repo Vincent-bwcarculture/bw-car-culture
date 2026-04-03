@@ -163,6 +163,32 @@
   line-height: 1;
 }
 
+.kb-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.kb-new-chat {
+  background: rgba(99,102,241,0.12);
+  border: 1px solid rgba(99,102,241,0.25);
+  color: #a5b4fc;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 9px;
+  border-radius: 6px;
+  line-height: 1.4;
+  transition: background 0.15s, color 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.kb-new-chat:hover {
+  background: rgba(99,102,241,0.22);
+  color: #c7d2fe;
+}
+
 .kb-close {
   background: none;
   border: none;
@@ -209,6 +235,14 @@
 
 .kb-msg-bot {
   align-self: flex-start;
+}
+
+/* Resume divider bubble */
+.kb-msg-bot .kb-bubble[data-resume] {
+  background: rgba(99,102,241,0.08);
+  border: 1px solid rgba(99,102,241,0.2);
+  color: #a5b4fc;
+  font-size: 11px;
 }
 
 .kb-avatar {

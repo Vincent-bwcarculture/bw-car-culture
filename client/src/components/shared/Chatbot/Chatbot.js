@@ -106,20 +106,45 @@ const Chatbot = () => {
   const [usageInfo, setUsageInfo] = useState(null); // { used, limit, isPro }
   const [isPro, setIsPro] = useState(false);
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [hasStoredHistory, setHasStoredHistory] = useState(false);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
 
-  // Check Pro status when authenticated
+  // On login: load chat history + pro status in parallel
   useEffect(() => {
-    if (!isAuthenticated) { setIsPro(false); return; }
+    if (!isAuthenticated) {
+      setIsPro(false);
+      setMessages([WELCOME_MSG]);
+      setHistory([]);
+      setHistoryLoaded(false);
+      setHasStoredHistory(false);
+      return;
+    }
     const token = localStorage.getItem('token');
-    fetch(`${API_BASE}/ai/subscription`, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
-      .then(r => r.json())
-      .then(d => { if (d.success) setIsPro(d.isPro); })
-      .catch(() => {});
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+    Promise.all([
+      fetch(`${API_BASE}/ai/subscription`, { headers }).then(r => r.json()).catch(() => ({})),
+      fetch(`${API_BASE}/ai/history`,      { headers }).then(r => r.json()).catch(() => ({}))
+    ]).then(([subData, histData]) => {
+      if (subData.success) setIsPro(subData.isPro);
+      if (histData.success && histData.messages?.length) {
+        // Restore text messages only (not card-type messages)
+        const restored = histData.messages
+          .filter(m => m.role === 'user' || m.role === 'assistant')
+          .map(m => ({ role: m.role, content: m.content }));
+        if (restored.length) {
+          setMessages([WELCOME_MSG, { role: 'assistant', content: '↩️ **Welcome back!** Here\'s your recent conversation:', isResume: true }, ...restored]);
+          setHistory(restored);
+          setHasStoredHistory(true);
+        }
+      }
+      setHistoryLoaded(true);
+    });
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -134,6 +159,17 @@ const Chatbot = () => {
     navigate(path);
     setIsOpen(false);
   }, [navigate]);
+
+  const clearHistory = useCallback(async () => {
+    setMessages([WELCOME_MSG]);
+    setHistory([]);
+    setHasStoredHistory(false);
+    const token = localStorage.getItem('token');
+    fetch(`${API_BASE}/ai/history/clear`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    }).catch(() => {});
+  }, []);
 
   const appendMsg = useCallback((msg) => {
     setMessages(prev => [...prev, msg]);
@@ -354,8 +390,8 @@ const Chatbot = () => {
     const isUser = msg.role === 'user';
     return (
       <div key={idx} className={`kb-msg ${isUser ? 'kb-msg-user' : 'kb-msg-bot'}`}>
-        {!isUser && <div className="kb-avatar">K</div>}
-        <div className="kb-bubble">
+        {!isUser && <div className="kb-avatar">M</div>}
+        <div className="kb-bubble" {...(msg.isResume ? { 'data-resume': 'true' } : {})}>
           {renderText(msg.content)}
           {msg.authGate && (
             <div className="kb-auth-btns">
@@ -374,7 +410,7 @@ const Chatbot = () => {
         {messages.map((msg, i) => renderMessage(msg, i))}
         {loading && (
           <div className="kb-msg kb-msg-bot">
-            <div className="kb-avatar">K</div>
+            <div className="kb-avatar">M</div>
             <div className="kb-bubble kb-typing">
               <span /><span /><span />
             </div>
@@ -511,7 +547,7 @@ const Chatbot = () => {
         <div className="kb-panel">
           <div className="kb-header">
             <div className="kb-header-info">
-              <div className="kb-header-avatar">K</div>
+              <div className="kb-header-avatar">M</div>
               <div>
                 <div className="kb-header-name">Mpho AI</div>
                 <div className="kb-header-status">
@@ -520,7 +556,14 @@ const Chatbot = () => {
                 </div>
               </div>
             </div>
-            <button className="kb-close" onClick={() => setIsOpen(false)}>✕</button>
+            <div className="kb-header-actions">
+              {isAuthenticated && hasStoredHistory && (
+                <button className="kb-new-chat" onClick={clearHistory} title="Start new chat">
+                  ✦ New
+                </button>
+              )}
+              <button className="kb-close" onClick={() => setIsOpen(false)}>✕</button>
+            </div>
           </div>
 
           {view === 'chat' ? renderChat() : renderFeedback()}
