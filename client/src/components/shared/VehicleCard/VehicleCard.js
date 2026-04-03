@@ -915,9 +915,11 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     } else if (phoneNum) {
       window.open(`tel:${formatNumber(phoneNum)}`, '_self');
     } else {
-      // Fallback: contact BW Car Culture directly with vehicle details
-      const fallbackMsg = encodeURIComponent(`Hi! I'm interested in this vehicle on BW Car Culture:\n\n${vehicleDetails}\n\nPlease help me get in touch with the seller.`);
-      window.open(`https://wa.me/26774122453?text=${fallbackMsg}`, '_blank');
+      // No seller contact — open Mpho AI to assist with drafting + forwarding
+      const draftMessage = `Hi! I found a vehicle on BW Car Culture that I'm interested in:\n\n${vehicleDetails}\n\nI'd like to enquire about this vehicle. Please help me get in touch with the seller or provide more details. Thank you!`;
+      window.dispatchEvent(new CustomEvent('mpho:contact-assist', {
+        detail: { vehicleTitle: car.title, draftMessage }
+      }));
     }
   }, [car, dealer, analytics]);
 

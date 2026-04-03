@@ -94,6 +94,46 @@ const ServiceCard = ({ service, onNavigate }) => (
   </div>
 );
 
+const ContactDraftCard = ({ draftMessage, onSent }) => {
+  const [draft, setDraft] = useState(draftMessage);
+  const [sent, setSent] = useState(false);
+
+  const handleSend = () => {
+    const encoded = encodeURIComponent(draft.trim());
+    window.open(`https://wa.me/26774122453?text=${encoded}`, '_blank');
+    setSent(true);
+    if (onSent) onSent();
+  };
+
+  if (sent) {
+    return (
+      <div className="kb-draft-sent">
+        <span>✅</span>
+        <span>Enquiry sent to the BW Car Culture team! They'll connect you with the seller shortly.</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="kb-draft-card">
+      <div className="kb-draft-label">📋 Draft message — edit if you'd like:</div>
+      <textarea
+        className="kb-draft-textarea"
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        rows={7}
+        maxLength={1000}
+      />
+      <div className="kb-draft-footer">
+        <span className="kb-draft-chars">{draft.length}/1000</span>
+        <button className="kb-draft-send" onClick={handleSend} disabled={!draft.trim()}>
+          💬 Send to WhatsApp
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState('chat'); // 'chat' | 'feedback'
@@ -173,6 +213,33 @@ const Chatbot = () => {
 
   const appendMsg = useCallback((msg) => {
     setMessages(prev => [...prev, msg]);
+  }, []);
+
+  // Listen for contact-assist events from VehicleCard
+  useEffect(() => {
+    const handler = (e) => {
+      const { vehicleTitle, draftMessage } = e.detail || {};
+      setIsOpen(true);
+      setView('chat');
+      // Small delay so panel is mounted before we append
+      setTimeout(() => {
+        setMessages(prev => {
+          // Avoid duplicate contact_assist cards
+          const already = prev.some(m => m.role === 'contact_assist' && m.draftMessage === draftMessage);
+          if (already) return prev;
+          return [
+            ...prev,
+            {
+              role: 'assistant',
+              content: `I couldn't retrieve the seller's contact number for **${vehicleTitle || 'this vehicle'}** 🔍\n\nNo worries — I've drafted an enquiry message below that will go directly to the **BW Car Culture team**, who will forward it to the seller on your behalf.\n\nFeel free to edit it before sending! 👇`
+            },
+            { role: 'contact_assist', draftMessage, vehicleTitle }
+          ];
+        });
+      }, 120);
+    };
+    window.addEventListener('mpho:contact-assist', handler);
+    return () => window.removeEventListener('mpho:contact-assist', handler);
   }, []);
 
   const sendMessage = useCallback(async (text) => {
@@ -298,6 +365,16 @@ const Chatbot = () => {
   };
 
   const renderMessage = (msg, idx) => {
+    if (msg.role === 'contact_assist') {
+      return (
+        <div key={idx} className="kb-action-cards">
+          <ContactDraftCard
+            draftMessage={msg.draftMessage}
+            onSent={() => appendMsg({ role: 'assistant', content: "Your enquiry is on its way! 🚀 The BW Car Culture team will get back to you as soon as possible. You can also reach us directly at +26774122453." })}
+          />
+        </div>
+      );
+    }
     if (msg.role === 'upsell') {
       return (
         <div key={idx} className="kb-upsell-card">
