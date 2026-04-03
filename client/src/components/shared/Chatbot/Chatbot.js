@@ -287,7 +287,14 @@ const Chatbot = () => {
 
       const data = await res.json();
 
-      if (!data.success) throw new Error(data.reply || 'API error');
+      // Soft errors (quota, daily limit) — show message + upsell if present, don't throw
+      if (!data.success) {
+        if (data.reply) appendMsg({ role: 'assistant', content: data.reply });
+        if (data.actions?.some(a => a.type === 'show_upsell')) {
+          appendMsg({ role: 'upsell' });
+        }
+        return;
+      }
 
       // Update usage + Pro status
       if (data.usage) {
@@ -303,7 +310,6 @@ const Chatbot = () => {
       if (data.actions && data.actions.length > 0) {
         for (const action of data.actions) {
           if (action.type === 'navigate') {
-            // Small delay so user reads reply first
             setTimeout(() => navigate(action.path), 1200);
           } else if (action.type === 'prefill_listing') {
             localStorage.setItem('ai_listing_prefill', JSON.stringify(action.data));
@@ -327,9 +333,7 @@ const Chatbot = () => {
     } catch (err) {
       appendMsg({
         role: 'assistant',
-        content: err.message && !err.message.includes('API error') && !err.message.includes('fetch')
-          ? err.message
-          : "Sorry, I'm having a moment. Try again or reach us on WhatsApp at +26774122453."
+        content: "Sorry, I'm having a moment. Try again or reach us on WhatsApp at +26774122453."
       });
       // Do NOT keep the failed user message in history — it would break Gemini's
       // strict user/model alternation on the next send attempt
