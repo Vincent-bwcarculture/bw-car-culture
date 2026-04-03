@@ -906,16 +906,18 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       ? (n.startsWith('+') ? n.replace(/\s+/g, '') : `+267${n.replace(/\s+/g, '')}`)
       : null;
 
+    const encodedMessage = encodeURIComponent(message);
+
     if (preferredMethod === 'phone' && phoneNum) {
       window.open(`tel:${formatNumber(phoneNum)}`, '_self');
     } else if (whatsappNum) {
-      const encodedMessage = encodeURIComponent(message);
       window.open(`https://wa.me/${formatNumber(whatsappNum)}?text=${encodedMessage}`, '_blank');
     } else if (phoneNum) {
       window.open(`tel:${formatNumber(phoneNum)}`, '_self');
     } else {
-      const sellerTypeText = dealer?.sellerType === 'private' ? 'seller' : 'dealer';
-      alert(`Contact information is not available for this listing. Please view the full details to contact the ${sellerTypeText}.`);
+      // Fallback: contact BW Car Culture directly with vehicle details
+      const fallbackMsg = encodeURIComponent(`Hi! I'm interested in this vehicle on BW Car Culture:\n\n${vehicleDetails}\n\nPlease help me get in touch with the seller.`);
+      window.open(`https://wa.me/26774122453?text=${fallbackMsg}`, '_blank');
     }
   }, [car, dealer, analytics]);
 
