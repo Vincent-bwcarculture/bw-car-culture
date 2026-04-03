@@ -327,9 +327,12 @@ const Chatbot = () => {
     } catch (err) {
       appendMsg({
         role: 'assistant',
-        content: "Sorry, I'm having a moment. Try again or reach us on WhatsApp at +26774122453 😊"
+        content: err.message && !err.message.includes('API error') && !err.message.includes('fetch')
+          ? err.message
+          : "Sorry, I'm having a moment. Try again or reach us on WhatsApp at +26774122453."
       });
-      setHistory(newHistory); // keep user msg in history
+      // Do NOT keep the failed user message in history — it would break Gemini's
+      // strict user/model alternation on the next send attempt
     } finally {
       setLoading(false);
     }
