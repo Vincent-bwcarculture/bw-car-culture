@@ -1,0 +1,173 @@
+.cp-card {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.cp-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.cp-card--full { opacity: 0.7; }
+
+/* Image */
+.cp-card-image-wrap {
+  position: relative;
+  height: 160px;
+  background: #111;
+  overflow: hidden;
+}
+.cp-card-image {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.cp-card-image-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+  font-size: 3rem;
+}
+.cp-card-badge {
+  position: absolute; top: 10px; left: 10px;
+  background: rgba(0,0,0,0.75);
+  color: #fff; font-size: 0.7rem; font-weight: 600;
+  padding: 3px 8px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  backdrop-filter: blur(4px);
+}
+.cp-card-full-badge {
+  position: absolute; top: 10px; right: 10px;
+  background: #ef4444; color: #fff;
+  font-size: 0.7rem; font-weight: 700;
+  padding: 3px 8px; border-radius: 20px;
+  text-transform: uppercase;
+}
+
+/* Content */
+.cp-card-content {
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  flex: 1;
+}
+
+/* Route */
+.cp-card-route {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
+}
+.cp-card-city {
+  font-size: 1rem; font-weight: 700; color: #fff;
+}
+.cp-card-arrow {
+  color: #e53e3e; font-size: 1.1rem; font-weight: 700;
+}
+
+/* Meta */
+.cp-card-meta {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: #111; border-radius: 8px;
+  padding: 10px;
+}
+.cp-card-meta-item {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.cp-card-meta-label {
+  font-size: 0.65rem; color: #666; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.cp-card-meta-value {
+  font-size: 0.82rem; color: #ddd; font-weight: 600;
+}
+.cp-card-price { color: #f59e0b; }
+
+/* Vehicle */
+.cp-card-vehicle {
+  font-size: 0.78rem; color: #888;
+  text-transform: capitalize;
+}
+
+/* Notes */
+.cp-card-notes {
+  font-size: 0.8rem; color: #aaa;
+  line-height: 1.4; margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Driver */
+.cp-card-driver {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 2px;
+}
+.cp-card-driver-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: #e53e3e; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.cp-card-driver-name {
+  font-size: 0.82rem; color: #ccc; font-weight: 500;
+}
+
+/* Reserve panel */
+.cp-card-reserve-panel {
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.cp-card-msg {
+  font-size: 0.8rem; padding: 6px 10px; border-radius: 6px;
+}
+.cp-card-msg--success { background: rgba(34,197,94,0.15); color: #4ade80; }
+.cp-card-msg--error   { background: rgba(239,68,68,0.15);  color: #f87171; }
+
+.cp-card-input {
+  background: #1a1a1a; border: 1px solid #333; border-radius: 6px;
+  color: #fff; font-size: 0.82rem; padding: 7px 10px;
+  outline: none; width: 100%;
+}
+.cp-card-input:focus { border-color: #e53e3e; }
+
+.cp-card-seats-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.cp-card-seats-label { font-size: 0.8rem; color: #aaa; }
+.cp-card-seats-select {
+  background: #1a1a1a; border: 1px solid #333; border-radius: 6px;
+  color: #fff; font-size: 0.82rem; padding: 5px 8px;
+}
+.cp-card-seats-total { font-size: 0.8rem; color: #f59e0b; margin-left: auto; font-weight: 600; }
+
+.cp-card-reserve-actions {
+  display: flex; gap: 8px;
+}
+
+/* Footer */
+.cp-card-footer {
+  display: flex; gap: 8px; margin-top: auto;
+}
+
+/* Buttons */
+.cp-card-btn {
+  flex: 1; padding: 8px 12px;
+  border: none; border-radius: 7px;
+  font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.cp-card-btn:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
+.cp-card-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.cp-card-btn--reserve  { background: #e53e3e; color: #fff; }
+.cp-card-btn--wa       { background: #25d366; color: #fff; flex: 0 0 auto; padding: 8px 14px; }
+.cp-card-btn--confirm  { background: #e53e3e; color: #fff; }
+.cp-card-btn--cancel   { background: #2a2a2a; color: #aaa; }
+
+@media (max-width: 480px) {
+  .cp-card-meta { grid-template-columns: 1fr 1fr; }
+  .cp-card-meta-item:last-child { grid-column: span 2; }
+}

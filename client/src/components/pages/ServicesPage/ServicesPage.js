@@ -4,6 +4,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import BusinessCard from '../../shared/BusinessCard/BusinessCard.js';
 import RentalCard from '../../shared/RentalCard/RentalCard.js';
 import PublicTransportCard from '../../shared/PublicTransportCard/PublicTransportCard.js';
+import CarpoolCard from '../../shared/CarpoolCard/CarpoolCard.js';
+import CreateRideModal from '../../modals/CreateRideModal/CreateRideModal.js';
 import { http } from '../../../config/axios.js';
 import './ServicesPage.css';
 import { buildHelmet } from '../../../hooks/useSEO.js';
@@ -76,7 +78,26 @@ const SERVICE_CATEGORIES = [
         { name: 'routeType', label: 'Route Type', options: ['All', 'Bus', 'Taxi', 'Shuttle'] }
       ]
     }
-  }
+  },
+  {
+    id: 'carpooling',
+    name: 'Shared Rides',
+    description: 'Find drivers heading your way and split the cost. A community-powered transport alternative.',
+    shortDescription: 'Share rides with drivers heading the same direction',
+    heroTitle: 'Community Shared Rides',
+    heroSubtitle: 'Connect with drivers going your way and share the journey',
+    image: '/images/categories/carpooling-banner.jpg',
+    icon: '🤝',
+    gradient: 'linear-gradient(135deg,rgb(0,0,0) 0%,rgb(36,36,36) 100%)',
+    filterOptions: {
+      placeholder: 'Search by origin or destination city…',
+      locationLabel: 'Destination city…',
+      filters: [
+        { name: 'recurrence', label: 'Trip type', options: ['All', 'Once', 'Daily', 'Weekdays', 'Weekly'] },
+        { name: 'seats',      label: 'Seats needed', options: ['All', '1', '2', '3', '4+'] }
+      ]
+    }
+  },
   // {
   //   id: 'trailer-rentals',
   //   name: 'Trailer Rentals',
@@ -128,6 +149,11 @@ const ServicesPage = () => {
   const listingsPerPage = 8;
   const [listingsError, setListingsError] = useState(null);
   const [listingsLoading, setListingsLoading] = useState(false);
+
+  // Carpooling state
+  const [rides, setRides] = useState([]);
+  const [ridesLoading, setRidesLoading] = useState(false);
+  const [showCreateRide, setShowCreateRide] = useState(false);
 
   // Enhanced search suggestions for transport stops
   const [searchSuggestions, setSearchSuggestions] = useState([]);
@@ -228,13 +254,18 @@ const ServicesPage = () => {
         serviceFilters.providerType = providerType;
       }
       
-      await fetchServiceProviders(serviceFilters, page);
-      
-      if (['car-rentals', 'trailer-rentals', 'transport'].includes(category)) {
-        await fetchListings(category, search, locationFilter, page, filters);
+      if (category === 'carpooling') {
+        await fetchRides(search, locationFilter, filters);
+        setServices([]); setFilteredServices([]);
+        setListings([]); setFilteredListings([]);
       } else {
-        setListings([]);
-        setFilteredListings([]);
+        await fetchServiceProviders(serviceFilters, page);
+        if (['car-rentals', 'trailer-rentals', 'transport'].includes(category)) {
+          await fetchListings(category, search, locationFilter, page, filters);
+        } else {
+          setListings([]);
+          setFilteredListings([]);
+        }
       }
     } catch (err) {
       console.error('Error in fetchData:', err);
@@ -302,6 +333,22 @@ const ServicesPage = () => {
       setFilteredServices([]);
       setTotalPages(1);
     }
+  };
+
+  const fetchRides = async (search, destination, filters) => {
+    setRidesLoading(true);
+    try {
+      const API_BASE = process.env.REACT_APP_API_URL || 'https://api.i3wcarculture.com/api';
+      const params = new URLSearchParams({ limit: '20' });
+      if (search)      params.set('origin', search);
+      if (destination) params.set('destination', destination);
+      if (filters.seats && filters.seats !== 'All') params.set('seats', filters.seats.replace('+',''));
+      const res = await fetch(`${API_BASE}/rides?${params}`);
+      const data = await res.json();
+      if (data.success) setRides(data.data || []);
+      else setRides([]);
+    } catch { setRides([]); }
+    finally { setRidesLoading(false); }
   };
 
   // Enhanced fetchListings with stops search functionality
@@ -846,6 +893,46 @@ const ServicesPage = () => {
                 onBook={() => handleRentalItemClick(route)}
               />
             ))}
+          </div>
+        );
+      case 'carpooling':
+        return (
+          <div>
+            <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:'16px' }}>
+              <button
+                onClick={() => setShowCreateRide(true)}
+                style={{ background:'#e53e3e', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 20px', fontWeight:600, fontSize:'0.85rem', cursor:'pointer' }}
+              >
+                + Post Your Ride
+              </button>
+            </div>
+            {ridesLoading ? (
+              <div className="bcc-services-loading-page"><div className="bcc-services-spinner" /></div>
+            ) : rides.length === 0 ? (
+              <div style={{ textAlign:'center', padding:'60px 20px', color:'#666' }}>
+                <div style={{ fontSize:'3rem', marginBottom:'12px' }}>🚗</div>
+                <p style={{ color:'#ccc', marginBottom:'8px', fontWeight:600 }}>No rides available right now</p>
+                <p style={{ fontSize:'0.85rem', marginBottom:'20px' }}>Be the first to post a shared ride</p>
+                <button onClick={() => setShowCreateRide(true)} style={{ background:'#e53e3e', color:'#fff', border:'none', borderRadius:'8px', padding:'10px 20px', fontWeight:600, cursor:'pointer' }}>
+                  Post a Ride
+                </button>
+              </div>
+            ) : (
+              <div className="bcc-service-transport-grid">
+                {rides.map(ride => (
+                  <CarpoolCard
+                    key={ride._id}
+                    ride={ride}
+                    onReserved={(id, avail) => setRides(prev => prev.map(r => String(r._id) === String(id) ? { ...r, seatsAvailable: avail, status: avail === 0 ? 'full' : 'active' } : r))}
+                  />
+                ))}
+              </div>
+            )}
+            <CreateRideModal
+              isOpen={showCreateRide}
+              onClose={() => setShowCreateRide(false)}
+              onCreated={(r) => setRides(prev => [r, ...prev])}
+            />
           </div>
         );
       case 'trailer-rentals':
