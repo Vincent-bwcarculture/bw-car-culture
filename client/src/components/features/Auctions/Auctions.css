@@ -619,46 +619,51 @@
   }
   
   @media (max-width: 768px) {
+    /* Featured: 2 columns at tablet, not 1 */
     .featured-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
     }
-    
+
     .auctions-grid {
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
     }
-    
+
     .auction-title {
+      font-size: 1rem;
+    }
+
+    .bid-amount {
       font-size: 1.1rem;
     }
-    
-    .bid-amount {
-      font-size: 1.2rem;
-    }
   }
-  
+
   @media (max-width: 480px) {
     .auctions-container {
       padding: 1rem;
     }
-    
+
+    /* 2-column compact grid on small phones — reduces vertical scroll */
+    .featured-grid,
     .auctions-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
     }
-    
+
     .auction-content {
-      padding: 1.2rem;
+      padding: 0.75rem;
     }
-    
+
+    .auction-title {
+      font-size: 0.9rem;
+    }
+
+    /* Keep specs/bid-info horizontal with wrap instead of stacking */
     .auction-specs,
     .auction-bid-info {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.8rem;
-    }
-    
-    .watchers {
-      align-items: flex-start;
-      margin-top: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
   }
   

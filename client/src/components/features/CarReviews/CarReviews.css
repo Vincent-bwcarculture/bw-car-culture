@@ -686,37 +686,51 @@
   .car-reviews-header h1 {
     font-size: 2rem;
   }
-  
+
+  /* Tabs: horizontal scroll instead of stacking vertically */
   .car-reviews-tabs {
-    flex-direction: column;
-    gap: 0.8rem;
+    flex-direction: row;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    flex-wrap: nowrap;
   }
-  
+
+  .car-reviews-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
   .car-reviews-tab-button {
-    width: 100%;
-    padding: 0.9rem 1.5rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 0.7rem 1.2rem;
   }
-  
+
+  /* 2-column grids on mobile — not single column */
   .car-reviews-form-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .car-reviews-ratings-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
-  
+
   .car-reviews-review-ratings {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
-  
+
   .car-reviews-review-form {
     padding: 1.5rem;
   }
-  
+
   .car-reviews-search-container {
     flex-direction: column;
   }
-  
+
   .car-reviews-search-container button {
     width: 100%;
     padding: 1rem;

@@ -319,24 +319,36 @@
   }
   
   @media (max-width: 576px) {
+    /* Keep 2-column grid on mobile to reduce vertical scrolling */
     .bcc-dealerships-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
     }
-    
+
     .bcc-dealerships-hero h1 {
       font-size: 1.8rem;
     }
-    
+
     .bcc-dealerships-container {
       padding: 1rem;
     }
-    
+
     .bcc-dealership-filter-selects {
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
     }
-    
+
     .bcc-dealership-filter-select,
     .bcc-dealership-location-input {
       width: 100%;
+      min-width: unset;
+    }
+  }
+
+  @media (max-width: 380px) {
+    /* Only go single column on very small phones */
+    .bcc-dealerships-grid {
+      grid-template-columns: 1fr;
     }
   }

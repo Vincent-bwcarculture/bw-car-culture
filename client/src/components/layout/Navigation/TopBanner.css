@@ -41,3 +41,18 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
+
+@media (max-width: 480px) {
+  .banner-container {
+    height: 32px;
+    margin-top: 1%;
+  }
+
+  .banner-item {
+    padding: 0 16px;
+  }
+
+  .banner-item h3 {
+    font-size: 11px;
+  }
+}

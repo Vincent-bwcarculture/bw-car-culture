@@ -720,16 +720,17 @@
   }
   
   @media (max-width: 768px) {
+    /* 2-column grids on tablets — only go single column at 480px */
     .bcc-services-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
     }
 
     .bcc-service-rental-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
     }
 
     .bcc-service-transport-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
     }
 
     .bcc-services-hero {
@@ -841,6 +842,13 @@
     .bcc-services-tab-button {
       padding: 0.6rem 0.8rem;
       font-size: 0.8rem;
+    }
+
+    /* Single column only on very small phones */
+    .bcc-services-grid,
+    .bcc-service-rental-grid,
+    .bcc-service-transport-grid {
+      grid-template-columns: 1fr;
     }
 
     .bcc-service-pagination {

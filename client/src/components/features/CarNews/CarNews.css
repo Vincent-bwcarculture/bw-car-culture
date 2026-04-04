@@ -394,9 +394,10 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .news-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  .news-grid,
+  .news-grid-loading {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
   
   .featured-news {
@@ -457,20 +458,35 @@
   .media-filter-button span {
     display: none; /* Hide text, show only icons on very small screens */
   }
-  
+
   .media-filter-button {
     padding: 0.4rem;
   }
-  
+
   .autoplay-toggle span {
     display: none;
   }
-  
+
   .autoplay-toggle {
     padding: 0.4rem;
   }
-  
+
+  /* Keep 2-column news grid on small phones — cards are simple enough */
+  .news-grid,
+  .news-grid-loading {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+
   .news-card-image {
-    height: 180px;
+    height: 120px;
+  }
+
+  .news-card h3 {
+    font-size: 0.85rem;
+  }
+
+  .news-description {
+    display: none; /* hide description on very small screens to save space */
   }
 }

@@ -629,20 +629,31 @@
     padding: 1rem;
   }
 
+  /* 2-column article grid on mobile — saves significant vertical space */
   .cc-newspage-container .cc-newspage-articles-container.grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 
   .cc-newspage-container .cc-newspage-title {
     font-size: 1.8rem;
   }
 
+  /* Reduce featured image height on tablets */
+  .cc-newspage-container .cc-newspage-featured-article-image {
+    height: 260px;
+  }
+
   .cc-newspage-container .cc-newspage-featured-article-overlay {
-    padding: 1.5rem;
+    padding: 1rem;
   }
 
   .cc-newspage-container .cc-newspage-featured-article-title {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+  }
+
+  .cc-newspage-container .cc-newspage-featured-article-description {
+    display: none; /* hide on mobile to save vertical space */
   }
 
   .cc-newspage-container .cc-newspage-filter-option span {
@@ -663,6 +674,29 @@
 @media (max-width: 480px) {
   .cc-newspage-container .cc-newspage-title {
     font-size: 1.5rem;
+  }
+
+  /* Keep 2-column on small phones */
+  .cc-newspage-container .cc-newspage-articles-container.grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  /* Reduce article card image height on small phones */
+  .cc-newspage-container .cc-newspage-articles-container.grid .cc-newspage-article-card-image {
+    height: 130px;
+  }
+
+  .cc-newspage-container .cc-newspage-article-card-content {
+    padding: 0.75rem;
+  }
+
+  .cc-newspage-container .cc-newspage-article-card-title {
+    font-size: 0.95rem;
+  }
+
+  .cc-newspage-container .cc-newspage-article-card-description {
+    display: none; /* hide on very small to save vertical space */
   }
 
   .cc-newspage-container .cc-newspage-filter-toggle span {

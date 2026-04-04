@@ -499,39 +499,37 @@
 
 @media (max-width: 480px) {
   .transport-card-image-container {
-      height: 140px;
+    height: 140px;
   }
-  
+
+  /* Keep provider info horizontal — stacking wastes vertical space */
   .transport-card-provider-info {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
+    gap: 0.5rem;
   }
-  
+
+  .transport-card-provider-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* Footer stays horizontal with wrap */
   .transport-card-footer {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.4rem;
   }
-  
+
   .transport-card-actions {
-      width: 100%;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 4px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+    width: 100%;
   }
-  
-  .transport-card-share-btn {
-      grid-column: 1;
-  }
-  
-  .transport-card-reserve-btn {
-      grid-column: 2;
-  }
-  
+
+  .transport-card-share-btn { grid-column: 1; }
+  .transport-card-reserve-btn { grid-column: 2; }
   .transport-card-details-btn {
-      grid-column: span 2;
-      margin-top: 4px;
+    grid-column: span 2;
+    margin-top: 4px;
   }
 }
 
