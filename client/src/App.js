@@ -38,7 +38,7 @@ import HomeDealershipsSection from './components/features/HomeDealershipsSection
 import VideoSection from './components/features/VideoSection/VideoSection.js';
 import HomeRentalsSection from './components/features/HomeRentalsSection/HomeRentalsSection.js';
 import HomeServicesSection from './components/features/HomeServicesSection/HomeServicesSection.js';
-import CarpoolSection from './components/features/CarpoolSection/CarpoolSection.js';
+// import CarpoolSection from './components/features/CarpoolSection/CarpoolSection.js'; // hidden until launch
 
 // Styles and Utilities
 import './App.css';
@@ -740,7 +740,7 @@ const HomeContent = () => {
       <MarketplaceSection />
       {/* <CarCategories /> */}
       <CarBrands />
-      <CarpoolSection />
+      {/* <CarpoolSection /> */}
       <VideoSection />
       <HomeRentalsSection />
       <NewsProvider>

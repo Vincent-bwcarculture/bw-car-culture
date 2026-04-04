@@ -4,8 +4,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import BusinessCard from '../../shared/BusinessCard/BusinessCard.js';
 import RentalCard from '../../shared/RentalCard/RentalCard.js';
 import PublicTransportCard from '../../shared/PublicTransportCard/PublicTransportCard.js';
-import CarpoolCard from '../../shared/CarpoolCard/CarpoolCard.js';
-import CreateRideModal from '../../modals/CreateRideModal/CreateRideModal.js';
+// import CarpoolCard from '../../shared/CarpoolCard/CarpoolCard.js'; // hidden until launch
+// import CreateRideModal from '../../modals/CreateRideModal/CreateRideModal.js'; // hidden until launch
 import { http } from '../../../config/axios.js';
 import './ServicesPage.css';
 import { buildHelmet } from '../../../hooks/useSEO.js';
@@ -79,6 +79,7 @@ const SERVICE_CATEGORIES = [
       ]
     }
   },
+  /* hidden until launch — uncomment to activate
   {
     id: 'carpooling',
     name: 'Shared Rides',
@@ -98,6 +99,7 @@ const SERVICE_CATEGORIES = [
       ]
     }
   },
+  */
   // {
   //   id: 'trailer-rentals',
   //   name: 'Trailer Rentals',
