@@ -95,7 +95,7 @@ const ServiceCard = ({ service, onNavigate }) => (
 );
 
 const ContactDraftCard = ({ draftMessage, onSent }) => {
-  const [draft, setDraft] = useState(draftMessage);
+  const [draft, setDraft] = useState(draftMessage || '');
   const [sent, setSent] = useState(false);
 
   const handleSend = () => {
@@ -289,6 +289,7 @@ const Chatbot = () => {
 
       // Soft errors (quota, daily limit) — show message + upsell if present, don't throw
       if (!data.success) {
+        if (data.usage) { setUsageInfo(data.usage); if (data.usage.isPro !== undefined) setIsPro(data.usage.isPro); }
         if (data.reply) appendMsg({ role: 'assistant', content: data.reply });
         if (data.actions?.some(a => a.type === 'show_upsell')) {
           appendMsg({ role: 'upsell' });
@@ -445,7 +446,7 @@ const Chatbot = () => {
         </div>
       );
     }
-    if (msg.role === 'listings') {
+    if (msg.role === 'listings' && msg.listings?.length > 0) {
       return (
         <div key={idx} className="kb-action-cards">
           {msg.listings.map(l => (
