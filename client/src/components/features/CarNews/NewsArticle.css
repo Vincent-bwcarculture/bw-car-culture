@@ -197,10 +197,11 @@
   border-color: #ff3300;
 }
 
-.cc-news-action-button.comment-btn:hover {
+.cc-news-action-button.comment-btn:hover,
+.cc-news-action-button.comment-btn.active {
   border-color: #3b82f6;
   color: #3b82f6;
-  background: rgba(59, 130, 246, 0.08);
+  background: rgba(59, 130, 246, 0.12);
 }
 
 /* ── Comment section ────────────────────────────────────────────────── */
@@ -1069,11 +1070,11 @@
 /* Responsive design */
 @media (max-width: 768px) {
   .cc-news-article-header h1 {
-    font-size: 2rem;
+    font-size: 1.35rem;
   }
-  
+
   .cc-news-article-header h2 {
-    font-size: 1.125rem;
+    font-size: 0.95rem;
   }
   
   .cc-news-article-meta {
@@ -1127,7 +1128,7 @@
 
 @media (max-width: 480px) {
   .cc-news-article-header h1 {
-    font-size: 1.75rem;
+    font-size: 1.1rem;
   }
   
   .cc-news-article-content {

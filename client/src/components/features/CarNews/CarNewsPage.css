@@ -276,12 +276,18 @@
 .cc-newspage-container .cc-newspage-featured-article-card {
   border-radius: 12px;
   overflow: hidden;
+  position: relative;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease;
 }
 
 .cc-newspage-container .cc-newspage-featured-article-card:hover {
   transform: translateY(-5px);
+}
+
+.cc-newspage-container .cc-newspage-featured-article-link {
+  display: block;
+  position: relative;
 }
 
 .cc-newspage-container .cc-newspage-featured-article-image {
@@ -414,6 +420,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.25rem;
+  min-height: 400px;
 }
 
 .cc-newspage-container .cc-newspage-articles-container.list {
@@ -467,12 +474,14 @@
 .cc-newspage-container .cc-newspage-article-card-image {
   position: relative;
   overflow: hidden;
+  background: #1a1a1a; /* prevents flash of blank space while image loads */
 }
 
 .cc-newspage-container .cc-newspage-article-card-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
   transition: transform 0.3s ease;
 }
 

@@ -793,7 +793,7 @@ const NewsArticle = () => {
               onClick={handleLike}
               aria-label={liked ? 'Unlike article' : 'Like article'}
             >
-              <Heart size={16} />
+              <Heart size={16} fill={liked ? 'currentColor' : 'none'} />
               <span>{liked ? 'Liked' : 'Like'}</span>
             </button>
             <button

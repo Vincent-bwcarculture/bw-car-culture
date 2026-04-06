@@ -50,6 +50,8 @@
   width: 100%;
   position: relative;
   overflow: hidden;
+  background: #1a1a1a; /* prevents flash while image loads */
+  flex-shrink: 0;
 }
 
 .news-card-image img {
