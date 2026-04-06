@@ -28,8 +28,8 @@ const normalizeUrlPath = (url) => {
     }
   }
   
-  // Remove leading /api if present (since it's already in baseURL)
-  let path = url.startsWith('/api/') ? url.substring(4) : url;
+  // Keep full path — baseURL is https://bw-car-culture-api.vercel.app (no /api suffix)
+  let path = url;
   
   // Ensure path starts with / if it doesn't
   if (!path.startsWith('/')) {

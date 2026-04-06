@@ -4,12 +4,11 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { addNotification } from '../store/slices/uiSlice.js';
 import AddListingModal from '../components/shared/AddListingModal/AddListingModal.js';
-import ReviewModal from '../components/shared/ReviewModal/ReviewModal.js';
+import SimpleArticleModal from './SimpleArticleModal/SimpleArticleModal.js';
 import VideoUploadModal from './VideoUploadModal/VideoUploadModal.js';
 import InventoryForm from './InventoryManager/InventoryForm.js';
 import AssistedListingModal from './AssistedListingModal/AssistedListingModal.js';
 import { listingService } from '../services/listingService.js';
-import { newsService } from '../services/newsService.js';
 import { videoService } from '../services/videoService.js';
 import { useAuth } from '../context/AuthContext.js';
 import ErrorBoundary from '../components/ErrorBoundary.js';
@@ -19,8 +18,7 @@ const QuickActions = ({ onActionSelected }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showAddListing, setShowAddListing] = useState(false);
-  const [showAddReview, setShowAddReview] = useState(false);
-  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showSimpleArticle, setShowSimpleArticle] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showInventoryForm, setShowInventoryForm] = useState(false);
   const [showAssistedListing, setShowAssistedListing] = useState(false);
@@ -51,32 +49,6 @@ const QuickActions = ({ onActionSelected }) => {
         message: error.message || 'Failed to create listing'
       }));
       console.error('Failed to create listing:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddReview = async (formData) => {
-    try {
-      setLoading(true);
-      
-      console.log('Creating new article with form data');
-      
-      const newArticle = await newsService.createArticle(formData);
-      console.log('Article created successfully:', newArticle);
-      
-      dispatch(addNotification({
-        type: 'success',
-        message: 'Article created successfully!'
-      }));
-      
-      setShowReviewModal(false);
-    } catch (error) {
-      console.error('Failed to create article:', error);
-      dispatch(addNotification({
-        type: 'error',
-        message: error.message || 'Failed to create article'
-      }));
     } finally {
       setLoading(false);
     }
@@ -167,11 +139,7 @@ const QuickActions = ({ onActionSelected }) => {
   };
 
   const handleReviewClick = () => {
-    try {
-      setShowReviewModal(true);
-    } catch (error) {
-      console.error('Error opening review modal:', error);
-    }
+    setShowSimpleArticle(true);
   };
 
   const handleVideoClick = () => {
@@ -393,13 +361,12 @@ const QuickActions = ({ onActionSelected }) => {
           </ErrorBoundary>
         )}
 
-        {showReviewModal && (
+        {showSimpleArticle && (
           <ErrorBoundary>
-            <ReviewModal
-              isOpen={showReviewModal}
-              onClose={() => setShowReviewModal(false)}
-              onSubmit={handleAddReview}
-              contentType="news" // Explicitly set content type to "news"
+            <SimpleArticleModal
+              isOpen={showSimpleArticle}
+              onClose={() => setShowSimpleArticle(false)}
+              onSuccess={() => dispatch(addNotification({ type: 'success', message: 'Article published!' }))}
             />
           </ErrorBoundary>
         )}
