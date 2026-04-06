@@ -38,6 +38,7 @@ import HomeDealershipsSection from './components/features/HomeDealershipsSection
 import VideoSection from './components/features/VideoSection/VideoSection.js';
 import HomeRentalsSection from './components/features/HomeRentalsSection/HomeRentalsSection.js';
 import HomeServicesSection from './components/features/HomeServicesSection/HomeServicesSection.js';
+import StickyCarBar from './components/shared/StickyCarBar/StickyCarBar.js';
 // import CarpoolSection from './components/features/CarpoolSection/CarpoolSection.js'; // hidden until launch
 
 // Styles and Utilities
@@ -759,6 +760,13 @@ const HomeContent = () => {
       <NewsReviews />
       <HomeDealershipsSection />
       <HomeServicesSection />
+
+      {/* Sticky bar — highest-viewed vehicles for sale */}
+      <StickyCarBar
+        fetchParams={{ sort: '-views', limit: 12, status: 'active' }}
+        label="Top Vehicles For Sale"
+        sessionKey="homeCarBar"
+      />
     </main>
   );
 };

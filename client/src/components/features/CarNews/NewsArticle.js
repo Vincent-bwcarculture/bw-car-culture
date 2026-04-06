@@ -12,6 +12,7 @@ import FeaturedNews from './FeaturedNews.js';
 import VideoSection from '../VideoSection/VideoSection.js';
 import { getNewsImageUrl, getGalleryImageUrls, formatDate, getAuthorInfo } from '../../../utils/newsHelpers.js';
 import { buildHelmet, SITE_URL } from '../../../hooks/useSEO.js';
+import StickyCarBar from '../../shared/StickyCarBar/StickyCarBar.js';
 import './NewsArticle.css';
 
 const NewsArticle = () => {
@@ -1142,6 +1143,14 @@ const NewsArticle = () => {
         <h2 className="cc-news-featured-heading">Featured Car News</h2>
         <FeaturedNews compact={true} />
       </div>
+
+      {/* Sticky bottom bar — related cars for sale */}
+      <StickyCarBar
+        vehicles={featuredVehicles.length ? featuredVehicles : relatedVehicles.length ? relatedVehicles : undefined}
+        fetchParams={{ sort: '-createdAt', limit: 12 }}
+        label="Related Cars For Sale"
+        sessionKey={`articleCarBar_${articleId}`}
+      />
     </div>
   );
 };
