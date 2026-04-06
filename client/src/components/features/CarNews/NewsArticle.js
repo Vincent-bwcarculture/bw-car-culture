@@ -2,7 +2,7 @@
 // COMPLETE FIXED VERSION - All API endpoints corrected to include /api prefix
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Share2, Heart, Clock, Calendar, Tag, ChevronLeft, Bookmark, BookmarkCheck, Image, ArrowRight, MessageSquare } from 'lucide-react';
+import { Share2, Heart, Clock, Calendar, Tag, ChevronLeft, ChevronRight, Camera, Bookmark, BookmarkCheck, Image, ArrowRight, MessageSquare } from 'lucide-react';
 import { http } from '../../../config/axios.js';
 import { useNews } from '../../../context/NewsContext.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
@@ -109,19 +109,33 @@ const NewsArticle = () => {
     return '/images/placeholders/default.jpg';
   };
 
-  // Process gallery images to handle S3 URLs
+  // Process gallery images to handle S3 URLs — robust multi-format support
   const processGalleryImages = (gallery) => {
     if (!gallery || !Array.isArray(gallery)) return [];
-    
-    return gallery.map(item => {
+    const results = [];
+    for (const item of gallery) {
+      if (!item) continue;
+      let url = null;
       if (typeof item === 'string') {
-        return handleImageUrl(item);
+        url = item;
+      } else if (item.url) {
+        url = item.url;
+      } else if (item.secure_url) {
+        url = item.secure_url;
+      } else if (item.key) {
+        url = `/api/images/s3-proxy/${item.key}`;
+      } else if (item.path) {
+        url = item.path;
       }
-      if (item.url) {
-        return handleImageUrl(item.url);
+      if (url) {
+        // Fix duplicate path segments
+        if (url.includes('/images/images/')) url = url.replace(/\/images\/images\//g, '/images/');
+        // Ensure local paths start with /
+        if (!url.startsWith('http') && !url.startsWith('/')) url = `/${url}`;
+        results.push(url);
       }
-      return '/images/placeholders/default.jpg';
-    }).filter(Boolean);
+    }
+    return results;
   };
 
   // Fetch featured vehicles from premium dealers
@@ -195,6 +209,13 @@ const NewsArticle = () => {
             const likes = JSON.parse(localStorage.getItem('likedArticles') || '{}');
             setLiked(!!likes[articleId]);
           } catch (_) {}
+
+          // Restore comments from localStorage
+          try {
+            const saved = JSON.parse(localStorage.getItem(`articleComments_${articleId}`) || '[]');
+            setComments(saved);
+            if (saved.length > 0) setShowComments(true);
+          } catch (_) { setComments([]); }
 
           // Process gallery images for S3 URLs
           if (fetchedArticle.gallery && Array.isArray(fetchedArticle.gallery)) {
@@ -714,58 +735,71 @@ const NewsArticle = () => {
             {renderArticleContent()}
           </div>
 
-          {/* Gallery section */}
+          {/* Inline photo gallery widget */}
           {galleryImages.length > 0 && (
-            <div className="cc-news-article-gallery">
-              <h3>Photo Gallery</h3>
-              <div className="cc-news-gallery-grid">
-                {galleryImages.map((imageUrl, index) => (
-                  <div 
-                    key={index} 
-                    className="cc-news-gallery-item"
-                    onClick={() => openGallery(index)}
-                  >
-                    <img 
-                      src={getImageUrl(imageUrl, 'gallery')}
-                      alt={`Gallery image ${index + 1}`}
-                      loading="lazy"
-                      onError={(e) => {
-                        const originalSrc = e.target.src;
-                        console.log('Gallery image failed to load:', originalSrc);
-                        
-                        // Mark this image as failed
-                        markFailedImage(originalSrc);
-                        
-                        // For S3 URLs, try the proxy endpoint
-                        if (originalSrc.includes('amazonaws.com')) {
-                          // Extract key from S3 URL
-                          const key = originalSrc.split('.amazonaws.com/').pop();
-                          if (key) {
-                            const normalizedKey = key.replace(/images\/images\//g, 'images/');
-                            e.target.src = `/api/images/s3-proxy/${normalizedKey}`;
-                            return;
-                          }
-                        }
-                        
-                        // Try other paths
-                        if (!originalSrc.includes('/images/placeholders/')) {
-                          const filename = originalSrc.split('/').pop();
-                          if (filename) {
-                            e.target.src = `/uploads/news/gallery/${filename}`;
-                            return;
-                          }
-                        }
-                        
-                        // Final fallback
-                        e.target.src = '/images/placeholders/default.jpg';
-                      }}
-                    />
-                    {article.gallery[index]?.caption && (
-                      <div className="cc-news-gallery-caption">{article.gallery[index].caption}</div>
-                    )}
-                  </div>
-                ))}
+            <div className="cc-news-inline-gallery">
+              <div className="cc-news-ig-header">
+                <Camera size={16} />
+                <span>Photo Gallery</span>
+                <span className="cc-news-ig-count">{galleryImages.length} photos</span>
               </div>
+
+              {/* Main image */}
+              <div className="cc-news-ig-main">
+                <button
+                  className="cc-news-ig-nav prev"
+                  onClick={() => setSelectedGalleryIndex(i => (i === 0 ? galleryImages.length - 1 : i - 1))}
+                  aria-label="Previous photo"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+
+                <img
+                  key={selectedGalleryIndex}
+                  src={galleryImages[selectedGalleryIndex]}
+                  alt={`Photo ${selectedGalleryIndex + 1} of ${galleryImages.length}`}
+                  className="cc-news-ig-main-img"
+                  onClick={() => openGallery(selectedGalleryIndex)}
+                  onError={(e) => {
+                    const src = e.target.src;
+                    if (src.includes('amazonaws.com')) {
+                      const key = src.split('.amazonaws.com/').pop();
+                      if (key) { e.target.src = `/api/images/s3-proxy/${key.replace(/images\/images\//g, 'images/')}`; return; }
+                    }
+                    e.target.src = '/images/placeholders/default.jpg';
+                  }}
+                />
+
+                <button
+                  className="cc-news-ig-nav next"
+                  onClick={() => setSelectedGalleryIndex(i => (i === galleryImages.length - 1 ? 0 : i + 1))}
+                  aria-label="Next photo"
+                >
+                  <ChevronRight size={24} />
+                </button>
+
+                <div className="cc-news-ig-counter">{selectedGalleryIndex + 1} / {galleryImages.length}</div>
+              </div>
+
+              {/* Thumbnails strip */}
+              {galleryImages.length > 1 && (
+                <div className="cc-news-ig-thumbs">
+                  {galleryImages.map((url, idx) => (
+                    <div
+                      key={idx}
+                      className={`cc-news-ig-thumb ${idx === selectedGalleryIndex ? 'active' : ''}`}
+                      onClick={() => setSelectedGalleryIndex(idx)}
+                    >
+                      <img
+                        src={url}
+                        alt={`Thumbnail ${idx + 1}`}
+                        loading="lazy"
+                        onError={(e) => { e.target.onerror = null; e.target.src = '/images/placeholders/default.jpg'; }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -818,14 +852,14 @@ const NewsArticle = () => {
               aria-label="Toggle comments"
             >
               <MessageSquare size={16} />
-              <span>Comment</span>
+              <span>Comment{comments.length > 0 ? ` (${comments.length})` : ''}</span>
             </button>
           </div>
 
           {/* Comment section */}
           {showComments && (
             <div className="cc-news-comment-section">
-              <h4>Comments</h4>
+              <h4>Comments {comments.length > 0 && <span className="cc-news-comment-count">({comments.length})</span>}</h4>
               <div className="cc-news-comment-form">
                 <textarea
                   className="cc-news-comment-input"
@@ -836,12 +870,22 @@ const NewsArticle = () => {
                 />
                 <button
                   className="cc-news-comment-submit"
+                  disabled={!commentText.trim()}
                   onClick={() => {
                     if (!commentText.trim()) return;
-                    setComments(prev => [
-                      { id: Date.now(), text: commentText.trim(), author: 'You', date: new Date().toLocaleDateString() },
-                      ...prev
-                    ]);
+                    const newComment = {
+                      id: Date.now(),
+                      text: commentText.trim(),
+                      author: 'You',
+                      date: new Date().toLocaleDateString()
+                    };
+                    setComments(prev => {
+                      const updated = [newComment, ...prev];
+                      try {
+                        localStorage.setItem(`articleComments_${articleId}`, JSON.stringify(updated));
+                      } catch (_) {}
+                      return updated;
+                    });
                     setCommentText('');
                   }}
                 >
