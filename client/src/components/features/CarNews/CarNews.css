@@ -16,8 +16,8 @@
 
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1rem;
   width: 100%;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .news-card-image {
-  height: 180px;
+  height: 145px;
   width: 100%;
   position: relative;
   overflow: hidden;

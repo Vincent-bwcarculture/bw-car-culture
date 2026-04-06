@@ -17,11 +17,14 @@ const SimpleArticleModal = ({ isOpen, onClose, onSuccess }) => {
     status: 'published',
     featured: false,
   });
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [coverFile, setCoverFile] = useState(null);
+  const [coverPreview, setCoverPreview] = useState(null);
+  const [galleryFiles, setGalleryFiles] = useState([]);
+  const [galleryPreviews, setGalleryPreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const imgInputRef = useRef();
+  const coverInputRef = useRef();
+  const galleryInputRef = useRef();
 
   if (!isOpen) return null;
 
@@ -30,11 +33,24 @@ const SimpleArticleModal = ({ isOpen, onClose, onSuccess }) => {
     setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  const handleImageChange = (e) => {
+  const handleCoverChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    setCoverFile(file);
+    setCoverPreview(URL.createObjectURL(file));
+  };
+
+  const handleGalleryChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setGalleryFiles(prev => [...prev, ...files]);
+    setGalleryPreviews(prev => [...prev, ...files.map(f => URL.createObjectURL(f))]);
+    e.target.value = '';
+  };
+
+  const removeGalleryImage = (idx) => {
+    setGalleryFiles(prev => prev.filter((_, i) => i !== idx));
+    setGalleryPreviews(prev => prev.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async (e) => {
@@ -52,7 +68,8 @@ const SimpleArticleModal = ({ isOpen, onClose, onSuccess }) => {
       fd.append('status', form.status);
       fd.append('featured', String(form.featured));
       fd.append('publishDate', new Date().toISOString().split('T')[0]);
-      if (imageFile) fd.append('featuredImage', imageFile);
+      if (coverFile) fd.append('featuredImage', coverFile);
+      galleryFiles.forEach(f => fd.append('gallery', f));
 
       const res = await http.post('/api/news/user', fd);
 
@@ -71,8 +88,10 @@ const SimpleArticleModal = ({ isOpen, onClose, onSuccess }) => {
 
   const handleClose = () => {
     setForm({ title: '', category: 'news', content: '', status: 'published', featured: false });
-    setImageFile(null);
-    setImagePreview(null);
+    setCoverFile(null);
+    setCoverPreview(null);
+    setGalleryFiles([]);
+    setGalleryPreviews([]);
     setError('');
     onClose();
   };
@@ -122,11 +141,11 @@ const SimpleArticleModal = ({ isOpen, onClose, onSuccess }) => {
             <label className="sam-label">Cover Image</label>
             <div
               className="sam-image-drop"
-              onClick={() => imgInputRef.current?.click()}
-              style={imagePreview ? { padding: 0, border: 'none' } : {}}
+              onClick={() => coverInputRef.current?.click()}
+              style={coverPreview ? { padding: 0, border: 'none' } : {}}
             >
-              {imagePreview ? (
-                <img src={imagePreview} alt="Cover" className="sam-image-preview" />
+              {coverPreview ? (
+                <img src={coverPreview} alt="Cover" className="sam-image-preview" />
               ) : (
                 <>
                   <span className="sam-image-icon">🖼</span>
@@ -135,22 +154,46 @@ const SimpleArticleModal = ({ isOpen, onClose, onSuccess }) => {
                 </>
               )}
               <input
-                ref={imgInputRef}
+                ref={coverInputRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 style={{ display: 'none' }}
-                onChange={handleImageChange}
+                onChange={handleCoverChange}
                 disabled={loading}
               />
             </div>
-            {imagePreview && (
-              <button
-                type="button"
-                className="sam-image-remove"
-                onClick={() => { setImageFile(null); setImagePreview(null); }}
-              >
-                Remove image
+            {coverPreview && (
+              <button type="button" className="sam-image-remove"
+                onClick={() => { setCoverFile(null); setCoverPreview(null); }}>
+                Remove cover image
               </button>
+            )}
+          </div>
+
+          {/* Gallery images */}
+          <div className="sam-field">
+            <label className="sam-label">Gallery Images <span className="sam-label-hint">(optional — multiple allowed)</span></label>
+            <div className="sam-gallery-add" onClick={() => galleryInputRef.current?.click()}>
+              <span>📸</span> Add gallery photos
+              <input
+                ref={galleryInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                style={{ display: 'none' }}
+                onChange={handleGalleryChange}
+                disabled={loading}
+              />
+            </div>
+            {galleryPreviews.length > 0 && (
+              <div className="sam-gallery-grid">
+                {galleryPreviews.map((src, i) => (
+                  <div key={i} className="sam-gallery-thumb">
+                    <img src={src} alt={`Gallery ${i + 1}`} />
+                    <button type="button" className="sam-gallery-remove" onClick={() => removeGalleryImage(i)}>✕</button>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
@@ -162,7 +205,7 @@ const SimpleArticleModal = ({ isOpen, onClose, onSuccess }) => {
               name="content"
               value={form.content}
               onChange={handleChange}
-              placeholder="Write your full article here. You can use basic HTML tags like &lt;p&gt;, &lt;h2&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;/&lt;li&gt; for formatting."
+              placeholder="Write your full article here. You can use basic HTML tags like <p>, <h2>, <strong>, <em>, <ul>/<li> for formatting."
               disabled={loading}
             />
           </div>

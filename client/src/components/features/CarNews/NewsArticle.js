@@ -186,7 +186,13 @@ const NewsArticle = () => {
           fetchedArticle.parsedContent = cleanedContent;
           
           setArticle(fetchedArticle);
-          
+
+          // Restore like state from localStorage
+          try {
+            const likes = JSON.parse(localStorage.getItem('likedArticles') || '{}');
+            setLiked(!!likes[articleId]);
+          } catch (_) {}
+
           // Process gallery images for S3 URLs
           if (fetchedArticle.gallery && Array.isArray(fetchedArticle.gallery)) {
             console.log('Processing gallery for articleId:', articleId);
@@ -206,6 +212,7 @@ const NewsArticle = () => {
           if (Array.isArray(apiRelated) && apiRelated.length > 0) {
             setRelatedArticles(apiRelated);
           } else {
+            // Will be filled from moreNewsItems once that fetch completes
             const related = getRelatedItems(fetchedArticle, 3);
             setRelatedArticles(related);
           }
@@ -257,27 +264,35 @@ const NewsArticle = () => {
         initialFetchCompleteRef.current = false;
       }
     };
-  }, [articleId, getRelatedItems, fetchFeaturedVehicles]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [articleId]);
 
-  // Fetch more news articles for bottom section
-  // FIXED: Added /api prefix
+  // Fetch more news articles for bottom section and related sidebar fallback
   const fetchMoreNews = useCallback(async (currentArticle) => {
     try {
       const category = currentArticle?.category || 'news';
-      // FIXED: Added /api prefix
-      const response = await http.get(`/api/news/category/${category}?limit=4`);
-      
+      const response = await http.get(`/api/news?category=${category}&limit=6`);
+
       if (response.data?.data) {
-        // Filter out the current article if it's in the list
-        const filteredNews = response.data.data.filter(
+        const filtered = response.data.data.filter(
           item => item._id !== articleId && item.id !== articleId
         );
-        
-        // Take only up to 3 items
-        setMoreNewsItems(filteredNews.slice(0, 3));
+        setMoreNewsItems(filtered.slice(0, 3));
+        // Also backfill the sidebar related articles if still empty
+        setRelatedArticles(prev => prev.length > 0 ? prev : filtered.slice(0, 3));
       }
     } catch (error) {
-      console.warn('Could not fetch more news articles:', error);
+      // Try simpler query as fallback
+      try {
+        const r2 = await http.get('/api/news?limit=5');
+        if (r2.data?.data) {
+          const filtered = r2.data.data.filter(
+            item => item._id !== articleId && item.id !== articleId
+          );
+          setMoreNewsItems(filtered.slice(0, 3));
+          setRelatedArticles(prev => prev.length > 0 ? prev : filtered.slice(0, 3));
+        }
+      } catch (_) {}
     }
   }, [articleId]);
 
@@ -385,20 +400,19 @@ const NewsArticle = () => {
     }
   }, [article]);
 
-  // Function to handle liking an article
-  const handleLike = useCallback(async () => {
-    // Toggle like state immediately for responsive UI
-    setLiked(prev => !prev);
-    
-    // In a real app, you'd have an API call here
-    try {
-      // await http.post(`/api/news/${articleId}/like`);
-      console.log('Article like toggled');
-    } catch (error) {
-      // Revert the state if API call fails
-      setLiked(prevLiked => !prevLiked);
-      console.error('Error toggling like:', error);
-    }
+  // Function to handle liking an article — persisted in localStorage
+  const handleLike = useCallback(() => {
+    if (!articleId) return;
+    setLiked(prev => {
+      const next = !prev;
+      try {
+        const likes = JSON.parse(localStorage.getItem('likedArticles') || '{}');
+        if (next) likes[articleId] = true;
+        else delete likes[articleId];
+        localStorage.setItem('likedArticles', JSON.stringify(likes));
+      } catch (_) {}
+      return next;
+    });
   }, [articleId]);
 
   // Function to handle saving/bookmarking an article
@@ -595,11 +609,11 @@ const NewsArticle = () => {
               Back to News
             </Link>
             {article.category && (
-              <button 
+              <button
                 className="cc-news-category-pill"
                 onClick={() => navigateToCategory(article.category)}
               >
-                {article.category}
+                {article.category.charAt(0).toUpperCase() + article.category.slice(1)}
               </button>
             )}
           </nav>

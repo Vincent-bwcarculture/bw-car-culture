@@ -518,24 +518,9 @@ const markFailedImage = (url) => {
                       {article.subtitle || article.description || ''}
                     </p>
                     <div className="cc-newspage-article-card-meta">
-                      {article.author && (
-                        <div className="cc-newspage-article-card-author">
-                          {article.author.avatar && (
-                            <img 
-  src={article.author.avatar} 
-  alt={article.author.name || article.author}
-  className="author-avatar"
-  onError={(e) => {
-    console.log('Author avatar failed to load:', e.target.src);
-    markFailedImage(e.target.src);
-    e.target.onerror = null;
-    e.target.src = '/images/placeholders/avatar.jpg';
-  }}
-/>
-                          )}
-                          <span>By {article.author.name || article.author}</span>
-                        </div>
-                      )}
+                      <div className="cc-newspage-article-card-author">
+                        <span>By {article.authorName || (typeof article.author === 'object' ? article.author?.name : null) || 'Car Culture'}</span>
+                      </div>
                       <span className="cc-newspage-article-card-date">
                         {formatDate(article.publishDate || article.createdAt || article.date)}
                       </span>
