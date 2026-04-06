@@ -1944,6 +1944,11 @@ const handleFormSubmit = async (e) => {
                 <span className="ulisting-platform-pill">WhatsApp Channel — 10,000+ followers</span>
                 <span className="ulisting-platform-pill">TikTok — 35,000+ followers</span>
               </div>
+
+              <div className="ulisting-boost-notice">
+                <span className="ulisting-boost-notice-icon">ℹ️</span>
+                <p>Your vehicle will be reshared regularly across all listed platforms until it sells. Once your vehicle has been sold, please notify our team so we can stop the cycle. You can reach us via WhatsApp or the contact details provided below.</p>
+              </div>
             </div>
 
             {/* Payment details — shown only when boost is selected */}

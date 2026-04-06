@@ -1622,6 +1622,31 @@
   color: var(--uprofile-text-secondary);
 }
 
+/* ===== BOOST RESHARE NOTICE ===== */
+.ulisting-boost-notice {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(255, 193, 7, 0.06);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  border-radius: 8px;
+}
+
+.ulisting-boost-notice-icon {
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ulisting-boost-notice p {
+  font-size: 0.78rem;
+  color: var(--uprofile-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
 /* ===== BOOST PAYMENT DETAILS ===== */
 .ulisting-boost-payment {
   padding: 1.1rem;
