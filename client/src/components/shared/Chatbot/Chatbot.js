@@ -385,7 +385,7 @@ const Chatbot = () => {
     if (msg.role === 'upsell') {
       return (
         <div key={idx} className="kb-upsell-card">
-          <div className="kb-upsell-title">Mpho — BWP 100/month</div>
+          <div className="kb-upsell-title">Mpho — BWP 200/month</div>
           <ul className="kb-upsell-list">
             <li>50 messages/day (vs 12 free)</li>
             <li>AI fills your listing form for you</li>
@@ -394,7 +394,7 @@ const Chatbot = () => {
             <li>Priority admin review of your listings</li>
           </ul>
           <button className="kb-upsell-btn" onClick={() => setShowSubscribeModal(true)}>
-            Subscribe to Mpho — BWP 100/mo
+            Subscribe to Mpho — BWP 200/mo
           </button>
         </div>
       );
