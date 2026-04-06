@@ -2,7 +2,7 @@
 // COMPLETE FIXED VERSION - All API endpoints corrected to include /api prefix
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Share2, Heart, Clock, Calendar, Tag, ChevronLeft, Bookmark, BookmarkCheck, Image, ArrowRight } from 'lucide-react';
+import { Share2, Heart, Clock, Calendar, Tag, ChevronLeft, Bookmark, BookmarkCheck, Image, ArrowRight, MessageSquare } from 'lucide-react';
 import { http } from '../../../config/axios.js';
 import { useNews } from '../../../context/NewsContext.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
@@ -31,6 +31,9 @@ const NewsArticle = () => {
   const [moreNewsItems, setMoreNewsItems] = useState([]);
   const [featuredVehicles, setFeaturedVehicles] = useState([]);
   const [isFeaturedVehiclesLoading, setIsFeaturedVehiclesLoading] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [comments, setComments] = useState([]);
   
   // Refs to prevent reprocessing
   const galleryProcessedRef = useRef(false);
@@ -658,32 +661,6 @@ const NewsArticle = () => {
                 )}
               </div>
 
-              <div className="cc-news-article-actions">
-                <button 
-                  className={`cc-news-action-button ${liked ? 'liked' : ''}`}
-                  onClick={handleLike}
-                  aria-label={liked ? "Unlike article" : "Like article"}
-                >
-                  <Heart size={20} />
-                  <span>{liked ? 'Liked' : 'Like'}</span>
-                </button>
-                <button 
-                  className={`cc-news-action-button ${isItemSaved(article) ? 'saved' : ''}`}
-                  onClick={handleSave}
-                  aria-label={isItemSaved(article) ? "Unsave article" : "Save article"}
-                >
-                  {isItemSaved(article) ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
-                  <span>{isItemSaved(article) ? 'Saved' : 'Save'}</span>
-                </button>
-                <button 
-                  className="cc-news-action-button"
-                  onClick={handleShare}
-                  aria-label="Share article"
-                >
-                  <Share2 size={20} />
-                  <span>Share</span>
-                </button>
-              </div>
             </div>
           </header>
 
@@ -808,7 +785,90 @@ const NewsArticle = () => {
               )}
             </div>
           </footer>
-          
+
+          {/* Bottom action bar */}
+          <div className="cc-news-article-action-bar">
+            <button
+              className={`cc-news-action-button ${liked ? 'liked' : ''}`}
+              onClick={handleLike}
+              aria-label={liked ? 'Unlike article' : 'Like article'}
+            >
+              <Heart size={16} />
+              <span>{liked ? 'Liked' : 'Like'}</span>
+            </button>
+            <button
+              className={`cc-news-action-button ${isItemSaved(article) ? 'saved' : ''}`}
+              onClick={handleSave}
+              aria-label={isItemSaved(article) ? 'Unsave article' : 'Save article'}
+            >
+              {isItemSaved(article) ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
+              <span>{isItemSaved(article) ? 'Saved' : 'Save'}</span>
+            </button>
+            <button
+              className="cc-news-action-button"
+              onClick={handleShare}
+              aria-label="Share article"
+            >
+              <Share2 size={16} />
+              <span>Share</span>
+            </button>
+            <button
+              className={`cc-news-action-button comment-btn ${showComments ? 'active' : ''}`}
+              onClick={() => setShowComments(prev => !prev)}
+              aria-label="Toggle comments"
+            >
+              <MessageSquare size={16} />
+              <span>Comment</span>
+            </button>
+          </div>
+
+          {/* Comment section */}
+          {showComments && (
+            <div className="cc-news-comment-section">
+              <h4>Comments</h4>
+              <div className="cc-news-comment-form">
+                <textarea
+                  className="cc-news-comment-input"
+                  placeholder="Share your thoughts..."
+                  value={commentText}
+                  onChange={e => setCommentText(e.target.value)}
+                  rows={3}
+                />
+                <button
+                  className="cc-news-comment-submit"
+                  onClick={() => {
+                    if (!commentText.trim()) return;
+                    setComments(prev => [
+                      { id: Date.now(), text: commentText.trim(), author: 'You', date: new Date().toLocaleDateString() },
+                      ...prev
+                    ]);
+                    setCommentText('');
+                  }}
+                >
+                  Post Comment
+                </button>
+              </div>
+              {comments.length > 0 ? (
+                <div className="cc-news-comment-list">
+                  {comments.map(c => (
+                    <div key={c.id} className="cc-news-comment-item">
+                      <div className="cc-news-comment-avatar">{c.author[0]}</div>
+                      <div className="cc-news-comment-body">
+                        <div className="cc-news-comment-header">
+                          <span className="cc-news-comment-author">{c.author}</span>
+                          <span className="cc-news-comment-date">{c.date}</span>
+                        </div>
+                        <p className="cc-news-comment-text">{c.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="cc-news-no-comments">No comments yet. Be the first!</p>
+              )}
+            </div>
+          )}
+
           {/* More car news section - stays within the main column */}
           {moreNewsItems.length > 0 && (
             <div className="cc-news-more-articles">
