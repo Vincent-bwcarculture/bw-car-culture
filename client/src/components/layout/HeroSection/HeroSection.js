@@ -558,7 +558,7 @@ const HeroSection = () => {
                 <div className="bcc-hero-sell-pricing-tier bcc-hero-sell-tier-popular">
                   <div className="bcc-hero-sell-tier-badge">More Exposure</div>
                   <div className="bcc-hero-sell-tier-header">
-                    <div className="bcc-hero-sell-tier-price">BWP 300</div>
+                    <div className="bcc-hero-sell-tier-price">BWP 200</div>
                     <div className="bcc-hero-sell-tier-period">one-time</div>
                   </div>
                   <div className="bcc-hero-sell-tier-value">Social Media Boost</div>

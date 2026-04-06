@@ -112,7 +112,7 @@ const MphoSubscribeModal = ({ isOpen, onClose }) => {
         <div className="mpm-header">
           <div>
             <div className="mpm-title">✨ Subscribe to Mpho</div>
-            <div className="mpm-subtitle">BWP 200 / month · 30 days access</div>
+            <div className="mpm-subtitle">BWP 100 / month · 30 days access</div>
           </div>
           <button className="mpm-close" onClick={onClose}>✕</button>
         </div>
@@ -125,7 +125,7 @@ const MphoSubscribeModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* Payment instructions */}
-        <div className="mpm-section-label">Pay BWP 200 to any of these:</div>
+        <div className="mpm-section-label">Pay BWP 100 to any of these:</div>
         <div className="mpm-accounts">
           {PAYMENT_DETAILS.map((d, i) => (
             <div key={i} className="mpm-account">
@@ -173,7 +173,7 @@ const MphoSubscribeModal = ({ isOpen, onClose }) => {
 
         <div className="mpm-footer-btns">
           <button className="mpm-btn-whatsapp"
-            onClick={() => window.open('https://wa.me/26774122453?text=' + encodeURIComponent('Hi! I want to subscribe to Mpho (BWP 200). Please send payment details.'), '_blank')}>
+            onClick={() => window.open('https://wa.me/26774122453?text=' + encodeURIComponent('Hi! I want to subscribe to Mpho (BWP 100). Please send payment details.'), '_blank')}>
             💬 Pay via WhatsApp
           </button>
           <button className="mpm-btn-primary" onClick={handleSubmit} disabled={!proof || submitting}>
