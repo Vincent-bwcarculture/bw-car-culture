@@ -180,7 +180,7 @@ const UserCarListingForm = ({
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Social media boost (BWP 300)
+  // Social media boost (BWP 200)
   const [wantsBoost, setWantsBoost] = useState(false);
   const [boostProofFile, setBoostProofFile] = useState(null);
   const [boostProofPreview, setBoostProofPreview] = useState(null);
@@ -1495,10 +1495,10 @@ const handleFormSubmit = async (e) => {
             <div className="ulisting-promote-teaser">
               <div className="ulisting-promote-teaser-text">
                 <strong>Want more exposure?</strong>
-                <span>Feature your listing across Facebook (685K), Instagram (15K+), WhatsApp (10K+) &amp; TikTok (35K+) for just BWP 300.</span>
+                <span>Feature your listing across Facebook (685K), Instagram (15K+), WhatsApp (10K+) &amp; TikTok (35K+) for just BWP 200.</span>
               </div>
               <button type="button" className="ulisting-promote-teaser-btn" onClick={() => { setWantsBoost(true); setCurrentTab('promote'); }}>
-                Add Boost — BWP 300
+                Add Boost — BWP 200
               </button>
             </div>
           )}
@@ -1925,7 +1925,7 @@ const handleFormSubmit = async (e) => {
             <div className="ulisting-boost-header">
               <div className="ulisting-boost-title-row">
                 <div>
-                  <strong className="ulisting-boost-title">Social Media Feature – BWP 300</strong>
+                  <strong className="ulisting-boost-title">Social Media Feature – BWP 200</strong>
                   <p className="ulisting-boost-subtitle">Get your vehicle posted across all our platforms</p>
                 </div>
                 <label className="ulisting-boost-toggle">
@@ -1951,7 +1951,7 @@ const handleFormSubmit = async (e) => {
               <div className="ulisting-boost-payment">
                 <h5>Payment Details</h5>
                 <p className="ulisting-boost-payment-note">
-                  Send BWP 300 to one of the accounts below, then upload your proof of payment.
+                  Send BWP 200 to one of the accounts below, then upload your proof of payment.
                   Once payment is verified by our team, your vehicle will be featured on all platforms and automatically added to the Featured section on the website.
                 </p>
 
@@ -1964,7 +1964,7 @@ const handleFormSubmit = async (e) => {
                     </div>
                     <div className="ulisting-payment-detail">
                       <span className="ulisting-payment-field">Amount</span>
-                      <span className="ulisting-payment-value ulisting-payment-amount">BWP 300</span>
+                      <span className="ulisting-payment-value ulisting-payment-amount">BWP 200</span>
                     </div>
                   </div>
 
@@ -1988,7 +1988,7 @@ const handleFormSubmit = async (e) => {
                     </div>
                     <div className="ulisting-payment-detail">
                       <span className="ulisting-payment-field">Amount</span>
-                      <span className="ulisting-payment-value ulisting-payment-amount">BWP 300</span>
+                      <span className="ulisting-payment-value ulisting-payment-amount">BWP 200</span>
                     </div>
                   </div>
                 </div>
@@ -2298,11 +2298,11 @@ const handleFormSubmit = async (e) => {
           {!wantsBoost && (
             <div className="ulisting-boost-reminder">
               <div className="ulisting-boost-reminder-text">
-                <strong>Boost your listing — BWP 300</strong>
+                <strong>Boost your listing — BWP 200</strong>
                 <span>Get featured on Facebook, Instagram, WhatsApp &amp; TikTok before you submit.</span>
               </div>
               <button type="button" className="ulisting-boost-reminder-btn" onClick={() => { setWantsBoost(true); setCurrentTab('promote'); }}>
-                Add Boost — BWP 300
+                Add Boost — BWP 200
               </button>
             </div>
           )}
