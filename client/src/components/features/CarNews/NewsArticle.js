@@ -1147,7 +1147,7 @@ const NewsArticle = () => {
       {/* Sticky bottom bar — related cars for sale */}
       <StickyCarBar
         vehicles={featuredVehicles.length ? featuredVehicles : relatedVehicles.length ? relatedVehicles : undefined}
-        fetchParams={{ sort: '-createdAt', limit: 12 }}
+        fetchParams={{ sort: '-listingQuality,-featured,-createdAt', limit: 12, status: 'active' }}
         label="Related Cars For Sale"
         sessionKey={`articleCarBar_${articleId}`}
       />

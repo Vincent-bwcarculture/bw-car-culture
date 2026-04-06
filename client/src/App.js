@@ -761,9 +761,9 @@ const HomeContent = () => {
       <HomeDealershipsSection />
       <HomeServicesSection />
 
-      {/* Sticky bar — highest-viewed vehicles for sale */}
+      {/* Sticky bar — highest priority listings (listingQuality desc, featured first) */}
       <StickyCarBar
-        fetchParams={{ sort: '-views', limit: 12, status: 'active' }}
+        fetchParams={{ sort: '-listingQuality,-featured,-createdAt', limit: 12, status: 'active' }}
         label="Top Vehicles For Sale"
         sessionKey="homeCarBar"
       />
