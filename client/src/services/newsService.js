@@ -629,8 +629,9 @@ class NewsService {
         console.log('FormData fields:', [...formData.entries()].map(e => e[0]));
       }
       
-      // Make the API request - FormData will handle S3 uploads on the backend
-      const response = await http.post(`${this.endpoint}`, formData, {
+      // Make the API request - /api/news/user handles both admins (publishes directly)
+      // and journalists (pending review). There is no standalone POST /api/news endpoint.
+      const response = await http.post(`${this.endpoint}/user`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
