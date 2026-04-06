@@ -7,6 +7,7 @@ import AddListingModal from '../components/shared/AddListingModal/AddListingModa
 import ReviewModal from '../components/shared/ReviewModal/ReviewModal.js';
 import VideoUploadModal from './VideoUploadModal/VideoUploadModal.js';
 import InventoryForm from './InventoryManager/InventoryForm.js';
+import AssistedListingModal from './AssistedListingModal/AssistedListingModal.js';
 import { listingService } from '../services/listingService.js';
 import { newsService } from '../services/newsService.js';
 import { videoService } from '../services/videoService.js';
@@ -22,6 +23,7 @@ const QuickActions = ({ onActionSelected }) => {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showInventoryForm, setShowInventoryForm] = useState(false);
+  const [showAssistedListing, setShowAssistedListing] = useState(false);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
@@ -265,6 +267,15 @@ const QuickActions = ({ onActionSelected }) => {
           Add Listing
         </button>
 
+        <button
+          className="qa-action-button"
+          onClick={() => setShowAssistedListing(true)}
+          disabled={loading}
+        >
+          <span className="qa-icon">👤</span>
+          List for Seller
+        </button>
+
         <button 
           className="qa-action-button"
           onClick={handleReviewClick}
@@ -401,6 +412,15 @@ const QuickActions = ({ onActionSelected }) => {
               onSubmit={handleAddVideo}
               dealers={[]} // You can populate these from your API if available
               listings={[]} // You can populate these from your API if available
+            />
+          </ErrorBoundary>
+        )}
+
+        {showAssistedListing && (
+          <ErrorBoundary>
+            <AssistedListingModal
+              isOpen={showAssistedListing}
+              onClose={() => setShowAssistedListing(false)}
             />
           </ErrorBoundary>
         )}
