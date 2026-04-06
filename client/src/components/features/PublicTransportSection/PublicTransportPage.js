@@ -203,6 +203,8 @@ const PublicTransportPage = () => {
   });
   const [viewMode, setViewMode] = useState('cards'); // 'cards', 'enhanced', 'combi'
   const [coordinators, setCoordinators] = useState([]);
+  const [fares, setFares] = useState([]);
+  const [showFares, setShowFares] = useState(false);
 
   // Add fetch controller ref and cooldown
   const fetchInProgress = useRef(false);
@@ -269,7 +271,13 @@ const PublicTransportPage = () => {
         // In a real app, this would be an API call with the filters
         // For now, use mock data
         setRoutes(MOCK_TRANSPORT_ROUTES);
-        
+
+        // Fetch fares from API
+        try {
+          const fareRes = await axios.get('/api/transit-fares');
+          if (fareRes.data?.data) setFares(fareRes.data.data);
+        } catch (_) {}
+
         lastFetchTime.current = Date.now();
         
       } catch (error) {
@@ -318,17 +326,22 @@ const PublicTransportPage = () => {
         );
       }
       
-      // Apply origin filter
+      // Apply origin filter (partial match)
       if (filters.origin) {
-        results = results.filter(route => 
-          route.origin?.toLowerCase() === filters.origin.toLowerCase()
+        const originTerm = filters.origin.toLowerCase();
+        results = results.filter(route =>
+          route.origin?.toLowerCase().includes(originTerm) ||
+          route.stops?.some(s => s.toLowerCase().includes(originTerm))
         );
       }
-      
-      // Apply destination filter
+
+      // Apply destination filter (partial match across destination, stops, and provider)
       if (filters.destination) {
-        results = results.filter(route => 
-          route.destination?.toLowerCase() === filters.destination.toLowerCase()
+        const destTerm = filters.destination.toLowerCase();
+        results = results.filter(route =>
+          route.destination?.toLowerCase().includes(destTerm) ||
+          route.stops?.some(s => s.toLowerCase().includes(destTerm)) ||
+          route.provider?.toLowerCase().includes(destTerm)
         );
       }
       
@@ -549,31 +562,33 @@ const fetchCoordinators = async () => {
         
         <div className="filters-advanced-row">
           <div className="filter-control">
-            <label>Origin</label>
-            <select
+            <label>From (Origin)</label>
+            <input
+              type="text"
               name="origin"
+              placeholder="e.g. Main Mall, Francistown CBD…"
               value={filters.origin}
               onChange={handleFilterChange}
-            >
-              <option value="">All Origins</option>
-              {getUniqueOrigins().map((origin, index) => (
-                <option key={index} value={origin}>{origin}</option>
-              ))}
-            </select>
+              list="origins-list"
+            />
+            <datalist id="origins-list">
+              {getUniqueOrigins().map((o, i) => <option key={i} value={o} />)}
+            </datalist>
           </div>
-          
+
           <div className="filter-control">
-            <label>Destination</label>
-            <select
+            <label>To (Destination)</label>
+            <input
+              type="text"
               name="destination"
+              placeholder="e.g. Airport, Game City, Tonota…"
               value={filters.destination}
               onChange={handleFilterChange}
-            >
-              <option value="">All Destinations</option>
-              {getUniqueDestinations().map((destination, index) => (
-                <option key={index} value={destination}>{destination}</option>
-              ))}
-            </select>
+              list="destinations-list"
+            />
+            <datalist id="destinations-list">
+              {getUniqueDestinations().map((d, i) => <option key={i} value={d} />)}
+            </datalist>
           </div>
           
           <div className="filter-group">
@@ -643,6 +658,53 @@ const fetchCoordinators = async () => {
     🚐 Combi Routes
   </button>
 </div>
+
+      {/* Transit Fares Panel */}
+      {fares.length > 0 && (
+        <div className="bcc-fares-panel">
+          <button className="bcc-fares-toggle" onClick={() => setShowFares(p => !p)}>
+            🎫 Transit Fares {showFares ? '▲' : '▼'}
+          </button>
+          {showFares && (
+            <div className="bcc-fares-table-wrap">
+              <table className="bcc-fares-table">
+                <thead>
+                  <tr>
+                    <th>Route</th>
+                    <th>Type</th>
+                    <th>Provider</th>
+                    <th>Standard</th>
+                    <th>Child</th>
+                    <th>Senior</th>
+                    <th>Student</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fares
+                    .filter(f => {
+                      if (!filters.destination && !filters.origin) return true;
+                      const d = filters.destination?.toLowerCase() || '';
+                      const o = filters.origin?.toLowerCase() || '';
+                      return (!d || f.destination?.toLowerCase().includes(d) || f.origin?.toLowerCase().includes(d))
+                        && (!o || f.origin?.toLowerCase().includes(o) || f.destination?.toLowerCase().includes(o));
+                    })
+                    .map(f => (
+                      <tr key={f._id}>
+                        <td><strong>{f.origin}</strong> → {f.destination}</td>
+                        <td>{f.routeType}</td>
+                        <td>{f.provider || '—'}</td>
+                        <td className="fare-price">P {Number(f.standardFare).toLocaleString()}</td>
+                        <td>{f.childFare != null ? `P ${f.childFare}` : '—'}</td>
+                        <td>{f.seniorFare != null ? `P ${f.seniorFare}` : '—'}</td>
+                        <td>{f.studentFare != null ? `P ${f.studentFare}` : '—'}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {loading && filteredRoutes.length === 0 ? (
         <div className="loading-overlay">

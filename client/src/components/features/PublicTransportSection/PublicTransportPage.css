@@ -598,3 +598,55 @@
     transform: translateY(0);
   }
 }
+/* ── Transit Fares Panel ──────────────────────────────────────────────── */
+.bcc-fares-panel {
+  margin: 0.75rem 0 1.25rem;
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.bcc-fares-toggle {
+  width: 100%;
+  background: #1a1a1a;
+  border: none;
+  color: #e5e7eb;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.65rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.bcc-fares-toggle:hover { background: #222; }
+
+.bcc-fares-table-wrap { overflow-x: auto; }
+
+.bcc-fares-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.bcc-fares-table th {
+  background: #111;
+  color: #9ca3af;
+  padding: 0.45rem 0.75rem;
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #2c2c2c;
+}
+.bcc-fares-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #1a1a1a;
+  color: #d1d5db;
+}
+.bcc-fares-table tr:last-child td { border-bottom: none; }
+.bcc-fares-table tr:hover td { background: rgba(255,255,255,0.02); }
+.fare-price { color: #0066ff; font-weight: 700; }
+
+/* Filter input datalist styling */
+.filter-control input[list] {
+  width: 100%;
+}

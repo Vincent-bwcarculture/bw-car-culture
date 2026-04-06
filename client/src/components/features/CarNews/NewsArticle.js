@@ -2,7 +2,8 @@
 // COMPLETE FIXED VERSION - All API endpoints corrected to include /api prefix
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Share2, Heart, Clock, Calendar, Tag, ChevronLeft, ChevronRight, Camera, Bookmark, BookmarkCheck, Image, ArrowRight, MessageSquare } from 'lucide-react';
+import { Share2, Heart, Clock, Calendar, Tag, ChevronLeft, ChevronRight, Camera, Bookmark, BookmarkCheck, Image, ArrowRight, MessageSquare, ThumbsUp, CornerDownRight } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext.js';
 import { http } from '../../../config/axios.js';
 import { useNews } from '../../../context/NewsContext.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
@@ -35,6 +36,11 @@ const NewsArticle = () => {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [comments, setComments] = useState([]);
+  const [commentLoading, setCommentLoading] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null); // commentId
+  const [replyText, setReplyText] = useState('');
+  const [likedComments, setLikedComments] = useState({}); // commentId -> bool
+  const { user } = useAuth();
   
   // Refs to prevent reprocessing
   const galleryProcessedRef = useRef(false);
@@ -211,11 +217,17 @@ const NewsArticle = () => {
             setLiked(!!likes[articleId]);
           } catch (_) {}
 
-          // Restore comments from localStorage
+          // Fetch comments from API
           try {
-            const saved = JSON.parse(localStorage.getItem(`articleComments_${articleId}`) || '[]');
-            setComments(saved);
-            if (saved.length > 0) setShowComments(true);
+            const cRes = await http.get(`/api/comments/${fetchedArticle._id}`);
+            const apiComments = cRes.data?.data || [];
+            setComments(apiComments);
+            if (apiComments.length > 0) setShowComments(true);
+            // Seed liked state from localStorage for optimistic UI
+            try {
+              const lc = JSON.parse(localStorage.getItem('likedComments') || '{}');
+              setLikedComments(lc);
+            } catch (_) {}
           } catch (_) { setComments([]); }
 
           // Process gallery images for S3 URLs
@@ -446,6 +458,64 @@ const NewsArticle = () => {
       toggleSaveItem(article);
     }
   }, [article, toggleSaveItem]);
+
+  // Submit a new top-level comment
+  const handleCommentSubmit = useCallback(async () => {
+    if (!commentText.trim() || !article) return;
+    setCommentLoading(true);
+    try {
+      const res = await http.post(`/api/comments/${article._id}`, {
+        text: commentText.trim(),
+        authorName: user?.name || 'Anonymous'
+      });
+      if (res.data?.data) {
+        setComments(prev => [res.data.data, ...prev]);
+        setCommentText('');
+      }
+    } catch (_) {} finally {
+      setCommentLoading(false);
+    }
+  }, [commentText, article, user]);
+
+  // Toggle like on a comment
+  const handleCommentLike = useCallback(async (commentId) => {
+    if (!user) return;
+    try {
+      const res = await http.put(`/api/comments/${commentId}/like`);
+      if (res.data?.data) {
+        const likedCount = res.data.data.likes.length;
+        setComments(prev => prev.map(c =>
+          c._id === commentId ? { ...c, likes: res.data.data.likes } : c
+        ));
+        setLikedComments(prev => {
+          const isNowLiked = res.data.data.likes.some(id => id === user._id || id === user.id);
+          const next = { ...prev, [commentId]: isNowLiked };
+          try { localStorage.setItem('likedComments', JSON.stringify(next)); } catch (_) {}
+          return next;
+        });
+      }
+    } catch (_) {}
+  }, [user]);
+
+  // Submit a reply to a comment
+  const handleReplySubmit = useCallback(async (commentId) => {
+    if (!replyText.trim()) return;
+    try {
+      const res = await http.post(`/api/comments/${commentId}/reply`, {
+        text: replyText.trim(),
+        authorName: user?.name || 'Anonymous'
+      });
+      if (res.data?.data) {
+        setComments(prev => prev.map(c =>
+          c._id === commentId
+            ? { ...c, replies: [...(c.replies || []), res.data.data] }
+            : c
+        ));
+        setReplyText('');
+        setReplyingTo(null);
+      }
+    } catch (_) {}
+  }, [replyText, user]);
 
   // Navigate to a specific category page
   const navigateToCategory = useCallback((category) => {
@@ -839,11 +909,7 @@ const NewsArticle = () => {
               {isItemSaved(article) ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
               <span>{isItemSaved(article) ? 'Saved' : 'Save'}</span>
             </button>
-            <button
-              className="cc-news-action-button"
-              onClick={handleShare}
-              aria-label="Share article"
-            >
+            <button className="cc-news-action-button" onClick={handleShare} aria-label="Share article">
               <Share2 size={16} />
               <span>Share</span>
             </button>
@@ -861,52 +927,120 @@ const NewsArticle = () => {
           {showComments && (
             <div className="cc-news-comment-section">
               <h4>Comments {comments.length > 0 && <span className="cc-news-comment-count">({comments.length})</span>}</h4>
+
+              {/* New comment form */}
               <div className="cc-news-comment-form">
                 <textarea
                   className="cc-news-comment-input"
-                  placeholder="Share your thoughts..."
+                  placeholder={user ? 'Share your thoughts…' : 'Comment as guest…'}
                   value={commentText}
                   onChange={e => setCommentText(e.target.value)}
                   rows={3}
                 />
                 <button
                   className="cc-news-comment-submit"
-                  disabled={!commentText.trim()}
-                  onClick={() => {
-                    if (!commentText.trim()) return;
-                    const newComment = {
-                      id: Date.now(),
-                      text: commentText.trim(),
-                      author: 'You',
-                      date: new Date().toLocaleDateString()
-                    };
-                    setComments(prev => {
-                      const updated = [newComment, ...prev];
-                      try {
-                        localStorage.setItem(`articleComments_${articleId}`, JSON.stringify(updated));
-                      } catch (_) {}
-                      return updated;
-                    });
-                    setCommentText('');
-                  }}
+                  disabled={!commentText.trim() || commentLoading}
+                  onClick={handleCommentSubmit}
                 >
-                  Post Comment
+                  {commentLoading ? 'Posting…' : 'Post Comment'}
                 </button>
               </div>
+
               {comments.length > 0 ? (
                 <div className="cc-news-comment-list">
-                  {comments.map(c => (
-                    <div key={c.id} className="cc-news-comment-item">
-                      <div className="cc-news-comment-avatar">{c.author[0]}</div>
-                      <div className="cc-news-comment-body">
-                        <div className="cc-news-comment-header">
-                          <span className="cc-news-comment-author">{c.author}</span>
-                          <span className="cc-news-comment-date">{c.date}</span>
+                  {comments.map(c => {
+                    const cId = c._id || c.id;
+                    const isLiked = likedComments[cId];
+                    const likeCount = c.likes?.length || 0;
+                    const replyCount = c.replies?.length || 0;
+                    return (
+                      <div key={cId} className="cc-news-comment-item">
+                        <div className="cc-news-comment-avatar">
+                          {c.authorAvatar
+                            ? <img src={c.authorAvatar} alt={c.authorName} onError={e => { e.target.onerror = null; e.target.style.display = 'none'; }} />
+                            : (c.authorName || 'A')[0].toUpperCase()}
                         </div>
-                        <p className="cc-news-comment-text">{c.text}</p>
+                        <div className="cc-news-comment-body">
+                          <div className="cc-news-comment-header">
+                            <span className="cc-news-comment-author">{c.authorName || c.author || 'Anonymous'}</span>
+                            <span className="cc-news-comment-date">
+                              {c.createdAt ? new Date(c.createdAt).toLocaleDateString() : c.date}
+                            </span>
+                          </div>
+                          <p className="cc-news-comment-text">{c.text}</p>
+                          <div className="cc-news-comment-actions">
+                            <button
+                              className={`cc-news-comment-action-btn ${isLiked ? 'liked' : ''}`}
+                              onClick={() => handleCommentLike(cId)}
+                              title={user ? 'Like' : 'Sign in to like'}
+                            >
+                              <ThumbsUp size={13} fill={isLiked ? 'currentColor' : 'none'} />
+                              {likeCount > 0 && <span>{likeCount}</span>}
+                            </button>
+                            <button
+                              className="cc-news-comment-action-btn"
+                              onClick={() => setReplyingTo(replyingTo === cId ? null : cId)}
+                            >
+                              <CornerDownRight size={13} />
+                              <span>Reply{replyCount > 0 ? ` (${replyCount})` : ''}</span>
+                            </button>
+                          </div>
+
+                          {/* Replies */}
+                          {replyCount > 0 && (
+                            <div className="cc-news-replies">
+                              {c.replies.map((r, ri) => (
+                                <div key={r._id || ri} className="cc-news-reply-item">
+                                  <div className="cc-news-comment-avatar small">
+                                    {r.authorAvatar
+                                      ? <img src={r.authorAvatar} alt={r.authorName} onError={e => { e.target.onerror = null; e.target.style.display = 'none'; }} />
+                                      : (r.authorName || 'A')[0].toUpperCase()}
+                                  </div>
+                                  <div className="cc-news-comment-body">
+                                    <div className="cc-news-comment-header">
+                                      <span className="cc-news-comment-author">{r.authorName || 'Anonymous'}</span>
+                                      <span className="cc-news-comment-date">
+                                        {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : ''}
+                                      </span>
+                                    </div>
+                                    <p className="cc-news-comment-text">{r.text}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Reply form */}
+                          {replyingTo === cId && (
+                            <div className="cc-news-reply-form">
+                              <textarea
+                                className="cc-news-comment-input"
+                                placeholder={`Reply to ${c.authorName || 'comment'}…`}
+                                value={replyText}
+                                onChange={e => setReplyText(e.target.value)}
+                                rows={2}
+                              />
+                              <div className="cc-news-reply-actions">
+                                <button
+                                  className="cc-news-comment-submit small"
+                                  disabled={!replyText.trim()}
+                                  onClick={() => handleReplySubmit(cId)}
+                                >
+                                  Post Reply
+                                </button>
+                                <button
+                                  className="cc-news-comment-cancel"
+                                  onClick={() => { setReplyingTo(null); setReplyText(''); }}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="cc-news-no-comments">No comments yet. Be the first!</p>

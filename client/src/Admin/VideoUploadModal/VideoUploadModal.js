@@ -11,13 +11,13 @@ const DEFAULT_VIDEO_STATE = {
   description: '',
   youtubeUrl: '',
   category: 'car-review',
-  subscriptionTier: 'standard',
+  subscriptionTier: 'none',
   thumbnailUrl: '',
   featured: false,
   relatedDealerId: '',
   relatedListingId: '',
   publishDate: new Date().toISOString().split('T')[0],
-  status: 'draft'
+  status: 'published'
 };
 
 // Utility function to extract YouTube video ID from URL

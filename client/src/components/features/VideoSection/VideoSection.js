@@ -67,20 +67,22 @@ const markFailedThumbnail = (url) => {
       let response;
       
       if (activeCategory === 'all') {
-        // Fetch featured videos by default
-        response = await videoService.getFeaturedVideos(6);
+        // Try featured first, fall back to latest published
+        const featured = await videoService.getFeaturedVideos(6);
+        if (Array.isArray(featured) && featured.length > 0) {
+          response = featured;
+        } else {
+          const all = await videoService.getVideos({}, 1, 6);
+          response = all.videos || [];
+        }
       } else {
         // Fetch videos for specific category
         response = await videoService.getVideosByCategory(activeCategory, 6);
       }
-      
+
       if (Array.isArray(response) && response.length > 0) {
         setVideos(response);
-        
-        // Set first video as active if none selected
-        if (!activeVideo) {
-          setActiveVideo(response[0]);
-        }
+        setActiveVideo(prev => prev || response[0]);
       } else {
         setVideos([]);
         setActiveVideo(null);

@@ -7,6 +7,7 @@ import DealershipManager from './DealershipManager/DealershipManager.js';
 import RentalVehicleManager from './RentalVehicleManager/RentalVehicleManager.js';
 import TrailerListingManager from './TrailerListingManager/TrailerListingManager.js';
 import TransportRouteManager from './TransportRouteManager/TransportRouteManager.js';
+import TransitFareManager from './TransitFareManager/TransitFareManager.js';
 import ServiceProviderManager from './ServiceProviderManager/ServiceProviderManager.js';
 import GIONAdminDashboard from '../components/GION/GIONAdminDashboard/GIONAdminDashboard.js';
 import BroadcastNotification from './BroadcastNotification/BroadcastNotification.js';
@@ -117,14 +118,14 @@ const AdminDashboard = () => {
           <>
             <div className="section-header">
               <h2>Transport Routes Management</h2>
-              <button 
-                className="back-button"
-                onClick={() => setActiveSection('dashboard')}
-              >
+              <button className="back-button" onClick={() => setActiveSection('dashboard')}>
                 ← Back to Dashboard
               </button>
             </div>
             <TransportRouteManager />
+            <div style={{ marginTop: '2rem', background: 'rgba(20,20,20,0.8)', border: '1px solid #2c2c2c', borderRadius: '10px', padding: '1.25rem' }}>
+              <TransitFareManager />
+            </div>
           </>
         );
       case 'videos':

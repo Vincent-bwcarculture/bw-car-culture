@@ -111,6 +111,9 @@ import providerRequestRoutes from './routes/providerRequestRoutes.js';
 import ministryRequestRoutes from './routes/ministryRequestRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import marketPriceRoutes from './routes/marketPriceRoutes.js';
+import commentRoutes from './routes/commentRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+import transitFareRoutes from './routes/transitFareRoutes.js';
 
 import { ensureUploadDirectories } from './utils/uploadDiagnostics.js';
 
@@ -759,6 +762,9 @@ app.use('/api/transport', transportRouteRoutes);
 app.use('/api/provider-requests', providerRequestRoutes);
 app.use('/api/ministry-requests', ministryRequestRoutes);
 app.use('/api/market-prices', marketPriceRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/transit-fares', transitFareRoutes);
 
 // ============================================
 // ANALYTICS ROUTES INTEGRATION - ADDED

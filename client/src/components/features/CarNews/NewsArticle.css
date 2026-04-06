@@ -360,6 +360,80 @@
   padding: 1rem 0;
 }
 
+/* Comment actions (like / reply buttons) */
+.cc-news-comment-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.cc-news-comment-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+.cc-news-comment-action-btn:hover { color: #e5e7eb; background: rgba(255,255,255,0.05); }
+.cc-news-comment-action-btn.liked { color: #ff3300; }
+
+/* Replies */
+.cc-news-replies {
+  margin-top: 0.75rem;
+  padding-left: 1rem;
+  border-left: 2px solid #2c2c2c;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.cc-news-reply-item {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.cc-news-comment-avatar.small {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  font-size: 0.65rem;
+}
+
+/* Reply form */
+.cc-news-reply-form {
+  margin-top: 0.6rem;
+  padding-left: 1rem;
+}
+
+.cc-news-reply-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.cc-news-comment-submit.small {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.78rem;
+}
+
+.cc-news-comment-cancel {
+  background: none;
+  border: 1px solid #3a3a3a;
+  color: #9ca3af;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.cc-news-comment-cancel:hover { color: #e5e7eb; }
+
 /* Cover image */
 .cc-news-article-cover {
   margin: 2rem -2rem;

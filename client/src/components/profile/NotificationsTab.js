@@ -2,8 +2,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Bell, X, CheckCircle, AlertCircle, Info, AlertTriangle, Settings, Car, Check } from 'lucide-react';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
-const authHeader = () => ({ 'Authorization': `Bearer ${localStorage.getItem('token')}` });
+const API_BASE = process.env.REACT_APP_API_URL || '';
+const authHeader = () => ({
+  'Authorization': `Bearer ${localStorage.getItem('token')}`,
+  'Content-Type': 'application/json'
+});
 
 const NotificationsTab = ({ profileData }) => {
   const [notifications, setNotifications] = useState([]);
@@ -14,12 +17,12 @@ const NotificationsTab = ({ profileData }) => {
   const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE}/user/notifications`, {
+      const response = await fetch(`${API_BASE}/api/notifications`, {
         headers: authHeader()
       });
       if (response.ok) {
         const data = await response.json();
-        setNotifications(data.notifications || []);
+        setNotifications(data.data || data.notifications || []);
         setUnreadCount(data.unreadCount || 0);
       }
     } catch (err) {
@@ -35,7 +38,7 @@ const NotificationsTab = ({ profileData }) => {
 
   const markAsRead = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/user/notifications/${id}/read`, {
+      const res = await fetch(`${API_BASE}/api/notifications/${id}/read`, {
         method: 'PUT',
         headers: authHeader()
       });
@@ -50,7 +53,7 @@ const NotificationsTab = ({ profileData }) => {
 
   const markAllAsRead = async () => {
     try {
-      const res = await fetch(`${API_BASE}/user/notifications/read-all`, {
+      const res = await fetch(`${API_BASE}/api/notifications/read-all`, {
         method: 'PUT',
         headers: authHeader()
       });
@@ -65,7 +68,7 @@ const NotificationsTab = ({ profileData }) => {
 
   const deleteNotification = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/user/notifications/${id}`, {
+      const res = await fetch(`${API_BASE}/api/notifications/${id}`, {
         method: 'DELETE',
         headers: authHeader()
       });
