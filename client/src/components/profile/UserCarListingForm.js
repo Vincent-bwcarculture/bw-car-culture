@@ -1976,7 +1976,7 @@ const handleFormSubmit = async (e) => {
                     </div>
                     <div className="ulisting-payment-detail">
                       <span className="ulisting-payment-field">Amount</span>
-                      <span className="ulisting-payment-value ulisting-payment-amount">BWP 310 <span className="ulisting-payment-surcharge">(+BWP10 Orange Money fee)</span></span>
+                      <span className="ulisting-payment-value ulisting-payment-amount">BWP 210 <span className="ulisting-payment-surcharge">(+BWP10 Orange Money fee)</span></span>
                     </div>
                   </div>
 
