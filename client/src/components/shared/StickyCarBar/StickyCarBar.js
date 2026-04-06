@@ -137,6 +137,14 @@ const StickyCarBar = ({
                     <p className="scb-card-title">{title}</p>
                     {price && <p className="scb-card-price">{price}</p>}
                     {car.mileage && <p className="scb-card-meta">{Number(car.mileage).toLocaleString()} km</p>}
+                    {(car.transmission || car.fuelType) && (
+                      <p className="scb-card-meta">
+                        {[car.transmission, car.fuelType].filter(Boolean).join(' · ')}
+                      </p>
+                    )}
+                    {car.condition && (
+                      <span className="scb-card-condition">{car.condition}</span>
+                    )}
                   </div>
                 </Link>
               );

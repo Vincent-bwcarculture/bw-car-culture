@@ -170,14 +170,34 @@
 .scb-card-price {
   font-size: 0.82rem;
   font-weight: 700;
-  color: #ff3300;
-  margin: 0 0 0.15rem;
+  color: #0066ff;
+  margin: 0 0 0.1rem;
 }
 
 .scb-card-meta {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: #6b7280;
-  margin: 0;
+  margin: 0 0 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scb-card-meta + .scb-card-meta {
+  margin-top: 0;
+}
+
+.scb-card-condition {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-top: 0.15rem;
+  background: rgba(255,255,255,0.07);
+  color: #9ca3af;
 }
 
 /* ── Mobile ──────────────────────────────────────────────────────────────── */

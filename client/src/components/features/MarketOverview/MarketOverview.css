@@ -819,7 +819,7 @@
   border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 .mo-country-name { color: #ccc; flex: 1; }
-.mo-country-price { color: #ff3300; font-weight: 600; margin: 0 0.5rem; }
+.mo-country-price { color: #0066ff; font-weight: 600; margin: 0 0.5rem; }
 .mo-country-count { color: #666; font-size: 0.75rem; }
 
 .mo-vehicle-color-bar {
