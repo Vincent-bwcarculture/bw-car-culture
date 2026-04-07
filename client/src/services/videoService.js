@@ -299,7 +299,7 @@ class VideoService {
       // Thumbnail URL will be handled by S3 if a custom thumbnail is uploaded
       // Otherwise, use YouTube's default thumbnail
       if (!data.thumbnailUrl && !data.customThumbnail) {
-        data.thumbnailUrl = `https://img.youtube.com/vi/${data.youtubeVideoId}/maxresdefault.jpg`;
+        data.thumbnailUrl = `https://img.youtube.com/vi/${data.youtubeVideoId}/hqdefault.jpg`;
       }
       
       // If custom thumbnail is provided, it will be handled by multipart upload

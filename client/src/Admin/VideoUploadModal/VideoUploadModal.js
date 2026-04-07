@@ -37,7 +37,7 @@ const getYouTubeThumbnailUrl = (videoId) => {
   if (!videoId) return null;
   
   // Try to use high quality thumbnail
-  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 };
 
 const VideoUploadModal = ({ 
@@ -519,7 +519,7 @@ const markFailedThumbnail = (url) => {
     }
     
     // If high-quality thumbnail fails, try default thumbnail
-    if (e.target.src.includes('maxresdefault')) {
+    if (e.target.src.includes('maxresdefault') || e.target.src.includes('hqdefault')) {
       e.target.src = `https://img.youtube.com/vi/${previewData.videoId}/mqdefault.jpg`;
       return;
     }

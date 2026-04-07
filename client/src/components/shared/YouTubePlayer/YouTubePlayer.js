@@ -173,7 +173,7 @@ const getVideoThumbnail = () => {
     
     // Priority 3: YouTube thumbnail
     if (!thumbnailUrl && embedId) {
-      thumbnailUrl = `https://img.youtube.com/vi/${embedId}/maxresdefault.jpg`;
+      thumbnailUrl = `https://img.youtube.com/vi/${embedId}/hqdefault.jpg`;
     }
     
     // If we have a thumbnail URL at this point
@@ -231,13 +231,13 @@ const handleThumbnailError = (e) => {
       (customThumbnail && originalSrc === (typeof customThumbnail === 'string' ? 
                                           customThumbnail : customThumbnail.url))) {
     if (embedId) {
-      e.target.src = `https://img.youtube.com/vi/${embedId}/maxresdefault.jpg`;
+      e.target.src = `https://img.youtube.com/vi/${embedId}/hqdefault.jpg`;
       return;
     }
   }
   
   // Try lower quality YouTube thumbnail if high quality fails
-  if (embedId && originalSrc.includes('maxresdefault')) {
+  if (embedId && (originalSrc.includes('maxresdefault') || originalSrc.includes('hqdefault'))) {
     e.target.src = `https://img.youtube.com/vi/${embedId}/mqdefault.jpg`;
     return;
   }
