@@ -33,7 +33,7 @@ const BusinessDetailPage = () => {
   const [filteredListings, setFilteredListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('about');
+  const [activeTab, setActiveTab] = useState('listings');
    const [reviews, setReviews] = useState([]);
   const [reviewStats, setReviewStats] = useState({
     totalReviews: 0,
