@@ -21,7 +21,12 @@ const PROMO_CARD_FREQUENCY = 8;
 const MarketplaceList = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
+  // Recently viewed (from localStorage)
+  const [recentlyViewed, setRecentlyViewed] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('recentlyViewed') || '[]'); } catch (_) { return []; }
+  });
+
   // Refs for performance optimization
   const containerRef = useRef(null);
   const fetchTimeoutRef = useRef(null);
@@ -1477,6 +1482,34 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
           )}
         </div>
       )}
+
+          {/* Recently Viewed */}
+          {recentlyViewed.length > 0 && (
+            <div className="recently-viewed-section">
+              <div className="recently-viewed-header">
+                <h3>Recently Viewed</h3>
+                <button className="recently-viewed-clear" onClick={() => { localStorage.removeItem('recentlyViewed'); setRecentlyViewed([]); }}>Clear</button>
+              </div>
+              <div className="recently-viewed-grid">
+                {recentlyViewed.map(item => (
+                  <div key={item._id} className="rv-card" onClick={() => navigate(`/marketplace/${item._id}`)}>
+                    <div className="rv-image-wrap">
+                      <img
+                        src={item.image || '/images/placeholders/car.jpg'}
+                        alt={item.title}
+                        className="rv-image"
+                        onError={e => { e.target.src = '/images/placeholders/car.jpg'; }}
+                      />
+                    </div>
+                    <div className="rv-info">
+                      <div className="rv-title">{item.title || `${item.year || ''} ${item.make || ''}`.trim() || 'Vehicle'}</div>
+                      <div className="rv-price">{item.price ? `P${Number(item.price).toLocaleString()}` : 'POA'}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
         </div>{/* marketplace-main */}
       </div>{/* marketplace-layout */}

@@ -9,6 +9,7 @@ import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
 import ShareModal from '../../shared/ShareModal.js';
 import { listingService } from '../../../services/listingService.js';
 import { newsService } from '../../../services/newsService.js';
+import { dealerService } from '../../../services/dealerService.js';
 import { useSelector, useDispatch } from 'react-redux';
 import { addNotification } from '../../../store/slices/uiSlice.js';
 import { useAuth } from '../../../context/AuthContext.js';
@@ -37,6 +38,7 @@ const CarMarketplace = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
   const [dealerListings, setDealerListings] = useState([]);
+  const [otherDealerships, setOtherDealerships] = useState([]);
   const [relatedListings, setRelatedListings] = useState([]);
   const [relatedNews, setRelatedNews] = useState([]);
   const [views, setViews] = useState(0);
@@ -475,6 +477,13 @@ const CarMarketplace = () => {
         setCar(carData);
         const savedCars = JSON.parse(localStorage.getItem('savedCars') || '[]');
         setIsSaved(savedCars.includes(carData._id));
+        // Track recently viewed
+        try {
+          const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+          const entry = { _id: carData._id, title: carData.title, price: carData.price, image: carData.images?.[0]?.url || carData.images?.[0] || null, make: carData.specifications?.make, year: carData.specifications?.year, viewedAt: Date.now() };
+          const filtered = viewed.filter(v => v._id !== carData._id);
+          localStorage.setItem('recentlyViewed', JSON.stringify([entry, ...filtered].slice(0, 10)));
+        } catch (_) {}
         await loadRelatedContent(carData);
         if (!viewRecorded.current) {
           recordView(carData._id);
@@ -544,7 +553,8 @@ const CarMarketplace = () => {
       await Promise.all([
         loadDealerListings(currentCar),
         loadSimilarVehicles(currentCar),
-        loadRelatedNews(currentCar)
+        loadRelatedNews(currentCar),
+        loadOtherDealerships(currentCar)
       ]);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') console.error('Error loading related content:', error);
@@ -607,6 +617,21 @@ const CarMarketplace = () => {
       setDealerListings([]);
     }
   }, [extractDealerId, isPrivateSeller]);
+
+  const loadOtherDealerships = useCallback(async (currentCar) => {
+    try {
+      const currentDealerId = extractDealerId(currentCar);
+      const res = await dealerService.getDealers({}, 1);
+      const dealers = res?.dealers || res?.data || [];
+      const filtered = dealers
+        .filter(d => {
+          const id = d._id || d.id;
+          return id && String(id) !== String(currentDealerId) && d.sellerType !== 'private';
+        })
+        .slice(0, 4);
+      setOtherDealerships(filtered);
+    } catch (_) {}
+  }, [extractDealerId]);
 
   const loadSimilarVehicles = useCallback(async (currentCar) => {
     try {
@@ -1301,6 +1326,45 @@ const CarMarketplace = () => {
                     <button className="contact-button view-dealer" onClick={() => { let dealerId = null; if (car.dealer && car.dealer._id) { dealerId = safeGetStringId(car.dealer._id); } else if (car.dealer && car.dealer.id) { dealerId = safeGetStringId(car.dealer.id); } else if (car.dealerId) { dealerId = safeGetStringId(car.dealerId); } if (process.env.NODE_ENV === 'development') console.log('Navigating to dealer with ID:', dealerId); if (dealerId) { navigate(`/dealerships/${dealerId}`); } else { if (process.env.NODE_ENV === 'development') console.error('Failed to get valid dealer ID for navigation'); dispatch(addNotification({ type: 'error', message: 'Unable to view dealership details at this time.' })); } }}>View Dealership</button>
                   )}
                 </div>
+
+                {/* More from this dealer — compact sidebar list */}
+                {!isPrivateSeller && dealerListings.length > 0 && (
+                  <div className="sidebar-dealer-vehicles">
+                    <div className="sidebar-section-title">More from this dealer</div>
+                    {dealerListings.slice(0, 3).map(dl => (
+                      <div key={dl._id} className="sidebar-vehicle-item" onClick={() => navigate(`/marketplace/${dl._id}`)}>
+                        <img
+                          src={dl.images?.[0]?.url || dl.images?.[0] || '/images/placeholders/car.jpg'}
+                          alt={dl.title}
+                          className="sidebar-vehicle-thumb"
+                          onError={e => { e.target.src = '/images/placeholders/car.jpg'; }}
+                        />
+                        <div className="sidebar-vehicle-info">
+                          <div className="sidebar-vehicle-name">{dl.title || `${dl.specifications?.year || ''} ${dl.specifications?.make || ''}`}</div>
+                          <div className="sidebar-vehicle-price">{dl.price ? `P${Number(dl.price).toLocaleString()}` : 'POA'}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Other dealerships */}
+                {otherDealerships.length > 0 && (
+                  <div className="sidebar-dealerships">
+                    <div className="sidebar-section-title">Other Dealerships</div>
+                    {otherDealerships.map(d => (
+                      <div key={d._id || d.id} className="sidebar-dealership-item" onClick={() => navigate(`/dealerships/${d._id || d.id}`)}>
+                        <img
+                          src={d.profile?.logo || d.logo || '/images/placeholders/dealer-logo.jpg'}
+                          alt={d.businessName}
+                          className="sidebar-dealer-logo"
+                          onError={e => { e.target.src = '/images/placeholders/dealer-logo.jpg'; }}
+                        />
+                        <div className="sidebar-dealer-name">{d.businessName || d.name}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
