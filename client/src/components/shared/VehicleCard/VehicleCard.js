@@ -942,14 +942,11 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       console.warn('Analytics tracking failed:', error);
     }
     
-    if (dealer && dealer.id) {
-      navigate(`/dealerships/${dealer.id}`);
-    } else {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('No dealer ID available for navigation');
-      }
+    const targetId = dealer?.id || safeGetStringId(car?.dealerId) || safeGetStringId(car?.dealer?._id);
+    if (targetId) {
+      navigate(`/dealerships/${targetId}`);
     }
-  }, [dealer, navigate, analytics, car]);
+  }, [dealer, navigate, analytics, car, safeGetStringId]);
 
   // TRUE ZOOM: Enhanced image error handling with dimension tracking
   const handleImageError = useCallback((e) => {

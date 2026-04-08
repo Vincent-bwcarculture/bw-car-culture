@@ -292,12 +292,19 @@ const BusinessDetailPage = () => {
       });
       
       if (response.data && response.data.success) {
-        const items = response.data.data || 
-                      response.data.vehicles || 
-                      response.data.trailers || 
-                      response.data.routes || 
+        const rawItems = response.data.data ||
+                      response.data.vehicles ||
+                      response.data.trailers ||
+                      response.data.routes ||
                       [];
-        
+        // Inject dealer reference into each listing so VehicleCard can navigate to dealer profile
+        const items = rawItems.map(item => {
+          if (isDealer && business && !item.dealer?._id) {
+            return { ...item, dealer: { ...business, _id: business._id || id }, dealerId: business._id || id };
+          }
+          return item;
+        });
+
         setListings(items);
         setListingsCount(response.data.total || items.length || 0);
         
@@ -627,6 +634,24 @@ const handleReviewSubmitted = (result) => {
         if (!itemCategory || itemCategory.toLowerCase() !== filters.category.toLowerCase()) {
           return false;
         }
+      }
+
+      // Condition filter
+      if (filters.condition) {
+        const itemCondition = item.condition || item.specifications?.condition;
+        if (!itemCondition || itemCondition.toLowerCase() !== filters.condition.toLowerCase()) return false;
+      }
+
+      // Fuel type filter
+      if (filters.fuelType) {
+        const itemFuel = item.fuelType || item.specifications?.fuelType;
+        if (!itemFuel || itemFuel.toLowerCase() !== filters.fuelType.toLowerCase()) return false;
+      }
+
+      // Transmission filter
+      if (filters.transmission) {
+        const itemTrans = item.transmission || item.specifications?.transmission;
+        if (!itemTrans || itemTrans.toLowerCase() !== filters.transmission.toLowerCase()) return false;
       }
 
       // Service type filter (for transport)
@@ -1415,6 +1440,42 @@ return (
                     </div>
                   </div>
                   
+                  {isDealer && (
+                    <div className="bcc-filter-group">
+                      <label>Condition</label>
+                      <select className="bcc-filter-select" value={filters.condition} onChange={(e) => handleFilterChange('condition', e.target.value)}>
+                        <option value="">Any</option>
+                        <option value="New">New</option>
+                        <option value="Used">Used</option>
+                        <option value="Certified">Certified</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {isDealer && (
+                    <div className="bcc-filter-group">
+                      <label>Fuel Type</label>
+                      <select className="bcc-filter-select" value={filters.fuelType} onChange={(e) => handleFilterChange('fuelType', e.target.value)}>
+                        <option value="">Any</option>
+                        <option value="Petrol">Petrol</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="Electric">Electric</option>
+                        <option value="Hybrid">Hybrid</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {isDealer && (
+                    <div className="bcc-filter-group">
+                      <label>Transmission</label>
+                      <select className="bcc-filter-select" value={filters.transmission} onChange={(e) => handleFilterChange('transmission', e.target.value)}>
+                        <option value="">Any</option>
+                        <option value="Automatic">Automatic</option>
+                        <option value="Manual">Manual</option>
+                      </select>
+                    </div>
+                  )}
+
                   {availableFilters.categories.length > 0 && (
                     <div className="bcc-filter-group">
                       <label>Category</label>

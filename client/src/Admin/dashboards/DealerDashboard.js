@@ -8,7 +8,7 @@ import {
   XCircle, AlertCircle, X, Save, Send, MessageSquare,
   Phone, Mail, Globe, Clock,
   Settings, Building2, ToggleLeft, ToggleRight,
-  ExternalLink
+  ExternalLink, Search, Link2, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import './DealerDashboard.css';
@@ -553,6 +553,136 @@ const ProfileSection = ({ dealerProfile, userId, onSaved, showToast }) => {
   );
 };
 
+// ─── Claim Dealership Card ────────────────────────────────────────────────────
+const ClaimDealershipCard = ({ userId, showToast }) => {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [reason, setReason] = useState('');
+  const [proof, setProof] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(null); // pending claim object
+
+  const search = async () => {
+    if (query.trim().length < 2) return;
+    setSearching(true);
+    setResults([]);
+    setSelected(null);
+    try {
+      const res = await fetch(`${API_BASE}/dealers/search?q=${encodeURIComponent(query.trim())}`, { headers: authHeaders() });
+      const data = await res.json();
+      setResults(data.data || []);
+    } catch { showToast('Search failed', 'error'); }
+    finally { setSearching(false); }
+  };
+
+  const handleSubmit = async () => {
+    if (!selected || !reason.trim()) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE}/dealers/${selected._id}/claim`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ reason: reason.trim(), proofDescription: proof.trim() })
+      });
+      const data = await res.json();
+      if (res.ok && data.success !== false) {
+        setSubmitted(data.data);
+        showToast('Claim submitted — admin will review shortly.');
+      } else {
+        showToast(data.message || 'Failed to submit claim', 'error');
+      }
+    } catch { showToast('Network error', 'error'); }
+    finally { setSubmitting(false); }
+  };
+
+  return (
+    <div className="dd-profile-card dd-profile-card-full dd-claim-card">
+      <button className="dd-profile-card-title dd-claim-toggle" onClick={() => setOpen(o => !o)}>
+        <Link2 size={15} /> Claim an Existing Dealership Profile
+        {open ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+      </button>
+
+      {open && (
+        <div className="dd-claim-body">
+          {submitted ? (
+            <div className="dd-claim-submitted">
+              <CheckCircle size={28} color="#22c55e" />
+              <h4>Claim submitted</h4>
+              <p>Your claim for <strong>{submitted.dealerName}</strong> is under review. You'll be notified once an admin approves or rejects it.</p>
+              <div className="dd-claim-badge pending">Pending review</div>
+            </div>
+          ) : selected ? (
+            <div className="dd-claim-form">
+              <div className="dd-claim-selected-dealer">
+                <Building2 size={16} />
+                <div>
+                  <div className="dd-claim-dealer-name">{selected.businessName}</div>
+                  <div className="dd-claim-dealer-meta">{selected.businessType || selected.sellerType || 'Dealership'} · {selected.location?.city || 'Unknown location'}</div>
+                </div>
+                <button className="dd-link-btn" onClick={() => setSelected(null)}>Change</button>
+              </div>
+              <div className="dd-form-field dd-field-full" style={{ marginTop: 12 }}>
+                <label>Why are you claiming this dealership? *</label>
+                <textarea rows={3} value={reason} onChange={e => setReason(e.target.value)}
+                  placeholder="e.g. I am the owner/manager of this dealership and want to manage its listings and profile..." />
+              </div>
+              <div className="dd-form-field dd-field-full">
+                <label>Proof / Supporting details (optional)</label>
+                <textarea rows={2} value={proof} onChange={e => setProof(e.target.value)}
+                  placeholder="Business registration number, contact person, website, etc." />
+              </div>
+              <div className="dd-claim-actions">
+                <button className="dd-btn-ghost" onClick={() => setSelected(null)}>Back</button>
+                <button className="dd-btn-primary" disabled={submitting || !reason.trim()} onClick={handleSubmit}>
+                  {submitting ? 'Submitting...' : <><Send size={14} /> Submit Claim</>}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="dd-claim-intro">
+                If your dealership already has a profile on I3W Car Culture (created by an admin or imported), you can claim it to take ownership and manage its listings and public page.
+              </p>
+              <div className="dd-claim-search-row">
+                <input className="dd-search-input"
+                  placeholder="Search by dealership name..."
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && search()}
+                />
+                <button className="dd-btn-primary" onClick={search} disabled={searching || query.trim().length < 2}>
+                  {searching ? <RefreshCw size={15} className="dd-spin" /> : <Search size={15} />} Search
+                </button>
+              </div>
+              {results.length > 0 && (
+                <div className="dd-claim-results">
+                  {results.map(d => (
+                    <div key={d._id} className="dd-claim-result-row">
+                      <div>
+                        <div className="dd-claim-dealer-name">{d.businessName}</div>
+                        <div className="dd-claim-dealer-meta">{d.businessType || d.sellerType || 'Dealership'} · {d.location?.city || '—'}</div>
+                      </div>
+                      <button className="dd-btn-primary dd-sm" onClick={() => setSelected(d)}>
+                        <Link2 size={13} /> Claim
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {results.length === 0 && query.trim().length >= 2 && !searching && (
+                <p className="dd-claim-no-results">No dealerships found matching "{query}". Try a different name.</p>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 const DealerDashboard = () => {
   const navigate = useNavigate();
@@ -1048,7 +1178,14 @@ const DealerDashboard = () => {
         {activeTab === 'profile' && (
           profileLoading
             ? <div className="dd-loading"><RefreshCw size={24} className="dd-spin" /> Loading profile...</div>
-            : <ProfileSection dealerProfile={dealerProfile} userId={userId} showToast={showToast} onSaved={setDealerProfile} />
+            : (
+              <>
+                <ProfileSection dealerProfile={dealerProfile} userId={userId} showToast={showToast} onSaved={setDealerProfile} />
+                <div style={{ padding: '0 0 24px' }}>
+                  <ClaimDealershipCard userId={userId} showToast={showToast} />
+                </div>
+              </>
+            )
         )}
         {activeTab === 'reviews' && renderReviews()}
       </div>
