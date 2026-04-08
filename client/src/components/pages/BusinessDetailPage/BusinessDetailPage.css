@@ -1128,9 +1128,23 @@
 .bcc-business-detail-listings-grid,
 .bcc-business-detail-inventory-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .bcc-business-detail-listings-grid,
+  .bcc-business-detail-inventory-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .bcc-business-detail-listings-grid,
+  .bcc-business-detail-inventory-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .bcc-business-detail-vehicle-card-wrapper,
@@ -1565,11 +1579,7 @@
     padding: 2.5rem 1.5rem;
   }
   
-  .bcc-business-detail-listings-grid,
-  .bcc-business-detail-inventory-grid {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
-  }
+  /* grid columns handled by base styles */
   
   .bcc-business-detail-header-container {
     gap: 1.5rem;
