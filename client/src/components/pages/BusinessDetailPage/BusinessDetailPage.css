@@ -1124,6 +1124,53 @@
   left: 100%;
 }
 
+/* Sidebar layout for listings tab */
+.bcc-listings-layout {
+  display: block;
+}
+
+.bcc-listings-sidebar {
+  display: none;
+}
+
+.bcc-listings-main {
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .bcc-listings-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .bcc-listings-sidebar {
+    display: block;
+    position: sticky;
+    top: 70px;
+    max-height: calc(100vh - 90px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #444 transparent;
+  }
+
+  .bcc-listings-sidebar::-webkit-scrollbar { width: 4px; }
+  .bcc-listings-sidebar::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+}
+
+/* Filter becomes a vertical stack in sidebar */
+.bcc-listings-sidebar .bcc-business-detail-filters {
+  margin: 0;
+  border-radius: 10px;
+}
+
+.bcc-listings-sidebar .bcc-filters-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 /* Enhanced Grid Layouts */
 .bcc-business-detail-listings-grid,
 .bcc-business-detail-inventory-grid {
@@ -1133,14 +1180,14 @@
   margin-bottom: 1.5rem;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .bcc-business-detail-listings-grid,
   .bcc-business-detail-inventory-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1400px) {
   .bcc-business-detail-listings-grid,
   .bcc-business-detail-inventory-grid {
     grid-template-columns: repeat(4, 1fr);

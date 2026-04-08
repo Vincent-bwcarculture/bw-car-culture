@@ -1332,8 +1332,10 @@ return (
           <div className="bcc-business-detail-listings-tab">
             <h2>{isDealer ? 'Vehicles for Sale' : getRentalsTitle()}</h2>
             
-            {/* Enhanced Filter Section */}
+            <div className="bcc-listings-layout">
+            {/* Sidebar Filter */}
             {listings.length > 0 && (
+              <div className="bcc-listings-sidebar">
               <div className="bcc-business-detail-filters">
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem'}}>
                   <h3>Filter {isDealer ? 'Vehicles' : getRentalsTitle()}</h3>
@@ -1517,8 +1519,10 @@ return (
                   </div>
                 )}
               </div>
+              </div>
             )}
-            
+
+            <div className="bcc-listings-main">
             {listingsLoading ? (
               <div className="bcc-business-detail-loading-container">
                 <div className="bcc-business-detail-spinner"></div>
@@ -1659,9 +1663,11 @@ return (
                 )}
               </>
             )}
+            </div>
+            </div>
           </div>
         )}
-        
+
         {/* Keep ALL other tab content exactly as is - inventory, reviews, contact */}
         {activeTab === 'inventory' && (
           <div className="bcc-business-detail-inventory-tab">
