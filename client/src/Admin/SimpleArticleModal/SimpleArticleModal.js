@@ -69,7 +69,7 @@ const SimpleArticleModal = ({ isOpen, onClose, onSuccess }) => {
       fd.append('featured', String(form.featured));
       fd.append('publishDate', new Date().toISOString().split('T')[0]);
       if (coverFile) fd.append('featuredImage', coverFile);
-      galleryFiles.forEach(f => fd.append('gallery', f));
+      galleryFiles.forEach(f => fd.append('galleryImages', f));
 
       const res = await http.post('/api/news/user', fd);
 
