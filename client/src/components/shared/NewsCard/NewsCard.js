@@ -5,6 +5,7 @@ import { Clock, Tag, MessageCircle, Eye, Bookmark, BookmarkCheck, Share2 } from 
 import './NewsCard.css';
 
 // Create a version of the card that doesn't depend on NewsContext
+
 const NewsCard = ({ article, onSave, onShare, compact = false }) => {
   const navigate = useNavigate();
 
@@ -130,7 +131,7 @@ const NewsCard = ({ article, onSave, onShare, compact = false }) => {
     return {
       name: article.author?.name || 'Car Culture News Desk',
       role: article.author?.role || 'Editor',
-      avatar: article.author?.avatar || "/images/BCC Logo.png"
+      avatar: article.author?.avatar || 'https://i3wcarculture-images.s3.us-east-1.amazonaws.com/branding/bcc-logo.png'
     };
   };
 
@@ -180,35 +181,11 @@ const NewsCard = ({ article, onSave, onShare, compact = false }) => {
   return (
     <article className={`news-card-article ${compact ? 'compact' : ''}`} onClick={handleCardClick}>
       <div className="news-card-image">
-       <img 
-  src={getImageUrl()} 
-  alt={article.title} 
+       <img
+  src={getImageUrl()}
+  alt={article.title}
   onError={(e) => {
-    // Log the error for debugging
-    console.log(`News image failed to load: ${e.target.src}`);
-    
-    // For S3 URLs, try to use the proxy endpoint
-    if (e.target.src.includes('amazonaws.com')) {
-      // Extract key from S3 URL
-      const key = e.target.src.split('.amazonaws.com/').pop();
-      if (key) {
-        // Normalize the key to prevent duplicate segments
-        const normalizedKey = key.replace(/images\/images\//g, 'images/');
-        e.target.src = `/api/images/s3-proxy/${normalizedKey}`;
-        return;
-      }
-    }
-    
-    // For relative paths, try direct path if not already a placeholder
-    if (!e.target.src.includes('/images/placeholders/')) {
-      const filename = e.target.src.split('/').pop();
-      if (filename) {
-        e.target.src = `/uploads/news/${filename}`;
-        return;
-      }
-    }
-    
-    // Final fallback
+    e.target.onerror = null;
     e.target.src = '/images/placeholders/default.jpg';
   }}
 />
@@ -258,7 +235,7 @@ const NewsCard = ({ article, onSave, onShare, compact = false }) => {
               className="news-card-author-avatar"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = '/images/BCC Logo.png';
+                e.target.src = 'https://i3wcarculture-images.s3.us-east-1.amazonaws.com/branding/bcc-logo.png';
               }}
             />
             <div className="news-card-author-details">
