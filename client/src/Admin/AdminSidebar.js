@@ -93,6 +93,19 @@ const AdminSidebar = ({ collapsed, isMobile, mobileOpen, onClose, user }) => {
 
       {/* Nav */}
       <nav className="sidebar-nav">
+        {/* Morasimo Simulation - pinned at top */}
+        <div className="nav-item-container morasimo-container">
+          <a
+            href="/morasimo"
+            className="nav-item morasimo-btn"
+            title={!showFull ? 'Morasimo' : undefined}
+            onClick={handleNavClick}
+          >
+            <span className="nav-icon">⬡</span>
+            {showFull && <span className="nav-title">Morasimo</span>}
+          </a>
+        </div>
+
         {menuItems.map((item, index) => (
           <div key={index} className="nav-item-container">
             {item.path && !item.submenu ? (

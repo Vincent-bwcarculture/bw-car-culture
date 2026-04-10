@@ -253,3 +253,28 @@
     box-shadow: 4px 0 24px rgba(0,0,0,0.4);
   }
 }
+
+/* ── Morasimo ── */
+.morasimo-container {
+  margin-bottom: 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 200, 0, 0.25);
+}
+
+.morasimo-btn {
+  background: linear-gradient(135deg, rgba(255, 180, 0, 0.15), rgba(255, 100, 0, 0.1));
+  border: 1px solid rgba(255, 180, 0, 0.35);
+  color: #ffc107 !important;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.morasimo-btn .nav-icon {
+  color: #ffc107;
+}
+
+.morasimo-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 180, 0, 0.28), rgba(255, 100, 0, 0.2));
+  border-color: rgba(255, 180, 0, 0.6);
+  color: #ffe066 !important;
+}
