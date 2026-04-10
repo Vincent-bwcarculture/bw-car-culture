@@ -903,8 +903,7 @@ body.section-transitioning * {
 /* Grid View */
 .marketplace-grid-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 260px));
-  justify-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
   margin-bottom: 12px;
   contain: layout;
@@ -914,8 +913,7 @@ body.section-transitioning * {
 /* Compact View */
 .marketplace-grid-compact {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 260px));
-  justify-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
   margin-bottom: 12px;
   contain: layout;
@@ -1368,8 +1366,7 @@ body.section-transitioning * {
   }
 
   .marketplace-main .marketplace-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 260px));
-    justify-content: start;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 12px;
   }
 }
@@ -1380,8 +1377,7 @@ body.section-transitioning * {
   }
 
   .marketplace-main .marketplace-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 260px));
-    justify-content: start;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 12px;
   }
 }
