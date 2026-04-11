@@ -80,6 +80,7 @@ const TransportRouteManager = React.lazy(() => import('./Admin/TransportRouteMan
 const EditorDashboard = React.lazy(() => import('./Admin/dashboards/EditorDashboard.js'));
 const DealerDashboard = React.lazy(() => import('./Admin/dashboards/DealerDashboard.js'));
 const AdminScripts = React.lazy(() => import('./Admin/AdminScripts/AdminScripts.js'));
+const AdminOps = React.lazy(() => import('./Admin/AdminOps/AdminOps.js'));
 // — Journalist
 const CreateArticle = React.lazy(() => import('./components/journalist/CreateArticle.js'));
 // — User pages
@@ -1112,10 +1113,12 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         
-        <Route path="/admin/scripts" element={
+        <Route path="/admin/scripts" element={<Navigate to="/admin/ops" replace />} />
+
+        <Route path="/admin/ops" element={
           <ProtectedRoute requiredRoles={['admin']}>
             <AdminLayout>
-              <AdminScripts />
+              <AdminOps />
             </AdminLayout>
           </ProtectedRoute>
         } />

@@ -1,0 +1,221 @@
+/* AdminOpsDashboardWidget.css */
+
+.ops-widget {
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 12px;
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+}
+
+.ops-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: linear-gradient(90deg, rgba(255,51,0,0.06) 0%, transparent 60%);
+  border-bottom: 1px solid #21262d;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ops-widget-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ops-widget-icon {
+  color: #ff3300;
+  font-size: 0.9rem;
+}
+
+.ops-widget-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #e6edf3;
+}
+
+.ops-widget-open-btn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ff6633;
+  text-decoration: none;
+  border: 1px solid rgba(255,51,0,0.25);
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  background: rgba(255,51,0,0.06);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.ops-widget-open-btn:hover { background: rgba(255,51,0,0.12); border-color: rgba(255,51,0,0.4); color: #ff3300; }
+
+.ops-widget-body {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0;
+  align-items: start;
+}
+
+/* Mission */
+.ops-widget-mission {
+  padding: 0.9rem 1.25rem;
+  border-right: 1px solid #21262d;
+  min-width: 0;
+}
+
+.ops-widget-section-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #484f58;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.ops-widget-online-count {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.ops-widget-mission-text {
+  font-size: 0.82rem;
+  color: #8b949e;
+  margin: 0;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Team */
+.ops-widget-team {
+  padding: 0.9rem 1.25rem;
+  border-right: 1px solid #21262d;
+  min-width: 180px;
+}
+
+.ops-widget-members {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.3rem;
+}
+
+.ops-widget-member {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ops-widget-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ops-widget-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff3300, #cc2900);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ops-widget-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #30363d;
+  border: 1.5px solid #0d1117;
+}
+.ops-widget-dot.online { background: #22c55e; }
+
+.ops-widget-member-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ops-widget-member-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #c9d1d9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ops-widget-member-pos {
+  font-size: 0.68rem;
+  color: #ff6633;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ops-widget-member-schedule {
+  font-size: 0.65rem;
+  color: #484f58;
+}
+
+/* Stats */
+.ops-widget-stats {
+  padding: 0.9rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ops-widget-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #21262d;
+  background: #161b22;
+  min-width: 72px;
+  transition: border-color 0.15s;
+}
+.ops-widget-stat:hover { border-color: rgba(255,51,0,0.3); }
+
+.ops-widget-stat-num {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ff6633;
+  line-height: 1.1;
+}
+
+.ops-widget-stat-label {
+  font-size: 0.62rem;
+  color: #6b7280;
+  text-align: center;
+  margin-top: 0.1rem;
+}
+
+/* Responsive */
+@media (max-width: 800px) {
+  .ops-widget-body {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ops-widget-mission { grid-column: 1 / -1; border-right: none; border-bottom: 1px solid #21262d; }
+  .ops-widget-team { border-right: 1px solid #21262d; }
+  .ops-widget-stats { flex-direction: row; align-items: center; border-top: none; }
+}
+
+@media (max-width: 520px) {
+  .ops-widget-body { grid-template-columns: 1fr; }
+  .ops-widget-team { border-right: none; border-bottom: 1px solid #21262d; }
+  .ops-widget-stats { flex-direction: row; padding: 0.75rem 1.25rem; }
+}

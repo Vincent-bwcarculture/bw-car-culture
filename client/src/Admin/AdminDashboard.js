@@ -11,7 +11,7 @@ import TransitFareManager from './TransitFareManager/TransitFareManager.js';
 import ServiceProviderManager from './ServiceProviderManager/ServiceProviderManager.js';
 import GIONAdminDashboard from '../components/GION/GIONAdminDashboard/GIONAdminDashboard.js';
 import BroadcastNotification from './BroadcastNotification/BroadcastNotification.js';
-import AdminOps from './AdminOps/AdminOps.js';
+import AdminOpsDashboardWidget from './AdminOps/AdminOpsDashboardWidget.js';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -164,7 +164,7 @@ const AdminDashboard = () => {
       default:
         return (
           <>
-            <AdminOps />
+            <AdminOpsDashboardWidget />
             <div className="dashboard-content">
               <QuickActions onActionSelected={setActiveSection} />
               <NewsManager />
