@@ -560,13 +560,14 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         dealerId = safeGetStringId(car.dealer.id);
       }
       
-      const isPrivateSeller = 
+      const isPrivateSeller =
         car.dealer.sellerType === 'private' ||
-        (car.dealer.privateSeller && 
-         car.dealer.privateSeller.firstName && 
+        car.dealer.businessType === 'private' ||
+        (car.dealer.privateSeller &&
+         car.dealer.privateSeller.firstName &&
          car.dealer.privateSeller.lastName) ||
-        (car.dealer.businessName && 
-         (car.dealer.businessName.includes('Private') || 
+        (car.dealer.businessName &&
+         (car.dealer.businessName.includes('Private') ||
           car.dealer.businessName.match(/^[A-Z][a-z]+ [A-Z][a-z]+$/))) ||
         (!car.dealer.businessType && car.dealer.name && !car.dealer.businessName);
 
