@@ -4,11 +4,18 @@ import './AssistedListingModal.css';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 
+const COMMON_FEATURES = [
+  'Air Conditioning', 'Power Steering', 'Electric Windows', 'Central Locking',
+  'ABS Brakes', 'Airbags', 'Sunroof / Moonroof', 'Reverse Camera',
+  'Parking Sensors', 'Bluetooth', 'Navigation / GPS', 'Leather Seats',
+  'Heated Seats', 'Cruise Control', 'Alloy Wheels', 'Tow Bar',
+  'Bull Bar', 'Roof Rack', '4x4 / AWD', 'Turbo',
+];
+
 const INITIAL_SELLER = {
   name: '',
   email: '',
   phone: '',
-  password: '',
   profileImage: null,
   profileImagePreview: null,
 };
@@ -28,19 +35,38 @@ const INITIAL_VEHICLE = {
   interiorColor: '',
   city: '',
   description: '',
-  features: '',
+  features: [],
+  customFeature: '',
   images: [],
   imagePreviews: [],
 };
 
+const DEFAULT_SHARE_MSG = (name, title, claimUrl) =>
+`Hi ${name},
+
+Your vehicle "${title}" has been successfully listed on BW Car Culture! 🎉
+
+To access your profile and manage your listing, use the link below to set up your account password:
+${claimUrl}
+
+(This link expires in 30 days)
+
+💡 Want more buyers to see your car? Boost your listing to the top of search results and featured sections for just BWP 50/week — it dramatically increases your visibility and chances of a quick sale.
+
+Visit the platform or reply to this message to learn more.
+
+– BW Car Culture Team`;
+
 const AssistedListingModal = ({ isOpen, onClose }) => {
-  const [step, setStep] = useState(1); // 1 = seller, 2 = vehicle, 3 = success
+  const [step, setStep] = useState(1);
   const [seller, setSeller] = useState(INITIAL_SELLER);
   const [vehicle, setVehicle] = useState(INITIAL_VEHICLE);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [shareMsg, setShareMsg] = useState('');
+  const [msgCopied, setMsgCopied] = useState(false);
 
   const profileInputRef = useRef();
   const vehicleImagesInputRef = useRef();
@@ -56,14 +82,32 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
   const handleProfileImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const preview = URL.createObjectURL(file);
-    setSeller(prev => ({ ...prev, profileImage: file, profileImagePreview: preview }));
+    setSeller(prev => ({ ...prev, profileImage: file, profileImagePreview: URL.createObjectURL(file) }));
   };
 
   // ── Vehicle handlers ─────────────────────────────────────────────────────
 
   const handleVehicleChange = (e) => {
     setVehicle(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const toggleFeature = (feat) => {
+    setVehicle(prev => ({
+      ...prev,
+      features: prev.features.includes(feat)
+        ? prev.features.filter(f => f !== feat)
+        : [...prev.features, feat],
+    }));
+  };
+
+  const addCustomFeature = () => {
+    const val = vehicle.customFeature.trim();
+    if (!val || vehicle.features.includes(val)) return;
+    setVehicle(prev => ({ ...prev, features: [...prev.features, val], customFeature: '' }));
+  };
+
+  const removeFeature = (feat) => {
+    setVehicle(prev => ({ ...prev, features: prev.features.filter(f => f !== feat) }));
   };
 
   const handleVehicleImagesChange = (e) => {
@@ -89,11 +133,9 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
 
   const validateStep1 = () => {
     if (!seller.name.trim()) return 'Seller name is required.';
-    if (!seller.email.trim()) return 'Seller email is required.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(seller.email)) return 'Invalid email address.';
     if (!seller.phone.trim()) return 'Seller phone is required.';
-    if (!seller.password.trim() || seller.password.length < 6)
-      return 'Password must be at least 6 characters.';
+    if (seller.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(seller.email))
+      return 'Invalid email address.';
     return '';
   };
 
@@ -128,14 +170,12 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
     setLoading(true);
 
     try {
-      // Upload profile image if provided
       let profileImageUrl = '';
       if (seller.profileImage) {
         const uploaded = await imageService.uploadImage(seller.profileImage, 'profiles');
         profileImageUrl = uploaded.url || uploaded.secure_url || uploaded.location || '';
       }
 
-      // Upload vehicle images
       let vehicleImageUrls = [];
       for (const img of vehicle.images) {
         const uploaded = await imageService.uploadImage(img, 'listings');
@@ -144,9 +184,8 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
 
       const payload = {
         sellerName: seller.name.trim(),
-        sellerEmail: seller.email.trim().toLowerCase(),
+        sellerEmail: seller.email.trim().toLowerCase() || undefined,
         sellerPhone: seller.phone.trim(),
-        sellerPassword: seller.password,
         sellerProfileImage: profileImageUrl,
         title: vehicle.title.trim() || `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
         make: vehicle.make.trim(),
@@ -162,19 +201,14 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
         interiorColor: vehicle.interiorColor.trim(),
         city: vehicle.city.trim(),
         description: vehicle.description.trim(),
-        features: vehicle.features
-          ? vehicle.features.split(',').map(f => f.trim()).filter(Boolean)
-          : [],
+        features: vehicle.features,
         images: vehicleImageUrls,
       };
 
       const token = localStorage.getItem('token');
       const res = await fetch(`${API_URL}/admin/listings/assisted`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
       });
 
@@ -182,6 +216,10 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
       if (!data.success) throw new Error(data.message || 'Failed to create listing.');
 
       setResult(data);
+      // Pre-fill the share message
+      const listingTitle = data.listing?.title || `${vehicle.year} ${vehicle.make} ${vehicle.model}`;
+      const claimUrl = data.seller?.claimUrl || '';
+      setShareMsg(DEFAULT_SHARE_MSG(seller.name.trim(), listingTitle, claimUrl));
       setStep(3);
     } catch (e) {
       setError(e.message || 'An unexpected error occurred.');
@@ -190,17 +228,21 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
     }
   };
 
-  // ── Copy credentials ──────────────────────────────────────────────────────
+  // ── Copy helpers ──────────────────────────────────────────────────────────
 
-  const handleCopyCredentials = () => {
-    if (!result?.seller?.credentials) return;
-    const text =
-      `Seller Login Credentials\n` +
-      `Email: ${result.seller.credentials.email}\n` +
-      `Password: ${result.seller.credentials.password}`;
-    navigator.clipboard.writeText(text).then(() => {
+  const handleCopyLink = () => {
+    const url = result?.seller?.claimUrl;
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
+    });
+  };
+
+  const handleCopyMessage = () => {
+    navigator.clipboard.writeText(shareMsg).then(() => {
+      setMsgCopied(true);
+      setTimeout(() => setMsgCopied(false), 2500);
     });
   };
 
@@ -211,6 +253,8 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
     setError('');
     setResult(null);
     setCopied(false);
+    setShareMsg('');
+    setMsgCopied(false);
     onClose();
   };
 
@@ -245,14 +289,14 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
 
         {/* Body */}
         <div className="alm-body">
+
           {/* ── Step 1: Seller Info ── */}
           {step === 1 && (
             <div className="alm-section">
               <p className="alm-section-desc">
-                Enter the seller's details. A new account will be created if no existing user matches the email.
+                Enter the seller's details. A private seller profile will be created — they'll receive a claim link to set their own password.
               </p>
 
-              {/* Profile picture */}
               <div className="alm-profile-upload" onClick={() => profileInputRef.current?.click()}>
                 {seller.profileImagePreview ? (
                   <img src={seller.profileImagePreview} alt="Profile" className="alm-profile-preview" />
@@ -295,7 +339,7 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
               </div>
 
               <div className="alm-field">
-                <label className="alm-label">Email Address *</label>
+                <label className="alm-label">Email Address <span className="alm-label-hint">(optional — needed to send claim link)</span></label>
                 <input
                   className="alm-input"
                   name="email"
@@ -303,18 +347,6 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
                   value={seller.email}
                   onChange={handleSellerChange}
                   placeholder="seller@example.com"
-                />
-              </div>
-
-              <div className="alm-field">
-                <label className="alm-label">Account Password * <span className="alm-label-hint">(share this with the seller)</span></label>
-                <input
-                  className="alm-input"
-                  name="password"
-                  type="text"
-                  value={seller.password}
-                  onChange={handleSellerChange}
-                  placeholder="Minimum 6 characters"
                 />
               </div>
             </div>
@@ -326,59 +358,23 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
               <div className="alm-grid-2">
                 <div className="alm-field">
                   <label className="alm-label">Make *</label>
-                  <input
-                    className="alm-input"
-                    name="make"
-                    value={vehicle.make}
-                    onChange={handleVehicleChange}
-                    placeholder="e.g. Toyota"
-                  />
+                  <input className="alm-input" name="make" value={vehicle.make} onChange={handleVehicleChange} placeholder="e.g. Toyota" />
                 </div>
                 <div className="alm-field">
                   <label className="alm-label">Model *</label>
-                  <input
-                    className="alm-input"
-                    name="model"
-                    value={vehicle.model}
-                    onChange={handleVehicleChange}
-                    placeholder="e.g. Hilux"
-                  />
+                  <input className="alm-input" name="model" value={vehicle.model} onChange={handleVehicleChange} placeholder="e.g. Hilux" />
                 </div>
                 <div className="alm-field">
                   <label className="alm-label">Year</label>
-                  <input
-                    className="alm-input"
-                    name="year"
-                    type="number"
-                    min="1970"
-                    max={new Date().getFullYear() + 1}
-                    value={vehicle.year}
-                    onChange={handleVehicleChange}
-                  />
+                  <input className="alm-input" name="year" type="number" min="1970" max={new Date().getFullYear() + 1} value={vehicle.year} onChange={handleVehicleChange} />
                 </div>
                 <div className="alm-field">
                   <label className="alm-label">Price (BWP) *</label>
-                  <input
-                    className="alm-input"
-                    name="price"
-                    type="number"
-                    min="0"
-                    value={vehicle.price}
-                    onChange={handleVehicleChange}
-                    placeholder="e.g. 85000"
-                  />
+                  <input className="alm-input" name="price" type="number" min="0" value={vehicle.price} onChange={handleVehicleChange} placeholder="e.g. 85000" />
                 </div>
                 <div className="alm-field">
                   <label className="alm-label">Mileage (km)</label>
-                  <input
-                    className="alm-input"
-                    name="mileage"
-                    type="number"
-                    min="0"
-                    value={vehicle.mileage}
-                    onChange={handleVehicleChange}
-                    placeholder="e.g. 45000"
-                  />
+                  <input className="alm-input" name="mileage" type="number" min="0" value={vehicle.mileage} onChange={handleVehicleChange} placeholder="e.g. 45000" />
                 </div>
                 <div className="alm-field">
                   <label className="alm-label">Condition</label>
@@ -405,55 +401,25 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
                 </div>
                 <div className="alm-field">
                   <label className="alm-label">Engine Size</label>
-                  <input
-                    className="alm-input"
-                    name="engineSize"
-                    value={vehicle.engineSize}
-                    onChange={handleVehicleChange}
-                    placeholder="e.g. 2.0L"
-                  />
+                  <input className="alm-input" name="engineSize" value={vehicle.engineSize} onChange={handleVehicleChange} placeholder="e.g. 2.0L" />
                 </div>
                 <div className="alm-field">
                   <label className="alm-label">City *</label>
-                  <input
-                    className="alm-input"
-                    name="city"
-                    value={vehicle.city}
-                    onChange={handleVehicleChange}
-                    placeholder="e.g. Gaborone"
-                  />
+                  <input className="alm-input" name="city" value={vehicle.city} onChange={handleVehicleChange} placeholder="e.g. Gaborone" />
                 </div>
                 <div className="alm-field">
                   <label className="alm-label">Exterior Color</label>
-                  <input
-                    className="alm-input"
-                    name="exteriorColor"
-                    value={vehicle.exteriorColor}
-                    onChange={handleVehicleChange}
-                    placeholder="e.g. Pearl White"
-                  />
+                  <input className="alm-input" name="exteriorColor" value={vehicle.exteriorColor} onChange={handleVehicleChange} placeholder="e.g. Pearl White" />
                 </div>
                 <div className="alm-field">
                   <label className="alm-label">Interior Color</label>
-                  <input
-                    className="alm-input"
-                    name="interiorColor"
-                    value={vehicle.interiorColor}
-                    onChange={handleVehicleChange}
-                    placeholder="e.g. Black Leather"
-                  />
+                  <input className="alm-input" name="interiorColor" value={vehicle.interiorColor} onChange={handleVehicleChange} placeholder="e.g. Black Leather" />
                 </div>
               </div>
 
               <div className="alm-field">
                 <label className="alm-label">Custom Title <span className="alm-label-hint">(optional — auto-generated if blank)</span></label>
-                <input
-                  className="alm-input"
-                  name="title"
-                  value={vehicle.title}
-                  onChange={handleVehicleChange}
-                  placeholder="e.g. 2020 Toyota Hilux GD-6 4x4 Double Cab"
-                />
+                <input className="alm-input" name="title" value={vehicle.title} onChange={handleVehicleChange} placeholder="e.g. 2020 Toyota Hilux GD-6 4x4 Double Cab" />
               </div>
 
               <div className="alm-field">
@@ -463,29 +429,56 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
                   name="description"
                   value={vehicle.description}
                   onChange={handleVehicleChange}
-                  rows={4}
+                  rows={3}
                   placeholder="Describe the vehicle's condition, service history, extras, etc."
                 />
               </div>
 
+              {/* Features */}
               <div className="alm-field">
-                <label className="alm-label">Features <span className="alm-label-hint">(comma-separated)</span></label>
-                <input
-                  className="alm-input"
-                  name="features"
-                  value={vehicle.features}
-                  onChange={handleVehicleChange}
-                  placeholder="e.g. Sunroof, Reverse Camera, Heated Seats"
-                />
+                <label className="alm-label">Features</label>
+                <div className="alm-features-grid">
+                  {COMMON_FEATURES.map(feat => (
+                    <label key={feat} className={`alm-feature-chip ${vehicle.features.includes(feat) ? 'alm-feature-chip--active' : ''}`}>
+                      <input
+                        type="checkbox"
+                        checked={vehicle.features.includes(feat)}
+                        onChange={() => toggleFeature(feat)}
+                        style={{ display: 'none' }}
+                      />
+                      {feat}
+                    </label>
+                  ))}
+                </div>
+                {/* Custom feature input */}
+                <div className="alm-custom-feature">
+                  <input
+                    className="alm-input"
+                    name="customFeature"
+                    value={vehicle.customFeature}
+                    onChange={handleVehicleChange}
+                    placeholder="Add custom feature…"
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomFeature())}
+                  />
+                  <button type="button" className="alm-btn alm-btn--ghost" onClick={addCustomFeature}>Add</button>
+                </div>
+                {/* Selected custom/extra features */}
+                {vehicle.features.filter(f => !COMMON_FEATURES.includes(f)).length > 0 && (
+                  <div className="alm-selected-tags">
+                    {vehicle.features.filter(f => !COMMON_FEATURES.includes(f)).map(f => (
+                      <span key={f} className="alm-tag">
+                        {f}
+                        <button type="button" onClick={() => removeFeature(f)}>✕</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Vehicle images */}
               <div className="alm-field">
                 <label className="alm-label">Vehicle Photos</label>
-                <div
-                  className="alm-images-drop"
-                  onClick={() => vehicleImagesInputRef.current?.click()}
-                >
+                <div className="alm-images-drop" onClick={() => vehicleImagesInputRef.current?.click()}>
                   <span className="alm-images-drop-icon">📸</span>
                   <span>Click to add photos</span>
                   <input
@@ -502,12 +495,7 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
                     {vehicle.imagePreviews.map((src, i) => (
                       <div key={i} className="alm-image-thumb">
                         <img src={src} alt={`Vehicle ${i + 1}`} />
-                        <button
-                          className="alm-image-remove"
-                          onClick={() => removeVehicleImage(i)}
-                          type="button"
-                          aria-label="Remove"
-                        >✕</button>
+                        <button className="alm-image-remove" onClick={() => removeVehicleImage(i)} type="button" aria-label="Remove">✕</button>
                         {i === 0 && <span className="alm-image-badge">Cover</span>}
                       </div>
                     ))}
@@ -523,35 +511,46 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
               <div className="alm-success-icon">✓</div>
               <h3 className="alm-success-title">Listing Created!</h3>
               <p className="alm-success-desc">
-                The vehicle <strong>{result.listing?.title}</strong> has been listed successfully
-                {result.seller?.isNewUser ? ' and a new account has been created for the seller.' : '.'}
+                <strong>{result.listing?.title}</strong> is now live
+                {result.seller?.isNewUser ? ' and a private seller profile has been created.' : '.'}
               </p>
 
-              {result.seller?.credentials && (
+              {/* Claim link */}
+              {result.seller?.claimUrl && (
                 <div className="alm-credentials">
-                  <p className="alm-credentials-title">Seller Login Credentials</p>
-                  <div className="alm-credentials-row">
-                    <span className="alm-credentials-label">Email</span>
-                    <span className="alm-credentials-value">{result.seller.credentials.email}</span>
-                  </div>
-                  <div className="alm-credentials-row">
-                    <span className="alm-credentials-label">Password</span>
-                    <span className="alm-credentials-value">{result.seller.credentials.password}</span>
-                  </div>
-                  <button className="alm-copy-btn" onClick={handleCopyCredentials}>
-                    {copied ? '✓ Copied!' : '📋 Copy Credentials'}
-                  </button>
-                  <p className="alm-credentials-note">
-                    Share these credentials with the seller so they can log in and manage their listing.
+                  <p className="alm-credentials-title">Profile Claim Link</p>
+                  <p className="alm-credentials-note" style={{ marginBottom: '0.5rem' }}>
+                    Share this with the seller — they'll use it to set their own password and access their profile.
                   </p>
+                  <div className="alm-claim-url">{result.seller.claimUrl}</div>
+                  <button className="alm-copy-btn" onClick={handleCopyLink}>
+                    {copied ? '✓ Copied!' : '🔗 Copy Claim Link'}
+                  </button>
                 </div>
               )}
 
-              {!result.seller?.credentials && (
+              {!result.seller?.claimUrl && !result.seller?.isNewUser && (
                 <p className="alm-existing-user-note">
-                  This seller already has an account — their existing credentials remain unchanged.
+                  This seller already has an account — their existing login remains unchanged.
                 </p>
               )}
+
+              {/* Editable share message */}
+              <div className="alm-share-message">
+                <div className="alm-share-message-header">
+                  <label className="alm-credentials-title" style={{ margin: 0 }}>Message to Share with Seller</label>
+                  <span className="alm-label-hint">Edit as needed before copying</span>
+                </div>
+                <textarea
+                  className="alm-input alm-textarea"
+                  value={shareMsg}
+                  onChange={(e) => setShareMsg(e.target.value)}
+                  rows={12}
+                />
+                <button className="alm-copy-btn" style={{ marginTop: '0.5rem' }} onClick={handleCopyMessage}>
+                  {msgCopied ? '✓ Message Copied!' : '📋 Copy Message'}
+                </button>
+              </div>
 
               <button className="alm-done-btn" onClick={handleClose}>Done</button>
             </div>
@@ -561,7 +560,7 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
           {error && <p className="alm-error">{error}</p>}
         </div>
 
-        {/* Footer actions */}
+        {/* Footer */}
         {step < 3 && (
           <div className="alm-footer">
             {step === 1 && (
@@ -573,11 +572,7 @@ const AssistedListingModal = ({ isOpen, onClose }) => {
             {step === 2 && (
               <>
                 <button className="alm-btn alm-btn--ghost" onClick={handleBack}>← Back</button>
-                <button
-                  className="alm-btn alm-btn--primary"
-                  onClick={handleSubmit}
-                  disabled={loading}
-                >
+                <button className="alm-btn alm-btn--primary" onClick={handleSubmit} disabled={loading}>
                   {loading ? 'Creating Listing…' : 'Create Listing'}
                 </button>
               </>
