@@ -79,6 +79,7 @@ const TrailerListingManager = React.lazy(() => import('./Admin/TrailerListingMan
 const TransportRouteManager = React.lazy(() => import('./Admin/TransportRouteManager/TransportRouteManager.js'));
 const EditorDashboard = React.lazy(() => import('./Admin/dashboards/EditorDashboard.js'));
 const DealerDashboard = React.lazy(() => import('./Admin/dashboards/DealerDashboard.js'));
+const AdminScripts = React.lazy(() => import('./Admin/AdminScripts/AdminScripts.js'));
 // — Journalist
 const CreateArticle = React.lazy(() => import('./components/journalist/CreateArticle.js'));
 // — User pages
@@ -1111,6 +1112,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         
+        <Route path="/admin/scripts" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <AdminLayout>
+              <AdminScripts />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
         <Route path="/admin/gion" element={
           <AdminLayout>
             <div className="gion-admin-wrapper">

@@ -53,6 +53,7 @@ const menuItems = [
       { title: 'Pending Reviews', path: '/admin/role-requests' },
     ]
   },
+  { title: 'Scripts & Activity', icon: '✎', path: '/admin/scripts' },
   { title: 'GION',     icon: '◉', path: '/admin/gion' },
   { title: 'Settings', icon: '◌', path: '/admin/settings' },
 ];
