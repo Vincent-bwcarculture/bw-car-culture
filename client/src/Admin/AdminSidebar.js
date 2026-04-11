@@ -38,6 +38,7 @@ const menuItems = [
     ]
   },
   { title: 'Dealers',   icon: '◇', path: '/admin/dealer' },
+  { title: 'Business',  icon: '◆', path: '/admin/business' },
   {
     title: 'Payments', icon: '◆',
     submenu: [

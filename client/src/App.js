@@ -81,6 +81,7 @@ const EditorDashboard = React.lazy(() => import('./Admin/dashboards/EditorDashbo
 const DealerDashboard = React.lazy(() => import('./Admin/dashboards/DealerDashboard.js'));
 const AdminScripts = React.lazy(() => import('./Admin/AdminScripts/AdminScripts.js'));
 const AdminOps = React.lazy(() => import('./Admin/AdminOps/AdminOps.js'));
+const AdminBusiness = React.lazy(() => import('./Admin/AdminBusiness/AdminBusiness.js'));
 // — Journalist
 const CreateArticle = React.lazy(() => import('./components/journalist/CreateArticle.js'));
 // — User pages
@@ -1119,6 +1120,14 @@ const AppRoutes = () => {
           <ProtectedRoute requiredRoles={['admin']}>
             <AdminLayout>
               <AdminOps />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/business" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <AdminLayout>
+              <AdminBusiness />
             </AdminLayout>
           </ProtectedRoute>
         } />
