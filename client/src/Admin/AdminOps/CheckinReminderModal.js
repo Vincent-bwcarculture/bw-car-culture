@@ -28,15 +28,17 @@ const CheckinReminderModal = ({ user }) => {
           // Not checked in at all today
           setModal('not-in');
         } else if (!myRecord.checkOut) {
-          // Checked in but not out — check if overdue
-          const [inH, inM] = myRecord.checkIn.split(':').map(Number);
-          const now = new Date();
-          const elapsedMins = now.getHours() * 60 + now.getMinutes() - (inH * 60 + inM);
-          if (elapsedMins >= OVERDUE_HOURS * 60) {
-            setCheckinTime(myRecord.checkIn);
-            setModal('overdue');
+          // Checked in but not out — check if overdue (skip if intentionally paused)
+          if (myRecord.status !== 'paused') {
+            const [inH, inM] = myRecord.checkIn.split(':').map(Number);
+            const now = new Date();
+            const elapsedMins = now.getHours() * 60 + now.getMinutes() - (inH * 60 + inM);
+            if (elapsedMins >= OVERDUE_HOURS * 60) {
+              setCheckinTime(myRecord.checkIn);
+              setModal('overdue');
+            }
           }
-          // Under 14hrs checked in → no modal, they're actively working
+          // Paused or under 14hrs → no modal
         }
         // Already checked out → no modal
       })

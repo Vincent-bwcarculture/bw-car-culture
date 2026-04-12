@@ -426,7 +426,9 @@ function TeamSection({ currentUser, headers }) {
   const [logTo, setLogTo] = useState('');
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
-  const [noteModal, setNoteModal] = useState(null); // 'in' | 'out'
+  const [pausing, setPausing] = useState(false);
+  const [resuming, setResuming] = useState(false);
+  const [noteModal, setNoteModal] = useState(null); // 'in' | 'out' | 'pause'
   const [noteText, setNoteText] = useState('');
   const [successModal, setSuccessModal] = useState(null); // null | 'in' | 'out'
   const myId = String(currentUser?._id || currentUser?.id || '');
@@ -490,6 +492,28 @@ function TeamSection({ currentUser, headers }) {
     setCheckingOut(false);
   };
 
+  const pause = async () => {
+    setPausing(true);
+    try {
+      const res = await fetch(`${API}/admin/checkins/pause`, { method: 'POST', headers, body: JSON.stringify({ reason: noteText }) });
+      const d = await res.json();
+      if (d.success) { await loadTodayCheckins(); setNoteModal(null); setNoteText(''); }
+      else alert(d.message);
+    } catch (_) {}
+    setPausing(false);
+  };
+
+  const resume = async () => {
+    setResuming(true);
+    try {
+      const res = await fetch(`${API}/admin/checkins/resume`, { method: 'POST', headers });
+      const d = await res.json();
+      if (d.success) { await loadTodayCheckins(); }
+      else alert(d.message);
+    } catch (_) {}
+    setResuming(false);
+  };
+
   const deleteCheckin = async (id) => {
     if (!window.confirm('Delete this record?')) return;
     await fetch(`${API}/admin/checkins/${id}`, { method: 'DELETE', headers });
@@ -521,9 +545,20 @@ function TeamSection({ currentUser, headers }) {
               ● Check In
             </button>
           ) : !myToday.checkOut ? (
-            <button className="ops-btn ops-btn--checkout" onClick={() => { setNoteModal('out'); setNoteText(myToday.note || ''); }} disabled={checkingOut}>
-              ○ Check Out
-            </button>
+            <>
+              {myToday.status === 'paused' ? (
+                <button className="ops-btn ops-btn--resume" onClick={resume} disabled={resuming}>
+                  {resuming ? 'Resuming…' : '▶ Resume'}
+                </button>
+              ) : (
+                <button className="ops-btn ops-btn--pause" onClick={() => { setNoteModal('pause'); setNoteText(''); }} disabled={pausing}>
+                  ⏸ Pause
+                </button>
+              )}
+              <button className="ops-btn ops-btn--checkout" onClick={() => { setNoteModal('out'); setNoteText(myToday.note || ''); }} disabled={checkingOut}>
+                ○ Check Out
+              </button>
+            </>
           ) : (
             <span className="ops-checkin-done">✓ Done {myToday.checkIn}–{myToday.checkOut} ({fmtDuration(myToday.duration)})</span>
           )}
@@ -541,15 +576,15 @@ function TeamSection({ currentUser, headers }) {
           const ci = getCheckinForMember(member._id);
           const checkedInToday = !!ci;
           const checkedOutToday = !!ci?.checkOut;
+          const isPaused = ci?.status === 'paused';
+          const dotClass = checkedOutToday ? ' done' : isPaused ? ' paused' : checkedInToday ? ' online' : '';
+          const dotTitle = checkedOutToday ? `Checked out ${ci.checkOut}` : isPaused ? `Paused since ${ci.pauses?.slice(-1)[0]?.start}` : checkedInToday ? `Checked in ${ci.checkIn}` : 'Not checked in today';
           return (
             <div key={member._id} className={`ops-member-card${isMe ? ' ops-member-card--me' : ''}`}>
               <div className="ops-member-top">
                 <div className="ops-member-avatar-wrap">
                   <div className="ops-member-avatar">{(member.name || 'A').charAt(0).toUpperCase()}</div>
-                  <span
-                    className={`ops-member-dot${checkedInToday && !checkedOutToday ? ' online' : checkedOutToday ? ' done' : ''}`}
-                    title={checkedOutToday ? `Checked out at ${ci.checkOut}` : checkedInToday ? `Checked in at ${ci.checkIn}` : 'Not checked in today'}
-                  ></span>
+                  <span className={`ops-member-dot${dotClass}`} title={dotTitle}></span>
                 </div>
                 <div className="ops-member-info">
                   <span className="ops-member-name">{member.name}{isMe && <span className="ops-me-badge">You</span>}</span>
@@ -567,6 +602,11 @@ function TeamSection({ currentUser, headers }) {
                   <span className="ops-ci-in">In {ci.checkIn}</span>
                   {ci.checkOut && <><span className="ops-ci-sep">→</span><span className="ops-ci-out">Out {ci.checkOut}</span></>}
                   {ci.duration != null && <span className="ops-ci-dur">{fmtDuration(ci.duration)}</span>}
+                  {isPaused && (() => {
+                    const latest = ci.pauses?.slice(-1)[0];
+                    return <span className="ops-ci-paused">⏸ Paused {latest?.start}{latest?.reason ? ` · ${latest.reason}` : ''}</span>;
+                  })()}
+                  {ci.totalPausedMins > 0 && !isPaused && <span className="ops-ci-pause-total">{fmtDuration(ci.totalPausedMins)} break</span>}
                   {ci.note && <span className="ops-ci-note">{ci.note}</span>}
                 </div>
               ) : (
@@ -595,28 +635,32 @@ function TeamSection({ currentUser, headers }) {
         })}
       </div>
 
-      {/* Check-in/out note modal */}
+      {/* Check-in/out/pause note modal */}
       {noteModal && (
         <div className="ops-modal-overlay" onClick={e => e.target === e.currentTarget && setNoteModal(null)}>
           <div className="ops-modal ops-modal--profile">
             <div className="ops-modal-header">
-              <h2 className="ops-modal-title">{noteModal === 'in' ? '● Check In' : '○ Check Out'} — {currentUser?.name}</h2>
+              <h2 className="ops-modal-title">
+                {noteModal === 'in' ? '● Check In' : noteModal === 'pause' ? '⏸ Pause Session' : '○ Check Out'} — {currentUser?.name}
+              </h2>
               <button className="ops-modal-close" onClick={() => setNoteModal(null)}>✕</button>
             </div>
             <div className="ops-modal-body">
               <p className="ops-note-hint">
                 {noteModal === 'in'
                   ? `Recording check-in at ${new Date().toTimeString().slice(0, 5)} today.`
+                  : noteModal === 'pause'
+                  ? `Pausing your session at ${new Date().toTimeString().slice(0, 5)}. Your active time will be preserved.`
                   : `Recording check-out at ${new Date().toTimeString().slice(0, 5)}. You checked in at ${myToday?.checkIn}.`}
               </p>
               <div className="ops-field" style={{ marginTop: '0.75rem' }}>
-                <label className="ops-label">Note (optional)</label>
+                <label className="ops-label">{noteModal === 'pause' ? 'Reason for break (optional)' : 'Note (optional)'}</label>
                 <textarea
                   className="ops-textarea"
                   rows={3}
                   value={noteText}
                   onChange={e => setNoteText(e.target.value)}
-                  placeholder={noteModal === 'in' ? 'What are you working on today?' : 'Summary of what you accomplished…'}
+                  placeholder={noteModal === 'in' ? 'What are you working on today?' : noteModal === 'pause' ? 'e.g. Lunch, meeting, errand…' : 'Summary of what you accomplished…'}
                   autoFocus
                 />
               </div>
@@ -624,11 +668,15 @@ function TeamSection({ currentUser, headers }) {
             <div className="ops-modal-footer">
               <button className="ops-btn ops-btn--ghost" onClick={() => setNoteModal(null)}>Cancel</button>
               <button
-                className={`ops-btn ${noteModal === 'in' ? 'ops-btn--checkin' : 'ops-btn--checkout'}`}
-                onClick={noteModal === 'in' ? checkin : checkout}
-                disabled={noteModal === 'in' ? checkingIn : checkingOut}
+                className={`ops-btn ${noteModal === 'in' ? 'ops-btn--checkin' : noteModal === 'pause' ? 'ops-btn--pause' : 'ops-btn--checkout'}`}
+                onClick={noteModal === 'in' ? checkin : noteModal === 'pause' ? pause : checkout}
+                disabled={noteModal === 'in' ? checkingIn : noteModal === 'pause' ? pausing : checkingOut}
               >
-                {noteModal === 'in' ? (checkingIn ? 'Checking in…' : '● Confirm Check In') : (checkingOut ? 'Checking out…' : '○ Confirm Check Out')}
+                {noteModal === 'in'
+                  ? (checkingIn ? 'Checking in…' : '● Confirm Check In')
+                  : noteModal === 'pause'
+                  ? (pausing ? 'Pausing…' : '⏸ Confirm Pause')
+                  : (checkingOut ? 'Checking out…' : '○ Confirm Check Out')}
               </button>
             </div>
           </div>
@@ -679,11 +727,23 @@ function TeamSection({ currentUser, headers }) {
                         <span className="ops-ci-in">In {ci.checkIn}</span>
                         {ci.checkOut ? (
                           <><span className="ops-ci-sep">→</span><span className="ops-ci-out">Out {ci.checkOut}</span>
-                          {ci.duration != null && <span className="ops-ci-dur">{fmtDuration(ci.duration)}</span>}</>
+                          {ci.duration != null && <span className="ops-ci-dur">{fmtDuration(ci.duration)}</span>}
+                          {ci.totalPausedMins > 0 && <span className="ops-ci-pause-total">{fmtDuration(ci.totalPausedMins)} break</span>}</>
+                        ) : ci.status === 'paused' ? (
+                          <span className="ops-ci-paused">⏸ paused</span>
                         ) : (
                           <span className="ops-ci-still-in">still checked in</span>
                         )}
                       </div>
+                      {(ci.pauses || []).length > 0 && (
+                        <div className="ops-ci-log-pauses">
+                          {ci.pauses.map((p, i) => (
+                            <span key={i} className="ops-ci-pause-entry">
+                              {p.start}{p.end ? `–${p.end}` : '…'}{p.reason ? ` · ${p.reason}` : ''}{p.duration != null ? ` (${fmtDuration(p.duration)})` : ''}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       {ci.note && <p className="ops-ci-log-note">{ci.note}</p>}
                     </div>
                     {isOwn && (

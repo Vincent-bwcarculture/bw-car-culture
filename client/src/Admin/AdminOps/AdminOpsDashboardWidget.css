@@ -59,6 +59,15 @@
   border-radius: 20px;
 }
 
+.ops-widget-paused-dot {
+  font-size: 0.68rem;
+  color: #f59e0b;
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.2);
+  padding: 0.08rem 0.45rem;
+  border-radius: 20px;
+}
+
 .ops-widget-collapse-btn {
   background: transparent;
   border: 1px solid #21262d;
@@ -175,8 +184,9 @@
   background: #30363d;
   border: 1.5px solid #0d1117;
 }
-.ops-widget-dot.online { background: #22c55e; }
-.ops-widget-dot.done   { background: #8b5cf6; }
+.ops-widget-dot.online  { background: #22c55e; }
+.ops-widget-dot.done    { background: #8b5cf6; }
+.ops-widget-dot.paused  { background: #f59e0b; }
 
 .ops-widget-member-info {
   display: flex;

@@ -47,7 +47,8 @@ const AdminOpsDashboardWidget = () => {
   const getCheckin = (memberId) => todayCheckins.find(c => c.adminId === String(memberId));
 
   const checkedInCount = team.filter(m => !!getCheckin(m._id)).length;
-  const activeCount = team.filter(m => { const ci = getCheckin(m._id); return ci && !ci.checkOut; }).length;
+  const activeCount = team.filter(m => { const ci = getCheckin(m._id); return ci && !ci.checkOut && ci.status !== 'paused'; }).length;
+  const pausedCount = team.filter(m => { const ci = getCheckin(m._id); return ci && ci.status === 'paused'; }).length;
 
   const fmtDur = (mins) => {
     if (!mins && mins !== 0) return '';
@@ -67,7 +68,8 @@ const AdminOpsDashboardWidget = () => {
           {team.length > 0 && (
             <span className="ops-widget-attendance">
               {activeCount > 0 && <span className="ops-widget-active">{activeCount} active</span>}
-              {checkedInCount > activeCount && <span className="ops-widget-done-dot">{checkedInCount - activeCount} done today</span>}
+              {pausedCount > 0 && <span className="ops-widget-paused-dot">{pausedCount} on break</span>}
+              {checkedInCount > activeCount + pausedCount && <span className="ops-widget-done-dot">{checkedInCount - activeCount - pausedCount} done today</span>}
             </span>
           )}
         </div>
@@ -106,15 +108,15 @@ const AdminOpsDashboardWidget = () => {
                   const ci = getCheckin(m._id);
                   const checkedIn = !!ci;
                   const checkedOut = !!ci?.checkOut;
+                  const isPaused = ci?.status === 'paused';
+                  const dotClass = checkedOut ? ' done' : isPaused ? ' paused' : checkedIn ? ' online' : '';
+                  const dotTitle = checkedOut ? `Checked out ${ci.checkOut}` : isPaused ? `Paused · ${ci.pauses?.slice(-1)[0]?.reason || ci.pauses?.slice(-1)[0]?.start || ''}` : checkedIn ? `Checked in ${ci.checkIn}` : 'Not in today';
                   const pos = m.opsProfile?.position;
                   return (
                     <div key={m._id} className="ops-widget-member">
                       <div className="ops-widget-avatar-wrap">
                         <div className="ops-widget-avatar">{(m.name || 'A').charAt(0).toUpperCase()}</div>
-                        <span
-                          className={`ops-widget-dot${checkedIn && !checkedOut ? ' online' : checkedOut ? ' done' : ''}`}
-                          title={checkedOut ? `Checked out ${ci.checkOut}` : checkedIn ? `Checked in ${ci.checkIn}` : 'Not in today'}
-                        ></span>
+                        <span className={`ops-widget-dot${dotClass}`} title={dotTitle}></span>
                       </div>
                       <div className="ops-widget-member-info">
                         <span className="ops-widget-member-name">{m.name}</span>
