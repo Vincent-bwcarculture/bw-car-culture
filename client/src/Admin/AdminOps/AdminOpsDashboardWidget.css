@@ -12,10 +12,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.85rem 1.25rem;
+  padding: 0.75rem 1.25rem;
   background: linear-gradient(90deg, rgba(255,51,0,0.06) 0%, transparent 60%);
   border-bottom: 1px solid #21262d;
-  gap: 1rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
 }
 
@@ -23,64 +23,100 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
-.ops-widget-icon {
-  color: #ff3300;
-  font-size: 0.9rem;
-}
+.ops-widget-icon { color: #ff3300; font-size: 0.88rem; }
 
 .ops-widget-title {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #e6edf3;
 }
 
+.ops-widget-attendance {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ops-widget-active {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(34,197,94,0.1);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.25);
+  padding: 0.08rem 0.45rem;
+  border-radius: 20px;
+}
+
+.ops-widget-done-dot {
+  font-size: 0.68rem;
+  color: #8b5cf6;
+  background: rgba(139,92,246,0.08);
+  border: 1px solid rgba(139,92,246,0.2);
+  padding: 0.08rem 0.45rem;
+  border-radius: 20px;
+}
+
+.ops-widget-collapse-btn {
+  background: transparent;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  color: #6b7280;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.45rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.ops-widget-collapse-btn:hover { border-color: #30363d; color: #e6edf3; }
+
 .ops-widget-open-btn {
-  font-size: 0.75rem;
+  font-size: 0.73rem;
   font-weight: 600;
   color: #ff6633;
   text-decoration: none;
   border: 1px solid rgba(255,51,0,0.25);
-  padding: 0.25rem 0.65rem;
+  padding: 0.22rem 0.6rem;
   border-radius: 6px;
   background: rgba(255,51,0,0.06);
   transition: all 0.15s;
   white-space: nowrap;
 }
-.ops-widget-open-btn:hover { background: rgba(255,51,0,0.12); border-color: rgba(255,51,0,0.4); color: #ff3300; }
+.ops-widget-open-btn:hover { background: rgba(255,51,0,0.12); border-color: rgba(255,51,0,0.4); }
 
+/* Body layout: mission | team | stats */
 .ops-widget-body {
   display: grid;
   grid-template-columns: 1fr auto auto;
-  gap: 0;
   align-items: start;
 }
 
-/* Mission */
-.ops-widget-mission {
-  padding: 0.9rem 1.25rem;
+/* ── Mission & Vision ── */
+.ops-widget-mv {
+  padding: 0.85rem 1.25rem;
   border-right: 1px solid #21262d;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   min-width: 0;
 }
 
+.ops-widget-mv-block { }
+
 .ops-widget-section-label {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   color: #484f58;
   display: block;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.22rem;
 }
 
-.ops-widget-online-count {
-  color: #22c55e;
-  font-weight: 600;
-}
-
-.ops-widget-mission-text {
-  font-size: 0.82rem;
+.ops-widget-mv-text {
+  font-size: 0.81rem;
   color: #8b949e;
   margin: 0;
   line-height: 1.55;
@@ -90,23 +126,24 @@
   overflow: hidden;
 }
 
-/* Team */
+/* ── Team ── */
 .ops-widget-team {
-  padding: 0.9rem 1.25rem;
+  padding: 0.85rem 1.25rem;
   border-right: 1px solid #21262d;
-  min-width: 180px;
+  min-width: 200px;
+  max-width: 280px;
 }
 
 .ops-widget-members {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.5rem;
   margin-top: 0.3rem;
 }
 
 .ops-widget-member {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
 }
 
@@ -116,8 +153,8 @@
 }
 
 .ops-widget-avatar {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: linear-gradient(135deg, #ff3300, #cc2900);
   color: #fff;
@@ -132,18 +169,20 @@
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: #30363d;
   border: 1.5px solid #0d1117;
 }
 .ops-widget-dot.online { background: #22c55e; }
+.ops-widget-dot.done   { background: #8b5cf6; }
 
 .ops-widget-member-info {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  gap: 0.06rem;
 }
 
 .ops-widget-member-name {
@@ -156,24 +195,30 @@
 }
 
 .ops-widget-member-pos {
-  font-size: 0.68rem;
+  font-size: 0.67rem;
   color: #ff6633;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.ops-widget-member-schedule {
-  font-size: 0.65rem;
-  color: #484f58;
+.ops-widget-ci-times {
+  font-size: 0.67rem;
+  color: #6b7280;
 }
 
-/* Stats */
+.ops-widget-ci-absent {
+  font-size: 0.67rem;
+  color: #484f58;
+  font-style: italic;
+}
+
+/* ── Stats ── */
 .ops-widget-stats {
-  padding: 0.9rem 1.25rem;
+  padding: 0.85rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
 .ops-widget-stat {
@@ -181,7 +226,7 @@
   flex-direction: column;
   align-items: center;
   text-decoration: none;
-  padding: 0.35rem 0.6rem;
+  padding: 0.35rem 0.65rem;
   border-radius: 8px;
   border: 1px solid #21262d;
   background: #161b22;
@@ -198,24 +243,34 @@
 }
 
 .ops-widget-stat-label {
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   color: #6b7280;
   text-align: center;
   margin-top: 0.1rem;
 }
 
-/* Responsive */
-@media (max-width: 800px) {
+/* ── Responsive ── */
+@media (max-width: 860px) {
   .ops-widget-body {
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
   }
-  .ops-widget-mission { grid-column: 1 / -1; border-right: none; border-bottom: 1px solid #21262d; }
+  .ops-widget-mv {
+    grid-column: 1 / -1;
+    border-right: none;
+    border-bottom: 1px solid #21262d;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .ops-widget-mv-block { flex: 1 1 200px; }
   .ops-widget-team { border-right: 1px solid #21262d; }
-  .ops-widget-stats { flex-direction: row; align-items: center; border-top: none; }
+  .ops-widget-stats { flex-direction: row; align-items: flex-start; flex-wrap: wrap; }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 540px) {
   .ops-widget-body { grid-template-columns: 1fr; }
-  .ops-widget-team { border-right: none; border-bottom: 1px solid #21262d; }
+  .ops-widget-team { border-right: none; border-bottom: 1px solid #21262d; max-width: 100%; }
+  .ops-widget-mv { flex-direction: column; gap: 0.65rem; }
   .ops-widget-stats { flex-direction: row; padding: 0.75rem 1.25rem; }
 }

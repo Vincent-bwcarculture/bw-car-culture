@@ -185,14 +185,15 @@ function ProfileModal({ profile, userName, onClose, onSaved, headers }) {
           </div>
 
           <div style={{ marginTop: '1.25rem' }}>
-            <label className="ops-label" style={{ display: 'block', marginBottom: '0.75rem' }}>Working Schedule</label>
+            <label className="ops-label" style={{ display: 'block', marginBottom: '0.35rem' }}>Expected Working Hours</label>
+            <p className="ops-placeholder" style={{ marginBottom: '0.75rem', marginTop: 0 }}>Your typical schedule — shown on team cards. Actual daily check-in/out is logged from the Team section.</p>
             <div className="ops-schedule-row">
               <div className="ops-field">
-                <label className="ops-label">Check-in time</label>
+                <label className="ops-label">Usual start time</label>
                 <input className="ops-input ops-input--time" type="time" value={schedule.checkIn} onChange={e => setSchedule(p => ({ ...p, checkIn: e.target.value }))} />
               </div>
               <div className="ops-field">
-                <label className="ops-label">Check-out time</label>
+                <label className="ops-label">Usual end time</label>
                 <input className="ops-input ops-input--time" type="time" value={schedule.checkOut} onChange={e => setSchedule(p => ({ ...p, checkOut: e.target.value }))} />
               </div>
             </div>
@@ -364,10 +365,20 @@ function CompanySection({ headers }) {
 // ─── Section: Team ────────────────────────────────────────────────────────────
 function TeamSection({ currentUser, headers }) {
   const [team, setTeam] = useState([]);
+  const [todayCheckins, setTodayCheckins] = useState([]);
+  const [allCheckins, setAllCheckins] = useState([]);
   const [profileModal, setProfileModal] = useState(false);
+  const [showLog, setShowLog] = useState(false);
+  const [logAdminFilter, setLogAdminFilter] = useState('');
+  const [logFrom, setLogFrom] = useState('');
+  const [logTo, setLogTo] = useState('');
+  const [checkingIn, setCheckingIn] = useState(false);
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [noteModal, setNoteModal] = useState(null); // 'in' | 'out'
+  const [noteText, setNoteText] = useState('');
   const myId = String(currentUser?._id || currentUser?.id || '');
 
-  const load = useCallback(async () => {
+  const loadTeam = useCallback(async () => {
     try {
       const res = await fetch(`${API}/admin/team`, { headers });
       const d = await res.json();
@@ -375,51 +386,117 @@ function TeamSection({ currentUser, headers }) {
     } catch (_) {}
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  const loadTodayCheckins = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/admin/checkins/today`, { headers });
+      const d = await res.json();
+      if (d.success) setTodayCheckins(d.data || []);
+    } catch (_) {}
+  }, []);
+
+  const loadLog = useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+      if (logAdminFilter) params.set('adminId', logAdminFilter);
+      if (logFrom) params.set('from', logFrom);
+      if (logTo) params.set('to', logTo);
+      const res = await fetch(`${API}/admin/checkins?${params}`, { headers });
+      const d = await res.json();
+      if (d.success) setAllCheckins(d.data || []);
+    } catch (_) {}
+  }, [logAdminFilter, logFrom, logTo]);
+
+  useEffect(() => { loadTeam(); loadTodayCheckins(); }, [loadTeam, loadTodayCheckins]);
+  useEffect(() => { if (showLog) loadLog(); }, [showLog, loadLog]);
 
   const myEntry = team.find(t => String(t._id) === myId);
   const myProfile = myEntry?.opsProfile;
+  const myToday = todayCheckins.find(c => c.adminId === myId);
 
-  const isOnline = (member) => {
-    const p = member.opsProfile;
-    if (!p?.schedule) return false;
-    const { checkIn, checkOut, days } = p.schedule;
-    if (!checkIn || !checkOut) return false;
-    const now = new Date();
-    const dayName = now.toLocaleDateString('en-US', { weekday: 'short' });
-    if (days && days.length && !days.includes(dayName)) return false;
-    const [inH, inM] = checkIn.split(':').map(Number);
-    const [outH, outM] = checkOut.split(':').map(Number);
-    const nowMins = now.getHours() * 60 + now.getMinutes();
-    const inMins = inH * 60 + inM;
-    const outMins = outH * 60 + outM;
-    return nowMins >= inMins && nowMins <= outMins;
+  const getCheckinForMember = (memberId) => todayCheckins.find(c => c.adminId === String(memberId));
+
+  const checkin = async () => {
+    setCheckingIn(true);
+    try {
+      const res = await fetch(`${API}/admin/checkins/checkin`, { method: 'POST', headers, body: JSON.stringify({ note: noteText }) });
+      const d = await res.json();
+      if (d.success) { await loadTodayCheckins(); setNoteModal(null); setNoteText(''); }
+      else alert(d.message);
+    } catch (_) {}
+    setCheckingIn(false);
+  };
+
+  const checkout = async () => {
+    setCheckingOut(true);
+    try {
+      const res = await fetch(`${API}/admin/checkins/checkout`, { method: 'POST', headers, body: JSON.stringify({ note: noteText }) });
+      const d = await res.json();
+      if (d.success) { await loadTodayCheckins(); if (showLog) loadLog(); setNoteModal(null); setNoteText(''); }
+      else alert(d.message);
+    } catch (_) {}
+    setCheckingOut(false);
+  };
+
+  const deleteCheckin = async (id) => {
+    if (!window.confirm('Delete this record?')) return;
+    await fetch(`${API}/admin/checkins/${id}`, { method: 'DELETE', headers });
+    setAllCheckins(prev => prev.filter(c => c._id !== id));
+    loadTodayCheckins();
+  };
+
+  const fmtDuration = (mins) => {
+    if (!mins && mins !== 0) return '';
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
   };
 
   const handleProfileSaved = (data) => {
     setTeam(prev => prev.map(m => String(m._id) === myId ? { ...m, opsProfile: data } : m));
   };
 
+  const knownAdmins = [...new Map(allCheckins.filter(c => c.adminId && c.adminName).map(c => [c.adminId, { id: c.adminId, name: c.adminName }])).values()];
+
   return (
     <div className="ops-section">
       <div className="ops-section-title-row">
         <h2 className="ops-section-title">◐ Admin Team</h2>
-        <button className="ops-edit-btn" onClick={() => setProfileModal(true)}>Edit My Profile</button>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          {/* My check-in/out for today */}
+          {!myToday ? (
+            <button className="ops-btn ops-btn--checkin" onClick={() => { setNoteModal('in'); setNoteText(''); }} disabled={checkingIn}>
+              ● Check In
+            </button>
+          ) : !myToday.checkOut ? (
+            <button className="ops-btn ops-btn--checkout" onClick={() => { setNoteModal('out'); setNoteText(myToday.note || ''); }} disabled={checkingOut}>
+              ○ Check Out
+            </button>
+          ) : (
+            <span className="ops-checkin-done">✓ Done {myToday.checkIn}–{myToday.checkOut} ({fmtDuration(myToday.duration)})</span>
+          )}
+          <button className="ops-edit-btn" onClick={() => setProfileModal(true)}>Edit My Profile</button>
+          <button className="ops-edit-btn" onClick={() => setShowLog(p => !p)}>{showLog ? 'Hide Log' : 'View Log'}</button>
+        </div>
       </div>
 
-      {team.length === 0 && <p className="ops-placeholder">No admin users found.</p>}
-
+      {/* Team cards */}
       <div className="ops-team-grid">
+        {team.length === 0 && <p className="ops-placeholder">No admin users found.</p>}
         {team.map(member => {
-          const online = isOnline(member);
           const p = member.opsProfile;
           const isMe = String(member._id) === myId;
+          const ci = getCheckinForMember(member._id);
+          const checkedInToday = !!ci;
+          const checkedOutToday = !!ci?.checkOut;
           return (
             <div key={member._id} className={`ops-member-card${isMe ? ' ops-member-card--me' : ''}`}>
               <div className="ops-member-top">
                 <div className="ops-member-avatar-wrap">
                   <div className="ops-member-avatar">{(member.name || 'A').charAt(0).toUpperCase()}</div>
-                  <span className={`ops-member-dot${online ? ' online' : ''}`} title={online ? 'Currently active' : 'Offline'}></span>
+                  <span
+                    className={`ops-member-dot${checkedInToday && !checkedOutToday ? ' online' : checkedOutToday ? ' done' : ''}`}
+                    title={checkedOutToday ? `Checked out at ${ci.checkOut}` : checkedInToday ? `Checked in at ${ci.checkIn}` : 'Not checked in today'}
+                  ></span>
                 </div>
                 <div className="ops-member-info">
                   <span className="ops-member-name">{member.name}{isMe && <span className="ops-me-badge">You</span>}</span>
@@ -431,10 +508,23 @@ function TeamSection({ currentUser, headers }) {
                 </div>
               </div>
 
+              {/* Today's attendance */}
+              {ci ? (
+                <div className="ops-member-ci-today">
+                  <span className="ops-ci-in">In {ci.checkIn}</span>
+                  {ci.checkOut && <><span className="ops-ci-sep">→</span><span className="ops-ci-out">Out {ci.checkOut}</span></>}
+                  {ci.duration != null && <span className="ops-ci-dur">{fmtDuration(ci.duration)}</span>}
+                  {ci.note && <span className="ops-ci-note">{ci.note}</span>}
+                </div>
+              ) : (
+                <div className="ops-member-ci-today ops-member-ci-absent">Not checked in today</div>
+              )}
+
+              {/* Expected schedule */}
               {p?.schedule && (
                 <div className="ops-member-schedule">
                   <span className="ops-schedule-time">
-                    {p.schedule.checkIn} – {p.schedule.checkOut}
+                    Expected {p.schedule.checkIn} – {p.schedule.checkOut}
                     {p.schedule.days?.length ? ` · ${p.schedule.days.join(', ')}` : ''}
                   </span>
                   {p.schedule.statusNote && <span className="ops-schedule-note">{p.schedule.statusNote}</span>}
@@ -451,6 +541,108 @@ function TeamSection({ currentUser, headers }) {
           );
         })}
       </div>
+
+      {/* Check-in/out note modal */}
+      {noteModal && (
+        <div className="ops-modal-overlay" onClick={e => e.target === e.currentTarget && setNoteModal(null)}>
+          <div className="ops-modal ops-modal--profile">
+            <div className="ops-modal-header">
+              <h2 className="ops-modal-title">{noteModal === 'in' ? '● Check In' : '○ Check Out'} — {currentUser?.name}</h2>
+              <button className="ops-modal-close" onClick={() => setNoteModal(null)}>✕</button>
+            </div>
+            <div className="ops-modal-body">
+              <p className="ops-note-hint">
+                {noteModal === 'in'
+                  ? `Recording check-in at ${new Date().toTimeString().slice(0, 5)} today.`
+                  : `Recording check-out at ${new Date().toTimeString().slice(0, 5)}. You checked in at ${myToday?.checkIn}.`}
+              </p>
+              <div className="ops-field" style={{ marginTop: '0.75rem' }}>
+                <label className="ops-label">Note (optional)</label>
+                <textarea
+                  className="ops-textarea"
+                  rows={3}
+                  value={noteText}
+                  onChange={e => setNoteText(e.target.value)}
+                  placeholder={noteModal === 'in' ? 'What are you working on today?' : 'Summary of what you accomplished…'}
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="ops-modal-footer">
+              <button className="ops-btn ops-btn--ghost" onClick={() => setNoteModal(null)}>Cancel</button>
+              <button
+                className={`ops-btn ${noteModal === 'in' ? 'ops-btn--checkin' : 'ops-btn--checkout'}`}
+                onClick={noteModal === 'in' ? checkin : checkout}
+                disabled={noteModal === 'in' ? checkingIn : checkingOut}
+              >
+                {noteModal === 'in' ? (checkingIn ? 'Checking in…' : '● Confirm Check In') : (checkingOut ? 'Checking out…' : '○ Confirm Check Out')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Attendance log */}
+      {showLog && (
+        <div className="ops-checkin-log">
+          <div className="ops-log-filters" style={{ marginBottom: '0.85rem' }}>
+            <div className="ops-filter-group">
+              <label className="ops-label">From</label>
+              <input className="ops-input ops-input--date" type="date" value={logFrom} onChange={e => setLogFrom(e.target.value)} />
+            </div>
+            <div className="ops-filter-group">
+              <label className="ops-label">To</label>
+              <input className="ops-input ops-input--date" type="date" value={logTo} onChange={e => setLogTo(e.target.value)} />
+            </div>
+            {team.length > 1 && (
+              <div className="ops-filter-group">
+                <label className="ops-label">Admin</label>
+                <select className="ops-input" value={logAdminFilter} onChange={e => setLogAdminFilter(e.target.value)}>
+                  <option value="">All</option>
+                  {team.map(m => <option key={m._id} value={String(m._id)}>{m.name}</option>)}
+                </select>
+              </div>
+            )}
+            {(logFrom || logTo || logAdminFilter) && (
+              <button className="ops-btn ops-btn--ghost" style={{ alignSelf: 'flex-end' }} onClick={() => { setLogFrom(''); setLogTo(''); setLogAdminFilter(''); }}>Clear</button>
+            )}
+          </div>
+
+          {allCheckins.length === 0 ? (
+            <div className="ops-empty" style={{ padding: '1.5rem' }}>No attendance records found.</div>
+          ) : (
+            <div className="ops-ci-log-list">
+              {allCheckins.map(ci => {
+                const isOwn = ci.adminId === myId;
+                return (
+                  <div key={ci._id} className={`ops-ci-log-row${isOwn ? ' ops-ci-log-row--own' : ''}`}>
+                    <div className="ops-ci-log-avatar">{(ci.adminName || 'A').charAt(0).toUpperCase()}</div>
+                    <div className="ops-ci-log-body">
+                      <div className="ops-ci-log-top">
+                        <span className="ops-ci-log-name">{ci.adminName}{isOwn && <span className="ops-me-badge">You</span>}</span>
+                        <span className="ops-ci-log-date">{ci.date}</span>
+                      </div>
+                      <div className="ops-ci-log-times">
+                        <span className="ops-ci-in">In {ci.checkIn}</span>
+                        {ci.checkOut ? (
+                          <><span className="ops-ci-sep">→</span><span className="ops-ci-out">Out {ci.checkOut}</span>
+                          {ci.duration != null && <span className="ops-ci-dur">{fmtDuration(ci.duration)}</span>}</>
+                        ) : (
+                          <span className="ops-ci-still-in">still checked in</span>
+                        )}
+                      </div>
+                      {ci.note && <p className="ops-ci-log-note">{ci.note}</p>}
+                    </div>
+                    {isOwn && (
+                      <button className="ops-icon-btn ops-icon-btn--del" onClick={() => deleteCheckin(ci._id)} title="Delete record">✕</button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {profileModal && (
         <ProfileModal

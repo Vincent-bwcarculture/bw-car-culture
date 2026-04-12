@@ -936,6 +936,161 @@ select.ops-input { cursor: pointer; }
 }
 .ops-edit-btn:hover { border-color: #ff3300; color: #ff6633; }
 
+/* ── Check-in / Check-out ── */
+.ops-btn--checkin {
+  background: rgba(34,197,94,0.12);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.3);
+  padding: 0.35rem 0.85rem;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.ops-btn--checkin:hover:not(:disabled) { background: rgba(34,197,94,0.22); }
+.ops-btn--checkin:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ops-btn--checkout {
+  background: rgba(239,68,68,0.1);
+  color: #f87171;
+  border: 1px solid rgba(239,68,68,0.28);
+  padding: 0.35rem 0.85rem;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.ops-btn--checkout:hover:not(:disabled) { background: rgba(239,68,68,0.18); }
+.ops-btn--checkout:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ops-checkin-done {
+  font-size: 0.75rem;
+  color: #22c55e;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.2);
+  border-radius: 20px;
+}
+
+.ops-member-dot.done {
+  background: #8b5cf6;
+}
+
+.ops-member-ci-today {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  padding: 0.35rem 0.55rem;
+  background: rgba(34,197,94,0.06);
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+
+.ops-member-ci-absent {
+  background: rgba(255,255,255,0.03);
+  color: #484f58;
+  font-style: italic;
+}
+
+.ops-ci-in { color: #22c55e; font-weight: 600; }
+.ops-ci-sep { color: #484f58; }
+.ops-ci-out { color: #f87171; font-weight: 600; }
+.ops-ci-dur { color: #8b949e; background: rgba(255,255,255,0.06); padding: 0.05rem 0.35rem; border-radius: 4px; }
+.ops-ci-note { color: #6b7280; font-style: italic; flex: 1 0 100%; }
+.ops-ci-still-in { color: #f59e0b; font-style: italic; }
+
+.ops-note-hint {
+  font-size: 0.82rem;
+  color: #8b949e;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Check-in log ── */
+.ops-checkin-log {
+  margin-top: 1.25rem;
+  border-top: 1px solid #21262d;
+  padding-top: 1.25rem;
+}
+
+.ops-ci-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ops-ci-log-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 9px;
+  padding: 0.7rem 0.9rem;
+}
+
+.ops-ci-log-row--own { border-color: rgba(255,51,0,0.2); }
+
+.ops-ci-log-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff3300, #cc2900);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ops-ci-log-body { flex: 1; min-width: 0; }
+
+.ops-ci-log-top {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.ops-ci-log-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e6edf3;
+}
+
+.ops-ci-log-date {
+  font-size: 0.73rem;
+  color: #6b7280;
+}
+
+.ops-ci-log-times {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+}
+
+.ops-ci-log-note {
+  font-size: 0.78rem;
+  color: #8b949e;
+  margin: 0.3rem 0 0;
+  line-height: 1.5;
+  font-style: italic;
+  white-space: pre-wrap;
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .ops-mv-display { grid-template-columns: 1fr; }
