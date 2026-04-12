@@ -83,7 +83,7 @@ const CheckinReminderModal = ({ user }) => {
 
         <div className="cir-actions">
           <button className="cir-btn cir-btn--ghost" onClick={() => setDismissed(true)}>
-            {isNotIn ? 'I'll check in later' : 'Remind me later'}
+            {isNotIn ? "I'll check in later" : 'Remind me later'}
           </button>
           <Link to="/admin/ops" className="cir-btn cir-btn--primary" onClick={() => setDismissed(true)}>
             {isNotIn ? '● Go Check In' : '○ Go Check Out'}

@@ -922,19 +922,11 @@ const ServicesPage = () => {
             ) : (
               <div className="bcc-service-transport-grid">
                 {rides.map(ride => (
-                  <CarpoolCard
-                    key={ride._id}
-                    ride={ride}
-                    onReserved={(id, avail) => setRides(prev => prev.map(r => String(r._id) === String(id) ? { ...r, seatsAvailable: avail, status: avail === 0 ? 'full' : 'active' } : r))}
-                  />
+                  <div key={ride._id} />
                 ))}
               </div>
             )}
-            <CreateRideModal
-              isOpen={showCreateRide}
-              onClose={() => setShowCreateRide(false)}
-              onCreated={(r) => setRides(prev => [r, ...prev])}
-            />
+            {/* CreateRideModal hidden until launch */}
           </div>
         );
       case 'trailer-rentals':
