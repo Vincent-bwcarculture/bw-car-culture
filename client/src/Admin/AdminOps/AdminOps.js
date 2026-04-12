@@ -362,6 +362,58 @@ function CompanySection({ headers }) {
   );
 }
 
+// ─── Check-in/out success modal ───────────────────────────────────────────────
+function CheckinSuccessModal({ type, userName, checkinTime, checkoutTime, duration, onClose }) {
+  const fmtDur = (mins) => {
+    if (!mins && mins !== 0) return '';
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  };
+
+  const isIn = type === 'in';
+  const firstName = (userName || 'Admin').split(' ')[0];
+
+  return (
+    <div className="ops-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="ops-modal ops-success-modal">
+        <button className="ops-modal-close ops-success-close" onClick={onClose}>✕</button>
+
+        <div className="ops-success-icon">{isIn ? '●' : '○'}</div>
+
+        <h2 className="ops-success-title">
+          {isIn ? `Checked in, ${firstName}!` : `Checked out, ${firstName}!`}
+        </h2>
+
+        {isIn ? (
+          <>
+            <p className="ops-success-time">You're on the clock from <strong>{checkinTime}</strong> today.</p>
+            <div className="ops-success-message">
+              <p>Every action you take today is a step toward the mission. Keep the vision in mind — we're building something that matters.</p>
+              <p>Your recorded activity contributes to understanding team contributions and will help guide how we allocate time, tools, and support across the team.</p>
+              <p className="ops-success-reminder">📌 Remember to <strong>check out</strong> before you wrap up today so your contribution is fully logged.</p>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="ops-success-time">
+              Logged {checkinTime} → <strong>{checkoutTime}</strong>
+              {duration != null && <> · <strong>{fmtDur(duration)}</strong> on the clock</>}
+            </p>
+            <div className="ops-success-message">
+              <p>Great work today. Consistent daily effort is how we turn our mission into results. Every contribution counts.</p>
+              <p>Your time and activity logs are part of how the team tracks progress, identifies where support is needed, and distributes resources fairly across all areas of the business.</p>
+              <p className="ops-success-reminder">📌 Check in again first thing <strong>tomorrow</strong> to keep your record complete.</p>
+            </div>
+          </>
+        )}
+
+        <button className="ops-btn ops-btn--primary ops-success-btn" onClick={onClose}>Got it, let's go</button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Section: Team ────────────────────────────────────────────────────────────
 function TeamSection({ currentUser, headers }) {
   const [team, setTeam] = useState([]);
@@ -376,6 +428,7 @@ function TeamSection({ currentUser, headers }) {
   const [checkingOut, setCheckingOut] = useState(false);
   const [noteModal, setNoteModal] = useState(null); // 'in' | 'out'
   const [noteText, setNoteText] = useState('');
+  const [successModal, setSuccessModal] = useState(null); // null | 'in' | 'out'
   const myId = String(currentUser?._id || currentUser?.id || '');
 
   const loadTeam = useCallback(async () => {
@@ -420,7 +473,7 @@ function TeamSection({ currentUser, headers }) {
     try {
       const res = await fetch(`${API}/admin/checkins/checkin`, { method: 'POST', headers, body: JSON.stringify({ note: noteText }) });
       const d = await res.json();
-      if (d.success) { await loadTodayCheckins(); setNoteModal(null); setNoteText(''); }
+      if (d.success) { await loadTodayCheckins(); setNoteModal(null); setNoteText(''); setSuccessModal('in'); }
       else alert(d.message);
     } catch (_) {}
     setCheckingIn(false);
@@ -431,7 +484,7 @@ function TeamSection({ currentUser, headers }) {
     try {
       const res = await fetch(`${API}/admin/checkins/checkout`, { method: 'POST', headers, body: JSON.stringify({ note: noteText }) });
       const d = await res.json();
-      if (d.success) { await loadTodayCheckins(); if (showLog) loadLog(); setNoteModal(null); setNoteText(''); }
+      if (d.success) { await loadTodayCheckins(); if (showLog) loadLog(); setNoteModal(null); setNoteText(''); setSuccessModal('out'); }
       else alert(d.message);
     } catch (_) {}
     setCheckingOut(false);
@@ -651,6 +704,18 @@ function TeamSection({ currentUser, headers }) {
           headers={headers}
           onClose={() => setProfileModal(false)}
           onSaved={handleProfileSaved}
+        />
+      )}
+
+      {/* Post check-in / check-out motivational modal */}
+      {successModal && (
+        <CheckinSuccessModal
+          type={successModal}
+          userName={currentUser?.name || 'Admin'}
+          checkinTime={myToday?.checkIn}
+          checkoutTime={myToday?.checkOut}
+          duration={myToday?.duration}
+          onClose={() => setSuccessModal(null)}
         />
       )}
     </div>

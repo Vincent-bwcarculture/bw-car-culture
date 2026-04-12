@@ -1,0 +1,120 @@
+/* CheckinReminderModal.css */
+
+.cir-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  backdrop-filter: blur(2px);
+}
+
+.cir-modal {
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 16px;
+  padding: 2rem 2rem 1.75rem;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,51,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cir-icon {
+  font-size: 2rem;
+  line-height: 1;
+  color: #ff6633;
+  margin-bottom: 0.15rem;
+}
+
+.cir-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #e6edf3;
+  margin: 0;
+}
+
+.cir-sub {
+  font-size: 0.82rem;
+  color: #ff6633;
+  margin: 0;
+  font-weight: 500;
+}
+
+.cir-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  border-top: 1px solid #21262d;
+  padding-top: 0.85rem;
+  margin-top: 0.15rem;
+}
+
+.cir-body p {
+  font-size: 0.82rem;
+  color: #8b949e;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.cir-highlight {
+  font-size: 0.82rem !important;
+  color: #c9d1d9 !important;
+  background: rgba(255,51,0,0.05);
+  border-left: 3px solid rgba(255,51,0,0.4);
+  padding: 0.55rem 0.75rem;
+  border-radius: 0 6px 6px 0;
+}
+
+.cir-actions {
+  display: flex;
+  gap: 0.65rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+  border-top: 1px solid #21262d;
+  padding-top: 1rem;
+}
+
+.cir-btn {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.5rem 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cir-btn--ghost {
+  background: transparent;
+  border: 1px solid #30363d;
+  color: #6b7280;
+}
+.cir-btn--ghost:hover {
+  border-color: #484f58;
+  color: #8b949e;
+}
+
+.cir-btn--primary {
+  background: rgba(255,51,0,0.12);
+  border: 1px solid rgba(255,51,0,0.35);
+  color: #ff6633;
+}
+.cir-btn--primary:hover {
+  background: rgba(255,51,0,0.2);
+  border-color: rgba(255,51,0,0.55);
+}
+
+@media (max-width: 520px) {
+  .cir-modal { padding: 1.5rem 1.25rem 1.25rem; }
+  .cir-actions { flex-direction: column-reverse; }
+  .cir-btn { justify-content: center; }
+}

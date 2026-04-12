@@ -12,6 +12,7 @@ import ServiceProviderManager from './ServiceProviderManager/ServiceProviderMana
 import GIONAdminDashboard from '../components/GION/GIONAdminDashboard/GIONAdminDashboard.js';
 import BroadcastNotification from './BroadcastNotification/BroadcastNotification.js';
 import AdminOpsDashboardWidget from './AdminOps/AdminOpsDashboardWidget.js';
+import CheckinReminderModal from './AdminOps/CheckinReminderModal.js';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -176,6 +177,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
+      <CheckinReminderModal user={user} />
       <div className="dashboard-header">
         <div className="welcome-section">
           <h1>Welcome, {user?.name || 'Admin'}</h1>
