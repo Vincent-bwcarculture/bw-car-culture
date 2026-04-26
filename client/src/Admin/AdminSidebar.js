@@ -37,7 +37,13 @@ const menuItems = [
       { title: 'Service Providers', path: '/admin/service-providers' },
     ]
   },
-  { title: 'Dealers',   icon: '◇', path: '/admin/dealer' },
+  {
+    title: 'Dealers', icon: '◇',
+    submenu: [
+      { title: 'Manage Dealerships', path: '/admin/dealerships' },
+      { title: 'Dealer Dashboard',   path: '/admin/dealer' },
+    ]
+  },
   { title: 'Business',  icon: '◆', path: '/admin/business' },
   {
     title: 'Payments', icon: '◆',

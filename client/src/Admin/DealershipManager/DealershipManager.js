@@ -393,10 +393,12 @@ const DealershipManager = () => {
   return (
     <div className="dealership-manager-container">
       <div className="dealership-header">
-        <h1>Seller Management</h1>
-        <p className="header-subtitle">Manage dealerships and private sellers</p>
+        <div className="dealership-header-text">
+          <h1>Seller Management</h1>
+          <p className="header-subtitle">Manage dealerships and private sellers</p>
+        </div>
         <div className="dealership-actions">
-          <button 
+          <button
             className="add-dealer-btn"
             onClick={() => {
               setSelectedSeller(null);

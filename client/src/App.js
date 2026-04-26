@@ -79,6 +79,7 @@ const TrailerListingManager = React.lazy(() => import('./Admin/TrailerListingMan
 const TransportRouteManager = React.lazy(() => import('./Admin/TransportRouteManager/TransportRouteManager.js'));
 const EditorDashboard = React.lazy(() => import('./Admin/dashboards/EditorDashboard.js'));
 const DealerDashboard = React.lazy(() => import('./Admin/dashboards/DealerDashboard.js'));
+const DealershipManager = React.lazy(() => import('./Admin/DealershipManager/DealershipManager.js'));
 const AdminScripts = React.lazy(() => import('./Admin/AdminScripts/AdminScripts.js'));
 const AdminOps = React.lazy(() => import('./Admin/AdminOps/AdminOps.js'));
 const AdminBusiness = React.lazy(() => import('./Admin/AdminBusiness/AdminBusiness.js'));
@@ -1061,6 +1062,15 @@ const AppRoutes = () => {
           <ProtectedRoute requiredRoles={['dealer', 'dealership_admin', 'admin']}>
             <AdminLayout>
               <DealerDashboard />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        {/* Admin Dealership Management — add/edit/manage all dealerships */}
+        <Route path="/admin/dealerships" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <AdminLayout>
+              <DealershipManager />
             </AdminLayout>
           </ProtectedRoute>
         } />
