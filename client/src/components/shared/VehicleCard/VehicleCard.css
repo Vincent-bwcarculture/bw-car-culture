@@ -43,25 +43,25 @@
 
 /* Light Mode Theme */
 [data-theme="light"] {
-  --vc-text-primary: #1a1a1a;
-  --vc-text-secondary: #4a5568;
-  --vc-text-muted: #718096;
-  --vc-text-light: #a0aec0;
-  
-  --vc-bg-card: rgba(255, 255, 255, 0.95);
-  --vc-bg-overlay: rgba(255, 255, 255, 0.9);
-  --vc-bg-tooltip: rgba(255, 255, 255, 0.98);
-  --vc-bg-hover: rgba(0, 0, 0, 0.03);
-  --vc-bg-button: rgba(0, 0, 0, 0.05);
-  --vc-bg-button-hover: rgba(0, 0, 0, 0.1);
-  
-  --vc-border-color: #e2e8f0;
-  --vc-border-light: rgba(0, 0, 0, 0.08);
-  --vc-border-medium: rgba(0, 0, 0, 0.15);
-  --vc-border-strong: rgba(0, 0, 0, 0.25);
-  
-  --vc-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --vc-shadow-hover: 0 5px 15px rgba(0, 0, 0, 0.15);
+  --vc-text-primary: #111827;
+  --vc-text-secondary: #374151;
+  --vc-text-muted: #6b7280;
+  --vc-text-light: #9ca3af;
+
+  --vc-bg-card: #ffffff;
+  --vc-bg-overlay: rgba(255, 255, 255, 0.92);
+  --vc-bg-tooltip: #ffffff;
+  --vc-bg-hover: rgba(0, 0, 0, 0.025);
+  --vc-bg-button: rgba(0, 0, 0, 0.06);
+  --vc-bg-button-hover: rgba(0, 0, 0, 0.12);
+
+  --vc-border-color: #e5e7eb;
+  --vc-border-light: rgba(0, 0, 0, 0.07);
+  --vc-border-medium: rgba(0, 0, 0, 0.13);
+  --vc-border-strong: rgba(0, 0, 0, 0.22);
+
+  --vc-shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --vc-shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
 /* Dark Mode Explicit (mirrors default) */
@@ -145,9 +145,7 @@
   transform: scale(1.05);
 }
 
-.vc-image[style*="position: absolute"] {
-  /* Disable hover transform when true zoom is active */
-}
+/* .vc-image[style*="position: absolute"] — hover transform disabled when true zoom is active (handled by .vc-card:hover override below) */
 
 .vc-card:hover .vc-image[style*="position: absolute"] {
   transform: var(--image-transform, none) !important;
@@ -572,6 +570,7 @@
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
@@ -1311,8 +1310,9 @@
     font-size: 1.1rem;
     font-weight: 600;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
-  
+
   .vc-title-badges {
     gap: 0.3rem;
     margin-top: 0.1rem;
@@ -1447,8 +1447,9 @@
     font-size: 1.05rem;
     font-weight: 600;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
-  
+
   .vc-price-container {
     min-width: 40%;
   }

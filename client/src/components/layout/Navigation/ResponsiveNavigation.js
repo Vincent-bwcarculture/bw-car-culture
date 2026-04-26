@@ -5,9 +5,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, ShoppingBag, Store, Settings, User, LogIn, LogOut,
   UserCircle, Star, QrCode, Hash, X, UserPlus, Newspaper, MessageCircle,
-  Menu, BarChart3, Info, Map, Zap, Tag, MapPin
+  Menu, BarChart3, Info, Map, Zap, Tag, MapPin, Sun, Moon
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
+import { useTheme } from '../../../context/ThemeContext.js';
 import useUnreadNotifCount from '../../../hooks/useUnreadNotifCount.js';
 import EnhancedFABModal from './EnhancedFABModal.js';
 import './ResponsiveNavigation.css';
@@ -63,6 +64,7 @@ const NavigationMenu = () => {
   const menuRef = useRef(null);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   // Close menu when clicking outside (accounting for Portal)
   useEffect(() => {
@@ -310,6 +312,25 @@ const NavigationMenu = () => {
           <button className="menu-item feedback-item" onClick={handleFeedbackClick} type="button">
             <span className="menu-item-icon"><MessageCircle size={12} /></span>
             <span className="menu-item-text">Feedback</span>
+          </button>
+
+          <div className="menu-divider"></div>
+
+          {/* Theme Toggle */}
+          <button
+            className="menu-item theme-toggle-item"
+            type="button"
+            onClick={(e) => { e.stopPropagation(); toggleTheme(); }}
+          >
+            <span className="menu-item-icon">
+              {theme === 'dark' ? <Sun size={12} /> : <Moon size={12} />}
+            </span>
+            <span className="menu-item-text">
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </span>
+            <span className="theme-toggle-pill">
+              <span className={`theme-toggle-knob ${theme}`}></span>
+            </span>
           </button>
         </div>
         , document.body
