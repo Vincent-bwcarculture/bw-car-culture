@@ -329,41 +329,6 @@
     margin: 0.5rem 0;
 }
 
-/* Theme Toggle Item */
-.theme-toggle-item {
-    justify-content: space-between;
-}
-
-.theme-toggle-pill {
-    width: 32px;
-    height: 18px;
-    background: var(--nav-border);
-    border-radius: 9px;
-    position: relative;
-    flex-shrink: 0;
-    transition: background 0.25s;
-}
-
-[data-theme="dark"] .theme-toggle-pill {
-    background: #ff3300;
-}
-
-.theme-toggle-knob {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #fff;
-    transition: transform 0.25s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-}
-
-.theme-toggle-knob.dark {
-    transform: translateX(14px);
-}
-
 /* Vehicle Type Search */
 .menu-vehicle-search {
     display: flex;

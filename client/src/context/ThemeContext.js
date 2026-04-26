@@ -20,8 +20,10 @@ export const ThemeProvider = ({ children }) => {
     if (savedTheme) {
       return savedTheme;
     }
-    // Default to dark mode
-    return 'dark';
+
+    // Check for system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'dark' : 'light';
   });
 
   const [autoSwitch, setAutoSwitch] = useState(() => {
