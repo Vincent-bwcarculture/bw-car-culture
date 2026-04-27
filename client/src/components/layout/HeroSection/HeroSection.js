@@ -373,53 +373,6 @@ const HeroSection = () => {
       {/* 3D car background — desktop only, fades in when model loads */}
       <CarBackground3D sellMode={activeTab === 'sell'} />
 
-      {/* Featured Dealerships strip — top of hero, below nav */}
-      {featuredDealers.length > 0 && (
-        <div className="bcc-hero-dealers">
-          <div className="bcc-hero-dealers-label">Featured Dealerships</div>
-          <div className="bcc-hero-dealers-row">
-            <button
-              className="bcc-hero-dealers-arrow"
-              onClick={() => heroStripRef.current?.scrollBy({ left: -230, behavior: 'smooth' })}
-              aria-label="Scroll left"
-            >‹</button>
-            <div className="bcc-hero-dealers-track" ref={heroStripRef}>
-              {featuredDealers.map(dealer => {
-                const logoSrc =
-                  dealer.profile?.logo || dealer.logo?.url || dealer.logo ||
-                  dealer.profilePicture?.url || dealer.profilePicture || null;
-                const initials = (dealer.businessName || dealer.name || '?')
-                  .split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-                const isVerified = dealer.verification?.isVerified || dealer.verification?.status === 'verified';
-                return (
-                  <button
-                    key={dealer._id}
-                    className="bcc-hero-dealer-card"
-                    onClick={() => navigate(`/dealerships/${dealer._id}`)}
-                    title={dealer.businessName || dealer.name}
-                  >
-                    <div className="bcc-hero-dealer-logo">
-                      {logoSrc
-                        ? <img src={logoSrc} alt={dealer.businessName} />
-                        : <div className="bcc-hero-dealer-initials">{initials}</div>}
-                    </div>
-                    <div className="bcc-hero-dealer-name">
-                      <span>{dealer.businessName || dealer.name}</span>
-                      {isVerified && <span className="bcc-hero-dealer-tick" title="Verified">✓</span>}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-            <button
-              className="bcc-hero-dealers-arrow"
-              onClick={() => heroStripRef.current?.scrollBy({ left: 230, behavior: 'smooth' })}
-              aria-label="Scroll right"
-            >›</button>
-          </div>
-        </div>
-      )}
-
       <div className="bcc-hero-content">
         <div className="bcc-hero-tabs">
           <button 
@@ -775,6 +728,52 @@ const HeroSection = () => {
         ) : null}
       </div>
 
+      {/* Featured Dealerships strip — bottom of hero, replaces stats */}
+      {featuredDealers.length > 0 && (
+        <div className="bcc-hero-dealers">
+          <div className="bcc-hero-dealers-label">Featured Dealerships</div>
+          <div className="bcc-hero-dealers-row">
+            <button
+              className="bcc-hero-dealers-arrow"
+              onClick={() => heroStripRef.current?.scrollBy({ left: -230, behavior: 'smooth' })}
+              aria-label="Scroll left"
+            >‹</button>
+            <div className="bcc-hero-dealers-track" ref={heroStripRef}>
+              {featuredDealers.map(dealer => {
+                const logoSrc =
+                  dealer.profile?.logo || dealer.logo?.url || dealer.logo ||
+                  dealer.profilePicture?.url || dealer.profilePicture || null;
+                const initials = (dealer.businessName || dealer.name || '?')
+                  .split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+                const isVerified = dealer.verification?.isVerified || dealer.verification?.status === 'verified';
+                return (
+                  <button
+                    key={dealer._id}
+                    className="bcc-hero-dealer-card"
+                    onClick={() => navigate(`/dealerships/${dealer._id}`)}
+                    title={dealer.businessName || dealer.name}
+                  >
+                    <div className="bcc-hero-dealer-logo">
+                      {logoSrc
+                        ? <img src={logoSrc} alt={dealer.businessName} />
+                        : <div className="bcc-hero-dealer-initials">{initials}</div>}
+                    </div>
+                    <div className="bcc-hero-dealer-name">
+                      <span>{dealer.businessName || dealer.name}</span>
+                      {isVerified && <span className="bcc-hero-dealer-tick" title="Verified">✓</span>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              className="bcc-hero-dealers-arrow"
+              onClick={() => heroStripRef.current?.scrollBy({ left: 230, behavior: 'smooth' })}
+              aria-label="Scroll right"
+            >›</button>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

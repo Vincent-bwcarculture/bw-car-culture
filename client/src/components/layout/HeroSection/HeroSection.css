@@ -919,10 +919,6 @@
   width: 100%;
 }
 
-/* When strip is present, content doesn't need the full nav-clearance top padding */
-.bcc-hero-dealers + .bcc-hero-content {
-  padding-top: 1.5rem;
-}
 
 .bcc-hero-dealers-label {
   font-size: 0.6rem;
