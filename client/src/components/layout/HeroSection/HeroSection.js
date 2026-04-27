@@ -5,6 +5,7 @@ import { useAuth } from '../../../context/AuthContext.js'; // NEW: Added authent
 import { statsService } from '../../../services/statsService.js';
 import { listingService } from '../../../services/listingService.js';
 import QuickFeedbackButton from '../../shared/QuickFeedbackButton/QuickFeedbackButton.js';
+import CarBackground3D from './CarBackground3D.js';
 import './HeroSection.css';
 
 const HeroSection = () => {
@@ -359,6 +360,9 @@ const HeroSection = () => {
 
   return (
     <section className="bcc-hero-section">
+      {/* 3D car background — desktop only, fades in when model loads */}
+      <CarBackground3D />
+
       {/* Feedback Button in Top Right Corner */}
       <div className="bcc-hero-feedback-button">
         <QuickFeedbackButton 

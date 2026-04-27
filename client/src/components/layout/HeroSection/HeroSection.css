@@ -1,14 +1,55 @@
 /* src/components/layout/HeroSection/HeroSection.css - Complete with modal-style preparation */
 .bcc-hero-section {
   width: 100%;
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.65)), url('./garage2.png');
-  background-size: cover;
-  background-position: center;
+  /* Base dark gradient — visible while 3D model loads, and on mobile */
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #111111 100%);
   padding: 0;
   position: relative;
+  overflow: hidden;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* ── Left-side content overlay gradient (keeps CTA readable over the car) ── */
+.bcc-hero-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.90) 0%,
+    rgba(0, 0, 0, 0.72) 38%,
+    rgba(0, 0, 0, 0.30) 65%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── 3D canvas — sits behind content, fades in when model is ready ── */
+.hero-3d-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+.hero-3d-canvas--on {
+  opacity: 1;
+}
+
+/* Mobile: hide canvas, revert to a subtle dark gradient bg */
+@media (max-width: 899px) {
+  .hero-3d-canvas { display: none; }
+  .bcc-hero-section {
+    background: linear-gradient(135deg, #0d0d0d 0%, #1c1c1c 100%);
+  }
+  .bcc-hero-section::before { display: none; }
 }
 
 .bcc-hero-section span {
@@ -127,6 +168,8 @@
   margin: 0 auto;
   padding: 8rem 2rem 3rem;
   width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .bcc-hero-tabs {
