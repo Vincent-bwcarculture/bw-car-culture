@@ -2831,6 +2831,42 @@
   flex-direction: column;
   gap: 0.5rem;
 }
+/* Preset buttons */
+.bdp-hours-presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 0.3rem;
+}
+.bdp-presets-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  white-space: nowrap;
+  margin-right: 0.2rem;
+}
+.bdp-preset-btn {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.bdp-preset-btn:hover {
+  background: #ff3300;
+  border-color: #ff3300;
+  color: #fff;
+}
 .bdp-hours-row {
   display: flex;
   align-items: center;

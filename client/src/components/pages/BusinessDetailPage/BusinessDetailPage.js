@@ -274,19 +274,13 @@ const BusinessDetailPage = () => {
     const setter = field === 'banner' ? setUploadingBanner : setUploadingLogo;
     setter(true);
     try {
-      const token = localStorage.getItem('token');
       const form = new FormData();
       form.append(field, file);
-      const res = await fetch(`/api/dealers/${business._id}/self`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}` },
-        body: form
-      });
-      const data = await res.json();
-      if (data.success) {
+      const data = await http.multipartPost(`/dealers/${business._id}/self`, form, null, { method: 'PUT' });
+      if (data.data?.success) {
         setBusiness(prev => ({
           ...prev,
-          profile: { ...prev.profile, [field]: data.data.profile?.[field] || prev.profile?.[field] }
+          profile: { ...prev.profile, [field]: data.data.data?.profile?.[field] || prev.profile?.[field] }
         }));
         setImageErrors(prev => ({ ...prev, [field]: false }));
       }
@@ -301,14 +295,8 @@ const BusinessDetailPage = () => {
   const handleSaveBio = async () => {
     setSavingProfile(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`/api/dealers/${business._id}/self`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description: bioText })
-      });
-      const data = await res.json();
-      if (data.success) {
+      const res = await http.put(`/dealers/${business._id}/self`, { description: bioText });
+      if (res.data?.success) {
         setBusiness(prev => ({ ...prev, profile: { ...prev.profile, description: bioText } }));
         setEditingBio(false);
       }
@@ -323,14 +311,8 @@ const BusinessDetailPage = () => {
   const handleSaveHours = async () => {
     setSavingProfile(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`/api/dealers/${business._id}/self`, {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ workingHours: hoursData })
-      });
-      const data = await res.json();
-      if (data.success) {
+      const res = await http.put(`/dealers/${business._id}/self`, { workingHours: hoursData });
+      if (res.data?.success) {
         setBusiness(prev => ({ ...prev, profile: { ...prev.profile, workingHours: hoursData } }));
         setEditingHours(false);
       }
@@ -346,9 +328,8 @@ const BusinessDetailPage = () => {
     if (!business?._id || !businessType) return;
     setUpdatesLoading(true);
     try {
-      const res = await fetch(`/api/updates?businessId=${business._id}&businessType=${businessType}&limit=10`);
-      const data = await res.json();
-      if (data.success) setUpdates(data.data);
+      const res = await http.get(`/updates`, { params: { businessId: business._id, businessType, limit: 10 } });
+      if (res.data?.success) setUpdates(res.data.data);
     } catch (e) {
       console.error('Failed to fetch updates:', e);
     } finally {
@@ -360,15 +341,9 @@ const BusinessDetailPage = () => {
     if (!newUpdate.title.trim() || !newUpdate.content.trim()) return;
     setSubmittingUpdate(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('/api/updates', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessId: business._id, businessType, ...newUpdate })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setUpdates(prev => [data.data, ...prev]);
+      const res = await http.post(`/updates`, { businessId: business._id, businessType, ...newUpdate });
+      if (res.data?.success) {
+        setUpdates(prev => [res.data.data, ...prev]);
         setNewUpdate({ title: '', content: '', type: 'update' });
         setShowUpdateForm(false);
       }
@@ -381,13 +356,8 @@ const BusinessDetailPage = () => {
 
   const handleDeleteUpdate = async (updateId) => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`/api/updates/${updateId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) setUpdates(prev => prev.filter(u => u._id !== updateId));
+      const res = await http.delete(`/updates/${updateId}`);
+      if (res.data?.success) setUpdates(prev => prev.filter(u => u._id !== updateId));
     } catch (e) {
       console.error('Failed to delete update:', e);
     }
@@ -1665,6 +1635,62 @@ return (
 
               {editingHours ? (
                 <div className="bdp-hours-editor">
+                  {/* ── Preset shortcuts ── */}
+                  <div className="bdp-hours-presets">
+                    <span className="bdp-presets-label">Quick presets:</span>
+                    {[
+                      { label: '24 / 7 (Always Open)', apply: () => {
+                        const d = {};
+                        ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(day => {
+                          d[day] = { open: '00:00', close: '23:59', closed: false };
+                        });
+                        setHoursData(d);
+                      }},
+                      { label: 'Mon–Fri 9AM–5:30PM', apply: () => {
+                        const d = {};
+                        ['monday','tuesday','wednesday','thursday','friday'].forEach(day => {
+                          d[day] = { open: '09:00', close: '17:30', closed: false };
+                        });
+                        ['saturday','sunday'].forEach(day => {
+                          d[day] = { open: '', close: '', closed: true };
+                        });
+                        setHoursData(d);
+                      }},
+                      { label: 'Mon–Sat 8AM–5PM', apply: () => {
+                        const d = {};
+                        ['monday','tuesday','wednesday','thursday','friday','saturday'].forEach(day => {
+                          d[day] = { open: '08:00', close: '17:00', closed: false };
+                        });
+                        d['sunday'] = { open: '', close: '', closed: true };
+                        setHoursData(d);
+                      }},
+                      { label: 'All Days 8AM–5PM', apply: () => {
+                        const d = {};
+                        ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(day => {
+                          d[day] = { open: '08:00', close: '17:00', closed: false };
+                        });
+                        setHoursData(d);
+                      }},
+                      { label: 'All Days 9AM–5:30PM', apply: () => {
+                        const d = {};
+                        ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(day => {
+                          d[day] = { open: '09:00', close: '17:30', closed: false };
+                        });
+                        setHoursData(d);
+                      }},
+                      { label: 'Close Weekends', apply: () => {
+                        setHoursData(prev => ({
+                          ...prev,
+                          saturday: { ...prev.saturday, closed: true },
+                          sunday:   { ...prev.sunday,   closed: true },
+                        }));
+                      }},
+                    ].map(({ label, apply }) => (
+                      <button key={label} type="button" className="bdp-preset-btn" onClick={apply}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
                   {['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].map(day => (
                     <div key={day} className="bdp-hours-row">
                       <span className="bdp-hours-day">{day.charAt(0).toUpperCase() + day.slice(1)}</span>
