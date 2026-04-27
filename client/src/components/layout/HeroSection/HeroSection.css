@@ -909,15 +909,19 @@
   pointer-events: none;
 }
 
-/* ── Featured Dealerships strip (top of hero, sits below nav overlay) ── */
+/* ── Featured Dealerships strip (top of hero) ── */
 .bcc-hero-dealers {
   position: relative;
   z-index: 2;
-  /* ~4.5rem clears the nav bar (~72px) + a small gap */
-  padding: 4.5rem 1.5rem 0.8rem;
+  padding: 0.75rem 1.5rem 0.4rem;
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+}
+
+/* When strip is present, content doesn't need the full nav-clearance top padding */
+.bcc-hero-dealers + .bcc-hero-content {
+  padding-top: 1.5rem;
 }
 
 .bcc-hero-dealers-label {
@@ -1052,7 +1056,7 @@
 }
 
 @media (max-width: 768px) {
-  .bcc-hero-dealers { padding: 4rem 1rem 0.6rem; }
+  .bcc-hero-dealers { padding: 0.5rem 1rem 0.3rem; }
 }
 
 
