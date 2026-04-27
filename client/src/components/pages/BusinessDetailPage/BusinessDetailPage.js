@@ -113,6 +113,14 @@ const BusinessDetailPage = () => {
   const bannerInputRef = useRef(null);
   const logoInputRef = useRef(null);
 
+  // ── Business Updates state ─────────────────────────────────────────────────
+  const [updates, setUpdates] = useState([]);
+  const [updatesLoading, setUpdatesLoading] = useState(false);
+  const [mobileUpdatesOpen, setMobileUpdatesOpen] = useState(false);
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [newUpdate, setNewUpdate] = useState({ title: '', content: '', type: 'update' });
+  const [submittingUpdate, setSubmittingUpdate] = useState(false);
+
   // Business type detection
   const [businessType, setBusinessType] = useState('');
   const [serviceType, setServiceType] = useState('');
@@ -211,6 +219,12 @@ const BusinessDetailPage = () => {
     loadBusinessReviews();
   }
 }, [business, businessType]);
+
+  useEffect(() => {
+    if (business && business._id && businessType) {
+      fetchUpdates();
+    }
+  }, [business, businessType]);
 
   // Check if business is saved
   useEffect(() => {
@@ -325,6 +339,73 @@ const BusinessDetailPage = () => {
     } finally {
       setSavingProfile(false);
     }
+  };
+
+  // ── Business Updates handlers ──────────────────────────────────────────────
+  const fetchUpdates = async () => {
+    if (!business?._id || !businessType) return;
+    setUpdatesLoading(true);
+    try {
+      const res = await fetch(`/api/updates?businessId=${business._id}&businessType=${businessType}&limit=10`);
+      const data = await res.json();
+      if (data.success) setUpdates(data.data);
+    } catch (e) {
+      console.error('Failed to fetch updates:', e);
+    } finally {
+      setUpdatesLoading(false);
+    }
+  };
+
+  const handleCreateUpdate = async () => {
+    if (!newUpdate.title.trim() || !newUpdate.content.trim()) return;
+    setSubmittingUpdate(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/updates', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessId: business._id, businessType, ...newUpdate })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUpdates(prev => [data.data, ...prev]);
+        setNewUpdate({ title: '', content: '', type: 'update' });
+        setShowUpdateForm(false);
+      }
+    } catch (e) {
+      console.error('Failed to create update:', e);
+    } finally {
+      setSubmittingUpdate(false);
+    }
+  };
+
+  const handleDeleteUpdate = async (updateId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/updates/${updateId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) setUpdates(prev => prev.filter(u => u._id !== updateId));
+    } catch (e) {
+      console.error('Failed to delete update:', e);
+    }
+  };
+
+  const formatUpdateTime = (dateStr) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now - d;
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   };
 
   const fetchBusiness = async () => {
@@ -1151,6 +1232,28 @@ return (
         </>
       )}
 
+      {/* Business Updates overlay — desktop, top-left of banner */}
+      {updates.length > 0 && (
+        <div className="bdp-updates-overlay">
+          <div className="bdp-updates-overlay-header">
+            <span className="bdp-updates-overlay-label">Updates</span>
+            {updates.length > 1 && (
+              <span className="bdp-updates-overlay-count">{updates.length}</span>
+            )}
+          </div>
+          <div className="bdp-updates-overlay-item">
+            <span className={`bdp-update-badge bdp-badge-${updates[0].type}`}>
+              {updates[0].type}
+            </span>
+            <p className="bdp-updates-overlay-title-text">{updates[0].title}</p>
+            <span className="bdp-updates-overlay-time">{formatUpdateTime(updates[0].createdAt)}</span>
+          </div>
+          {updates.length > 1 && (
+            <p className="bdp-updates-overlay-more">+{updates.length - 1} more — see Updates tab</p>
+          )}
+        </div>
+      )}
+
       {/* Save/Share buttons stay on banner */}
       <div className="bcc-business-detail-action-buttons">
         <button 
@@ -1179,6 +1282,37 @@ return (
           </button>
       </div>
     </div>
+
+    {/* Business Updates bar — mobile only */}
+    {updates.length > 0 && (
+      <div className="bdp-mobile-updates-bar">
+        <button
+          className="bdp-mobile-updates-toggle"
+          onClick={() => setMobileUpdatesOpen(o => !o)}
+          aria-expanded={mobileUpdatesOpen}
+        >
+          <span className="bdp-mobile-updates-toggle-label">
+            <span className="bdp-mobile-updates-dot" />
+            Updates ({updates.length})
+          </span>
+          <span className={`bdp-mobile-updates-chevron ${mobileUpdatesOpen ? 'open' : ''}`}>›</span>
+        </button>
+        {mobileUpdatesOpen && (
+          <div className="bdp-mobile-updates-list">
+            {updates.map(u => (
+              <div key={u._id} className="bdp-mobile-update-item">
+                <span className={`bdp-update-badge bdp-badge-${u.type}`}>{u.type}</span>
+                <div className="bdp-mobile-update-body">
+                  <p className="bdp-mobile-update-title">{u.title}</p>
+                  <p className="bdp-mobile-update-content">{u.content}</p>
+                  <span className="bdp-mobile-update-time">{formatUpdateTime(u.createdAt)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
 
     {/* FIXED: Business info header - separate from banner */}
     <div className="bcc-business-detail-content-header">
@@ -1318,7 +1452,14 @@ return (
     {/* FIXED: Main content section - now properly positioned */}
     <div className="bcc-business-detail-content">
       <div className="bcc-business-detail-tabs">
-        <button 
+        <button
+          className={`bcc-business-detail-tab-button ${activeTab === 'updates' ? 'active' : ''}`}
+          onClick={() => handleTabChange('updates')}
+        >
+          Updates {updates.length > 0 && <span className="bdp-tab-updates-count">{updates.length}</span>}
+        </button>
+
+        <button
           className={`bcc-business-detail-tab-button ${activeTab === 'about' ? 'active' : ''}`}
           onClick={() => handleTabChange('about')}
         >
@@ -1357,6 +1498,98 @@ return (
       </div>
       
       <div className="bcc-business-detail-tab-content">
+        {activeTab === 'updates' && (
+          <div className="bdp-updates-tab">
+            {/* Owner: add new update */}
+            {isOwner && (
+              <div className="bdp-updates-owner-bar">
+                {!showUpdateForm ? (
+                  <button className="bdp-add-update-btn" onClick={() => setShowUpdateForm(true)}>
+                    <Plus size={14} /> Post Update
+                  </button>
+                ) : (
+                  <div className="bdp-update-form">
+                    <div className="bdp-update-form-row">
+                      <select
+                        value={newUpdate.type}
+                        onChange={e => setNewUpdate(p => ({ ...p, type: e.target.value }))}
+                        className="bdp-update-type-select"
+                      >
+                        <option value="update">Update</option>
+                        <option value="deal">Deal</option>
+                        <option value="announcement">Announcement</option>
+                        <option value="event">Event</option>
+                      </select>
+                      <input
+                        className="bdp-update-title-input"
+                        placeholder="Title (max 120 chars)"
+                        maxLength={120}
+                        value={newUpdate.title}
+                        onChange={e => setNewUpdate(p => ({ ...p, title: e.target.value }))}
+                      />
+                    </div>
+                    <textarea
+                      className="bdp-update-content-input"
+                      placeholder="Share your update, deal or announcement…"
+                      maxLength={1000}
+                      rows={3}
+                      value={newUpdate.content}
+                      onChange={e => setNewUpdate(p => ({ ...p, content: e.target.value }))}
+                    />
+                    <div className="bdp-update-form-actions">
+                      <button className="bdp-cancel-btn" onClick={() => { setShowUpdateForm(false); setNewUpdate({ title: '', content: '', type: 'update' }); }}>
+                        Cancel
+                      </button>
+                      <button
+                        className="bdp-save-btn"
+                        onClick={handleCreateUpdate}
+                        disabled={submittingUpdate || !newUpdate.title.trim() || !newUpdate.content.trim()}
+                      >
+                        {submittingUpdate ? 'Posting…' : 'Post'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Updates list */}
+            {updatesLoading ? (
+              <div className="bdp-updates-loading">Loading updates…</div>
+            ) : updates.length === 0 ? (
+              <div className="bdp-updates-empty">
+                <p>No updates yet.</p>
+                {isOwner && <p>Post your first update above to keep customers informed.</p>}
+              </div>
+            ) : (
+              <div className="bdp-updates-list">
+                {updates.map(u => (
+                  <div key={u._id} className="bdp-update-card">
+                    <div className="bdp-update-card-header">
+                      <div className="bdp-update-card-meta">
+                        <span className={`bdp-update-badge bdp-badge-${u.type}`}>{u.type}</span>
+                        {u.pinned && <span className="bdp-update-pinned-badge">Pinned</span>}
+                        <span className="bdp-update-card-time">{formatUpdateTime(u.createdAt)}</span>
+                      </div>
+                      {isOwner && (
+                        <button
+                          className="bdp-update-delete-btn"
+                          onClick={() => handleDeleteUpdate(u._id)}
+                          title="Delete update"
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
+                    <h4 className="bdp-update-card-title">{u.title}</h4>
+                    <p className="bdp-update-card-content">{u.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Keep all the existing tab content exactly as it is */}
         {activeTab === 'about' && (
           <div className="bcc-business-detail-about-tab">

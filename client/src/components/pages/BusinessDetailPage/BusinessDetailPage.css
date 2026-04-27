@@ -3055,3 +3055,323 @@
   .bdp-hours-day { width: 70px; }
 }
 
+/* ═══════════════════════════════════════════════════════
+   BUSINESS UPDATES — overlay, mobile bar, tab
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Type badge ────────────────────────────────────────── */
+.bdp-update-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.bdp-badge-update      { background: rgba(99,102,241,0.18); color: #a5b4fc; }
+.bdp-badge-deal        { background: rgba(34,197,94,0.18);  color: #86efac; }
+.bdp-badge-announcement{ background: rgba(234,179,8,0.18);  color: #fde047; }
+.bdp-badge-event       { background: rgba(239,68,68,0.18);  color: #fca5a5; }
+
+/* ── Desktop overlay (sits inside .bcc-business-detail-banner) ─ */
+.bdp-updates-overlay {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  z-index: 10;
+  width: 220px;
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  padding: 10px 12px;
+  pointer-events: none;          /* read-only widget, click goes through */
+}
+.bdp-updates-overlay-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.bdp-updates-overlay-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.55);
+}
+.bdp-updates-overlay-count {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: rgba(255,51,0,0.7);
+  color: #fff;
+  border-radius: 999px;
+  padding: 1px 6px;
+  min-width: 18px;
+  text-align: center;
+}
+.bdp-updates-overlay-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.bdp-updates-overlay-title-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.bdp-updates-overlay-time {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.45);
+}
+.bdp-updates-overlay-more {
+  margin: 5px 0 0;
+  font-size: 0.65rem;
+  color: rgba(255,51,0,0.85);
+}
+
+/* Hide overlay on mobile */
+@media (max-width: 768px) {
+  .bdp-updates-overlay { display: none; }
+}
+
+/* ── Mobile collapsible bar ────────────────────────────── */
+.bdp-mobile-updates-bar {
+  display: none;
+  background: rgba(18,18,18,0.97);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+@media (max-width: 768px) {
+  .bdp-mobile-updates-bar { display: block; }
+}
+.bdp-mobile-updates-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+}
+.bdp-mobile-updates-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.bdp-mobile-updates-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff3300;
+  flex-shrink: 0;
+}
+.bdp-mobile-updates-chevron {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.5);
+  transition: transform 0.2s;
+  display: inline-block;
+}
+.bdp-mobile-updates-chevron.open { transform: rotate(90deg); }
+.bdp-mobile-updates-list {
+  padding: 0 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bdp-mobile-update-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.bdp-mobile-update-body { flex: 1; }
+.bdp-mobile-update-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 3px 0 2px;
+}
+.bdp-mobile-update-content {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.6);
+  margin: 0 0 3px;
+  line-height: 1.4;
+}
+.bdp-mobile-update-time {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.35);
+}
+
+/* ── Updates tab counter pill on tab button ────────────── */
+.bdp-tab-updates-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ff3300;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 1px 5px;
+  margin-left: 4px;
+  min-width: 16px;
+  line-height: 1.4;
+}
+
+/* ── Updates tab panel ─────────────────────────────────── */
+.bdp-updates-tab {
+  padding: 1.2rem 0;
+}
+.bdp-updates-owner-bar {
+  margin-bottom: 1.4rem;
+}
+.bdp-add-update-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: rgba(255,51,0,0.12);
+  border: 1px solid rgba(255,51,0,0.35);
+  border-radius: 8px;
+  color: #ff5522;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.bdp-add-update-btn:hover { background: rgba(255,51,0,0.2); }
+.bdp-update-form {
+  background: rgba(25,25,25,0.9);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bdp-update-form-row {
+  display: flex;
+  gap: 10px;
+}
+.bdp-update-type-select {
+  padding: 7px 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 7px;
+  color: #fff;
+  font-size: 0.78rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.bdp-update-title-input {
+  flex: 1;
+  padding: 7px 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 7px;
+  color: #fff;
+  font-size: 0.82rem;
+}
+.bdp-update-title-input::placeholder { color: rgba(255,255,255,0.3); }
+.bdp-update-content-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 7px;
+  color: #fff;
+  font-size: 0.82rem;
+  resize: vertical;
+  font-family: inherit;
+}
+.bdp-update-content-input::placeholder { color: rgba(255,255,255,0.3); }
+.bdp-update-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ── Update cards in list ──────────────────────────────── */
+.bdp-updates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.bdp-update-card {
+  background: rgba(25,25,25,0.8);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: border-color 0.2s;
+}
+.bdp-update-card:hover { border-color: rgba(255,255,255,0.14); }
+.bdp-update-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 7px;
+}
+.bdp-update-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.bdp-update-pinned-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fde047;
+  letter-spacing: 0.05em;
+}
+.bdp-update-card-time {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.35);
+}
+.bdp-update-card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 5px;
+}
+.bdp-update-card-content {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.65);
+  margin: 0;
+  line-height: 1.5;
+}
+.bdp-update-delete-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+}
+.bdp-update-delete-btn:hover { color: #ff5555; }
+
+/* ── Empty / loading states ────────────────────────────── */
+.bdp-updates-loading,
+.bdp-updates-empty {
+  padding: 2rem 0;
+  text-align: center;
+  color: rgba(255,255,255,0.35);
+  font-size: 0.85rem;
+}
+.bdp-updates-empty p { margin: 0.2rem 0; }
+

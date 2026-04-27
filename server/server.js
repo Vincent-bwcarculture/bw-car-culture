@@ -114,6 +114,7 @@ import marketPriceRoutes from './routes/marketPriceRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import transitFareRoutes from './routes/transitFareRoutes.js';
+import businessUpdateRoutes from './routes/businessUpdateRoutes.js';
 
 import { ensureUploadDirectories } from './utils/uploadDiagnostics.js';
 
@@ -765,6 +766,7 @@ app.use('/api/market-prices', marketPriceRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/transit-fares', transitFareRoutes);
+app.use('/api/updates', businessUpdateRoutes);
 
 // ============================================
 // ANALYTICS ROUTES INTEGRATION - ADDED
