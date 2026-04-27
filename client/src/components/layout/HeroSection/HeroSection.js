@@ -361,7 +361,7 @@ const HeroSection = () => {
   return (
     <section className="bcc-hero-section">
       {/* 3D car background — desktop only, fades in when model loads */}
-      <CarBackground3D />
+      <CarBackground3D sellMode={activeTab === 'sell'} />
 
       {/* Feedback Button in Top Right Corner */}
       <div className="bcc-hero-feedback-button">
