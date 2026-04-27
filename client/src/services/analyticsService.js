@@ -85,15 +85,6 @@ class AnalyticsService {
       });
     }
     
-    // Track page visibility changes
-    if (typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          this.retryFailedEvents();
-        }
-      });
-    }
-    
     // Track errors
     if (typeof window !== 'undefined') {
       window.addEventListener('error', (event) => {
@@ -166,11 +157,7 @@ class AnalyticsService {
 
     } catch (error) {
       console.error(`❌ Failed to send analytics event to ${endpoint}:`, error.message);
-      
-      // Store failed event for retry
-      this.storeFailedEvent(endpoint, payload);
-      
-      // Don't throw error to prevent blocking the app
+      // Don't re-queue here — callers that want retry handle storage themselves
       return null;
     }
   }
@@ -285,7 +272,8 @@ class AnalyticsService {
 
   // Retry failed events
   async retryFailedEvents() {
-    if (typeof localStorage === 'undefined' || !this.isOnline) return;
+    if (typeof localStorage === 'undefined' || !this.isOnline || this.isRetrying) return;
+    this.isRetrying = true;
     
     try {
       const failedEvents = JSON.parse(localStorage.getItem('failedAnalyticsEvents') || '[]');
@@ -330,6 +318,8 @@ class AnalyticsService {
       
     } catch (error) {
       console.warn('❌ Failed to retry analytics events:', error);
+    } finally {
+      this.isRetrying = false;
     }
   }
 

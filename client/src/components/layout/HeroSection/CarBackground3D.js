@@ -209,9 +209,22 @@ const CarBackground3D = ({ sellMode = false }) => {
 
     animate();
 
+    // ── WebGL context loss ────────────────────────────────────────────────
+    const onContextLost = (e) => {
+      e.preventDefault();           // allow restore attempt
+      cancelAnimationFrame(animId);
+    };
+    const onContextRestored = () => {
+      animate();                    // restart the loop on restore
+    };
+    canvas.addEventListener('webglcontextlost',     onContextLost,     false);
+    canvas.addEventListener('webglcontextrestored', onContextRestored, false);
+
     // ── Cleanup ───────────────────────────────────────────────────────────
     return () => {
       cancelAnimationFrame(animId);
+      canvas.removeEventListener('webglcontextlost',     onContextLost);
+      canvas.removeEventListener('webglcontextrestored', onContextRestored);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('scroll',    onScroll);
       window.removeEventListener('resize',    onResize);
