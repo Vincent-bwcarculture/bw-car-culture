@@ -1500,56 +1500,12 @@ return (
       <div className="bcc-business-detail-tab-content">
         {activeTab === 'updates' && (
           <div className="bdp-updates-tab">
-            {/* Owner: add new update */}
+            {/* Owner: post update button → opens subscription modal */}
             {isOwner && (
               <div className="bdp-updates-owner-bar">
-                {!showUpdateForm ? (
-                  <button className="bdp-add-update-btn" onClick={() => setShowUpdateForm(true)}>
-                    <Plus size={14} /> Post Update
-                  </button>
-                ) : (
-                  <div className="bdp-update-form">
-                    <div className="bdp-update-form-row">
-                      <select
-                        value={newUpdate.type}
-                        onChange={e => setNewUpdate(p => ({ ...p, type: e.target.value }))}
-                        className="bdp-update-type-select"
-                      >
-                        <option value="update">Update</option>
-                        <option value="deal">Deal</option>
-                        <option value="announcement">Announcement</option>
-                        <option value="event">Event</option>
-                      </select>
-                      <input
-                        className="bdp-update-title-input"
-                        placeholder="Title (max 120 chars)"
-                        maxLength={120}
-                        value={newUpdate.title}
-                        onChange={e => setNewUpdate(p => ({ ...p, title: e.target.value }))}
-                      />
-                    </div>
-                    <textarea
-                      className="bdp-update-content-input"
-                      placeholder="Share your update, deal or announcement…"
-                      maxLength={1000}
-                      rows={3}
-                      value={newUpdate.content}
-                      onChange={e => setNewUpdate(p => ({ ...p, content: e.target.value }))}
-                    />
-                    <div className="bdp-update-form-actions">
-                      <button className="bdp-cancel-btn" onClick={() => { setShowUpdateForm(false); setNewUpdate({ title: '', content: '', type: 'update' }); }}>
-                        Cancel
-                      </button>
-                      <button
-                        className="bdp-save-btn"
-                        onClick={handleCreateUpdate}
-                        disabled={submittingUpdate || !newUpdate.title.trim() || !newUpdate.content.trim()}
-                      >
-                        {submittingUpdate ? 'Posting…' : 'Post'}
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <button className="bdp-add-update-btn" onClick={() => setShowUpdateForm(true)}>
+                  <Plus size={14} /> Post Update
+                </button>
               </div>
             )}
 
@@ -2466,6 +2422,20 @@ return (
       />
     )}
 
+    {showUpdateForm && business && (
+      <PostUpdateModal
+        business={business}
+        newUpdate={newUpdate}
+        setNewUpdate={setNewUpdate}
+        submittingUpdate={submittingUpdate}
+        handleCreateUpdate={handleCreateUpdate}
+        onClose={() => {
+          setShowUpdateForm(false);
+          setNewUpdate({ title: '', content: '', type: 'update' });
+        }}
+      />
+    )}
+
     {showListingModal && business && (
       <OwnerListingModal
         dealer={business}
@@ -2782,6 +2752,279 @@ const ReviewCard = ({ review, business }) => {
             <p className="bcc-response-text">{review.response.text}</p>
           </div>
         )}
+      </div>
+    </div>
+  );
+};
+
+// ─── Subscription tier data ──────────────────────────────────────────────────
+const SUB_TIERS = [
+  {
+    id: 'basic',
+    name: 'Basic',
+    price: 'P0',
+    sub: 'Free forever',
+    accent: '#6b7280',
+    features: [
+      'Listed on BW Car Culture',
+      'Public dealer profile page',
+      'Text-only business updates',
+      'Customer reviews & ratings',
+      'Standard search visibility',
+    ],
+    locked: [
+      'Listing performance stats',
+      'Profile image / banner editing',
+      'Image uploads in updates',
+      'Video & 3D media',
+      'AI integration',
+    ],
+  },
+  {
+    id: 'standard',
+    name: 'Standard',
+    price: 'P300',
+    sub: '/month',
+    accent: '#3b82f6',
+    popular: true,
+    features: [
+      'Everything in Basic',
+      'Listing performance stats',
+      'Profile & banner image editing',
+      'Image uploads in updates',
+      'Contact & view analytics',
+      'Up to 20 active listings',
+    ],
+    locked: [
+      'Video uploads',
+      '3D visual support',
+      'AI integration',
+      'Platform content features',
+    ],
+  },
+  {
+    id: 'premium',
+    name: 'Premium',
+    price: 'P1,000',
+    sub: '/month',
+    accent: '#ff3300',
+    features: [
+      'Everything in Standard',
+      'Priority placement in search',
+      'Full AI integration',
+      'Video media uploads',
+      '3D visuals support',
+      'Unlimited image uploads',
+      'Featured in platform video content',
+      'Up to 40 active listings',
+    ],
+    locked: [],
+  },
+];
+
+const SUB_ADDONS = [
+  {
+    name: 'Premium Listing Photography',
+    price: 'P2,500',
+    detail: '1–5 listings',
+    media: true,
+  },
+  {
+    name: 'Car Reviews — Automotive Video',
+    price: 'P1,400',
+    detail: '1–3 selected vehicle reviews',
+    media: true,
+  },
+  {
+    name: 'Dedicated Dealership Video',
+    price: 'P2,000',
+    detail: '1 video · 3–10 min',
+    media: true,
+  },
+  {
+    name: 'Social Media Coverage — 1 post',
+    price: 'P400',
+    detail: 'Single dedicated post',
+    media: true,
+  },
+  {
+    name: 'Social Media Coverage — 2 posts',
+    price: 'P700',
+    detail: 'Two dedicated posts',
+    media: true,
+  },
+];
+
+// ─── Post Update Modal ────────────────────────────────────────────────────────
+const PostUpdateModal = ({ business, newUpdate, setNewUpdate, submittingUpdate, handleCreateUpdate, onClose }) => {
+  const tier = business?.subscription?.tier || 'basic';
+  const tierInfo = SUB_TIERS.find(t => t.id === tier) || SUB_TIERS[0];
+  const canUpload = tier === 'standard' || tier === 'premium';
+
+  const UPGRADE_EMAIL = 'subscribe@bwcarculture.com';
+
+  const handleUpgradeClick = (targetTier) => {
+    const subject = encodeURIComponent(`Subscription Upgrade Request — ${targetTier.charAt(0).toUpperCase() + targetTier.slice(1)} Plan`);
+    const body = encodeURIComponent(
+      `Hi BW Car Culture,\n\nI'd like to upgrade my dealership "${business.businessName}" to the ${targetTier} plan.\n\nDealer ID: ${business._id}\n\nPlease get in touch to process the upgrade.\n\nThank you.`
+    );
+    window.open(`mailto:${UPGRADE_EMAIL}?subject=${subject}&body=${body}`, '_blank');
+  };
+
+  return (
+    <div className="bdp-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="bdp-sub-modal">
+
+        {/* Header */}
+        <div className="bdp-sub-modal-header">
+          <div className="bdp-sub-modal-title-row">
+            <h3>Post an Update</h3>
+            <span className={`bdp-sub-current-badge bdp-sub-badge-${tier}`}>{tierInfo.name} Plan</span>
+          </div>
+          <button className="bdp-modal-close" onClick={onClose}><X size={18} /></button>
+        </div>
+
+        <div className="bdp-sub-modal-body">
+
+          {/* Tier notice */}
+          <div className={`bdp-sub-notice bdp-sub-notice-${tier}`}>
+            <span className="bdp-sub-notice-icon">{tier === 'basic' ? '📋' : tier === 'standard' ? '📊' : '⭐'}</span>
+            <div className="bdp-sub-notice-text">
+              {tier === 'basic' && (
+                <>
+                  <strong>Basic tier</strong> — text-only updates available. Upgrade to <strong>Standard</strong> or <strong>Premium</strong> to attach images, videos, and more.
+                </>
+              )}
+              {tier === 'standard' && (
+                <>
+                  <strong>Standard tier</strong> — you can post updates with images. Upgrade to <strong>Premium</strong> for video uploads, 3D visuals, AI integration, and featured content placement.
+                </>
+              )}
+              {tier === 'premium' && (
+                <>
+                  <strong>Premium tier</strong> — full media and AI features unlocked. Post text, images, videos and 3D visuals.
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Post form */}
+          <div className="bdp-update-form bdp-update-form-modal">
+            <div className="bdp-update-form-row">
+              <select
+                value={newUpdate.type}
+                onChange={e => setNewUpdate(p => ({ ...p, type: e.target.value }))}
+                className="bdp-update-type-select"
+              >
+                <option value="update">Update</option>
+                <option value="deal">Deal</option>
+                <option value="announcement">Announcement</option>
+                <option value="event">Event</option>
+              </select>
+              <input
+                className="bdp-update-title-input"
+                placeholder="Title (max 120 chars)"
+                maxLength={120}
+                value={newUpdate.title}
+                onChange={e => setNewUpdate(p => ({ ...p, title: e.target.value }))}
+              />
+            </div>
+            <textarea
+              className="bdp-update-content-input"
+              placeholder="Share your update, deal or announcement…"
+              maxLength={1000}
+              rows={3}
+              value={newUpdate.content}
+              onChange={e => setNewUpdate(p => ({ ...p, content: e.target.value }))}
+            />
+            {!canUpload && (
+              <p className="bdp-update-media-locked">
+                🔒 Image &amp; video uploads require Standard or Premium — <button className="bdp-inline-upgrade-link" onClick={() => handleUpgradeClick('standard')}>upgrade now</button>
+              </p>
+            )}
+            <div className="bdp-update-form-actions">
+              <button className="bdp-cancel-btn" onClick={onClose} disabled={submittingUpdate}>Cancel</button>
+              <button
+                className="bdp-save-btn"
+                onClick={handleCreateUpdate}
+                disabled={submittingUpdate || !newUpdate.title.trim() || !newUpdate.content.trim()}
+              >
+                {submittingUpdate ? 'Posting…' : <><Check size={13} /> Post Update</>}
+              </button>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="bdp-sub-divider">
+            <span>Subscription Plans</span>
+          </div>
+
+          {/* Tiers grid */}
+          <div className="bdp-sub-tiers-grid">
+            {SUB_TIERS.map(t => {
+              const isCurrent = t.id === tier;
+              const isUpgrade = (
+                (tier === 'basic' && (t.id === 'standard' || t.id === 'premium')) ||
+                (tier === 'standard' && t.id === 'premium')
+              );
+              return (
+                <div
+                  key={t.id}
+                  className={`bdp-sub-tier-card ${isCurrent ? 'bdp-sub-tier-current' : ''} ${t.popular ? 'bdp-sub-tier-popular' : ''}`}
+                  style={{ '--tier-accent': t.accent }}
+                >
+                  {t.popular && <div className="bdp-sub-popular-badge">Most Popular</div>}
+                  {isCurrent && <div className="bdp-sub-current-ribbon">Your Plan</div>}
+                  <div className="bdp-sub-tier-header">
+                    <span className="bdp-sub-tier-name">{t.name}</span>
+                    <span className="bdp-sub-tier-price">{t.price}<small>{t.sub}</small></span>
+                  </div>
+                  <ul className="bdp-sub-tier-features">
+                    {t.features.map(f => <li key={f} className="bdp-sub-feature-yes">✓ {f}</li>)}
+                    {t.locked.map(f => <li key={f} className="bdp-sub-feature-no">✗ {f}</li>)}
+                  </ul>
+                  {isUpgrade && (
+                    <button
+                      className="bdp-sub-upgrade-btn"
+                      style={{ background: t.accent }}
+                      onClick={() => handleUpgradeClick(t.id)}
+                    >
+                      Upgrade to {t.name}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Add-ons */}
+          <div className="bdp-sub-divider">
+            <span>Media Coverage Add-ons</span>
+          </div>
+          <p className="bdp-sub-addons-intro">Available for subscribed dealers (Standard &amp; Premium). Contact us to book.</p>
+          <table className="bdp-addons-table">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Price</th>
+                <th>Includes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {SUB_ADDONS.map(a => (
+                <tr key={a.name}>
+                  <td>{a.name}</td>
+                  <td className="bdp-addon-price">{a.price}</td>
+                  <td className="bdp-addon-detail">{a.detail}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="bdp-addons-distance-note">
+            📍 <strong>Distance surcharge:</strong> Dealers operating more than 40 km outside Gaborone will incur an additional charge of <strong>P3.50 per km</strong> on all media coverage add-ons that involve photography or video production.
+          </div>
+
+        </div>
       </div>
     </div>
   );

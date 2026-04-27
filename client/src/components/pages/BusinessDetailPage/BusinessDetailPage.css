@@ -3375,3 +3375,279 @@
 }
 .bdp-updates-empty p { margin: 0.2rem 0; }
 
+/* ═══════════════════════════════════════════════════════
+   POST UPDATE / SUBSCRIPTION MODAL
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Modal shell ───────────────────────────────────────── */
+.bdp-sub-modal {
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  width: min(720px, 95vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+}
+
+/* ── Header ────────────────────────────────────────────── */
+.bdp-sub-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+.bdp-sub-modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bdp-sub-modal-title-row h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+.bdp-sub-current-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+.bdp-sub-badge-basic    { background: rgba(107,114,128,0.25); color: #9ca3af; border: 1px solid rgba(107,114,128,0.4); }
+.bdp-sub-badge-standard { background: rgba(59,130,246,0.2);  color: #93c5fd; border: 1px solid rgba(59,130,246,0.4); }
+.bdp-sub-badge-premium  { background: rgba(255,51,0,0.18);   color: #fca5a5; border: 1px solid rgba(255,51,0,0.4); }
+
+/* ── Body ──────────────────────────────────────────────── */
+.bdp-sub-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.bdp-sub-modal-body::-webkit-scrollbar { width: 4px; }
+.bdp-sub-modal-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+
+/* ── Tier notice banner ────────────────────────────────── */
+.bdp-sub-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.bdp-sub-notice-basic    { background: rgba(107,114,128,0.12); border: 1px solid rgba(107,114,128,0.25); color: #d1d5db; }
+.bdp-sub-notice-standard { background: rgba(59,130,246,0.1);  border: 1px solid rgba(59,130,246,0.25);  color: #bfdbfe; }
+.bdp-sub-notice-premium  { background: rgba(255,51,0,0.1);    border: 1px solid rgba(255,51,0,0.25);    color: #fecaca; }
+.bdp-sub-notice-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.bdp-sub-notice-text strong { color: #fff; }
+
+/* ── Update form inside modal ──────────────────────────── */
+.bdp-update-form-modal {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+}
+.bdp-update-media-locked {
+  font-size: 0.76rem;
+  color: rgba(255,255,255,0.4);
+  margin: 0;
+}
+.bdp-inline-upgrade-link {
+  background: none;
+  border: none;
+  color: #ff5522;
+  font-size: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  font-family: inherit;
+}
+.bdp-inline-upgrade-link:hover { color: #ff7755; }
+
+/* ── Section divider ───────────────────────────────────── */
+.bdp-sub-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255,255,255,0.3);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.bdp-sub-divider::before,
+.bdp-sub-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+
+/* ── Tiers grid ────────────────────────────────────────── */
+.bdp-sub-tiers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width: 600px) {
+  .bdp-sub-tiers-grid { grid-template-columns: 1fr; }
+}
+
+.bdp-sub-tier-card {
+  position: relative;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 16px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+.bdp-sub-tier-card:hover { border-color: rgba(255,255,255,0.16); }
+.bdp-sub-tier-current {
+  border-color: var(--tier-accent) !important;
+  background: rgba(255,255,255,0.05);
+}
+.bdp-sub-tier-popular {
+  border-color: rgba(59,130,246,0.5);
+}
+
+.bdp-sub-popular-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #3b82f6;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.bdp-sub-current-ribbon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tier-accent);
+  background: rgba(255,255,255,0.06);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.bdp-sub-tier-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bdp-sub-tier-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+}
+.bdp-sub-tier-price {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--tier-accent, #fff);
+  line-height: 1.1;
+}
+.bdp-sub-tier-price small {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.4);
+  margin-left: 2px;
+}
+
+.bdp-sub-tier-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.73rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.bdp-sub-feature-yes { color: rgba(255,255,255,0.8); }
+.bdp-sub-feature-yes::before { content: ''; }
+.bdp-sub-feature-no  { color: rgba(255,255,255,0.22); text-decoration: line-through; }
+
+.bdp-sub-upgrade-btn {
+  width: 100%;
+  padding: 9px;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+  margin-top: auto;
+}
+.bdp-sub-upgrade-btn:hover { opacity: 1; }
+
+/* ── Add-ons table ─────────────────────────────────────── */
+.bdp-sub-addons-intro {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.45);
+  margin: -10px 0 0;
+}
+.bdp-addons-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+.bdp-addons-table th {
+  text-align: left;
+  padding: 6px 10px;
+  color: rgba(255,255,255,0.35);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.bdp-addons-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.75);
+  vertical-align: top;
+}
+.bdp-addons-table tr:last-child td { border-bottom: none; }
+.bdp-addon-price {
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+.bdp-addon-detail { color: rgba(255,255,255,0.45); }
+
+/* ── Distance note ─────────────────────────────────────── */
+.bdp-addons-distance-note {
+  font-size: 0.74rem;
+  color: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  padding: 10px 14px;
+  line-height: 1.5;
+}
+.bdp-addons-distance-note strong { color: rgba(255,255,255,0.75); }
+
