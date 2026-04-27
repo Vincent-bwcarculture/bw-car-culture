@@ -2853,6 +2853,13 @@ const SUB_ADDONS = [
     detail: 'Two dedicated posts',
     media: true,
   },
+  {
+    name: 'Verified Dealership Badge',
+    price: 'P950',
+    detail: 'Includes on-site dealership visit · once-off',
+    media: false,
+    oneOff: true,
+  },
 ];
 
 // ─── Post Update Modal ────────────────────────────────────────────────────────
@@ -3012,8 +3019,11 @@ const PostUpdateModal = ({ business, newUpdate, setNewUpdate, submittingUpdate, 
             </thead>
             <tbody>
               {SUB_ADDONS.map(a => (
-                <tr key={a.name}>
-                  <td>{a.name}</td>
+                <tr key={a.name} className={a.oneOff ? 'bdp-addon-row-onceoff' : ''}>
+                  <td>
+                    {a.name}
+                    {a.oneOff && <span className="bdp-addon-oneoff-tag">once-off</span>}
+                  </td>
                   <td className="bdp-addon-price">{a.price}</td>
                   <td className="bdp-addon-detail">{a.detail}</td>
                 </tr>
@@ -3021,7 +3031,7 @@ const PostUpdateModal = ({ business, newUpdate, setNewUpdate, submittingUpdate, 
             </tbody>
           </table>
           <div className="bdp-addons-distance-note">
-            📍 <strong>Distance surcharge:</strong> Dealers operating more than 40 km outside Gaborone will incur an additional charge of <strong>P3.50 per km</strong> on all media coverage add-ons that involve photography or video production.
+            📍 <strong>Distance surcharge:</strong> Dealers operating more than 40 km outside Gaborone will incur an additional charge of <strong>P3.50 per km</strong> on all add-ons that involve an on-site visit — this includes photography, video production, and the Verified Dealership Badge inspection.
           </div>
 
         </div>

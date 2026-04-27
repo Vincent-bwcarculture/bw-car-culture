@@ -3651,3 +3651,25 @@
 }
 .bdp-addons-distance-note strong { color: rgba(255,255,255,0.75); }
 
+/* ── Once-off addon row (Verification Badge) ───────────── */
+.bdp-addon-row-onceoff td {
+  background: rgba(255,255,255,0.02);
+}
+.bdp-addon-row-onceoff td:first-child {
+  color: #fff;
+}
+.bdp-addon-oneoff-tag {
+  display: inline-block;
+  margin-left: 7px;
+  padding: 1px 7px;
+  background: rgba(34,197,94,0.15);
+  border: 1px solid rgba(34,197,94,0.3);
+  color: #86efac;
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
