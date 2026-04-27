@@ -1,125 +1,145 @@
 // CarBackground3D.js — vanilla Three.js background car for the Hero section
 // Mouse follow on desktop · Scroll-driven rotation · Fades in when model is ready
+// Part-filtering logic ported directly from RegisterVehicleTab.js (CarViewer)
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { loadCarModel } from '../../../utils/modelCache.js';
+
+// ── Same hide-lists used in RegisterVehicleTab ────────────────────────────────
+const HIDE_KEYWORDS = [
+  'turntable', 'platform', 'ground', 'floor', 'shadow', 'spoon',
+  'highpoly', 'lowpoly',
+  '2262a6d3f82749',
+  'wheel.obj.cleaner.materialmerger.gles',
+];
+const HIDE_OBJECT_RE    = /^object_([2-9]|10)$/i;   // BBS mesh parts
+const HIDE_ROOTNODE_RE  = /^rootnode\.\d{3,}$/i;    // download artifacts
 
 const CarBackground3D = () => {
   const canvasRef = useRef(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Desktop only — skip on narrow screens
+    // Desktop only
     if (window.innerWidth < 900) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // ── Renderer ───────────────────────────────────────────────────────────
     const W = window.innerWidth;
     const H = window.innerHeight;
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    // ── Renderer (same settings as CarViewer) ─────────────────────────────
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
     renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.3;
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-    // ── Scene & Camera ─────────────────────────────────────────────────────
+    // ── Scene (transparent bg so gradient behind shows through) ──────────
     const scene = new THREE.Scene();
+    // No scene.background — keep alpha: true transparent
 
-    const camera = new THREE.PerspectiveCamera(42, W / H, 0.1, 100);
-    camera.position.set(0.6, 1.1, 5.8);
-    camera.lookAt(0, 0.2, 0);
+    // ── Camera — mirrored from CarViewer, shifted right for hero layout ───
+    const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
+    camera.position.set(4, 1.5, 4);
+    camera.lookAt(0, 0.4, 0);
 
-    // ── Lighting ───────────────────────────────────────────────────────────
-    // Soft ambient
-    scene.add(new THREE.AmbientLight(0xfff4e6, 0.35));
+    // ── Lighting — exact same setup as CarViewer ──────────────────────────
+    scene.add(new THREE.AmbientLight(0xffffff, 1.5));
 
-    // Key light (upper front-left — illuminates the windscreen & hood)
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.8);
-    keyLight.position.set(-4, 7, 6);
-    keyLight.castShadow = true;
-    keyLight.shadow.mapSize.set(1024, 1024);
-    keyLight.shadow.camera.near = 0.5;
-    keyLight.shadow.camera.far = 25;
-    scene.add(keyLight);
+    const key = new THREE.DirectionalLight(0xfff5e0, 4);
+    key.position.set(4, 5, 4);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    scene.add(key);
 
-    // Fill light (cool blue from right)
-    const fillLight = new THREE.DirectionalLight(0x6699cc, 0.9);
-    fillLight.position.set(6, 4, 2);
-    scene.add(fillLight);
+    const fill = new THREE.DirectionalLight(0xe0eeff, 1.5);
+    fill.position.set(-5, 3, 3);
+    scene.add(fill);
 
-    // Rim / back-light (warm brand-red — traces the roofline)
-    const rimLight = new THREE.DirectionalLight(0xff3300, 0.45);
-    rimLight.position.set(0, 3, -7);
-    scene.add(rimLight);
+    const rim = new THREE.DirectionalLight(0xffffff, 2);
+    rim.position.set(0, 4, -5);
+    scene.add(rim);
 
-    // Ground bounce (soft warm underneath)
-    const bounceLight = new THREE.PointLight(0x442200, 0.4, 10);
-    bounceLight.position.set(0, -1.5, 0);
-    scene.add(bounceLight);
-
-    // ── Car group (positioned to right side so it doesn't obscure the CTA) ─
+    // ── Car group — offset right so it sits beside the CTA text ──────────
     const carGroup = new THREE.Group();
-    carGroup.position.set(1.8, -0.65, 0);
+    // Shift group to the right in world space; camera already looks at origin
+    carGroup.position.set(1.6, -0.5, 0);
     scene.add(carGroup);
 
-    // ── State for smooth mouse & scroll follow ─────────────────────────────
+    // ── Interaction state ─────────────────────────────────────────────────
     let modelReady = false;
-    const mouse      = { nx: 0, ny: 0 };            // normalised -1..1
-    const target     = { rotY: 0, rotX: 0 };        // desired rotation
-    const current    = { rotY: 0, rotX: 0 };        // lerped rotation
-    const BASE_ROT_Y = -0.35;                        // initial angle (front-quarter view)
-    let   scrollY    = window.scrollY;
-    let   animId;
+    const target  = { rotY: 0, rotX: 0 };
+    const current = { rotY: 0, rotX: 0 };
+    const BASE_Y  = -0.35;   // front-quarter angle
+    let scrollY   = window.scrollY;
+    let animId;
 
-    // ── Load model ─────────────────────────────────────────────────────────
+    // ── Load & filter model ───────────────────────────────────────────────
     loadCarModel(null)
       .then(gltf => {
         const car = gltf.scene;
 
-        // Auto-scale to consistent height
-        const box     = new THREE.Box3().setFromObject(car);
-        const size    = box.getSize(new THREE.Vector3());
-        const maxDim  = Math.max(size.x, size.y, size.z);
-        const scale   = 3.0 / maxDim;
-        car.scale.setScalar(scale);
+        // Measure overall bounding box to detect oversized flat meshes
+        const carBox  = new THREE.Box3().setFromObject(car);
+        const carSize = new THREE.Vector3();
+        carBox.getSize(carSize);
 
-        // Centre the model at origin
-        const center = box.getCenter(new THREE.Vector3());
-        car.position.sub(center.multiplyScalar(scale));
-
-        // Enable shadows on every mesh
         car.traverse(node => {
-          if (node.isMesh) {
-            node.castShadow    = true;
-            node.receiveShadow = true;
+          if (!node.isMesh) return;
+
+          const nameLower = node.name.toLowerCase();
+          const matName   = (Array.isArray(node.material)
+            ? node.material[0]?.name
+            : node.material?.name) || '';
+          const matLower  = matName.toLowerCase();
+
+          // 1. Hide by keyword / regex (same rules as CarViewer)
+          if (
+            HIDE_KEYWORDS.some(k => nameLower.includes(k) || matLower.includes(k)) ||
+            HIDE_OBJECT_RE.test(node.name) ||
+            HIDE_ROOTNODE_RE.test(node.name)
+          ) {
+            node.visible = false;
+            return;
           }
+
+          // 2. Hide large flat discs near ground (turntable fallback)
+          const meshBox    = new THREE.Box3().setFromObject(node);
+          const meshSize   = new THREE.Vector3();
+          const meshCenter = new THREE.Vector3();
+          meshBox.getSize(meshSize);
+          meshBox.getCenter(meshCenter);
+          const isWide = meshSize.x > carSize.x * 0.7 || meshSize.z > carSize.z * 0.7;
+          const isFlat = meshSize.y < 0.25;
+          const isLow  = meshCenter.y < 0.15;
+          if (isWide && isFlat && isLow) {
+            node.visible = false;
+            return;
+          }
+
+          // 3. Shadows
+          node.castShadow    = true;
+          node.receiveShadow = true;
         });
 
         carGroup.add(car);
         modelReady = true;
-
-        // Start rotation at the base angle, then the loop takes over
-        carGroup.rotation.y = BASE_ROT_Y;
-
-        // Fade the canvas in
+        carGroup.rotation.y = BASE_Y;
         setVisible(true);
       })
-      .catch(() => { /* silent — background just stays gradient */ });
+      .catch(() => { /* silent — gradient background stays */ });
 
-    // ── Event handlers ─────────────────────────────────────────────────────
+    // ── Event handlers ────────────────────────────────────────────────────
     const onMouseMove = e => {
-      mouse.nx = (e.clientX / window.innerWidth)  * 2 - 1;   //  -1 (left) → 1 (right)
-      mouse.ny = (e.clientY / window.innerHeight) * 2 - 1;   //  -1 (top)  → 1 (bottom)
-
-      // Mouse drives ±30° yaw, ±6° pitch
-      target.rotY = mouse.nx *  0.52;
-      target.rotX = mouse.ny * -0.10;
+      const nx = (e.clientX / window.innerWidth)  * 2 - 1;
+      const ny = (e.clientY / window.innerHeight) * 2 - 1;
+      target.rotY = nx *  0.52;   // ±30° yaw
+      target.rotX = ny * -0.10;   // ±6° pitch
     };
 
     const onScroll = () => { scrollY = window.scrollY; };
@@ -136,25 +156,22 @@ const CarBackground3D = () => {
     window.addEventListener('scroll',    onScroll,    { passive: true });
     window.addEventListener('resize',    onResize);
 
-    // ── Animation loop ─────────────────────────────────────────────────────
+    // ── Render loop ───────────────────────────────────────────────────────
     const lerp = (a, b, t) => a + (b - a) * t;
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
 
       if (modelReady) {
-        // Smooth-follow mouse
         current.rotY = lerp(current.rotY, target.rotY, 0.04);
         current.rotX = lerp(current.rotX, target.rotX, 0.04);
 
-        // Scroll adds a gentle continuous rotation (1 full page ≈ +90°)
         const scrollRot = scrollY * 0.0012;
-
-        carGroup.rotation.y = BASE_ROT_Y + current.rotY + scrollRot;
+        carGroup.rotation.y = BASE_Y + current.rotY + scrollRot;
         carGroup.rotation.x = current.rotX;
 
-        // Subtle camera parallax on scroll
-        camera.position.y = lerp(camera.position.y, 1.1 - scrollY * 0.0005, 0.06);
+        // Subtle camera lift on scroll
+        camera.position.y = lerp(camera.position.y, 1.5 - scrollY * 0.0005, 0.06);
       }
 
       renderer.render(scene, camera);
@@ -162,7 +179,7 @@ const CarBackground3D = () => {
 
     animate();
 
-    // ── Cleanup ────────────────────────────────────────────────────────────
+    // ── Cleanup ───────────────────────────────────────────────────────────
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('mousemove', onMouseMove);

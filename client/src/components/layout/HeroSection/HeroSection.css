@@ -18,10 +18,10 @@
   inset: 0;
   background: linear-gradient(
     to right,
-    rgba(0, 0, 0, 0.90) 0%,
-    rgba(0, 0, 0, 0.72) 38%,
-    rgba(0, 0, 0, 0.30) 65%,
-    rgba(0, 0, 0, 0.05) 100%
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.50) 35%,
+    rgba(0, 0, 0, 0.18) 60%,
+    rgba(0, 0, 0, 0.00) 100%
   );
   z-index: 1;
   pointer-events: none;
