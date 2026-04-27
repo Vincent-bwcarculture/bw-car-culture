@@ -27,7 +27,7 @@ class AnalyticsQueue {
     const batch = this.queue.splice(0, this.batchSize);
 
     try {
-      await fetch('/api/analytics/track/batch', {
+      await fetch('https://bw-car-culture-api.vercel.app/api/analytics/track/batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ events: batch })

@@ -489,7 +489,7 @@ class ClientAnalytics {
       
       // Only track if user spent more than 10 seconds on page
       if (timeOnPage > 10000) {
-        navigator.sendBeacon('/api/analytics/track', JSON.stringify({
+        navigator.sendBeacon('https://bw-car-culture-api.vercel.app/api/analytics/track', JSON.stringify({
           eventType: 'page_time',
           category: 'engagement',
           page: window.location.pathname,

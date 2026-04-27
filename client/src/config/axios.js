@@ -65,14 +65,6 @@ api.interceptors.request.use(
         console.warn(`⚠️ Request without token: ${config.url}`);
       }
 
-      // Add timestamp to GET requests to prevent caching
-      if (config.method?.toLowerCase() === 'get') {
-        config.params = {
-          ...config.params,
-          _t: new Date().getTime()
-        };
-      }
-      
       // IMPORTANT: For FormData requests, DO NOT set the Content-Type header 
       // as axios will add it automatically with the correct boundary
       if (config.data instanceof FormData) {

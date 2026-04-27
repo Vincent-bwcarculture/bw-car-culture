@@ -10,7 +10,7 @@ const useUnreadNotifCount = (isAuthenticated) => {
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-      const res = await fetch('/api/user/notifications/unread-count', {
+      const res = await fetch('https://bw-car-culture-api.vercel.app/api/user/notifications/unread-count', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
