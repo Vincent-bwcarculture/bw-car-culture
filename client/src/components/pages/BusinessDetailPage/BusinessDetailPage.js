@@ -2825,13 +2825,13 @@ const SUB_TIERS = [
 const SUB_ADDONS = [
   {
     name: 'Premium Listing Photography',
-    price: 'P2,500',
+    price: 'P1,500',
     detail: '1–5 listings',
     media: true,
   },
   {
     name: 'Car Reviews — Automotive Video',
-    price: 'P1,400',
+    price: 'P2,500',
     detail: '1–3 selected vehicle reviews',
     media: true,
   },
