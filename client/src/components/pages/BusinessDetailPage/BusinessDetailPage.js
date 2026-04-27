@@ -2822,51 +2822,110 @@ const SUB_TIERS = [
   },
 ];
 
+// WhatsApp number for BW Car Culture bookings
+const BWCC_WHATSAPP = '26771234567'; // update with real number
+
 const SUB_ADDONS = [
   {
     name: 'Premium Listing Photography',
     price: 'P1,500',
-    detail: '1–5 listings',
+    priceNum: 1500,
+    detail: '1–5 vehicle listings',
+    platforms: [],
     media: true,
   },
   {
     name: 'Car Reviews — Automotive Video',
     price: 'P2,500',
+    priceNum: 2500,
     detail: '1–3 selected vehicle reviews',
+    platforms: ['Facebook', 'Instagram', 'WhatsApp', 'TikTok'],
     media: true,
   },
   {
     name: 'Dedicated Dealership Video',
     price: 'P2,000',
+    priceNum: 2000,
     detail: '1 video · 3–10 min',
+    platforms: ['Facebook', 'Instagram', 'WhatsApp', 'TikTok'],
     media: true,
   },
   {
     name: 'Social Media Coverage — 1 post',
     price: 'P400',
-    detail: 'Single dedicated post',
+    priceNum: 400,
+    detail: '1 dedicated post on BW Car Culture pages & channel',
+    platforms: ['Facebook', 'Instagram', 'WhatsApp'],
     media: true,
   },
   {
     name: 'Social Media Coverage — 2 posts',
     price: 'P700',
-    detail: 'Two dedicated posts',
+    priceNum: 700,
+    detail: '2 dedicated posts on BW Car Culture pages & channel',
+    platforms: ['Facebook', 'Instagram', 'WhatsApp'],
     media: true,
   },
   {
     name: 'Verified Dealership Badge',
     price: 'P950',
-    detail: 'Includes on-site dealership visit · once-off',
+    priceNum: 950,
+    detail: 'Includes on-site dealership visit',
+    platforms: [],
     media: false,
     oneOff: true,
   },
 ];
 
 // ─── Post Update Modal ────────────────────────────────────────────────────────
+const PLATFORM_COLORS = {
+  Facebook:  { bg: 'rgba(24,119,242,0.18)', color: '#93c5fd' },
+  Instagram: { bg: 'rgba(225,48,108,0.18)', color: '#f9a8d4' },
+  WhatsApp:  { bg: 'rgba(37,211,102,0.18)', color: '#86efac' },
+  TikTok:    { bg: 'rgba(255,255,255,0.1)', color: '#e2e8f0' },
+};
+
 const PostUpdateModal = ({ business, newUpdate, setNewUpdate, submittingUpdate, handleCreateUpdate, onClose }) => {
   const tier = business?.subscription?.tier || 'basic';
   const tierInfo = SUB_TIERS.find(t => t.id === tier) || SUB_TIERS[0];
   const canUpload = tier === 'standard' || tier === 'premium';
+
+  const [selectedAddons, setSelectedAddons] = useState(new Set());
+
+  const toggleAddon = (name) => {
+    setSelectedAddons(prev => {
+      const next = new Set(prev);
+      next.has(name) ? next.delete(name) : next.add(name);
+      return next;
+    });
+  };
+
+  const bookingTotal = [...selectedAddons].reduce((sum, name) => {
+    const a = SUB_ADDONS.find(x => x.name === name);
+    return sum + (a?.priceNum || 0);
+  }, 0);
+
+  const handleWhatsAppBook = () => {
+    const selected = [...selectedAddons].map(name => SUB_ADDONS.find(a => a.name === name)).filter(Boolean);
+    const lines = selected.map(a => `  • ${a.name} — ${a.price}`).join('\n');
+    const message = [
+      `Hi BW Car Culture! 👋`,
+      ``,
+      `I'd like to book the following service(s) for my dealership:`,
+      ``,
+      `🏢 *${business.businessName}*`,
+      ``,
+      `📋 *Selected add-ons:*`,
+      lines,
+      ``,
+      `💰 *Estimated Total: P${bookingTotal.toLocaleString()}*`,
+      ``,
+      `Note: Distance surcharge may apply if my dealership is more than 40 km outside Gaborone (P3.50/km).`,
+      ``,
+      `Please get in touch to confirm and arrange. Thank you!`,
+    ].join('\n');
+    window.open(`https://wa.me/${BWCC_WHATSAPP}?text=${encodeURIComponent(message)}`, '_blank');
+  };
 
   const UPGRADE_EMAIL = 'subscribe@bwcarculture.com';
 
@@ -3004,34 +3063,83 @@ const PostUpdateModal = ({ business, newUpdate, setNewUpdate, submittingUpdate, 
             })}
           </div>
 
-          {/* Add-ons */}
+          {/* Add-ons booking */}
           <div className="bdp-sub-divider">
-            <span>Media Coverage Add-ons</span>
+            <span>Media Coverage &amp; Add-ons</span>
           </div>
-          <p className="bdp-sub-addons-intro">Available for subscribed dealers (Standard &amp; Premium). Contact us to book.</p>
-          <table className="bdp-addons-table">
-            <thead>
-              <tr>
-                <th>Service</th>
-                <th>Price</th>
-                <th>Includes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {SUB_ADDONS.map(a => (
-                <tr key={a.name} className={a.oneOff ? 'bdp-addon-row-onceoff' : ''}>
-                  <td>
-                    {a.name}
-                    {a.oneOff && <span className="bdp-addon-oneoff-tag">once-off</span>}
-                  </td>
-                  <td className="bdp-addon-price">{a.price}</td>
-                  <td className="bdp-addon-detail">{a.detail}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <p className="bdp-sub-addons-intro">Select the services you'd like — we'll open WhatsApp with your request ready to send.</p>
+
+          <div className="bdp-addon-booking-list">
+            {SUB_ADDONS.map(a => {
+              const checked = selectedAddons.has(a.name);
+              return (
+                <label
+                  key={a.name}
+                  className={`bdp-addon-booking-row ${checked ? 'bdp-addon-booking-row--selected' : ''} ${a.oneOff ? 'bdp-addon-booking-row--oneoff' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    className="bdp-addon-checkbox"
+                    checked={checked}
+                    onChange={() => toggleAddon(a.name)}
+                  />
+                  <div className="bdp-addon-booking-info">
+                    <span className="bdp-addon-booking-name">
+                      {a.name}
+                      {a.oneOff && <span className="bdp-addon-oneoff-tag">once-off</span>}
+                    </span>
+                    <span className="bdp-addon-booking-detail">{a.detail}</span>
+                    {a.platforms.length > 0 && (
+                      <div className="bdp-addon-platforms">
+                        {a.platforms.map(p => (
+                          <span
+                            key={p}
+                            className="bdp-platform-pill"
+                            style={{ background: PLATFORM_COLORS[p]?.bg, color: PLATFORM_COLORS[p]?.color }}
+                          >
+                            {p}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <span className="bdp-addon-booking-price">{a.price}</span>
+                </label>
+              );
+            })}
+          </div>
+
+          {selectedAddons.size > 0 && (
+            <div className="bdp-booking-summary">
+              <div className="bdp-booking-summary-lines">
+                {[...selectedAddons].map(name => {
+                  const a = SUB_ADDONS.find(x => x.name === name);
+                  return (
+                    <div key={name} className="bdp-booking-summary-line">
+                      <span>{name}</span>
+                      <span>{a?.price}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="bdp-booking-total">
+                <span>Estimated Total</span>
+                <strong>P{bookingTotal.toLocaleString()}</strong>
+              </div>
+              <p className="bdp-booking-note">* Distance surcharge may apply. Final price confirmed on booking.</p>
+              <button className="bdp-whatsapp-book-btn" onClick={handleWhatsAppBook}>
+                <span className="bdp-whatsapp-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                </span>
+                Contact via WhatsApp to Book
+              </button>
+            </div>
+          )}
+
           <div className="bdp-addons-distance-note">
-            📍 <strong>Distance surcharge:</strong> Dealers operating more than 40 km outside Gaborone will incur an additional charge of <strong>P3.50 per km</strong> on all add-ons that involve an on-site visit — this includes photography, video production, and the Verified Dealership Badge inspection.
+            📍 <strong>Distance surcharge:</strong> Dealers operating more than 40 km outside Gaborone will incur an additional charge of <strong>P3.50 per km</strong> on all add-ons that involve an on-site visit — photography, video production, and the Verified Dealership Badge inspection.
           </div>
 
         </div>
