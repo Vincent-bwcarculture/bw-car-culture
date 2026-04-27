@@ -1251,26 +1251,6 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
             </div>
           </div>
         )}
-        <div className="header-content">
-          <div className="marketplace-stats">
-            {loading ? (
-              <span className="loading-text">{loadingText}</span>
-            ) : error ? (
-              <span className="error-text">Error loading data</span>
-            ) : (
-              <span>
-                {activeSection === 'premium'
-                  ? `${displayData.premium} premium vehicles available ${displayData.privatePremium > 0 ? `(${displayData.privatePremium} from private sellers)` : ''}`
-                  : activeSection === 'savings'
-                  ? `${displayData.savings} vehicles with savings • Total savings: P${displayData.totalSavings.toLocaleString()} ${displayData.privateSavings > 0 ? `• ${displayData.privateSavings} from private sellers` : ''}`
-                  : activeSection === 'private'
-                  ? `${displayData.private} vehicles from private sellers ${displayData.privateSavings > 0 ? `• ${displayData.privateSavings} with savings` : ''} ${displayData.privatePremium > 0 ? `• ${displayData.privatePremium} premium` : ''}`
-                  : `${displayData.total} vehicles available • ${displayData.premium} premium • ${displayData.savings} with savings • ${displayData.private} private sellers`
-                }
-              </span>
-            )}
-          </div>
-        </div>
       </div>
 
       {loading ? (
