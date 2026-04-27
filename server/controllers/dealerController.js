@@ -844,6 +844,59 @@ export const getDealerListings = asyncHandler(async (req, res, next) => {
   }
 });
 
+// @desc    Dealer owner self-updates safe profile fields (bio, hours, banner, logo)
+// @route   PUT /api/dealers/:id/self
+// @access  Private — owner or admin only
+const selfUpdateDealer = asyncHandler(async (req, res, next) => {
+  const dealer = await Dealer.findById(req.params.id);
+  if (!dealer) return res.status(404).json({ success: false, message: 'Dealer not found' });
+
+  const isOwner = String(dealer.user) === String(req.user._id);
+  const isAdmin = req.user.role === 'admin';
+  if (!isOwner && !isAdmin) {
+    return res.status(403).json({ success: false, message: 'Not authorized to update this dealership' });
+  }
+
+  // Build safe $set — only profile fields + contact
+  const updates = {};
+
+  if (req.body.description !== undefined) {
+    updates['profile.description'] = req.body.description;
+  }
+
+  if (req.body.workingHours !== undefined) {
+    try {
+      updates['profile.workingHours'] = typeof req.body.workingHours === 'string'
+        ? JSON.parse(req.body.workingHours)
+        : req.body.workingHours;
+    } catch (e) { /* ignore parse errors */ }
+  }
+
+  if (req.body.contact !== undefined) {
+    try {
+      updates.contact = typeof req.body.contact === 'string'
+        ? JSON.parse(req.body.contact)
+        : req.body.contact;
+    } catch (e) { /* ignore */ }
+  }
+
+  // S3 image URLs set by route middleware
+  if (req.s3Logo)   updates['profile.logo']   = req.s3Logo.url;
+  if (req.s3Banner) updates['profile.banner'] = req.s3Banner.url;
+
+  if (Object.keys(updates).length === 0) {
+    return res.status(400).json({ success: false, message: 'No updates provided' });
+  }
+
+  const updated = await Dealer.findByIdAndUpdate(
+    req.params.id,
+    { $set: updates },
+    { new: true, runValidators: false }
+  );
+
+  res.status(200).json({ success: true, data: updated });
+});
+
 // Export all controller functions
 export {
   getAllDealers,
@@ -852,6 +905,7 @@ export {
   getDealer,
   createDealer,
   updateDealer,
+  selfUpdateDealer,
   deleteDealer,
   updateSubscription,
   verifyDealer,

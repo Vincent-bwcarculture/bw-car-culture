@@ -2728,3 +2728,330 @@
   }
 }
 
+/* ── Owner edit UI (bdp- prefix) ─────────────────────────────────────────── */
+
+/* Shared section header row */
+.bdp-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+.bdp-section-header h2,
+.bdp-section-header h3 {
+  margin: 0;
+}
+
+/* Small "Edit" / "Edit Hours" button */
+.bdp-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #374151;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+.bdp-edit-btn:hover {
+  background: #fff;
+  border-color: #ff3300;
+  color: #ff3300;
+}
+
+/* Inline bio textarea */
+.bdp-inline-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.bdp-bio-textarea {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--vc-text-primary, #111827);
+  background: var(--vc-bg-card, #fff);
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+.bdp-bio-textarea:focus {
+  outline: none;
+  border-color: #ff3300;
+  box-shadow: 0 0 0 3px rgba(255,51,0,0.08);
+}
+
+/* Save / Cancel row */
+.bdp-inline-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+.bdp-cancel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid #e5e7eb;
+  background: transparent;
+  color: #6b7280;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.bdp-cancel-btn:hover { background: #f3f4f6; }
+.bdp-save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 1rem;
+  border: none;
+  background: #ff3300;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.bdp-save-btn:hover:not(:disabled) { background: #cc2900; transform: translateY(-1px); }
+.bdp-save-btn:disabled, .bdp-cancel-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* Hours editor */
+.bdp-hours-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.bdp-hours-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.bdp-hours-day {
+  width: 90px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--vc-text-primary, #111827);
+  flex-shrink: 0;
+}
+.bdp-closed-label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.bdp-time-input {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  font-size: 0.82rem;
+  background: var(--vc-bg-card, #fff);
+  color: var(--vc-text-primary, #111827);
+}
+.bdp-time-input:focus { outline: none; border-color: #ff3300; }
+
+/* Edit cover photo button (overlaid bottom-left on banner) */
+.bdp-edit-banner-btn {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s;
+  z-index: 5;
+}
+.bdp-edit-banner-btn:hover { background: rgba(255,51,0,0.8); }
+.bdp-edit-banner-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Edit logo button (small circle overlay on logo) */
+.bdp-edit-logo-btn {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #ff3300;
+  color: #fff;
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background 0.2s, transform 0.15s;
+  z-index: 5;
+}
+.bdp-edit-logo-btn:hover { background: #cc2900; transform: scale(1.1); }
+.bdp-edit-logo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Listings header row */
+.bdp-listings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.bdp-listings-header h2 { margin: 0; }
+.bdp-add-listing-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.1rem;
+  background: #ff3300;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+.bdp-add-listing-btn:hover {
+  background: #cc2900;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255,51,0,0.25);
+}
+
+/* Listing modal */
+.bdp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  backdrop-filter: blur(3px);
+}
+.bdp-modal {
+  background: var(--vc-bg-card, #fff);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+.bdp-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+.bdp-modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--vc-text-primary, #111827);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.bdp-modal-close {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.2rem;
+  transition: color 0.15s;
+}
+.bdp-modal-close:hover { color: #374151; }
+.bdp-modal-body {
+  padding: 1.2rem 1.4rem;
+  overflow-y: auto;
+  flex: 1;
+}
+.bdp-modal-error {
+  background: #fff1f0;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  padding: 0.6rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+.bdp-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+.bdp-field { display: flex; flex-direction: column; gap: 0.3rem; }
+.bdp-field-full { grid-column: 1 / -1; }
+.bdp-field label { font-size: 0.78rem; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; }
+.bdp-field input,
+.bdp-field select,
+.bdp-field textarea {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: var(--vc-text-primary, #111827);
+  background: var(--vc-bg-card, #fff);
+  transition: border-color 0.2s;
+}
+.bdp-field input:focus,
+.bdp-field select:focus,
+.bdp-field textarea:focus {
+  outline: none;
+  border-color: #ff3300;
+  box-shadow: 0 0 0 3px rgba(255,51,0,0.08);
+}
+.bdp-field textarea { resize: vertical; }
+.bdp-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 1rem 1.4rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+/* Spinner */
+.bdp-spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: bdp-spin 0.7s linear infinite;
+}
+@keyframes bdp-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 480px) {
+  .bdp-form-grid { grid-template-columns: 1fr; }
+  .bdp-hours-row { gap: 0.4rem; }
+  .bdp-hours-day { width: 70px; }
+}
+

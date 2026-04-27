@@ -2,8 +2,9 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { debounce } from 'lodash';
-import { 
-  Star, QrCode, MessageSquare, Plus, Eye, User, Hash, Car, Heart, Share
+import {
+  Star, QrCode, MessageSquare, Plus, Eye, User, Hash, Car, Heart, Share,
+  Camera, Edit2, X, Check, Clock, UploadCloud
 } from 'lucide-react';
 import { http } from '../../../config/axios.js';
 import { useInternalAnalytics } from '../../../hooks/useInternalAnalytics.js';
@@ -99,7 +100,19 @@ const BusinessDetailPage = () => {
   const [sharingBusiness, setSharingBusiness] = useState(false);
   const shareButtonRef = useRef(null);
   const [imageErrors, setImageErrors] = useState({ banner: false, logo: false });
-  
+
+  // ── Owner edit state ──────────────────────────────────────────────────────
+  const [editingBio, setEditingBio] = useState(false);
+  const [bioText, setBioText] = useState('');
+  const [editingHours, setEditingHours] = useState(false);
+  const [hoursData, setHoursData] = useState({});
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [showListingModal, setShowListingModal] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const bannerInputRef = useRef(null);
+  const logoInputRef = useRef(null);
+
   // Business type detection
   const [businessType, setBusinessType] = useState('');
   const [serviceType, setServiceType] = useState('');
@@ -234,6 +247,85 @@ const BusinessDetailPage = () => {
     console.log('========================');
   }
 }, [showReviewModal, business, reviewMethod]);
+
+  // True when the logged-in user owns this dealer profile (or is admin)
+  const isOwner = isAuthenticated && business && (
+    user?.role === 'admin' ||
+    String(business.user) === String(user?._id || user?.id)
+  );
+
+  // ── Owner: upload banner / logo ────────────────────────────────────────────
+  const handleImageUpload = async (file, field) => {
+    if (!file || !business?._id) return;
+    const setter = field === 'banner' ? setUploadingBanner : setUploadingLogo;
+    setter(true);
+    try {
+      const token = localStorage.getItem('token');
+      const form = new FormData();
+      form.append(field, file);
+      const res = await fetch(`/api/dealers/${business._id}/self`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBusiness(prev => ({
+          ...prev,
+          profile: { ...prev.profile, [field]: data.data.profile?.[field] || prev.profile?.[field] }
+        }));
+        setImageErrors(prev => ({ ...prev, [field]: false }));
+      }
+    } catch (e) {
+      console.error(`Failed to upload ${field}:`, e);
+    } finally {
+      setter(false);
+    }
+  };
+
+  // ── Owner: save bio ────────────────────────────────────────────────────────
+  const handleSaveBio = async () => {
+    setSavingProfile(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/dealers/${business._id}/self`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: bioText })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBusiness(prev => ({ ...prev, profile: { ...prev.profile, description: bioText } }));
+        setEditingBio(false);
+      }
+    } catch (e) {
+      console.error('Failed to save bio:', e);
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  // ── Owner: save hours ──────────────────────────────────────────────────────
+  const handleSaveHours = async () => {
+    setSavingProfile(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`/api/dealers/${business._id}/self`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workingHours: hoursData })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBusiness(prev => ({ ...prev, profile: { ...prev.profile, workingHours: hoursData } }));
+        setEditingHours(false);
+      }
+    } catch (e) {
+      console.error('Failed to save hours:', e);
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   const fetchBusiness = async () => {
     if (!businessType) return;
@@ -1018,10 +1110,10 @@ return (
         address: business.profile?.city ? { '@type': 'PostalAddress', addressLocality: business.profile.city, addressCountry: 'BW' } : undefined
       }
     })}
-    {/* FIXED: Banner section - only banner image and action buttons */}
+    {/* Banner section */}
     <div className="bcc-business-detail-banner">
       {business.profile?.banner && !imageErrors.banner ? (
-        <img 
+        <img
           src={getBusinessImageUrl(business.profile.banner, 'banner')}
           alt={`${business.businessName} banner`}
           className="bcc-business-detail-banner-image"
@@ -1036,7 +1128,29 @@ return (
           {business.businessName}
         </div>
       )}
-      
+
+      {/* Owner: edit banner button */}
+      {isOwner && (
+        <>
+          <input
+            ref={bannerInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={e => e.target.files[0] && handleImageUpload(e.target.files[0], 'banner')}
+          />
+          <button
+            className="bdp-edit-banner-btn"
+            onClick={() => bannerInputRef.current?.click()}
+            disabled={uploadingBanner}
+            title="Change cover photo"
+          >
+            {uploadingBanner ? <span className="bdp-spinner" /> : <Camera size={15} />}
+            {uploadingBanner ? 'Uploading…' : 'Edit Cover'}
+          </button>
+        </>
+      )}
+
       {/* Save/Share buttons stay on banner */}
       <div className="bcc-business-detail-action-buttons">
         <button 
@@ -1069,9 +1183,9 @@ return (
     {/* FIXED: Business info header - separate from banner */}
     <div className="bcc-business-detail-content-header">
       <div className="bcc-business-detail-header-container">
-        <div className="bcc-business-detail-logo-container">
+        <div className="bcc-business-detail-logo-container" style={{ position: 'relative' }}>
           {business.profile?.logo && !imageErrors.logo ? (
-            <img 
+            <img
               src={getBusinessImageUrl(business.profile.logo, 'logo')}
               alt={`${business.businessName} logo`}
               className="bcc-business-detail-logo"
@@ -1085,6 +1199,25 @@ return (
             <div className="bcc-business-detail-logo-placeholder">
               {business.businessName.charAt(0)}
             </div>
+          )}
+          {isOwner && (
+            <>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={e => e.target.files[0] && handleImageUpload(e.target.files[0], 'logo')}
+              />
+              <button
+                className="bdp-edit-logo-btn"
+                onClick={() => logoInputRef.current?.click()}
+                disabled={uploadingLogo}
+                title="Change logo"
+              >
+                {uploadingLogo ? <span className="bdp-spinner" /> : <Camera size={13} />}
+              </button>
+            </>
           )}
         </div>
         
@@ -1228,8 +1361,41 @@ return (
         {activeTab === 'about' && (
           <div className="bcc-business-detail-about-tab">
             <div className="bcc-business-detail-description">
-              <h2>About {business.businessName}</h2>
-              <p>{business.profile?.description || 'No description available.'}</p>
+              <div className="bdp-section-header">
+                <h2>About {business.businessName}</h2>
+                {isOwner && !editingBio && (
+                  <button
+                    className="bdp-edit-btn"
+                    onClick={() => { setBioText(business.profile?.description || ''); setEditingBio(true); }}
+                  >
+                    <Edit2 size={13} /> Edit
+                  </button>
+                )}
+              </div>
+
+              {editingBio ? (
+                <div className="bdp-inline-edit">
+                  <textarea
+                    className="bdp-bio-textarea"
+                    value={bioText}
+                    onChange={e => setBioText(e.target.value)}
+                    placeholder="Describe your dealership…"
+                    rows={5}
+                    autoFocus
+                  />
+                  <div className="bdp-inline-actions">
+                    <button className="bdp-cancel-btn" onClick={() => setEditingBio(false)} disabled={savingProfile}>
+                      <X size={13} /> Cancel
+                    </button>
+                    <button className="bdp-save-btn" onClick={handleSaveBio} disabled={savingProfile}>
+                      {savingProfile ? <span className="bdp-spinner" /> : <Check size={13} />}
+                      {savingProfile ? 'Saving…' : 'Save'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p>{business.profile?.description || (isOwner ? 'Click Edit to add a description.' : 'No description available.')}</p>
+              )}
               
               {business.profile?.specialties && business.profile.specialties.length > 0 && (
                 <div className="bcc-business-detail-specialties-section">
@@ -1284,43 +1450,87 @@ return (
             </div>
             
             <div className="bcc-business-detail-business-hours">
-              <h3>Business Hours</h3>
-              
-              {business.profile?.workingHours ? (
+              <div className="bdp-section-header">
+                <h3>Business Hours</h3>
+                {isOwner && !editingHours && (
+                  <button
+                    className="bdp-edit-btn"
+                    onClick={() => {
+                      const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+                      const init = {};
+                      days.forEach(d => {
+                        init[d] = {
+                          open: business.profile?.workingHours?.[d]?.open || '',
+                          close: business.profile?.workingHours?.[d]?.close || '',
+                          closed: business.profile?.workingHours?.[d]?.closed || false
+                        };
+                      });
+                      setHoursData(init);
+                      setEditingHours(true);
+                    }}
+                  >
+                    <Clock size={13} /> Edit Hours
+                  </button>
+                )}
+              </div>
+
+              {editingHours ? (
+                <div className="bdp-hours-editor">
+                  {['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].map(day => (
+                    <div key={day} className="bdp-hours-row">
+                      <span className="bdp-hours-day">{day.charAt(0).toUpperCase() + day.slice(1)}</span>
+                      <label className="bdp-closed-label">
+                        <input
+                          type="checkbox"
+                          checked={hoursData[day]?.closed || false}
+                          onChange={e => setHoursData(prev => ({ ...prev, [day]: { ...prev[day], closed: e.target.checked } }))}
+                        />
+                        Closed
+                      </label>
+                      {!hoursData[day]?.closed && (
+                        <>
+                          <input
+                            className="bdp-time-input"
+                            type="time"
+                            value={hoursData[day]?.open || ''}
+                            onChange={e => setHoursData(prev => ({ ...prev, [day]: { ...prev[day], open: e.target.value } }))}
+                          />
+                          <span>–</span>
+                          <input
+                            className="bdp-time-input"
+                            type="time"
+                            value={hoursData[day]?.close || ''}
+                            onChange={e => setHoursData(prev => ({ ...prev, [day]: { ...prev[day], close: e.target.value } }))}
+                          />
+                        </>
+                      )}
+                    </div>
+                  ))}
+                  <div className="bdp-inline-actions">
+                    <button className="bdp-cancel-btn" onClick={() => setEditingHours(false)} disabled={savingProfile}>
+                      <X size={13} /> Cancel
+                    </button>
+                    <button className="bdp-save-btn" onClick={handleSaveHours} disabled={savingProfile}>
+                      {savingProfile ? <span className="bdp-spinner" /> : <Check size={13} />}
+                      {savingProfile ? 'Saving…' : 'Save Hours'}
+                    </button>
+                  </div>
+                </div>
+              ) : business.profile?.workingHours ? (
                 <table className="bcc-business-detail-hours-table">
                   <tbody>
-                    <tr>
-                      <td>Monday</td>
-                      <td>{formatWorkingHours(business.profile.workingHours.monday)}</td>
-                    </tr>
-                    <tr>
-                      <td>Tuesday</td>
-                      <td>{formatWorkingHours(business.profile.workingHours.tuesday)}</td>
-                    </tr>
-                    <tr>
-                      <td>Wednesday</td>
-                      <td>{formatWorkingHours(business.profile.workingHours.wednesday)}</td>
-                    </tr>
-                    <tr>
-                      <td>Thursday</td>
-                      <td>{formatWorkingHours(business.profile.workingHours.thursday)}</td>
-                    </tr>
-                    <tr>
-                      <td>Friday</td>
-                      <td>{formatWorkingHours(business.profile.workingHours.friday)}</td>
-                    </tr>
-                    <tr>
-                      <td>Saturday</td>
-                      <td>{formatWorkingHours(business.profile.workingHours.saturday)}</td>
-                    </tr>
-                    <tr>
-                      <td>Sunday</td>
-                      <td>{formatWorkingHours(business.profile.workingHours.sunday)}</td>
-                    </tr>
+                    {['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].map(day => (
+                      <tr key={day}>
+                        <td>{day.charAt(0).toUpperCase() + day.slice(1)}</td>
+                        <td>{formatWorkingHours(business.profile.workingHours[day])}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               ) : (
-                <p className="bcc-business-detail-no-hours">Working hours not provided</p>
+                <p className="bcc-business-detail-no-hours">
+                  {isOwner ? 'Click "Edit Hours" to add your operating hours.' : 'Working hours not provided'}
+                </p>
               )}
             </div>
           </div>
@@ -1330,7 +1540,17 @@ return (
         {activeTab === 'listings' && (isDealer || isRentalService) && (
           // ... keep the entire listings tab content as-is
           <div className="bcc-business-detail-listings-tab">
-            <h2>{isDealer ? 'Vehicles for Sale' : getRentalsTitle()}</h2>
+            <div className="bdp-listings-header">
+              <h2>{isDealer ? 'Vehicles for Sale' : getRentalsTitle()}</h2>
+              {isOwner && isDealer && (
+                <button
+                  className="bdp-add-listing-btn"
+                  onClick={() => setShowListingModal(true)}
+                >
+                  <Plus size={15} /> Add Listing
+                </button>
+              )}
+            </div>
             
             <div className="bcc-listings-layout">
             {/* Sidebar Filter */}
@@ -2005,11 +2225,24 @@ return (
     </div>
     
     {shareModalOpen && (
-      <ShareModal 
+      <ShareModal
         car={selectedItem}
         dealer={sharingBusiness ? business : null}
         onClose={() => setShareModalOpen(false)}
         buttonRef={shareButtonRef}
+      />
+    )}
+
+    {showListingModal && business && (
+      <OwnerListingModal
+        dealer={business}
+        onClose={() => setShowListingModal(false)}
+        onCreated={(newListing) => {
+          setListings(prev => [newListing, ...prev]);
+          setFilteredListings(prev => [newListing, ...prev]);
+          setListingsCount(prev => prev + 1);
+          setActiveTab('listings');
+        }}
       />
     )}
 
@@ -2316,6 +2549,152 @@ const ReviewCard = ({ review, business }) => {
             <p className="bcc-response-text">{review.response.text}</p>
           </div>
         )}
+      </div>
+    </div>
+  );
+};
+
+// ─── Owner Listing Modal ─────────────────────────────────────────────────────
+const OwnerListingModal = ({ dealer, onClose, onCreated }) => {
+  const DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+  const [form, setForm] = useState({
+    title: '', make: '', model: '', year: new Date().getFullYear(),
+    price: '', condition: 'used', category: 'Sedan',
+    fuelType: 'petrol', transmission: 'automatic',
+    city: dealer?.location?.city || '', country: dealer?.location?.country || 'Botswana',
+    description: '', status: 'active'
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const handleSubmit = async () => {
+    if (!form.title || !form.make || !form.model || !form.price) {
+      setError('Title, Make, Model and Price are required.');
+      return;
+    }
+    setSubmitting(true);
+    setError('');
+    try {
+      const token = localStorage.getItem('token');
+      const payload = {
+        title: form.title,
+        description: form.description,
+        category: form.category,
+        condition: form.condition,
+        status: form.status,
+        price: Number(form.price),
+        specifications: {
+          make: form.make, model: form.model,
+          year: String(form.year), transmission: form.transmission,
+          fuelType: form.fuelType
+        },
+        location: { city: form.city, country: form.country },
+        dealerId: dealer._id,
+        dealer: {
+          businessName: dealer.businessName,
+          contact: dealer.contact || {},
+          location: dealer.location || {}
+        }
+      };
+      const res = await fetch('/api/listings', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (res.ok && (data.success !== false)) {
+        onCreated(data.data || data.listing);
+        onClose();
+      } else {
+        setError(data.message || 'Failed to create listing.');
+      }
+    } catch (e) {
+      setError('Network error. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="bdp-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="bdp-modal">
+        <div className="bdp-modal-header">
+          <h3><Plus size={16} /> New Listing</h3>
+          <button className="bdp-modal-close" onClick={onClose}><X size={18} /></button>
+        </div>
+        <div className="bdp-modal-body">
+          {error && <div className="bdp-modal-error">{error}</div>}
+          <div className="bdp-form-grid">
+            <div className="bdp-field bdp-field-full">
+              <label>Listing Title *</label>
+              <input value={form.title} onChange={e => set('title', e.target.value)} placeholder="e.g. 2020 Toyota Corolla" />
+            </div>
+            <div className="bdp-field">
+              <label>Make *</label>
+              <input value={form.make} onChange={e => set('make', e.target.value)} placeholder="Toyota" />
+            </div>
+            <div className="bdp-field">
+              <label>Model *</label>
+              <input value={form.model} onChange={e => set('model', e.target.value)} placeholder="Corolla" />
+            </div>
+            <div className="bdp-field">
+              <label>Year</label>
+              <input type="number" value={form.year} onChange={e => set('year', e.target.value)} min="1960" max={new Date().getFullYear() + 1} />
+            </div>
+            <div className="bdp-field">
+              <label>Price (BWP) *</label>
+              <input type="number" value={form.price} onChange={e => set('price', e.target.value)} placeholder="0" min="0" />
+            </div>
+            <div className="bdp-field">
+              <label>Condition</label>
+              <select value={form.condition} onChange={e => set('condition', e.target.value)}>
+                <option value="new">New</option>
+                <option value="used">Used</option>
+                <option value="certified">Certified Pre-Owned</option>
+              </select>
+            </div>
+            <div className="bdp-field">
+              <label>Category</label>
+              <select value={form.category} onChange={e => set('category', e.target.value)}>
+                {['Sedan','SUV','Sports Car','Hatchback','Pickup / Bakkie','Family Car','Luxury','Electric','Hybrid','4x4 / Off-road','Van','Minibus'].map(c => (
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div className="bdp-field">
+              <label>Fuel Type</label>
+              <select value={form.fuelType} onChange={e => set('fuelType', e.target.value)}>
+                {[['petrol','Petrol'],['diesel','Diesel'],['electric','Electric'],['hybrid','Hybrid'],['plugin_hybrid','Plug-in Hybrid']].map(([v,l]) => (
+                  <option key={v} value={v}>{l}</option>
+                ))}
+              </select>
+            </div>
+            <div className="bdp-field">
+              <label>Transmission</label>
+              <select value={form.transmission} onChange={e => set('transmission', e.target.value)}>
+                <option value="automatic">Automatic</option>
+                <option value="manual">Manual</option>
+                <option value="cvt">CVT</option>
+              </select>
+            </div>
+            <div className="bdp-field">
+              <label>City</label>
+              <input value={form.city} onChange={e => set('city', e.target.value)} placeholder="Gaborone" />
+            </div>
+            <div className="bdp-field bdp-field-full">
+              <label>Description</label>
+              <textarea rows={3} value={form.description} onChange={e => set('description', e.target.value)} placeholder="Optional details about the vehicle…" />
+            </div>
+          </div>
+        </div>
+        <div className="bdp-modal-footer">
+          <button className="bdp-cancel-btn" onClick={onClose} disabled={submitting}>Cancel</button>
+          <button className="bdp-save-btn" onClick={handleSubmit} disabled={submitting || !form.title || !form.make || !form.model || !form.price}>
+            {submitting ? 'Creating…' : <><UploadCloud size={14} /> Create Listing</>}
+          </button>
+        </div>
       </div>
     </div>
   );

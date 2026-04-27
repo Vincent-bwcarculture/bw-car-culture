@@ -10,6 +10,7 @@ import {
   getDealer,
   createDealer,
   updateDealer,
+  selfUpdateDealer,
   deleteDealer,
   updateSubscription,
   verifyDealer,
@@ -56,6 +57,30 @@ router.get('/:id/listings', getDealerListings);
 
 // Protected routes
 router.use(protect);
+
+// Owner self-update (bio, hours, banner, logo) — must be before /:id admin routes
+router.put('/:id/self',
+  upload.any(),
+  async (req, res, next) => {
+    try {
+      if (req.files && req.files.length > 0) {
+        const logoFile   = req.files.find(f => f.fieldname === 'logo');
+        const bannerFile = req.files.find(f => f.fieldname === 'banner');
+        if (logoFile) {
+          const result = await uploadMultipleImagesToS3([logoFile], 'dealers', { optimization: { quality: 90, format: 'webp' }, createThumbnail: false });
+          req.s3Logo = { url: result[0].url, key: result[0].key };
+        }
+        if (bannerFile) {
+          const result = await uploadMultipleImagesToS3([bannerFile], 'dealers', { optimization: { quality: 85, format: 'webp' }, createThumbnail: false });
+          req.s3Banner = { url: result[0].url, key: result[0].key };
+        }
+      }
+      selfUpdateDealer(req, res, next);
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Upload failed', error: error.message });
+    }
+  }
+);
 
 // Claim submission (any authenticated user)
 router.post('/:id/claim', claimDealer);
