@@ -67,8 +67,7 @@ const CarBackground3D = () => {
 
     // ── Car group — offset right so it sits beside the CTA text ──────────
     const carGroup = new THREE.Group();
-    // Shift group to the right in world space; camera already looks at origin
-    carGroup.position.set(1.6, -0.5, 0);
+    carGroup.position.set(1.6, 0.3, 0);
     scene.add(carGroup);
 
     // ── Interaction state ─────────────────────────────────────────────────
@@ -171,7 +170,7 @@ const CarBackground3D = () => {
         carGroup.rotation.x = current.rotX;
 
         // Subtle camera lift on scroll
-        camera.position.y = lerp(camera.position.y, 1.5 - scrollY * 0.0005, 0.06);
+        camera.position.y = lerp(camera.position.y, 1.5 + scrollY * 0.0005, 0.06);
       }
 
       renderer.render(scene, camera);
