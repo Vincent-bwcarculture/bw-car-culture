@@ -155,15 +155,142 @@ const getDealers = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    Search dealers by name/email (for claim flow)
+// @route   GET /api/dealers/search?q=...
+// @access  Private
+const searchDealers = asyncHandler(async (req, res, next) => {
+  const q = (req.query.q || '').trim();
+  if (q.length < 2) {
+    return res.status(400).json({ success: false, message: 'Query must be at least 2 characters' });
+  }
+
+  const dealers = await Dealer.find({
+    $or: [
+      { businessName: { $regex: q, $options: 'i' } },
+      { 'contact.email': { $regex: q, $options: 'i' } },
+      { 'privateSeller.firstName': { $regex: q, $options: 'i' } },
+      { 'privateSeller.lastName': { $regex: q, $options: 'i' } }
+    ],
+    status: { $ne: 'suspended' }
+  })
+    .select('businessName businessType sellerType location contact verification user')
+    .limit(20)
+    .lean();
+
+  res.status(200).json({ success: true, data: dealers });
+});
+
+// @desc    Submit a claim for an existing dealership
+// @route   POST /api/dealers/:id/claim
+// @access  Private
+const claimDealer = asyncHandler(async (req, res, next) => {
+  const { reason, proofDescription } = req.body;
+  if (!reason || !reason.trim()) {
+    return res.status(400).json({ success: false, message: 'Reason is required' });
+  }
+
+  const dealer = await Dealer.findById(req.params.id);
+  if (!dealer) {
+    return res.status(404).json({ success: false, message: 'Dealer not found' });
+  }
+
+  // Already owned by this user
+  if (String(dealer.user) === String(req.user._id)) {
+    return res.status(400).json({ success: false, message: 'You already own this dealership profile' });
+  }
+
+  const DealerClaim = (await import('../models/DealerClaim.js')).default;
+
+  // Prevent duplicate pending claims
+  const existing = await DealerClaim.findOne({
+    dealer: req.params.id,
+    claimant: req.user._id,
+    status: 'pending'
+  });
+  if (existing) {
+    return res.status(400).json({ success: false, message: 'You already have a pending claim for this dealership' });
+  }
+
+  const claim = await DealerClaim.create({
+    dealer: req.params.id,
+    dealerName: dealer.businessName,
+    claimant: req.user._id,
+    claimantEmail: req.user.email,
+    claimantName: req.user.name || req.user.username || req.user.email,
+    reason: reason.trim(),
+    proofDescription: (proofDescription || '').trim()
+  });
+
+  res.status(201).json({ success: true, data: claim });
+});
+
+// @desc    Get all pending dealer claims (admin)
+// @route   GET /api/dealers/claims
+// @access  Private/Admin
+const getPendingClaims = asyncHandler(async (req, res, next) => {
+  const DealerClaim = (await import('../models/DealerClaim.js')).default;
+  const claims = await DealerClaim.find()
+    .populate('dealer', 'businessName location sellerType')
+    .populate('claimant', 'name email username')
+    .populate('reviewedBy', 'name email')
+    .sort({ createdAt: -1 });
+  res.status(200).json({ success: true, data: claims });
+});
+
+// @desc    Approve a dealer claim — links the dealer profile to the claimant user
+// @route   PUT /api/dealers/claims/:claimId/approve
+// @access  Private/Admin
+const approveClaim = asyncHandler(async (req, res, next) => {
+  const DealerClaim = (await import('../models/DealerClaim.js')).default;
+  const claim = await DealerClaim.findById(req.params.claimId);
+  if (!claim) return res.status(404).json({ success: false, message: 'Claim not found' });
+  if (claim.status !== 'pending') {
+    return res.status(400).json({ success: false, message: `Claim is already ${claim.status}` });
+  }
+
+  // Reassign dealer ownership to the claimant
+  await Dealer.findByIdAndUpdate(claim.dealer, { user: claim.claimant });
+
+  claim.status = 'approved';
+  claim.reviewedBy = req.user._id;
+  claim.reviewedAt = new Date();
+  await claim.save();
+
+  res.status(200).json({ success: true, data: claim });
+});
+
+// @desc    Reject a dealer claim
+// @route   PUT /api/dealers/claims/:claimId/reject
+// @access  Private/Admin
+const rejectClaim = asyncHandler(async (req, res, next) => {
+  const DealerClaim = (await import('../models/DealerClaim.js')).default;
+  const claim = await DealerClaim.findById(req.params.claimId);
+  if (!claim) return res.status(404).json({ success: false, message: 'Claim not found' });
+  if (claim.status !== 'pending') {
+    return res.status(400).json({ success: false, message: `Claim is already ${claim.status}` });
+  }
+
+  claim.status = 'rejected';
+  claim.reviewedBy = req.user._id;
+  claim.reviewedAt = new Date();
+  claim.rejectionReason = (req.body.reason || '').trim();
+  await claim.save();
+
+  res.status(200).json({ success: true, data: claim });
+});
+
 // @desc    Get single dealer
 // @route   GET /api/dealers/:id
 // @access  Public
 const getDealer = asyncHandler(async (req, res, next) => {
   try {
     console.log(`Looking up dealer with ID: ${req.params.id}`);
-    
-    // Try to find the dealer
-    const dealer = await Dealer.findById(req.params.id);
+
+    // First try by dealer _id, then fall back to user ref (dealer dashboard passes userId)
+    let dealer = await Dealer.findById(req.params.id).catch(() => null);
+    if (!dealer) {
+      dealer = await Dealer.findOne({ user: req.params.id });
+    }
 
     if (!dealer) {
       console.log(`No dealer found with id ${req.params.id}`);
@@ -721,10 +848,15 @@ export const getDealerListings = asyncHandler(async (req, res, next) => {
 export {
   getAllDealers,
   getDealers,
+  searchDealers,
   getDealer,
   createDealer,
   updateDealer,
   deleteDealer,
   updateSubscription,
   verifyDealer,
+  claimDealer,
+  getPendingClaims,
+  approveClaim,
+  rejectClaim,
 };

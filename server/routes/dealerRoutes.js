@@ -6,6 +6,7 @@ import { uploadMultipleImagesToS3 } from '../utils/s3Upload.js';
 import { deleteFromS3, deleteImageWithThumbnail } from '../utils/s3Delete.js';
 import {
   getDealers,
+  searchDealers,
   getDealer,
   createDealer,
   updateDealer,
@@ -13,7 +14,11 @@ import {
   updateSubscription,
   verifyDealer,
   getDealerListings,
-  getAllDealers
+  getAllDealers,
+  claimDealer,
+  getPendingClaims,
+  approveClaim,
+  rejectClaim
 } from '../controllers/dealerController.js';
 
 const router = express.Router();
@@ -33,8 +38,16 @@ const upload = multer({
   }
 });
 
-// Route to get all dealers for dropdowns (add this BEFORE other routes with params)
+// Route to get all dealers for dropdowns (must be BEFORE /:id)
 router.get('/all', getAllDealers);
+
+// Search dealers by name/email (must be BEFORE /:id)
+router.get('/search', protect, searchDealers);
+
+// Admin claim management routes (must be BEFORE /:id)
+router.get('/claims', protect, authorize('admin'), getPendingClaims);
+router.put('/claims/:claimId/approve', protect, authorize('admin'), approveClaim);
+router.put('/claims/:claimId/reject', protect, authorize('admin'), rejectClaim);
 
 // Public routes
 router.get('/', getDealers);
@@ -43,6 +56,9 @@ router.get('/:id/listings', getDealerListings);
 
 // Protected routes
 router.use(protect);
+
+// Claim submission (any authenticated user)
+router.post('/:id/claim', claimDealer);
 
 // Routes with file upload middleware and S3 integration
 router.post('/', 
