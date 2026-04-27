@@ -909,11 +909,12 @@
   pointer-events: none;
 }
 
-/* ── Featured Dealerships strip (bottom of hero) ── */
+/* ── Featured Dealerships strip (top of hero, sits below nav overlay) ── */
 .bcc-hero-dealers {
   position: relative;
   z-index: 2;
-  padding: 0.6rem 1.5rem 1.2rem;
+  /* ~4.5rem clears the nav bar (~72px) + a small gap */
+  padding: 4.5rem 1.5rem 0.8rem;
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
@@ -1051,36 +1052,9 @@
 }
 
 @media (max-width: 768px) {
-  .bcc-hero-dealers { padding: 0.4rem 1rem 0.8rem; }
+  .bcc-hero-dealers { padding: 4rem 1rem 0.6rem; }
 }
 
-/* Feedback Button in Hero Section */
-.bcc-hero-feedback-button {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 100;
-}
-
-.hero-feedback-btn {
-  background: rgba(255, 255, 255, 0.9) !important;
-  color: #333 !important;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  font-size: 0.85rem;
-  padding: 0.6rem 1.2rem;
-  border-radius: 25px;
-  transition: all 0.3s ease;
-}
-
-.hero-feedback-btn:hover {
-  background: rgba(255, 255, 255, 1) !important;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-  border-color: rgba(255, 51, 0, 0.3);
-}
 
 .hero-feedback-btn .btn-icon {
   font-size: 1rem;
@@ -1232,29 +1206,6 @@
     font-size: 0.9rem;
   }
 
-  /* Mobile adjustments for feedback button */
-  .bcc-hero-feedback-button {
-    top: 15px;
-    right: 15px;
-  }
-  
-  .hero-feedback-btn {
-    font-size: 0.8rem;
-    padding: 0.5rem 1rem;
-  }
-  
-  .hero-feedback-btn .btn-label {
-    display: none;
-  }
-  
-  .hero-feedback-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    padding: 0;
-    justify-content: center;
-  }
-
   /* Mobile Preparation Section */
   .bcc-hero-sell-preparation {
     padding: 1.5rem 1rem;
@@ -1376,21 +1327,6 @@
     font-size: 0.8rem;
   }
 
-  /* Mobile feedback button */
-  .bcc-hero-feedback-button {
-    top: 10px;
-    right: 10px;
-  }
-  
-  .hero-feedback-btn {
-    width: 36px;
-    height: 36px;
-  }
-  
-  .hero-feedback-btn .btn-icon {
-    font-size: 0.9rem;
-  }
-
   /* Mobile Preparation Section */
   .bcc-hero-sell-preparation {
     padding: 1.2rem 0.8rem;
@@ -1486,11 +1422,6 @@
     border-width: 2px;
   }
 
-  /* Dark mode support for hero feedback button */
-  .hero-feedback-btn {
-    border-width: 2px;
-    font-weight: 700;
-  }
 }
 
 /* Reduced Motion Support */
@@ -1539,19 +1470,6 @@
   }
 }
 
-/* Dark mode support for hero feedback button */
-@media (prefers-color-scheme: dark) {
-  .hero-feedback-btn {
-    background: rgba(44, 44, 44, 0.9) !important;
-    color: #ffffff !important;
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-  
-  .hero-feedback-btn:hover {
-    background: rgba(44, 44, 44, 1) !important;
-    border-color: rgba(255, 51, 0, 0.5);
-  }
-}
 
 /* Print Styles */
 @media print {
