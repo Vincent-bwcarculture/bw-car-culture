@@ -2823,7 +2823,7 @@ const SUB_TIERS = [
 ];
 
 // WhatsApp number for BW Car Culture bookings
-const BWCC_WHATSAPP = '26771234567'; // update with real number
+const BWCC_WHATSAPP = '26774122453';
 
 const SUB_ADDONS = [
   {

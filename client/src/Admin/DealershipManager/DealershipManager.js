@@ -42,6 +42,7 @@ const DealershipManager = () => {
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [selectedSeller, setSelectedSeller] = useState(null); // Renamed from selectedDealer
+  const [activeSection, setActiveSection] = useState('sellers'); // 'sellers' | 'access'
   const [filters, setFilters] = useState({
     status: 'all',
     subscriptionStatus: 'all',
@@ -331,6 +332,24 @@ const DealershipManager = () => {
     }
   };
 
+  const handleQuickTierChange = async (sellerId, newTier) => {
+    try {
+      await dealerService.updateSubscription(sellerId, { tier: newTier, status: 'active' });
+      setSellers(prev => prev.map(s => s._id === sellerId
+        ? { ...s, subscription: { ...s.subscription, tier: newTier, status: 'active' } }
+        : s
+      ));
+    } catch (e) {
+      console.error('Tier update failed:', e);
+    }
+  };
+
+  const getTierColor = (tier) => {
+    if (tier === 'premium')  return { bg: 'rgba(255,51,0,0.15)',   color: '#fca5a5', border: 'rgba(255,51,0,0.4)' };
+    if (tier === 'standard') return { bg: 'rgba(59,130,246,0.15)', color: '#93c5fd', border: 'rgba(59,130,246,0.4)' };
+    return                          { bg: 'rgba(107,114,128,0.15)', color: '#9ca3af', border: 'rgba(107,114,128,0.4)' };
+  };
+
   const handleFilterChange = (name, value) => {
     setFilters(prev => ({
       ...prev,
@@ -390,6 +409,14 @@ const DealershipManager = () => {
     fetchSellers();
   };
 
+  // Derived: sellers with an active user link (dealer dashboard access)
+  const accessSellers = sellers.filter(s => s.user);
+  const accessByTier = {
+    premium:  accessSellers.filter(s => s.subscription?.tier === 'premium').length,
+    standard: accessSellers.filter(s => s.subscription?.tier === 'standard').length,
+    basic:    accessSellers.filter(s => !s.subscription?.tier || s.subscription?.tier === 'basic').length,
+  };
+
   return (
     <div className="dealership-manager-container">
       <div className="dealership-header">
@@ -410,7 +437,25 @@ const DealershipManager = () => {
         </div>
       </div>
 
-      <div className="dealership-filters">
+      {/* Section tabs */}
+      <div className="dm-section-tabs">
+        <button
+          className={`dm-section-tab ${activeSection === 'sellers' ? 'active' : ''}`}
+          onClick={() => setActiveSection('sellers')}
+        >
+          All Sellers
+          <span className="dm-tab-count">{pagination.total || sellers.length}</span>
+        </button>
+        <button
+          className={`dm-section-tab ${activeSection === 'access' ? 'active' : ''}`}
+          onClick={() => setActiveSection('access')}
+        >
+          Dealer Dashboard Access
+          <span className="dm-tab-count dm-tab-count--accent">{accessSellers.length}</span>
+        </button>
+      </div>
+
+      {activeSection === 'sellers' && <div className="dealership-filters">
         <div className="filter-group">
           <input 
             type="text"
@@ -486,9 +531,9 @@ const DealershipManager = () => {
             <option value="subscriptionExpiry">Subscription Expiry</option>
           </select>
         </div>
-      </div>
+      </div>}
 
-      {error && (
+      {activeSection === 'sellers' && error && (
         <div className="error-message">
           {error}
           <button className="retry-button" onClick={handleRetry}>
@@ -497,7 +542,7 @@ const DealershipManager = () => {
         </div>
       )}
 
-      {loading && sellers.length === 0 ? (
+      {activeSection === 'sellers' && (loading && sellers.length === 0 ? (
         <div className="loading-container">
           <div className="spinner"></div>
         </div>
@@ -685,9 +730,9 @@ const DealershipManager = () => {
             </tbody>
           </table>
         </div>
-      )}
+      ))}
 
-      {pagination.totalPages > 1 && (
+      {activeSection === 'sellers' && pagination.totalPages > 1 && (
         <div className="pagination">
           <button 
             className="page-button prev" 
@@ -728,6 +773,136 @@ const DealershipManager = () => {
           >
             Next
           </button>
+        </div>
+      )}
+
+      {/* ── Dashboard Access Panel ─────────────────────────── */}
+      {activeSection === 'access' && (
+        <div className="dm-access-panel">
+          {/* Summary stats */}
+          <div className="dm-access-stats">
+            <div className="dm-access-stat">
+              <span className="dm-access-stat-value">{accessSellers.length}</span>
+              <span className="dm-access-stat-label">Total with Access</span>
+            </div>
+            <div className="dm-access-stat dm-access-stat--premium">
+              <span className="dm-access-stat-value">{accessByTier.premium}</span>
+              <span className="dm-access-stat-label">Premium</span>
+            </div>
+            <div className="dm-access-stat dm-access-stat--standard">
+              <span className="dm-access-stat-value">{accessByTier.standard}</span>
+              <span className="dm-access-stat-label">Standard</span>
+            </div>
+            <div className="dm-access-stat dm-access-stat--basic">
+              <span className="dm-access-stat-value">{accessByTier.basic}</span>
+              <span className="dm-access-stat-label">Basic</span>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="loading-container"><div className="spinner"></div></div>
+          ) : accessSellers.length === 0 ? (
+            <div className="no-dealers">
+              <p>No dealers have claimed dashboard access yet.</p>
+            </div>
+          ) : (
+            <div className="dm-access-grid">
+              {accessSellers.map(seller => {
+                const tier = seller.subscription?.tier || 'basic';
+                const tc = getTierColor(tier);
+                const linkedUser = seller.user;
+                const userEmail = typeof linkedUser === 'object' ? linkedUser?.email : null;
+                const userName  = typeof linkedUser === 'object' ? (linkedUser?.name || linkedUser?.username) : null;
+                return (
+                  <div key={seller._id} className="dm-access-card">
+                    {/* Logo */}
+                    <div className="dm-access-card-logo">
+                      {seller.profile?.logo ? (
+                        <img
+                          src={getSellerImageUrl(seller.profile.logo, 'logo')}
+                          alt={getSellerDisplayName(seller)}
+                          onError={e => { e.target.onerror = null; e.target.src = '/images/placeholders/dealer-logo.jpg'; }}
+                        />
+                      ) : (
+                        <div className="dm-access-logo-placeholder">
+                          {getSellerDisplayName(seller).charAt(0)}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="dm-access-card-info">
+                      <span className="dm-access-card-name">{getSellerDisplayName(seller)}</span>
+                      {seller.location?.city && (
+                        <span className="dm-access-card-location">
+                          {seller.location.city}{seller.location.country ? `, ${seller.location.country}` : ''}
+                        </span>
+                      )}
+
+                      {/* Linked user */}
+                      <div className="dm-access-user-row">
+                        <span className="dm-access-user-icon">👤</span>
+                        <div className="dm-access-user-info">
+                          {userName && <span className="dm-access-user-name">{userName}</span>}
+                          <span className="dm-access-user-email">{userEmail || 'User linked (no email populated)'}</span>
+                        </div>
+                      </div>
+
+                      {/* Badges row */}
+                      <div className="dm-access-badges">
+                        {/* Tier badge */}
+                        <span
+                          className="dm-tier-badge"
+                          style={{ background: tc.bg, color: tc.color, border: `1px solid ${tc.border}` }}
+                        >
+                          {tier.charAt(0).toUpperCase() + tier.slice(1)}
+                        </span>
+
+                        {/* Access status */}
+                        <span className="dm-access-active-badge">
+                          ● Dashboard Active
+                        </span>
+
+                        {/* Subscription status */}
+                        {seller.subscription?.status && seller.subscription.status !== 'active' && (
+                          <span className="dm-access-sub-warn">
+                            Sub: {seller.subscription.status}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Quick tier change */}
+                      <div className="dm-access-actions">
+                        <select
+                          className="dm-tier-select"
+                          value={tier}
+                          onChange={e => handleQuickTierChange(seller._id, e.target.value)}
+                        >
+                          <option value="basic">Basic — P0</option>
+                          <option value="standard">Standard — P300</option>
+                          <option value="premium">Premium — P1,000</option>
+                        </select>
+                        <button
+                          className="action-btn view"
+                          onClick={() => navigate(`/dealerships/${seller._id}`)}
+                          title="View public profile"
+                        >
+                          👁
+                        </button>
+                        <button
+                          className="action-btn edit"
+                          onClick={() => { setSelectedSeller(seller); setShowForm(true); }}
+                          title="Edit dealer"
+                        >
+                          ✎
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

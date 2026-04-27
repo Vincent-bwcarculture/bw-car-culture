@@ -583,3 +583,245 @@
     font-size: 0.85rem;
   }
 }
+
+/* ════════════════════════════════════════════════════════
+   SECTION TABS
+   ════════════════════════════════════════════════════════ */
+.dm-section-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+.dm-section-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.dm-section-tab:hover { color: #111827; }
+.dm-section-tab.active {
+  color: #111827;
+  border-bottom-color: #ff3300;
+}
+.dm-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 1px 7px;
+  min-width: 20px;
+}
+.dm-tab-count--accent {
+  background: rgba(255,51,0,0.1);
+  color: #ff3300;
+}
+
+/* ════════════════════════════════════════════════════════
+   DASHBOARD ACCESS PANEL
+   ════════════════════════════════════════════════════════ */
+.dm-access-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Summary stats row ── */
+.dm-access-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .dm-access-stats { grid-template-columns: repeat(2, 1fr); }
+}
+.dm-access-stat {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.dm-access-stat-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1;
+}
+.dm-access-stat-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9ca3af;
+}
+.dm-access-stat--premium .dm-access-stat-value { color: #ff3300; }
+.dm-access-stat--standard .dm-access-stat-value { color: #3b82f6; }
+.dm-access-stat--basic .dm-access-stat-value { color: #6b7280; }
+
+/* ── Cards grid ── */
+.dm-access-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+.dm-access-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  gap: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s;
+}
+.dm-access-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+.dm-access-card-logo {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+.dm-access-card-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.dm-access-logo-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.dm-access-card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.dm-access-card-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dm-access-card-location {
+  font-size: 0.72rem;
+  color: #9ca3af;
+}
+
+/* ── Linked user row ── */
+.dm-access-user-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  background: #f9fafb;
+  border: 1px solid #f3f4f6;
+  border-radius: 7px;
+  padding: 6px 8px;
+  margin-top: 2px;
+}
+.dm-access-user-icon { font-size: 0.8rem; flex-shrink: 0; }
+.dm-access-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.dm-access-user-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+}
+.dm-access-user-email {
+  font-size: 0.69rem;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Badge row ── */
+.dm-access-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+.dm-tier-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.dm-access-active-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #16a34a;
+  background: rgba(22,163,74,0.1);
+  border: 1px solid rgba(22,163,74,0.25);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.dm-access-sub-warn {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #d97706;
+  background: rgba(217,119,6,0.1);
+  border: 1px solid rgba(217,119,6,0.25);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+/* ── Quick actions ── */
+.dm-access-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+.dm-tier-select {
+  flex: 1;
+  padding: 5px 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  color: #374151;
+  background: #fff;
+  cursor: pointer;
+}
+.dm-tier-select:focus {
+  outline: none;
+  border-color: #ff3300;
+}
+

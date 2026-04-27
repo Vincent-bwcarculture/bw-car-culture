@@ -131,7 +131,7 @@ const getDealers = asyncHandler(async (req, res, next) => {
 
   // Execute query with pagination
   const total = await Dealer.countDocuments(query.getFilter());
-  const sellers = await query.skip(skip).limit(limit).exec();
+  const sellers = await query.skip(skip).limit(limit).populate('user', 'name email username').exec();
 
   // Log results with seller type information
   console.log(`Found ${sellers.length} sellers:`, {
