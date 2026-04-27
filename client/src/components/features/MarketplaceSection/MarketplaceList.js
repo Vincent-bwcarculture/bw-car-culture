@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom';
 import { debounce, throttle } from 'lodash';
 import { listingService } from '../../../services/listingService.js';
+import { dealerService } from '../../../services/dealerService.js';
 import { getPreferenceParams } from '../../../utils/userPrefs.js';
 import VehicleCard from '../../shared/VehicleCard/VehicleCard.js';
 import ShareModal from '../../shared/ShareModal.js';
@@ -60,6 +61,16 @@ const MarketplaceList = () => {
   const shareButtonRef = useRef(null);
   const [loadingText, setLoadingText] = useState('Loading vehicles...');
   const [similarCarsData, setSimilarCarsData] = useState(new Map());
+
+  // Featured dealers strip
+  const [featuredDealers, setFeaturedDealers] = useState([]);
+  const dealerStripRef = useRef(null);
+
+  useEffect(() => {
+    dealerService.getDealers({ status: 'active', sellerType: 'dealership' }, 1)
+      .then(res => setFeaturedDealers((res.dealers || []).filter(d => d.sellerType !== 'private').slice(0, 30)))
+      .catch(() => {});
+  }, []);
 
   // Sharing handler
   const handleShare = useCallback((car, buttonRef) => {
@@ -1188,6 +1199,58 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
         </aside>
         <div className="marketplace-main">
       <div className="marketplace-header">
+        {/* ── Featured Dealerships Strip ── */}
+        {featuredDealers.length > 0 && (
+          <div className="fdstrip-wrapper">
+            <div className="fdstrip-label">Featured Dealerships</div>
+            <div className="fdstrip-nav-row">
+              <button
+                className="fdstrip-arrow fdstrip-arrow-left"
+                onClick={() => dealerStripRef.current?.scrollBy({ left: -220, behavior: 'smooth' })}
+                aria-label="Scroll left"
+              >‹</button>
+              <div className="fdstrip-track" ref={dealerStripRef}>
+                {featuredDealers.map(dealer => {
+                  const logoSrc =
+                    dealer.profile?.logo ||
+                    dealer.logo?.url ||
+                    dealer.logo ||
+                    dealer.profilePicture?.url ||
+                    dealer.profilePicture ||
+                    null;
+                  const initials = (dealer.businessName || dealer.name || '?')
+                    .split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+                  const isVerified = dealer.verification?.isVerified || dealer.verification?.status === 'verified';
+                  return (
+                    <button
+                      key={dealer._id}
+                      className="fdstrip-card"
+                      onClick={() => navigate(`/dealerships/${dealer._id}`)}
+                      title={dealer.businessName || dealer.name}
+                    >
+                      <div className="fdstrip-logo-wrap">
+                        {logoSrc ? (
+                          <img src={logoSrc} alt={dealer.businessName} className="fdstrip-logo-img" />
+                        ) : (
+                          <div className="fdstrip-logo-placeholder">{initials}</div>
+                        )}
+                      </div>
+                      <div className="fdstrip-name">
+                        <span className="fdstrip-name-text">{dealer.businessName || dealer.name}</span>
+                        {isVerified && <span className="fdstrip-verified" title="Verified Dealership">✓</span>}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                className="fdstrip-arrow fdstrip-arrow-right"
+                onClick={() => dealerStripRef.current?.scrollBy({ left: 220, behavior: 'smooth' })}
+                aria-label="Scroll right"
+              >›</button>
+            </div>
+          </div>
+        )}
         <div className="header-content">
           <div className="marketplace-stats">
             {loading ? (
@@ -1196,7 +1259,7 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
               <span className="error-text">Error loading data</span>
             ) : (
               <span>
-                {activeSection === 'premium' 
+                {activeSection === 'premium'
                   ? `${displayData.premium} premium vehicles available ${displayData.privatePremium > 0 ? `(${displayData.privatePremium} from private sellers)` : ''}`
                   : activeSection === 'savings'
                   ? `${displayData.savings} vehicles with savings • Total savings: P${displayData.totalSavings.toLocaleString()} ${displayData.privateSavings > 0 ? `• ${displayData.privateSavings} from private sellers` : ''}`
