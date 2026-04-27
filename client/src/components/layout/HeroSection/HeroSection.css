@@ -166,7 +166,7 @@
   justify-content: center;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 8rem 2rem 3rem;
+  padding: 8rem 2rem 1.5rem;
   width: 100%;
   position: relative;
   z-index: 2;
@@ -896,56 +896,162 @@
   font-size: 1.2rem;
 }
 
-/* Stats */
-.bcc-hero-stats {
+/* ── Seamless bottom fade — blends hero into the section below ── */
+.bcc-hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 160px;
+  background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.85) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── Featured Dealerships strip (bottom of hero) ── */
+.bcc-hero-dealers {
+  position: relative;
+  z-index: 2;
+  padding: 0.6rem 1.5rem 1.2rem;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 3rem 2rem 2rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-  text-align: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
+  width: 100%;
 }
 
-.bcc-hero-stat {
+.bcc-hero-dealers-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 7px;
+  padding-left: 2px;
+}
+
+.bcc-hero-dealers-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bcc-hero-dealers-arrow {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 50%;
+  color: rgba(255,255,255,0.55);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.bcc-hero-dealers-arrow:hover {
+  background: rgba(255,51,0,0.22);
+  border-color: rgba(255,51,0,0.5);
+  color: #ff3300;
+}
+
+.bcc-hero-dealers-track {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex: 1;
+  padding: 2px 2px 4px;
+}
+.bcc-hero-dealers-track::-webkit-scrollbar { display: none; }
+
+.bcc-hero-dealer-card {
+  flex-shrink: 0;
+  width: 78px;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 10px;
+  padding: 8px 6px 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  text-align: center;
+  outline: none;
+}
+.bcc-hero-dealer-card:hover {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,51,0,0.45);
+  transform: translateY(-2px);
 }
 
-.bcc-hero-stat-number {
-  font-size: 2.5rem;
+.bcc-hero-dealer-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid rgba(255,255,255,0.13);
+  background: rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+.bcc-hero-dealer-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.bcc-hero-dealer-initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
   font-weight: 700;
-  color: #ffffff;
+  color: rgba(255,255,255,0.55);
+  background: linear-gradient(135deg, rgba(255,51,0,0.2), rgba(255,255,255,0.05));
+}
+
+.bcc-hero-dealer-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+}
+.bcc-hero-dealer-name span:first-child {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 58px;
+}
+.bcc-hero-dealer-tick {
+  font-size: 0.58rem;
+  color: #28a745;
+  background: rgba(40,167,69,0.15);
+  border: 1px solid rgba(40,167,69,0.35);
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-weight: 700;
   line-height: 1;
 }
 
-.bcc-hero-stat-label {
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 0.85rem;
-}
-
-/* Loading state for stats */
-.bcc-hero-stat-loading {
-  width: 40px;
-  height: 40px;
-  margin: 0 auto;
-  border: 3px solid rgba(255, 51, 0, 0.3);
-  border-radius: 50%;
-  border-top-color: #ff3300;
-  animation: bcc-hero-spin 1s linear infinite;
-}
-
-@keyframes bcc-hero-spin {
-  to {
-    transform: rotate(360deg);
-  }
+@media (max-width: 768px) {
+  .bcc-hero-dealers { padding: 0.4rem 1rem 0.8rem; }
 }
 
 /* Feedback Button in Hero Section */

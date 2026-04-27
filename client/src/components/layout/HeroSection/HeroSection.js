@@ -1,9 +1,10 @@
 // src/components/layout/HeroSection/HeroSection.js - With authentication integration
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.js'; // NEW: Added authentication
 import { statsService } from '../../../services/statsService.js';
 import { listingService } from '../../../services/listingService.js';
+import { dealerService } from '../../../services/dealerService.js';
 import QuickFeedbackButton from '../../shared/QuickFeedbackButton/QuickFeedbackButton.js';
 import CarBackground3D from './CarBackground3D.js';
 import './HeroSection.css';
@@ -33,6 +34,16 @@ const HeroSection = () => {
     loading: true,
     error: false
   });
+
+  // Featured dealers for the bottom strip
+  const [featuredDealers, setFeaturedDealers] = useState([]);
+  const heroStripRef = useRef(null);
+
+  useEffect(() => {
+    dealerService.getDealers({ status: 'active', sellerType: 'dealership' }, 1)
+      .then(res => setFeaturedDealers((res.dealers || []).filter(d => d.sellerType !== 'private').slice(0, 30)))
+      .catch(() => {});
+  }, []);
 
   // Memoized popular search options
   const popularSearches = useMemo(() => [
@@ -729,23 +740,52 @@ const HeroSection = () => {
         ) : null}
       </div>
 
-      {/* Enhanced Stats Section */}
-      <div className="bcc-hero-stats">
-        {statsDisplay.map((stat) => (
-          <div key={stat.key} className="bcc-hero-stat">
-            {statsLoading ? (
-              <div className="bcc-hero-stat-loading" aria-label="Loading statistics"></div>
-            ) : (
-              <>
-                <span className="bcc-hero-stat-number">
-                  {formatNumber(stat.value)}{stat.suffix}
-                </span>
-                <span className="bcc-hero-stat-label">{stat.label}</span>
-              </>
-            )}
+      {/* Featured Dealerships strip — replaces stats */}
+      {featuredDealers.length > 0 && (
+        <div className="bcc-hero-dealers">
+          <div className="bcc-hero-dealers-label">Featured Dealerships</div>
+          <div className="bcc-hero-dealers-row">
+            <button
+              className="bcc-hero-dealers-arrow"
+              onClick={() => heroStripRef.current?.scrollBy({ left: -230, behavior: 'smooth' })}
+              aria-label="Scroll left"
+            >‹</button>
+            <div className="bcc-hero-dealers-track" ref={heroStripRef}>
+              {featuredDealers.map(dealer => {
+                const logoSrc =
+                  dealer.profile?.logo || dealer.logo?.url || dealer.logo ||
+                  dealer.profilePicture?.url || dealer.profilePicture || null;
+                const initials = (dealer.businessName || dealer.name || '?')
+                  .split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+                const isVerified = dealer.verification?.isVerified || dealer.verification?.status === 'verified';
+                return (
+                  <button
+                    key={dealer._id}
+                    className="bcc-hero-dealer-card"
+                    onClick={() => navigate(`/dealerships/${dealer._id}`)}
+                    title={dealer.businessName || dealer.name}
+                  >
+                    <div className="bcc-hero-dealer-logo">
+                      {logoSrc
+                        ? <img src={logoSrc} alt={dealer.businessName} />
+                        : <div className="bcc-hero-dealer-initials">{initials}</div>}
+                    </div>
+                    <div className="bcc-hero-dealer-name">
+                      <span>{dealer.businessName || dealer.name}</span>
+                      {isVerified && <span className="bcc-hero-dealer-tick" title="Verified">✓</span>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              className="bcc-hero-dealers-arrow"
+              onClick={() => heroStripRef.current?.scrollBy({ left: 230, behavior: 'smooth' })}
+              aria-label="Scroll right"
+            >›</button>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </section>
   );
 };
