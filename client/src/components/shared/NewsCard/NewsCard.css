@@ -304,7 +304,7 @@
   .news-card-article.compact {
     flex-direction: column;
   }
-  
+
   .news-card-article.compact .news-card-image {
     width: 100%;
     height: 130px;
@@ -321,15 +321,31 @@
   .news-card-content {
     padding: 0.75rem;
   }
-  
-  .news-card-meta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+
+  /* Compact carousel cards — hide excerpt and view/comment counts */
+  .news-card-excerpt {
+    display: none;
   }
-  
+
+  .news-card-stat {
+    display: none;
+  }
+
+  .news-card-author-info {
+    margin-bottom: 0.4rem;
+  }
+
+  .news-card-author-avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .news-card-meta {
+    flex-direction: row;
+    align-items: center;
+  }
+
   .news-card-actions {
-    width: 100%;
     justify-content: flex-end;
   }
 }
