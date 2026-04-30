@@ -603,9 +603,9 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         businessName: displayName,
         sellerType: isPrivateSeller ? 'private' : 'dealership',
         sellerTypeLabel: sellerTypeLabel,
-        logo: car.dealer.logo || car.dealer.profile?.logo || car.dealer.avatar || car.dealer.profilePicture,
-        avatar: car.dealer.avatar || car.dealer.logo || car.dealer.profile?.logo || car.dealer.profilePicture,
-        profilePicture: car.dealer.profilePicture || car.dealer.profile?.logo || car.dealer.logo || car.dealer.avatar,
+        logo: car.dealer.logo || car.dealer.profile?.logo || car.dealer.profile?.avatar || car.dealer.avatar || car.dealer.profilePicture,
+        avatar: car.dealer.avatar || car.dealer.logo || car.dealer.profile?.logo || car.dealer.profile?.avatar || car.dealer.profilePicture,
+        profilePicture: car.dealer.profilePicture || car.dealer.profile?.logo || car.dealer.profile?.avatar || car.dealer.logo || car.dealer.avatar,
         location: {
           city: car.dealer.location?.city || car.location?.city || 'Unknown Location',
           state: car.dealer.location?.state || car.location?.state || '',
@@ -1370,10 +1370,16 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               dealer?.logo,
               dealer?.profilePicture?.url,
               dealer?.profilePicture,
+              car?.dealer?.profile?.logo?.url,
               car?.dealer?.profile?.logo,
+              car?.dealer?.profile?.avatar?.url,
+              car?.dealer?.profile?.avatar,
+              car?.dealer?.logo?.url,
               car?.dealer?.logo,
+              car?.dealer?.avatar?.url,
+              car?.dealer?.avatar,
+              car?.dealer?.profilePicture?.url,
               car?.dealer?.profilePicture,
-              car?.dealer?.avatar
             ];
             
             let imageSource = null;
