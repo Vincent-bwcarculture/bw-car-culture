@@ -1005,6 +1005,9 @@
 
 .bcc-services-hero-content--split .bcc-services-hero-subtitle {
   text-align: left;
+  margin-left: 0;
+  margin-right: 0;
+  max-width: none;
 }
 
 /* right column: departure board */
