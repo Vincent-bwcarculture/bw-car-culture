@@ -80,14 +80,24 @@ const CarBackground3D = ({ sellMode = false }) => {
     let idleTimer = null;
     let isIdle = false;
     let autoRotAngle = 0;
+    // rotOffset accumulates so mouse-follow always continues from wherever the car is
+    let rotOffset = 0;
     const IDLE_DELAY = 5000; // 5s
     const AUTO_ROT_SPEED = 0.003; // radians per frame
 
     const resetIdle = () => {
+      if (isIdle) {
+        // Snap rotOffset to current position so mouse-follow starts from here
+        rotOffset = current.rotY;
+        target.rotY = current.rotY;
+      }
       isIdle = false;
-      autoRotAngle = current.rotY; // sync so rotation doesn't jump
       clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => { isIdle = true; }, IDLE_DELAY);
+      idleTimer = setTimeout(() => {
+        // Capture position so auto-rotation begins smoothly from here
+        autoRotAngle = current.rotY;
+        isIdle = true;
+      }, IDLE_DELAY);
     };
 
     // Door nodes discovered after model loads
@@ -178,7 +188,8 @@ const CarBackground3D = ({ sellMode = false }) => {
       resetIdle();
       const nx = (e.clientX / window.innerWidth)  * 2 - 1;
       const ny = (e.clientY / window.innerHeight) * 2 - 1;
-      target.rotY = nx *  0.52;
+      // rotOffset carries any accumulated auto-rotation so there's no jump
+      target.rotY = rotOffset + nx * 0.52;
       target.rotX = ny * -0.10;
     };
     const onScroll = () => { scrollY = window.scrollY; resetIdle(); };

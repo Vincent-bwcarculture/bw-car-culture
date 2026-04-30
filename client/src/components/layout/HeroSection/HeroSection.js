@@ -309,7 +309,17 @@ const HeroSection = () => {
       {/* 3D car background — desktop only, fades in when model loads */}
       <CarBackground3D sellMode={activeTab === 'sell'} />
 
+      {/* Semi-transparent dark layer for content legibility */}
+      <div className="bcc-hero-dark-overlay" aria-hidden="true" />
+
       <div className="bcc-hero-content">
+        {/* Slogan */}
+        <div className="bcc-hero-slogan" aria-label="All your mobility needs in one place">
+          <span className="bcc-hero-slogan-dot" aria-hidden="true" />
+          All your mobility needs in one place
+          <span className="bcc-hero-slogan-dot" aria-hidden="true" />
+        </div>
+
         <div className="bcc-hero-tabs">
           <button 
             className={`bcc-hero-tab-button ${activeTab === 'buy' ? 'active' : ''}`}
@@ -345,52 +355,54 @@ const HeroSection = () => {
           </button>
         </div>
 
-        {/* Import Vehicles Button */}
-        <div className="bcc-import-wrapper">
-          <div className="bcc-import-container">
-            <div className="bcc-import-button">
-              {/* Left: action label */}
-              <button
-                className="bcc-import-action"
-                onClick={() => navigate(`/marketplace${selectedCountry !== 'Select country' ? `?country=${encodeURIComponent(selectedCountry)}` : ''}`)}
-                type="button"
-              >
-                Import a car from
-              </button>
+        {/* Import Vehicles Button — only on Buy tab */}
+        {activeTab === 'buy' && (
+          <div className="bcc-import-wrapper">
+            <div className="bcc-import-container">
+              <div className="bcc-import-button">
+                {/* Left: action label */}
+                <button
+                  className="bcc-import-action"
+                  onClick={() => navigate(`/marketplace${selectedCountry !== 'Select country' ? `?country=${encodeURIComponent(selectedCountry)}` : ''}`)}
+                  type="button"
+                >
+                  Import a car from
+                </button>
 
-              {/* Divider */}
-              <span className="bcc-import-divider" />
+                {/* Divider */}
+                <span className="bcc-import-divider" />
 
-              {/* Right: country selector */}
-              <button
-                className="bcc-import-selector"
-                onClick={() => setShowImportDropdown(prev => !prev)}
-                type="button"
-              >
-                <span className="bcc-import-country">{selectedCountry}</span>
-                <span className="bcc-import-arrow">{showImportDropdown ? '▲' : '▼'}</span>
-              </button>
-            </div>
-
-            {showImportDropdown && (
-              <div className="bcc-import-dropdown">
-                {['South Africa', 'Namibia', 'Zimbabwe', 'Zambia', 'Japan', 'China'].map(country => (
-                  <button
-                    key={country}
-                    className={`bcc-import-option${selectedCountry === country ? ' selected' : ''}`}
-                    onClick={() => {
-                      setSelectedCountry(country);
-                      setShowImportDropdown(false);
-                    }}
-                    type="button"
-                  >
-                    {country}
-                  </button>
-                ))}
+                {/* Right: country selector */}
+                <button
+                  className="bcc-import-selector"
+                  onClick={() => setShowImportDropdown(prev => !prev)}
+                  type="button"
+                >
+                  <span className="bcc-import-country">{selectedCountry}</span>
+                  <span className="bcc-import-arrow">{showImportDropdown ? '▲' : '▼'}</span>
+                </button>
               </div>
-            )}
+
+              {showImportDropdown && (
+                <div className="bcc-import-dropdown">
+                  {['South Africa', 'Namibia', 'Zimbabwe', 'Zambia', 'Japan', 'China'].map(country => (
+                    <button
+                      key={country}
+                      className={`bcc-import-option${selectedCountry === country ? ' selected' : ''}`}
+                      onClick={() => {
+                        setSelectedCountry(country);
+                        setShowImportDropdown(false);
+                      }}
+                      type="button"
+                    >
+                      {country}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {activeTab === 'buy' ? (
           <div className="bcc-hero-buy">
