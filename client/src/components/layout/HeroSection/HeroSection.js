@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.js'; // NEW: Added authentication
 import { statsService } from '../../../services/statsService.js';
-import { listingService } from '../../../services/listingService.js';
 import { dealerService } from '../../../services/dealerService.js';
 import CarBackground3D from './CarBackground3D.js';
 import './HeroSection.css';
@@ -26,13 +25,6 @@ const HeroSection = () => {
   });
   const [statsLoading, setStatsLoading] = useState(true);
   
-  // Savings data state with error handling
-  const [savingsData, setSavingsData] = useState({
-    totalSavings: 0,
-    savingsCount: 0,
-    loading: true,
-    error: false
-  });
 
   // Featured dealers for the bottom strip
   const [featuredDealers, setFeaturedDealers] = useState([]);
@@ -90,75 +82,6 @@ const HeroSection = () => {
     fetchWebsiteStats();
   }, []);
 
-  // Fetch savings data with enhanced error handling
-  useEffect(() => {
-    let isMounted = true;
-    
-    const fetchSavingsData = async () => {
-      if (!isMounted) return;
-      
-      try {
-        setSavingsData(prev => ({ ...prev, loading: true, error: false }));
-        
-        const response = await listingService.getListings({}, 1, 100);
-        
-        if (!isMounted) return;
-        
-        if (response && response.listings) {
-          let totalSavings = 0;
-          let savingsCount = 0;
-          
-          response.listings.forEach(car => {
-            if (car && car.priceOptions && car.priceOptions.showSavings) {
-              const { originalPrice, savingsAmount } = car.priceOptions;
-              
-              let carSavings = 0;
-              if (savingsAmount && savingsAmount > 0) {
-                carSavings = savingsAmount;
-              } else if (originalPrice && originalPrice > car.price) {
-                carSavings = originalPrice - car.price;
-              }
-              
-              if (carSavings > 0) {
-                totalSavings += carSavings;
-                savingsCount++;
-              }
-            }
-          });
-          
-          setSavingsData({
-            totalSavings,
-            savingsCount,
-            loading: false,
-            error: false
-          });
-        } else {
-          setSavingsData({
-            totalSavings: 0,
-            savingsCount: 0,
-            loading: false,
-            error: false
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching savings data:', error);
-        if (isMounted) {
-          setSavingsData({
-            totalSavings: 0,
-            savingsCount: 0,
-            loading: false,
-            error: true
-          });
-        }
-      }
-    };
-
-    fetchSavingsData();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   // Enhanced search change handler
   const handleSearchChange = useCallback((e) => {
@@ -323,10 +246,6 @@ const HeroSection = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // Savings click handler
-  const handleSavingsClick = useCallback(() => {
-    navigate('/marketplace?section=savings');
-  }, [navigate]);
 
   // Format numbers with enhanced formatting
   const formatNumber = useCallback((num) => {
@@ -334,11 +253,6 @@ const HeroSection = () => {
     return new Intl.NumberFormat('en-US').format(Math.floor(num));
   }, []);
 
-  // Format price with Pula symbol
-  const formatPrice = useCallback((amount) => {
-    if (typeof amount !== 'number' || isNaN(amount)) return 'P0';
-    return `P${new Intl.NumberFormat('en-US').format(Math.floor(amount))}`;
-  }, []);
 
   // Memoized stats display
   const statsDisplay = useMemo(() => [
@@ -500,33 +414,6 @@ const HeroSection = () => {
               </div>
             </div>
 
-            {/* Enhanced Savings Showcase */}
-            {!savingsData.loading && !savingsData.error && savingsData.savingsCount > 0 && (
-              <div className="bcc-hero-savings-showcase">
-                <div className="bcc-savings-badge">
-                  <div className="bcc-savings-badge-content">
-                      <div className="bcc-savings-info">
-                      <div className="bcc-savings-label">Total Available Savings</div>
-                      <div className="bcc-savings-amount">{formatPrice(savingsData.totalSavings)}</div>
-                    </div>
-                  </div>
-                  <button 
-                    className="bcc-savings-action-btn"
-                    onClick={handleSavingsClick}
-                    disabled={loading}
-                    aria-label="View all savings deals"
-                  >
-                    View Deals
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M5 12h14m-7-7 7 7-7 7"/>
-                    </svg>
-                  </button>
-                </div>
-                <p className="bcc-savings-subtitle">
-                  {savingsData.savingsCount} vehicles with exclusive savings available
-                </p>
-              </div>
-            )}
 
           </div>
         ) : activeTab === 'sell' ? (
