@@ -1676,14 +1676,16 @@ const ServicesPage = () => {
               Found {filteredServices.length} service provider{filteredServices.length !== 1 ? 's' : ''}
             </div>
             
-            <div className="bcc-services-grid">
-              {getCurrentPageServices().map(service => (
-                <BusinessCard 
-                  key={service._id}
-                  business={service}
-                  onAction={() => handleServiceClick(service)}
-                />
-              ))}
+            <div className="bcc-service-carousel-wrap">
+              <div className="bcc-services-grid bcc-service-carousel">
+                {getCurrentPageServices().map(service => (
+                  <BusinessCard
+                    key={service._id}
+                    business={service}
+                    onAction={() => handleServiceClick(service)}
+                  />
+                ))}
+              </div>
             </div>
             
             {totalPages > 1 && (

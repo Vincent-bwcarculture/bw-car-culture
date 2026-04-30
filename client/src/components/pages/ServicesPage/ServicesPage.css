@@ -1353,7 +1353,8 @@
 
   /* Each card gets a fixed width so they sit side by side */
   .bcc-service-transport-grid.bcc-service-carousel > *,
-  .bcc-service-rental-grid.bcc-service-carousel > .bcc-service-rental-card-wrapper {
+  .bcc-service-rental-grid.bcc-service-carousel > .bcc-service-rental-card-wrapper,
+  .bcc-services-grid.bcc-service-carousel > * {
     flex: 0 0 78vw;
     max-width: 320px;
     scroll-snap-align: start;
