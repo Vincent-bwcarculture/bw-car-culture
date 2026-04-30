@@ -70,7 +70,7 @@ const DepartureBoard = () => {
       </div>
 
       <div className="dep-board-cols">
-        <span>TIME</span><span>ROUTE</span><span>FARE</span><span>TYPE</span>
+        <span>TIME</span><span>ROUTE</span><span>FARE</span><span>MODE</span>
       </div>
 
       <div className="dep-board-rows">

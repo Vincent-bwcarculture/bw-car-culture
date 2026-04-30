@@ -180,7 +180,7 @@ const RouteModal = ({ route, onSave, onClose, saving }) => {
             <h4>Pricing</h4>
             <div className="ta-form-grid">
               <div className="ta-form-field">
-                <label>Fare (BWP)</label>
+                <label>Government-Set Fare (BWP)</label>
                 <input type="number" min="0" step="0.50" value={form.fare} onChange={e => set('fare', e.target.value)} placeholder="0.00" />
               </div>
               <div className="ta-form-field">
@@ -375,10 +375,18 @@ const TransportAdminDashboard = () => {
     setSaving(true);
     try {
       const userId = user._id || user.id;
+      const resolvedName =
+        user.businessName ||
+        user.profile?.businessName ||
+        user.name ||
+        user.profile?.name ||
+        user.email ||
+        'BW Car Culture';
       const payload = {
         ...form,
         providerId: userId,
-        provider: { name: user.name, businessName: user.name },
+        operatorName: resolvedName,
+        provider: { name: resolvedName, businessName: resolvedName },
         stops: typeof form.stops === 'string' ? form.stops.split(',').map(s => s.trim()).filter(Boolean).map(s => ({ name: s })) : form.stops,
         schedule: {
           ...form.schedule,
