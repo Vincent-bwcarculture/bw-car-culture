@@ -551,44 +551,103 @@
       align-items: flex-start;
       gap: 1rem;
     }
-    
+
     .view-all-btn {
       align-self: flex-end;
     }
-    
+
     .category-btn {
       padding: 0.5rem 1rem;
       font-size: 0.8rem;
     }
-    
+
     .featured-video-title {
       font-size: 1.3rem;
     }
-    
+
     .featured-video-info {
       padding: 1.2rem;
     }
+
+    /* Horizontal scroll carousel for video thumbnails */
+    .video-thumbnails-list {
+      background: none;
+      border: none;
+      border-radius: 0;
+      overflow: visible;
+    }
+
+    .list-title {
+      background: none;
+      border-bottom: none;
+      padding: 0.75rem 0 0.5rem;
+    }
+
+    .thumbnails-grid {
+      display: flex;
+      flex-direction: row;
+      overflow-x: auto;
+      overflow-y: visible;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      max-height: none;
+      gap: 0.75rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .thumbnails-grid::-webkit-scrollbar {
+      display: none;
+    }
+
+    .video-thumbnail-item {
+      flex-shrink: 0;
+      width: 68vw;
+      max-width: 240px;
+      scroll-snap-align: start;
+      border-bottom: none;
+      border-right: none;
+      background: rgba(20, 20, 20, 0.9);
+      border: 1px solid #2c2c2c;
+      border-radius: 10px;
+      overflow: hidden;
+      padding: 0;
+    }
+
+    .video-thumbnail-item .thumbnail-image {
+      border-radius: 0;
+      margin-bottom: 0;
+    }
+
+    .video-thumbnail-item .thumbnail-title,
+    .video-thumbnail-item .thumbnail-date {
+      padding: 0.5rem 0.75rem;
+    }
+
+    .video-thumbnail-item .thumbnail-title {
+      padding-bottom: 0.25rem;
+    }
+
+    .video-thumbnail-item .thumbnail-date {
+      padding-top: 0;
+    }
   }
-  
+
   @media (max-width: 576px) {
     .video-section {
       padding: 0 0.8rem;
     }
-    
-    .thumbnails-grid {
-      grid-template-columns: 1fr;
-    }
-    
+
     .video-thumbnail-item {
-      border-right: none;
-      border-bottom: 1px solid #2c2c2c;
+      width: 75vw;
     }
-    
+
     .featured-video-meta {
       flex-direction: column;
       gap: 0.5rem;
     }
-    
+
     .play-featured-btn {
       bottom: 1rem;
       left: 1rem;
