@@ -19,11 +19,11 @@ const HeroSection = () => {
   const [showPreparation, setShowPreparation] = useState(false);
 
   // Transport form state
-  const [transportForm, setTransportForm] = useState({ from: '', to: '' });
+  const [transportForm, setTransportForm] = useState({ from: '', to: '', date: '', time: '' });
 
   // Rentals form state
   const [rentalsForm, setRentalsForm] = useState({
-    location: '', date: '', time: '', vehicleType: ''
+    location: '', date: '', time: '', vehicleType: '', budget: ''
   });
   const [stats, setStats] = useState({
     carListings: 0,
@@ -172,6 +172,8 @@ const HeroSection = () => {
     const params = new URLSearchParams({ category: 'transport' });
     if (transportForm.from.trim()) params.set('from', transportForm.from.trim());
     if (transportForm.to.trim()) params.set('to', transportForm.to.trim());
+    if (transportForm.date) params.set('date', transportForm.date);
+    if (transportForm.time) params.set('time', transportForm.time);
     navigate(`/services?${params.toString()}`);
   }, [transportForm, navigate]);
 
@@ -183,6 +185,7 @@ const HeroSection = () => {
     if (rentalsForm.date) params.set('date', rentalsForm.date);
     if (rentalsForm.time) params.set('time', rentalsForm.time);
     if (rentalsForm.vehicleType) params.set('vehicleType', rentalsForm.vehicleType);
+    if (rentalsForm.budget) params.set('maxBudget', rentalsForm.budget);
     navigate(`/services?${params.toString()}`);
   }, [rentalsForm, navigate]);
 
@@ -454,204 +457,138 @@ const HeroSection = () => {
           </div>
         ) : activeTab === 'sell' ? (
           <div className="bcc-hero-sell">
-            <h1>Sell Faster. Smarter. Nationwide.</h1>
-            <p>Tap into Botswana's #1 automotive ecosystem. Get maximum exposure, real buyers, and support every step of the way.</p>
+            <h1>Sell Faster. Smarter.</h1>
+            <p>Botswana's largest automotive audience. Real buyers, maximum exposure, zero hassle.</p>
 
-            {/* Pricing Information Section */}
-            <div className="bcc-hero-sell-pricing-section">
-              <div className="bcc-hero-sell-pricing-header">
-                <h3>Simple, Transparent Pricing</h3>
-                <p>List for free. Boost when you're ready.</p>
-              </div>
-
-              <div className="bcc-hero-sell-pricing-tiers">
-                {/* Free Tier */}
-                <div className="bcc-hero-sell-pricing-tier">
-                  <div className="bcc-hero-sell-tier-header">
-                    <div className="bcc-hero-sell-tier-price">FREE</div>
-                    <div className="bcc-hero-sell-tier-period">always</div>
+            {!showPreparation ? (
+              <>
+                {/* Two-path cards */}
+                <div className="bcc-sell-paths">
+                  {/* Free listing path */}
+                  <div className="bcc-sell-path">
+                    <div className="bcc-sell-path-price">
+                      <span className="bcc-sell-path-amount">Free</span>
+                      <span className="bcc-sell-path-period">always</span>
+                    </div>
+                    <h3 className="bcc-sell-path-title">Standard Listing</h3>
+                    <ul className="bcc-sell-path-features">
+                      <li>Multiple photos &amp; full description</li>
+                      <li>Direct buyer contact</li>
+                      <li>Searchable across Botswana</li>
+                      <li>Live until sold</li>
+                    </ul>
+                    <button
+                      className="bcc-sell-path-cta bcc-sell-path-cta--free"
+                      onClick={handleShowPreparation}
+                      disabled={loading}
+                    >
+                      {isAuthenticated ? 'List My Car' : 'Login to List'}
+                    </button>
                   </div>
-                  <div className="bcc-hero-sell-tier-value">Standard Listing</div>
-                  <div className="bcc-hero-sell-tier-features">
-                    <span>✓ Website listing with multiple photos</span>
-                    <span>✓ Direct contact with buyers</span>
-                    <span>✓ Searchable across Botswana</span>
-                    <span>✓ Listed until sold</span>
+
+                  {/* Boost path */}
+                  <div className="bcc-sell-path bcc-sell-path--featured">
+                    <div className="bcc-sell-path-badge">Most Popular</div>
+                    <div className="bcc-sell-path-price">
+                      <span className="bcc-sell-path-amount">P200</span>
+                      <span className="bcc-sell-path-period">one-time</span>
+                    </div>
+                    <h3 className="bcc-sell-path-title">Social Media Boost</h3>
+                    <ul className="bcc-sell-path-features">
+                      <li>Everything in free listing</li>
+                      <li>Facebook — 685,000 followers</li>
+                      <li>Instagram · TikTok · WhatsApp</li>
+                      <li>Featured section on site</li>
+                    </ul>
+                    <button
+                      className="bcc-sell-path-cta bcc-sell-path-cta--boost"
+                      onClick={handleShowPreparation}
+                      disabled={loading}
+                    >
+                      {isAuthenticated ? 'List &amp; Boost' : 'Login to Boost'}
+                    </button>
+                    <p className="bcc-sell-path-pay">Pay via PayToCell · Orange Money</p>
+                  </div>
+
+                  {/* Valuation path */}
+                  <div className="bcc-sell-path bcc-sell-path--valuation">
+                    <div className="bcc-sell-path-price">
+                      <span className="bcc-sell-path-amount">Free</span>
+                      <span className="bcc-sell-path-period">estimate</span>
+                    </div>
+                    <h3 className="bcc-sell-path-title">Instant Valuation</h3>
+                    <ul className="bcc-sell-path-features">
+                      <li>Market-based price estimate</li>
+                      <li>Know your car's true worth</li>
+                      <li>Sell faster at the right price</li>
+                      <li>No commitment required</li>
+                    </ul>
+                    <button
+                      className="bcc-sell-path-cta bcc-sell-path-cta--free"
+                      onClick={handleCallClick}
+                      disabled={loading}
+                    >
+                      {isAuthenticated ? 'Get Valuation' : 'Login for Valuation'}
+                    </button>
                   </div>
                 </div>
 
-                {/* Boost Tier */}
-                <div className="bcc-hero-sell-pricing-tier bcc-hero-sell-tier-popular">
-                  <div className="bcc-hero-sell-tier-badge">More Exposure</div>
-                  <div className="bcc-hero-sell-tier-header">
-                    <div className="bcc-hero-sell-tier-price">BWP 200</div>
-                    <div className="bcc-hero-sell-tier-period">one-time</div>
-                  </div>
-                  <div className="bcc-hero-sell-tier-value">Social Media Boost</div>
-                  <div className="bcc-hero-sell-tier-features">
-                    <span>✓ Everything in the free listing</span>
-                    <span>✓ Facebook — 685,000 followers</span>
-                    <span>✓ Instagram — 15,000+ followers</span>
-                    <span>✓ WhatsApp Channel — 10,000+ followers</span>
-                    <span>✓ TikTok — 35,000+ followers</span>
-                    <span>✓ Featured section on website</span>
-                  </div>
-                  <div style={{
-                    marginTop: '1.5rem',
-                    paddingTop: '1.5rem',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: '#c9c9c9',
-                    fontSize: '0.82rem',
-                    textAlign: 'center'
-                  }}>
-                    Pay via PayToCell or Orange Money — +267 72 573 475
-                  </div>
-                </div>
-              </div>
-
-              <div className="bcc-hero-sell-pricing-dealer-note">
-                <div className="bcc-hero-sell-dealer-notice">
-                  <strong>Are you a dealer?</strong>
-                  <p>Custom packages are available for dealerships. Contact us for special rates and premium features.</p>
+                {/* Dealer strip */}
+                <div className="bcc-sell-dealer-strip">
+                  <span>Are you a dealer?</span>
                   <button
-                    className="bcc-hero-sell-dealer-contact-btn"
                     onClick={() => {
-                      const whatsappNumber = '+26774122453';
-                      const message = encodeURIComponent('Hi! I am a car dealer interested in listing vehicles on Bw Car Culture. Please provide information about dealer packages and pricing.');
-                      window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
+                      const msg = encodeURIComponent('Hi! I am a car dealer interested in listing vehicles on Bw Car Culture. Please provide information about dealer packages and pricing.');
+                      window.open(`https://wa.me/+26774122453?text=${msg}`, '_blank');
                     }}
                   >
-                    Contact Us on WhatsApp
+                    Contact us for custom rates →
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* Preparation checklist */
+              <div className="bcc-hero-sell-preparation" id="preparation-section">
+                <h3>Before you list — get the best price</h3>
+                <p className="bcc-prep-intro">Cars with complete info and quality photos sell 3× faster and for up to 15% more.</p>
+                <div className="bcc-preparation-grid">
+                  {[
+                    { title: 'Quality Photos', items: ['Front, back, sides & interior', 'Engine bay & dashboard', 'Clear, well-lit images', 'Show any damage honestly'] },
+                    { title: 'Vehicle Details', items: ['Registration documents', 'Service history records', 'Exact mileage reading', 'Modifications or repairs'] },
+                    { title: 'Condition Notes', items: ['Recent service info', 'Known issues', 'Tyre condition', 'Accident history (if any)'] },
+                    { title: 'Pricing Research', items: ['Check similar listings', 'Factor in unique features', 'Be realistic about condition', 'Consider market demand'] },
+                  ].map(({ title, items }) => (
+                    <div key={title} className="bcc-preparation-item">
+                      <div className="bcc-prep-content">
+                        <h4>{title}</h4>
+                        <ul>{items.map(i => <li key={i}>{i}</li>)}</ul>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="bcc-preparation-actions">
+                  <button
+                    className="bcc-preparation-ready-button"
+                    onClick={handleWhatsAppClick}
+                    disabled={loading}
+                  >
+                    {isAuthenticated ? "I'm Ready — Start Listing" : "I'm Ready — Login to List"}
+                  </button>
+                  <button
+                    className="bcc-preparation-back-button"
+                    onClick={handleHidePreparation}
+                    disabled={loading}
+                  >
+                    Go Back
                   </button>
                 </div>
               </div>
-            </div>
-
-            {/* Initial sell options */}
-            <div className="bcc-hero-sell-options">
-              <div className="bcc-hero-sell-option">
-                <div className="bcc-hero-option-header">
-                  <h3>Instant Valuation</h3>
-                </div>
-                <p>Get a guaranteed price and sell your car fast.</p>
-                <button
-                  className="bcc-hero-option-button bcc-hero-call-button"
-                  onClick={handleCallClick}
-                  disabled={loading}
-                  aria-label="Call for vehicle valuation"
-                >
-                  {isAuthenticated ? 'Get Valuation' : 'Login for Valuation'}
-                </button>
-              </div>
-
-              <div className="bcc-hero-sell-option">
-                <div className="bcc-hero-option-header">
-                  <h3>List and Sell My Car</h3>
-                </div>
-                <p>Reach thousands of buyers and sell your car fast for a fair price.</p>
-                <button
-                  className="bcc-hero-option-button bcc-hero-whatsapp-button"
-                  onClick={handleShowPreparation}
-                  disabled={loading}
-                  aria-label="Get preparation guidelines for listing your vehicle"
-                >
-                  {isAuthenticated ? 'List My Car' : 'Login to List Car'}
-                </button>
-              </div>
-            </div>
-
-            {/* Conditional Preparation Section */}
-            {showPreparation && (
-              <div className="bcc-hero-sell-preparation" id="preparation-section">
-                <div className="bcc-preparation-header">
-                  <h3>Before You Proceed - Get the Best Price</h3>
-                </div>
-                <div className="bcc-preparation-content">
-                  <p>To ensure you get the best price and sell quickly, please prepare the following information:</p>
-                  <div className="bcc-preparation-grid">
-                    <div className="bcc-preparation-item">
-                      <div className="bcc-prep-content">
-                        <h4>Quality Photos</h4>
-                        <ul>
-                          <li>Multiple angles (front, back, sides, interior)</li>
-                          <li>Engine bay and dashboard photos</li>
-                          <li>Clear, well-lit images</li>
-                          <li>Show any damage honestly</li>
-                        </ul>
-                      </div>
-                    </div>
-                    
-                    <div className="bcc-preparation-item">
-                      <div className="bcc-prep-content">
-                        <h4>Vehicle Details</h4>
-                        <ul>
-                          <li>Registration documents</li>
-                          <li>Service history records</li>
-                          <li>Exact mileage reading</li>
-                          <li>Any modifications or repairs</li>
-                        </ul>
-                      </div>
-                    </div>
-                    
-                    <div className="bcc-preparation-item">
-                      <div className="bcc-prep-content">
-                        <h4>Vehicle Condition</h4>
-                        <ul>
-                          <li>Recent service information</li>
-                          <li>Known issues or problems</li>
-                          <li>Tire condition</li>
-                          <li>Accident history (if any)</li>
-                        </ul>
-                      </div>
-                    </div>
-                    
-                    <div className="bcc-preparation-item">
-                      <div className="bcc-prep-content">
-                        <h4>Pricing Research</h4>
-                        <ul>
-                          <li>Check similar cars online</li>
-                          <li>Consider your car's unique features</li>
-                          <li>Be realistic about condition</li>
-                          <li>Factor in market demand</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bcc-preparation-tip">
-                    <div className="bcc-tip-content">
-                      <strong>Pro Tip:</strong> Vehicles with complete information and quality photos sell 3x faster and for up to 15% more than incomplete listings!
-                    </div>
-                  </div>
-
-                  {/* Action buttons for preparation section */}
-                  <div className="bcc-preparation-actions">
-                    <button
-                      className="bcc-preparation-ready-button"
-                      onClick={handleWhatsAppClick}
-                      disabled={loading}
-                      aria-label="I'm ready - start listing process"
-                    >
-                      {isAuthenticated ? "I'm Ready — Start Listing" : "I'm Ready — Login to List"}
-                    </button>
-                    <button
-                      className="bcc-preparation-back-button"
-                      onClick={handleHidePreparation}
-                      disabled={loading}
-                      aria-label="Go back to options"
-                    >
-                      Go Back
-                    </button>
-                  </div>
-                </div>
-              </div>
             )}
-
           </div>
         ) : activeTab === 'transport' ? (
           <div className="bcc-hero-quickform">
             <h1>Plan your trip.</h1>
-            <p>Tell us where you're headed and we'll find the best routes for you.</p>
+            <p>Tell us where you are headed and we will find the best routes and transport for you.</p>
             <form className="bcc-hero-quickform-fields" onSubmit={handleTransportSubmit}>
               <div className="bcc-hero-quickform-row">
                 <div className="bcc-hero-quickform-field">
@@ -673,6 +610,27 @@ const HeroSection = () => {
                     placeholder="e.g. Francistown"
                     value={transportForm.to}
                     onChange={e => setTransportForm(f => ({ ...f, to: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="bcc-hero-quickform-row">
+                <div className="bcc-hero-quickform-field">
+                  <label htmlFor="transport-date">Date</label>
+                  <input
+                    id="transport-date"
+                    type="date"
+                    min={new Date().toISOString().split('T')[0]}
+                    value={transportForm.date}
+                    onChange={e => setTransportForm(f => ({ ...f, date: e.target.value }))}
+                  />
+                </div>
+                <div className="bcc-hero-quickform-field">
+                  <label htmlFor="transport-time">Time</label>
+                  <input
+                    id="transport-time"
+                    type="time"
+                    value={transportForm.time}
+                    onChange={e => setTransportForm(f => ({ ...f, time: e.target.value }))}
                   />
                 </div>
               </div>
@@ -739,6 +697,22 @@ const HeroSection = () => {
                     <option value="bakkie">Bakkie / Pickup</option>
                     <option value="minibus">Minibus</option>
                     <option value="luxury">Luxury</option>
+                  </select>
+                </div>
+                <div className="bcc-hero-quickform-field">
+                  <label htmlFor="rental-budget">Budget (BWP / day)</label>
+                  <select
+                    id="rental-budget"
+                    value={rentalsForm.budget}
+                    onChange={e => setRentalsForm(f => ({ ...f, budget: e.target.value }))}
+                  >
+                    <option value="">Any budget</option>
+                    <option value="300">Up to P300</option>
+                    <option value="500">Up to P500</option>
+                    <option value="800">Up to P800</option>
+                    <option value="1200">Up to P1,200</option>
+                    <option value="2000">Up to P2,000</option>
+                    <option value="9999">P2,000+</option>
                   </select>
                 </div>
               </div>
