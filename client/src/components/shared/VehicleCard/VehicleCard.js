@@ -603,7 +603,9 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         businessName: displayName,
         sellerType: isPrivateSeller ? 'private' : 'dealership',
         sellerTypeLabel: sellerTypeLabel,
-        logo: car.dealer.logo || car.dealer.profile?.logo, 
+        logo: car.dealer.logo || car.dealer.profile?.logo || car.dealer.avatar || car.dealer.profilePicture,
+        avatar: car.dealer.avatar || car.dealer.logo || car.dealer.profile?.logo || car.dealer.profilePicture,
+        profilePicture: car.dealer.profilePicture || car.dealer.profile?.logo || car.dealer.logo || car.dealer.avatar,
         location: {
           city: car.dealer.location?.city || car.location?.city || 'Unknown Location',
           state: car.dealer.location?.state || car.location?.state || '',
