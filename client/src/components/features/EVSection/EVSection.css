@@ -1,8 +1,9 @@
 /* EVSection.css */
 .ev-section {
   padding: 2.5rem 1rem;
-  background: linear-gradient(135deg, rgba(0, 10, 30, 0.97) 0%, rgba(0, 30, 20, 0.93) 100%);
-  border-top: 1px solid rgba(0, 195, 124, 0.15);
+  background:
+    linear-gradient(to bottom, #0a0a0a 0%, transparent 80px),
+    linear-gradient(135deg, rgba(0, 10, 30, 0.97) 0%, rgba(0, 30, 20, 0.93) 100%);
   border-bottom: 1px solid rgba(0, 195, 124, 0.15);
 }
 
