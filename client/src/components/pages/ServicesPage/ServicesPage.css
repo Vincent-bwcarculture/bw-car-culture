@@ -992,23 +992,25 @@
   z-index: 2;
 }
 
-/* left column: departure board */
+/* left column: title + filters — aligned to the left */
+.bcc-services-hero-content--split .bcc-services-hero-text {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  padding: 1.5rem 2rem 1.5rem 0;
+}
+
+/* right column: departure board */
 .dep-board-wrap {
   flex: 0 0 320px;
   min-width: 260px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 1.5rem 1rem 1.5rem 0;
-}
-
-/* right column: title + filters */
-.bcc-services-hero-content--split .bcc-services-hero-text {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 1.5rem 0 1.5rem 2rem;
+  padding: 1.5rem 0 1.5rem 1.5rem;
 }
 
 /* ── Departure board ──────────────────────────────────────────────────── */
@@ -1167,16 +1169,58 @@
   text-align: center;
 }
 
-/* ── Responsive: hide board on smaller screens ───────────────────────── */
+/* ── Responsive: compact horizontal board strip on mobile ────────────── */
 @media (max-width: 899px) {
-  .dep-board-wrap { display: none; }
+  .bcc-services-hero--transport {
+    min-height: auto;
+  }
+
   .bcc-services-hero-content--split {
     flex-direction: column;
+    gap: 0;
   }
+
   .bcc-services-hero-content--split .bcc-services-hero-text {
-    padding: 1.5rem 1rem;
+    padding: 1.25rem 1rem 0.75rem;
+    align-items: flex-start;
+    text-align: left;
   }
-  .bcc-services-hero--transport {
-    min-height: 20vh;
+
+  /* Mobile: narrow horizontal ticker-style strip below the text */
+  .dep-board-wrap {
+    flex: none;
+    min-width: 0;
+    width: 100%;
+    padding: 0 0 1rem;
+  }
+
+  .dep-board {
+    border-radius: 0 0 8px 8px;
+    border-top: none;
+  }
+
+  /* On mobile show only 4 rows max to stay compact */
+  .dep-board-rows {
+    max-height: 132px;
+  }
+
+  /* Tighten header on mobile */
+  .dep-board-header {
+    padding: 0.4rem 0.75rem;
+  }
+
+  .dep-board-label {
+    font-size: 0.55rem;
+  }
+
+  .dep-board-clock {
+    font-size: 0.65rem;
+  }
+
+  .dep-board-cols,
+  .dep-board-row {
+    grid-template-columns: 48px 1fr 54px 46px;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
 }

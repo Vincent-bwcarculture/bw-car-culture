@@ -1196,13 +1196,6 @@ const ServicesPage = () => {
         <div className="bcc-services-hero-overlay">
           <div className={`bcc-services-hero-content${selectedCategory === 'transport' ? ' bcc-services-hero-content--split' : ''}`}>
 
-            {/* Departure board — transport desktop only */}
-            {selectedCategory === 'transport' && (
-              <div className="dep-board-wrap">
-                <DepartureBoard />
-              </div>
-            )}
-
             <div className="bcc-services-hero-text">
               <h1 className="bcc-services-hero-title">
                 {selectedCategoryObject.heroTitle || selectedCategoryObject.name}
@@ -1221,6 +1214,13 @@ const ServicesPage = () => {
                 </div>
               </div>
             </div>
+
+            {/* Departure board — right side, desktop; compact strip on mobile */}
+            {selectedCategory === 'transport' && (
+              <div className="dep-board-wrap">
+                <DepartureBoard />
+              </div>
+            )}
 
           </div>
         </div>
