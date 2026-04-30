@@ -10,6 +10,106 @@ import { http } from '../../../config/axios.js';
 import './ServicesPage.css';
 import { buildHelmet } from '../../../hooks/useSEO.js';
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const getNextDeparture = (departureTimes) => {
+  if (!departureTimes || departureTimes.length === 0) return null;
+  const now = new Date();
+  const curMin = now.getHours() * 60 + now.getMinutes();
+  const parsed = (Array.isArray(departureTimes) ? departureTimes : [departureTimes])
+    .map(t => {
+      if (typeof t !== 'string') return null;
+      const [h, m] = t.trim().split(':').map(Number);
+      if (isNaN(h) || isNaN(m)) return null;
+      return { str: t.trim(), minutes: h * 60 + m };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.minutes - b.minutes);
+  if (!parsed.length) return null;
+  return parsed.find(t => t.minutes > curMin) || parsed[0];
+};
+
+const routeTypeColor = { bus: '#3b82f6', taxi: '#f59e0b', shuttle: '#10b981', train: '#8b5cf6', ferry: '#06b6d4' };
+
+// ── Departure Board ───────────────────────────────────────────────────────────
+const DepartureBoard = () => {
+  const [routes, setRoutes] = useState([]);
+  const [clock, setClock] = useState('');
+
+  useEffect(() => {
+    const fmt = () => new Date().toLocaleTimeString('en-BW', { hour: '2-digit', minute: '2-digit', hour12: false });
+    setClock(fmt());
+    const tick = setInterval(() => setClock(fmt()), 30000);
+    return () => clearInterval(tick);
+  }, []);
+
+  useEffect(() => {
+    const API = process.env.REACT_APP_API_URL || 'https://api.i3wcarculture.com/api';
+    fetch(`${API}/transport-routes?status=active&limit=20`)
+      .then(r => r.json())
+      .then(d => setRoutes(d.data || []))
+      .catch(() => {});
+  }, []);
+
+  const now = new Date();
+  const curMin = now.getHours() * 60 + now.getMinutes();
+
+  const rows = routes
+    .map(r => ({ ...r, nextDep: getNextDeparture(r.schedule?.departureTimes) }))
+    .sort((a, b) => {
+      const am = a.nextDep ? (a.nextDep.minutes - curMin + 1440) % 1440 : 9999;
+      const bm = b.nextDep ? (b.nextDep.minutes - curMin + 1440) % 1440 : 9999;
+      return am - bm;
+    })
+    .slice(0, 8);
+
+  return (
+    <div className="dep-board">
+      <div className="dep-board-header">
+        <span className="dep-board-label">DEPARTURES</span>
+        <span className="dep-board-clock">{clock}</span>
+      </div>
+
+      <div className="dep-board-cols">
+        <span>TIME</span><span>ROUTE</span><span>FARE</span><span>TYPE</span>
+      </div>
+
+      <div className="dep-board-rows">
+        {rows.length === 0 ? (
+          <div className="dep-board-empty">No active routes — check back soon</div>
+        ) : rows.map((route, i) => {
+          const minsAway = route.nextDep ? (route.nextDep.minutes - curMin + 1440) % 1440 : null;
+          const soon = minsAway !== null && minsAway <= 30;
+          const typeKey = (route.routeType || 'bus').toLowerCase();
+          const typeColor = routeTypeColor[typeKey] || '#94a3b8';
+          return (
+            <div key={route._id || i} className={`dep-board-row${soon ? ' dep-board-row--soon' : ''}`}>
+              <div className="dep-board-time">
+                {route.nextDep ? route.nextDep.str : '—'}
+                {soon && <span className="dep-board-soon-dot" />}
+              </div>
+              <div className="dep-board-route">
+                <span className="dep-board-origin">{(route.origin || '—').split(',')[0]}</span>
+                <span className="dep-board-arrow">›</span>
+                <span className="dep-board-dest">{(route.destination || '—').split(',')[0]}</span>
+              </div>
+              <div className="dep-board-fare">
+                {route.fare ? `P${Number(route.fare).toLocaleString()}` : '—'}
+              </div>
+              <div className="dep-board-type" style={{ color: typeColor, borderColor: typeColor + '44' }}>
+                {route.routeType || 'Bus'}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="dep-board-footer">
+        Live schedule · updated by operators
+      </div>
+    </div>
+  );
+};
+
 // Enhanced service categories with better transport search options
 const SERVICE_CATEGORIES = [
   {
@@ -1089,12 +1189,20 @@ const ServicesPage = () => {
         description: 'Find trusted workshops, car rentals, and transport services across Botswana. Browse verified service providers in Gaborone, Francistown, Maun and more.'
       })}
       {/* Professional Hero Section */}
-      <div 
-        className="bcc-services-hero"
+      <div
+        className={`bcc-services-hero${selectedCategory === 'transport' ? ' bcc-services-hero--transport' : ''}`}
         style={{ background: selectedCategoryObject.gradient }}
       >
         <div className="bcc-services-hero-overlay">
-          <div className="bcc-services-hero-content">
+          <div className={`bcc-services-hero-content${selectedCategory === 'transport' ? ' bcc-services-hero-content--split' : ''}`}>
+
+            {/* Departure board — transport desktop only */}
+            {selectedCategory === 'transport' && (
+              <div className="dep-board-wrap">
+                <DepartureBoard />
+              </div>
+            )}
+
             <div className="bcc-services-hero-text">
               <h1 className="bcc-services-hero-title">
                 {selectedCategoryObject.heroTitle || selectedCategoryObject.name}
@@ -1105,14 +1213,15 @@ const ServicesPage = () => {
               <div className="bcc-services-hero-stats">
                 <div className="bcc-services-stat">
                   <span className="bcc-services-stat-number">{filteredListings.length}</span>
-                  <span className="bcc-services-stat-label">Available Services</span>
+                  <span className="bcc-services-stat-label">Available Routes</span>
                 </div>
                 <div className="bcc-services-stat">
                   <span className="bcc-services-stat-number">{filteredServices.length}</span>
-                  <span className="bcc-services-stat-label">Trusted Providers</span>
+                  <span className="bcc-services-stat-label">Transport Providers</span>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>
