@@ -1,6 +1,6 @@
 /* ===== GLOBAL THEME VARIABLES ===== */
 :root {
-  --app-bg: radial-gradient(#000000bb, rgba(0, 0, 0, 0.979));
+  --app-bg: #0a0a0a;
   --app-color: #ffffff;
   --page-bg: rgba(20, 20, 20, 0.95);
   --card-bg: rgba(20, 20, 20, 0.9);
