@@ -2062,3 +2062,163 @@
 [data-theme="light"] .bcc-hero-stat-label {
   color: #555555 !important;
 }
+
+/* ── Quick-form panels (Transport & Rentals) ─────────────────────────── */
+.bcc-hero-quickform {
+  animation: bcc-fade-up 0.35s ease both;
+}
+
+@keyframes bcc-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.bcc-hero-quickform h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 0.4rem;
+  line-height: 1.1;
+}
+
+.bcc-hero-quickform p {
+  color: rgba(255,255,255,0.65);
+  font-size: 1rem;
+  margin: 0 0 1.6rem;
+}
+
+.bcc-hero-quickform-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.bcc-hero-quickform-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.bcc-hero-quickform-row--wrap {
+  flex-wrap: wrap;
+}
+
+.bcc-hero-quickform-arrow {
+  font-size: 1.4rem;
+  color: #ff3300;
+  padding-bottom: 0.5rem;
+  flex-shrink: 0;
+}
+
+.bcc-hero-quickform-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 160px;
+}
+
+.bcc-hero-quickform-field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+
+.bcc-hero-quickform-field input,
+.bcc-hero-quickform-field select {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.95rem;
+  padding: 0.65rem 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bcc-hero-quickform-field input::placeholder {
+  color: rgba(255,255,255,0.3);
+}
+
+.bcc-hero-quickform-field input:focus,
+.bcc-hero-quickform-field select:focus {
+  border-color: #ff3300;
+  background: rgba(255,255,255,0.11);
+}
+
+/* Fix date/time native picker colour in dark mode */
+.bcc-hero-quickform-field input[type="date"],
+.bcc-hero-quickform-field input[type="time"] {
+  color-scheme: dark;
+}
+
+.bcc-hero-quickform-field select option {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.bcc-hero-quickform-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.bcc-hero-quickform-submit {
+  background: #ff3300;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.75rem 2rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.bcc-hero-quickform-submit:hover {
+  background: #e62e00;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255,51,0,0.35);
+}
+
+.bcc-hero-quickform-skip {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.45);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+
+.bcc-hero-quickform-skip:hover {
+  color: rgba(255,255,255,0.8);
+}
+
+@media (max-width: 768px) {
+  .bcc-hero-quickform h1 { font-size: 1.7rem; }
+  .bcc-hero-quickform-row { flex-direction: column; align-items: stretch; }
+  .bcc-hero-quickform-arrow { display: none; }
+  .bcc-hero-quickform-field { min-width: 0; }
+}
+
+/* Light mode */
+[data-theme="light"] .bcc-hero-quickform h1 { color: #0a0a0a; }
+[data-theme="light"] .bcc-hero-quickform p { color: #555; }
+[data-theme="light"] .bcc-hero-quickform-field input,
+[data-theme="light"] .bcc-hero-quickform-field select {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.15);
+  color: #0a0a0a;
+}
+[data-theme="light"] .bcc-hero-quickform-field input::placeholder { color: rgba(0,0,0,0.35); }
+[data-theme="light"] .bcc-hero-quickform-field label { color: rgba(0,0,0,0.5); }
+[data-theme="light"] .bcc-hero-quickform-skip { color: rgba(0,0,0,0.45); }
+[data-theme="light"] .bcc-hero-quickform-skip:hover { color: rgba(0,0,0,0.8); }

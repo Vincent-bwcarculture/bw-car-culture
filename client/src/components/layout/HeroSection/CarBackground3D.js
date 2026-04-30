@@ -76,6 +76,20 @@ const CarBackground3D = ({ sellMode = false }) => {
     let scrollY   = window.scrollY;
     let animId;
 
+    // Auto-rotation idle tracking
+    let idleTimer = null;
+    let isIdle = false;
+    let autoRotAngle = 0;
+    const IDLE_DELAY = 5000; // 5s
+    const AUTO_ROT_SPEED = 0.003; // radians per frame
+
+    const resetIdle = () => {
+      isIdle = false;
+      autoRotAngle = current.rotY; // sync so rotation doesn't jump
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => { isIdle = true; }, IDLE_DELAY);
+    };
+
     // Door nodes discovered after model loads
     // Each entry: { node, openAngle, closedAngle, currentAngle }
     const doorEntries = [];
@@ -161,12 +175,13 @@ const CarBackground3D = ({ sellMode = false }) => {
 
     // ── Events ────────────────────────────────────────────────────────────
     const onMouseMove = e => {
+      resetIdle();
       const nx = (e.clientX / window.innerWidth)  * 2 - 1;
       const ny = (e.clientY / window.innerHeight) * 2 - 1;
       target.rotY = nx *  0.52;
       target.rotX = ny * -0.10;
     };
-    const onScroll = () => { scrollY = window.scrollY; };
+    const onScroll = () => { scrollY = window.scrollY; resetIdle(); };
     const onResize = () => {
       const nW = window.innerWidth, nH = window.innerHeight;
       camera.aspect = nW / nH;
@@ -177,6 +192,9 @@ const CarBackground3D = ({ sellMode = false }) => {
     window.addEventListener('scroll',    onScroll,    { passive: true });
     window.addEventListener('resize',    onResize);
 
+    // Start idle countdown immediately on mount
+    resetIdle();
+
     // ── Render loop ───────────────────────────────────────────────────────
     const lerp = (a, b, t) => a + (b - a) * t;
 
@@ -184,9 +202,16 @@ const CarBackground3D = ({ sellMode = false }) => {
       animId = requestAnimationFrame(animate);
 
       if (modelReady) {
-        // Mouse follow
-        current.rotY = lerp(current.rotY, target.rotY, 0.04);
-        current.rotX = lerp(current.rotX, target.rotX, 0.04);
+        if (isIdle) {
+          // Slow auto-rotation — smoothly drift autoRotAngle and lerp current toward it
+          autoRotAngle += AUTO_ROT_SPEED;
+          current.rotY = lerp(current.rotY, autoRotAngle, 0.012);
+          current.rotX = lerp(current.rotX, 0, 0.02);
+        } else {
+          // Mouse follow
+          current.rotY = lerp(current.rotY, target.rotY, 0.04);
+          current.rotX = lerp(current.rotX, target.rotX, 0.04);
+        }
 
         carGroup.rotation.y = BASE_Y + current.rotY + scrollY * 0.0012;
         carGroup.rotation.x = current.rotX;
@@ -222,6 +247,7 @@ const CarBackground3D = ({ sellMode = false }) => {
 
     // ── Cleanup ───────────────────────────────────────────────────────────
     return () => {
+      clearTimeout(idleTimer);
       cancelAnimationFrame(animId);
       canvas.removeEventListener('webglcontextlost',     onContextLost);
       canvas.removeEventListener('webglcontextrestored', onContextRestored);
