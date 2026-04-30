@@ -32,7 +32,7 @@ const routeTypeColor = { bus: '#3b82f6', taxi: '#f59e0b', shuttle: '#10b981', tr
 
 // ── Departure Board ───────────────────────────────────────────────────────────
 const DepartureBoard = () => {
-  const [routes, setRoutes] = useState([]);
+  const [rows, setRows] = useState([]);
   const [clock, setClock] = useState('');
 
   useEffect(() => {
@@ -43,60 +43,92 @@ const DepartureBoard = () => {
   }, []);
 
   useEffect(() => {
-    const API = process.env.REACT_APP_API_URL || 'https://api.i3wcarculture.com/api';
-    fetch(`${API}/transport-routes?status=active&limit=20`)
-      .then(r => r.json())
-      .then(d => setRoutes(d.data || []))
-      .catch(() => {});
+    const API = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
+    const now = new Date();
+    const curMin = now.getHours() * 60 + now.getMinutes();
+
+    Promise.all([
+      // scheduled routes (have departure times)
+      fetch(`${API}/transport-routes?status=active&limit=20`).then(r => r.json()).catch(() => ({ data: [] })),
+      // government fare table (no departure times — show as reference rows)
+      fetch(`${API}/transit-fares?active=true&limit=20`).then(r => r.json()).catch(() => ({ data: [] })),
+    ]).then(([routeRes, fareRes]) => {
+      const routeRows = (routeRes.data || []).map(r => ({
+        _id: r._id,
+        origin:      typeof r.origin === 'object' ? r.origin.name : r.origin,
+        destination: typeof r.destination === 'object' ? r.destination.name : r.destination,
+        fare:        r.pricing?.baseFare || r.fare || null,
+        routeType:   r.routeType || r.vehicleType || 'Bus',
+        nextDep:     getNextDeparture(r.schedule?.departureTimes),
+        _minsAway:   null,
+        _source:     'route',
+      }));
+      routeRows.forEach(r => {
+        r._minsAway = r.nextDep ? (r.nextDep.minutes - curMin + 1440) % 1440 : 9999;
+      });
+
+      // Build a set of origin→dest pairs already covered by scheduled routes
+      const routeKeys = new Set(routeRows.map(r => `${r.origin}|${r.destination}`));
+
+      const fareRows = (fareRes.data || [])
+        .filter(f => f.active !== false)
+        .filter(f => !routeKeys.has(`${f.origin}|${f.destination}`))
+        .map(f => ({
+          _id:         f._id,
+          origin:      f.origin,
+          destination: f.destination,
+          fare:        f.standardFare,
+          routeType:   f.routeType || 'Bus',
+          nextDep:     null,
+          _minsAway:   9998,
+          _source:     'fare',
+        }));
+
+      const combined = [...routeRows, ...fareRows]
+        .sort((a, b) => a._minsAway - b._minsAway)
+        .slice(0, 8);
+
+      setRows(combined);
+    });
   }, []);
 
   const now = new Date();
   const curMin = now.getHours() * 60 + now.getMinutes();
 
-  const rows = routes
-    .map(r => ({ ...r, nextDep: getNextDeparture(r.schedule?.departureTimes) }))
-    .sort((a, b) => {
-      const am = a.nextDep ? (a.nextDep.minutes - curMin + 1440) % 1440 : 9999;
-      const bm = b.nextDep ? (b.nextDep.minutes - curMin + 1440) % 1440 : 9999;
-      return am - bm;
-    })
-    .slice(0, 8);
-
   return (
     <div className="dep-board">
       <div className="dep-board-header">
-        <span className="dep-board-label">DEPARTURES</span>
+        <span className="dep-board-label">ROUTES &amp; FARES</span>
         <span className="dep-board-clock">{clock}</span>
       </div>
 
       <div className="dep-board-cols">
-        <span>TIME</span><span>ROUTE</span><span>FARE</span><span>MODE</span>
+        <span>TIME</span><span>ROUTE</span><span>FARE</span><span>TYPE</span>
       </div>
 
       <div className="dep-board-rows">
         {rows.length === 0 ? (
           <div className="dep-board-empty">No active routes — check back soon</div>
-        ) : rows.map((route, i) => {
-          const minsAway = route.nextDep ? (route.nextDep.minutes - curMin + 1440) % 1440 : null;
+        ) : rows.map((row, i) => {
+          const minsAway = row.nextDep ? (row.nextDep.minutes - curMin + 1440) % 1440 : null;
           const soon = minsAway !== null && minsAway <= 30;
-          const typeKey = (route.routeType || 'bus').toLowerCase();
-          const typeColor = routeTypeColor[typeKey] || '#94a3b8';
+          const typeKey = (row.routeType || 'bus').toLowerCase();
           return (
-            <div key={route._id || i} className={`dep-board-row${soon ? ' dep-board-row--soon' : ''}`}>
+            <div key={row._id || i} className={`dep-board-row${soon ? ' dep-board-row--soon' : ''}`}>
               <div className="dep-board-time">
-                {route.nextDep ? route.nextDep.str : '—'}
+                {row.nextDep ? row.nextDep.str : <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.6rem' }}>FIXED</span>}
                 {soon && <span className="dep-board-soon-dot" />}
               </div>
               <div className="dep-board-route">
-                <span className="dep-board-origin">{(route.origin || '—').split(',')[0]}</span>
-                <span className="dep-board-arrow">›</span>
-                <span className="dep-board-dest">{(route.destination || '—').split(',')[0]}</span>
+                <span>{(row.origin || '—').split(',')[0]}</span>
+                <span className="dep-board-arrow"> › </span>
+                <span>{(row.destination || '—').split(',')[0]}</span>
               </div>
               <div className="dep-board-fare">
-                {route.fare ? `P${Number(route.fare).toLocaleString()}` : '—'}
+                {row.fare != null ? `P${Number(row.fare).toLocaleString()}` : '—'}
               </div>
-              <div className="dep-board-type" style={{ color: typeColor, borderColor: typeColor + '44' }}>
-                {route.routeType || 'Bus'}
+              <div className={`dep-board-type dep-board-type--${typeKey}`}>
+                {row.routeType || 'Bus'}
               </div>
             </div>
           );
@@ -104,7 +136,7 @@ const DepartureBoard = () => {
       </div>
 
       <div className="dep-board-footer">
-        Live schedule · updated by operators
+        Gov't fares · live schedule by operators
       </div>
     </div>
   );
