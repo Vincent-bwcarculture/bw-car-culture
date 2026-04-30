@@ -146,6 +146,12 @@ const ServicesPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalListingPages, setTotalListingPages] = useState(1);
   const [activeFilters, setActiveFilters] = useState({});
+  // Hero form pre-fill state
+  const [tripFrom, setTripFrom] = useState('');
+  const [tripTo, setTripTo] = useState('');
+  const [bookingDate, setBookingDate] = useState('');
+  const [bookingTime, setBookingTime] = useState('');
+  const [maxBudget, setMaxBudget] = useState('');
   const categoriesTabsRef = useRef(null);
   const servicesPerPage = 9;
   const listingsPerPage = 8;
@@ -166,26 +172,44 @@ const ServicesPage = () => {
   // Initialize data with API calls
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
-    
+
     const categoryParam = searchParams.get('category') || 'all';
-    const searchParam = searchParams.get('search') || '';
-    const locationParam = searchParams.get('location') || '';
     const pageParam = parseInt(searchParams.get('page'), 10) || 1;
-    
+
+    // Hero pre-fill params
+    const fromParam   = searchParams.get('from')      || '';
+    const toParam     = searchParams.get('to')        || '';
+    const dateParam   = searchParams.get('date')      || '';
+    const timeParam   = searchParams.get('time')      || '';
+    const budgetParam = searchParams.get('maxBudget') || '';
+
+    // For transport: from→search, to→location. For rentals: location param used directly.
+    const searchParam   = categoryParam === 'transport'
+      ? (fromParam || searchParams.get('search') || '')
+      : (searchParams.get('search') || '');
+    const locationParam = categoryParam === 'transport'
+      ? (toParam || searchParams.get('location') || '')
+      : (searchParams.get('location') || '');
+
+    // Exclude hero pre-fill keys and structural params from activeFilters chips
+    const excludedKeys = ['category', 'search', 'location', 'page', 'from', 'to', 'date', 'time', 'maxBudget'];
     const newFilters = {};
     searchParams.forEach((value, key) => {
-      if (!['category', 'search', 'location', 'page'].includes(key)) {
-        newFilters[key] = value;
-      }
+      if (!excludedKeys.includes(key)) newFilters[key] = value;
     });
-    
+
     setSelectedCategory(categoryParam);
     setSearchQuery(searchParam);
     setLocationFilter(locationParam);
     setCurrentPage(pageParam);
     setActiveFilters(newFilters);
-    
-    fetchData(categoryParam, searchParam, locationParam, pageParam, newFilters);
+    setTripFrom(fromParam);
+    setTripTo(toParam);
+    setBookingDate(dateParam);
+    setBookingTime(timeParam);
+    setMaxBudget(budgetParam);
+
+    fetchData(categoryParam, searchParam, locationParam, pageParam, newFilters, dateParam, timeParam, budgetParam);
   }, [location.search]);
 
   // Enhanced search suggestions handler
@@ -227,8 +251,9 @@ const ServicesPage = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const fetchData = async (category = selectedCategory, search = searchQuery, 
-                          locationFilter = locationFilter, page = currentPage, filters = activeFilters) => {
+  const fetchData = async (category = selectedCategory, search = searchQuery,
+                          locationFilter = locationFilter, page = currentPage, filters = activeFilters,
+                          date = bookingDate, time = bookingTime, budget = maxBudget) => {
     try {
       setLoading(true);
       setError(null);
@@ -263,7 +288,7 @@ const ServicesPage = () => {
       } else {
         await fetchServiceProviders(serviceFilters, page);
         if (['car-rentals', 'trailer-rentals', 'transport'].includes(category)) {
-          await fetchListings(category, search, locationFilter, page, filters);
+          await fetchListings(category, search, locationFilter, page, filters, date, time, budget);
         } else {
           setListings([]);
           setFilteredListings([]);
@@ -354,11 +379,11 @@ const ServicesPage = () => {
   };
 
   // Enhanced fetchListings with stops search functionality
-  const fetchListings = async (category, search, locationFilter, page, filters) => {
+  const fetchListings = async (category, search, locationFilter, page, filters, date = '', time = '', budget = '') => {
     try {
       let endpoint = '';
       let responseKey = 'data';
-      
+
       if (category === 'car-rentals') {
         endpoint = '/rentals';
       } else if (category === 'trailer-rentals') {
@@ -366,12 +391,17 @@ const ServicesPage = () => {
       } else if (category === 'transport') {
         endpoint = '/transport-routes';
       }
-      
+
       console.log(`Fetching ${category} items from endpoint: ${endpoint}`);
-      
+
       const queryParams = new URLSearchParams();
       queryParams.append('page', page.toString());
       queryParams.append('limit', listingsPerPage.toString());
+
+      // Pass hero pre-fill params to the API
+      if (date)   queryParams.append('date',      date);
+      if (time)   queryParams.append('time',      time);
+      if (budget) queryParams.append('maxBudget', budget);
       
       // Enhanced search for transport routes - include stops search
       if (search) {
@@ -675,10 +705,19 @@ const ServicesPage = () => {
         }
       });
       
+      // Budget filter for car rentals
+      if (maxBudget && selectedCategory === 'car-rentals') {
+        const budget = parseInt(maxBudget);
+        filteredResults = filteredResults.filter(item => {
+          const rate = item.rates?.daily || item.dailyRate || item.price || 0;
+          return rate <= budget;
+        });
+      }
+
       setFilteredListings(filteredResults);
       setTotalListingPages(Math.ceil(filteredResults.length / listingsPerPage));
     }
-  }, [listings, searchQuery, locationFilter, activeFilters, listingsPerPage, selectedCategory]);
+  }, [listings, searchQuery, locationFilter, activeFilters, listingsPerPage, selectedCategory, maxBudget]);
 
   // Push current text inputs into the URL (replace so history stays clean)
   const applyTextFiltersToUrl = (search, loc) => {
@@ -747,6 +786,53 @@ const ServicesPage = () => {
   const handleSearchSubmit = () => {
     clearTimeout(searchDebounceRef.current);
     applyTextFiltersToUrl(searchQuery, locationFilter);
+  };
+
+  // Helpers for hero pre-fill inputs
+  const updateUrl = (key, value) => {
+    const sp = new URLSearchParams(location.search);
+    if (value) sp.set(key, value); else sp.delete(key);
+    sp.set('page', '1');
+    navigate({ pathname: location.pathname, search: sp.toString() }, { replace: true });
+  };
+
+  const handleTripFromChange = (value) => {
+    setTripFrom(value);
+    setSearchQuery(value);
+    clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      const sp = new URLSearchParams(location.search);
+      if (value) { sp.set('from', value); sp.set('search', value); } else { sp.delete('from'); sp.delete('search'); }
+      sp.set('page', '1');
+      navigate({ pathname: location.pathname, search: sp.toString() }, { replace: true });
+    }, 400);
+  };
+
+  const handleTripToChange = (value) => {
+    setTripTo(value);
+    setLocationFilter(value);
+    clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      const sp = new URLSearchParams(location.search);
+      if (value) { sp.set('to', value); sp.set('location', value); } else { sp.delete('to'); sp.delete('location'); }
+      sp.set('page', '1');
+      navigate({ pathname: location.pathname, search: sp.toString() }, { replace: true });
+    }, 400);
+  };
+
+  const handleDateChange = (value) => {
+    setBookingDate(value);
+    updateUrl('date', value);
+  };
+
+  const handleTimeChange = (value) => {
+    setBookingTime(value);
+    updateUrl('time', value);
+  };
+
+  const handleBudgetChange = (value) => {
+    setMaxBudget(value);
+    updateUrl('maxBudget', value);
   };
 
   const handleCategorySelect = (categoryId) => {
@@ -1055,79 +1141,205 @@ const ServicesPage = () => {
 
       {/* Main Services Container */}
       <div className="bcc-services-container">
-        {/* Enhanced Filter Controls with Search Suggestions */}
+        {/* Filter Controls */}
         <div className="bcc-service-filter-container">
-          <div className="bcc-service-filter-row">
-            <div className="bcc-service-search-container" ref={searchInputRef}>
-              <input
-                type="text"
-                placeholder={selectedCategoryObject.filterOptions?.placeholder || "Search services..."}
-                value={searchQuery}
-                onChange={handleSearchChange}
-                onKeyPress={handleSearchKeyPress}
-                onFocus={() => {
-                  if (selectedCategory === 'transport' && searchQuery.length > 1) {
-                    setShowSuggestions(true);
-                  }
-                }}
-                className="bcc-service-search-input"
-              />
-              
-              {/* Enhanced Search Suggestions for Transport */}
-              {showSuggestions && selectedCategory === 'transport' && searchSuggestions.length > 0 && (
-                <div className="search-suggestions-dropdown">
-                  <div className="suggestions-header">
-                    <span>Popular bus stops and destinations:</span>
+
+          {/* Transport: From / To / Date / Time */}
+          {selectedCategory === 'transport' && (
+            <div className="bcc-service-trip-row">
+              <div className="bcc-service-trip-field" ref={searchInputRef}>
+                <label className="bcc-service-trip-label">From</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Gaborone CBD"
+                  value={tripFrom}
+                  onChange={e => handleTripFromChange(e.target.value)}
+                  onFocus={() => { if (tripFrom.length > 1) setShowSuggestions(true); }}
+                  onKeyPress={e => e.key === 'Enter' && handleSearchSubmit()}
+                  className="bcc-service-search-input"
+                />
+                {showSuggestions && searchSuggestions.length > 0 && (
+                  <div className="search-suggestions-dropdown">
+                    <div className="suggestions-header"><span>Popular stops:</span></div>
+                    {searchSuggestions.map((s, i) => (
+                      <div key={i} className="suggestion-item" onClick={() => handleSuggestionClick(s)}>
+                        <span className="suggestion-icon">📍</span>
+                        <span className="suggestion-text">{s}</span>
+                      </div>
+                    ))}
                   </div>
-                  {searchSuggestions.map((suggestion, index) => (
-                    <div
-                      key={index}
-                      className="suggestion-item"
-                      onClick={() => handleSuggestionClick(suggestion)}
-                    >
-                      <span className="suggestion-icon">📍</span>
-                      <span className="suggestion-text">{suggestion}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <div className="bcc-service-filter-selects">
-              <input
-                type="text"
-                placeholder={selectedCategoryObject.filterOptions?.locationLabel || "Filter by location..."}
-                value={locationFilter}
-                onChange={handleLocationChange}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearchSubmit()}
-                className="bcc-service-location-input"
-              />
-              
-              {selectedCategory !== 'all' && selectedCategoryObject.filterOptions && selectedCategoryObject.filterOptions.filters && (
-                <div className="bcc-service-additional-filters">
-                  {selectedCategoryObject.filterOptions.filters.map((filter, index) => (
-                    <select 
-                      key={index}
-                      className="bcc-service-filter-select"
-                      value={activeFilters[filter.name] || 'All'}
-                      onChange={(e) => handleFilterChange(filter.name, e.target.value)}
-                    >
-                      {filter.options.map((option, optIndex) => (
-                        <option key={optIndex} value={option}>{option}</option>
-                      ))}
-                    </select>
-                  ))}
-                </div>
-              )}
-              
-              <button 
-                className="bcc-service-search-button"
-                onClick={handleSearchSubmit}
-              >
-                Search
+                )}
+              </div>
+              <div className="bcc-service-trip-arrow">→</div>
+              <div className="bcc-service-trip-field">
+                <label className="bcc-service-trip-label">To</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Francistown"
+                  value={tripTo}
+                  onChange={e => handleTripToChange(e.target.value)}
+                  onKeyPress={e => e.key === 'Enter' && handleSearchSubmit()}
+                  className="bcc-service-search-input"
+                />
+              </div>
+              <div className="bcc-service-trip-field bcc-service-trip-field--narrow">
+                <label className="bcc-service-trip-label">Date</label>
+                <input
+                  type="date"
+                  min={new Date().toISOString().split('T')[0]}
+                  value={bookingDate}
+                  onChange={e => handleDateChange(e.target.value)}
+                  className="bcc-service-search-input"
+                />
+              </div>
+              <div className="bcc-service-trip-field bcc-service-trip-field--narrow">
+                <label className="bcc-service-trip-label">Time</label>
+                <input
+                  type="time"
+                  value={bookingTime}
+                  onChange={e => handleTimeChange(e.target.value)}
+                  className="bcc-service-search-input"
+                />
+              </div>
+              <button className="bcc-service-search-button" onClick={handleSearchSubmit}>
+                Find Routes
               </button>
             </div>
-          </div>
+          )}
+
+          {/* Rentals: name search + location + date + time + budget */}
+          {selectedCategory === 'car-rentals' && (
+            <>
+              <div className="bcc-service-filter-row">
+                <div className="bcc-service-search-container">
+                  <input
+                    type="text"
+                    placeholder="Search vehicles, companies…"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    onKeyPress={handleSearchKeyPress}
+                    className="bcc-service-search-input"
+                  />
+                </div>
+                <div className="bcc-service-filter-selects">
+                  <input
+                    type="text"
+                    placeholder="Pickup location…"
+                    value={locationFilter}
+                    onChange={handleLocationChange}
+                    onKeyPress={e => e.key === 'Enter' && handleSearchSubmit()}
+                    className="bcc-service-location-input"
+                  />
+                </div>
+              </div>
+              <div className="bcc-service-filter-row bcc-service-filter-row--secondary">
+                <div className="bcc-service-trip-field bcc-service-trip-field--narrow">
+                  <label className="bcc-service-trip-label">Date needed</label>
+                  <input
+                    type="date"
+                    min={new Date().toISOString().split('T')[0]}
+                    value={bookingDate}
+                    onChange={e => handleDateChange(e.target.value)}
+                    className="bcc-service-search-input"
+                  />
+                </div>
+                <div className="bcc-service-trip-field bcc-service-trip-field--narrow">
+                  <label className="bcc-service-trip-label">Time</label>
+                  <input
+                    type="time"
+                    value={bookingTime}
+                    onChange={e => handleTimeChange(e.target.value)}
+                    className="bcc-service-search-input"
+                  />
+                </div>
+                <div className="bcc-service-trip-field bcc-service-trip-field--narrow">
+                  <label className="bcc-service-trip-label">Budget (BWP / day)</label>
+                  <select
+                    value={maxBudget}
+                    onChange={e => handleBudgetChange(e.target.value)}
+                    className="bcc-service-filter-select"
+                  >
+                    <option value="">Any budget</option>
+                    <option value="300">Up to P300</option>
+                    <option value="500">Up to P500</option>
+                    <option value="800">Up to P800</option>
+                    <option value="1200">Up to P1,200</option>
+                    <option value="2000">Up to P2,000</option>
+                    <option value="9999">P2,000+</option>
+                  </select>
+                </div>
+                {selectedCategoryObject.filterOptions?.filters?.map((filter, i) => (
+                  <select
+                    key={i}
+                    className="bcc-service-filter-select"
+                    value={activeFilters[filter.name] || 'All'}
+                    onChange={e => handleFilterChange(filter.name, e.target.value)}
+                  >
+                    {filter.options.map((opt, oi) => <option key={oi} value={opt}>{opt}</option>)}
+                  </select>
+                ))}
+                <button className="bcc-service-search-button" onClick={handleSearchSubmit}>Search</button>
+              </div>
+            </>
+          )}
+
+          {/* All other categories: generic search + location + standard dropdowns */}
+          {selectedCategory !== 'transport' && selectedCategory !== 'car-rentals' && (
+            <div className="bcc-service-filter-row">
+              <div className="bcc-service-search-container">
+                <input
+                  type="text"
+                  placeholder={selectedCategoryObject.filterOptions?.placeholder || "Search services..."}
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onKeyPress={handleSearchKeyPress}
+                  className="bcc-service-search-input"
+                />
+              </div>
+              <div className="bcc-service-filter-selects">
+                <input
+                  type="text"
+                  placeholder={selectedCategoryObject.filterOptions?.locationLabel || "Filter by location..."}
+                  value={locationFilter}
+                  onChange={handleLocationChange}
+                  onKeyPress={e => e.key === 'Enter' && handleSearchSubmit()}
+                  className="bcc-service-location-input"
+                />
+                {selectedCategory !== 'all' && selectedCategoryObject.filterOptions?.filters && (
+                  <div className="bcc-service-additional-filters">
+                    {selectedCategoryObject.filterOptions.filters.map((filter, index) => (
+                      <select
+                        key={index}
+                        className="bcc-service-filter-select"
+                        value={activeFilters[filter.name] || 'All'}
+                        onChange={e => handleFilterChange(filter.name, e.target.value)}
+                      >
+                        {filter.options.map((option, oi) => <option key={oi} value={option}>{option}</option>)}
+                      </select>
+                    ))}
+                  </div>
+                )}
+                <button className="bcc-service-search-button" onClick={handleSearchSubmit}>Search</button>
+              </div>
+            </div>
+          )}
+
+          {/* Standard dropdowns for transport (below trip row) */}
+          {selectedCategory === 'transport' && selectedCategoryObject.filterOptions?.filters && (
+            <div className="bcc-service-filter-row bcc-service-filter-row--secondary">
+              {selectedCategoryObject.filterOptions.filters.map((filter, i) => (
+                <select
+                  key={i}
+                  className="bcc-service-filter-select"
+                  value={activeFilters[filter.name] || 'All'}
+                  onChange={e => handleFilterChange(filter.name, e.target.value)}
+                >
+                  {filter.options.map((opt, oi) => <option key={oi} value={opt}>{opt}</option>)}
+                </select>
+              ))}
+            </div>
+          )}
+
           
           {Object.keys(activeFilters).length > 0 && (
             <div className="bcc-active-filters">

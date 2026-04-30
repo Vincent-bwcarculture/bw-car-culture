@@ -507,7 +507,6 @@ const HeroSection = () => {
                     >
                       {isAuthenticated ? 'List &amp; Boost' : 'Login to Boost'}
                     </button>
-                    <p className="bcc-sell-path-pay">Pay via PayToCell · Orange Money</p>
                   </div>
 
                   {/* Valuation path */}

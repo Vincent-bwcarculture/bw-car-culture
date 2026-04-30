@@ -908,3 +908,68 @@
       transform: none;
     }
   }
+
+/* ── Trip / booking filter row (transport & rentals) ─────────────────── */
+.bcc-service-trip-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.bcc-service-trip-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+  min-width: 150px;
+}
+
+.bcc-service-trip-field--narrow {
+  flex: 0 0 auto;
+  min-width: 130px;
+  max-width: 170px;
+}
+
+.bcc-service-trip-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  line-height: 1;
+}
+
+.bcc-service-trip-arrow {
+  font-size: 1.3rem;
+  color: #ff3300;
+  padding-bottom: 0.55rem;
+  flex-shrink: 0;
+}
+
+/* Secondary filter row (dropdowns below trip row, rentals extras) */
+.bcc-service-filter-row--secondary {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+/* Date / time native colour in dark context */
+.bcc-service-search-input[type="date"],
+.bcc-service-search-input[type="time"] {
+  color-scheme: dark;
+}
+
+[data-theme="light"] .bcc-service-trip-label {
+  color: rgba(0,0,0,0.45);
+}
+[data-theme="light"] .bcc-service-trip-arrow {
+  color: #cc2900;
+}
+[data-theme="light"] .bcc-service-search-input[type="date"],
+[data-theme="light"] .bcc-service-search-input[type="time"] {
+  color-scheme: light;
+}
