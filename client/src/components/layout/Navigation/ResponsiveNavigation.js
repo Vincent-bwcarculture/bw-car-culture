@@ -449,7 +449,6 @@ const DesktopUserMenu = () => {
 // ENHANCED: User Profile Link Component with improved avatar handling and fallback
 const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
   const [imageError, setImageError] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
   const { isAuthenticated } = useAuth();
   const unreadCount = useUnreadNotifCount(isAuthenticated);
 
@@ -465,48 +464,11 @@ const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
   };
 
   const getAvatarUrl = (user) => {
-    if (!user) {
-      console.log('👤 UserProfileLink: No user data provided');
-      return null;
-    }
-
-    console.log('👤 UserProfileLink: Checking avatar for user:', {
-      userId: user.id,
-      userName: user.name,
-      userEmail: user.email,
-      hasAvatar: !!user.avatar,
-      avatar: user.avatar,
-      avatarType: typeof user.avatar,
-      avatarUrl: user.avatar?.url,
-      hasProfilePicture: !!user.profilePicture,
-      profilePicture: user.profilePicture
-    });
-
-    // Primary check: avatar.url (main field in your system)
-    if (user.avatar && typeof user.avatar === 'object' && user.avatar.url) {
-      console.log('👤 ✅ Using avatar.url:', user.avatar.url);
-      return user.avatar.url;
-    }
-    
-    // Fallback: avatar as string
-    if (user.avatar && typeof user.avatar === 'string' && user.avatar.startsWith('http')) {
-      console.log('👤 ✅ Using avatar string:', user.avatar);
-      return user.avatar;
-    }
-    
-    // Additional fallback: profilePicture.url
-    if (user.profilePicture && typeof user.profilePicture === 'object' && user.profilePicture.url) {
-      console.log('👤 ✅ Using profilePicture.url:', user.profilePicture.url);
-      return user.profilePicture.url;
-    }
-    
-    // Additional fallback: profilePicture as string
-    if (user.profilePicture && typeof user.profilePicture === 'string' && user.profilePicture.startsWith('http')) {
-      console.log('👤 ✅ Using profilePicture string:', user.profilePicture);
-      return user.profilePicture;
-    }
-
-    console.log('👤 ⚠️ No valid avatar URL found, using fallback');
+    if (!user) return null;
+    if (user.avatar && typeof user.avatar === 'object' && user.avatar.url) return user.avatar.url;
+    if (user.avatar && typeof user.avatar === 'string' && user.avatar.startsWith('http')) return user.avatar;
+    if (user.profilePicture && typeof user.profilePicture === 'object' && user.profilePicture.url) return user.profilePicture.url;
+    if (user.profilePicture && typeof user.profilePicture === 'string' && user.profilePicture.startsWith('http')) return user.profilePicture;
     return null;
   };
 
@@ -514,40 +476,10 @@ const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
   const userName = getUserName(user);
   const userInitials = getInitials(userName);
 
-  // Reset image states when user or avatarUrl changes
+  // Reset error state when user changes
   useEffect(() => {
-    if (avatarUrl) {
-      setImageError(false);
-      setImageLoading(true);
-    }
-  }, [user?.id, avatarUrl]);
-
-  // Enhanced error handling for avatar image
-  const handleImageError = (e) => {
-    console.error('👤 ❌ Profile image failed to load:', avatarUrl);
-    setImageError(true);
-    setImageLoading(false);
-  };
-
-  const handleImageLoad = () => {
-    console.log('👤 ✅ Profile image loaded successfully:', avatarUrl);
     setImageError(false);
-    setImageLoading(false);
-  };
-
-  // Debug logging
-  useEffect(() => {
-    if (user) {
-      console.log('👤 UserProfileLink - Current state:', {
-        userName,
-        avatarUrl,
-        hasValidAvatarUrl: !!avatarUrl,
-        imageError,
-        imageLoading,
-        userInitials
-      });
-    }
-  }, [user, avatarUrl, imageError, imageLoading, userName, userInitials]);
+  }, [user?.id]);
 
   return (
     <Link
@@ -572,54 +504,36 @@ const UserProfileLink = ({ user, onMouseEnter, onClick }) => {
             pointerEvents: 'none'
           }} />
         )}
-        {avatarUrl && !imageError ? (
-          <>
-            <img 
-              src={avatarUrl} 
-              alt={userName}
-              onError={handleImageError}
-              onLoad={handleImageLoad}
-              style={{ 
-                display: imageLoading ? 'none' : 'block',
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                borderRadius: '50%'
-              }}
-            />
-            {imageLoading && (
-              <div style={{ 
-                display: 'flex',
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                width: '100%', 
-                height: '100%', 
-                backgroundColor: 'var(--nav-accent, #007bff)', 
-                borderRadius: '50%', 
-                color: 'white', 
-                fontSize: '0.8rem', 
-                fontWeight: 'bold' 
-              }}>
-                {userInitials}
-              </div>
-            )}
-          </>
-        ) : (
-          // Fallback: Show initials or UserCircle icon
-          <div style={{ 
-            display: 'flex',
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            width: '100%', 
-            height: '100%', 
-            backgroundColor: 'var(--nav-accent, #007bff)', 
-            borderRadius: '50%', 
-            color: 'white', 
-            fontSize: '0.8rem', 
-            fontWeight: 'bold' 
-          }}>
-            {userName !== 'User' ? userInitials : <UserCircle size={24} />}
-          </div>
+        {/* Initials always rendered as base layer */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'var(--nav-accent, #007bff)',
+          borderRadius: '50%',
+          color: 'white',
+          fontSize: '0.8rem',
+          fontWeight: 'bold'
+        }}>
+          {userName !== 'User' ? userInitials : <UserCircle size={24} />}
+        </div>
+        {/* Image absolutely on top — covers initials when loaded */}
+        {avatarUrl && !imageError && (
+          <img
+            src={avatarUrl}
+            alt={userName}
+            onError={() => setImageError(true)}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              borderRadius: '50%'
+            }}
+          />
         )}
       </div>
       <div className="user-profile-info">
