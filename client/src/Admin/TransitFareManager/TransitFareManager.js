@@ -7,6 +7,7 @@ import './TransitFareManager.css';
 const EMPTY_FARE = {
   origin: '', destination: '', routeType: 'Bus', provider: '',
   standardFare: '', childFare: '', seniorFare: '', studentFare: '',
+  estimatedDuration: '', vehicleCount: '',
   currency: 'BWP', notes: '', active: true
 };
 
@@ -34,17 +35,19 @@ const TransitFareManager = () => {
   const openEdit = (fare) => {
     setEditing(fare);
     setForm({
-      origin: fare.origin || '',
-      destination: fare.destination || '',
-      routeType: fare.routeType || 'Bus',
-      provider: fare.provider || '',
-      standardFare: fare.standardFare ?? '',
-      childFare: fare.childFare ?? '',
-      seniorFare: fare.seniorFare ?? '',
-      studentFare: fare.studentFare ?? '',
-      currency: fare.currency || 'BWP',
-      notes: fare.notes || '',
-      active: fare.active !== false
+      origin:            fare.origin || '',
+      destination:       fare.destination || '',
+      routeType:         fare.routeType || 'Bus',
+      provider:          fare.provider || '',
+      standardFare:      fare.standardFare ?? '',
+      childFare:         fare.childFare ?? '',
+      seniorFare:        fare.seniorFare ?? '',
+      studentFare:       fare.studentFare ?? '',
+      estimatedDuration: fare.estimatedDuration || '',
+      vehicleCount:      fare.vehicleCount ?? '',
+      currency:          fare.currency || 'BWP',
+      notes:             fare.notes || '',
+      active:            fare.active !== false,
     });
     setShowModal(true);
   };
@@ -61,10 +64,12 @@ const TransitFareManager = () => {
     try {
       const payload = {
         ...form,
-        standardFare: Number(form.standardFare),
-        childFare: form.childFare !== '' ? Number(form.childFare) : null,
-        seniorFare: form.seniorFare !== '' ? Number(form.seniorFare) : null,
-        studentFare: form.studentFare !== '' ? Number(form.studentFare) : null,
+        standardFare:      Number(form.standardFare),
+        childFare:         form.childFare !== ''      ? Number(form.childFare)   : null,
+        seniorFare:        form.seniorFare !== ''     ? Number(form.seniorFare)  : null,
+        studentFare:       form.studentFare !== ''    ? Number(form.studentFare) : null,
+        vehicleCount:      form.vehicleCount !== ''   ? Number(form.vehicleCount): null,
+        estimatedDuration: form.estimatedDuration.trim() || null,
       };
       if (editing) {
         const res = await http.put(`/api/transit-fares/${editing._id}`, payload);
@@ -206,6 +211,16 @@ const TransitFareManager = () => {
                 <div className="tfm-field">
                   <label>Student Fare</label>
                   <input type="number" name="studentFare" value={form.studentFare} onChange={handleChange} min="0" step="0.50" placeholder="Optional" />
+                </div>
+              </div>
+              <div className="tfm-row">
+                <div className="tfm-field">
+                  <label>Est. Trip Duration <span style={{ opacity: 0.5, fontWeight: 400 }}>(optional)</span></label>
+                  <input name="estimatedDuration" value={form.estimatedDuration} onChange={handleChange} placeholder="e.g. 1h 30min" />
+                </div>
+                <div className="tfm-field">
+                  <label>Vehicles on Route <span style={{ opacity: 0.5, fontWeight: 400 }}>(optional)</span></label>
+                  <input type="number" name="vehicleCount" value={form.vehicleCount} onChange={handleChange} min="0" placeholder="e.g. 5" />
                 </div>
               </div>
               <div className="tfm-field">

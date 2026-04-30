@@ -1003,6 +1003,10 @@
   padding: 0 2rem 0 0;
 }
 
+.bcc-services-hero-content--split .bcc-services-hero-subtitle {
+  text-align: left;
+}
+
 /* right column: departure board */
 .dep-board-wrap {
   flex: 0 0 300px;
@@ -1048,6 +1052,29 @@
   letter-spacing: 1px;
 }
 
+/* Board search input */
+.dep-board-search-wrap {
+  padding: 0.4rem 0.6rem 0.3rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.dep-board-search {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.65rem;
+  font-family: 'Courier New', monospace;
+  padding: 0.28rem 0.5rem;
+  outline: none;
+  letter-spacing: 0.5px;
+  transition: border-color 0.15s;
+}
+
+.dep-board-search::placeholder { color: rgba(255,255,255,0.25); }
+.dep-board-search:focus { border-color: rgba(255,51,0,0.45); }
+
 .dep-board-cols {
   display: grid;
   grid-template-columns: 52px 1fr 58px 52px;
@@ -1072,15 +1099,20 @@
 
 .dep-board-row {
   display: grid;
-  grid-template-columns: 52px 1fr 58px 52px;
+  grid-template-columns: 52px 1fr 54px 46px;
   align-items: center;
   padding: 0.38rem 0.85rem;
   border-bottom: 1px solid rgba(255,255,255,0.04);
   transition: background 0.15s;
+  position: relative;
 }
 
-.dep-board-row:hover {
-  background: rgba(255,255,255,0.04);
+.dep-board-row--clickable {
+  cursor: pointer;
+}
+
+.dep-board-row--clickable:hover {
+  background: rgba(255,255,255,0.07);
 }
 
 .dep-board-row.dep-board-row--soon {
@@ -1114,16 +1146,33 @@
 
 .dep-board-route {
   font-size: 0.68rem;
-  color: rgba(255,255,255,0.80);
+  color: #fff;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
-  padding-right: 0.4rem;
+  padding-right: 0.3rem;
+  position: relative;
 }
 
-.dep-board-route span {
-  color: rgba(255,255,255,0.40);
-  margin: 0 3px;
+/* Scrolling marquee — only triggers when row is hovered */
+.dep-board-route-inner {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.dep-board-row--clickable:hover .dep-board-route-inner {
+  animation: dep-marquee 3.5s linear 0.4s infinite;
+}
+
+@keyframes dep-marquee {
+  0%   { transform: translateX(0); }
+  40%  { transform: translateX(-35%); }
+  60%  { transform: translateX(-35%); }
+  100% { transform: translateX(0); }
+}
+
+.dep-board-arrow {
+  color: rgba(255,255,255,0.35);
+  margin: 0 2px;
 }
 
 .dep-board-fare {
@@ -1157,6 +1206,62 @@
   color: rgba(255,255,255,0.25);
   text-align: center;
   letter-spacing: 1px;
+}
+
+.dep-board-fixed-tag {
+  font-size: 0.48rem;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  padding: 1px 3px;
+}
+
+/* Hover tooltip */
+.dep-board-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  background: #1a1a1a;
+  border: 1px solid rgba(255,51,0,0.35);
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  min-width: 200px;
+  max-width: 260px;
+  z-index: 20;
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+}
+
+.dep-board-tooltip-route {
+  font-size: 0.7rem;
+  color: #fff;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.dep-board-tooltip-row {
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.75);
+  margin-top: 0.25rem;
+}
+
+.dep-board-tooltip-note {
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.45);
+  margin-top: 0.35rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.dep-board-tooltip-cta {
+  font-size: 0.58rem;
+  color: #ff3300;
+  margin-top: 0.45rem;
+  letter-spacing: 0.5px;
 }
 
 .dep-board-footer {
@@ -1222,5 +1327,64 @@
     grid-template-columns: 48px 1fr 54px 46px;
     padding-left: 0.75rem;
     padding-right: 0.75rem;
+  }
+
+  /* ── Carousel: horizontal scroll for transport & rental cards ── */
+  .bcc-service-carousel-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 0.5rem;
+  }
+
+  .bcc-service-carousel-wrap::-webkit-scrollbar { display: none; }
+
+  .bcc-service-carousel {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 1rem;
+    width: max-content;
+  }
+
+  /* Each card gets a fixed width so they sit side by side */
+  .bcc-service-transport-grid.bcc-service-carousel > *,
+  .bcc-service-rental-grid.bcc-service-carousel > .bcc-service-rental-card-wrapper {
+    flex: 0 0 78vw;
+    max-width: 320px;
+    scroll-snap-align: start;
+  }
+
+  /* ── Transport filter: 2-column grid on mobile ── */
+  .bcc-service-trip-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 0.75rem;
+    align-items: end;
+  }
+
+  /* FROM takes full width (col 1), arrow hidden, TO takes full width (col 2) */
+  .bcc-service-trip-row .bcc-service-trip-arrow { display: none; }
+
+  /* Date and Time sit beside each other (already in the grid) */
+  .bcc-service-trip-field { min-width: 0; }
+  .bcc-service-trip-field--narrow { min-width: 0; }
+
+  /* Find Routes button spans both columns */
+  .bcc-service-trip-row .bcc-service-search-button {
+    grid-column: 1 / -1;
+  }
+
+  /* ── Rentals filter: 2-column on mobile ── */
+  .bcc-service-filter-row--secondary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 0.75rem;
+    align-items: end;
+  }
+
+  .bcc-service-filter-row--secondary .bcc-service-search-button {
+    grid-column: 1 / -1;
   }
 }

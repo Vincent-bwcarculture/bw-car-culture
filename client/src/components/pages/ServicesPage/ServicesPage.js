@@ -32,8 +32,11 @@ const routeTypeColor = { bus: '#3b82f6', taxi: '#f59e0b', shuttle: '#10b981', tr
 
 // ── Departure Board ───────────────────────────────────────────────────────────
 const DepartureBoard = () => {
-  const [rows, setRows] = useState([]);
-  const [clock, setClock] = useState('');
+  const [rows, setRows]         = useState([]);
+  const [clock, setClock]       = useState('');
+  const [hovered, setHovered]   = useState(null);
+  const [fareSearch, setFareSearch] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fmt = () => new Date().toLocaleTimeString('en-BW', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -48,18 +51,19 @@ const DepartureBoard = () => {
     const curMin = now.getHours() * 60 + now.getMinutes();
 
     Promise.all([
-      // scheduled routes (have departure times)
       fetch(`${API}/transport-routes?status=active&limit=20`).then(r => r.json()).catch(() => ({ data: [] })),
-      // government fare table (no departure times — show as reference rows)
       fetch(`${API}/transit-fares?active=true&limit=20`).then(r => r.json()).catch(() => ({ data: [] })),
     ]).then(([routeRes, fareRes]) => {
       const routeRows = (routeRes.data || []).map(r => ({
-        _id: r._id,
+        _id:         r._id,
         origin:      typeof r.origin === 'object' ? r.origin.name : r.origin,
         destination: typeof r.destination === 'object' ? r.destination.name : r.destination,
         fare:        r.pricing?.baseFare || r.fare || null,
         routeType:   r.routeType || r.vehicleType || 'Bus',
         nextDep:     getNextDeparture(r.schedule?.departureTimes),
+        duration:    r.estimatedDuration || r.schedule?.duration || null,
+        vehicleCount: r.vehicleCount || null,
+        notes:       r.shortDescription || null,
         _minsAway:   null,
         _source:     'route',
       }));
@@ -67,33 +71,48 @@ const DepartureBoard = () => {
         r._minsAway = r.nextDep ? (r.nextDep.minutes - curMin + 1440) % 1440 : 9999;
       });
 
-      // Build a set of origin→dest pairs already covered by scheduled routes
       const routeKeys = new Set(routeRows.map(r => `${r.origin}|${r.destination}`));
 
       const fareRows = (fareRes.data || [])
         .filter(f => f.active !== false)
         .filter(f => !routeKeys.has(`${f.origin}|${f.destination}`))
         .map(f => ({
-          _id:         f._id,
-          origin:      f.origin,
-          destination: f.destination,
-          fare:        f.standardFare,
-          routeType:   f.routeType || 'Bus',
-          nextDep:     null,
-          _minsAway:   9998,
-          _source:     'fare',
+          _id:          f._id,
+          origin:       f.origin,
+          destination:  f.destination,
+          fare:         f.standardFare,
+          routeType:    f.routeType || 'Bus',
+          nextDep:      null,
+          duration:     f.estimatedDuration || null,
+          vehicleCount: f.vehicleCount || null,
+          notes:        f.notes || null,
+          _minsAway:    9998,
+          _source:      'fare',
         }));
 
-      const combined = [...routeRows, ...fareRows]
-        .sort((a, b) => a._minsAway - b._minsAway)
-        .slice(0, 8);
-
-      setRows(combined);
+      setRows(
+        [...routeRows, ...fareRows]
+          .sort((a, b) => a._minsAway - b._minsAway)
+          .slice(0, 8)
+      );
     });
   }, []);
 
   const now = new Date();
   const curMin = now.getHours() * 60 + now.getMinutes();
+
+  const handleRowClick = (row) => {
+    const p = new URLSearchParams({ category: 'transport', from: row.origin || '', to: row.destination || '' });
+    navigate(`/services?${p.toString()}`);
+  };
+
+  const q = fareSearch.trim().toLowerCase();
+  const visibleRows = q
+    ? rows.filter(r =>
+        (r.origin || '').toLowerCase().includes(q) ||
+        (r.destination || '').toLowerCase().includes(q)
+      )
+    : rows;
 
   return (
     <div className="dep-board">
@@ -102,34 +121,71 @@ const DepartureBoard = () => {
         <span className="dep-board-clock">{clock}</span>
       </div>
 
+      <div className="dep-board-search-wrap">
+        <input
+          className="dep-board-search"
+          placeholder="Search destination…"
+          value={fareSearch}
+          onChange={e => setFareSearch(e.target.value)}
+        />
+      </div>
+
       <div className="dep-board-cols">
         <span>TIME</span><span>ROUTE</span><span>FARE</span><span>TYPE</span>
       </div>
 
       <div className="dep-board-rows">
-        {rows.length === 0 ? (
+        {visibleRows.length === 0 ? (
           <div className="dep-board-empty">No active routes — check back soon</div>
-        ) : rows.map((row, i) => {
+        ) : visibleRows.map((row, i) => {
           const minsAway = row.nextDep ? (row.nextDep.minutes - curMin + 1440) % 1440 : null;
           const soon = minsAway !== null && minsAway <= 30;
           const typeKey = (row.routeType || 'bus').toLowerCase();
+          const isHovered = hovered === (row._id || i);
+
           return (
-            <div key={row._id || i} className={`dep-board-row${soon ? ' dep-board-row--soon' : ''}`}>
+            <div
+              key={row._id || i}
+              className={`dep-board-row dep-board-row--clickable${soon ? ' dep-board-row--soon' : ''}`}
+              onClick={() => handleRowClick(row)}
+              onMouseEnter={() => setHovered(row._id || i)}
+              onMouseLeave={() => setHovered(null)}
+            >
               <div className="dep-board-time">
-                {row.nextDep ? row.nextDep.str : <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.6rem' }}>FIXED</span>}
-                {soon && <span className="dep-board-soon-dot" />}
+                {row.nextDep
+                  ? <>{row.nextDep.str}{soon && <span className="dep-board-soon-dot" />}</>
+                  : <span className="dep-board-fixed-tag">GOV'T</span>
+                }
               </div>
+
               <div className="dep-board-route">
-                <span>{(row.origin || '—').split(',')[0]}</span>
-                <span className="dep-board-arrow"> › </span>
-                <span>{(row.destination || '—').split(',')[0]}</span>
+                <span className="dep-board-route-inner">
+                  {(row.origin || '—').split(',')[0]}
+                  <span className="dep-board-arrow"> › </span>
+                  {(row.destination || '—').split(',')[0]}
+                </span>
               </div>
+
               <div className="dep-board-fare">
                 {row.fare != null ? `P${Number(row.fare).toLocaleString()}` : '—'}
               </div>
+
               <div className={`dep-board-type dep-board-type--${typeKey}`}>
                 {row.routeType || 'Bus'}
               </div>
+
+              {/* Hover tooltip */}
+              {isHovered && (row.duration || row.vehicleCount || row.notes) && (
+                <div className="dep-board-tooltip">
+                  <div className="dep-board-tooltip-route">
+                    {row.origin} → {row.destination}
+                  </div>
+                  {row.duration    && <div className="dep-board-tooltip-row">⏱ {row.duration}</div>}
+                  {row.vehicleCount && <div className="dep-board-tooltip-row">🚌 {row.vehicleCount} vehicles on route</div>}
+                  {row.notes       && <div className="dep-board-tooltip-note">{row.notes}</div>}
+                  <div className="dep-board-tooltip-cta">Click to find transport →</div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -1077,42 +1133,46 @@ const ServicesPage = () => {
     switch (selectedCategory) {
       case 'car-rentals':
         return (
-          <div className="bcc-service-rental-grid">
-            {currentListings.map(rental => (
-              <div className="bcc-service-rental-card-wrapper" key={rental._id || rental.id}>
-                <RentalCard
-                  vehicle={{
-                    ...rental,
-                    provider: typeof rental.provider === 'object' ? 
-                      rental.provider.businessName || rental.provider.name : rental.provider,
-                    providerLocation: typeof rental.provider === 'object' && rental.provider.location ? 
-                      `${rental.provider.location.city || ''}${rental.provider.location.country ? `, ${rental.provider.location.country}` : ''}` : '',
-                    providerLogo: typeof rental.provider === 'object' ? rental.provider.logo : null,
-                    providerContact: typeof rental.provider === 'object' ? rental.provider.contact : null,
-                    name: rental.name || rental.title || `${rental.specifications?.make || ''} ${rental.specifications?.model || ''}`,
-                    year: rental.specifications?.year || rental.year,
-                    transmission: rental.specifications?.transmission || rental.transmission,
-                    fuelType: rental.specifications?.fuelType || rental.fuelType,
-                    seats: rental.specifications?.seats || rental.seats,
-                    doors: rental.specifications?.doors || rental.doors,
-                    features: rental.features || []
-                  }}
-                  onRent={() => handleRentalItemClick(rental)}
-                />
-              </div>
-            ))}
+          <div className="bcc-service-carousel-wrap">
+            <div className="bcc-service-rental-grid bcc-service-carousel">
+              {currentListings.map(rental => (
+                <div className="bcc-service-rental-card-wrapper" key={rental._id || rental.id}>
+                  <RentalCard
+                    vehicle={{
+                      ...rental,
+                      provider: typeof rental.provider === 'object' ?
+                        rental.provider.businessName || rental.provider.name : rental.provider,
+                      providerLocation: typeof rental.provider === 'object' && rental.provider.location ?
+                        `${rental.provider.location.city || ''}${rental.provider.location.country ? `, ${rental.provider.location.country}` : ''}` : '',
+                      providerLogo: typeof rental.provider === 'object' ? rental.provider.logo : null,
+                      providerContact: typeof rental.provider === 'object' ? rental.provider.contact : null,
+                      name: rental.name || rental.title || `${rental.specifications?.make || ''} ${rental.specifications?.model || ''}`,
+                      year: rental.specifications?.year || rental.year,
+                      transmission: rental.specifications?.transmission || rental.transmission,
+                      fuelType: rental.specifications?.fuelType || rental.fuelType,
+                      seats: rental.specifications?.seats || rental.seats,
+                      doors: rental.specifications?.doors || rental.doors,
+                      features: rental.features || []
+                    }}
+                    onRent={() => handleRentalItemClick(rental)}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         );
       case 'transport':
         return (
-          <div className="bcc-service-transport-grid">
-            {currentListings.map(route => (
-              <PublicTransportCard
-                key={route._id || route.id}
-                route={route}
-                onBook={() => handleRentalItemClick(route)}
-              />
-            ))}
+          <div className="bcc-service-carousel-wrap">
+            <div className="bcc-service-transport-grid bcc-service-carousel">
+              {currentListings.map(route => (
+                <PublicTransportCard
+                  key={route._id || route.id}
+                  route={route}
+                  onBook={() => handleRentalItemClick(route)}
+                />
+              ))}
+            </div>
           </div>
         );
       case 'carpooling':
@@ -1235,16 +1295,6 @@ const ServicesPage = () => {
               <p className="bcc-services-hero-subtitle">
                 {selectedCategoryObject.heroSubtitle || selectedCategoryObject.shortDescription}
               </p>
-              <div className="bcc-services-hero-stats">
-                <div className="bcc-services-stat">
-                  <span className="bcc-services-stat-number">{filteredListings.length}</span>
-                  <span className="bcc-services-stat-label">Available Routes</span>
-                </div>
-                <div className="bcc-services-stat">
-                  <span className="bcc-services-stat-number">{filteredServices.length}</span>
-                  <span className="bcc-services-stat-label">Transport Providers</span>
-                </div>
-              </div>
             </div>
 
             {/* Departure board — right side, desktop; compact strip on mobile */}

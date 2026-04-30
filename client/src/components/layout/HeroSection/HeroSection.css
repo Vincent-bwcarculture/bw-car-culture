@@ -2218,9 +2218,37 @@
 
 @media (max-width: 768px) {
   .bcc-hero-quickform h1 { font-size: 1.7rem; }
-  .bcc-hero-quickform-row { flex-direction: column; align-items: stretch; }
-  .bcc-hero-quickform-arrow { display: none; }
+
+  /* 2-column grid on mobile — each row keeps its 2 fields side by side */
+  .bcc-hero-quickform-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    align-items: end;
+  }
+
+  /* Arrow between FROM→TO becomes a centered symbol */
+  .bcc-hero-quickform-arrow {
+    display: none;
+  }
+
+  /* FROM gets its own row spanning both columns, TO sits in next row—
+     handled by wrapping row having arrow hidden; FROM+TO already share a row
+     via the grid. The --wrap row for rentals just lets fields wrap in pairs. */
+  .bcc-hero-quickform-row--wrap {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .bcc-hero-quickform-field { min-width: 0; }
+
+  /* Submit/actions row spans full width */
+  .bcc-hero-quickform-actions {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .bcc-hero-quickform-submit { flex: 1; }
 }
 
 /* Light mode */
