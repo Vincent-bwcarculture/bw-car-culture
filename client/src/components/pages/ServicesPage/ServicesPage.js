@@ -1313,11 +1313,13 @@ const ServicesPage = () => {
 
               {selectedCategory === 'transport' && (
                 <div className="transport-hero-visual">
-                  <img
-                    src="/G801.png"
-                    alt="Public transport bus"
-                    className="transport-bus-img"
-                  />
+                  <div className="transport-bus-img-wrap">
+                    <img
+                      src="/G801.png"
+                      alt="Public transport bus"
+                      className="transport-bus-img"
+                    />
+                  </div>
                   <button
                     className="transport-find-btn"
                     onClick={() => searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
