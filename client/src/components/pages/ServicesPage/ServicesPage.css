@@ -1010,6 +1010,55 @@
   max-width: none;
 }
 
+/* Bus illustration + CTA button */
+.transport-hero-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.transport-bus-svg {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  opacity: 0.9;
+  filter: drop-shadow(0 4px 12px rgba(255,51,0,0.15));
+}
+
+.transport-find-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.25rem;
+  background: rgba(255,51,0,0.18);
+  border: 1px solid rgba(255,51,0,0.45);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, transform 0.12s;
+  white-space: nowrap;
+}
+
+.transport-find-btn:hover {
+  background: rgba(255,51,0,0.32);
+  border-color: rgba(255,51,0,0.7);
+  transform: translateY(-1px);
+}
+
+.transport-find-btn-arrow {
+  transition: transform 0.18s;
+}
+
+.transport-find-btn:hover .transport-find-btn-arrow {
+  transform: translateX(3px);
+}
+
 /* right column: departure board */
 .dep-board-wrap {
   flex: 0 0 300px;
@@ -1313,6 +1362,15 @@
     padding: 1.25rem 1rem 0.75rem;
     align-items: flex-start;
     text-align: left;
+  }
+
+  /* Hide bus illustration on mobile to keep it compact */
+  .transport-bus-svg {
+    display: none;
+  }
+
+  .transport-hero-visual {
+    margin-top: 0.5rem;
   }
 
   /* Mobile: narrow horizontal ticker-style strip below the text */
