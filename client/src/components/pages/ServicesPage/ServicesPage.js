@@ -93,7 +93,7 @@ const DepartureBoard = () => {
       setRows(
         [...routeRows, ...fareRows]
           .sort((a, b) => a._minsAway - b._minsAway)
-          .slice(0, 8)
+          .slice(0, 20)
       );
     });
   }, []);
@@ -113,6 +113,63 @@ const DepartureBoard = () => {
         (r.destination || '').toLowerCase().includes(q)
       )
     : rows;
+
+  // Auto-scroll ticker: only when not searching and there are enough rows to scroll
+  const shouldTicker = !q && visibleRows.length > 5;
+  const tickerRows = shouldTicker ? [...visibleRows, ...visibleRows] : visibleRows;
+  // ~2.5s per row, minimum 10s
+  const scrollDuration = Math.max(10, visibleRows.length * 2.5);
+
+  const renderRow = (row, i) => {
+    const minsAway = row.nextDep ? (row.nextDep.minutes - curMin + 1440) % 1440 : null;
+    const soon = minsAway !== null && minsAway <= 30;
+    const typeKey = (row.routeType || 'bus').toLowerCase();
+    const isHovered = hovered === `${row._id || i}-${i}`;
+    return (
+      <div
+        key={`${row._id || i}-${i}`}
+        className={`dep-board-row dep-board-row--clickable${soon ? ' dep-board-row--soon' : ''}`}
+        onClick={() => handleRowClick(row)}
+        onMouseEnter={() => setHovered(`${row._id || i}-${i}`)}
+        onMouseLeave={() => setHovered(null)}
+      >
+        <div className="dep-board-time">
+          {row.nextDep
+            ? <>{row.nextDep.str}{soon && <span className="dep-board-soon-dot" />}</>
+            : <span className="dep-board-fixed-tag">GOV'T</span>
+          }
+        </div>
+
+        <div className="dep-board-route">
+          <span className="dep-board-route-inner">
+            {(row.origin || '—').split(',')[0]}
+            <span className="dep-board-arrow"> › </span>
+            {(row.destination || '—').split(',')[0]}
+          </span>
+        </div>
+
+        <div className="dep-board-fare">
+          {row.fare != null ? `P${Number(row.fare).toLocaleString()}` : '—'}
+        </div>
+
+        <div className={`dep-board-type dep-board-type--${typeKey}`}>
+          {row.routeType || 'Bus'}
+        </div>
+
+        {isHovered && (row.duration || row.vehicleCount || row.notes) && (
+          <div className="dep-board-tooltip">
+            <div className="dep-board-tooltip-route">
+              {row.origin} → {row.destination}
+            </div>
+            {row.duration     && <div className="dep-board-tooltip-row">⏱ {row.duration}</div>}
+            {row.vehicleCount && <div className="dep-board-tooltip-row">🚌 {row.vehicleCount} vehicles on route</div>}
+            {row.notes        && <div className="dep-board-tooltip-note">{row.notes}</div>}
+            <div className="dep-board-tooltip-cta">Click to find transport →</div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="dep-board">
@@ -134,61 +191,19 @@ const DepartureBoard = () => {
         <span>TIME</span><span>ROUTE</span><span>FARE</span><span>TYPE</span>
       </div>
 
-      <div className="dep-board-rows">
+      <div className={`dep-board-rows${shouldTicker ? ' dep-board-rows--ticker' : ''}`}>
         {visibleRows.length === 0 ? (
           <div className="dep-board-empty">No active routes — check back soon</div>
-        ) : visibleRows.map((row, i) => {
-          const minsAway = row.nextDep ? (row.nextDep.minutes - curMin + 1440) % 1440 : null;
-          const soon = minsAway !== null && minsAway <= 30;
-          const typeKey = (row.routeType || 'bus').toLowerCase();
-          const isHovered = hovered === (row._id || i);
-
-          return (
-            <div
-              key={row._id || i}
-              className={`dep-board-row dep-board-row--clickable${soon ? ' dep-board-row--soon' : ''}`}
-              onClick={() => handleRowClick(row)}
-              onMouseEnter={() => setHovered(row._id || i)}
-              onMouseLeave={() => setHovered(null)}
-            >
-              <div className="dep-board-time">
-                {row.nextDep
-                  ? <>{row.nextDep.str}{soon && <span className="dep-board-soon-dot" />}</>
-                  : <span className="dep-board-fixed-tag">GOV'T</span>
-                }
-              </div>
-
-              <div className="dep-board-route">
-                <span className="dep-board-route-inner">
-                  {(row.origin || '—').split(',')[0]}
-                  <span className="dep-board-arrow"> › </span>
-                  {(row.destination || '—').split(',')[0]}
-                </span>
-              </div>
-
-              <div className="dep-board-fare">
-                {row.fare != null ? `P${Number(row.fare).toLocaleString()}` : '—'}
-              </div>
-
-              <div className={`dep-board-type dep-board-type--${typeKey}`}>
-                {row.routeType || 'Bus'}
-              </div>
-
-              {/* Hover tooltip */}
-              {isHovered && (row.duration || row.vehicleCount || row.notes) && (
-                <div className="dep-board-tooltip">
-                  <div className="dep-board-tooltip-route">
-                    {row.origin} → {row.destination}
-                  </div>
-                  {row.duration    && <div className="dep-board-tooltip-row">⏱ {row.duration}</div>}
-                  {row.vehicleCount && <div className="dep-board-tooltip-row">🚌 {row.vehicleCount} vehicles on route</div>}
-                  {row.notes       && <div className="dep-board-tooltip-note">{row.notes}</div>}
-                  <div className="dep-board-tooltip-cta">Click to find transport →</div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+        ) : shouldTicker ? (
+          <div
+            className="dep-board-ticker"
+            style={{ animationDuration: `${scrollDuration}s` }}
+          >
+            {tickerRows.map((row, i) => renderRow(row, i))}
+          </div>
+        ) : (
+          visibleRows.map((row, i) => renderRow(row, i))
+        )}
       </div>
 
       <div className="dep-board-footer">

@@ -1093,12 +1093,33 @@
 }
 
 .dep-board-rows {
-  max-height: 220px;
-  overflow-y: auto;
+  height: 220px;
+  overflow: hidden;
+  position: relative;
 }
 
-.dep-board-rows::-webkit-scrollbar { width: 3px; }
-.dep-board-rows::-webkit-scrollbar-thumb { background: rgba(255,51,0,0.35); border-radius: 2px; }
+/* Static (few rows or searching): allow scroll in case content overflows */
+.dep-board-rows:not(.dep-board-rows--ticker) {
+  overflow-y: auto;
+}
+.dep-board-rows:not(.dep-board-rows--ticker)::-webkit-scrollbar { width: 3px; }
+.dep-board-rows:not(.dep-board-rows--ticker)::-webkit-scrollbar-thumb { background: rgba(255,51,0,0.35); border-radius: 2px; }
+
+/* Ticker scroll animation */
+@keyframes dep-scroll-up {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+.dep-board-ticker {
+  animation: dep-scroll-up linear infinite;
+  will-change: transform;
+}
+
+/* Pause on hover so users can read / click rows */
+.dep-board-rows--ticker:hover .dep-board-ticker {
+  animation-play-state: paused;
+}
 
 .dep-board-row {
   display: grid;
@@ -1309,7 +1330,7 @@
 
   /* On mobile show only 4 rows max to stay compact */
   .dep-board-rows {
-    max-height: 132px;
+    height: 132px;
   }
 
   /* Tighten header on mobile */
