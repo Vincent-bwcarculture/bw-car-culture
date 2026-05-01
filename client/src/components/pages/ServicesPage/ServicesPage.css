@@ -957,6 +957,36 @@
   margin-top: 0.5rem;
 }
 
+/* Filter item: label + select stacked */
+.bcc-service-filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 120px;
+}
+
+.bcc-service-filter-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Override: solid dark background so browser doesn't bleed white */
+.bcc-service-filter-row--secondary .bcc-service-filter-select {
+  background-color: #1a1a1a;
+  border-color: rgba(255, 255, 255, 0.12);
+  width: 100%;
+  min-width: unset;
+}
+
+.bcc-service-filter-row--secondary .bcc-service-filter-select option {
+  background-color: #1a1a1a;
+  color: #fff;
+}
+
 /* Date / time native colour in dark context */
 .bcc-service-search-input[type="date"],
 .bcc-service-search-input[type="time"] {
@@ -1471,7 +1501,11 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem 0.75rem;
-    align-items: end;
+    align-items: start;
+  }
+
+  .bcc-service-filter-item {
+    min-width: unset;
   }
 
   .bcc-service-filter-row--secondary .bcc-service-search-button {

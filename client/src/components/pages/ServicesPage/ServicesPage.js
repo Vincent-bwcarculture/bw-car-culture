@@ -1552,14 +1552,16 @@ const ServicesPage = () => {
           {selectedCategory === 'transport' && selectedCategoryObject.filterOptions?.filters && (
             <div className="bcc-service-filter-row bcc-service-filter-row--secondary">
               {selectedCategoryObject.filterOptions.filters.map((filter, i) => (
-                <select
-                  key={i}
-                  className="bcc-service-filter-select"
-                  value={activeFilters[filter.name] || 'All'}
-                  onChange={e => handleFilterChange(filter.name, e.target.value)}
-                >
-                  {filter.options.map((opt, oi) => <option key={oi} value={opt}>{opt}</option>)}
-                </select>
+                <div key={i} className="bcc-service-filter-item">
+                  <label className="bcc-service-filter-label">{filter.label}</label>
+                  <select
+                    className="bcc-service-filter-select"
+                    value={activeFilters[filter.name] || 'All'}
+                    onChange={e => handleFilterChange(filter.name, e.target.value)}
+                  >
+                    {filter.options.map((opt, oi) => <option key={oi} value={opt}>{opt}</option>)}
+                  </select>
+                </div>
               ))}
             </div>
           )}
