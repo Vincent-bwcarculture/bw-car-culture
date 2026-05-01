@@ -1020,6 +1020,14 @@
   width: 100%;
 }
 
+.transport-bus-img {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.5));
+}
+
 .transport-find-btn {
   display: inline-flex;
   align-items: center;
@@ -1354,6 +1362,10 @@
     padding: 1.25rem 1rem 0.75rem;
     align-items: flex-start;
     text-align: left;
+  }
+
+  .transport-bus-img {
+    display: none;
   }
 
   .transport-hero-visual {
