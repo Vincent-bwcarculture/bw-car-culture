@@ -68,10 +68,12 @@ const NetworkTab = ({ profileData }) => {
       if (response.data.success) {
         let fetchedUsers = response.data.data || response.data.available || [];
 
-        // Filter out current user
+        // Filter out current user and private profiles
         const currentUserId = profileData?.id || profileData?._id;
         fetchedUsers = fetchedUsers.filter(user =>
-          (user._id || user.id) !== currentUserId
+          (user._id || user.id) !== currentUserId &&
+          user.profileVisibility !== 'private' &&
+          user?.profile?.privacy?.profileVisibility !== 'private'
         );
 
         // Apply client-side filtering if using fallback endpoint
