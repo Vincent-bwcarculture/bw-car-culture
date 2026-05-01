@@ -1313,38 +1313,7 @@ const ServicesPage = () => {
 
               {selectedCategory === 'transport' && (
                 <div className="transport-hero-visual">
-                  <svg className="transport-bus-svg" viewBox="0 0 300 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    {/* Ground shadow */}
-                    <ellipse cx="152" cy="87" rx="118" ry="4" fill="rgba(0,0,0,0.28)"/>
-                    {/* Main body */}
-                    <rect x="10" y="18" width="266" height="52" rx="8" fill="rgba(255,51,0,0.08)" stroke="rgba(255,51,0,0.28)" strokeWidth="1.5"/>
-                    {/* Roof bar */}
-                    <rect x="16" y="14" width="254" height="7" rx="4" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.09)" strokeWidth="1"/>
-                    {/* Accent stripe */}
-                    <line x1="10" y1="46" x2="276" y2="46" stroke="rgba(255,51,0,0.22)" strokeWidth="1.5"/>
-                    {/* Windows */}
-                    <rect x="20" y="24" width="22" height="15" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.14)" strokeWidth="1"/>
-                    <rect x="50" y="24" width="22" height="15" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.14)" strokeWidth="1"/>
-                    <rect x="80" y="24" width="22" height="15" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.14)" strokeWidth="1"/>
-                    <rect x="110" y="24" width="22" height="15" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.14)" strokeWidth="1"/>
-                    <rect x="140" y="24" width="22" height="15" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.14)" strokeWidth="1"/>
-                    <rect x="170" y="24" width="22" height="15" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.14)" strokeWidth="1"/>
-                    <rect x="200" y="24" width="22" height="15" rx="3" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.14)" strokeWidth="1"/>
-                    {/* Front windshield */}
-                    <path d="M240 18 L276 28 L276 44 L240 44 Z" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.14)" strokeWidth="1"/>
-                    {/* Headlight */}
-                    <ellipse cx="278" cy="38" rx="3.5" ry="5" fill="rgba(255,220,100,0.55)"/>
-                    {/* Door */}
-                    <rect x="10" y="36" width="9" height="32" rx="0" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" strokeWidth="1"/>
-                    {/* Rear light */}
-                    <rect x="10" y="24" width="4" height="8" rx="1" fill="rgba(255,80,60,0.5)"/>
-                    {/* Wheels */}
-                    <circle cx="66" cy="73" r="13" fill="#0d0d0d" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5"/>
-                    <circle cx="66" cy="73" r="6" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
-                    <circle cx="220" cy="73" r="13" fill="#0d0d0d" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5"/>
-                    <circle cx="220" cy="73" r="6" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
-                  </svg>
-
+                  {/* 3D bus model will go here */}
                   <button
                     className="transport-find-btn"
                     onClick={() => searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}

@@ -1020,14 +1020,6 @@
   width: 100%;
 }
 
-.transport-bus-svg {
-  width: 100%;
-  max-width: 280px;
-  height: auto;
-  opacity: 0.9;
-  filter: drop-shadow(0 4px 12px rgba(255,51,0,0.15));
-}
-
 .transport-find-btn {
   display: inline-flex;
   align-items: center;
@@ -1362,11 +1354,6 @@
     padding: 1.25rem 1rem 0.75rem;
     align-items: flex-start;
     text-align: left;
-  }
-
-  /* Hide bus illustration on mobile to keep it compact */
-  .transport-bus-svg {
-    display: none;
   }
 
   .transport-hero-visual {
