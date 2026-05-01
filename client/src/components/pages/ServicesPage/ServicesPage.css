@@ -1022,7 +1022,7 @@
 
 .transport-bus-img-wrap {
   width: 100%;
-  max-width: 300px;
+  max-width: 420px;
   overflow: hidden;
   line-height: 0;
 }
@@ -1069,8 +1069,8 @@
 
 /* right column: departure board */
 .dep-board-wrap {
-  flex: 0 0 300px;
-  min-width: 240px;
+  flex: 0 0 380px;
+  min-width: 300px;
   display: flex;
   flex-direction: column;
   justify-content: center;
