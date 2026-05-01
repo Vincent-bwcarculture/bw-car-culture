@@ -28,6 +28,19 @@
 /* ===== SECTION SELECTOR ===== */
 .section-selector {
   margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Section buttons fill available width; toggle-filters-btn sits at the end */
+.section-selector .section-buttons {
+  flex: 1;
+}
+
+/* Toggle button inside section-selector (desktop: keep existing look) */
+.section-selector .toggle-filters-btn {
+  flex-shrink: 0;
 }
 
 .section-buttons {
@@ -724,66 +737,51 @@
 /* ===== MOBILE SPACE OPTIMIZATION - HORIZONTAL FILTERS ===== */
 @media (max-width: 767px) {
   .marketplace-filters {
-    padding: 0.25rem;
+    padding: 0.35rem 0.5rem;
     margin-bottom: 0.5rem;
   }
-  
+
+  /* Merge section tabs + MORE FILTERS onto one row */
   .section-selector {
-    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.4rem;
   }
-  
+
   .section-buttons {
-    padding: 2px;
-    gap: 1px;
-  }
-  
-  .section-btn {
-    padding: 3px 4px;
-    min-height: 24px;
-    font-size: 9px;
-  }
-  
-  .section-badge {
-    font-size: 7px;
-    padding: 1px 2px;
-    margin-top: 1px;
-  }
-  
-  .section-description {
-    margin-top: 0.3rem;
-    padding: 0.3rem;
-  }
-  
-  .section-description h3 {
-    font-size: 0.8rem;
-    margin-bottom: 0.2rem;
-  }
-  
-  .section-description p {
-    font-size: 0.7rem;
-    margin-bottom: 0.3rem;
-  }
-  
-  .section-features {
+    flex: 1;
+    padding: 3px;
     gap: 2px;
   }
-  
-  .section-features span {
-    padding: 1px 3px;
-    font-size: 0.6rem;
+
+  /* Compact single-line tabs — hide icon, text only */
+  .section-btn {
+    flex-direction: row;
+    padding: 5px 6px;
+    min-height: 0;
+    font-size: 0.7rem;
+    gap: 0;
   }
-  
-  .filters-header {
-    margin-bottom: 0.3rem;
+
+  .section-icon {
+    display: none;
   }
-  
-  .filters-header h2 {
-    font-size: 0.9rem;
+
+  /* Description block is redundant on mobile — hide it */
+  .section-description {
+    display: none;
   }
-  
+
   .toggle-filters-btn {
-    padding: 2px 4px;
-    font-size: 0.6rem;
+    padding: 5px 8px;
+    font-size: 0.65rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .section-badge {
+    display: none;
   }
   
   /* UPDATED: Mobile layout for horizontal filters */
@@ -912,56 +910,18 @@
 /* ===== ULTRA-MOBILE OPTIMIZATION (Small Phones) - KEEP HORIZONTAL LAYOUT ===== */
 @media (max-width: 480px) {
   .marketplace-filters {
-    padding: 0.2rem;
+    padding: 0.3rem 0.4rem;
     margin-bottom: 0.3rem;
   }
-  
-  .section-selector {
-    margin-bottom: 0.3rem;
-  }
-  
+
   .section-btn {
-    padding: 2px 3px;
-    min-height: 20px;
-    font-size: 8px;
-  }
-  
-  .section-badge {
-    font-size: 6px;
-    padding: 1px;
-  }
-  
-  .section-description {
-    margin-top: 0.2rem;
-    padding: 0.2rem;
-  }
-  
-  .section-description h3 {
-    font-size: 0.75rem;
-    margin-bottom: 0.1rem;
-  }
-  
-  .section-description p {
+    padding: 4px 5px;
     font-size: 0.65rem;
-    margin-bottom: 0.2rem;
   }
-  
-  .section-features span {
-    padding: 1px 2px;
-    font-size: 0.55rem;
-  }
-  
-  .filters-header {
-    margin-bottom: 0.2rem;
-  }
-  
-  .filters-header h2 {
-    font-size: 0.8rem;
-  }
-  
+
   .toggle-filters-btn {
-    padding: 1px 3px;
-    font-size: 0.55rem;
+    padding: 4px 6px;
+    font-size: 0.6rem;
   }
   
   /* UPDATED: Keep horizontal layout even on very small screens */

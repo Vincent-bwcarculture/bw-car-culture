@@ -411,37 +411,29 @@ const MarketplaceFilters = ({
               </button>
             ))}
           </div>
-          
-          {/* ENHANCED: Better section description with features */}
-          <div className="section-description">
-            <div className="section-info">
-              <span className={`section-badge ${currentSectionConfig.badge}`}>
-                {currentSectionConfig.icon} {currentSectionConfig.title}
-              </span>
-              <p>{currentSectionConfig.description}</p>
-            </div>
-            {/* <div className="section-features">
-              {currentSectionConfig.features.map((feature, index) => (
-                <span key={index} className="feature-tag">
-                  {feature}
-                </span>
-              ))}
-            </div> */}
-          </div>
-        </div>
 
-        {!sidebarMode && (
-          <div className="filters-header">
+          {/* More Filters sits inline with the tabs on mobile */}
+          {!sidebarMode && (
             <button
               className="toggle-filters-btn"
               onClick={() => setExpanded(!expanded)}
               type="button"
               aria-expanded={expanded}
             >
-              {expanded ? 'Less Filters' : 'More Filters'}
+              {expanded ? '– Less' : '+ Filters'}
             </button>
+          )}
+        </div>
+
+        {/* Section description — desktop only, hidden on mobile via CSS */}
+        <div className="section-description">
+          <div className="section-info">
+            <span className={`section-badge ${currentSectionConfig.badge}`}>
+              {currentSectionConfig.icon} {currentSectionConfig.title}
+            </span>
+            <p>{currentSectionConfig.description}</p>
           </div>
-        )}
+        </div>
         
         {/* UPDATED: Quick Search and Filters Row - Mobile Optimized */}
         <div className="filters-quick-row">
