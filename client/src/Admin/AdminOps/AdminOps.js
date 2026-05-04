@@ -19,6 +19,11 @@ const LOG_CATS = ['Listings', 'Enquiries', 'Communications', 'Content', 'Tech/Pl
 const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
 const PRIORITY_COLOR = { low: '#22c55e', medium: '#f59e0b', high: '#f97316', urgent: '#ef4444' };
 
+const IDEA_STATUSES = ['idea', 'planned', 'in-progress', 'executed'];
+const IDEA_STATUS_COLOR = { idea: '#8b949e', planned: '#60a5fa', 'in-progress': '#f59e0b', executed: '#22c55e' };
+const EQ_PRIORITIES = ['now', 'soon', 'future'];
+const EQ_PRIORITY_COLOR = { now: '#ef4444', soon: '#f59e0b', future: '#60a5fa' };
+
 function useToken() {
   const token = localStorage.getItem('token');
   return { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } };
@@ -1194,6 +1199,377 @@ function ActivityLogSection({ currentUser, headers }) {
   );
 }
 
+// ─── Section: Ideas Tracker ───────────────────────────────────────────────────
+function IdeasSection({ headers }) {
+  const [ideas, setIdeas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(null);
+  const blankIdea = { title: '', description: '', executeBy: '', conditions: '', executionStandard: '', status: 'idea', priority: 'medium' };
+  const [form, setForm] = useState(blankIdea);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterPriority, setFilterPriority] = useState('');
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/admin/ideas`, { headers });
+      const d = await res.json();
+      if (d.success) setIdeas(d.data || []);
+    } catch (_) {}
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const startNew = () => { setForm(blankIdea); setEditing('new'); setError(''); };
+  const startEdit = (idea) => {
+    setForm({
+      title: idea.title || '',
+      description: idea.description || '',
+      executeBy: idea.executeBy ? idea.executeBy.substring(0, 10) : '',
+      conditions: idea.conditions || '',
+      executionStandard: idea.executionStandard || '',
+      status: idea.status || 'idea',
+      priority: idea.priority || 'medium',
+    });
+    setEditing(idea);
+    setError('');
+  };
+
+  const save = async () => {
+    if (!form.title.trim()) { setError('Title is required.'); return; }
+    setSaving(true);
+    try {
+      const isNew = editing === 'new';
+      const url = isNew ? `${API}/admin/ideas` : `${API}/admin/ideas/${editing._id}`;
+      const res = await fetch(url, { method: isNew ? 'POST' : 'PUT', headers, body: JSON.stringify(form) });
+      const d = await res.json();
+      if (!d.success) throw new Error(d.message);
+      await load(); setEditing(null); setError('');
+    } catch (e) { setError(e.message || 'Save failed.'); }
+    setSaving(false);
+  };
+
+  const remove = async (id) => {
+    if (!window.confirm('Delete this idea?')) return;
+    await fetch(`${API}/admin/ideas/${id}`, { method: 'DELETE', headers });
+    setIdeas(prev => prev.filter(i => i._id !== id));
+  };
+
+  const visible = ideas.filter(i => {
+    const s = !filterStatus || i.status === filterStatus;
+    const p = !filterPriority || i.priority === filterPriority;
+    return s && p;
+  });
+
+  return (
+    <div className="ops-section">
+      <div className="ops-section-title-row">
+        <h2 className="ops-section-title">💡 Ideas Tracker</h2>
+        <button className="ops-btn ops-btn--primary ops-btn--sm" onClick={startNew}>+ New Idea</button>
+      </div>
+
+      <div className="ops-toolbar">
+        <select className="ops-filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+          <option value="">All Statuses</option>
+          {IDEA_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+        </select>
+        <select className="ops-filter-select" value={filterPriority} onChange={e => setFilterPriority(e.target.value)}>
+          <option value="">All Priorities</option>
+          {['low', 'medium', 'high'].map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
+        </select>
+      </div>
+
+      {editing && (
+        <div className="ops-inline-editor">
+          <div className="ops-editor-row ops-editor-row--wrap">
+            <div className="ops-field ops-field--grow2">
+              <label className="ops-label">Idea Title *</label>
+              <input className="ops-input" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="What's the idea?" />
+            </div>
+            <div className="ops-field">
+              <label className="ops-label">Status</label>
+              <select className="ops-input" value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value }))}>
+                {IDEA_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+              </select>
+            </div>
+            <div className="ops-field">
+              <label className="ops-label">Priority</label>
+              <select className="ops-input" value={form.priority} onChange={e => setForm(p => ({ ...p, priority: e.target.value }))}>
+                {['low', 'medium', 'high'].map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
+              </select>
+            </div>
+            <div className="ops-field">
+              <label className="ops-label">Target Date</label>
+              <input className="ops-input ops-input--date" type="date" value={form.executeBy} onChange={e => setForm(p => ({ ...p, executeBy: e.target.value }))} />
+            </div>
+          </div>
+          <div className="ops-field ops-field--mt">
+            <label className="ops-label">Description</label>
+            <textarea className="ops-textarea" rows={3} value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Describe the idea in detail…" />
+          </div>
+          <div className="ops-editor-row ops-field--mt">
+            <div className="ops-field">
+              <label className="ops-label">What We Need to Execute</label>
+              <textarea className="ops-textarea" rows={2} value={form.conditions} onChange={e => setForm(p => ({ ...p, conditions: e.target.value }))} placeholder="Resources, people, or milestones needed…" />
+            </div>
+            <div className="ops-field">
+              <label className="ops-label">Execution Standard</label>
+              <textarea className="ops-textarea" rows={2} value={form.executionStandard} onChange={e => setForm(p => ({ ...p, executionStandard: e.target.value }))} placeholder="How to execute to a high standard…" />
+            </div>
+          </div>
+          {error && <p className="ops-error">{error}</p>}
+          <div className="ops-actions">
+            <button className="ops-btn ops-btn--ghost" onClick={() => setEditing(null)}>Cancel</button>
+            <button className="ops-btn ops-btn--primary" disabled={saving} onClick={save}>{saving ? 'Saving…' : 'Save Idea'}</button>
+          </div>
+        </div>
+      )}
+
+      {loading ? <div className="ops-empty">Loading…</div> : visible.length === 0 ? (
+        <div className="ops-empty">{ideas.length === 0 ? 'No ideas yet. Add your first one!' : 'No ideas match the current filters.'}</div>
+      ) : (
+        <div className="ops-ideas-grid">
+          {visible.map(idea => (
+            <div key={idea._id} className="ops-idea-card">
+              <div className="ops-idea-head">
+                <div className="ops-idea-badges">
+                  <span className="ops-idea-status-badge" style={{ background: `${IDEA_STATUS_COLOR[idea.status]}22`, color: IDEA_STATUS_COLOR[idea.status], border: `1px solid ${IDEA_STATUS_COLOR[idea.status]}44` }}>
+                    {idea.status}
+                  </span>
+                  <span className="ops-priority-dot" style={{ background: PRIORITY_COLOR[idea.priority] }} title={idea.priority} />
+                </div>
+                <div className="ops-idea-actions">
+                  <button className="ops-icon-btn" onClick={() => startEdit(idea)} title="Edit">✎</button>
+                  <button className="ops-icon-btn ops-icon-btn--del" onClick={() => remove(idea._id)} title="Delete">✕</button>
+                </div>
+              </div>
+              <h3 className="ops-idea-title">{idea.title}</h3>
+              {idea.executeBy && <span className="ops-idea-date">Target: {fmtShortDate(idea.executeBy)}</span>}
+              {idea.description && <p className="ops-idea-desc">{idea.description}</p>}
+              {idea.conditions && (
+                <div className="ops-idea-detail">
+                  <span className="ops-idea-detail-label">Needs</span>
+                  <p className="ops-idea-detail-text">{idea.conditions}</p>
+                </div>
+              )}
+              {idea.executionStandard && (
+                <div className="ops-idea-detail">
+                  <span className="ops-idea-detail-label">Standard</span>
+                  <p className="ops-idea-detail-text">{idea.executionStandard}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Section: Equipment Tracker ───────────────────────────────────────────────
+function EquipmentSection({ headers }) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(null);
+  const blankEq = { name: '', purpose: '', price: '', purchased: false, priority: 'soon', usageStandard: '', expectedResults: '', notes: '' };
+  const [form, setForm] = useState(blankEq);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [filterPurchased, setFilterPurchased] = useState('');
+  const [filterPriority, setFilterPriority] = useState('');
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/admin/equipment`, { headers });
+      const d = await res.json();
+      if (d.success) setItems(d.data || []);
+    } catch (_) {}
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const startNew = () => { setForm(blankEq); setEditing('new'); setError(''); };
+  const startEdit = (item) => {
+    setForm({
+      name: item.name || '',
+      purpose: item.purpose || '',
+      price: item.price != null ? String(item.price) : '',
+      purchased: !!item.purchased,
+      priority: item.priority || 'soon',
+      usageStandard: item.usageStandard || '',
+      expectedResults: item.expectedResults || '',
+      notes: item.notes || '',
+    });
+    setEditing(item);
+    setError('');
+  };
+
+  const save = async () => {
+    if (!form.name.trim()) { setError('Name is required.'); return; }
+    setSaving(true);
+    try {
+      const isNew = editing === 'new';
+      const url = isNew ? `${API}/admin/equipment` : `${API}/admin/equipment/${editing._id}`;
+      const payload = { ...form, price: form.price !== '' ? parseFloat(form.price) : null };
+      const res = await fetch(url, { method: isNew ? 'POST' : 'PUT', headers, body: JSON.stringify(payload) });
+      const d = await res.json();
+      if (!d.success) throw new Error(d.message);
+      await load(); setEditing(null); setError('');
+    } catch (e) { setError(e.message || 'Save failed.'); }
+    setSaving(false);
+  };
+
+  const remove = async (id) => {
+    if (!window.confirm('Delete this equipment entry?')) return;
+    await fetch(`${API}/admin/equipment/${id}`, { method: 'DELETE', headers });
+    setItems(prev => prev.filter(i => i._id !== id));
+  };
+
+  const togglePurchased = async (item) => {
+    const payload = { name: item.name, purpose: item.purpose, price: item.price, purchased: !item.purchased, priority: item.priority, usageStandard: item.usageStandard, expectedResults: item.expectedResults, notes: item.notes };
+    const res = await fetch(`${API}/admin/equipment/${item._id}`, { method: 'PUT', headers, body: JSON.stringify(payload) });
+    const d = await res.json();
+    if (d.success) setItems(prev => prev.map(i => i._id === item._id ? { ...i, purchased: !item.purchased } : i));
+  };
+
+  const visible = items.filter(i => {
+    const p = !filterPurchased || (filterPurchased === 'yes' ? i.purchased : !i.purchased);
+    const pr = !filterPriority || i.priority === filterPriority;
+    return p && pr;
+  });
+
+  const totalCost = items.reduce((s, i) => s + (i.price || 0), 0);
+  const purchasedCount = items.filter(i => i.purchased).length;
+  const pendingCount = items.filter(i => !i.purchased).length;
+
+  return (
+    <div className="ops-section">
+      <div className="ops-section-title-row">
+        <h2 className="ops-section-title">🔧 Equipment Tracker</h2>
+        <button className="ops-btn ops-btn--primary ops-btn--sm" onClick={startNew}>+ Add Equipment</button>
+      </div>
+
+      {items.length > 0 && (
+        <div className="ops-eq-stats">
+          <div className="ops-eq-stat"><span className="ops-eq-stat-val">{items.length}</span><span className="ops-eq-stat-label">Total</span></div>
+          <div className="ops-eq-stat"><span className="ops-eq-stat-val ops-eq-stat-val--green">{purchasedCount}</span><span className="ops-eq-stat-label">Purchased</span></div>
+          <div className="ops-eq-stat"><span className="ops-eq-stat-val ops-eq-stat-val--red">{pendingCount}</span><span className="ops-eq-stat-label">Pending</span></div>
+          {totalCost > 0 && <div className="ops-eq-stat"><span className="ops-eq-stat-val">P{totalCost.toLocaleString()}</span><span className="ops-eq-stat-label">Est. Total</span></div>}
+        </div>
+      )}
+
+      <div className="ops-toolbar">
+        <select className="ops-filter-select" value={filterPurchased} onChange={e => setFilterPurchased(e.target.value)}>
+          <option value="">All Items</option>
+          <option value="no">Not Purchased</option>
+          <option value="yes">Purchased</option>
+        </select>
+        <select className="ops-filter-select" value={filterPriority} onChange={e => setFilterPriority(e.target.value)}>
+          <option value="">All Priorities</option>
+          {EQ_PRIORITIES.map(p => <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>)}
+        </select>
+      </div>
+
+      {editing && (
+        <div className="ops-inline-editor">
+          <div className="ops-editor-row ops-editor-row--wrap">
+            <div className="ops-field ops-field--grow2">
+              <label className="ops-label">Equipment Name *</label>
+              <input className="ops-input" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Canon R5, DJI Mini 4 Pro…" />
+            </div>
+            <div className="ops-field">
+              <label className="ops-label">Priority</label>
+              <select className="ops-input" value={form.priority} onChange={e => setForm(p => ({ ...p, priority: e.target.value }))}>
+                {EQ_PRIORITIES.map(pr => <option key={pr} value={pr}>{pr.charAt(0).toUpperCase() + pr.slice(1)}</option>)}
+              </select>
+            </div>
+            <div className="ops-field">
+              <label className="ops-label">Price (BWP)</label>
+              <input className="ops-input" type="number" min="0" step="0.01" value={form.price} onChange={e => setForm(p => ({ ...p, price: e.target.value }))} placeholder="0.00" />
+            </div>
+            <div className="ops-field ops-field--checkbox-field">
+              <label className="ops-label ops-label--checkbox">
+                <input type="checkbox" checked={form.purchased} onChange={e => setForm(p => ({ ...p, purchased: e.target.checked }))} />
+                Purchased
+              </label>
+            </div>
+          </div>
+          <div className="ops-editor-row ops-field--mt">
+            <div className="ops-field">
+              <label className="ops-label">Purpose / Task</label>
+              <input className="ops-input" value={form.purpose} onChange={e => setForm(p => ({ ...p, purpose: e.target.value }))} placeholder="What will this be used for?" />
+            </div>
+            <div className="ops-field">
+              <label className="ops-label">Usage Standard</label>
+              <input className="ops-input" value={form.usageStandard} onChange={e => setForm(p => ({ ...p, usageStandard: e.target.value }))} placeholder="How it should be used…" />
+            </div>
+          </div>
+          <div className="ops-editor-row ops-field--mt">
+            <div className="ops-field">
+              <label className="ops-label">Expected Results</label>
+              <textarea className="ops-textarea" rows={2} value={form.expectedResults} onChange={e => setForm(p => ({ ...p, expectedResults: e.target.value }))} placeholder="What improvement or output do we expect?" />
+            </div>
+            <div className="ops-field">
+              <label className="ops-label">Notes</label>
+              <textarea className="ops-textarea" rows={2} value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} placeholder="Additional notes…" />
+            </div>
+          </div>
+          {error && <p className="ops-error">{error}</p>}
+          <div className="ops-actions">
+            <button className="ops-btn ops-btn--ghost" onClick={() => setEditing(null)}>Cancel</button>
+            <button className="ops-btn ops-btn--primary" disabled={saving} onClick={save}>{saving ? 'Saving…' : 'Save Equipment'}</button>
+          </div>
+        </div>
+      )}
+
+      {loading ? <div className="ops-empty">Loading…</div> : visible.length === 0 ? (
+        <div className="ops-empty">{items.length === 0 ? 'No equipment tracked yet.' : 'No items match the current filters.'}</div>
+      ) : (
+        <div className="ops-eq-grid">
+          {visible.map(item => (
+            <div key={item._id} className={`ops-eq-card${item.purchased ? ' ops-eq-card--purchased' : ''}`}>
+              <div className="ops-eq-card-head">
+                <div className="ops-eq-badges">
+                  <span className="ops-eq-priority-badge" style={{ color: EQ_PRIORITY_COLOR[item.priority] }}>● {item.priority}</span>
+                  {item.purchased && <span className="ops-eq-purchased-badge">✓ Purchased</span>}
+                </div>
+                <div className="ops-eq-actions">
+                  <button className="ops-icon-btn" onClick={() => startEdit(item)} title="Edit">✎</button>
+                  <button className={`ops-icon-btn ${item.purchased ? '' : 'ops-icon-btn--purchase'}`} onClick={() => togglePurchased(item)} title={item.purchased ? 'Mark not purchased' : 'Mark purchased'}>
+                    {item.purchased ? '↩' : '✓'}
+                  </button>
+                  <button className="ops-icon-btn ops-icon-btn--del" onClick={() => remove(item._id)} title="Delete">✕</button>
+                </div>
+              </div>
+              <h3 className="ops-eq-name">{item.name}</h3>
+              {item.price != null && item.price > 0 && <span className="ops-eq-price">P{item.price.toLocaleString()}</span>}
+              {item.purpose && <p className="ops-eq-purpose">{item.purpose}</p>}
+              {item.usageStandard && (
+                <div className="ops-idea-detail">
+                  <span className="ops-idea-detail-label">Usage</span>
+                  <p className="ops-idea-detail-text">{item.usageStandard}</p>
+                </div>
+              )}
+              {item.expectedResults && (
+                <div className="ops-idea-detail">
+                  <span className="ops-idea-detail-label">Expected</span>
+                  <p className="ops-idea-detail-text">{item.expectedResults}</p>
+                </div>
+              )}
+              {item.notes && <p className="ops-eq-notes">{item.notes}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const AdminOps = () => {
   const { user } = useAuth();
@@ -1211,6 +1587,8 @@ const AdminOps = () => {
       <TemplatesSection headers={headers} />
       <TasksSection currentUser={user} headers={headers} />
       <ActivityLogSection currentUser={user} headers={headers} />
+      <IdeasSection headers={headers} />
+      <EquipmentSection headers={headers} />
     </div>
   );
 };
