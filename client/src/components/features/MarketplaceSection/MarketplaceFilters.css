@@ -798,9 +798,9 @@
   
   .filter-control input,
   .filter-control select {
-    padding: 0.3rem 0.4rem;
+    padding: 0.2rem 0.4rem;
     font-size: 0.75rem;
-    min-height: 32px; /* Ensure touch-friendly height */
+    min-height: 28px;
   }
   
   .filter-control label {
@@ -852,7 +852,7 @@
   }
   
   .apply-filters-btn {
-    padding: 0.4rem 0.8rem;
+    padding: 0.28rem 0.8rem;
     font-size: 0.75rem;
   }
   

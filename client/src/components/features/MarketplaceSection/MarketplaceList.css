@@ -773,8 +773,9 @@ body.section-transitioning * {
   }
 
   .section-header {
-    margin-bottom: 6px; /* REDUCED from 20px */
-    flex-direction: column; /* STACK ON MOBILE */
+    margin-bottom: 6px;
+    flex-direction: column;
+    align-items: flex-start;
     text-align: left;
     gap: 4px;
   }
