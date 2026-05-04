@@ -745,13 +745,34 @@ input[type="radio"] {
     max-width: 90vw;
     margin: 1rem;
   }
-  
+
+  /* Keep 2-column grid on tablet — only wide items span full width */
   .form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
-  
+
   .features-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Still keep 2 columns on small phones for short fields */
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+
+  /* Only full-width fields (textarea, image upload, description) collapse to 1 */
+  .form-group.full-width,
+  .form-group:has(textarea),
+  .form-group:has(input[type="file"]) {
+    grid-column: 1 / -1;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
   }
 }
 

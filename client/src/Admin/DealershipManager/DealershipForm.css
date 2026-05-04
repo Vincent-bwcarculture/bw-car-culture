@@ -284,20 +284,29 @@
       max-width: 95%;
       max-height: 95vh;
     }
-    
+
+    /* Keep 2-column row layout on mobile */
     .form-row {
-      flex-direction: column;
-      gap: 0;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.6rem;
     }
-    
+
     .form-group {
-      min-width: 100%;
+      min-width: 0;
+      flex: 1 1 calc(50% - 0.3rem);
     }
-    
+
+    /* Full-width exceptions: textareas, selects that need space */
+    .form-group:has(textarea),
+    .form-group.full-width {
+      flex: 1 1 100%;
+    }
+
     .form-section {
       padding: 1rem;
     }
-    
+
     .modal-overlay {
       padding: 1rem;
     }

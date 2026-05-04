@@ -359,22 +359,41 @@
     }
     
     .inventory-form-grid {
-      grid-template-columns: 1fr;
-      gap: 1rem;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
     }
-    
+
+    /* Full-width for textareas and description fields */
+    .inventory-form-group:has(textarea),
+    .inventory-form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* Spec rows: keep key+value side by side, just narrower */
     .specification-row,
     .compatible-vehicle-row {
-      flex-direction: column;
-      gap: 0.8rem;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
-    
+
     .specification-key,
-    .specification-value,
+    .specification-value {
+      flex: 1 1 calc(50% - 0.25rem);
+      min-width: 0;
+      width: auto;
+    }
+
     .vehicle-make,
-    .vehicle-model,
+    .vehicle-model {
+      flex: 1 1 calc(50% - 0.25rem);
+      min-width: 0;
+      width: auto;
+    }
+
     .vehicle-years {
-      width: 100%;
+      flex: 1 1 100%;
+      width: auto;
     }
     
     .remove-button {

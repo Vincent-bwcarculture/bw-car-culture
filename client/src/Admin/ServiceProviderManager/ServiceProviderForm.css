@@ -552,10 +552,20 @@
     padding: 1rem 1.5rem;
   }
   
-  .spm-form-row,
+  /* Keep 2-column grid on mobile */
+  .spm-form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+
   .spm-image-upload-section {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 1rem;
+  }
+
+  /* Full-width exception for textareas */
+  .spm-form-group:has(textarea) {
+    grid-column: 1 / -1;
   }
   
   .spm-working-hours-row {
