@@ -734,34 +734,38 @@ const MarketplaceList = () => {
     }
     
     if (filters.minPrice) {
+      const minPrice = Number(filters.minPrice);
       filterFunctions.push(car => {
         if (car.isPromoCard) return true;
         const price = parseFloat(car.price);
-        return !isNaN(price) && price >= filters.minPrice;
+        return !isNaN(price) && price >= minPrice;
       });
     }
-    
+
     if (filters.maxPrice) {
+      const maxPrice = Number(filters.maxPrice);
       filterFunctions.push(car => {
         if (car.isPromoCard) return true;
         const price = parseFloat(car.price);
-        return !isNaN(price) && price <= filters.maxPrice;
+        return !isNaN(price) && price <= maxPrice;
       });
     }
-    
+
     if (filters.minYear) {
+      const minYear = parseInt(filters.minYear);
       filterFunctions.push(car => {
         if (car.isPromoCard) return true;
         const year = parseInt(car.year || car.specifications?.year);
-        return !isNaN(year) && year >= filters.minYear;
+        return !isNaN(year) && year >= minYear;
       });
     }
-    
+
     if (filters.maxYear) {
+      const maxYear = parseInt(filters.maxYear);
       filterFunctions.push(car => {
         if (car.isPromoCard) return true;
         const year = parseInt(car.year || car.specifications?.year);
-        return !isNaN(year) && year <= filters.maxYear;
+        return !isNaN(year) && year <= maxYear;
       });
     }
     
@@ -796,7 +800,7 @@ const MarketplaceList = () => {
       const minMileage = Number(filters.minMileage);
       filterFunctions.push(car => {
         if (car.isPromoCard) return true;
-        const mileage = Number(car.specifications?.mileage);
+        const mileage = Number(car.specifications?.mileage || car.mileage);
         return !isNaN(mileage) && mileage >= minMileage;
       });
     }
@@ -805,8 +809,35 @@ const MarketplaceList = () => {
       const maxMileage = Number(filters.maxMileage);
       filterFunctions.push(car => {
         if (car.isPromoCard) return true;
-        const mileage = Number(car.specifications?.mileage);
+        const mileage = Number(car.specifications?.mileage || car.mileage);
         return !isNaN(mileage) && mileage <= maxMileage;
+      });
+    }
+
+    if (filters.fuelType) {
+      const fuelLower = filters.fuelType.toLowerCase();
+      filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
+        const fuel = (car.fuelType || car.specifications?.fuelType || '').toLowerCase();
+        return fuel === fuelLower;
+      });
+    }
+
+    if (filters.country) {
+      const countryLower = filters.country.toLowerCase();
+      filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
+        const country = (car.location?.country || car.dealer?.location?.country || '').toLowerCase();
+        return country.includes(countryLower) || countryLower.includes(country);
+      });
+    }
+
+    if (filters.availability) {
+      const avail = filters.availability.toLowerCase();
+      filterFunctions.push(car => {
+        if (car.isPromoCard) return true;
+        const status = (car.transit?.status || car.transit || car.availability || '').toLowerCase();
+        return status === avail;
       });
     }
 
