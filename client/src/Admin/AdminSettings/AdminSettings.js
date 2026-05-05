@@ -1,6 +1,6 @@
 // AdminSettings.js — admin feature toggles stored globally in MongoDB
 import React, { useState } from 'react';
-import { useSiteSettings, notifySiteSettingsChanged } from './useSiteSettings';
+import { useSiteSettings, notifySiteSettingsChanged } from './useSiteSettings.js';
 import './AdminSettings.css';
 
 const API = process.env.REACT_APP_API_URL || '/api';

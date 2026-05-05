@@ -327,7 +327,6 @@ const ReviewFAB = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { showFAB } = useSiteSettings();
-  if (!showFAB) return null;
 
   // Hide/show FAB on scroll
   useEffect(() => {
@@ -360,6 +359,8 @@ const ReviewFAB = () => {
       setShowReviewModal(true);
     }
   };
+
+  if (!showFAB) return null;
 
   return (
     <>
