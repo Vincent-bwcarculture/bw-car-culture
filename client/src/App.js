@@ -13,6 +13,7 @@ import { NewsProvider } from './context/NewsContext.js';
 
 // Layout Components
 import Chatbot from './components/shared/Chatbot/Chatbot.js';
+import { useSiteSettings } from './Admin/AdminSettings/useSiteSettings.js';
 import MainLayout from './components/layout/MainLayout.js';
 import LoadingScreen from './components/shared/LoadingScreen/LoadingScreen.js';
 import SplashScreen from './components/SplashScreen.js';
@@ -83,6 +84,7 @@ const DealershipManager = React.lazy(() => import('./Admin/DealershipManager/Dea
 const AdminScripts = React.lazy(() => import('./Admin/AdminScripts/AdminScripts.js'));
 const AdminOps = React.lazy(() => import('./Admin/AdminOps/AdminOps.js'));
 const AdminBusiness = React.lazy(() => import('./Admin/AdminBusiness/AdminBusiness.js'));
+const AdminSettings = React.lazy(() => import('./Admin/AdminSettings/AdminSettings.js'));
 // — Journalist
 const CreateArticle = React.lazy(() => import('./components/journalist/CreateArticle.js'));
 // — User pages
@@ -1142,6 +1144,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
+        <Route path="/admin/settings" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <AdminLayout>
+              <AdminSettings />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
         <Route path="/admin/gion" element={
           <AdminLayout>
             <div className="gion-admin-wrapper">
@@ -1485,6 +1495,7 @@ function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [analyticsInitialized, setAnalyticsInitialized] = useState(false);
   const appStartTime = React.useRef(Date.now());
+  const siteSettings = useSiteSettings();
 
   // Preload 3D car model in the background after the app settles
   useEffect(() => {
@@ -1790,7 +1801,7 @@ function App() {
               <div className="App">
                 {process.env.NODE_ENV === 'development' && <ConnectionTest />}
                 <AppRoutes />
-                <Chatbot />
+                {siteSettings.showChatbot && <Chatbot />}
                 {false && (
                   <GIONApp withChatbot={false} />
                 )}

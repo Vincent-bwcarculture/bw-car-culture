@@ -5,6 +5,25 @@ import { useAuth } from '../context/AuthContext.js';
 import { useNotifications } from '../hooks/useNotifications.js';
 import './AdminHeader.css';
 
+const IconBell = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+  </svg>
+);
+
+const IconSearch = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </svg>
+);
+
+const IconMenu = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+);
+
 const AdminHeader = ({ onToggleSidebar }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -16,9 +35,7 @@ const AdminHeader = ({ onToggleSidebar }) => {
     try {
       await logout();
       navigate('/login');
-    } catch (err) {
-      console.error('Logout error:', err);
-      // Force logout even if API call fails
+    } catch {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
@@ -32,16 +49,6 @@ const AdminHeader = ({ onToggleSidebar }) => {
     }
   };
 
-  const getNotificationIcon = (type) => {
-    switch (type) {
-      case 'feedback': return '💬';
-      case 'user': return '👤';
-      case 'system': return '⚙️';
-      case 'alert': return '⚠️';
-      default: return '📝';
-    }
-  };
-
   const getPriorityClass = (priority) => {
     switch (priority) {
       case 'high': return 'priority-high';
@@ -52,54 +59,40 @@ const AdminHeader = ({ onToggleSidebar }) => {
   };
 
   const formatNotificationTime = (timestamp) => {
-    const now = new Date();
-    const time = new Date(timestamp);
-    const diffInMinutes = Math.floor((now - time) / (1000 * 60));
-    
+    const diffInMinutes = Math.floor((Date.now() - new Date(timestamp)) / 60000);
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
+    const h = Math.floor(diffInMinutes / 60);
+    if (h < 24) return `${h}h ago`;
+    return `${Math.floor(h / 24)}d ago`;
   };
+
+  const avatarSrc = user?.avatar || user?.profile?.avatar || null;
+  const initials = user?.name?.charAt(0)?.toUpperCase() || 'A';
 
   return (
     <header className="admin-header">
       <div className="header-left">
-        <button 
-          className="menu-toggle"
-          onClick={onToggleSidebar}
-          aria-label="Toggle Sidebar"
-        >
-          ☰
+        <button className="menu-toggle" onClick={onToggleSidebar} aria-label="Toggle Sidebar">
+          <IconMenu />
         </button>
-        
         <div className="search-bar">
-          <input 
-            type="text" 
-            placeholder="Search..."
-            aria-label="Search"
-          />
-          <button className="search-button">🔍</button>
+          <IconSearch />
+          <input type="text" placeholder="Search..." aria-label="Search" />
         </div>
       </div>
 
       <div className="header-right">
-        {/* Real-time Notifications */}
+        {/* Notifications */}
         <div className="notifications-container">
-          <button 
+          <button
             className="notifications-toggle"
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={() => { setShowNotifications(p => !p); setShowUserMenu(false); }}
             aria-label="Notifications"
           >
-            🔔
+            <IconBell />
             {unreadCount > 0 && (
-              <span className="notification-badge">
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
+              <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
             )}
           </button>
 
@@ -108,57 +101,35 @@ const AdminHeader = ({ onToggleSidebar }) => {
               <div className="notifications-header">
                 <h3>Notifications</h3>
                 {unreadCount > 0 && (
-                  <button 
-                    className="mark-all-read"
-                    onClick={() => {
-                      markAllAsRead();
-                      setShowNotifications(false);
-                    }}
-                  >
-                    Mark all as read
+                  <button className="mark-all-read" onClick={() => { markAllAsRead(); setShowNotifications(false); }}>
+                    Mark all read
                   </button>
                 )}
               </div>
-              
               <div className="notifications-list">
                 {notifications.length === 0 ? (
-                  <div className="no-notifications">
-                    <p>No notifications yet</p>
-                  </div>
+                  <div className="no-notifications"><p>No notifications</p></div>
                 ) : (
-                  notifications.slice(0, 10).map(notification => (
-                    <div 
-                      key={notification.id} 
-                      className={`notification-item ${notification.unread ? 'unread' : ''} ${getPriorityClass(notification.priority)}`}
-                      onClick={() => handleNotificationClick(notification)}
+                  notifications.slice(0, 10).map(n => (
+                    <div
+                      key={n.id}
+                      className={`notification-item ${n.unread ? 'unread' : ''} ${getPriorityClass(n.priority)}`}
+                      onClick={() => handleNotificationClick(n)}
                     >
-                      <span className="notification-icon">
-                        {getNotificationIcon(notification.type)}
-                      </span>
                       <div className="notification-content">
-                        <h4>{notification.title}</h4>
-                        <p>{notification.message}</p>
-                        <span className="notification-time">
-                          {formatNotificationTime(notification.timestamp)}
-                        </span>
+                        <h4>{n.title}</h4>
+                        <p>{n.message}</p>
+                        <span className="notification-time">{formatNotificationTime(n.timestamp)}</span>
                       </div>
-                      {notification.unread && (
-                        <span className="unread-indicator"></span>
-                      )}
+                      {n.unread && <span className="unread-indicator" />}
                     </div>
                   ))
                 )}
               </div>
-              
               {notifications.length > 10 && (
                 <div className="notifications-footer">
-                  <button 
-                    onClick={() => {
-                      navigate('/admin/notifications');
-                      setShowNotifications(false);
-                    }}
-                  >
-                    View All Notifications
+                  <button onClick={() => { navigate('/admin/notifications'); setShowNotifications(false); }}>
+                    View All
                   </button>
                 </div>
               )}
@@ -166,23 +137,29 @@ const AdminHeader = ({ onToggleSidebar }) => {
           )}
         </div>
 
-        {/* User Menu */}
+        {/* User Avatar */}
         <div className="user-menu-container">
-          <button 
+          <button
             className="user-menu-toggle"
-            onClick={() => setShowUserMenu(!showUserMenu)}
+            onClick={() => { setShowUserMenu(p => !p); setShowNotifications(false); }}
           >
             <div className="user-avatar">
-              {user?.name?.charAt(0)?.toUpperCase() || 'A'}
+              {avatarSrc
+                ? <img src={avatarSrc} alt={user?.name || 'Admin'} className="user-avatar-img" />
+                : <span>{initials}</span>
+              }
             </div>
             <span className="user-name">{user?.name || 'Admin'}</span>
           </button>
 
           {showUserMenu && (
             <div className="user-dropdown">
-              <div className="user-info">
+              <div className="user-info" onClick={() => { navigate('/profile'); setShowUserMenu(false); }} style={{ cursor: 'pointer' }}>
                 <div className="user-avatar-large">
-                  {user?.name?.charAt(0)?.toUpperCase() || 'A'}
+                  {avatarSrc
+                    ? <img src={avatarSrc} alt={user?.name || 'Admin'} className="user-avatar-img" />
+                    : <span>{initials}</span>
+                  }
                 </div>
                 <div>
                   <h4>{user?.name || 'Admin'}</h4>
@@ -190,38 +167,14 @@ const AdminHeader = ({ onToggleSidebar }) => {
                 </div>
               </div>
               <div className="user-menu-items">
-                <button 
-                  className="user-menu-item"
-                  onClick={() => {
-                    navigate('/admin/profile');
-                    setShowUserMenu(false);
-                  }}
-                >
-                  <span>👤</span> Profile
+                <button className="user-menu-item" onClick={() => { navigate('/profile'); setShowUserMenu(false); }}>
+                  Profile
                 </button>
-                <button 
-                  className="user-menu-item"
-                  onClick={() => {
-                    navigate('/admin/settings');
-                    setShowUserMenu(false);
-                  }}
-                >
-                  <span>⚙️</span> Settings
+                <button className="user-menu-item" onClick={() => { navigate('/admin/settings'); setShowUserMenu(false); }}>
+                  Settings
                 </button>
-                <button 
-                  className="user-menu-item"
-                  onClick={() => {
-                    navigate('/admin/security');
-                    setShowUserMenu(false);
-                  }}
-                >
-                  <span>🔒</span> Security
-                </button>
-                <button 
-                  className="user-menu-item logout-button" 
-                  onClick={handleLogout}
-                >
-                  <span>📤</span> Sign Out
+                <button className="user-menu-item logout-button" onClick={handleLogout}>
+                  Sign Out
                 </button>
               </div>
             </div>

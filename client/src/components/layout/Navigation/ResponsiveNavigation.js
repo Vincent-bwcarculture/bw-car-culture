@@ -10,6 +10,7 @@ import {
 import { useAuth } from '../../../context/AuthContext.js';
 import useUnreadNotifCount from '../../../hooks/useUnreadNotifCount.js';
 import EnhancedFABModal from './EnhancedFABModal.js';
+import { useSiteSettings } from '../../../Admin/AdminSettings/useSiteSettings.js';
 import './ResponsiveNavigation.css';
 
 // Updated navigation categories - News added for desktop, Profile kept for mobile
@@ -325,6 +326,8 @@ const ReviewFAB = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { showFAB } = useSiteSettings();
+  if (!showFAB) return null;
 
   // Hide/show FAB on scroll
   useEffect(() => {

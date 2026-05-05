@@ -1,0 +1,153 @@
+/* AdminSettings.css */
+.adm-settings-page {
+  padding: 1.5rem;
+  max-width: 760px;
+}
+
+.adm-settings-header {
+  margin-bottom: 2rem;
+}
+
+.adm-settings-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.3rem;
+}
+
+.adm-settings-sub {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ── Section ── */
+.adm-settings-section {
+  background: #161b22;
+  border: 1px solid #21262d;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.adm-settings-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e6edf3;
+  margin: 0 0 0.4rem;
+}
+
+.adm-settings-section-note {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin: 0 0 1.25rem;
+  line-height: 1.5;
+}
+
+/* ── Rows ── */
+.adm-settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.adm-settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid #21262d;
+}
+
+.adm-settings-row:last-child { border-bottom: none; }
+
+.adm-settings-row--danger .adm-settings-row-label {
+  color: #f87171;
+}
+
+.adm-settings-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.adm-settings-row-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #e6edf3;
+}
+
+.adm-settings-row-desc {
+  font-size: 0.78rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* ── Toggle switch ── */
+.adm-toggle {
+  width: 44px;
+  height: 24px;
+  background: #30363d;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.2s;
+  padding: 0;
+}
+
+.adm-toggle--on { background: #ff3300; }
+
+.adm-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  display: block;
+}
+
+.adm-toggle--on .adm-toggle-knob { transform: translateX(20px); }
+
+/* ── Link button ── */
+.adm-settings-link-btn {
+  padding: 0.45rem 1rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid #30363d;
+  border-radius: 7px;
+  color: #c9d1d9;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.adm-settings-link-btn:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: #484f58;
+  color: #e6edf3;
+}
+
+/* ── Save feedback ── */
+.adm-settings-saved {
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  color: #22c55e;
+  font-weight: 500;
+  margin-bottom: 0;
+}
+
+@media (max-width: 600px) {
+  .adm-settings-page { padding: 1rem; }
+  .adm-settings-section { padding: 1rem; }
+  .adm-settings-row { flex-wrap: wrap; gap: 0.75rem; }
+}
