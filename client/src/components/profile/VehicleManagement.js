@@ -15,6 +15,8 @@ import UserSubmissionCard from './UserSubmissionCard.js';
 import SubmissionEditModal from './SubmissionEditModal.js';
 import './VehicleManagement.css';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
+
 const VehicleManagement = () => {
   const navigate = useNavigate();
 
@@ -282,7 +284,7 @@ const VehicleManagement = () => {
     try {
       setEditLoading(true);
       
-      const apiUrl = `https://bw-car-culture-api.vercel.app/api/user/submissions/${submission._id}/edit`;
+      const apiUrl = `${API_BASE}/api/user/submissions/${submission._id}/edit`;
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -314,7 +316,7 @@ const VehicleManagement = () => {
     try {
       setEditLoading(true);
       
-      const apiUrl = `https://bw-car-culture-api.vercel.app/api/user/submissions/${editingSubmission._id}`;
+      const apiUrl = `${API_BASE}/api/user/submissions/${editingSubmission._id}`;
       
       const response = await fetch(apiUrl, {
         method: 'PUT',
@@ -350,7 +352,7 @@ const VehicleManagement = () => {
     try {
       setLoading(true);
       
-      const apiUrl = `https://bw-car-culture-api.vercel.app/api/user/submissions/${submission._id}/clone`;
+      const apiUrl = `${API_BASE}/api/user/submissions/${submission._id}/clone`;
       
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -473,7 +475,7 @@ const VehicleManagement = () => {
     try {
       setLoading(true);
       
-      const apiUrl = 'https://bw-car-culture-api.vercel.app/api/user/my-submissions';
+      const apiUrl = `${API_BASE}/api/user/my-submissions`;
       
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -582,7 +584,7 @@ const VehicleManagement = () => {
     try {
       setLoading(true);
       
-      const apiUrl = 'https://bw-car-culture-api.vercel.app/api/user/submit-listing';
+      const apiUrl = `${API_BASE}/api/user/submit-listing`;
       
       // Calculate pricing details
       let pricingDetails = null;

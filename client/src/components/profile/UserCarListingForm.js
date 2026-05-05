@@ -5,6 +5,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { imageService } from '../../services/imageService.js';
 import './UserCarListingForm.css';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
+
 const UserCarListingForm = ({
   onSubmit,
   onCancel,
@@ -766,7 +768,7 @@ const handleFormSubmit = async (e) => {
 
         console.log('🔄 Uploading to /api/user/upload-images...');
         
-        const uploadResponse = await fetch('https://bw-car-culture-api.vercel.app/api/user/upload-images', {
+        const uploadResponse = await fetch(`${API_BASE}/api/user/upload-images`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -836,7 +838,7 @@ const handleFormSubmit = async (e) => {
         const boostFormData = new FormData();
         boostFormData.append('image0', boostProofFile);
         boostFormData.append('folder', 'boost-payment-proofs');
-        const boostRes = await fetch('https://bw-car-culture-api.vercel.app/api/user/upload-images', {
+        const boostRes = await fetch(`${API_BASE}/api/user/upload-images`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
           body: boostFormData
@@ -1042,7 +1044,7 @@ const handleFormSubmit = async (e) => {
     showMessage('info', 'Submitting your listing...');
     console.log('🔄 Submitting listing to /api/user/submit-listing...');
     
-    const submitResponse = await fetch('https://bw-car-culture-api.vercel.app/api/user/submit-listing', {
+    const submitResponse = await fetch(`${API_BASE}/api/user/submit-listing`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
