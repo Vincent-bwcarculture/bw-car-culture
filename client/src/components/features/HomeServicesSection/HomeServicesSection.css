@@ -270,28 +270,46 @@
 
 @media (max-width: 768px) {
   .home-services-section {
-    margin: 3rem 0;
+    margin: 1.25rem 0;
     padding: 0;
   }
 
   .home-services-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
     padding: 0 0.75rem;
   }
 
   .home-services-header h2 {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .home-services-header h2::after {
+    bottom: -6px;
+    width: 36px;
+    height: 2px;
+  }
+
+  .home-services-view-all {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+    border-width: 1.5px;
+    flex-shrink: 0;
   }
 
   .home-services-categories {
     justify-content: flex-start;
     overflow-x: auto;
-    padding: 0.5rem 1rem;
+    flex-wrap: nowrap;
+    padding: 0.25rem 0.75rem 0.5rem;
+    margin-bottom: 0.75rem;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
 
   .home-services-categories::-webkit-scrollbar {
@@ -301,35 +319,42 @@
   .home-services-category-button {
     white-space: nowrap;
     flex-shrink: 0;
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-  }
-}
-
-@media (max-width: 576px) {
-  .carousel-nav {
-    width: 30px;
-    height: 30px;
-    font-size: 1rem;
-  }
-  
-  .home-services-carousel-container {
-    padding: 0 20px;
-  }
-
-  .home-services-category-button {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.78rem;
     gap: 0.3rem;
   }
 
-  .home-services-view-all {
-    padding: 0.5rem 1.2rem;
+  .home-services-category-icon {
     font-size: 0.9rem;
   }
 
-  .home-services-category-icon {
-    font-size: 1rem;
+  .home-services-carousel-container {
+    padding: 0 24px;
+  }
+
+  .carousel-nav {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-services-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .home-services-categories {
+    padding: 0.25rem 0.5rem 0.4rem;
+  }
+
+  .home-services-category-button {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.75rem;
+  }
+
+  .home-services-carousel-container {
+    padding: 0 20px;
   }
 }
 
