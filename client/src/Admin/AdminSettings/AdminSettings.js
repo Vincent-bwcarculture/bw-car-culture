@@ -1,30 +1,9 @@
-// AdminSettings.js — admin feature toggles stored in localStorage
-import React, { useState, useEffect } from 'react';
+// AdminSettings.js — admin feature toggles stored globally in MongoDB
+import React, { useState } from 'react';
+import { useSiteSettings, notifySiteSettingsChanged } from './useSiteSettings';
 import './AdminSettings.css';
 
-const SETTINGS_KEY = 'bwcc_site_settings';
-
-const DEFAULTS = {
-  showFAB: true,
-  showChatbot: true,
-  showMarketplaceCreate: true,
-  maintenanceMode: false,
-};
-
-export function getSiteSettings() {
-  try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : { ...DEFAULTS };
-  } catch {
-    return { ...DEFAULTS };
-  }
-}
-
-function saveSiteSettings(settings) {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-  // Notify other components on same page
-  window.dispatchEvent(new CustomEvent('siteSettingsChanged', { detail: settings }));
-}
+const API = process.env.REACT_APP_API_URL || '/api';
 
 const TOGGLES = [
   {
@@ -51,29 +30,49 @@ const TOGGLES = [
 ];
 
 const AdminSettings = () => {
-  const [settings, setSettings] = useState(getSiteSettings);
+  const settings = useSiteSettings();
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
 
-  const toggle = (key) => {
+  const toggle = async (key) => {
     const next = { ...settings, [key]: !settings[key] };
-    setSettings(next);
-    saveSiteSettings(next);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1800);
+    // Optimistic update — all subscribers see it immediately
+    notifySiteSettingsChanged(next);
+    setSaving(true);
+    setError('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API}/admin/site-settings`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(next),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || 'Save failed');
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1800);
+    } catch (err) {
+      setError('Could not save — changes will reset on reload.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <div className="adm-settings-page">
       <div className="adm-settings-header">
         <h1 className="adm-settings-title">Settings</h1>
-        <p className="adm-settings-sub">Control which features are visible on the platform. Changes apply immediately on this device.</p>
+        <p className="adm-settings-sub">Control which features are visible on the platform. Changes apply globally for all users.</p>
       </div>
 
       <div className="adm-settings-section">
         <h2 className="adm-settings-section-title">Platform Features</h2>
         <p className="adm-settings-section-note">
-          These toggles control visibility of UI features across the site.
-          Settings are saved in the browser — use the API-based feature flags (coming soon) for cross-device control.
+          Toggle features on or off site-wide. Changes take effect immediately for all visitors.
         </p>
 
         <div className="adm-settings-list">
@@ -86,6 +85,7 @@ const AdminSettings = () => {
               <button
                 className={`adm-toggle${settings[t.key] ? ' adm-toggle--on' : ''}`}
                 onClick={() => toggle(t.key)}
+                disabled={saving}
                 aria-checked={settings[t.key]}
                 role="switch"
               >
@@ -95,7 +95,8 @@ const AdminSettings = () => {
           ))}
         </div>
 
-        {saved && <p className="adm-settings-saved">Settings saved.</p>}
+        {saved && <p className="adm-settings-saved">Saved — all users will see the change.</p>}
+        {error && <p className="adm-settings-saved" style={{ color: '#f87171' }}>{error}</p>}
       </div>
 
       <div className="adm-settings-section">

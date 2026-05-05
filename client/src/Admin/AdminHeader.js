@@ -67,7 +67,7 @@ const AdminHeader = ({ onToggleSidebar }) => {
     return `${Math.floor(h / 24)}d ago`;
   };
 
-  const avatarSrc = user?.avatar || user?.profile?.avatar || null;
+  const avatarSrc = user?.avatar?.url || user?.profile?.avatar?.url || (typeof user?.avatar === 'string' ? user?.avatar : null) || null;
   const initials = user?.name?.charAt(0)?.toUpperCase() || 'A';
 
   return (
