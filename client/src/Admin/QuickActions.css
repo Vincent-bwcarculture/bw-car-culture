@@ -72,12 +72,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .qa-action-button {
-    flex: 1 1 100%;
-  }
-}
-
 /* High Contrast Mode */
 @media (prefers-contrast: more) {
   .qa-action-button {
