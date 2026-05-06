@@ -57,8 +57,91 @@ const DealershipManager = () => {
     total: 0
   });
 
+  const [copiedId, setCopiedId] = useState(null);
+
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const generateWelcomeMessage = (seller) => {
+    const name = seller.businessName || `${seller.privateSeller?.firstName || ''} ${seller.privateSeller?.lastName || ''}`.trim() || 'Valued Partner';
+    return `BW CAR CULTURE
+Botswana's Default Digital Mobility Platform
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Dear ${name},
+
+Welcome to Bw Car Culture — Botswana's default digital mobility platform, redefining how vehicles are discovered, marketed, and transacted.
+
+You are among a select group of founding dealerships onboarded at this stage. Your early positioning places you at the foundation of what is being built into Botswana's central layer for automotive commerce, media, and customer engagement.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✦ YOUR FOUNDING PARTNER BENEFITS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PREMIUM REGISTRATION — 2026
+Full access to premium features at no cost for the 2026 calendar year. No setup fees. No surprises.
+
+DEDICATED DEALERSHIP DASHBOARD
+A branded dashboard to manage inventory, monitor inquiries, and track listing performance — all in one place. (Your dashboard is being configured and will be activated shortly.)
+
+MARKETPLACE LISTINGS
+List your vehicles directly on the platform, visible to buyers actively searching across Botswana. Free tier listings go live upon approval at no cost.
+
+MEDIA-DRIVEN EXPOSURE
+Optional promotion through our social media ecosystem, reaching 700,000+ engaged followers. Available per listing at a flat rate of BWP 200.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✦ THE PLATFORM ADVANTAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Bw Car Culture combines marketplace + media + data — giving dealerships both reach and measurable results, not just presence.
+
+We are actively developing:
+→ Advanced dealership analytics and lead tracking
+→ Integrated customer messaging and inquiry management
+→ Financing integrations with partner institutions
+→ A structured vehicle history and lifecycle layer
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✦ WHAT MAKES THIS POSSIBLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+We are deeply grateful for the Botswana government's support through the Botswana Innovation Hub and the MIT Kuo Sharper Center for Prosperity and Entrepreneurship — whose institutional backing gives us every confidence that a world-class digital experience for dealers and their customers is not a distant goal. It is the roadmap we are executing on.
+
+Bw Car Culture is already the largest automotive community platform in Botswana, with growing regional reach. Our aim is to become the definitive platform for automotive transactions and mobility data in Botswana and beyond.
+
+Your early involvement is strategic — founding partners benefit from priority visibility, direct input into platform evolution, and first-mover advantage as the ecosystem scales.
+
+Thank you for being part of this journey.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Warm regards,
+The Bw Car Culture Team
+🌐 www.bwcarculture.com
+
+© 2026 Bw Car Culture · Gaborone, Botswana
+Empowering Dealers. Connecting Buyers. Driving Commerce.`;
+  };
+
+  const handleCopyWelcomeMessage = (seller) => {
+    const message = generateWelcomeMessage(seller);
+    navigator.clipboard.writeText(message).then(() => {
+      setCopiedId(seller._id);
+      setTimeout(() => setCopiedId(null), 2500);
+    }).catch(() => {
+      // Fallback for browsers without clipboard API
+      const ta = document.createElement('textarea');
+      ta.value = message;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setCopiedId(seller._id);
+      setTimeout(() => setCopiedId(null), 2500);
+    });
+  };
 
   useEffect(() => {
     fetchSellers();
@@ -717,7 +800,16 @@ const DealershipManager = () => {
                     >
                       $
                     </button>
-                    <button 
+                    {seller.sellerType !== 'private' && (
+                      <button
+                        className={`action-btn welcome-msg${copiedId === seller._id ? ' copied' : ''}`}
+                        onClick={() => handleCopyWelcomeMessage(seller)}
+                        title="Copy welcome message"
+                      >
+                        {copiedId === seller._id ? '✓' : '📋'}
+                      </button>
+                    )}
+                    <button
                       className="action-btn delete"
                       onClick={() => handleDeleteSeller(seller._id)}
                       title={`Delete ${seller.sellerType === 'private' ? 'private seller' : 'dealership'}`}

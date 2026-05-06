@@ -495,6 +495,19 @@
   border-color: #fca5a5;
 }
 
+.action-btn.welcome-msg:hover {
+  background: #f0f9ff;
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+.action-btn.welcome-msg.copied {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #bbf7d0;
+  pointer-events: none;
+}
+
 /* ── Pagination ── */
 .pagination {
   display: flex;
