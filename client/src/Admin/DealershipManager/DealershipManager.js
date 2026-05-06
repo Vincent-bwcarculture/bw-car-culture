@@ -58,6 +58,7 @@ const DealershipManager = () => {
   });
 
   const [copiedId, setCopiedId] = useState(null);
+  const [transferState, setTransferState] = useState({}); // { [sellerId]: 'loading'|'done'|'error' }
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -141,6 +142,32 @@ Empowering Dealers. Connecting Buyers. Driving Commerce.`;
       setCopiedId(seller._id);
       setTimeout(() => setCopiedId(null), 2500);
     });
+  };
+
+  const handleTransferListings = async (seller) => {
+    const name = seller.businessName || 'this dealership';
+    if (!window.confirm(`Transfer all listings created by this dealer's user account to "${name}"?\n\nThis will update their existing vehicle listings to show under the dealership.`)) return;
+
+    setTransferState(prev => ({ ...prev, [seller._id]: 'loading' }));
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+      const res = await http.post(
+        `/api/admin/dealers/${seller._id}/transfer-listings`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data.success) {
+        setTransferState(prev => ({ ...prev, [seller._id]: 'done' }));
+        alert(`✅ ${res.data.message}`);
+        setTimeout(() => setTransferState(prev => { const s = {...prev}; delete s[seller._id]; return s; }), 3000);
+      } else {
+        throw new Error(res.data.message || 'Transfer failed');
+      }
+    } catch (err) {
+      setTransferState(prev => ({ ...prev, [seller._id]: 'error' }));
+      alert(`❌ ${err.response?.data?.message || err.message || 'Transfer failed'}`);
+      setTimeout(() => setTransferState(prev => { const s = {...prev}; delete s[seller._id]; return s; }), 3000);
+    }
   };
 
   useEffect(() => {
@@ -807,6 +834,22 @@ Empowering Dealers. Connecting Buyers. Driving Commerce.`;
                         title="Copy welcome message"
                       >
                         {copiedId === seller._id ? '✓' : '📋'}
+                      </button>
+                    )}
+                    {seller.sellerType !== 'private' && (
+                      <button
+                        className={`action-btn transfer${
+                          transferState[seller._id] === 'loading' ? ' loading' :
+                          transferState[seller._id] === 'done'    ? ' done'    :
+                          transferState[seller._id] === 'error'   ? ' error'   : ''
+                        }`}
+                        onClick={() => handleTransferListings(seller)}
+                        disabled={transferState[seller._id] === 'loading'}
+                        title="Transfer user's existing listings to this dealership"
+                      >
+                        {transferState[seller._id] === 'loading' ? '…' :
+                         transferState[seller._id] === 'done'    ? '✓' :
+                         transferState[seller._id] === 'error'   ? '!' : '⇄'}
                       </button>
                     )}
                     <button

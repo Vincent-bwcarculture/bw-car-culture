@@ -508,6 +508,30 @@
   pointer-events: none;
 }
 
+.action-btn.transfer:hover {
+  background: #f0f9ff;
+  color: #0369a1;
+  border-color: #7dd3fc;
+}
+
+.action-btn.transfer.loading {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.action-btn.transfer.done {
+  background: #f0fdf4;
+  color: #15803d;
+  border-color: #bbf7d0;
+  pointer-events: none;
+}
+
+.action-btn.transfer.error {
+  background: #fff1f0;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
 /* ── Pagination ── */
 .pagination {
   display: flex;
