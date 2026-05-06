@@ -21,6 +21,7 @@ const AdminUserSubmissions = () => {
   const [error, setError] = useState('');
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [stats, setStats] = useState({ 
@@ -333,13 +334,19 @@ const AdminUserSubmissions = () => {
   const handleReviewSubmission = (submission) => {
     console.log('Opening review modal for submission:', submission._id);
     setSelectedSubmission(submission);
+    setGalleryIndex(0);
     setReviewData({
       action: 'approve',
       adminNotes: '',
-      subscriptionTier: Object.keys(pricingData.tiers)[0] || 'basic' // Use first available tier
+      subscriptionTier: Object.keys(pricingData.tiers)[0] || 'basic'
     });
     setShowReviewModal(true);
-    setError(''); // Clear any previous errors
+    setError('');
+  };
+
+  const getAllImages = (submission) => {
+    const images = submission?.listingData?.images || [];
+    return images.map(img => (typeof img === 'string' ? img : img?.url)).filter(Boolean);
   };
 
   const submitReview = async () => {
@@ -1053,52 +1060,210 @@ const AdminUserSubmissions = () => {
             </div>
             
             <div className="admin-submissions-modal-body">
-              <div className="admin-submissions-submission-summary">
-                <h3>{selectedSubmission.listingData?.title}</h3>
-                <p>By: {selectedSubmission.userName}</p>
-                <p>Vehicle: {selectedSubmission.listingData?.specifications?.make} {selectedSubmission.listingData?.specifications?.model}</p>
-                <p>Price: {formatPrice(selectedSubmission.listingData?.pricing?.price)}</p>
-                
-                {/* Show assistance request info in modal */}
-                {hasListingAssistance(selectedSubmission) && (
-                  <div className="admin-submissions-assistance-info">
-                    <div className="admin-submissions-assistance-alert">
-                      <Headphones size={16} />
-                      <span>User requested professional listing assistance</span>
+
+              {/* ── Image Gallery ── */}
+              {(() => {
+                const imgs = getAllImages(selectedSubmission);
+                if (imgs.length === 0) return (
+                  <div className="review-gallery-empty">
+                    <Image size={32} />
+                    <span>No photos uploaded</span>
+                  </div>
+                );
+                return (
+                  <div className="review-gallery">
+                    <div className="review-gallery-main">
+                      <img src={imgs[galleryIndex]} alt={`Vehicle photo ${galleryIndex + 1}`} />
+                      <span className="review-gallery-counter">{galleryIndex + 1} / {imgs.length}</span>
+                      {galleryIndex > 0 && (
+                        <button className="review-gallery-nav review-gallery-prev" onClick={() => setGalleryIndex(i => i - 1)}>‹</button>
+                      )}
+                      {galleryIndex < imgs.length - 1 && (
+                        <button className="review-gallery-nav review-gallery-next" onClick={() => setGalleryIndex(i => i + 1)}>›</button>
+                      )}
                     </div>
-                    {getWhatsAppContact(selectedSubmission) && (
-                      <p>WhatsApp Contact: {getWhatsAppContact(selectedSubmission)}</p>
+                    {imgs.length > 1 && (
+                      <div className="review-gallery-thumbs">
+                        {imgs.map((url, i) => (
+                          <button
+                            key={i}
+                            className={`review-gallery-thumb${i === galleryIndex ? ' active' : ''}`}
+                            onClick={() => setGalleryIndex(i)}
+                          >
+                            <img src={url} alt={`Thumb ${i + 1}`} />
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </div>
-                )}
-                
-                {/* Show selected plan and pricing in modal */}
-                {(selectedSubmission.listingData?.selectedPlan || selectedSubmission.listingData?.selectedAddons?.length > 0) && (
-                  <div className="admin-submissions-modal-pricing-summary">
-                    <h4>Selected Plan & Pricing:</h4>
-                    {pricingData.loaded ? (
-                      <>
-                        {selectedSubmission.listingData?.selectedPlan && (
-                          <p>Plan: {getPlanInfo(selectedSubmission.listingData.selectedPlan).name} 
-                             (P{getPlanInfo(selectedSubmission.listingData.selectedPlan).price})</p>
-                        )}
-                        {selectedSubmission.listingData?.selectedAddons?.length > 0 && (
-                          <p>Add-ons: {selectedSubmission.listingData.selectedAddons.length} selected 
-                             (+P{selectedSubmission.listingData.selectedAddons.reduce((total, addonId) => 
-                               total + getAddonInfo(addonId).price, 0)})</p>
-                        )}
-                        <p><strong>Total: P{calculateTotalCost(selectedSubmission.listingData?.selectedPlan, selectedSubmission.listingData?.selectedAddons)}</strong></p>
-                      </>
-                    ) : (
-                      <p>Loading pricing information...</p>
-                    )}
+                );
+              })()}
+
+              {/* ── Title / Status / Price ── */}
+              <div className="review-detail-section review-title-row">
+                <div>
+                  <h3 className="review-vehicle-title">{selectedSubmission.listingData?.title || 'Untitled'}</h3>
+                  <div className="review-meta-row">
+                    {getStatusBadge(selectedSubmission.status)}
+                    <span className="review-submitted-by">By: <strong>{selectedSubmission.userName}</strong></span>
+                    <span className="review-date">{formatDate(selectedSubmission.createdAt)}</span>
                   </div>
-                )}
+                </div>
+                <div className="review-price-block">
+                  <span className="review-price">{formatPrice(selectedSubmission.listingData?.pricing?.price)}</span>
+                  {selectedSubmission.listingData?.pricing?.negotiable && (
+                    <span className="review-negotiable">Negotiable</span>
+                  )}
+                </div>
               </div>
-              
-              <div className="admin-submissions-review-form">
+
+              {/* ── Specifications ── */}
+              <div className="review-detail-section">
+                <h4 className="review-section-title"><Car size={14} /> Specifications</h4>
+                <div className="review-spec-grid">
+                  {[
+                    ['Make', selectedSubmission.listingData?.specifications?.make],
+                    ['Model', selectedSubmission.listingData?.specifications?.model],
+                    ['Year', selectedSubmission.listingData?.specifications?.year],
+                    ['Mileage', selectedSubmission.listingData?.specifications?.mileage ? `${Number(selectedSubmission.listingData.specifications.mileage).toLocaleString()} km` : null],
+                    ['Transmission', selectedSubmission.listingData?.specifications?.transmission],
+                    ['Fuel Type', selectedSubmission.listingData?.specifications?.fuelType],
+                    ['Engine', selectedSubmission.listingData?.specifications?.engine],
+                    ['Condition', selectedSubmission.listingData?.specifications?.condition],
+                    ['Colour', selectedSubmission.listingData?.specifications?.color || selectedSubmission.listingData?.specifications?.colour],
+                    ['Body Type', selectedSubmission.listingData?.specifications?.bodyType || selectedSubmission.listingData?.specifications?.category],
+                    ['Doors', selectedSubmission.listingData?.specifications?.doors],
+                    ['Seats', selectedSubmission.listingData?.specifications?.seats],
+                  ].filter(([, v]) => v != null && v !== '').map(([label, value]) => (
+                    <div key={label} className="review-spec-item">
+                      <span className="review-spec-label">{label}</span>
+                      <span className="review-spec-value">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ── Description ── */}
+              {selectedSubmission.listingData?.description && (
+                <div className="review-detail-section">
+                  <h4 className="review-section-title"><FileText size={14} /> Description</h4>
+                  <p className="review-description">{selectedSubmission.listingData.description}</p>
+                </div>
+              )}
+
+              {/* ── Features ── */}
+              {(() => {
+                const feats = selectedSubmission.listingData?.features;
+                let allFeats = [];
+                if (Array.isArray(feats)) {
+                  allFeats = feats;
+                } else if (feats && typeof feats === 'object') {
+                  allFeats = Object.values(feats).flat();
+                }
+                if (allFeats.length === 0) return null;
+                return (
+                  <div className="review-detail-section">
+                    <h4 className="review-section-title"><Star size={14} /> Features & Extras</h4>
+                    <div className="review-features-grid">
+                      {allFeats.map((f, i) => <span key={i} className="review-feature-tag">{f}</span>)}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* ── Contact & Location ── */}
+              <div className="review-detail-section">
+                <h4 className="review-section-title"><Phone size={14} /> Contact & Location</h4>
+                <div className="review-contact-grid">
+                  {selectedSubmission.listingData?.contact?.phone && (
+                    <div className="review-contact-item">
+                      <Phone size={13} /><span>{selectedSubmission.listingData.contact.phone}</span>
+                    </div>
+                  )}
+                  {selectedSubmission.listingData?.contact?.whatsapp && (
+                    <div className="review-contact-item">
+                      <MessageCircle size={13} /><span>WhatsApp: {selectedSubmission.listingData.contact.whatsapp}</span>
+                    </div>
+                  )}
+                  {selectedSubmission.listingData?.contact?.email && (
+                    <div className="review-contact-item">
+                      <ExternalLink size={13} /><span>{selectedSubmission.listingData.contact.email}</span>
+                    </div>
+                  )}
+                  {(selectedSubmission.listingData?.location?.city || selectedSubmission.listingData?.location?.country) && (
+                    <div className="review-contact-item">
+                      <MapPin size={13} />
+                      <span>{[selectedSubmission.listingData.location.city, selectedSubmission.listingData.location.country].filter(Boolean).join(', ')}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* ── Plan & Pricing ── */}
+              {(selectedSubmission.listingData?.selectedPlan || selectedSubmission.listingData?.selectedAddons?.length > 0) && (
+                <div className="review-detail-section">
+                  <h4 className="review-section-title"><CreditCard size={14} /> Selected Plan & Pricing</h4>
+                  {pricingData.loaded ? (
+                    <div className="review-spec-grid">
+                      {selectedSubmission.listingData?.selectedPlan && (
+                        <div className="review-spec-item">
+                          <span className="review-spec-label">Plan</span>
+                          <span className="review-spec-value">{getPlanInfo(selectedSubmission.listingData.selectedPlan).name} — P{getPlanInfo(selectedSubmission.listingData.selectedPlan).price}</span>
+                        </div>
+                      )}
+                      {selectedSubmission.listingData?.selectedAddons?.map(addonId => (
+                        <div key={addonId} className="review-spec-item">
+                          <span className="review-spec-label">Add-on</span>
+                          <span className="review-spec-value">{getAddonInfo(addonId).name} — P{getAddonInfo(addonId).price}</span>
+                        </div>
+                      ))}
+                      <div className="review-spec-item review-spec-total">
+                        <span className="review-spec-label">Total</span>
+                        <span className="review-spec-value">P{calculateTotalCost(selectedSubmission.listingData?.selectedPlan, selectedSubmission.listingData?.selectedAddons)}</span>
+                      </div>
+                    </div>
+                  ) : <p style={{color:'#8b949e',fontSize:'0.82rem'}}>Loading pricing…</p>}
+                </div>
+              )}
+
+              {/* ── Boost Proof of Payment ── */}
+              {(selectedSubmission.listingData?.featuredBoost?.proofUrl || selectedSubmission.listingData?.featuredBoost?.requested) && (
+                <div className="review-detail-section">
+                  <h4 className="review-section-title"><TrendingUp size={14} /> Social Media Boost</h4>
+                  {selectedSubmission.listingData?.featuredBoost?.proofUrl ? (
+                    <div className="review-boost-proof">
+                      <p className="review-boost-label">Proof of Payment (BWP 200):</p>
+                      <a href={selectedSubmission.listingData.featuredBoost.proofUrl} target="_blank" rel="noopener noreferrer">
+                        <img src={selectedSubmission.listingData.featuredBoost.proofUrl} alt="Boost payment proof" className="review-boost-img" />
+                      </a>
+                    </div>
+                  ) : (
+                    <p className="review-boost-pending">Boost requested — proof of payment not yet uploaded.</p>
+                  )}
+                </div>
+              )}
+
+              {/* ── Professional Assistance ── */}
+              {hasListingAssistance(selectedSubmission) && (
+                <div className="review-detail-section review-assistance-section">
+                  <h4 className="review-section-title"><Headphones size={14} /> Professional Assistance Requested</h4>
+                  {getWhatsAppContact(selectedSubmission) && (
+                    <a
+                      href={getAssistanceWhatsAppLink(selectedSubmission)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="review-whatsapp-btn"
+                    >
+                      <MessageCircle size={14} /> Contact via WhatsApp
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* ── Review Decision Form ── */}
+              <div className="review-detail-section admin-submissions-review-form">
+                <h4 className="review-section-title"><CheckCircle size={14} /> Decision</h4>
                 <div className="admin-submissions-form-group">
-                  <label>Decision</label>
                   <div className="admin-submissions-radio-group">
                     <label className="admin-submissions-radio-option">
                       <input
@@ -1125,10 +1290,9 @@ const AdminUserSubmissions = () => {
                   </div>
                 </div>
 
-                {/* Use actual pricing data in dropdown */}
                 {reviewData.action === 'approve' && pricingData.loaded && (
                   <div className="admin-submissions-form-group">
-                    <label>Recommended Subscription Tier</label>
+                    <label>Subscription Tier</label>
                     <select
                       value={reviewData.subscriptionTier}
                       onChange={(e) => setReviewData({...reviewData, subscriptionTier: e.target.value})}
@@ -1147,8 +1311,8 @@ const AdminUserSubmissions = () => {
                   <textarea
                     value={reviewData.adminNotes}
                     onChange={(e) => setReviewData({...reviewData, adminNotes: e.target.value})}
-                    placeholder={reviewData.action === 'approve' 
-                      ? "Add any notes for the approval..." 
+                    placeholder={reviewData.action === 'approve'
+                      ? "Add any notes for the approval..."
                       : "Explain why this submission is being rejected..."}
                     rows={4}
                   />
