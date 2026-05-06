@@ -748,6 +748,12 @@ const handleFormSubmit = async (e) => {
       return;
     }
 
+    // Require proof of payment when boost is selected
+    if (wantsBoost && !boostProofFile) {
+      showMessage('error', 'Please upload your proof of payment (BWP 200) before submitting with the Social Media Feature.');
+      return;
+    }
+
     console.log(`📤 Starting submission with ${imageFiles?.length || 0} images`);
 
     // ========================================
@@ -1085,9 +1091,9 @@ const handleFormSubmit = async (e) => {
     // Reset form to clean state
     resetForm();
     
-    // Call parent callback if provided
+    // Call parent callback — pass result plus hasBoost so parent can show correct success messaging
     if (onSubmit) {
-      onSubmit(result);
+      onSubmit({ ...result, hasBoost: wantsBoost && !!boostProofFile });
     }
 
   } catch (error) {

@@ -579,89 +579,14 @@ const VehicleManagement = () => {
     }
   };
 
-  // Handle car listing form submission
-  const handleListingFormSubmit = async (listingData) => {
-    try {
-      setLoading(true);
-      
-      const apiUrl = `${API_BASE}/api/user/submit-listing`;
-      
-      // Calculate pricing details
-      let pricingDetails = null;
-      if (selectedPlan && pricingData.loaded) {
-        const planInfo = getPlanInfo(selectedPlan);
-        const totalCost = calculateTotalCost(selectedPlan, selectedAddons);
-        const addonCost = totalCost - planInfo.price;
-        const selectedAddonDetails = getAddonDetails(selectedAddons);
-        
-        pricingDetails = {
-          ...planInfo,
-          addonCost,
-          totalCost,
-          addons: selectedAddonDetails,
-          hasAddons: selectedAddonDetails.length > 0
-        };
-      }
-      
-      console.log('Submitting to:', apiUrl);
-      console.log('Listing data with pricing:', {
-        ...listingData,
-        selectedPlan,
-        selectedAddons,
-        pricingDetails,
-        status: 'pending_review',
-        submissionType: selectedPlan === 'free' ? 'free_tier' : 'paid_tier'
-      });
-      
-      // Submit listing for admin review
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          listingData: {
-            ...listingData,
-            selectedPlan,
-            selectedAddons,
-            pricingDetails,
-            status: 'pending_review',
-            submissionType: selectedPlan === 'free' ? 'free_tier' : 'paid_tier'
-          }
-        })
-      });
-
-      const result = await response.json();
-      
-      if (response.ok && result.success) {
-        setPendingListingData(result.data);
-        setListingStep('submitted');
-        
-        if (selectedPlan === 'free') {
-          showMessage('success', '🎉 FREE listing submitted for review! No payment required - we\'ll contact you within 24-48 hours.');
-        } else {
-          showMessage('success', '🎉 Listing submitted for review! We\'ll contact you within 24-48 hours.');
-        }
-        
-        // Refresh submissions
-        fetchUserSubmissions();
-        
-        // Reset form state
-        setTimeout(() => {
-          setSelectedPlan(null);
-          setSelectedAddons([]);
-          setActiveSection('submissions');
-        }, 3000);
-      } else {
-        console.error('API Error Response:', result);
-        showMessage('error', result.message || 'Failed to submit listing');
-      }
-    } catch (error) {
-      console.error('Listing submission error:', error);
-      showMessage('error', 'Failed to submit listing for review');
-    } finally {
-      setLoading(false);
+  // Receives the result already submitted by UserCarListingForm — just update UI state
+  const handleListingFormSubmit = (result) => {
+    if (result && result.success) {
+      setPendingListingData({ ...result.data, hasBoost: result.hasBoost });
+      setListingStep('submitted');
+      fetchUserSubmissions();
+    } else {
+      showMessage('error', result?.message || 'Failed to submit listing');
     }
   };
 
@@ -980,33 +905,31 @@ const VehicleManagement = () => {
 
     // Step 3: Submission Confirmation
     if (listingStep === 'submitted') {
+      const hasBoost = pendingListingData?.hasBoost;
       return (
         <div className="vm-create-listing-section">
           <div className="vm-submission-success">
             <CheckCircle size={64} color="#27ae60" />
-            <h3>
-              Listing Submitted Successfully!
-              {selectedPlan === 'free' && <span className="vm-free-badge-large">FREE TIER</span>}
-            </h3>
-            <p>Your car listing has been submitted for admin review.</p>
+            <h3>Listing Submitted!</h3>
+            <p>Your vehicle listing has been received and is now awaiting admin review.</p>
             <div className="vm-next-steps">
               <h4>What happens next?</h4>
               <ul>
-                <li>✅ Admin reviews your listing (FREE)</li>
-                <li>📧 You'll receive email notification within 24-48 hours</li>
-                {selectedPlan === 'free' ? (
-                  <li>🚗 Your FREE listing goes live immediately after approval</li>
-                ) : (
-                  <>
-                    <li>💳 Pay for your selected plan after approval</li>
-                    <li>🚗 Your listing goes live immediately after payment</li>
-                  </>
+                <li>Our team reviews your listing — usually within 24 hours</li>
+                <li>Once approved, your listing goes live on the marketplace immediately as a standard listing</li>
+                {hasBoost && (
+                  <li>Your Social Media Feature boost will be activated once our team verifies your proof of payment</li>
                 )}
               </ul>
             </div>
-            <button 
+            <button
               className="vm-btn vm-btn-primary"
-              onClick={() => setActiveSection('submissions')}
+              onClick={() => {
+                setListingStep('form');
+                setSelectedPlan(null);
+                setSelectedAddons([]);
+                setActiveSection('submissions');
+              }}
             >
               View My Submissions
             </button>
