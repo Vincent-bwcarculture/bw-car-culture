@@ -354,11 +354,80 @@
 .user-menu-item.logout-button { color: #ff6633; }
 .user-menu-item.logout-button:hover { background: rgba(255,51,0,0.08); color: #ff3300; }
 
+/* ── Pending-action quick buttons ── */
+.header-pending-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.hpa-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.32rem 0.7rem;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: #8b949e;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.hpa-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: #c9d1d9;
+}
+
+/* When count > 0 the button lights up */
+.hpa-btn--review.hpa-btn--active {
+  border-color: rgba(255, 51, 0, 0.5);
+  background: rgba(255, 51, 0, 0.1);
+  color: #ff6633;
+}
+
+.hpa-btn--boost.hpa-btn--active {
+  border-color: rgba(255, 180, 0, 0.5);
+  background: rgba(255, 180, 0, 0.1);
+  color: #f5a623;
+}
+
+.hpa-btn--stuck.hpa-btn--active {
+  border-color: rgba(255, 51, 0, 0.7);
+  background: rgba(255, 51, 0, 0.15);
+  color: #ff3300;
+}
+
+.hpa-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: #ff3300;
+  color: #fff;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.hpa-badge--amber { background: #f5a623; color: #1a1a1a; }
+.hpa-badge--red   { background: #ff3300; }
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .admin-header { padding: 0 1rem; }
   .search-bar { display: none; }
   .user-name { display: none; }
+  /* On mobile show only badges, hide text labels */
+  .hpa-label { display: none; }
+  .hpa-btn { padding: 0.32rem 0.5rem; }
 }
 
 @media (max-width: 480px) {

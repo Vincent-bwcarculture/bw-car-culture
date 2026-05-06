@@ -1,9 +1,37 @@
 // src/Admin/AdminHeader.js
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
 import { useNotifications } from '../hooks/useNotifications.js';
 import './AdminHeader.css';
+
+const API = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
+const POLL_INTERVAL = 60000; // refresh every 60 s
+
+function usePendingCounts() {
+  const [counts, setCounts] = useState({ pendingReview: 0, boostPending: 0, stuckApproved: 0 });
+  const timerRef = useRef(null);
+
+  const fetchCounts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API}/api/admin/pending-counts`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.success) setCounts(data.counts);
+    } catch (_) {}
+  };
+
+  useEffect(() => {
+    fetchCounts();
+    timerRef.current = setInterval(fetchCounts, POLL_INTERVAL);
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  return counts;
+}
 
 const IconBell = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -30,6 +58,7 @@ const AdminHeader = ({ onToggleSidebar }) => {
   const { user, logout } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const navigate = useNavigate();
+  const pendingCounts = usePendingCounts();
 
   const handleLogout = async () => {
     try {
@@ -80,6 +109,42 @@ const AdminHeader = ({ onToggleSidebar }) => {
           <IconSearch />
           <input type="text" placeholder="Search..." aria-label="Search" />
         </div>
+      </div>
+
+      {/* ── Quick-action pending badges ── */}
+      <div className="header-pending-actions">
+        <button
+          className={`hpa-btn hpa-btn--review${pendingCounts.pendingReview > 0 ? ' hpa-btn--active' : ''}`}
+          onClick={() => navigate('/admin/user-submissions')}
+          title="User submissions awaiting review"
+        >
+          <span className="hpa-label">Reviews</span>
+          {pendingCounts.pendingReview > 0 && (
+            <span className="hpa-badge">{pendingCounts.pendingReview > 99 ? '99+' : pendingCounts.pendingReview}</span>
+          )}
+        </button>
+
+        {pendingCounts.boostPending > 0 && (
+          <button
+            className="hpa-btn hpa-btn--boost hpa-btn--active"
+            onClick={() => navigate('/admin/user-submissions')}
+            title="Boost payments awaiting verification"
+          >
+            <span className="hpa-label">Boost Payments</span>
+            <span className="hpa-badge hpa-badge--amber">{pendingCounts.boostPending > 99 ? '99+' : pendingCounts.boostPending}</span>
+          </button>
+        )}
+
+        {pendingCounts.stuckApproved > 0 && (
+          <button
+            className="hpa-btn hpa-btn--stuck hpa-btn--active"
+            onClick={() => navigate('/admin/user-submissions')}
+            title="Approved submissions with no listing created — need manual attention"
+          >
+            <span className="hpa-label">Needs Attention</span>
+            <span className="hpa-badge hpa-badge--red">{pendingCounts.stuckApproved}</span>
+          </button>
+        )}
       </div>
 
       <div className="header-right">
