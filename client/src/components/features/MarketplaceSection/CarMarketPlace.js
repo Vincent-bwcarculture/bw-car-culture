@@ -757,7 +757,14 @@ const CarMarketplace = () => {
   }, [car, isSaved, isPrivateSeller]);
 
   const handleWhatsAppClick = useCallback(() => {
-    if (!car?.dealer?.contact?.phone) {
+    // Resolve contact from all storage locations (dealership listings vs user-submission listings)
+    const cleanPhone = (v) => (v && typeof v === 'string' && v.trim() !== '' && v.trim().toUpperCase() !== 'N/A') ? v.trim() : null;
+    const resolvedPhone = cleanPhone(car?.dealer?.contact?.phone)
+      || cleanPhone(car?.contact?.phone)
+      || cleanPhone(car?.dealer?.phone)
+      || cleanPhone(car?.contact?.whatsapp)
+      || cleanPhone(car?.dealer?.contact?.whatsapp);
+    if (!resolvedPhone) {
       dispatch(addNotification({
         type: 'warning',
         message: `${isPrivateSeller ? 'Seller' : 'Dealer'} contact information is not available.`
@@ -815,7 +822,7 @@ const CarMarketplace = () => {
       `I'm interested in learning more about the vehicle and arranging a viewing at your convenience.` :
       `Please let me know about availability, financing options, and viewing arrangements.`;
     const message = `🚗 *VEHICLE INQUIRY - BW CAR CULTURE - ${sellerTitle}*\n\n${greeting}${preferenceNote}\n\n${calculateSavings ? 'I would like to take advantage of this exclusive Bw Car Culture savings offer:\n\n' : 'I\'m interested in this vehicle:\n\n'}${vehicleDetails}${vehicleLink}\n\n${closingNote}\n\nThank you!`;
-    const phone = car.dealer.contact.phone;
+    const phone = resolvedPhone;
     const formattedPhone = phone.startsWith('+') ? phone.replace(/\s+/g, '') : `+267${phone.replace(/\s+/g, '')}`;
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/${formattedPhone}?text=${encodedMessage}`, '_blank');
@@ -1310,10 +1317,10 @@ const CarMarketplace = () => {
                   <div className="stat-item"><div className="stat-value">{sellerStats.rating}</div><div className="stat-label">Rating</div></div>
                   {sellerStats.experience !== 'N/A' && <div className="stat-item"><div className="stat-value">{sellerStats.experience}</div><div className="stat-label">{isPrivateSeller ? 'Member' : 'Experience'}</div></div>}
                 </div>
-                {car.dealer?.contact && (
+                {(car.dealer?.contact || car.contact) && (
                   <div className="dealer-contact-grid">
-                    {car.dealer.contact.email && <div className="contact-grid-item"><span className="contact-icon">✉️</span><span className="contact-info">{car.dealer.contact.email}</span></div>}
-                    {car.dealer.contact.phone && <div className="contact-grid-item"><span className="contact-icon">📞</span><span className="contact-info">{car.dealer.contact.phone}</span></div>}
+                    {(car.dealer?.contact?.email || car.contact?.email) && <div className="contact-grid-item"><span className="contact-icon">✉️</span><span className="contact-info">{car.dealer?.contact?.email || car.contact?.email}</span></div>}
+                    {(car.dealer?.contact?.phone || car.contact?.phone || car.dealer?.phone) && <div className="contact-grid-item"><span className="contact-icon">📞</span><span className="contact-info">{car.dealer?.contact?.phone || car.contact?.phone || car.dealer?.phone}</span></div>}
                     {car.dealer.contact.website && !isPrivateSeller && (
                       <div className="contact-grid-item"><span className="contact-icon">🌐</span><a href={car.dealer.contact.website.startsWith('http') ? car.dealer.contact.website : `https://${car.dealer.contact.website}`} target="_blank" rel="noopener noreferrer" className="contact-info website-link">{car.dealer.contact.website.replace(/^https?:\/\//, '').split('/')[0]}</a></div>
                     )}
@@ -1321,7 +1328,7 @@ const CarMarketplace = () => {
                 )}
                 <div className="contact-buttons">
                   <button className="contact-button whatsapp" onClick={handleWhatsAppClick}>{calculateSavings ? `Claim Bw Car Culture Savings via WhatsApp` : `Contact ${isPrivateSeller ? 'Seller' : 'Dealer'} via WhatsApp`}</button>
-                  <button className="contact-button contact-dealer" onClick={() => { if (car.dealer?.contact?.phone) { window.open(`tel:${car.dealer.contact.phone}`); } else { dispatch(addNotification({ type: 'warning', message: `${isPrivateSeller ? 'Seller' : 'Dealer'} phone number is not available.` })); } }}>📞 Call {isPrivateSeller ? 'Seller' : 'Dealer'}</button>
+                  <button className="contact-button contact-dealer" onClick={() => { const callPhone = car.dealer?.contact?.phone || car.contact?.phone || car.dealer?.phone; if (callPhone) { window.open(`tel:${callPhone.startsWith('+') ? callPhone.replace(/\s+/g,'') : '+267'+callPhone.replace(/\s+/g,'')}`); } else { dispatch(addNotification({ type: 'warning', message: `${isPrivateSeller ? 'Seller' : 'Dealer'} phone number is not available.` })); } }}>📞 Call {isPrivateSeller ? 'Seller' : 'Dealer'}</button>
                   {car.dealer && !isPrivateSeller && (
                     <button className="contact-button view-dealer" onClick={() => { let dealerId = null; if (car.dealer && car.dealer._id) { dealerId = safeGetStringId(car.dealer._id); } else if (car.dealer && car.dealer.id) { dealerId = safeGetStringId(car.dealer.id); } else if (car.dealerId) { dealerId = safeGetStringId(car.dealerId); } if (process.env.NODE_ENV === 'development') console.log('Navigating to dealer with ID:', dealerId); if (dealerId) { navigate(`/dealerships/${dealerId}`); } else { if (process.env.NODE_ENV === 'development') console.error('Failed to get valid dealer ID for navigation'); dispatch(addNotification({ type: 'error', message: 'Unable to view dealership details at this time.' })); } }}>View Dealership</button>
                   )}

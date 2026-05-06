@@ -615,8 +615,8 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           isVerified: !!car.dealer.verification?.isVerified || car.dealer.verification?.status === 'verified'
         },
         contact: {
-          phone: [car.dealer.contact?.phone, car.dealer.phone, car.dealer.contactPhone].find(v => v && v !== 'N/A' && v.trim() !== '') || null,
-          email: [car.dealer.contact?.email, car.dealer.email, car.dealer.contactEmail].find(v => v && v !== 'N/A' && v.trim() !== '') || null,
+          phone: [car.dealer.contact?.phone, car.dealer.phone, car.dealer.contactPhone, car.contact?.phone, car.contact?.whatsapp].find(v => v && v !== 'N/A' && v.trim() !== '') || null,
+          email: [car.dealer.contact?.email, car.dealer.email, car.dealer.contactEmail, car.contact?.email].find(v => v && v !== 'N/A' && v.trim() !== '') || null,
           website: !isPrivateSeller ? ([car.dealer.contact?.website, car.dealer.website].find(v => v && v !== 'N/A' && v.trim() !== '') || null) : null
         },
         privateSeller: isPrivateSeller ? {
