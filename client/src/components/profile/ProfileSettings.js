@@ -59,7 +59,7 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
 
   // Privacy form state
   const [privacyForm, setPrivacyForm] = useState({
-    profileVisibility: profileData?.profile?.privacy?.profileVisibility || 'public',
+    profileVisibility: profileData?.profile?.privacy?.profileVisibility || 'private',
     showEmail: profileData?.profile?.privacy?.showEmail !== false,
     showPhone: profileData?.profile?.privacy?.showPhone !== false,
     allowMessages: profileData?.profile?.privacy?.allowMessages !== false,
