@@ -15,6 +15,14 @@ const ListingManager = () => {
   const [selectedListing, setSelectedListing] = useState(null);
   const [showRecordsModal, setShowRecordsModal] = useState(false);
   const [recordsListing, setRecordsListing] = useState(null);
+
+  // Transfer to dealership
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [transferListing, setTransferListing] = useState(null);
+  const [transferDealerId, setTransferDealerId] = useState('');
+  const [dealers, setDealers] = useState([]);
+  const [transferState, setTransferState] = useState({}); // { [listingId]: 'idle'|'loading'|'done'|'error' }
+
   const [filters, setFilters] = useState({
     status: 'all',
     category: 'all',
@@ -36,6 +44,22 @@ const ListingManager = () => {
   useEffect(() => {
     fetchListings();
   }, [filters, pagination.currentPage]);
+
+  useEffect(() => {
+    const fetchDealers = async () => {
+      try {
+        const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app/api';
+        const res = await fetch(`${API_BASE}/admin/dealers?limit=200`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await res.json();
+        if (data.success) setDealers(data.data || []);
+      } catch (e) {
+        console.error('Failed to fetch dealers for transfer:', e);
+      }
+    };
+    fetchDealers();
+  }, []);
 
   // Helper function to check failed images and mark them
   const checkFailedImage = (url) => {
@@ -272,6 +296,42 @@ const ListingManager = () => {
       setError('Failed to update status. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTransferListing = async () => {
+    if (!transferListing || !transferDealerId) return;
+    const id = transferListing._id;
+    setTransferState(prev => ({ ...prev, [id]: 'loading' }));
+    try {
+      const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app/api';
+      const res = await fetch(`${API_BASE}/admin/listings/${id}/transfer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ dealerId: transferDealerId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTransferState(prev => ({ ...prev, [id]: 'done' }));
+        setListings(prev => prev.map(l =>
+          l._id === id ? { ...l, dealerId: transferDealerId, sellerType: 'dealership' } : l
+        ));
+        setTimeout(() => {
+          setShowTransferModal(false);
+          setTransferListing(null);
+          setTransferDealerId('');
+          setTransferState(prev => ({ ...prev, [id]: 'idle' }));
+        }, 1500);
+      } else {
+        setTransferState(prev => ({ ...prev, [id]: 'error' }));
+        setError(data.message || 'Transfer failed');
+      }
+    } catch (e) {
+      setTransferState(prev => ({ ...prev, [id]: 'error' }));
+      setError('Transfer failed. Please try again.');
     }
   };
 
@@ -546,6 +606,14 @@ const ListingManager = () => {
                       {listing.featured ? "Unfeature" : "Feature"}
                     </button>
                     <button
+                      className={`action-btn transfer ${transferState[listing._id] === 'done' ? 'done' : transferState[listing._id] === 'error' ? 'error' : ''}`}
+                      onClick={() => { setTransferListing(listing); setTransferDealerId(''); setShowTransferModal(true); }}
+                      title="Transfer to dealership"
+                      disabled={transferState[listing._id] === 'loading'}
+                    >
+                      {transferState[listing._id] === 'done' ? '✓ Transferred' : '⇄ Transfer'}
+                    </button>
+                    <button
                       className="action-btn delete"
                       onClick={() => handleDeleteListing(listing._id)}
                       title="Delete listing"
@@ -687,7 +755,15 @@ const ListingManager = () => {
                       >
                         🔄
                       </button>
-                      <button 
+                      <button
+                        className={`action-btn transfer ${transferState[listing._id] === 'done' ? 'done' : transferState[listing._id] === 'error' ? 'error' : ''}`}
+                        onClick={() => { setTransferListing(listing); setTransferDealerId(''); setShowTransferModal(true); }}
+                        title="Transfer to dealership"
+                        disabled={transferState[listing._id] === 'loading'}
+                      >
+                        {transferState[listing._id] === 'done' ? '✓' : transferState[listing._id] === 'loading' ? '…' : '⇄'}
+                      </button>
+                      <button
                         className="action-btn delete"
                         onClick={() => handleDeleteListing(listing._id)}
                         title="Delete listing"
@@ -831,6 +907,63 @@ const ListingManager = () => {
             <div className="records-modal-footer">
               <button className="records-edit-btn" onClick={() => { setSelectedListing(recordsListing); setShowUpdateModal(true); setShowRecordsModal(false); }}>
                 Open in Editor (Records tab)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Transfer to Dealership Modal */}
+      {showTransferModal && transferListing && (
+        <div className="records-modal-overlay" onClick={() => setShowTransferModal(false)}>
+          <div className="records-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
+            <div className="records-modal-header">
+              <h3>⇄ Transfer to Dealership</h3>
+              <p className="records-modal-subtitle">{transferListing.title}</p>
+              <button className="records-modal-close" onClick={() => setShowTransferModal(false)}>✕</button>
+            </div>
+            <div className="records-modal-body">
+              {transferListing.dealerId && (
+                <p style={{ color: '#fbbf24', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                  ⚠ This listing is already assigned to a dealership. Transferring will reassign it.
+                </p>
+              )}
+              <div className="records-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem' }}>
+                <span className="records-label">Select Dealership</span>
+                <select
+                  value={transferDealerId}
+                  onChange={e => setTransferDealerId(e.target.value)}
+                  style={{
+                    width: '100%', padding: '0.55rem 0.75rem',
+                    background: '#21262d', border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: 6, color: '#e6edf3', fontSize: '0.875rem'
+                  }}
+                >
+                  <option value="">— Choose a dealership —</option>
+                  {dealers.map(d => (
+                    <option key={d._id} value={d._id}>
+                      {d.businessName} {d.location?.city ? `(${d.location.city})` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {transferState[transferListing._id] === 'error' && (
+                <p style={{ color: '#ff6633', fontSize: '0.85rem', marginTop: '0.5rem' }}>Transfer failed. Please try again.</p>
+              )}
+              {transferState[transferListing._id] === 'done' && (
+                <p style={{ color: '#4ade80', fontSize: '0.85rem', marginTop: '0.5rem' }}>✓ Listing transferred successfully.</p>
+              )}
+            </div>
+            <div className="records-modal-footer">
+              <button
+                className="records-edit-btn"
+                onClick={handleTransferListing}
+                disabled={!transferDealerId || transferState[transferListing._id] === 'loading' || transferState[transferListing._id] === 'done'}
+                style={{ background: transferState[transferListing._id] === 'done' ? 'rgba(34,197,94,0.2)' : undefined }}
+              >
+                {transferState[transferListing._id] === 'loading' ? 'Transferring…'
+                  : transferState[transferListing._id] === 'done' ? '✓ Done'
+                  : 'Transfer Listing'}
               </button>
             </div>
           </div>
