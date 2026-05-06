@@ -103,10 +103,13 @@ const DealershipForm = ({ isOpen, onClose, onSubmit, initialData = null }) => {
     const fetchUsers = async () => {
       try {
         const response = await http.get('/auth/users');
-        
+
         if (response.data && response.data.success) {
+          const assignedIds = new Set(
+            (initialData?.users || [initialData?.user]).filter(Boolean).map(String)
+          );
           const eligibleUsers = response.data.data.filter(
-            user => user.role !== 'dealer' || !user.dealership
+            user => user.role !== 'dealer' || !user.dealership || assignedIds.has(String(user._id))
           );
           setUsers(eligibleUsers);
         }
@@ -116,7 +119,7 @@ const DealershipForm = ({ isOpen, onClose, onSubmit, initialData = null }) => {
     };
 
     fetchUsers();
-  }, []);
+  }, [initialData]);
 
   // Initialize form data when editing an existing seller
   useEffect(() => {
@@ -669,9 +672,8 @@ const DealershipForm = ({ isOpen, onClose, onSubmit, initialData = null }) => {
               </>
             )}
             
-            {!initialData && (
-              <div className="form-group">
-                <label>Associated Users * <span style={{fontWeight:400,fontSize:'0.8rem',color:'#888'}}>(up to 2 — all their listings will be transferable)</span></label>
+            <div className="form-group">
+                <label>Associated Users {!initialData ? '*' : ''} <span style={{fontWeight:400,fontSize:'0.8rem',color:'#888'}}>(up to 2 — all their listings will be transferable)</span></label>
                 {[0, 1].map(i => (
                   <select
                     key={i}
@@ -696,7 +698,6 @@ const DealershipForm = ({ isOpen, onClose, onSubmit, initialData = null }) => {
                 ))}
                 {errors.users && <div className="error-message">{errors.users}</div>}
               </div>
-            )}
             
             <div className="form-group">
               <label>Status</label>
