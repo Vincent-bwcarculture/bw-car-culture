@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.js';
 import { listingService } from '../../services/listingService.js';
+import { http } from '../../config/axios.js';
 import AddListingModal from '../../components/shared/AddListingModal/AddListingModal.js';
 import UpdateListingModal from './UpdateListingModal.js';
 import './ListingManager.css';
@@ -48,11 +49,8 @@ const ListingManager = () => {
   useEffect(() => {
     const fetchDealers = async () => {
       try {
-        const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app/api';
-        const res = await fetch(`${API_BASE}/admin/dealers?limit=200`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-        });
-        const data = await res.json();
+        const res = await http.get('/dealers?limit=200&sellerType=dealership');
+        const data = res.data;
         if (data.success) setDealers(data.data || []);
       } catch (e) {
         console.error('Failed to fetch dealers for transfer:', e);
@@ -304,16 +302,8 @@ const ListingManager = () => {
     const id = transferListing._id;
     setTransferState(prev => ({ ...prev, [id]: 'loading' }));
     try {
-      const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app/api';
-      const res = await fetch(`${API_BASE}/admin/listings/${id}/transfer`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ dealerId: transferDealerId })
-      });
-      const data = await res.json();
+      const res = await http.post(`/api/admin/listings/${id}/transfer`, { dealerId: transferDealerId });
+      const data = res.data;
       if (data.success) {
         setTransferState(prev => ({ ...prev, [id]: 'done' }));
         setListings(prev => prev.map(l =>
