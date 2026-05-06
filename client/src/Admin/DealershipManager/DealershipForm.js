@@ -49,6 +49,7 @@ const DealershipForm = ({ isOpen, onClose, onSubmit, initialData = null }) => {
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     },
     user: '',
+    users: ['', ''],
     status: 'active',
     
     // NEW: Private seller specific fields
@@ -167,7 +168,10 @@ const DealershipForm = ({ isOpen, onClose, onSubmit, initialData = null }) => {
           lastName: '',
           preferredContactMethod: 'both',
           canShowContactInfo: true
-        }
+        },
+        users: Array.isArray(clonedData.users) && clonedData.users.length
+          ? [...clonedData.users, ''].slice(0, 2)
+          : [clonedData.user || '', '']
       });
       
       // Set image previews
@@ -324,8 +328,8 @@ const DealershipForm = ({ isOpen, onClose, onSubmit, initialData = null }) => {
     const newErrors = {};
     
     // Common validations
-    if (!formData.user && !initialData) {
-      newErrors.user = 'User association is required';
+    if (!initialData && !formData.users.some(u => u)) {
+      newErrors.users = 'At least one associated user is required';
     }
     
     if (!formData.contact.email) {
@@ -418,7 +422,8 @@ const DealershipForm = ({ isOpen, onClose, onSubmit, initialData = null }) => {
       // FIXED: Only include businessType for dealerships
       ...(formData.sellerType === 'dealership' && { businessType: formData.businessType }),
       status: formData.status,
-      user: formData.user,
+      user: formData.users.find(u => u) || formData.user || '',
+      users: formData.users.filter(u => u),
       contact: formData.contact,
       location: formData.location,
       verification: formData.verification,
@@ -666,21 +671,30 @@ const DealershipForm = ({ isOpen, onClose, onSubmit, initialData = null }) => {
             
             {!initialData && (
               <div className="form-group">
-                <label>Associated User *</label>
-                <select
-                  name="user"
-                  value={formData.user}
-                  onChange={handleChange}
-                  className={errors.user ? 'error' : ''}
-                >
-                  <option value="">Select User</option>
-                  {users.map(user => (
-                    <option key={user._id} value={user._id}>
-                      {user.name} ({user.email})
-                    </option>
-                  ))}
-                </select>
-                {errors.user && <div className="error-message">{errors.user}</div>}
+                <label>Associated Users * <span style={{fontWeight:400,fontSize:'0.8rem',color:'#888'}}>(up to 2 — all their listings will be transferable)</span></label>
+                {[0, 1].map(i => (
+                  <select
+                    key={i}
+                    value={formData.users[i] || ''}
+                    onChange={e => {
+                      const next = [...formData.users];
+                      next[i] = e.target.value;
+                      setFormData(prev => ({ ...prev, users: next }));
+                    }}
+                    className={i === 0 && errors.users ? 'error' : ''}
+                    style={{ marginBottom: i === 0 ? '0.5rem' : 0 }}
+                  >
+                    <option value="">{i === 0 ? 'Primary user *' : 'Second user (optional)'}</option>
+                    {users
+                      .filter(u => i === 0 || u._id !== formData.users[0])
+                      .map(u => (
+                        <option key={u._id} value={u._id}>
+                          {u.name} ({u.email})
+                        </option>
+                      ))}
+                  </select>
+                ))}
+                {errors.users && <div className="error-message">{errors.users}</div>}
               </div>
             )}
             
