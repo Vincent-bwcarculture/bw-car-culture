@@ -36,8 +36,7 @@ export const initializeGA = async () => {
     ga.initialize(GA_MEASUREMENT_ID, {
       testMode: process.env.NODE_ENV !== 'production',
       gaOptions: {
-        anonymizeIp: true,
-        debug_mode: process.env.NODE_ENV !== 'production'
+        anonymizeIp: true
       }
     });
 

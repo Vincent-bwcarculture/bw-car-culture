@@ -47,9 +47,6 @@ class AnalyticsService {
   init() {
     if (this.isInitialized) return;
     
-    console.log('🔧 Initializing Analytics Service...');
-    console.log('Analytics API URL:', this.baseURL);
-    
     // Validate API URL
     if (!this.baseURL || this.baseURL === 'undefined/api/analytics') {
       console.error('❌ Invalid API URL detected. Please check REACT_APP_API_URL environment variable.');
@@ -114,7 +111,6 @@ class AnalyticsService {
     }
     
     this.isInitialized = true;
-    console.log('✅ Analytics Service initialized');
   }
 
   // CRITICAL: Missing sendEvent method implementation
@@ -142,8 +138,6 @@ class AnalyticsService {
         connection: this.getConnectionInfo()
       };
 
-      console.log(`📤 Sending analytics event to: ${this.baseURL}${endpoint}`);
-
       const response = await fetch(`${this.baseURL}${endpoint}`, {
         method: 'POST',
         headers: this.getAuthHeaders(),
@@ -151,8 +145,6 @@ class AnalyticsService {
       });
 
       const data = await this.handleResponse(response);
-      
-      console.log(`✅ Analytics event sent successfully: ${endpoint}`);
       return data;
 
     } catch (error) {
@@ -378,8 +370,6 @@ class AnalyticsService {
           referrer: typeof document !== 'undefined' ? document.referrer : ''
         }
       };
-      
-      console.log('📊 Tracking event:', eventData.eventType);
       
       // Ensure we pass the correct endpoint
       return await this.sendEvent('/track', payload);

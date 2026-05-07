@@ -65,7 +65,7 @@ const internalAnalytics = {
         }
       });
 
-      console.log(`📦 Queued analytics event: ${eventType} (queue size: ${this.eventQueue.length})`);
+      // queued silently
     } catch (error) {
       console.warn('⚠️ Failed to queue analytics event:', error);
     }
@@ -110,8 +110,6 @@ const internalAnalytics = {
         category: 'navigation'
       };
 
-      console.log('Tracking page view:', pageData.page);
-      
       // Don't wait for the API call to complete
       this.sendEventSafely('page_view', pageData);
     } catch (error) {
@@ -139,8 +137,6 @@ const internalAnalytics = {
         timestamp: new Date().toISOString()
       };
 
-      console.log('Tracking event:', eventType);
-      
       // Send event safely
       this.sendEventSafely(eventType, event);
     } catch (error) {
