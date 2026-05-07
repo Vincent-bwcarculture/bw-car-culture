@@ -33,8 +33,8 @@
 }
 
 .manager-message.info {
-  background: rgba(52, 152, 219, 0.1);
-  border: 1px solid rgba(52, 152, 219, 0.2);
+  background: rgba(0, 81, 255, 0.1);
+  border: 1px solid rgba(0, 81, 255, 0.2);
   color: var(--uprofile-info-blue);
 }
 
@@ -308,7 +308,7 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(52, 152, 219, 0.8);
+  background: rgba(0, 81, 255, 0.8);
   color: white;
   padding: 2px 8px;
   border-radius: 12px;

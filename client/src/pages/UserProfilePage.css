@@ -506,7 +506,7 @@ body {
 }
 
 .uprofile-nav-tab.driver-tab {
-  border-left: 3px solid #3498db;
+  border-left: 3px solid #0051ff;
 }
 
 .uprofile-nav-tab.business-tab {
@@ -545,7 +545,7 @@ body {
 }
 
 .tab-context-help.info .tab-context-help-icon {
-  color: #3498db;
+  color: #0051ff;
 }
 
 .tab-context-help.success .tab-context-help-icon {
@@ -579,7 +579,7 @@ body {
 
 .user-type-badge.driver {
   background: rgba(52, 152, 219, 0.2);
-  color: #3498db;
+  color: #0051ff;
   border: 1px solid rgba(52, 152, 219, 0.3);
 }
 

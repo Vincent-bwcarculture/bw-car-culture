@@ -97,13 +97,13 @@
   }
   
   .confirm-modal-btn-confirm {
-    background: #3498db;
+    background: #0051ff;
     border: none;
     color: #fff;
   }
   
   .confirm-modal-btn-confirm:hover {
-    background: #2980b9;
+    background: #0040cc;
   }
   
   .confirm-modal-btn-confirm.danger {

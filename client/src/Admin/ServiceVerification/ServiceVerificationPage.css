@@ -22,7 +22,7 @@
   width: 40px;
   height: 40px;
   border: 3px solid #f3f3f3;
-  border-top: 3px solid #3498db;
+  border-top: 3px solid #0051ff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -66,7 +66,7 @@
 }
 
 .refresh-button {
-  background: #3498db;
+  background: #0051ff;
   color: white;
   border: none;
   padding: 10px 16px;
@@ -80,7 +80,7 @@
 }
 
 .refresh-button:hover {
-  background: #2980b9;
+  background: #0040cc;
   transform: translateY(-2px);
 }
 
@@ -124,7 +124,7 @@
 
 .search-box input:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: #0051ff;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
@@ -147,7 +147,7 @@
 
 .filter-group select:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: #0051ff;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
@@ -176,7 +176,7 @@
 .stat-number {
   font-size: 32px;
   font-weight: 700;
-  color: #3498db;
+  color: #0051ff;
   margin-bottom: 5px;
 }
 
@@ -263,7 +263,7 @@
 }
 
 .verification-card:hover {
-  border-color: #3498db;
+  border-color: #0051ff;
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(52, 152, 219, 0.1);
 }
@@ -358,7 +358,7 @@
 }
 
 .view-button {
-  background: #3498db;
+  background: #0051ff;
   color: white;
   border: none;
   padding: 10px 16px;
@@ -373,7 +373,7 @@
 }
 
 .view-button:hover {
-  background: #2980b9;
+  background: #0040cc;
 }
 
 .quick-actions {
@@ -604,7 +604,7 @@
 }
 
 .view-doc-button {
-  background: #3498db;
+  background: #0051ff;
   color: white;
   border: none;
   padding: 6px 12px;
@@ -618,7 +618,7 @@
 }
 
 .view-doc-button:hover {
-  background: #2980b9;
+  background: #0040cc;
 }
 
 .no-documents {
@@ -642,7 +642,7 @@
 
 .section textarea:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: #0051ff;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
@@ -667,8 +667,8 @@
 
 .cancel-button:hover {
   background: #f8f9fa;
-  border-color: #3498db;
-  color: #3498db;
+  border-color: #0051ff;
+  color: #0051ff;
 }
 
 .approve-action-button {
@@ -868,6 +868,6 @@
 .reject-action-button:focus-visible,
 .cancel-button:focus-visible,
 .confirm-button:focus-visible {
-  outline: 3px solid #3498db;
+  outline: 3px solid #0051ff;
   outline-offset: 2px;
 }

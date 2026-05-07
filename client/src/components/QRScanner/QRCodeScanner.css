@@ -94,7 +94,7 @@
   position: absolute;
   width: 20px;
   height: 20px;
-  border: 3px solid #3498db;
+  border: 3px solid #0051ff;
 }
 
 .corner.top-left {
@@ -136,7 +136,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, #3498db, transparent);
+  background: linear-gradient(90deg, transparent, #0051ff, transparent);
   animation: scan 2s linear infinite;
 }
 
@@ -229,7 +229,7 @@
 }
 
 .status-indicator.scanning {
-  color: #3498db;
+  color: #0051ff;
 }
 
 .status-indicator.success {
@@ -240,7 +240,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #3498db;
+  background: #0051ff;
   animation: pulse 1.5s infinite;
 }
 
@@ -331,7 +331,7 @@
 }
 
 .retry-button {
-  background: #3498db;
+  background: #0051ff;
   color: white;
   border: none;
   padding: 12px 20px;
@@ -345,7 +345,7 @@
 }
 
 .retry-button:hover {
-  background: #2980b9;
+  background: #0040cc;
   transform: translateY(-2px);
 }
 

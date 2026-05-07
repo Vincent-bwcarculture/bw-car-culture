@@ -229,8 +229,8 @@
 
 /* === TERMS SECTION === */
 .terms-section {
-  background: rgba(52, 152, 219, 0.05);
-  border: 1px solid rgba(52, 152, 219, 0.1);
+  background: rgba(0, 81, 255, 0.05);
+  border: 1px solid rgba(0, 81, 255, 0.1);
   border-radius: 12px;
   padding: 20px;
 }

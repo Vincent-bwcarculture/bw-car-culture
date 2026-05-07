@@ -156,7 +156,7 @@
 }
 
 .poverview-stat-blue .poverview-stat-icon {
-  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  background: linear-gradient(135deg, #0051ff 0%, #0040cc 100%);
 }
 
 .poverview-stat-green .poverview-stat-icon {
@@ -232,8 +232,8 @@
 }
 
 .poverview-badge-blue {
-  border-color: #3498db;
-  color: #3498db;
+  border-color: #0051ff;
+  color: #0051ff;
 }
 
 .poverview-badge-purple {
@@ -360,7 +360,7 @@
 }
 
 .poverview-activity-vehicle {
-  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  background: linear-gradient(135deg, #0051ff 0%, #0040cc 100%);
 }
 
 .poverview-activity-service {

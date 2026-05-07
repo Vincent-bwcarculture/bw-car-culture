@@ -85,7 +85,7 @@
 .mark-all-read-btn {
   background: none;
   border: none;
-  color: #3498db;
+  color: #0051ff;
   cursor: pointer;
   font-size: 12px;
   font-weight: 500;
@@ -134,7 +134,7 @@
   width: 24px;
   height: 24px;
   border: 2px solid #f3f3f3;
-  border-top: 2px solid #3498db;
+  border-top: 2px solid #0051ff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 10px;
@@ -160,7 +160,7 @@
 
 .notification-item.unread {
   background: #f0f8ff;
-  border-left: 3px solid #3498db;
+  border-left: 3px solid #0051ff;
 }
 
 .notification-item.unread::before {
@@ -171,7 +171,7 @@
   transform: translateY(-50%);
   width: 6px;
   height: 6px;
-  background: #3498db;
+  background: #0051ff;
   border-radius: 50%;
 }
 
@@ -306,7 +306,7 @@
   width: 100%;
   background: none;
   border: none;
-  color: #3498db;
+  color: #0051ff;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
@@ -377,7 +377,7 @@
   }
   
   .notification-item.unread {
-    background: #2980b9;
+    background: #0040cc;
   }
   
   .notification-title {

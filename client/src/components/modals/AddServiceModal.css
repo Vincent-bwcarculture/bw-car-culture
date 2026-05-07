@@ -89,7 +89,7 @@
 }
 
 .step.active span {
-  background: #3498db;
+  background: #0051ff;
   color: white;
 }
 
@@ -105,7 +105,7 @@
 }
 
 .step.active label {
-  color: #3498db;
+  color: #0051ff;
   font-weight: 600;
 }
 
@@ -165,7 +165,7 @@
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: #0051ff;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
@@ -222,13 +222,13 @@
 }
 
 .service-type-card:hover {
-  border-color: #3498db;
+  border-color: #0051ff;
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(52, 152, 219, 0.1);
 }
 
 .service-type-card.selected {
-  border-color: #3498db;
+  border-color: #0051ff;
   background: #f8f9fa;
   box-shadow: 0 4px 15px rgba(52, 152, 219, 0.15);
 }
@@ -248,7 +248,7 @@
 }
 
 .service-type-card.selected h4 {
-  color: #3498db;
+  color: #0051ff;
 }
 
 /* Input with Icon */
@@ -388,12 +388,12 @@
 }
 
 .primary-button {
-  background: #3498db;
+  background: #0051ff;
   color: white;
 }
 
 .primary-button:hover:not(:disabled) {
-  background: #2980b9;
+  background: #0040cc;
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
 }
@@ -413,8 +413,8 @@
 
 .secondary-button:hover:not(:disabled) {
   background: #f8f9fa;
-  border-color: #3498db;
-  color: #3498db;
+  border-color: #0051ff;
+  color: #0051ff;
 }
 
 .secondary-button:disabled {
@@ -557,6 +557,6 @@
 .primary-button:focus-visible,
 .secondary-button:focus-visible,
 .close-button:focus-visible {
-  outline: 3px solid #3498db;
+  outline: 3px solid #0051ff;
   outline-offset: 2px;
 }

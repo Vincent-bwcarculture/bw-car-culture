@@ -106,8 +106,8 @@
 }
 
 .spm-tab-button.active {
-  color: #3498db;
-  border-bottom-color: #3498db;
+  color: #0051ff;
+  border-bottom-color: #0051ff;
 }
 
 .spm-service-provider-form {
@@ -159,7 +159,7 @@
 .spm-form-input:focus,
 .spm-form-select:focus,
 .spm-form-textarea:focus {
-  border-color: #3498db;
+  border-color: #0051ff;
   outline: none;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
@@ -202,12 +202,12 @@
 
 .spm-logo-upload-container:hover,
 .spm-banner-upload-container:hover {
-  border-color: #3498db;
+  border-color: #0051ff;
 }
 
 .spm-logo-upload-button label,
 .spm-banner-upload-button label {
-  background-color: #3498db;
+  background-color: #0051ff;
   color: #ffffff;
   border: none;
   border-radius: 6px;
@@ -221,7 +221,7 @@
 
 .spm-logo-upload-button label:hover,
 .spm-banner-upload-button label:hover {
-  background-color: #2980b9;
+  background-color: #0040cc;
 }
 
 .spm-logo-preview,
@@ -496,12 +496,12 @@
 }
 
 .spm-save-button {
-  background-color: #3498db;
+  background-color: #0051ff;
   color: #ffffff;
 }
 
 .spm-save-button:hover {
-  background-color: #2980b9;
+  background-color: #0040cc;
 }
 
 .spm-save-button:disabled,

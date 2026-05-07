@@ -403,8 +403,8 @@
 }
 
 .usercard-action-btn.message:hover {
-  border-color: #3498db;
-  color: #3498db;
+  border-color: #0051ff;
+  color: #0051ff;
   box-shadow: 0 2px 6px rgba(52, 152, 219, 0.1);
 }
 
@@ -416,14 +416,14 @@
 
 /* === ENGAGE BUTTON === */
 .usercard-action-btn.engage {
-  border-color: #3498db;
-  color: #3498db;
+  border-color: #0051ff;
+  color: #0051ff;
 }
 .usercard-action-btn.engage:hover,
 .usercard-action-btn.engage.active {
-  background: #3498db;
+  background: #0051ff;
   color: white;
-  border-color: #3498db;
+  border-color: #0051ff;
   box-shadow: 0 2px 6px rgba(52, 152, 219, 0.25);
 }
 
@@ -468,10 +468,10 @@
   outline: none;
   transition: border-color 0.2s;
 }
-.uc-thread-input:focus { border-color: #3498db; }
+.uc-thread-input:focus { border-color: #0051ff; }
 
 .uc-thread-send {
-  background: #3498db;
+  background: #0051ff;
   border: none;
   border-radius: 50%;
   width: 30px;
@@ -484,7 +484,7 @@
   flex-shrink: 0;
   transition: background 0.2s;
 }
-.uc-thread-send:hover { background: #2980b9; }
+.uc-thread-send:hover { background: #0040cc; }
 .uc-thread-send:disabled { background: #2a2a2a; cursor: default; }
 
 .uc-thread-login,
@@ -567,7 +567,7 @@
   transition: color 0.15s, background 0.15s;
 }
 .uc-eng-btn:hover { color: var(--uprofile-text-primary, #fff); background: rgba(255,255,255,0.05); }
-.uc-eng-btn.liked { color: #3498db; }
+.uc-eng-btn.liked { color: #0051ff; }
 
 /* Replies */
 .uc-reply {

@@ -98,13 +98,13 @@
   }
   
   .confirm-button {
-    background-color: #3498db;
+    background-color: #0051ff;
     border: none;
     color: white;
   }
   
   .confirm-button:hover {
-    background-color: #2980b9;
+    background-color: #0040cc;
   }
   
   /* Special styles for delete button */

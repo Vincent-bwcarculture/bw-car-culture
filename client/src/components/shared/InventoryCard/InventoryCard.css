@@ -500,7 +500,7 @@
 }
 
 .inventory-card-call-btn:hover:not(:disabled) {
-  background: #2980b9;
+  background: #0040cc;
 }
 
 .inventory-card-whatsapp-btn {
