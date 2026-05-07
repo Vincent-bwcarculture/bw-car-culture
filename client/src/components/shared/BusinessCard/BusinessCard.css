@@ -387,8 +387,9 @@
   
   .bcc-business-metric {
     display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 0.3rem;
   }
   
   .bcc-business-metric-value {
