@@ -48,16 +48,7 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
     setImageError(prev => ({ ...prev, [type]: true }));
   };
 
-  const getVerificationBadge = () => {
-    if (business.verification?.status === 'verified') {
-      return (
-        <div className="bcc-business-verified-badge">
-          <span className="verification-icon">✓</span> Verified
-        </div>
-      );
-    }
-    return null;
-  };
+  const isVerified = business.verification?.status === 'verified';
 
   const getBusinessTypeClass = (type, providerType) => {
     // First check for dealership types
@@ -193,7 +184,6 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
               loading="lazy"
             />
           )}
-          {getVerificationBadge()}
         </div>
 
         <div className="bcc-business-content">
@@ -217,7 +207,12 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
             </div>
 
             <div className="bcc-business-info">
-              <h3 title={business.businessName}>{business.businessName}</h3>
+              <div className="bcc-name-row">
+                <h3 title={business.businessName}>{business.businessName}</h3>
+                {isVerified && (
+                  <span className="bcc-verified-inline" title="Verified Business">✓</span>
+                )}
+              </div>
               
               <div className="bcc-business-details">
                 <span className={`bcc-business-badge ${getBusinessTypeClass(business.businessType, business.providerType)}`}>
