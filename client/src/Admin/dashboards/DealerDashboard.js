@@ -779,26 +779,23 @@ const DealerDashboard = () => {
   const paramDealerId = searchParams.get('dealerId');
   const targetId = isAdmin ? (paramDealerId || null) : userId;
 
-  const canManageListing = listing => {
-    if (isAdmin) return true;
-    const lid = String(listing.dealerId?._id || listing.dealerId || '');
-    const did = String(listing.dealer?._id || listing.dealer?.id || '');
-    return lid === String(userId) || did === String(userId);
-  };
+  // Dealers only receive their own listings from the API, so ownership is already enforced server-side.
+  const canManageListing = () => true;
 
   // ── Fetch listings ─────────────────────────────────────────────────────────
   const fetchListings = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
     try {
-      let query;
+      let url;
       if (isAdmin) {
-        // When viewing a specific dealer, scope to their listings; otherwise fetch all
-        query = targetId ? `dealerId=${targetId}&limit=200` : 'limit=200';
+        const query = targetId ? `dealerId=${targetId}&limit=200` : 'limit=200';
+        url = `${API_BASE}/listings?${query}`;
       } else {
-        query = `dealerId=${userId}&limit=100`;
+        // Dealer-scoped endpoint — server resolves ownership by JWT, no manual dealerId needed
+        url = `${API_BASE}/api/dealer/listings`;
       }
-      const res = await fetch(`${API_BASE}/listings?${query}`, { headers: authHeaders() });
+      const res = await fetch(url, { headers: authHeaders() });
       const data = await res.json();
       setListings(data.data || data.listings || []);
     } catch (err) {
@@ -894,9 +891,9 @@ const DealerDashboard = () => {
         },
       };
 
-      // Admin uses the admin routes which have proper audit trails
-      const adminPrefix = isAdmin ? '/api/admin' : '';
-      const baseUrl = `${API_BASE}${adminPrefix}/listings`;
+      const baseUrl = isAdmin
+        ? `${API_BASE}/api/admin/listings`
+        : `${API_BASE}/api/dealer/listings`;
       const url = isEdit ? `${baseUrl}/${listingId}` : baseUrl;
       const method = isEdit ? 'PUT' : 'POST';
 
@@ -926,16 +923,27 @@ const DealerDashboard = () => {
   const handleToggleStatus = async listing => {
     const next = listing.status === 'active' ? 'archived' : 'active';
     try {
-      const res = await fetch(`${API_BASE}/listings/${listing._id}/status`, {
-        method: 'PATCH',
-        headers: authHeaders(),
-        body: JSON.stringify({ status: next }),
-      });
+      let res;
+      if (isAdmin) {
+        res = await fetch(`${API_BASE}/listings/${listing._id}/status`, {
+          method: 'PATCH',
+          headers: authHeaders(),
+          body: JSON.stringify({ status: next }),
+        });
+      } else {
+        // Dealer uses their own PUT endpoint which enforces ownership server-side
+        res = await fetch(`${API_BASE}/api/dealer/listings/${listing._id}`, {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify({ status: next }),
+        });
+      }
       if (res.ok) {
         showToast(`Listing ${next === 'active' ? 'activated' : 'paused'}.`);
         fetchListings();
       } else {
-        showToast('Failed to update status', 'error');
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message || 'Failed to update status', 'error');
       }
     } catch { showToast('Failed to update status', 'error'); }
   };
@@ -943,17 +951,17 @@ const DealerDashboard = () => {
   // ── Delete listing ─────────────────────────────────────────────────────────
   const handleDeleteListing = async listing => {
     try {
-      const adminPrefix = isAdmin ? '/api/admin' : '';
-      const res = await fetch(`${API_BASE}${adminPrefix}/listings/${listing._id}`, {
-        method: 'DELETE',
-        headers: authHeaders(),
-      });
+      const url = isAdmin
+        ? `${API_BASE}/api/admin/listings/${listing._id}`
+        : `${API_BASE}/api/dealer/listings/${listing._id}`;
+      const res = await fetch(url, { method: 'DELETE', headers: authHeaders() });
       if (res.ok) {
         showToast('Listing deleted.');
         setDeleteConfirm(null);
         fetchListings();
       } else {
-        showToast('Failed to delete listing', 'error');
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message || 'Failed to delete listing', 'error');
       }
     } catch { showToast('Network error', 'error'); }
   };
