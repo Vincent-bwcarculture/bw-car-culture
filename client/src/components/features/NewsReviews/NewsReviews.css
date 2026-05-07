@@ -1,12 +1,12 @@
 /* src/components/features/NewsReviews/NewsReviews.css */
 .news-reviews-section {
-  padding: 0.5rem 2rem;
+  padding: 0.5rem 1rem;
   max-width: 1400px;
-  margin: 0 auto;
+  margin: 0.75rem auto;
 }
 
 .section-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;

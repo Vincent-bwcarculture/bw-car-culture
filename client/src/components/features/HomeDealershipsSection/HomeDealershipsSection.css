@@ -1,6 +1,6 @@
 /* src/components/features/HomeDealershipsSection/HomeDealershipsSection.css */
 .home-dealerships-section {
-    margin: 1.5rem 0;
+    margin: 0.75rem 0;
     padding: 0 1rem;
     position: relative;
   }
@@ -9,7 +9,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     padding: 0 1rem;
   }
   

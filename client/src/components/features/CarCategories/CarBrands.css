@@ -1,8 +1,8 @@
 /* CarBrands.css — editorial full-bleed image cards */
 
 .car-brands-section {
-  padding: 1.5rem;
-  margin: 20px auto;
+  padding: 0.75rem 1.5rem;
+  margin: 8px auto;
   width: 100%;
   max-width: 1200px;
 }

@@ -3,7 +3,7 @@
 .video-section {
     width: 100%;
     max-width: 1400px;
-    margin: 1.5rem auto;
+    margin: 0.75rem auto;
     padding: 0 1.5rem;
     /* Prevent child carousels from causing page-level horizontal scroll */
     overflow-x: hidden;
