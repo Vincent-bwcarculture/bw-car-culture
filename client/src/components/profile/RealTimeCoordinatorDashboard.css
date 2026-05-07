@@ -51,7 +51,7 @@
 .stat-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #3498db;
+  color: #0051ff;
   margin-bottom: 4px;
 }
 
@@ -84,12 +84,12 @@
 }
 
 .action-button.primary {
-  background: #3498db;
+  background: #0051ff;
   color: white;
 }
 
 .action-button.primary:hover {
-  background: #2980b9;
+  background: #0040cc;
   transform: translateY(-2px);
 }
 
@@ -194,14 +194,14 @@
 }
 
 .queue-item.loading {
-  border-left: 4px solid #3498db;
+  border-left: 4px solid #0051ff;
   background: #e8f4f8;
 }
 
 .queue-position {
   width: 40px;
   height: 40px;
-  background: #3498db;
+  background: #0051ff;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -216,7 +216,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #3498db;
+  color: #0051ff;
   font-weight: 600;
 }
 
@@ -224,7 +224,7 @@
   width: 20px;
   height: 20px;
   border: 2px solid #ecf0f1;
-  border-top: 2px solid #3498db;
+  border-top: 2px solid #0051ff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -303,7 +303,7 @@
 }
 
 .loading-time {
-  color: #3498db;
+  color: #0051ff;
   font-weight: 500;
 }
 
@@ -346,12 +346,12 @@
 }
 
 .action-btn.loading {
-  background: #3498db;
+  background: #0051ff;
   color: white;
 }
 
 .action-btn.loading:hover {
-  background: #2980b9;
+  background: #0040cc;
 }
 
 .action-btn.loaded {
@@ -544,7 +544,7 @@
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: #0051ff;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
@@ -555,7 +555,7 @@
 }
 
 .submit-btn {
-  background: #3498db;
+  background: #0051ff;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -566,7 +566,7 @@
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: #2980b9;
+  background: #0040cc;
 }
 
 .submit-btn:disabled {

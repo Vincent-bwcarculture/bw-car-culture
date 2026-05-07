@@ -27,7 +27,7 @@
 .header-icon {
   width: 32px;
   height: 32px;
-  color: #3498db;
+  color: #0051ff;
 }
 
 .header-content h2 {
@@ -55,7 +55,7 @@
 .stat-value {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #3498db;
+  color: #0051ff;
   margin-bottom: 4px;
 }
 
@@ -131,7 +131,7 @@
 }
 
 .register-btn {
-  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  background: linear-gradient(135deg, #0051ff 0%, #0040cc 100%);
   color: white;
   border: none;
   padding: 16px 32px;
@@ -252,7 +252,7 @@
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: #0051ff;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
@@ -293,7 +293,7 @@
 }
 
 .submit-btn {
-  background: #3498db;
+  background: #0051ff;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -304,7 +304,7 @@
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: #2980b9;
+  background: #0040cc;
 }
 
 .submit-btn:disabled {
@@ -479,7 +479,7 @@
 }
 
 .queue-position {
-  background: #3498db;
+  background: #0051ff;
   color: white;
   width: 32px;
   height: 32px;
@@ -562,12 +562,12 @@
 }
 
 .action-btn.primary {
-  background: #3498db;
+  background: #0051ff;
   color: white;
 }
 
 .action-btn.primary:hover {
-  background: #2980b9;
+  background: #0040cc;
 }
 
 .action-btn.secondary {

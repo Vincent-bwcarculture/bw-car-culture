@@ -13,7 +13,7 @@
   text-align: center;
   margin-bottom: 32px;
   padding: 24px;
-  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  background: linear-gradient(135deg, #2c3e50 0%, #0051ff 100%);
   color: white;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
@@ -51,15 +51,15 @@
 }
 
 .destination-card:hover {
-  border-color: #3498db;
-  box-shadow: 0 4px 16px rgba(52, 152, 219, 0.2);
+  border-color: #0051ff;
+  box-shadow: 0 4px 16px rgba(0, 81, 255, 0.2);
   transform: translateY(-2px);
 }
 
 .destination-card.selected {
-  border-color: #2980b9;
-  background: #e8f4f8;
-  box-shadow: 0 4px 16px rgba(41, 128, 185, 0.3);
+  border-color: #0040cc;
+  background: #e6eaff;
+  box-shadow: 0 4px 16px rgba(0, 64, 204, 0.3);
 }
 
 .destination-header {
@@ -77,7 +77,7 @@
 }
 
 .route-count {
-  background: #3498db;
+  background: #0051ff;
   color: white;
   padding: 4px 8px;
   border-radius: 12px;
@@ -207,7 +207,7 @@
 .route-arrow {
   width: 16px;
   height: 16px;
-  color: #3498db;
+  color: #0051ff;
 }
 
 .origin, .destination {
@@ -233,8 +233,8 @@
 }
 
 .status-indicator.scheduled {
-  background: #e8f4f8;
-  color: #3498db;
+  background: #e6eaff;
+  color: #0051ff;
 }
 
 .route-pricing {
@@ -311,7 +311,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #3498db;
+  color: #0051ff;
   font-size: 0.9rem;
 }
 
@@ -348,7 +348,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #3498db;
+  background: #0051ff;
   position: relative;
   z-index: 2;
 }
@@ -407,7 +407,7 @@
 .vehicle-icon-small {
   width: 18px;
   height: 18px;
-  color: #3498db;
+  color: #0051ff;
 }
 
 .vehicle-specs {
@@ -485,12 +485,12 @@
 }
 
 .action-btn.primary {
-  background: #3498db;
+  background: #0051ff;
   color: white;
 }
 
 .action-btn.primary:hover {
-  background: #2980b9;
+  background: #0040cc;
 }
 
 .action-btn.secondary {
@@ -537,8 +537,8 @@
 }
 
 .popular-destination-card:hover {
-  border-color: #3498db;
-  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+  border-color: #0051ff;
+  box-shadow: 0 2px 8px rgba(0, 81, 255, 0.2);
 }
 
 .popular-destination-name {

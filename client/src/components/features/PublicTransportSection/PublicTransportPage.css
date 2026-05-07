@@ -644,7 +644,7 @@
 }
 .bcc-fares-table tr:last-child td { border-bottom: none; }
 .bcc-fares-table tr:hover td { background: rgba(255,255,255,0.02); }
-.fare-price { color: #0066ff; font-weight: 700; }
+.fare-price { color: #0051ff; font-weight: 700; }
 
 /* Filter input datalist styling */
 .filter-control input[list] {

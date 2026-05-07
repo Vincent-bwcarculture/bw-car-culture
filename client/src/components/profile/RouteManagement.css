@@ -203,7 +203,7 @@
 }
 
 .rmanage-blue {
-  background: #3498db;
+  background: #0051ff;
   color: var(--uprofile-text-white);
 }
 
@@ -273,11 +273,11 @@
 
 .rmanage-edit-btn {
   background: rgba(52, 152, 219, 0.1);
-  color: #3498db;
+  color: #0051ff;
 }
 
 .rmanage-edit-btn:hover {
-  background: #3498db;
+  background: #0051ff;
   color: var(--uprofile-text-white);
 }
 
