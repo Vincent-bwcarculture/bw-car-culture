@@ -59,7 +59,7 @@
   
   .bcc-business-banner {
     position: relative;
-    height: 140px;
+    height: 110px;
     overflow: hidden;
   }
   
@@ -134,18 +134,18 @@
   }
   
   .bcc-business-content {
-    padding: 1rem 1.25rem;
+    padding: 0.6rem 1rem;
     position: relative;
     display: flex;
     flex-direction: column;
     flex: 1;
   }
-  
+
   .bcc-business-header {
     display: flex;
     align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
+    gap: 0.6rem;
+    margin-bottom: 0.3rem;
     position: relative;
   }
   
@@ -191,12 +191,12 @@
   .bcc-business-info {
     flex: 1;
     min-width: 0;
-    padding-top: 0.5rem;
+    padding-top: 0.25rem;
   }
-  
+
   .bcc-business-info h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.25rem;
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
     color: #ffffff;
     white-space: nowrap;
     overflow: hidden;
@@ -209,8 +209,8 @@
   .bcc-business-details {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.7rem;
-    margin-bottom: 0.7rem;
+    gap: 0.35rem;
+    margin-bottom: 0.4rem;
   }
   
   .bcc-business-badge {
@@ -297,19 +297,19 @@
   }
   
   .bcc-business-description {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.7);
-    line-height: 1.6;
-    margin-bottom: 0.7rem;
+    line-height: 1.5;
+    margin-bottom: 0.4rem;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    max-height: 4.2rem;
+    max-height: 2.6rem;
     position: relative;
     background: rgba(0, 0, 0, 0.1);
-    padding: 0.75rem;
+    padding: 0.4rem 0.6rem;
     border-radius: 6px;
     border-left: 3px solid rgba(255, 51, 0, 0.5);
   }
@@ -317,8 +317,8 @@
   .bcc-business-specialties {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
-    margin-bottom: 0.7rem;
+    gap: 0.2rem;
+    margin-bottom: 0.4rem;
   }
   
   .bcc-specialties-label {
@@ -372,17 +372,17 @@
   .bcc-business-footer {
     margin-top: auto;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 1rem 1.25rem;
+    padding: 0.5rem 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
     background: rgba(0, 0, 0, 0.1);
   }
-  
+
   .bcc-business-metrics {
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem;
   }
   
   .bcc-business-metric {
@@ -508,29 +508,29 @@
   
   @media (max-width: 992px) {
     .bcc-business-metrics {
-      gap: 1.2rem;
+      gap: 0.75rem;
     }
-    
+
     .bcc-business-banner {
-      height: 130px;
+      height: 100px;
     }
   }
-  
+
   @media (max-width: 768px) {
     .bcc-business-banner {
-      height: 120px;
+      height: 95px;
     }
-    
+
     .bcc-business-content {
-      padding: 0 0.875rem 0.875rem;
+      padding: 0.5rem 0.75rem 0.5rem;
     }
-    
+
     .bcc-business-footer {
-      padding: 0.75rem 0.875rem;
+      padding: 0.4rem 0.75rem;
     }
-    
+
     .bcc-business-cta {
-      padding: 0.5rem 1rem;
+      padding: 0.4rem 0.85rem;
     }
   }
   
@@ -539,7 +539,7 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
-      margin-bottom: 1rem;
+      margin-bottom: 0.4rem;
     }
     
     .bcc-business-info {
@@ -580,7 +580,7 @@
     
     .bcc-business-footer {
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.4rem;
     }
     
     .bcc-business-metrics {
@@ -601,28 +601,28 @@
   /* ===== GLOBAL DESKTOP COMPACT SIZE (1024px+) ===== */
   @media (min-width: 1024px) {
     .bcc-business-banner {
-      height: 95px;
+      height: 88px;
     }
 
     .bcc-business-card.compact .bcc-business-banner {
-      height: 80px;
+      height: 75px;
     }
 
     .bcc-business-logo {
-      width: 52px;
-      height: 52px;
-      margin-top: -18px;
+      width: 48px;
+      height: 48px;
+      margin-top: -16px;
     }
 
     .bcc-business-info h3 {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
 
     .bcc-business-content {
-      padding: 0 0.75rem 0.75rem;
+      padding: 0.4rem 0.65rem 0.5rem;
     }
 
     .bcc-business-footer {
-      padding: 0.5rem 0.75rem;
+      padding: 0.4rem 0.65rem;
     }
   }
