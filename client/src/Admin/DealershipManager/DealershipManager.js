@@ -829,6 +829,15 @@ Empowering Dealers. Connecting Buyers. Driving Commerce.`;
                     </button>
                     {seller.sellerType !== 'private' && (
                       <button
+                        className="action-btn dashboard"
+                        onClick={() => navigate(`/admin/dealer?dealerId=${seller._id}`)}
+                        title="View dealer dashboard"
+                      >
+                        📊
+                      </button>
+                    )}
+                    {seller.sellerType !== 'private' && (
+                      <button
                         className={`action-btn welcome-msg${copiedId === seller._id ? ' copied' : ''}`}
                         onClick={() => handleCopyWelcomeMessage(seller)}
                         title="Copy welcome message"
@@ -1017,6 +1026,13 @@ Empowering Dealers. Connecting Buyers. Driving Commerce.`;
                           <option value="standard">Standard — P300</option>
                           <option value="premium">Premium — P1,000</option>
                         </select>
+                        <button
+                          className="action-btn dashboard"
+                          onClick={() => navigate(`/admin/dealer?dealerId=${seller._id}`)}
+                          title="View dealer dashboard"
+                        >
+                          📊
+                        </button>
                         <button
                           className="action-btn view"
                           onClick={() => navigate(`/dealerships/${seller._id}`)}

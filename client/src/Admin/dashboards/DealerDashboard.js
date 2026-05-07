@@ -1,6 +1,6 @@
 // src/Admin/dashboards/DealerDashboard.js
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   LayoutDashboard, Car, Star,
   Plus, Edit2, Trash2, Eye, ArrowLeft, RefreshCw,
@@ -686,6 +686,7 @@ const ClaimDealershipCard = ({ userId, showToast }) => {
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 const DealerDashboard = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
 
   const [activeTab, setActiveTab] = useState('overview');
@@ -718,6 +719,11 @@ const DealerDashboard = () => {
   const userId = user?._id || user?.id;
   const isAdmin = user?.role === 'admin';
 
+  // When admin opens /admin/dealer?dealerId=xxx, use that dealer's ID for profile/reviews.
+  // For regular dealers, targetId is their own userId.
+  const paramDealerId = searchParams.get('dealerId');
+  const targetId = isAdmin ? (paramDealerId || null) : userId;
+
   // Ownership check — admin can manage any listing; dealers only their own
   const canManageListing = (listing) => {
     if (isAdmin) return true;
@@ -748,10 +754,10 @@ const DealerDashboard = () => {
 
   // ── Fetch dealer profile ───────────────────────────────────────────────────
   const fetchProfile = useCallback(async () => {
-    if (!userId) return;
+    if (!targetId) return;
     setProfileLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/dealers/${userId}`, { headers: authHeaders() });
+      const res = await fetch(`${API_BASE}/dealers/${targetId}`, { headers: authHeaders() });
       const data = await res.json();
       setDealerProfile(data.data || data.dealer || null);
     } catch (err) {
@@ -759,7 +765,7 @@ const DealerDashboard = () => {
     } finally {
       setProfileLoading(false);
     }
-  }, [userId]);
+  }, [targetId]);
 
   useEffect(() => {
     if (activeTab === 'profile') fetchProfile();
@@ -767,10 +773,10 @@ const DealerDashboard = () => {
 
   // ── Fetch reviews ──────────────────────────────────────────────────────────
   const fetchReviews = useCallback(async () => {
-    if (!userId) return;
+    if (!targetId) return;
     setReviewsLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/reviews/dealer/${userId}`, { headers: authHeaders() });
+      const res = await fetch(`${API_BASE}/reviews/dealer/${targetId}`, { headers: authHeaders() });
       const data = await res.json();
       setReviews(data.data || data.reviews || []);
     } catch (err) {
@@ -778,7 +784,7 @@ const DealerDashboard = () => {
     } finally {
       setReviewsLoading(false);
     }
-  }, [userId]);
+  }, [targetId]);
 
   useEffect(() => {
     if (activeTab === 'reviews') fetchReviews();
@@ -1133,12 +1139,16 @@ const DealerDashboard = () => {
       {/* Header */}
       <div className="dd-header">
         <div className="dd-header-left">
-          <button className="dd-back-btn" onClick={() => navigate('/profile')}>
-            <ArrowLeft size={18} /> Back to Profile
+          <button className="dd-back-btn" onClick={() => navigate(isAdmin ? '/admin/dealerships' : '/profile')}>
+            <ArrowLeft size={18} /> {isAdmin ? 'Back to Dealers' : 'Back to Profile'}
           </button>
           <div className="dd-header-title">
-            <h1>Dealer Dashboard</h1>
-            <p>{dealerProfile?.businessName || 'Manage your listings, profile & reviews'}</p>
+            <h1>Dealer Dashboard {isAdmin && <span style={{ fontSize: '13px', fontWeight: 400, opacity: 0.6, marginLeft: 8 }}>[Admin View]</span>}</h1>
+            <p>
+              {isAdmin && !targetId
+                ? 'Select a dealership from Seller Management to view their dashboard'
+                : dealerProfile?.businessName || 'Manage listings, profile & reviews'}
+            </p>
           </div>
         </div>
         <div className="dd-header-right">
@@ -1171,23 +1181,42 @@ const DealerDashboard = () => {
         ))}
       </div>
 
+      {/* Admin: no dealer selected notice */}
+      {isAdmin && !targetId && (
+        <div style={{ margin: '2rem', padding: '1.5rem', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 10, color: '#93c5fd' }}>
+          <strong>Admin mode — no dealer selected.</strong>
+          <p style={{ margin: '0.5rem 0 0', opacity: 0.8, fontSize: 14 }}>
+            Go to <button className="dd-link-btn" style={{ color: '#93c5fd' }} onClick={() => navigate('/admin/dealerships')}>Seller Management</button> and click the dashboard icon on any dealership to view their data here.
+            The Listings tab below shows all platform listings regardless.
+          </p>
+        </div>
+      )}
+
       {/* Content */}
       <div className="dd-content">
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'listings' && renderListings()}
         {activeTab === 'profile' && (
-          profileLoading
-            ? <div className="dd-loading"><RefreshCw size={24} className="dd-spin" /> Loading profile...</div>
-            : (
-              <>
-                <ProfileSection dealerProfile={dealerProfile} userId={userId} showToast={showToast} onSaved={setDealerProfile} />
-                <div style={{ padding: '0 0 24px' }}>
-                  <ClaimDealershipCard userId={userId} showToast={showToast} />
-                </div>
-              </>
-            )
+          isAdmin && !targetId
+            ? <div className="dd-empty-state"><Building2 size={40} /><h3>No dealership selected</h3><p>Navigate here from Seller Management with a specific dealer to view or edit their profile.</p></div>
+            : profileLoading
+              ? <div className="dd-loading"><RefreshCw size={24} className="dd-spin" /> Loading profile...</div>
+              : (
+                <>
+                  <ProfileSection dealerProfile={dealerProfile} userId={targetId || userId} showToast={showToast} onSaved={setDealerProfile} />
+                  {!isAdmin && (
+                    <div style={{ padding: '0 0 24px' }}>
+                      <ClaimDealershipCard userId={userId} showToast={showToast} />
+                    </div>
+                  )}
+                </>
+              )
         )}
-        {activeTab === 'reviews' && renderReviews()}
+        {activeTab === 'reviews' && (
+          isAdmin && !targetId
+            ? <div className="dd-empty-state"><Star size={40} /><h3>No dealership selected</h3><p>Navigate here from Seller Management with a specific dealer to view their reviews.</p></div>
+            : renderReviews()
+        )}
       </div>
 
       {/* Listing modal */}
