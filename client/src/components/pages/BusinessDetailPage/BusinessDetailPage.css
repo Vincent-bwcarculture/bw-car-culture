@@ -126,6 +126,24 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
+/* Bottom gradient — darkens lower portion so overlapping logo/info stays readable */
+.bcc-business-detail-banner::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 55%;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.88) 0%,
+    rgba(0, 0, 0, 0.45) 45%,
+    transparent 100%
+  );
+  z-index: 2;
+  pointer-events: none;
+}
+
 .bcc-business-detail-banner-image,
 .bcc-business-detail-default-banner {
   width: 100%;
@@ -226,14 +244,12 @@
 .bcc-business-detail-logo-container {
   width: 120px;
   height: 120px;
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
   background: var(--surface-lighter);
-  border: 4px solid var(--primary-color);
+  border: 3px solid rgba(255, 255, 255, 0.14);
   flex-shrink: 0;
-  box-shadow: 
-    var(--shadow-default),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
   margin-top: -60px;
   position: relative;
   z-index: 10;
@@ -242,10 +258,8 @@
 
 .bcc-business-detail-logo-container:hover {
   transform: translateY(-4px);
-  box-shadow: 
-    var(--shadow-hover),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-    0 0 30px rgba(255, 51, 0, 0.4);
+  border-color: rgba(255, 51, 0, 0.6);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 51, 0, 0.2);
 }
 
 .bcc-business-detail-logo {
@@ -282,7 +296,7 @@
 .bcc-business-detail-title-container {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   flex-wrap: wrap;
   margin-bottom: 0.5rem;
   margin-top: 0;
@@ -303,28 +317,26 @@
 }
 
 .bcc-business-detail-verified {
-  background: linear-gradient(135deg, rgba(46, 213, 115), rgba(39, 194, 101));
-  color: white;
-  padding: 0.3rem 0.8rem;
-  border-radius: 30px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  white-space: nowrap;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  background: #16a34a;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
   flex-shrink: 0;
-  transition: all 0.3s ease;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .bcc-business-detail-verified:hover {
-  transform: translateY(-2px);
-}
-
-.bcc-business-detail-verified::before {
-  /* content: ''; */
-  font-weight: 900;
-  font-size: 1rem;
+  transform: scale(1.1);
+  box-shadow: 0 3px 10px rgba(22, 163, 74, 0.6);
 }
 
 /* Business Type and Location - Better Alignment */
@@ -2028,7 +2040,7 @@
   .bcc-business-detail-banner {
     height: 200px;
     -webkit-print-color-adjust: exact;
-   
+    print-color-adjust: exact;
   }
 }
 

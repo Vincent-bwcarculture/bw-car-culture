@@ -1329,7 +1329,7 @@ return (
           <div className="bcc-business-detail-title-container">
             <h1>{business.businessName}</h1>
             {business.verification?.status === 'verified' && (
-              <div className="bcc-business-detail-verified">✓ Verified</div>
+              <span className="bcc-business-detail-verified" title="Verified Business">✓</span>
             )}
           </div>
           
