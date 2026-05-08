@@ -471,9 +471,9 @@ const HeroSection = () => {
                 {/* Pricing tiers */}
                 <div className="bcc-dealer-plans">
                   {[
-                    { id: 'basic', name: 'Basic', price: 'P1,000', period: '/month', listings: '15 listings', badge: null, features: ['10 photos per listing', '2 featured listings', 'Social media marketing', 'Basic analytics', 'Email support'] },
-                    { id: 'standard', name: 'Professional', price: 'P2,500', period: '/month', listings: '35 listings', badge: 'Most Popular', features: ['15 photos per listing', '5 featured listings', '3× social media marketing', 'Advanced analytics', 'Phone support', 'Custom branding'] },
-                    { id: 'enterprise', name: 'Enterprise', price: 'P6,000', period: '/month', listings: '100 listings', badge: null, features: ['Unlimited photos', '15 featured listings', 'Unlimited social media', 'Full analytics suite', 'Priority support', 'All add-ons included'] },
+                    { id: 'basic',    name: 'Basic',    price: 'P0',     sub: 'Free forever', badge: null,           features: ['Listed on BW Car Culture', 'Public dealer profile page', 'Text-only business updates', 'Customer reviews & ratings', 'Standard search visibility'] },
+                    { id: 'standard', name: 'Standard', price: 'P300',   sub: '/month',       badge: 'Most Popular',  features: ['Everything in Basic', 'Listing performance stats', 'Profile & banner image editing', 'Image uploads in updates', 'Contact & view analytics', 'Up to 20 active listings'] },
+                    { id: 'premium',  name: 'Premium',  price: 'P1,000', sub: '/month',       badge: null,           features: ['Everything in Standard', 'Priority placement in search', 'Full AI integration', 'Video & 3D media uploads', 'Featured in platform video content', 'Up to 40 active listings'] },
                   ].map(plan => (
                     <div
                       key={plan.id}
@@ -481,9 +481,8 @@ const HeroSection = () => {
                       onClick={() => setDealerForm(f => ({ ...f, plan: plan.id }))}
                     >
                       {plan.badge && <div className="bcc-dealer-plan-badge">{plan.badge}</div>}
-                      <div className="bcc-dealer-plan-price">{plan.price}<span>{plan.period}</span></div>
+                      <div className="bcc-dealer-plan-price">{plan.price}<span>{plan.sub}</span></div>
                       <div className="bcc-dealer-plan-name">{plan.name}</div>
-                      <div className="bcc-dealer-plan-listings">{plan.listings}</div>
                       <ul className="bcc-dealer-plan-features">
                         {plan.features.map(f => <li key={f}>✓ {f}</li>)}
                       </ul>
@@ -491,10 +490,25 @@ const HeroSection = () => {
                   ))}
                 </div>
 
-                {/* Registration fee note */}
+                {/* Add-ons teaser */}
+                <div className="bcc-dealer-addons-row">
+                  {[
+                    { label: 'Listing Photography', price: 'P1,500' },
+                    { label: 'Car Review Video', price: 'P2,500' },
+                    { label: 'Dealership Video', price: 'P2,000' },
+                    { label: 'Social Media Post', price: 'P400' },
+                    { label: 'Verified Badge', price: 'P950' },
+                  ].map(a => (
+                    <div key={a.label} className="bcc-dealer-addon-pill">
+                      <span>{a.label}</span><strong>{a.price}</strong>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Fees note */}
                 <div className="bcc-dealer-reg-fee-note">
                   <span>📌</span>
-                  <span>One-time registration fee: <strong>P500</strong> — covers account setup, business verification, and onboarding.</span>
+                  <span>One-time registration fee: <strong>P500</strong> — account setup, business verification &amp; onboarding. Distance surcharge of <strong>P3.50/km</strong> applies for dealers more than 40 km outside Gaborone.</span>
                 </div>
 
                 {/* Simple enquiry form */}
@@ -512,7 +526,7 @@ const HeroSection = () => {
                       className="bcc-dealer-reg-submit"
                       onClick={() => {
                         if (!dealerForm.name || !dealerForm.business || !dealerForm.phone) return;
-                        const planLabel = { basic: 'Basic (P1,000/mo)', standard: 'Professional (P2,500/mo)', enterprise: 'Enterprise (P6,000/mo)' }[dealerForm.plan];
+                        const planLabel = { basic: 'Basic (Free)', standard: 'Standard (P300/mo)', premium: 'Premium (P1,000/mo)' }[dealerForm.plan];
                         const msg = encodeURIComponent(
                           `Hi! I'd like to register my dealership on BW Car Culture.\n\nName: ${dealerForm.name}\nBusiness: ${dealerForm.business}\nPhone: ${dealerForm.phone}\nEmail: ${dealerForm.email || 'Not provided'}\nSelected Plan: ${planLabel}`
                         );

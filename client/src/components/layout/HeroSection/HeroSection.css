@@ -2705,6 +2705,30 @@
 }
 
 /* Registration fee note */
+/* Add-on pills row */
+.bcc-dealer-addons-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+
+.bcc-dealer-addon-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.73rem;
+  color: rgba(255,255,255,0.6);
+}
+.bcc-dealer-addon-pill strong {
+  color: #ff3300;
+  font-weight: 700;
+}
+
 .bcc-dealer-reg-fee-note {
   display: flex;
   align-items: flex-start;
