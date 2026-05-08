@@ -19,7 +19,7 @@ const HeroSection = () => {
   const [showPreparation, setShowPreparation] = useState(false);
   const [prepCardIdx, setPrepCardIdx] = useState(0);
   const [showDealerReg, setShowDealerReg] = useState(false);
-  const [dealerForm, setDealerForm] = useState({ name: '', business: '', phone: '', email: '', plan: 'basic' });
+  const [dealerForm, setDealerForm] = useState({ name: '', business: '', phone: '', email: '' });
 
   // Transport form state
   const [transportForm, setTransportForm] = useState({ from: '', to: '', date: '', time: '' });
@@ -468,48 +468,6 @@ const HeroSection = () => {
                 <h3 className="bcc-dealer-reg-title">Register Your Dealership</h3>
                 <p className="bcc-dealer-reg-sub">Choose a plan below and complete the form — our team will contact you within 24 hours to get you set up.</p>
 
-                {/* Pricing tiers */}
-                <div className="bcc-dealer-plans">
-                  {[
-                    { id: 'basic',    name: 'Basic',    price: 'P0',     sub: 'Free forever', badge: null,           features: ['Listed on BW Car Culture', 'Public dealer profile page', 'Text-only business updates', 'Customer reviews & ratings', 'Standard search visibility'] },
-                    { id: 'standard', name: 'Standard', price: 'P300',   sub: '/month',       badge: 'Most Popular',  features: ['Everything in Basic', 'Listing performance stats', 'Profile & banner image editing', 'Image uploads in updates', 'Contact & view analytics', 'Up to 20 active listings'] },
-                    { id: 'premium',  name: 'Premium',  price: 'P1,000', sub: '/month',       badge: null,           features: ['Everything in Standard', 'Priority placement in search', 'Full AI integration', 'Video & 3D media uploads', 'Featured in platform video content', 'Up to 40 active listings'] },
-                  ].map(plan => (
-                    <div
-                      key={plan.id}
-                      className={`bcc-dealer-plan${plan.badge ? ' bcc-dealer-plan--popular' : ''}${dealerForm.plan === plan.id ? ' bcc-dealer-plan--selected' : ''}`}
-                      onClick={() => setDealerForm(f => ({ ...f, plan: plan.id }))}
-                    >
-                      {plan.badge && <div className="bcc-dealer-plan-badge">{plan.badge}</div>}
-                      <div className="bcc-dealer-plan-price">{plan.price}<span>{plan.sub}</span></div>
-                      <div className="bcc-dealer-plan-name">{plan.name}</div>
-                      <ul className="bcc-dealer-plan-features">
-                        {plan.features.map(f => <li key={f}>✓ {f}</li>)}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Add-ons teaser */}
-                <div className="bcc-dealer-addons-row">
-                  {[
-                    { label: 'Listing Photography', price: 'P1,500' },
-                    { label: 'Car Review Video', price: 'P2,500' },
-                    { label: 'Dealership Video', price: 'P2,000' },
-                    { label: 'Social Media Post', price: 'P400' },
-                    { label: 'Verified Badge', price: 'P950' },
-                  ].map(a => (
-                    <div key={a.label} className="bcc-dealer-addon-pill">
-                      <span>{a.label}</span><strong>{a.price}</strong>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Fees note */}
-                <div className="bcc-dealer-reg-fee-note">
-                  <span>📌</span>
-                  <span>One-time registration fee: <strong>P500</strong> — account setup, business verification &amp; onboarding. Distance surcharge of <strong>P3.50/km</strong> applies for dealers more than 40 km outside Gaborone.</span>
-                </div>
 
                 {/* Simple enquiry form */}
                 <div className="bcc-dealer-reg-form">
@@ -526,9 +484,8 @@ const HeroSection = () => {
                       className="bcc-dealer-reg-submit"
                       onClick={() => {
                         if (!dealerForm.name || !dealerForm.business || !dealerForm.phone) return;
-                        const planLabel = { basic: 'Basic (Free)', standard: 'Standard (P300/mo)', premium: 'Premium (P1,000/mo)' }[dealerForm.plan];
                         const msg = encodeURIComponent(
-                          `Hi! I'd like to register my dealership on BW Car Culture.\n\nName: ${dealerForm.name}\nBusiness: ${dealerForm.business}\nPhone: ${dealerForm.phone}\nEmail: ${dealerForm.email || 'Not provided'}\nSelected Plan: ${planLabel}`
+                          `Hi! I'd like to register my dealership on BW Car Culture.\n\nName: ${dealerForm.name}\nBusiness: ${dealerForm.business}\nPhone: ${dealerForm.phone}\nEmail: ${dealerForm.email || 'Not provided'}`
                         );
                         window.open(`https://wa.me/+26774122453?text=${msg}`, '_blank');
                       }}
