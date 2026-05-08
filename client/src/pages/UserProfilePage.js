@@ -209,14 +209,10 @@ const getProfileHints = (userType) => {
 const getAvailableTabs = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Eye },
+    { id: 'vehicles', label: 'Sell My Vehicle', icon: Car },
     { id: 'register-vehicle', label: 'Register Vehicle', icon: Car },
     { id: 'notifications', label: 'Notifications', icon: Bell }
   ];
-
-  // === UNIVERSAL TABS (Everyone gets these) ===
-
-  // Always show vehicles for anyone who might own a car
-  tabs.push({ id: 'vehicles', label: 'Sell My Vehicle', icon: Car });
 
   // === NEW: JOURNALIST ARTICLES TAB ===
   // Show Articles tab for journalists (primary OR additional role)

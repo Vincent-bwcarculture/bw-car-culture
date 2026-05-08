@@ -2,6 +2,7 @@
 // ABSOLUTELY COMPLETE PRODUCTION VERSION - EVERY SINGLE SECTION INCLUDED
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { imageService } from '../../services/imageService.js';
 import './UserCarListingForm.css';
 
@@ -307,18 +308,32 @@ const UserCarListingForm = ({
         if (result.success && result.data) {
           setAutoFillData(result.data);
           setProfileCompletion(result.data.profileCompletion);
-          
-          // Show auto-fill prompt if we have useful data and form is empty
-          const hasUsefulData = result.data.contact?.phone || 
-                               result.data.contact?.location?.city || 
-                               result.data.sellerName;
-          
-          const formIsEmpty = !formData.contact.sellerName && 
-                             !formData.contact.phone && 
-                             !formData.contact.location.city;
 
-          if (hasUsefulData && formIsEmpty && !isEdit) {
-            setShowAutoFillPrompt(true);
+          // Auto-apply contact fields immediately for new forms
+          if (!isEdit) {
+            const d = result.data;
+            setFormData(prev => ({
+              ...prev,
+              contact: {
+                ...prev.contact,
+                sellerName: prev.contact.sellerName || d.sellerName || '',
+                phone: prev.contact.phone || d.contact?.phone || '',
+                email: prev.contact.email || d.contact?.email || '',
+                whatsapp: prev.contact.whatsapp || d.contact?.whatsapp || '',
+                location: {
+                  ...prev.contact.location,
+                  city: prev.contact.location.city || d.contact?.location?.city || '',
+                  state: prev.contact.location.state || d.contact?.location?.state || '',
+                  address: prev.contact.location.address || d.contact?.location?.address || '',
+                }
+              },
+              location: {
+                ...prev.location,
+                city: prev.location.city || d.contact?.location?.city || '',
+                state: prev.location.state || d.contact?.location?.state || '',
+                address: prev.location.address || d.contact?.location?.address || '',
+              }
+            }));
           }
           
           console.log('✅ User profile data loaded for auto-fill:', {
@@ -535,6 +550,9 @@ const UserCarListingForm = ({
     }
     if (!formData.contact?.phone?.trim()) {
       errors['contact.phone'] = 'Phone number is required';
+    }
+    if (!formData.contact?.sellerName?.trim()) {
+      errors['contact.sellerName'] = 'Seller name is required';
     }
 
     return errors;
@@ -757,6 +775,7 @@ const handleFormSubmit = async (e) => {
         'title': { tab: 'basic', label: 'Basic Info' },
         'description': { tab: 'basic', label: 'Basic Info' },
         'contact.phone': { tab: 'contact', label: 'Contact' },
+        'contact.sellerName': { tab: 'contact', label: 'Contact' },
         'images': { tab: 'images', label: 'Images' },
       };
       const dest = tabMap[firstKey] || { tab: 'basic', label: 'Basic Info' };
@@ -1169,8 +1188,8 @@ const handleFormSubmit = async (e) => {
 
   return (
     <div className="ulisting-form-container">
-      {/* Validation error modal */}
-      {validationModal && (
+      {/* Validation error modal — rendered via portal so fixed overlay always works */}
+      {validationModal && createPortal(
         <div className="ulisting-modal-overlay" onClick={() => setValidationModal(null)}>
           <div className="ulisting-modal" onClick={e => e.stopPropagation()}>
             <h4>Missing Required Info</h4>
@@ -1182,11 +1201,12 @@ const handleFormSubmit = async (e) => {
               <button className="ulisting-modal-btn-secondary" onClick={() => setValidationModal(null)}>Dismiss</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Success modal */}
-      {successModal && (
+      {/* Success modal — rendered via portal */}
+      {successModal && createPortal(
         <div className="ulisting-modal-overlay">
           <div className="ulisting-modal ulisting-success-modal">
             <div className="ulisting-success-icon">✓</div>
@@ -1200,7 +1220,8 @@ const handleFormSubmit = async (e) => {
               Done
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Auto-fill loading indicator */}
@@ -1720,15 +1741,17 @@ const handleFormSubmit = async (e) => {
 
             {/* Common Contact Fields */}
             <div className="ulisting-form-group">
-              <label htmlFor="contact.sellerName">Display Name</label>
+              <label htmlFor="contact.sellerName">Seller Name *</label>
               <input
                 type="text"
                 id="contact.sellerName"
                 name="contact.sellerName"
                 value={formData.contact?.sellerName || ''}
                 onChange={handleInputChange}
-                placeholder="Name to display on listing (auto-filled from profile)"
+                placeholder="Your full name"
+                className={errors['contact.sellerName'] ? 'error' : ''}
               />
+              {errors['contact.sellerName'] && <span className="ulisting-error-message">{errors['contact.sellerName']}</span>}
             </div>
 
             <div className="ulisting-form-group">
