@@ -399,11 +399,12 @@
 /* Enhanced Bottom Info Section */
 .bcc-business-detail-bottom-info {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
-  margin-top: 0.6rem;
+  margin-top: 0.75rem;
+  padding: 0 1rem;
 }
 
 /* Enhanced Metrics Styling */
@@ -552,9 +553,10 @@
 .bcc-business-detail-quick-contact {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem 0;
   border-top: 1px solid var(--border-color);
 }
 
@@ -1744,15 +1746,14 @@
   }
 
   .bcc-business-detail-bottom-info {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.6rem;
-    margin-top: 0.4rem;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0 0.75rem;
   }
 
   .bcc-business-detail-metrics {
     justify-content: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
   }
 
   .bcc-business-detail-actions {

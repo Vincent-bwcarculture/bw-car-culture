@@ -1344,78 +1344,78 @@ return (
               </span>
             )}
           </div>
-          
-          <div className="bcc-business-detail-bottom-info">
-            {business.metrics && (
-              <div className="bcc-business-detail-metrics">
-                {(isDealer || isRentalService) && (
-                  <div className="bcc-business-detail-metric">
-                    <span className="bcc-business-detail-metric-value">{listingsCount || business.metrics?.totalListings || 0}</span>
-                    <span className="bcc-business-detail-metric-label">
-                      {isDealer ? 'Listings' : serviceType === 'car_rental' ? 'Vehicles' : 
-                       serviceType === 'trailer_rental' ? 'Trailers' : 'Routes'}
-                    </span>
-                  </div>
-                )}
-                
-                {business.metrics.averageRating > 0 && (
-                  <div className="bcc-business-detail-metric">
-                    <span className="bcc-business-detail-metric-value">
-                      <span className="bcc-business-detail-stars">
-                        {"★".repeat(Math.floor(business.metrics.averageRating))}
-                        {business.metrics.averageRating % 1 >= 0.5 ? "½" : ""}
-                      </span>
-                      <span className="bcc-business-detail-rating-number">
-                        {business.metrics.averageRating?.toFixed(1) || '0.0'}
-                      </span>
-                    </span>
-                    <span className="bcc-business-detail-metric-label">
-                      {business.metrics.totalReviews} reviews
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            <div className="bcc-business-detail-actions">
-              <button className="bcc-business-detail-contact-button" onClick={handleContact}>
-                Contact {isDealer ? 'Dealer' : 'Business'}
-              </button>
-              
-              {(business.social?.whatsapp || business.contact?.phone) && (
-                <button className="bcc-business-detail-whatsapp-button" onClick={handleWhatsAppContact}>
-                  WhatsApp
-                </button>
-              )}
-              
-              {business.contact?.website && (
-                <button className="bcc-business-detail-website-button" onClick={handleWebsiteClick}>
-                  Visit Website
-                </button>
-              )}
-            </div>
-          </div>
-          
-          <div className="bcc-business-detail-quick-contact">
-            {business.contact?.phone && (
-              <div className="bcc-business-detail-phone">
-                <span className="bcc-business-detail-contact-label">Phone:</span>
-                <a 
-                  href={`tel:${business.contact.phone}`}
-                  onClick={() => handlePhoneClick(business.contact.phone)}
-                >
-                  {business.contact.phone}
-                </a>
-              </div>
-            )}
-            {business.contact?.email && (
-              <div className="bcc-business-detail-email">
-                <span className="bcc-business-detail-contact-label">Email:</span>
-                <a href={`mailto:${business.contact.email}`}>{business.contact.email}</a>
-              </div>
-            )}
-          </div>
         </div>
+      </div>
+
+      <div className="bcc-business-detail-bottom-info">
+        {business.metrics && (
+          <div className="bcc-business-detail-metrics">
+            {(isDealer || isRentalService) && (
+              <div className="bcc-business-detail-metric">
+                <span className="bcc-business-detail-metric-value">{listingsCount || business.metrics?.totalListings || 0}</span>
+                <span className="bcc-business-detail-metric-label">
+                  {isDealer ? 'Listings' : serviceType === 'car_rental' ? 'Vehicles' :
+                   serviceType === 'trailer_rental' ? 'Trailers' : 'Routes'}
+                </span>
+              </div>
+            )}
+
+            {business.metrics.averageRating > 0 && (
+              <div className="bcc-business-detail-metric">
+                <span className="bcc-business-detail-metric-value">
+                  <span className="bcc-business-detail-stars">
+                    {"★".repeat(Math.floor(business.metrics.averageRating))}
+                    {business.metrics.averageRating % 1 >= 0.5 ? "½" : ""}
+                  </span>
+                  <span className="bcc-business-detail-rating-number">
+                    {business.metrics.averageRating?.toFixed(1) || '0.0'}
+                  </span>
+                </span>
+                <span className="bcc-business-detail-metric-label">
+                  {business.metrics.totalReviews} reviews
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="bcc-business-detail-actions">
+          <button className="bcc-business-detail-contact-button" onClick={handleContact}>
+            Contact {isDealer ? 'Dealer' : 'Business'}
+          </button>
+
+          {(business.social?.whatsapp || business.contact?.phone) && (
+            <button className="bcc-business-detail-whatsapp-button" onClick={handleWhatsAppContact}>
+              WhatsApp
+            </button>
+          )}
+
+          {business.contact?.website && (
+            <button className="bcc-business-detail-website-button" onClick={handleWebsiteClick}>
+              Visit Website
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="bcc-business-detail-quick-contact">
+        {business.contact?.phone && (
+          <div className="bcc-business-detail-phone">
+            <span className="bcc-business-detail-contact-label">Phone:</span>
+            <a
+              href={`tel:${business.contact.phone}`}
+              onClick={() => handlePhoneClick(business.contact.phone)}
+            >
+              {business.contact.phone}
+            </a>
+          </div>
+        )}
+        {business.contact?.email && (
+          <div className="bcc-business-detail-email">
+            <span className="bcc-business-detail-contact-label">Email:</span>
+            <a href={`mailto:${business.contact.email}`}>{business.contact.email}</a>
+          </div>
+        )}
       </div>
     </div>
     
