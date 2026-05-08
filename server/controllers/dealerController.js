@@ -5,6 +5,7 @@ import { uploadImage, deleteImage } from '../utils/imageUpload.js';
 import Dealer from '../models/Dealer.js';
 import Listing from '../models/Listing.js';
 import User from '../models/User.js';
+import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -286,11 +287,13 @@ const getDealer = asyncHandler(async (req, res, next) => {
   try {
     console.log(`Looking up dealer with ID: ${req.params.id}`);
 
-    // First try by dealer _id, then fall back to user ref (dealer dashboard passes userId)
-    let dealer = await Dealer.findById(req.params.id).catch(() => null);
-    if (!dealer) {
-      dealer = await Dealer.findOne({ user: req.params.id });
-    }
+    // Try ObjectId, then slug, then user ref
+    const param = req.params.id;
+    let dealer = mongoose.Types.ObjectId.isValid(param)
+      ? await Dealer.findById(param).catch(() => null)
+      : null;
+    if (!dealer) dealer = await Dealer.findOne({ slug: param });
+    if (!dealer) dealer = await Dealer.findOne({ user: param }).catch(() => null);
 
     if (!dealer) {
       console.log(`No dealer found with id ${req.params.id}`);

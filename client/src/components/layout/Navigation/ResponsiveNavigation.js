@@ -593,19 +593,34 @@ const ResponsiveNavigation = () => {
   useEffect(() => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
     const breadcrumbs = [];
-    
+    const stateTitle = location.state?.breadcrumbTitle;
+
     pathSegments.forEach((segment, index) => {
       const currentPath = `/${pathSegments.slice(0, index + 1).join('/')}`;
       const category = categories.find(cat => cat.path === currentPath);
-      
-      breadcrumbs.push({
-        label: category ? category.name : segment.charAt(0).toUpperCase() + segment.slice(1),
-        url: index === pathSegments.length - 1 ? null : currentPath
-      });
+      const isLast = index === pathSegments.length - 1;
+
+      let label;
+      if (category) {
+        label = category.name;
+      } else if (isLast && stateTitle) {
+        label = stateTitle;
+      } else {
+        const isMongoId = /^[a-f0-9]{24}$/i.test(segment);
+        label = isMongoId
+          ? '...'
+          : segment
+              .replace(/-[a-f0-9]{6}$/, '')
+              .split('-')
+              .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+              .join(' ');
+      }
+
+      breadcrumbs.push({ label, url: isLast ? null : currentPath });
     });
-    
+
     setActivePath(breadcrumbs);
-  }, [location.pathname]);
+  }, [location.pathname, location.state]);
 
   // Enhanced scroll detection for navigation buttons
   useEffect(() => {

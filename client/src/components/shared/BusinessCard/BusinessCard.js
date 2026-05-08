@@ -118,22 +118,24 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
       return;
     }
     
+    // Use slug for clean URLs, fall back to _id
+    const identifier = business.slug || business._id;
+
     // Determine the correct path based on business type
     let path;
-    
+
     if (businessType === 'dealer') {
-      path = `/dealerships/${business._id}`;
+      path = `/dealerships/${identifier}`;
     } else if (businessType === 'car_rental') {
-      path = `/services/${business._id}?type=car_rental`;
+      path = `/services/${identifier}?type=car_rental`;
     } else if (businessType === 'trailer_rental') {
-      path = `/services/${business._id}?type=trailer_rental`;
+      path = `/services/${identifier}?type=trailer_rental`;
     } else if (businessType === 'public_transport') {
-      path = `/services/${business._id}?type=public_transport`;
+      path = `/services/${identifier}?type=public_transport`;
     } else if (businessType === 'workshop') {
-      path = `/services/${business._id}?type=workshop`;
+      path = `/services/${identifier}?type=workshop`;
     } else {
-      // Default to services path for other provider types
-      path = `/services/${business._id}`;
+      path = `/services/${identifier}`;
     }
     
     console.log(`Navigating to: ${path}`);
@@ -301,9 +303,9 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
 
           <div className="bcc-business-actions">
             <button className="bcc-business-cta" onClick={handleActionClick}>
-              {businessType === 'dealer' ? 'View Dealership' : 
-                businessType === 'car_rental' ? 'View Car Rentals' : 
-                businessType === 'trailer_rental' ? 'View Trailer Rentals' : 
+              {businessType === 'dealer' ? 'View Dealership' :
+                businessType === 'car_rental' ? 'View Car Rentals' :
+                businessType === 'trailer_rental' ? 'View Trailer Rentals' :
                 businessType === 'public_transport' ? 'View Transport' : 'View Details'}
             </button>
           </div>

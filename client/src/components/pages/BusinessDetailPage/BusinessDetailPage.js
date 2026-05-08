@@ -395,10 +395,26 @@ const BusinessDetailPage = () => {
       const response = await http.get(endpoint);
       
       if (response.data.success) {
-        setBusiness(response.data.data);
-        
-        if (isService && !serviceType && response.data.data?.providerType) {
-          setServiceType(response.data.data.providerType);
+        const biz = response.data.data;
+        setBusiness(biz);
+
+        if (isService && !serviceType && biz?.providerType) {
+          setServiceType(biz.providerType);
+        }
+
+        // Redirect from raw ObjectId URL to slug URL, and set breadcrumb title
+        const basePath = businessType === 'dealer' ? '/dealerships' : '/services';
+        const search = window.location.search;
+        if (biz?.slug && biz.slug !== id) {
+          navigate(`${basePath}/${biz.slug}${search}`, {
+            replace: true,
+            state: { breadcrumbTitle: biz.businessName }
+          });
+        } else {
+          navigate(`${basePath}/${id}${search}`, {
+            replace: true,
+            state: { breadcrumbTitle: biz.businessName }
+          });
         }
       } else {
         throw new Error(response.data.message || `Failed to fetch ${businessType}`);
