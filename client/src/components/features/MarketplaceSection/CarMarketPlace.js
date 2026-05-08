@@ -1072,14 +1072,14 @@ const CarMarketplace = () => {
                     </button>
                   </div>
 
-                  {/* UPDATED: Fullscreen button moved to BOTTOM LEFT */}
-                  <button 
-                    className="fullscreen-button" 
-                    onClick={(e) => handleOpenFullscreen(e)} 
-                    aria-label="View fullscreen" 
-                    title="View fullscreen"
+                  {/* Fullscreen button - bottom left, labeled */}
+                  <button
+                    className="fullscreen-button"
+                    onClick={(e) => handleOpenFullscreen(e)}
+                    aria-label="View full image"
+                    title="View full image"
                   >
-                    ⤢
+                    ⤢ Full Image
                   </button>
                   
                   {/* Fullscreen tooltip hint */}
