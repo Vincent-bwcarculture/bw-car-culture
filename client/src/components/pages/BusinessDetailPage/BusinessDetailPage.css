@@ -285,8 +285,8 @@
 .bcc-business-detail-header-info {
   flex: 1;
   min-width: 0;
-  padding-top: 0.5rem;
-  margin-top: 0;
+  padding-top: 0.25rem;
+  margin-top: -25px;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -472,15 +472,15 @@
 .bcc-business-detail-contact-button,
 .bcc-business-detail-website-button,
 .bcc-business-detail-whatsapp-button {
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  padding: 0.3rem 0.85rem;
+  border-radius: 7px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
   white-space: nowrap;
-  font-size: 0.875rem;
-  min-height: 38px;
+  font-size: 0.8rem;
+  min-height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -563,34 +563,32 @@
 .bcc-business-detail-phone,
 .bcc-business-detail-email {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.35rem;
   align-items: center;
   color: var(--text-secondary);
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   background: transparent;
-  padding: 0.5rem 0.8rem;
-  border-radius: 10px;
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
   border: 1px solid var(--border-color);
   flex: 1;
-  min-width: 0;
+  min-width: 130px;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
 
 .bcc-business-detail-phone:hover,
 .bcc-business-detail-email:hover {
-  /* background: rgba(255, 255, 255, 0.08); */
   border-color: var(--border-accent);
-  transform: translateY(-2px);
 }
 
 .bcc-business-detail-contact-label {
   color: var(--text-light);
   font-weight: 600;
   flex-shrink: 0;
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .bcc-business-detail-phone a,
@@ -602,7 +600,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
 }
 
 .bcc-business-detail-phone a:hover,
@@ -1720,7 +1718,8 @@
 
   .bcc-business-detail-header-info {
     align-items: flex-start;
-    padding-top: 0.25rem;
+    padding-top: 0.15rem;
+    margin-top: -15px;
   }
 
   .bcc-business-detail-title-container {
@@ -1778,9 +1777,7 @@
 
   .bcc-business-detail-phone,
   .bcc-business-detail-email {
-    width: 100%;
     justify-content: center;
-    padding: 0.55rem 0.85rem;
   }
 
   /* Mobile Content */
@@ -1858,6 +1855,7 @@
   .bcc-business-detail-header-info {
     align-items: flex-start;
     padding-top: 0.15rem;
+    margin-top: -12px;
   }
 
   .bcc-business-detail-title-container {
@@ -2947,11 +2945,11 @@
 }
 .bdp-time-input:focus { outline: none; border-color: #ff3300; }
 
-/* Edit cover photo button (overlaid bottom-left on banner) */
+/* Edit cover photo button (overlaid top-right on banner) */
 .bdp-edit-banner-btn {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
+  top: 12px;
+  right: 12px;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
