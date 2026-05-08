@@ -285,8 +285,8 @@
 .bcc-business-detail-header-info {
   flex: 1;
   min-width: 0;
-  padding-top: 0.25rem;
-  margin-top: -25px;
+  padding-top: 0;
+  margin-top: -60px;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -1718,8 +1718,8 @@
 
   .bcc-business-detail-header-info {
     align-items: flex-start;
-    padding-top: 0.15rem;
-    margin-top: -15px;
+    padding-top: 0;
+    margin-top: -42px;
   }
 
   .bcc-business-detail-title-container {
@@ -1854,8 +1854,8 @@
 
   .bcc-business-detail-header-info {
     align-items: flex-start;
-    padding-top: 0.15rem;
-    margin-top: -12px;
+    padding-top: 0;
+    margin-top: -33px;
   }
 
   .bcc-business-detail-title-container {
@@ -1952,6 +1952,11 @@
     height: 55px;
     margin-top: -28px;
     flex-shrink: 0;
+  }
+
+  .bcc-business-detail-header-info {
+    margin-top: -28px;
+    padding-top: 0;
   }
 
   .bcc-business-detail-title-container h1 {
@@ -2945,11 +2950,11 @@
 }
 .bdp-time-input:focus { outline: none; border-color: #ff3300; }
 
-/* Edit cover photo button (overlaid top-right on banner) */
+/* Edit cover photo button (overlaid top-left on banner) */
 .bdp-edit-banner-btn {
   position: absolute;
   top: 12px;
-  right: 12px;
+  left: 12px;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
