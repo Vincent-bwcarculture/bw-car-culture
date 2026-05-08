@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import UserCarListingForm from './UserCarListingForm.js';
-import CarListingManager from './CarListingManager/CarListingManager.js';
 import UserSubmissionCard from './UserSubmissionCard.js';
 import SubmissionEditModal from './SubmissionEditModal.js';
 import './VehicleManagement.css';
@@ -56,15 +55,6 @@ const VehicleManagement = () => {
     tiers: {},
     addons: {},
     loaded: false
-  });
-
-  // === FREE TIER STATE ===
-  const [hasFreeOption, setHasFreeOption] = useState(false);
-  const [freeListingStats, setFreeListingStats] = useState({
-    active: 0,
-    maxAllowed: 8,
-    remaining: 8,
-    canAddMore: true
   });
 
   // === FORM STATE ===
@@ -421,25 +411,13 @@ const VehicleManagement = () => {
       ]);
 
       if (tiersResponse.data.success && addonsResponse.data.success) {
-        const { tiers, hasFreeOption = false, freeListingStats = {} } = tiersResponse.data.data;
+        const { tiers } = tiersResponse.data.data;
         const addons = addonsResponse.data.data.addons;
 
         setPricingData({
           tiers,
           addons,
           loaded: true
-        });
-
-        setHasFreeOption(hasFreeOption);
-        if (freeListingStats && Object.keys(freeListingStats).length > 0) {
-          setFreeListingStats(freeListingStats);
-        }
-
-        console.log('💰 Pricing data loaded with free tier:', { 
-          tiers, 
-          addons, 
-          hasFreeOption,
-          freeStats: freeListingStats 
         });
       } else {
         throw new Error('Pricing endpoints returned unsuccessful response');
@@ -548,37 +526,6 @@ const VehicleManagement = () => {
 
   // === LISTING MANAGEMENT FUNCTIONS ===
   
-  // Handle plan selection in preview mode
-  const handlePlanSelection = (planId) => {
-    setSelectedPlan(planId);
-    console.log('Plan selected:', planId);
-    
-    if (planId === 'free') {
-      showMessage('success', 'Free tier selected! No payment required after approval.');
-    } else {
-      showMessage('success', 'Plan selected! Continue to fill out your car details.');
-    }
-  };
-
-  // Handle addon selection in preview mode
-  const handleAddonSelection = (addonIds) => {
-    setSelectedAddons(addonIds);
-    console.log('Addons selected:', addonIds);
-    showMessage('info', `${addonIds.length} add-on(s) selected.`);
-  };
-
-  // Proceed from plan selection to listing form
-  const handleProceedToForm = () => {
-    console.log('Proceeding to form with:', { selectedPlan, selectedAddons });
-    setListingStep('form');
-    
-    if (selectedPlan === 'free') {
-      showMessage('info', 'Fill out your car details for FREE admin review!');
-    } else {
-      showMessage('info', 'Now fill out your car details for admin review.');
-    }
-  };
-
   // Receives the result already submitted by UserCarListingForm — just update UI state
   const handleListingFormSubmit = (result) => {
     if (result && result.success) {
@@ -602,7 +549,7 @@ const VehicleManagement = () => {
       );
       
       // Reset to submissions view to show the new submission
-      setListingStep('pricing'); 
+      setListingStep('form');
       setActiveSection('submissions');
       
       // Refresh submissions to show the new one
@@ -610,7 +557,7 @@ const VehicleManagement = () => {
     } else {
       // Handle paid tier completion (existing logic)
       showMessage('success', 'Payment completed successfully! Your listing will be reviewed and activated.');
-      setListingStep('pricing');
+      setListingStep('form');
       setActiveSection('submissions');
       fetchUserSubmissions();
     }
@@ -841,65 +788,15 @@ const VehicleManagement = () => {
     </div>
   );
 
-  // Create listing with FREE TIER support
+  // Create listing flow
   const renderCreateListing = () => {
-    // Step 1: Plan Selection (Preview Mode)
-    if (listingStep === 'pricing') {
-      return (
-        <div className="vm-create-listing-section">
-          <div className="vm-section-header">
-            <h3>Create New Car Listing</h3>
-            <div className="vm-flow-info">
-              <p className="vm-flow-description">
-                📋 <strong>How it works:</strong> Select plan → Fill car details → FREE admin review → Pay after approval (or FREE for free tier) → Listing goes live
-              </p>
-              <div className="vm-flow-highlight">
-                <Info size={16} />
-                <span>🆓 FREE tier available! No payment required for basic listings.</span>
-              </div>
-            </div>
-          </div>
-          
-          <CarListingManager
-            onProceedToForm={handleProceedToForm}
-            onPlanSelected={handlePlanSelection}
-            onAddonSelected={handleAddonSelection}
-            selectedPlan={selectedPlan}
-            selectedAddons={selectedAddons}
-            mode="preview"
-            showPaymentInfo={false}
-            submitButtonText="Continue to Listing Form"
-            allowSkipPlan={true}
-            onCancel={() => setActiveSection('vehicles')}
-          />
-        </div>
-      );
-    }
-
-    // Step 2: Car Listing Form
+    // Step 1: Car Listing Form
     if (listingStep === 'form') {
       return (
-        <div className="vm-create-listing-section">
-          <div className="vm-section-header">
-            <h3>
-              Car Listing Details 
-              {selectedPlan === 'free' && <span className="vm-free-badge-header">FREE TIER</span>}
-            </h3>
-            <div className="vm-step-indicator">
-              <span className="vm-step vm-step-completed">1. Plan Selected</span>
-              <span className="vm-step vm-step-active">2. Car Details</span>
-              <span className="vm-step">3. Admin Review</span>
-              <span className="vm-step">{selectedPlan === 'free' ? '4. Go Live' : '4. Payment'}</span>
-            </div>
-          </div>
-          
-          <UserCarListingForm
-            onSubmit={handleListingFormSubmit}
-            onCancel={() => setListingStep('pricing')}
-            selectedPlan={selectedPlan}
-            selectedAddons={selectedAddons}
-          />
-        </div>
+        <UserCarListingForm
+          onSubmit={handleListingFormSubmit}
+          onCancel={() => setActiveSection('submissions')}
+        />
       );
     }
 
@@ -1126,7 +1023,7 @@ const VehicleManagement = () => {
           className={`vm-tab-button ${activeSection === 'create-listing' ? 'vm-active' : ''}`}
           onClick={() => {
             setActiveSection('create-listing');
-            setListingStep('pricing');
+            setListingStep('form');
           }}
         >
           <Plus size={16} />

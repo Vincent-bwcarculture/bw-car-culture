@@ -193,6 +193,10 @@ const UserCarListingForm = ({
   const [showAutoFillPrompt, setShowAutoFillPrompt] = useState(false);
   const [profileCompletion, setProfileCompletion] = useState(null);
 
+  const [activeFeatureIdx, setActiveFeatureIdx] = useState(0);
+  const [validationModal, setValidationModal] = useState(null);
+  const [successModal, setSuccessModal] = useState(null);
+
   const featureOptions = {
     safety: [
       'ABS (Anti-lock Braking)', 'Electronic Stability Control', 'Traction Control',
@@ -743,8 +747,20 @@ const handleFormSubmit = async (e) => {
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      const firstError = Object.values(validationErrors)[0];
-      showMessage('error', firstError);
+      const firstKey = Object.keys(validationErrors)[0];
+      const firstMsg = validationErrors[firstKey];
+      const tabMap = {
+        'specifications.make': { tab: 'basic', label: 'Basic Info' },
+        'specifications.model': { tab: 'basic', label: 'Basic Info' },
+        'specifications.year': { tab: 'basic', label: 'Basic Info' },
+        'price': { tab: 'basic', label: 'Basic Info' },
+        'title': { tab: 'basic', label: 'Basic Info' },
+        'description': { tab: 'basic', label: 'Basic Info' },
+        'contact.phone': { tab: 'contact', label: 'Contact' },
+        'images': { tab: 'images', label: 'Images' },
+      };
+      const dest = tabMap[firstKey] || { tab: 'basic', label: 'Basic Info' };
+      setValidationModal({ message: firstMsg, tab: dest.tab, tabLabel: dest.label });
       return;
     }
 
@@ -777,7 +793,7 @@ const handleFormSubmit = async (e) => {
         const uploadResponse = await fetch(`${API_BASE}/api/user/upload-images`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
           },
           body: formDataUpload
         });
@@ -846,7 +862,7 @@ const handleFormSubmit = async (e) => {
         boostFormData.append('folder', 'boost-payment-proofs');
         const boostRes = await fetch(`${API_BASE}/api/user/upload-images`, {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}` },
           body: boostFormData
         });
         if (boostRes.ok) {
@@ -1054,7 +1070,7 @@ const handleFormSubmit = async (e) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
       },
       body: JSON.stringify({ listingData })
     });
@@ -1076,25 +1092,17 @@ const handleFormSubmit = async (e) => {
 
     console.log('✅ Listing submitted successfully!');
     
-    // Success message
-    if (wantsBoost && boostProofUrl) {
-      showMessage('success', 'Listing submitted! Your proof of payment has been received — once verified, your vehicle will be featured across all our social media platforms.');
-    } else if (wantsBoost) {
-      showMessage('success', 'Listing submitted! Please upload your proof of payment on the Promote tab to complete your social media feature request.');
-    } else {
-      showMessage('success', "Listing submitted for review! We'll get it live on the website shortly.");
-    }
-    
-    // Save to profile for future listings
     await saveToProfile();
-    
-    // Reset form to clean state
     resetForm();
-    
-    // Call parent callback — pass result plus hasBoost so parent can show correct success messaging
-    if (onSubmit) {
-      onSubmit({ ...result, hasBoost: wantsBoost && !!boostProofFile });
-    }
+
+    setSuccessModal({
+      make: formData.make || formData.specifications?.make || 'Vehicle',
+      model: formData.model || formData.specifications?.model || '',
+      year: formData.year || formData.specifications?.year || '',
+      price: formData.price || '',
+      hasBoost: wantsBoost && !!boostProofFile,
+      callbackData: { ...result, hasBoost: wantsBoost && !!boostProofFile }
+    });
 
   } catch (error) {
     console.error('❌ Form submission failed:', error);
@@ -1161,6 +1169,40 @@ const handleFormSubmit = async (e) => {
 
   return (
     <div className="ulisting-form-container">
+      {/* Validation error modal */}
+      {validationModal && (
+        <div className="ulisting-modal-overlay" onClick={() => setValidationModal(null)}>
+          <div className="ulisting-modal" onClick={e => e.stopPropagation()}>
+            <h4>Missing Required Info</h4>
+            <p>{validationModal.message}</p>
+            <div className="ulisting-modal-actions">
+              <button className="ulisting-modal-btn-primary" onClick={() => { setCurrentTab(validationModal.tab); setValidationModal(null); }}>
+                Go to {validationModal.tabLabel}
+              </button>
+              <button className="ulisting-modal-btn-secondary" onClick={() => setValidationModal(null)}>Dismiss</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success modal */}
+      {successModal && (
+        <div className="ulisting-modal-overlay">
+          <div className="ulisting-modal ulisting-success-modal">
+            <div className="ulisting-success-icon">✓</div>
+            <h3>Listing Submitted!</h3>
+            <p className="ulisting-success-vehicle">{successModal.year} {successModal.make} {successModal.model}{successModal.price ? ` — BWP ${parseFloat(successModal.price).toLocaleString()}` : ''}</p>
+            <p className="ulisting-success-message">Thank you for choosing BW Car Culture! Our team will review your listing and get it live on the website shortly.</p>
+            {successModal.hasBoost && (
+              <p className="ulisting-success-boost">Your social media boost request has been received — once your payment is verified, your vehicle will be featured across all our platforms.</p>
+            )}
+            <button className="ulisting-modal-btn-primary" onClick={() => { const d = successModal.callbackData; setSuccessModal(null); if (onSubmit) onSubmit(d); }}>
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Auto-fill loading indicator */}
       {autoFillLoading && (
         <div className="ulisting-auto-fill-loading">
@@ -1455,19 +1497,6 @@ const handleFormSubmit = async (e) => {
               </select>
             </div>
 
-            <div className="ulisting-form-group">
-              <label htmlFor="sellerType">Seller Type</label>
-              <select
-                id="sellerType"
-                name="sellerType"
-                value={formData.sellerType}
-                onChange={handleInputChange}
-              >
-                <option value="private">Private Seller</option>
-                <option value="dealership">Dealership</option>
-              </select>
-            </div>
-
             {/* Title & Description */}
             <div className="ulisting-form-group full-width">
               <label htmlFor="title">Listing Title *</label>
@@ -1635,107 +1664,59 @@ const handleFormSubmit = async (e) => {
         {/* Features Tab */}
         <div className={`ulisting-form-section ${currentTab === 'features' ? 'active' : ''}`}>
           <p className="ulisting-section-hint">Select all features and extras fitted to the vehicle.</p>
-          <div className="ulisting-features-container">
-            {Object.keys(featureOptions).map(category => (
-              <div key={category} className="ulisting-feature-category">
-                <h5>{category.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} Features</h5>
-                <div className="ulisting-checkbox-group">
-                  {featureOptions[category].map(feature => (
-                    <label key={feature} className="ulisting-checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={formData.features[category]?.includes(feature) || false}
-                        onChange={() => handleFeatureToggle(category, feature)}
-                      />
-                      <span>{feature}</span>
-                    </label>
+          {(() => {
+            const categories = Object.keys(featureOptions);
+            const idx = Math.min(activeFeatureIdx, categories.length - 1);
+            const category = categories[idx];
+            const label = category.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+            return (
+              <div className="ulisting-features-carousel">
+                <div className="ulisting-features-carousel-nav">
+                  <button type="button" className="ulisting-carousel-btn" onClick={() => setActiveFeatureIdx(i => Math.max(0, i - 1))} disabled={idx === 0}>‹</button>
+                  <span className="ulisting-carousel-label">{label} <span className="ulisting-carousel-count">({idx + 1}/{categories.length})</span></span>
+                  <button type="button" className="ulisting-carousel-btn" onClick={() => setActiveFeatureIdx(i => Math.min(categories.length - 1, i + 1))} disabled={idx === categories.length - 1}>›</button>
+                </div>
+                <div className="ulisting-feature-category">
+                  <div className="ulisting-checkbox-group">
+                    {featureOptions[category].map(feature => (
+                      <label key={feature} className="ulisting-checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={formData.features[category]?.includes(feature) || false}
+                          onChange={() => handleFeatureToggle(category, feature)}
+                        />
+                        <span>{feature}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="ulisting-features-dots">
+                  {categories.map((_, i) => (
+                    <button key={i} type="button" className={`ulisting-dot${i === idx ? ' active' : ''}`} onClick={() => setActiveFeatureIdx(i)} />
                   ))}
                 </div>
               </div>
-            ))}
-          </div>
+            );
+          })()}
         </div>
 
         {/* Contact Tab */}
         <div className={`ulisting-form-section ${currentTab === 'contact' ? 'active' : ''}`}>
           <div className="ulisting-form-grid">
-            {/* Private Seller Fields */}
-            {formData.sellerType === 'private' && (
-              <>
-                <div className="ulisting-form-group">
-                  <label htmlFor="privateSeller.preferredContactMethod">Preferred Contact Method</label>
-                  <select
-                    id="privateSeller.preferredContactMethod"
-                    name="privateSeller.preferredContactMethod"
-                    value={formData.privateSeller?.preferredContactMethod || 'both'}
-                    onChange={handleInputChange}
-                  >
-                    <option value="both">Phone & WhatsApp</option>
-                    <option value="phone">Phone Only</option>
-                    <option value="whatsapp">WhatsApp Only</option>
-                    <option value="email">Email Only</option>
-                  </select>
-                </div>
-              </>
-            )}
-
-            {/* Business Fields */}
-            {formData.sellerType === 'dealership' && (
-              <>
-                <div className="ulisting-form-group">
-                  <label htmlFor="businessInfo.businessName">Business Name</label>
-                  <input
-                    type="text"
-                    id="businessInfo.businessName"
-                    name="businessInfo.businessName"
-                    value={formData.businessInfo?.businessName || ''}
-                    onChange={handleInputChange}
-                    placeholder="Your business name"
-                  />
-                </div>
-
-                <div className="ulisting-form-group">
-                  <label htmlFor="businessInfo.businessType">Business Type</label>
-                  <select
-                    id="businessInfo.businessType"
-                    name="businessInfo.businessType"
-                    value={formData.businessInfo?.businessType || ''}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select business type</option>
-                    <option value="independent">Independent Dealer</option>
-                    <option value="franchise">Franchise Dealer</option>
-                    <option value="certified">Certified Dealer</option>
-                    <option value="used">Used Car Dealer</option>
-                    <option value="luxury">Luxury Car Dealer</option>
-                  </select>
-                </div>
-
-                <div className="ulisting-form-group">
-                  <label htmlFor="businessInfo.registrationNumber">Registration Number</label>
-                  <input
-                    type="text"
-                    id="businessInfo.registrationNumber"
-                    name="businessInfo.registrationNumber"
-                    value={formData.businessInfo?.registrationNumber || ''}
-                    onChange={handleInputChange}
-                    placeholder="Business registration number"
-                  />
-                </div>
-
-                <div className="ulisting-form-group">
-                  <label htmlFor="businessInfo.vatNumber">VAT Number</label>
-                  <input
-                    type="text"
-                    id="businessInfo.vatNumber"
-                    name="businessInfo.vatNumber"
-                    value={formData.businessInfo?.vatNumber || ''}
-                    onChange={handleInputChange}
-                    placeholder="VAT registration number"
-                  />
-                </div>
-              </>
-            )}
+            <div className="ulisting-form-group">
+              <label htmlFor="privateSeller.preferredContactMethod">Preferred Contact Method</label>
+              <select
+                id="privateSeller.preferredContactMethod"
+                name="privateSeller.preferredContactMethod"
+                value={formData.privateSeller?.preferredContactMethod || 'both'}
+                onChange={handleInputChange}
+              >
+                <option value="both">Phone & WhatsApp</option>
+                <option value="phone">Phone Only</option>
+                <option value="whatsapp">WhatsApp Only</option>
+                <option value="email">Email Only</option>
+              </select>
+            </div>
 
             {/* Common Contact Fields */}
             <div className="ulisting-form-group">
@@ -1824,27 +1805,6 @@ const handleFormSubmit = async (e) => {
               />
             </div>
 
-            {/* Social Media Links */}
-            <div className="ulisting-form-group full-width">
-              <h5>Social Media (Optional)</h5>
-              <div className="ulisting-social-grid">
-                {Object.keys(formData.social).map(platform => (
-                  <div key={platform} className="ulisting-form-group">
-                    <label htmlFor={`social.${platform}`}>
-                      {platform.charAt(0).toUpperCase() + platform.slice(1)}
-                    </label>
-                    <input
-                      type="url"
-                      id={`social.${platform}`}
-                      name={`social.${platform}`}
-                      value={formData.social[platform]}
-                      onChange={handleInputChange}
-                      placeholder={`Your ${platform} profile URL`}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -1920,14 +1880,6 @@ const handleFormSubmit = async (e) => {
 
         {/* ── Promote Tab ── */}
         <div className={`ulisting-form-section ${currentTab === 'promote' ? 'active' : ''}`}>
-          {/* Free listing status */}
-          <div className="ulisting-free-listing-card">
-            <div className="ulisting-free-listing-info">
-              <strong>Your listing is FREE</strong>
-              <p>Once submitted, our team will review and publish your listing on the I3W Car Culture website at no charge.</p>
-            </div>
-          </div>
-
           {/* Boost option */}
           <div className={`ulisting-boost-card ${wantsBoost ? 'selected' : ''}`}>
             <div className="ulisting-boost-header">
@@ -2322,7 +2274,7 @@ const handleFormSubmit = async (e) => {
 
           <div className="ulisting-form-actions">
             <button type="button" className="ulisting-form-cancel-btn" onClick={onCancel} disabled={isSubmitting}>
-              Cancel
+              My Submissions
             </button>
             <button type="submit" className="ulisting-form-submit-btn" disabled={loading || isSubmitting}>
               {loading ? (
@@ -2331,7 +2283,7 @@ const handleFormSubmit = async (e) => {
                   {isEdit ? 'Updating...' : 'Submitting...'}
                 </>
               ) : (
-                isEdit ? 'Update Listing' : (wantsBoost ? 'Submit + Request Feature' : 'Submit Listing')
+                isEdit ? 'Update Listing' : (wantsBoost ? 'Submit + Boost' : 'Submit Listing')
               )}
             </button>
           </div>

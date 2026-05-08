@@ -72,7 +72,7 @@
 .vm-section-tabs {
   display: flex;
   gap: 4px;
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.75rem;
   overflow-x: auto;
   padding: 3px;
   background: var(--uprofile-bg-secondary, rgba(25, 25, 25, 0.9));
@@ -83,13 +83,13 @@
 .vm-tab-button {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 7px 14px;
+  gap: 0.35rem;
+  padding: 5px 12px;
   flex: 1;
   border: none;
   background: transparent;
   color: var(--uprofile-text-secondary, #e2e8f0);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 500;
   border-radius: var(--uprofile-border-radius-sm, 8px);
   cursor: pointer;

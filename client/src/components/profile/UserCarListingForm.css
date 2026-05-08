@@ -831,28 +831,36 @@
 
 .ulisting-form-cancel-btn,
 .ulisting-form-submit-btn {
-  padding: 16px 32px;
   border: none;
   border-radius: var(--uprofile-radius-md);
-  font-size: 1rem;
-  font-weight: 600;
   cursor: pointer;
   transition: var(--uprofile-transition);
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 140px;
   justify-content: center;
 }
 
+.ulisting-form-submit-btn {
+  padding: 14px 28px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  min-width: 140px;
+}
+
 .ulisting-form-cancel-btn {
-  background: var(--uprofile-bg-secondary);
-  color: var(--uprofile-text-primary);
-  border: 2px solid var(--uprofile-border-color);
+  background: transparent;
+  color: var(--uprofile-text-secondary, #94a3b8);
+  border: 1px solid var(--uprofile-border-color);
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  min-width: unset;
 }
 
 .ulisting-form-cancel-btn:hover {
-  background: var(--uprofile-bg-tertiary);
+  background: rgba(255,255,255,0.05);
+  color: var(--uprofile-text-primary);
   border-color: var(--uprofile-border-color-dark);
 }
 
@@ -1931,4 +1939,186 @@
   .ulisting-features-container {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* ── Modals ── */
+.ulisting-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.ulisting-modal {
+  background: var(--uprofile-bg-secondary, #1a1a1a);
+  border: 1px solid var(--uprofile-border-color, #333);
+  border-radius: 16px;
+  padding: 1.75rem 1.5rem;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.ulisting-modal h4 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+  color: var(--uprofile-primary-accent, #ff3300);
+}
+
+.ulisting-modal p {
+  margin: 0 0 1.25rem;
+  color: var(--uprofile-text-secondary, #94a3b8);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.ulisting-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ulisting-modal-btn-primary {
+  background: var(--uprofile-primary-accent, #ff3300);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.ulisting-modal-btn-primary:hover { opacity: 0.88; }
+
+.ulisting-modal-btn-secondary {
+  background: transparent;
+  color: var(--uprofile-text-secondary, #94a3b8);
+  border: 1px solid var(--uprofile-border-color, #333);
+  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+/* Success modal specifics */
+.ulisting-success-modal { border-color: #10b981; }
+
+.ulisting-success-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #10b981;
+  color: #fff;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.ulisting-success-modal h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.3rem;
+  color: #10b981;
+}
+
+.ulisting-success-vehicle {
+  font-weight: 600;
+  color: var(--uprofile-text-primary, #f1f5f9) !important;
+  font-size: 1rem !important;
+}
+
+.ulisting-success-message {
+  color: var(--uprofile-text-secondary, #94a3b8) !important;
+  font-size: 0.85rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.ulisting-success-boost {
+  font-size: 0.8rem !important;
+  color: #f59e0b !important;
+  margin-bottom: 1rem !important;
+}
+
+/* ── Features Carousel ── */
+.ulisting-features-carousel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ulisting-features-carousel-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--uprofile-bg-secondary, #1a1a1a);
+  border: 1px solid var(--uprofile-border-color, #333);
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+}
+
+.ulisting-carousel-btn {
+  background: transparent;
+  border: 1px solid var(--uprofile-border-color, #333);
+  color: var(--uprofile-text-primary, #f1f5f9);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.ulisting-carousel-btn:hover:not(:disabled) {
+  background: rgba(255,51,0,0.15);
+  border-color: var(--uprofile-primary-accent, #ff3300);
+}
+
+.ulisting-carousel-btn:disabled { opacity: 0.35; cursor: default; }
+
+.ulisting-carousel-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--uprofile-text-primary, #f1f5f9);
+}
+
+.ulisting-carousel-count {
+  font-weight: 400;
+  color: var(--uprofile-text-secondary, #94a3b8);
+  font-size: 0.8rem;
+}
+
+.ulisting-features-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  padding-top: 4px;
+}
+
+.ulisting-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--uprofile-border-color, #333);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.ulisting-dot.active {
+  background: var(--uprofile-primary-accent, #ff3300);
+  transform: scale(1.25);
 }
