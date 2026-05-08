@@ -17,6 +17,9 @@ const HeroSection = () => {
   const [showImportDropdown, setShowImportDropdown] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('Select country');
   const [showPreparation, setShowPreparation] = useState(false);
+  const [prepCardIdx, setPrepCardIdx] = useState(0);
+  const [showDealerReg, setShowDealerReg] = useState(false);
+  const [dealerForm, setDealerForm] = useState({ name: '', business: '', phone: '', email: '', plan: 'basic' });
 
   // Transport form state
   const [transportForm, setTransportForm] = useState({ from: '', to: '', date: '', time: '' });
@@ -460,7 +463,69 @@ const HeroSection = () => {
             <h1>Sell Faster. Smarter.</h1>
             <p>Botswana's largest automotive audience. Real buyers, maximum exposure, zero hassle.</p>
 
-            {!showPreparation ? (
+            {showDealerReg ? (
+              <div className="bcc-dealer-reg-section">
+                <h3 className="bcc-dealer-reg-title">Register Your Dealership</h3>
+                <p className="bcc-dealer-reg-sub">Choose a plan below and complete the form — our team will contact you within 24 hours to get you set up.</p>
+
+                {/* Pricing tiers */}
+                <div className="bcc-dealer-plans">
+                  {[
+                    { id: 'basic', name: 'Basic', price: 'P1,000', period: '/month', listings: '15 listings', badge: null, features: ['10 photos per listing', '2 featured listings', 'Social media marketing', 'Basic analytics', 'Email support'] },
+                    { id: 'standard', name: 'Professional', price: 'P2,500', period: '/month', listings: '35 listings', badge: 'Most Popular', features: ['15 photos per listing', '5 featured listings', '3× social media marketing', 'Advanced analytics', 'Phone support', 'Custom branding'] },
+                    { id: 'enterprise', name: 'Enterprise', price: 'P6,000', period: '/month', listings: '100 listings', badge: null, features: ['Unlimited photos', '15 featured listings', 'Unlimited social media', 'Full analytics suite', 'Priority support', 'All add-ons included'] },
+                  ].map(plan => (
+                    <div
+                      key={plan.id}
+                      className={`bcc-dealer-plan${plan.badge ? ' bcc-dealer-plan--popular' : ''}${dealerForm.plan === plan.id ? ' bcc-dealer-plan--selected' : ''}`}
+                      onClick={() => setDealerForm(f => ({ ...f, plan: plan.id }))}
+                    >
+                      {plan.badge && <div className="bcc-dealer-plan-badge">{plan.badge}</div>}
+                      <div className="bcc-dealer-plan-price">{plan.price}<span>{plan.period}</span></div>
+                      <div className="bcc-dealer-plan-name">{plan.name}</div>
+                      <div className="bcc-dealer-plan-listings">{plan.listings}</div>
+                      <ul className="bcc-dealer-plan-features">
+                        {plan.features.map(f => <li key={f}>✓ {f}</li>)}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Registration fee note */}
+                <div className="bcc-dealer-reg-fee-note">
+                  <span>📌</span>
+                  <span>One-time registration fee: <strong>P500</strong> — covers account setup, business verification, and onboarding.</span>
+                </div>
+
+                {/* Simple enquiry form */}
+                <div className="bcc-dealer-reg-form">
+                  <div className="bcc-dealer-reg-row">
+                    <input className="bcc-dealer-reg-input" type="text" placeholder="Your name *" value={dealerForm.name} onChange={e => setDealerForm(f => ({ ...f, name: e.target.value }))} />
+                    <input className="bcc-dealer-reg-input" type="text" placeholder="Business / dealership name *" value={dealerForm.business} onChange={e => setDealerForm(f => ({ ...f, business: e.target.value }))} />
+                  </div>
+                  <div className="bcc-dealer-reg-row">
+                    <input className="bcc-dealer-reg-input" type="tel" placeholder="Phone number *" value={dealerForm.phone} onChange={e => setDealerForm(f => ({ ...f, phone: e.target.value }))} />
+                    <input className="bcc-dealer-reg-input" type="email" placeholder="Email address" value={dealerForm.email} onChange={e => setDealerForm(f => ({ ...f, email: e.target.value }))} />
+                  </div>
+                  <div className="bcc-dealer-reg-actions">
+                    <button
+                      className="bcc-dealer-reg-submit"
+                      onClick={() => {
+                        if (!dealerForm.name || !dealerForm.business || !dealerForm.phone) return;
+                        const planLabel = { basic: 'Basic (P1,000/mo)', standard: 'Professional (P2,500/mo)', enterprise: 'Enterprise (P6,000/mo)' }[dealerForm.plan];
+                        const msg = encodeURIComponent(
+                          `Hi! I'd like to register my dealership on BW Car Culture.\n\nName: ${dealerForm.name}\nBusiness: ${dealerForm.business}\nPhone: ${dealerForm.phone}\nEmail: ${dealerForm.email || 'Not provided'}\nSelected Plan: ${planLabel}`
+                        );
+                        window.open(`https://wa.me/+26774122453?text=${msg}`, '_blank');
+                      }}
+                    >
+                      Submit via WhatsApp
+                    </button>
+                    <button className="bcc-dealer-reg-back" onClick={() => setShowDealerReg(false)}>← Back</button>
+                  </div>
+                </div>
+              </div>
+            ) : !showPreparation ? (
               <>
                 {/* Two-path cards */}
                 <div className="bcc-sell-paths">
@@ -534,54 +599,67 @@ const HeroSection = () => {
 
                 {/* Dealer strip */}
                 <div className="bcc-sell-dealer-strip">
-                  <span>Are you a dealer?</span>
+                  <span>Own a dealership?</span>
                   <button
-                    onClick={() => {
-                      const msg = encodeURIComponent('Hi! I am a car dealer interested in listing vehicles on Bw Car Culture. Please provide information about dealer packages and pricing.');
-                      window.open(`https://wa.me/+26774122453?text=${msg}`, '_blank');
-                    }}
+                    className="bcc-dealer-reg-btn"
+                    onClick={() => setShowDealerReg(true)}
                   >
-                    Contact us for custom rates →
+                    Register Your Dealership
                   </button>
                 </div>
               </>
             ) : (
               /* Preparation checklist */
-              <div className="bcc-hero-sell-preparation" id="preparation-section">
-                <h3>Before you list — get the best price</h3>
-                <p className="bcc-prep-intro">Cars with complete info and quality photos sell 3× faster and for up to 15% more.</p>
-                <div className="bcc-preparation-grid">
-                  {[
-                    { title: 'Quality Photos', items: ['Front, back, sides & interior', 'Engine bay & dashboard', 'Clear, well-lit images', 'Show any damage honestly'] },
-                    { title: 'Vehicle Details', items: ['Registration documents', 'Service history records', 'Exact mileage reading', 'Modifications or repairs'] },
-                    { title: 'Condition Notes', items: ['Recent service info', 'Known issues', 'Tyre condition', 'Accident history (if any)'] },
-                    { title: 'Pricing Research', items: ['Check similar listings', 'Factor in unique features', 'Be realistic about condition', 'Consider market demand'] },
-                  ].map(({ title, items }) => (
-                    <div key={title} className="bcc-preparation-item">
-                      <div className="bcc-prep-content">
-                        <h4>{title}</h4>
-                        <ul>{items.map(i => <li key={i}>{i}</li>)}</ul>
+              (() => {
+                const prepCards = [
+                  { icon: '📸', title: 'Quality Photos', items: ['Front, back, sides & interior', 'Engine bay & dashboard', 'Clear, well-lit images', 'Show any damage honestly'] },
+                  { icon: '📋', title: 'Vehicle Details', items: ['Registration documents', 'Service history records', 'Exact mileage reading', 'Modifications or repairs'] },
+                  { icon: '🔍', title: 'Condition Notes', items: ['Recent service info', 'Known issues', 'Tyre condition', 'Accident history (if any)'] },
+                  { icon: '💰', title: 'Pricing Research', items: ['Check similar listings', 'Factor in unique features', 'Be realistic about condition', 'Consider market demand'] },
+                ];
+                const card = prepCards[prepCardIdx];
+                return (
+                  <div className="bcc-hero-sell-preparation" id="preparation-section">
+                    <h3>Before you list — get the best price</h3>
+                    <p className="bcc-prep-intro">Cars with complete info and quality photos sell 3× faster and for up to 15% more.</p>
+
+                    <div className="bcc-prep-carousel">
+                      <button className="bcc-prep-carousel-btn" onClick={() => setPrepCardIdx(i => Math.max(0, i - 1))} disabled={prepCardIdx === 0}>‹</button>
+                      <div className="bcc-preparation-item bcc-preparation-item--single">
+                        <div className="bcc-prep-icon">{card.icon}</div>
+                        <div className="bcc-prep-content">
+                          <h4>{card.title}</h4>
+                          <ul>{card.items.map(item => <li key={item}>{item}</li>)}</ul>
+                        </div>
                       </div>
+                      <button className="bcc-prep-carousel-btn" onClick={() => setPrepCardIdx(i => Math.min(prepCards.length - 1, i + 1))} disabled={prepCardIdx === prepCards.length - 1}>›</button>
                     </div>
-                  ))}
-                </div>
-                <div className="bcc-preparation-actions">
-                  <button
-                    className="bcc-preparation-ready-button"
-                    onClick={handleWhatsAppClick}
-                    disabled={loading}
-                  >
-                    {isAuthenticated ? "I'm Ready — Start Listing" : "I'm Ready — Login to List"}
-                  </button>
-                  <button
-                    className="bcc-preparation-back-button"
-                    onClick={handleHidePreparation}
-                    disabled={loading}
-                  >
-                    Go Back
-                  </button>
-                </div>
-              </div>
+
+                    <div className="bcc-prep-dots">
+                      {prepCards.map((_, i) => (
+                        <button key={i} className={`bcc-prep-dot${i === prepCardIdx ? ' active' : ''}`} onClick={() => setPrepCardIdx(i)} />
+                      ))}
+                    </div>
+
+                    <div className="bcc-preparation-actions">
+                      <button
+                        className="bcc-preparation-ready-button"
+                        onClick={handleWhatsAppClick}
+                        disabled={loading}
+                      >
+                        {isAuthenticated ? "I'm Ready — Start Listing" : "I'm Ready — Login to List"}
+                      </button>
+                      <button
+                        className="bcc-preparation-back-button"
+                        onClick={handleHidePreparation}
+                        disabled={loading}
+                      >
+                        Go Back
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()
             )}
           </div>
         ) : activeTab === 'transport' ? (
