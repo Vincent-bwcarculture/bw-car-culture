@@ -16,8 +16,6 @@ const HeroSection = () => {
   const [loading, setLoading] = useState(false);
   const [showImportDropdown, setShowImportDropdown] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('Select country');
-  const [showPreparation, setShowPreparation] = useState(false);
-  const [prepCardIdx, setPrepCardIdx] = useState(0);
 
   // Transport form state
   const [transportForm, setTransportForm] = useState({ from: '', to: '', date: '', time: '' });
@@ -189,25 +187,6 @@ const HeroSection = () => {
     if (rentalsForm.budget) params.set('maxBudget', rentalsForm.budget);
     navigate(`/services?${params.toString()}`);
   }, [rentalsForm, navigate]);
-
-  // Show preparation step instead of direct WhatsApp
-  const handleShowPreparation = useCallback(() => {
-    setShowPreparation(true);
-    setTimeout(() => {
-      const preparationElement = document.querySelector('.bcc-hero-sell-preparation');
-      if (preparationElement) {
-        preparationElement.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center' 
-        });
-      }
-    }, 100);
-  }, []);
-
-  // Hide preparation and go back to options
-  const handleHidePreparation = useCallback(() => {
-    setShowPreparation(false);
-  }, []);
 
   // UPDATED: Car listing redirect with authentication check
   const handleWhatsAppClick = useCallback(() => {
@@ -461,148 +440,94 @@ const HeroSection = () => {
             <h1>Sell Faster. Smarter.</h1>
             <p>Botswana's largest automotive audience. Real buyers, maximum exposure, zero hassle.</p>
 
-            {!showPreparation ? (
-              <>
-                {/* Two-path cards */}
-                <div className="bcc-sell-paths">
-                  {/* Free listing path */}
-                  <div className="bcc-sell-path">
-                    <div className="bcc-sell-path-price">
-                      <span className="bcc-sell-path-amount">Free</span>
-                      <span className="bcc-sell-path-period">always</span>
-                    </div>
-                    <h3 className="bcc-sell-path-title">Standard Listing</h3>
-                    <ul className="bcc-sell-path-features">
-                      <li>Multiple photos &amp; full description</li>
-                      <li>Direct buyer contact</li>
-                      <li>Searchable across Botswana</li>
-                      <li>Live until sold</li>
-                    </ul>
-                    <button
-                      className="bcc-sell-path-cta bcc-sell-path-cta--free"
-                      onClick={handleShowPreparation}
-                      disabled={loading}
-                    >
-                      {isAuthenticated ? 'List My Car' : 'Login to List'}
-                    </button>
+            <>
+              {/* Two-path cards */}
+              <div className="bcc-sell-paths">
+                {/* Free listing path */}
+                <div className="bcc-sell-path">
+                  <div className="bcc-sell-path-price">
+                    <span className="bcc-sell-path-amount">Free</span>
+                    <span className="bcc-sell-path-period">always</span>
                   </div>
-
-                  {/* Boost path */}
-                  <div className="bcc-sell-path bcc-sell-path--featured">
-                    <div className="bcc-sell-path-badge">Most Popular</div>
-                    <div className="bcc-sell-path-price">
-                      <span className="bcc-sell-path-amount">P200</span>
-                      <span className="bcc-sell-path-period">one-time</span>
-                    </div>
-                    <h3 className="bcc-sell-path-title">Social Media Boost</h3>
-                    <ul className="bcc-sell-path-features">
-                      <li>Everything in free listing</li>
-                      <li>Facebook — 685,000 followers</li>
-                      <li>Instagram · TikTok · WhatsApp</li>
-                      <li>Featured section on site</li>
-                    </ul>
-                    <button
-                      className="bcc-sell-path-cta bcc-sell-path-cta--boost"
-                      onClick={handleShowPreparation}
-                      disabled={loading}
-                    >
-                      {isAuthenticated ? 'List &amp; Boost' : 'Login to Boost'}
-                    </button>
-                  </div>
-
-                  {/* Valuation path */}
-                  <div className="bcc-sell-path bcc-sell-path--valuation">
-                    <div className="bcc-sell-path-price">
-                      <span className="bcc-sell-path-amount">Free</span>
-                      <span className="bcc-sell-path-period">estimate</span>
-                    </div>
-                    <h3 className="bcc-sell-path-title">Instant Valuation</h3>
-                    <ul className="bcc-sell-path-features">
-                      <li>Market-based price estimate</li>
-                      <li>Know your car's true worth</li>
-                      <li>Sell faster at the right price</li>
-                      <li>No commitment required</li>
-                    </ul>
-                    <button
-                      className="bcc-sell-path-cta bcc-sell-path-cta--free"
-                      onClick={handleCallClick}
-                      disabled={loading}
-                    >
-                      {isAuthenticated ? 'Get Valuation' : 'Login for Valuation'}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Dealer strip */}
-                <div className="bcc-sell-dealer-strip">
-                  <span>Own a dealership?</span>
+                  <h3 className="bcc-sell-path-title">Standard Listing</h3>
+                  <ul className="bcc-sell-path-features">
+                    <li>Multiple photos &amp; full description</li>
+                    <li>Direct buyer contact</li>
+                    <li>Searchable across Botswana</li>
+                    <li>Live until sold</li>
+                  </ul>
                   <button
-                    className="bcc-dealer-reg-btn"
-                    onClick={() => {
-                      if (!isAuthenticated) {
-                        navigate('/login', { state: { from: '/profile?tab=overview', message: 'Please login to apply for a dealership account' } });
-                        return;
-                      }
-                      navigate('/profile?tab=overview');
-                    }}
+                    className="bcc-sell-path-cta bcc-sell-path-cta--free"
+                    onClick={handleWhatsAppClick}
+                    disabled={loading}
                   >
-                    Register Your Dealership
+                    {isAuthenticated ? 'List My Car' : 'Login to List'}
                   </button>
                 </div>
-              </>
-            ) : (
-              /* Preparation checklist */
-              (() => {
-                const prepCards = [
-                  { step: '01', title: 'Quality Photos', items: ['Front, back, sides & interior', 'Engine bay & dashboard', 'Clear, well-lit images', 'Show any damage honestly'] },
-                  { step: '02', title: 'Vehicle Details', items: ['Registration documents', 'Service history records', 'Exact mileage reading', 'Modifications or repairs'] },
-                  { step: '03', title: 'Condition Notes', items: ['Recent service info', 'Known issues', 'Tyre condition', 'Accident history (if any)'] },
-                  { step: '04', title: 'Pricing Research', items: ['Check similar listings', 'Factor in unique features', 'Be realistic about condition', 'Consider market demand'] },
-                ];
-                const card = prepCards[prepCardIdx];
-                return (
-                  <div className="bcc-hero-sell-preparation" id="preparation-section">
-                    <h3>Before you list — get the best price</h3>
-                    <p className="bcc-prep-intro">Cars with complete info and quality photos sell 3× faster and for up to 15% more.</p>
 
-                    <div className="bcc-prep-carousel">
-                      <button className="bcc-prep-carousel-btn" onClick={() => setPrepCardIdx(i => Math.max(0, i - 1))} disabled={prepCardIdx === 0}>‹</button>
-                      <div className="bcc-preparation-item bcc-preparation-item--single">
-                        <div className="bcc-prep-step">{card.step}</div>
-                        <div className="bcc-prep-content">
-                          <h4>{card.title}</h4>
-                          <ul>{card.items.map(item => <li key={item}>{item}</li>)}</ul>
-                        </div>
-                      </div>
-                      <button className="bcc-prep-carousel-btn" onClick={() => setPrepCardIdx(i => Math.min(prepCards.length - 1, i + 1))} disabled={prepCardIdx === prepCards.length - 1}>›</button>
-                    </div>
-
-                    <div className="bcc-prep-dots">
-                      {prepCards.map((_, i) => (
-                        <button key={i} className={`bcc-prep-dot${i === prepCardIdx ? ' active' : ''}`} onClick={() => setPrepCardIdx(i)} />
-                      ))}
-                    </div>
-
-                    <div className="bcc-preparation-actions">
-                      <button
-                        className="bcc-preparation-ready-button"
-                        onClick={handleWhatsAppClick}
-                        disabled={loading}
-                      >
-                        {isAuthenticated ? "I'm Ready — Start Listing" : "I'm Ready — Login to List"}
-                      </button>
-                      <button
-                        className="bcc-preparation-back-button"
-                        onClick={handleHidePreparation}
-                        disabled={loading}
-                      >
-                        Go Back
-                      </button>
-                    </div>
+                {/* Boost path */}
+                <div className="bcc-sell-path bcc-sell-path--featured">
+                  <div className="bcc-sell-path-badge">Most Popular</div>
+                  <div className="bcc-sell-path-price">
+                    <span className="bcc-sell-path-amount">P200</span>
+                    <span className="bcc-sell-path-period">one-time</span>
                   </div>
-                );
-              })()
-            )}
+                  <h3 className="bcc-sell-path-title">Social Media Boost</h3>
+                  <ul className="bcc-sell-path-features">
+                    <li>Everything in free listing</li>
+                    <li>Facebook — 685,000 followers</li>
+                    <li>Instagram · TikTok · WhatsApp</li>
+                    <li>Featured section on site</li>
+                  </ul>
+                  <button
+                    className="bcc-sell-path-cta bcc-sell-path-cta--boost"
+                    onClick={handleWhatsAppClick}
+                    disabled={loading}
+                  >
+                    {isAuthenticated ? 'List & Boost' : 'Login to Boost'}
+                  </button>
+                </div>
+
+                {/* Valuation path */}
+                <div className="bcc-sell-path bcc-sell-path--valuation">
+                  <div className="bcc-sell-path-price">
+                    <span className="bcc-sell-path-amount">Free</span>
+                    <span className="bcc-sell-path-period">estimate</span>
+                  </div>
+                  <h3 className="bcc-sell-path-title">Instant Valuation</h3>
+                  <ul className="bcc-sell-path-features">
+                    <li>Market-based price estimate</li>
+                    <li>Know your car's true worth</li>
+                    <li>Sell faster at the right price</li>
+                    <li>No commitment required</li>
+                  </ul>
+                  <button
+                    className="bcc-sell-path-cta bcc-sell-path-cta--free"
+                    onClick={handleCallClick}
+                    disabled={loading}
+                  >
+                    {isAuthenticated ? 'Get Valuation' : 'Login for Valuation'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Dealer strip */}
+              <div className="bcc-sell-dealer-strip">
+                <span>Own a dealership?</span>
+                <button
+                  className="bcc-dealer-reg-btn"
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      navigate('/login', { state: { from: '/profile?tab=overview', message: 'Please login to apply for a dealership account' } });
+                      return;
+                    }
+                    navigate('/profile?tab=overview');
+                  }}
+                >
+                  Register Your Dealership
+                </button>
+              </div>
+            </>
           </div>
         ) : activeTab === 'transport' ? (
           <div className="bcc-hero-quickform">
