@@ -386,10 +386,15 @@ body {
   background: var(--uprofile-bg-gradient);
 }
 
-.uprofile-navigation-container,
-.uprofile-content-container {
+.uprofile-navigation-container {
   background: var(--uprofile-bg-primary);
   backdrop-filter: blur(10px);
+  border: 1px solid var(--uprofile-border-color);
+}
+
+/* No backdrop-filter here — it would create a stacking context that traps fixed modals */
+.uprofile-content-container {
+  background: var(--uprofile-bg-primary);
   border: 1px solid var(--uprofile-border-color);
 }
 

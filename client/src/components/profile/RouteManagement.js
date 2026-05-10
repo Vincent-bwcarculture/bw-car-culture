@@ -106,22 +106,35 @@ const RouteManagement = ({ profileData, refreshProfile, setActiveTab }) => {
       routeNumber: route.routeNumber || '',
       routeType: route.routeType || 'Taxi',
       serviceType: route.serviceType || 'Regular',
-      description: route.description || '',
-      origin: { name: typeof route.origin === 'string' ? route.origin : (route.origin?.name || ''), address: route.origin?.address || '' },
-      destination: { name: typeof route.destination === 'string' ? route.destination : (route.destination?.name || ''), address: route.destination?.address || '' },
+      description: route.description || route.fullDescription || '',
+      origin: {
+        name: typeof route.origin === 'string' ? route.origin : (route.origin?.name || ''),
+        address: route.originAddress || (typeof route.origin === 'object' ? route.origin?.address || '' : '')
+      },
+      destination: {
+        name: typeof route.destination === 'string' ? route.destination : (route.destination?.name || ''),
+        address: route.destinationAddress || (typeof route.destination === 'object' ? route.destination?.address || '' : '')
+      },
       schedule: {
         startTime: route.schedule?.startTime || '05:00',
         endTime: route.schedule?.endTime || '22:00',
         frequency: route.schedule?.frequency || 'On demand',
         operatingDays: daysArray,
-        departureTimes: route.schedule?.departureTimes || []
+        departureTimes: Array.isArray(route.schedule?.departureTimes) ? route.schedule.departureTimes : []
       },
-      pricing: { baseFare: route.fare || route.pricing?.baseFare || '', currency: route.currency || route.pricing?.currency || 'BWP' },
+      pricing: {
+        baseFare: route.fare || route.pricing?.baseFare || '',
+        currency: route.currency || route.pricing?.currency || 'BWP'
+      },
       vehicleType: route.vehicleType || '',
-      capacity: route.capacity || '',
+      capacity: route.capacity !== undefined && route.capacity !== null && route.capacity !== '' ? route.capacity : '',
       estimatedDuration: route.estimatedDuration || '',
       distance: route.distance || '',
-      contact: { phone: route.contact?.phone || '', whatsapp: route.contact?.whatsapp || '', email: route.contact?.email || '' },
+      contact: {
+        phone: route.contact?.phone || '',
+        whatsapp: route.contact?.whatsapp || '',
+        email: route.contact?.email || ''
+      },
       status: route.status || route.operationalStatus || 'active'
     });
     setImageFiles([]);
