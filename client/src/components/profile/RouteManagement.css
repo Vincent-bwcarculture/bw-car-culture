@@ -1118,6 +1118,13 @@
   color: var(--uprofile-primary-accent);
 }
 
+.rmanage-amenities-grid .rmanage-day-btn {
+  min-width: unset;
+  font-size: 11px;
+  padding: 5px 10px;
+  text-transform: none;
+}
+
 /* === UPLOAD PROGRESS === */
 /* Structure: <div.rmanage-upload-progress> <div.rmanage-progress-bar style="width:X%"> <span>X%</span> */
 .rmanage-upload-progress {

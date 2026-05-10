@@ -13,6 +13,8 @@ const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'
 const ROUTE_TYPES = ['Bus', 'Taxi', 'Shuttle', 'Minibus', 'Combi', 'Train', 'Ferry', 'Other'];
 const SERVICE_TYPES = ['Regular', 'Express', 'Premium', 'Economy'];
 
+const COMMON_AMENITIES = ['Air Conditioning', 'Wi-Fi', 'USB Charging', 'Restroom', 'Luggage Storage', 'Refreshments', 'TV/Entertainment', 'Safety Belts', 'Reclining Seats', 'Power Outlets'];
+
 const emptyForm = () => ({
   routeName: '',
   routeNumber: '',
@@ -33,6 +35,7 @@ const emptyForm = () => ({
   capacity: '',
   estimatedDuration: '',
   distance: '',
+  amenities: [],
   contact: { phone: '', whatsapp: '', email: '' },
   status: 'active'
 });
@@ -130,6 +133,7 @@ const RouteManagement = ({ profileData, refreshProfile, setActiveTab }) => {
       capacity: route.capacity !== undefined && route.capacity !== null && route.capacity !== '' ? route.capacity : '',
       estimatedDuration: route.estimatedDuration || '',
       distance: route.distance || '',
+      amenities: Array.isArray(route.amenities) ? route.amenities : [],
       contact: {
         phone: route.contact?.phone || '',
         whatsapp: route.contact?.whatsapp || '',
@@ -195,6 +199,7 @@ const RouteManagement = ({ profileData, refreshProfile, setActiveTab }) => {
         capacity: formData.capacity,
         estimatedDuration: formData.estimatedDuration,
         distance: formData.distance,
+        amenities: formData.amenities || [],
         contact: formData.contact,
         status: formData.status,
         operationalStatus: formData.status,
@@ -606,6 +611,28 @@ const RouteManagement = ({ profileData, refreshProfile, setActiveTab }) => {
                       <option value="seasonal">Seasonal</option>
                     </select>
                   </div>
+                </div>
+              </div>
+
+              {/* Amenities */}
+              <div className="rmanage-form-section">
+                <h4>Amenities</h4>
+                <div className="rmanage-days-grid rmanage-amenities-grid">
+                  {COMMON_AMENITIES.map(amenity => (
+                    <button
+                      type="button"
+                      key={amenity}
+                      className={`rmanage-day-btn ${formData.amenities.includes(amenity) ? 'active' : ''}`}
+                      onClick={() => setFormData(prev => {
+                        const list = prev.amenities.includes(amenity)
+                          ? prev.amenities.filter(a => a !== amenity)
+                          : [...prev.amenities, amenity];
+                        return { ...prev, amenities: list };
+                      })}
+                    >
+                      {amenity}
+                    </button>
+                  ))}
                 </div>
               </div>
 

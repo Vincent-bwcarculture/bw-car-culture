@@ -227,32 +227,25 @@ const PublicTransportPage = () => {
     maxFare: ''
   });
 
-  // Initialize with mock data (replace with API call)
   useEffect(() => {
     const fetchRoutes = async () => {
-      // Prevent multiple concurrent fetches
-      if (fetchInProgress.current) {
-        return;
-      }
-      
-      // Add cooldown to prevent rapid successive fetches
+      if (fetchInProgress.current) return;
+
       const now = Date.now();
       const timeSinceLastFetch = now - lastFetchTime.current;
       if (timeSinceLastFetch < FETCH_COOLDOWN) {
         setTimeout(fetchRoutes, FETCH_COOLDOWN - timeSinceLastFetch);
         return;
       }
-      
+
       fetchInProgress.current = true;
       setLoading(true);
       setError(null);
-      
+
       try {
-        // Parse parameters from URL
         const searchParams = new URLSearchParams(location.search);
         const page = parseInt(searchParams.get('page')) || 1;
-        
-        // Update filter states from URL parameters
+
         const urlFilters = {
           search: searchParams.get('search') || '',
           city: searchParams.get('city') || '',
@@ -262,24 +255,42 @@ const PublicTransportPage = () => {
           provider: searchParams.get('provider') || '',
           maxFare: searchParams.get('maxFare') || ''
         };
-        
-        setFilters(urlFilters);
-        
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // In a real app, this would be an API call with the filters
-        // For now, use mock data
-        setRoutes(MOCK_TRANSPORT_ROUTES);
 
-        // Fetch fares from API
+        setFilters(urlFilters);
+
+        // Build query string for API
+        const apiParams = new URLSearchParams();
+        apiParams.set('page', page);
+        apiParams.set('limit', ROUTES_PER_PAGE);
+        if (urlFilters.search) apiParams.set('search', urlFilters.search);
+        if (urlFilters.transportType) apiParams.set('transportType', urlFilters.transportType);
+        if (urlFilters.origin) apiParams.set('origin', urlFilters.origin);
+        if (urlFilters.destination) apiParams.set('destination', urlFilters.destination);
+        if (urlFilters.city) apiParams.set('city', urlFilters.city);
+
+        const apiBase = 'https://bw-car-culture-api.vercel.app';
+        const res = await axios.get(`${apiBase}/transport-routes?${apiParams.toString()}`);
+
+        const data = res.data;
+        const fetchedRoutes = data.data || data.routes || [];
+        setRoutes(fetchedRoutes);
+
+        if (data.pagination) {
+          setPagination({
+            currentPage: data.pagination.currentPage || page,
+            totalPages: data.pagination.totalPages || 1,
+            total: data.pagination.total || fetchedRoutes.length
+          });
+        }
+
+        // Fetch fares
         try {
           const fareRes = await axios.get('/api/transit-fares');
           if (fareRes.data?.data) setFares(fareRes.data.data);
         } catch (_) {}
 
         lastFetchTime.current = Date.now();
-        
+
       } catch (error) {
         console.error('Error loading transport routes:', error);
         setError('Failed to load transport routes. Please try again later.');
@@ -291,7 +302,7 @@ const PublicTransportPage = () => {
     };
 
     fetchRoutes();
- fetchCoordinators();
+    fetchCoordinators();
 
   }, [location.search]);
 

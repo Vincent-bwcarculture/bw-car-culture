@@ -1708,9 +1708,7 @@ Route Link: ${window.location.href}
                 <div className="provider-stats">
                   <div className="stat-item">
                     <div className="stat-value">
-                      {typeof route.provider === 'object' && route.provider.metrics
-                        ? route.provider.metrics.totalListings || 0
-                        : '?'}
+                      {providerRoutes.length > 0 ? providerRoutes.length + 1 : 1}
                     </div>
                     <div className="stat-label">Routes</div>
                   </div>
@@ -1734,19 +1732,19 @@ Route Link: ${window.location.href}
                   <div className="provider-contact-grid">
                     {route.provider.contact.email && (
                       <div className="contact-grid-item">
-                        <span className="contact-icon">✉️</span>
+                        <span className="contact-icon contact-icon-email"></span>
                         <span className="contact-info">{route.provider.contact.email}</span>
                       </div>
                     )}
                     {route.provider.contact.phone && (
                       <div className="contact-grid-item">
-                        <span className="contact-icon">📞</span>
+                        <span className="contact-icon contact-icon-phone"></span>
                         <span className="contact-info">{route.provider.contact.phone}</span>
                       </div>
                     )}
                     {route.provider.contact.website && (
                       <div className="contact-grid-item">
-                        <span className="contact-icon">🌐</span>
+                        <span className="contact-icon contact-icon-web"></span>
                         <a 
                           href={route.provider.contact.website.startsWith('http') ? route.provider.contact.website : `https://${route.provider.contact.website}`} 
                           target="_blank" 
@@ -1913,7 +1911,7 @@ Route Link: ${window.location.href}
           {/* NEW: Car rentals at destination section */}
           <div className="related-listings-section">
             <h2 className="related-section-title">
-              🚗 Car Rentals in {extractDestinationCity(route) || route.destination}
+              Car Rentals in {extractDestinationCity(route) || route.destination}
             </h2>
             
             {rentalsLoading ? (
@@ -1978,7 +1976,7 @@ Route Link: ${window.location.href}
           {/* NEW: Cars for sale at destination section */}
           <div className="related-listings-section">
             <h2 className="related-section-title">
-              🏪 Cars for Sale in {extractDestinationCity(route) || route.destination}
+              Cars for Sale in {extractDestinationCity(route) || route.destination}
             </h2>
             
             {salesLoading ? (
