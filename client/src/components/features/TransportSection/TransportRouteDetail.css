@@ -343,15 +343,16 @@
   }
   
   .transport-price {
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: #0051ff;
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #ff3300;
     white-space: nowrap;
+    letter-spacing: -0.5px;
   }
-  
+
   .pula-price {
-    color: #0051ff;
-    font-weight: bold;
+    color: #ff3300;
+    font-weight: 800;
   }
   
   .fare-option {
@@ -1794,7 +1795,7 @@
     }
   
     .transport-price {
-      font-size: 1.5rem;
+      font-size: 2rem;
     }
   
     .transport-gallery {
