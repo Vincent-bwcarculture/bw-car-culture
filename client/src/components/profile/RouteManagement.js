@@ -6,7 +6,7 @@ import {
   Calendar, Star, Eye, Save, AlertCircle, Activity,
   ArrowRight, Map, Zap, Image, Upload, ChevronLeft, ChevronRight
 } from 'lucide-react';
-import { api as axios } from '../../config/axios.js';
+import axios from '../../config/axios.js';
 import './RouteManagement.css';
 
 const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
