@@ -47,6 +47,17 @@ const StatsGrid = ({
       </div>
       
 
+      {/* Total Views */}
+      <div className="stat-card">
+        <div className="stat-icon views">
+          <Eye size={24} />
+        </div>
+        <div className="stat-content">
+          <div className="stat-number">{formatNumber(stats.totalViews)}</div>
+          <div className="stat-label">Total Views</div>
+        </div>
+      </div>
+
       {/* Total Engagement */}
       <div className="stat-card">
         <div className="stat-icon engagement">

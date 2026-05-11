@@ -63,6 +63,7 @@ const EarningsOverview = ({
             <div className="top-article-info">
               <p className="article-title">{stats.topEarningArticle.title}</p>
               <div className="article-stats">
+                <span>{formatNumber(stats.topEarningArticle.calculatedEarnings.breakdown.views)} views</span>
                 <span className="earnings-amount">{formatCurrency(stats.topEarningArticle.calculatedEarnings.totalEarned)}</span>
                 <span className="engagement-amount">{formatNumber(stats.topEarningArticle.calculatedEngagement)} engagement</span>
               </div>

@@ -29,6 +29,7 @@ const EarningsSummary = ({
         <div className="earnings-card-content">
           <h3>{formatCurrency(stats.totalEarnings)}</h3>
           <p>Total Earnings</p>
+          <span className="earnings-note">From {formatNumber(stats.totalViews)} views</span>
         </div>
       </div>
 

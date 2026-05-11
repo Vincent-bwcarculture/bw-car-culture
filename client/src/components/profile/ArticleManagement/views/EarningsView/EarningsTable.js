@@ -26,6 +26,7 @@ const EarningsTable = ({
         <div className="table-header">
           <div className="header-cell">Article</div>
           <div className="header-cell">Category</div>
+          <div className="header-cell">Views</div>
           <div className="header-cell">Engagement</div>
           <div className="header-cell">Earnings</div>
           <div className="header-cell">Status</div>
@@ -48,6 +49,9 @@ const EarningsTable = ({
                 >
                   {getCategoryLabel(article.category)}
                 </span>
+              </div>
+              <div className="table-cell">
+                {formatNumber(article.views)}
               </div>
               <div className="table-cell">
                 {formatNumber(engagement)}
