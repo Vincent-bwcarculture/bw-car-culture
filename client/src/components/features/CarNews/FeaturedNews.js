@@ -612,10 +612,6 @@ const FeaturedNews = ({ compact = false }) => {
         <div className="fn-content-overlay">
           <div className="fn-stats">
             <div className="fn-stat-item">
-              <Eye />
-              <span>{formatNumber(stats.views)} views</span>
-            </div>
-            <div className="fn-stat-item">
               <MessageCircle />
               <span>{formatNumber(stats.comments)} comments</span>
             </div>

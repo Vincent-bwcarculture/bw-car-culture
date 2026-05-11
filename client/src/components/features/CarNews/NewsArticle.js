@@ -746,11 +746,6 @@ const NewsArticle = () => {
                     {article.metadata.readTime} min read
                   </span>
                 )}
-                {article.metadata?.views && (
-                  <span className="cc-news-stat-item">
-                    <span role="img" aria-label="views">👁️</span> {article.metadata.views} views
-                  </span>
-                )}
               </div>
 
             </div>

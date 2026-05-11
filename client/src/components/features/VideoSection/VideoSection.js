@@ -276,9 +276,6 @@ const getThumbnailUrl = (video) => {
                   <span className="video-date">
                     <Clock size={14} /> {formatDate(activeVideo.publishDate || activeVideo.createdAt)}
                   </span>
-                  <span className="video-views">
-                    {activeVideo.metadata?.views || 0} views
-                  </span>
                 </div>
               </div>
             </>

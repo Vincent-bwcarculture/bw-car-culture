@@ -247,10 +247,6 @@ const NewsCard = ({ article, onSave, onShare, compact = false }) => {
           <div className="news-card-meta">
             <div className="news-card-stats">
               <span className="news-card-stat">
-                <Eye size={14} />
-                {getStats().views}
-              </span>
-              <span className="news-card-stat">
                 <MessageCircle size={14} />
                 {getStats().comments}
               </span>

@@ -61,10 +61,6 @@ const RecentArticles = ({
                 
                 <div className="article-stats">
                   <div className="stat">
-                    <Eye size={14} />
-                    <span>{formatNumber(earnings.breakdown.views)} views</span>
-                  </div>
-                  <div className="stat">
                     <Activity size={14} />
                     <span>{formatNumber(engagement)} engagement</span>
                   </div>

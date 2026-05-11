@@ -159,9 +159,6 @@ const VideoDetailPage = () => {
             </div>
             
             <div className="video-stats">
-              <span className="video-views">
-                <Eye size={16} /> {video.metadata?.views || 0} views
-              </span>
               <span className="video-date">
                 <Clock size={16} /> {formatDate(video.publishDate || video.createdAt)}
               </span>
@@ -213,9 +210,6 @@ const VideoDetailPage = () => {
                 <div className="related-video-meta">
                   <span className="related-video-date">
                     {formatDate(relatedVideo.publishDate || relatedVideo.createdAt)}
-                  </span>
-                  <span className="related-video-views">
-                    {relatedVideo.metadata?.views || 0} views
                   </span>
                 </div>
               </div>
