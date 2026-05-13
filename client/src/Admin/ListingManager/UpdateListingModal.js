@@ -48,15 +48,15 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
 
   // Tab configuration - Same as AddListingModal
   const tabs = [
-    { id: 'basic', label: 'Basic Info', icon: '📝' },
-    { id: 'specs', label: 'Specifications', icon: '🔧' },
-    { id: 'features', label: 'Features', icon: '✨' },
-    { id: 'media', label: 'Media', icon: '📸' },
-    { id: 'pricing', label: 'Pricing', icon: '💰' },
-    { id: 'savings', label: 'I3W Savings', icon: '🎯' },
-    { id: 'location', label: 'Location', icon: '📍' },
-    { id: 'seo', label: 'SEO', icon: '🔍' },
-    { id: 'records', label: 'Records', icon: '🔒' }
+    { id: 'basic', label: 'Basic Info' },
+    { id: 'specs', label: 'Specifications' },
+    { id: 'features', label: 'Features' },
+    { id: 'media', label: 'Media' },
+    { id: 'pricing', label: 'Pricing' },
+    { id: 'savings', label: 'I3W Savings' },
+    { id: 'location', label: 'Location' },
+    { id: 'seo', label: 'SEO' },
+    { id: 'records', label: 'Records' }
   ];
 
   // Calculate savings automatically
@@ -668,30 +668,25 @@ const handleSubmit = async (e) => {
     
     // CORRECTED: Check the actual data structure that gets populated
     const requiredFields = [
-      { 
-        path: 'title', 
-        label: 'Title', 
-        value: formData.title 
+      {
+        path: 'title',
+        label: 'Title',
+        value: formData.title
       },
-      { 
-        path: 'price', 
-        label: 'Price', 
-        value: formData.price 
+      {
+        path: 'specifications.make',
+        label: 'Make',
+        value: formData.specifications?.make
       },
-      { 
-        path: 'specifications.make', 
-        label: 'Make', 
-        value: formData.specifications?.make  // ← CORRECT: Check nested structure
+      {
+        path: 'specifications.model',
+        label: 'Model',
+        value: formData.specifications?.model
       },
-      { 
-        path: 'specifications.model', 
-        label: 'Model', 
-        value: formData.specifications?.model  // ← CORRECT: Check nested structure
-      },
-      { 
-        path: 'specifications.year', 
-        label: 'Year', 
-        value: formData.specifications?.year  // ← CORRECT: Check nested structure
+      {
+        path: 'specifications.year',
+        label: 'Year',
+        value: formData.specifications?.year
       }
     ];
     
@@ -720,10 +715,10 @@ const handleSubmit = async (e) => {
       }
     }
     
-    if (formData.price && !formData.priceOptions?.showPriceAsPOA) {
+    if (!formData.priceOptions?.showPriceAsPOA) {
       const price = parseFloat(formData.price);
-      if (isNaN(price) || price <= 0) {
-        newErrors.price = 'Please enter a valid price';
+      if (!formData.price || isNaN(price) || price <= 0) {
+        newErrors.price = 'Price is required';
       }
     }
     
@@ -956,7 +951,6 @@ const validateImageState = () => {
               onClick={() => setActiveTab(tab.id)}
               disabled={isSubmitting}
             >
-              <span className="tab-icon">{tab.icon}</span>
               {tab.label}
             </button>
           ))}
@@ -1490,7 +1484,7 @@ const validateImageState = () => {
                     disabled={isSubmitting}
                   />
                   <div className="upload-placeholder">
-                    <span className="upload-icon">📸</span>
+                    <span className="upload-icon">+</span>
                     <span>Click or drag new images here</span>
                     <small>Maximum 10 images, 5MB each (JPEG, PNG, or WebP)</small>
                   </div>
@@ -1658,10 +1652,10 @@ const validateImageState = () => {
                 <label>Listing Quality Score</label>
                 {(() => {
                   const q = formData.listingQuality ?? 50;
-                  const tier = q >= 85 ? { label: '⭐ Showcase', desc: 'Always near the top — for your very best cars', cls: 'lq-showcase' }
-                    : q >= 60 ? { label: '🔥 Premium', desc: 'Elevated placement in search results', cls: 'lq-premium' }
-                    : q >= 35 ? { label: '✅ Good', desc: 'Above-average visibility', cls: 'lq-good' }
-                    : { label: '📋 Standard', desc: 'Normal ranking — no boost', cls: 'lq-standard' };
+                  const tier = q >= 85 ? { label: 'Showcase', desc: 'Always near the top — for your very best cars', cls: 'lq-showcase' }
+                    : q >= 60 ? { label: 'Premium', desc: 'Elevated placement in search results', cls: 'lq-premium' }
+                    : q >= 35 ? { label: 'Good', desc: 'Above-average visibility', cls: 'lq-good' }
+                    : { label: 'Standard', desc: 'Normal ranking — no boost', cls: 'lq-standard' };
                   return (
                     <div className={`lq-slider-wrap ${tier.cls}`}>
                       <div className="lq-header">
@@ -1690,7 +1684,7 @@ const validateImageState = () => {
           {/* I3W Savings Section - Same as AddListingModal */}
           <section className={`form-section ${activeTab === 'savings' ? 'active' : ''}`}>
             <div className="savings-section-header">
-              <h3>🎯 I3W Car Culture Savings</h3>
+              <h3>I3W Car Culture Savings</h3>
               <p>Configure exclusive discounts and savings for customers who buy through I3W Car Culture</p>
             </div>
             
@@ -1757,7 +1751,7 @@ const validateImageState = () => {
 
                   {(formData.priceOptions?.savingsAmount || formData.priceOptions?.savingsPercentage) && (
                     <div className="savings-preview">
-                      <h4>💰 Savings Preview</h4>
+                      <h4>Savings Preview</h4>
                       <div className="savings-preview-content">
                         <div className="preview-row">
                           <span>Original Price:</span>
@@ -2015,7 +2009,7 @@ const validateImageState = () => {
 
           {/* Records Section — Admin Only */}
           <section className={`form-section ${activeTab === 'records' ? 'active' : ''}`}>
-            <div className="records-private-banner">🔒 Private — visible to admins only</div>
+            <div className="records-private-banner">Private — visible to admins only</div>
             <div className="form-grid">
               <div className="form-group">
                 <label htmlFor="supplierName">Supplier / Source</label>
@@ -2104,7 +2098,7 @@ const validateImageState = () => {
             >
               {isSubmitting ? 'Updating...' : 
                 formData.priceOptions?.showSavings ? 
-                  '🎯 Update Listing with Savings' : 
+                  'Update Listing with Savings' :
                   'Update Listing'
               }
             </button>
