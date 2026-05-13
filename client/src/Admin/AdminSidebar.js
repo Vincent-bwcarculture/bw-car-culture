@@ -17,6 +17,7 @@ const menuItems = [
       { title: 'Requests',              path: '/admin/requests' },
       { title: 'Auctions',              path: '/admin/auctions' },
       { title: 'Inventory',             path: '/admin/inventory' },
+      { title: 'Price Calculator',      path: '/admin/price-calculator' },
     ]
   },
   {

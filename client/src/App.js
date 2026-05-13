@@ -85,6 +85,7 @@ const AdminScripts = React.lazy(() => import('./Admin/AdminScripts/AdminScripts.
 const AdminOps = React.lazy(() => import('./Admin/AdminOps/AdminOps.js'));
 const AdminBusiness = React.lazy(() => import('./Admin/AdminBusiness/AdminBusiness.js'));
 const AdminSettings = React.lazy(() => import('./Admin/AdminSettings/AdminSettings.js'));
+const PriceCalculator = React.lazy(() => import('./Admin/PriceCalculator/PriceCalculator.js'));
 // — Journalist
 const CreateArticle = React.lazy(() => import('./components/journalist/CreateArticle.js'));
 // — User pages
@@ -1148,6 +1149,14 @@ const AppRoutes = () => {
           <ProtectedRoute requiredRoles={['admin']}>
             <AdminLayout>
               <AdminSettings />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/price-calculator" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <AdminLayout>
+              <PriceCalculator />
             </AdminLayout>
           </ProtectedRoute>
         } />
