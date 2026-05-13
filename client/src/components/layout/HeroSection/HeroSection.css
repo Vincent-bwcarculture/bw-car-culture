@@ -938,10 +938,27 @@
   .bcc-hero-search-bar {
     flex-direction: column;
     gap: 0.5rem;
+    margin-bottom: 0.85rem;
   }
 
   .bcc-hero-search-button {
     width: 100%;
+  }
+
+  .bcc-hero-popular-searches {
+    gap: 0.5rem 0.6rem;
+    justify-content: flex-start;
+    padding: 0 0.25rem;
+  }
+
+  .bcc-hero-popular-searches span {
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  .bcc-hero-popular-searches button {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.78rem;
   }
 
   .bcc-hero-stats {
@@ -1035,6 +1052,19 @@
 }
 
 @media (max-width: 480px) {
+  .bcc-hero-search-bar {
+    margin-bottom: 0.65rem;
+  }
+
+  .bcc-hero-popular-searches {
+    gap: 0.4rem 0.5rem;
+  }
+
+  .bcc-hero-popular-searches button {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.75rem;
+  }
+
  .bcc-hero-nav-content {
     padding: 0 1rem;
   }
