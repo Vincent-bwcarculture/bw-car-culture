@@ -1,6 +1,7 @@
 // AdminBusiness.js — Packages, Customers, Finances
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext.js';
+import PriceCalculator from '../PriceCalculator/PriceCalculator.js';
 import './AdminBusiness.css';
 
 const API = process.env.REACT_APP_API_URL || '/api';
@@ -828,18 +829,20 @@ const AdminBusiness = () => {
 
       <div className="biz-tabs">
         {[
-          { key: 'packages', label: '◈ Packages' },
-          { key: 'customers', label: '◐ Customers' },
-          { key: 'finances', label: '◆ Finances' },
+          { key: 'packages',   label: '◈ Packages' },
+          { key: 'customers',  label: '◐ Customers' },
+          { key: 'finances',   label: '◆ Finances' },
+          { key: 'calculator', label: '◌ Price Calculator' },
         ].map(t => (
           <button key={t.key} className={`biz-tab${tab === t.key ? ' active' : ''}`} onClick={() => setTab(t.key)}>{t.label}</button>
         ))}
       </div>
 
       <div className="biz-tab-content">
-        {tab === 'packages' && <PackagesTab />}
-        {tab === 'customers' && <CustomersTab />}
-        {tab === 'finances' && <FinancesTab />}
+        {tab === 'packages'   && <PackagesTab />}
+        {tab === 'customers'  && <CustomersTab />}
+        {tab === 'finances'   && <FinancesTab />}
+        {tab === 'calculator' && <PriceCalculator />}
       </div>
     </div>
   );
