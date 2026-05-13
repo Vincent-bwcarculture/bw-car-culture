@@ -1,0 +1,306 @@
+/* DepartureBoard.css — FIDS-style departure board */
+
+.db-wrap {
+  background: #0a0f1e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 1rem 0 1.5rem;
+}
+
+/* ── Header ── */
+.db-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1.25rem;
+  background: #0d1426;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.db-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.db-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.db-dot--live {
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  animation: db-pulse 2s infinite;
+}
+
+@keyframes db-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.db-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.db-date {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.db-clock {
+  font-family: 'Courier New', monospace;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #facc15;
+  letter-spacing: 2px;
+}
+
+/* ── Controls row ── */
+.db-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1.25rem;
+  background: #0c1120;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-wrap: wrap;
+}
+
+.db-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.db-label {
+  font-size: 0.78rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.db-select {
+  background: #13203a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  border-radius: 6px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.db-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.db-locate-btn {
+  background: transparent;
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  color: #60a5fa;
+  border-radius: 6px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.db-locate-btn:hover {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: #3b82f6;
+}
+
+.db-city-pill {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+  border-radius: 20px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+}
+
+/* ── Table ── */
+.db-table-wrap {
+  overflow-x: auto;
+}
+
+.db-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+}
+
+.db-table thead tr {
+  background: #0d1a30;
+}
+
+.db-table th {
+  padding: 0.6rem 0.85rem;
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #475569;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+}
+
+.db-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s;
+}
+
+.db-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.db-row--soon {
+  background: rgba(250, 204, 21, 0.04);
+}
+
+.db-row--soon:hover {
+  background: rgba(250, 204, 21, 0.08);
+}
+
+.db-cell {
+  padding: 0.65rem 0.85rem;
+  color: #cbd5e1;
+  vertical-align: middle;
+}
+
+.db-cell--time {
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #facc15;
+  white-space: nowrap;
+  letter-spacing: 1px;
+}
+
+.db-row--soon .db-cell--time {
+  color: #fb923c;
+  animation: db-blink 1.4s ease-in-out infinite;
+}
+
+@keyframes db-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.55; }
+}
+
+.db-cell--dest {
+  font-weight: 600;
+  color: #f1f5f9;
+  font-size: 0.88rem;
+}
+
+.db-cell--origin {
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+
+.db-cell--op {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.db-type-badge {
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
+  border-radius: 4px;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.db-cell--fare {
+  font-weight: 600;
+  color: #34d399;
+  white-space: nowrap;
+}
+
+.db-status {
+  display: inline-block;
+  border-radius: 4px;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.db-status--on-time {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.db-status--delayed {
+  background: rgba(251, 146, 60, 0.1);
+  color: #fb923c;
+  border: 1px solid rgba(251, 146, 60, 0.25);
+}
+
+.db-status--cancelled {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.db-cell--countdown {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: #e2e8f0;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.db-row--soon .db-cell--countdown {
+  color: #fb923c;
+}
+
+/* ── Empty state ── */
+.db-empty {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  color: #475569;
+  font-size: 0.88rem;
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .db-table th:nth-child(3),
+  .db-table td:nth-child(3),
+  .db-table th:nth-child(4),
+  .db-table td:nth-child(4) {
+    display: none;
+  }
+
+  .db-clock {
+    font-size: 1.1rem;
+  }
+
+  .db-cell {
+    padding: 0.5rem 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .db-table th:nth-child(6),
+  .db-table td:nth-child(6) {
+    display: none;
+  }
+}

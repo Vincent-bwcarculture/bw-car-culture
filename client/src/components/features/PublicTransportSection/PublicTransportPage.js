@@ -6,6 +6,7 @@ import PublicTransportCard from '../../shared/PublicTransportCard/PublicTranspor
 import EnhancedBotswanaTransportSystem from './EnhancedBotswanaTransportSystem.js';
 import BotswanaCombiRouteSystem from './BotswanaCombiRouteSystem.js';
 import ShareModal from '../../shared/ShareModal.js';
+import DepartureBoard from './DepartureBoard.js';
 import './PublicTransportPage.css';
 
 // Mock transport routes data - now focusing on individual routes rather than providers
@@ -715,6 +716,11 @@ const fetchCoordinators = async () => {
             </div>
           )}
         </div>
+      )}
+
+      {/* Departure Board — computed from live route schedule data */}
+      {routes.length > 0 && (
+        <DepartureBoard routes={routes} />
       )}
 
       {loading && filteredRoutes.length === 0 ? (
