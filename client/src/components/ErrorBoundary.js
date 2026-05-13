@@ -203,165 +203,100 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Enhanced styles with better responsiveness and accessibility
-if (typeof document !== 'undefined') {
+// Styles injected once for this boundary's fallback UI
+if (typeof document !== 'undefined' && !document.getElementById('eb-styles')) {
   const styles = `
     .error-boundary-container {
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 1rem;
-      background: rgba(0, 0, 0, 0.8);
+      padding: 2rem;
+      background: #080d1a;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
-
     .error-boundary-content {
       width: 100%;
-      max-width: 600px;
-      padding: 2rem;
+      max-width: 480px;
+      padding: 3rem 2.5rem;
+      background: #0d1426;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
       text-align: center;
-      background: rgba(20, 20, 20, 0.95);
-      border: 1px solid #2c2c2c;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(10px);
     }
-
     .error-boundary-content h2 {
-      color: #ff3300;
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
-      font-weight: 600;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin: 0 0 0.85rem;
     }
-
     .error-message {
-      color: #ffffff;
-      margin-bottom: 2rem;
-      font-size: 1.1rem;
-      line-height: 1.6;
+      font-size: 0.95rem;
+      color: #64748b;
+      line-height: 1.65;
+      margin: 0 0 1.75rem;
     }
-
     .error-actions {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       justify-content: center;
-      margin-top: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
     }
-
-    .error-reset-button,
-    .error-home-button {
-      padding: 0.8rem 1.5rem;
-      border: none;
+    .error-reset-button, .error-home-button {
+      padding: 0.7rem 1.75rem;
       border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 500;
+      font-size: 0.9rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
+      border: none;
+      transition: opacity 0.15s, transform 0.15s;
     }
-
+    .error-reset-button:hover, .error-home-button:hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
     .error-reset-button {
       background: #ff3300;
-      color: white;
+      color: #fff;
     }
-
     .error-home-button {
       background: transparent;
-      border: 1px solid #ff3300;
-      color: #ff3300;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #cbd5e1;
     }
-
-    .error-reset-button:hover,
-    .error-home-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255, 51, 0, 0.2);
-    }
-
-    .error-reset-button:hover {
-      background: #cc2900;
-    }
-
-    .error-home-button:hover {
-      background: rgba(255, 51, 0, 0.1);
-    }
-
     .error-details {
-      margin: 1.5rem 0;
-      padding: 1rem;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 8px;
+      margin: 0 0 1.5rem;
       text-align: left;
-      border: 1px solid rgba(255, 51, 0, 0.2);
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
     }
-
     .error-details summary {
       cursor: pointer;
-      color: #888;
-      padding: 0.5rem;
+      font-size: 0.78rem;
+      color: #475569;
       user-select: none;
     }
-
     .error-details pre {
-      color: #ff3300;
-      font-size: 0.9rem;
-      padding: 1rem;
-      overflow-x: auto;
+      font-size: 0.72rem;
+      color: #64748b;
       white-space: pre-wrap;
-      word-wrap: break-word;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 4px;
-      margin-top: 0.5rem;
+      word-break: break-all;
+      margin: 0.5rem 0 0;
+      line-height: 1.5;
     }
-
-    @media (max-width: 768px) {
-      .error-boundary-content {
-        margin: 1rem;
-        padding: 1.5rem;
-      }
-
-      .error-boundary-content h2 {
-        font-size: 1.5rem;
-      }
-
-      .error-message {
-        font-size: 1rem;
-      }
-
-      .error-actions {
-        flex-direction: column;
-      }
-
-      .error-reset-button,
-      .error-home-button {
-        width: 100%;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .error-reset-button,
-      .error-home-button {
-        transition: none;
-      }
-    }
-
-    @media (prefers-color-scheme: light) {
-      .error-boundary-container {
-        background: rgba(255, 255, 255, 0.9);
-      }
-
-      .error-boundary-content {
-        background: rgba(255, 255, 255, 0.95);
-        border-color: #eaeaea;
-      }
-
-      .error-message {
-        color: #333;
-      }
+    @media (max-width: 480px) {
+      .error-boundary-content { padding: 2rem 1.5rem; }
+      .error-actions { flex-direction: column; }
+      .error-reset-button, .error-home-button { width: 100%; }
     }
   `;
-
-  const styleSheet = document.createElement('style');
-  styleSheet.textContent = styles;
-  document.head.appendChild(styleSheet);
+  const el = document.createElement('style');
+  el.id = 'eb-styles';
+  el.textContent = styles;
+  document.head.appendChild(el);
 }
 
 export default ErrorBoundary;

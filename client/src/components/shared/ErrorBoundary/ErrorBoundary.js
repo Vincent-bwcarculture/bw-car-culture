@@ -54,29 +54,22 @@ class ErrorBoundary extends Component {
       return (
         <div className="error-boundary-container">
           <div className="error-boundary-content">
-            <div className="error-icon">⚠️</div>
             <h2>Something went wrong</h2>
-            <p>We're sorry for the inconvenience. Please try refreshing the page.</p>
+            <p>We hit an unexpected error. Please try reloading or go back to continue.</p>
             {this.props.showDetails && (
               <details>
                 <summary>Technical Details</summary>
-                <p>{this.state.error && this.state.error.toString()}</p>
                 <div className="error-stack">
+                  {this.state.error && this.state.error.toString()}
                   {this.state.errorInfo && this.state.errorInfo.componentStack}
                 </div>
               </details>
             )}
             <div className="error-actions">
-              <button 
-                onClick={() => window.location.reload()}
-                className="reload-button"
-              >
+              <button onClick={() => window.location.reload()} className="reload-button">
                 Reload Page
               </button>
-              <button 
-                onClick={() => window.history.back()}
-                className="back-button"
-              >
+              <button onClick={() => window.history.back()} className="back-button">
                 Go Back
               </button>
             </div>

@@ -384,157 +384,45 @@ class AppErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      // FIXED: Enhanced error UI with better information
       return (
-        <div className="error-boundary" style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
-          padding: '20px',
-          backgroundColor: '#1a1a1a',
-          color: '#ffffff',
-          fontFamily: 'Arial, sans-serif'
-        }}>
-          <div className="error-boundary-content" style={{
-            maxWidth: '600px',
-            padding: '30px',
-            backgroundColor: '#2c2c2c',
-            borderRadius: '10px',
-            border: '1px solid #444',
-            textAlign: 'center'
-          }}>
-            <h2 style={{ color: '#ff6b6b', marginBottom: '20px' }}>
-              Something went wrong
-            </h2>
-            <p style={{ marginBottom: '20px', lineHeight: '1.6' }}>
-              We're sorry, but something unexpected happened. Our team has been notified.
+        <div className="aeb-wrap">
+          <div className="aeb-card">
+            <div className="aeb-eyebrow">BW Car Culture</div>
+            <div className="aeb-code">500</div>
+            <h2 className="aeb-title">Something went wrong</h2>
+            <p className="aeb-desc">
+              We hit an unexpected error. Our team has been notified and we're working on a fix.
             </p>
-            
-            {/* FIXED: Show error count if multiple errors */}
+
             {this.state.errorCount > 1 && (
-              <div style={{
-                backgroundColor: '#ff6b6b',
-                color: 'white',
-                padding: '10px',
-                borderRadius: '5px',
-                marginBottom: '20px',
-                fontSize: '14px'
-              }}>
-                Multiple errors detected ({this.state.errorCount}). 
-                {this.state.errorCount >= 3 && ' Page will reload automatically in 5 seconds.'}
+              <div className="aeb-warn">
+                Multiple errors detected ({this.state.errorCount}).
+                {this.state.errorCount >= 3 && ' The page will reload automatically.'}
               </div>
             )}
-            
-            {/* FIXED: Enhanced error details for development */}
+
             {process.env.NODE_ENV === 'development' && (
-              <details style={{ 
-                marginTop: '20px', 
-                textAlign: 'left',
-                backgroundColor: '#1a1a1a',
-                padding: '15px',
-                borderRadius: '5px',
-                border: '1px solid #555'
-              }}>
-                <summary style={{ 
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  marginBottom: '10px',
-                  color: '#ff6b6b'
-                }}>
-                  Error Details (Development)
-                </summary>
-                <div style={{ 
-                  fontSize: '12px',
-                  fontFamily: 'monospace',
-                  whiteSpace: 'pre-wrap',
-                  lineHeight: '1.4'
-                }}>
-                  <strong>Error Message:</strong><br/>
-                  {this.state.error ? this.state.error.toString() : 'No error details available'}
-                  
-                  <br/><br/>
-                  <strong>Component Stack:</strong><br/>
-                  {this.state.errorInfo?.componentStack || 'No component stack available'}
-                  
-                  <br/><br/>
-                  <strong>Error Count:</strong> {this.state.errorCount}<br/>
-                  <strong>Last Error:</strong> {this.state.lastErrorTime ? new Date(this.state.lastErrorTime).toLocaleString() : 'N/A'}<br/>
-                  <strong>Page:</strong> {window.location.pathname}<br/>
-                  <strong>User Agent:</strong> {navigator.userAgent}
-                </div>
+              <details className="aeb-details">
+                <summary>Error Details</summary>
+                <pre>{this.state.error?.toString()}</pre>
+                <pre>{this.state.errorInfo?.componentStack}</pre>
               </details>
             )}
-            
-            {/* FIXED: Enhanced action buttons */}
-            <div style={{ marginTop: '30px' }}>
+
+            <div className="aeb-actions">
               {this.state.errorCount < 3 && (
-                <button 
-                  onClick={this.handleReset}
-                  style={{ 
-                    padding: '12px 24px',
-                    marginRight: '15px',
-                    backgroundColor: '#4CAF50',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    fontWeight: 'bold'
-                  }}
-                  onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-                  onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
-                >
+                <button className="aeb-btn aeb-btn--primary" onClick={this.handleReset}>
                   Try Again
                 </button>
               )}
-              
-              <button 
-                onClick={() => window.location.reload()}
-                style={{ 
-                  padding: '12px 24px',
-                  marginRight: '15px',
-                  backgroundColor: '#2196F3',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  fontWeight: 'bold'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#1976D2'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#2196F3'}
-              >
-                Reload Page
-              </button>
-              
-              <button 
-                onClick={() => window.location.href = '/'}
-                style={{ 
-                  padding: '12px 24px',
-                  backgroundColor: '#ff9800',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  fontWeight: 'bold'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#f57c00'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#ff9800'}
-              >
+              <button className="aeb-btn aeb-btn--secondary" onClick={() => window.location.href = '/'}>
                 Go to Homepage
               </button>
             </div>
-            
-            {/* Additional help text */}
-            <p style={{ 
-              marginTop: '20px', 
-              fontSize: '14px', 
-              color: '#ccc',
-              lineHeight: '1.5'
-            }}>
-              If this problem persists, please try clearing your browser cache or contact support.
+
+            <p className="aeb-hint">
+              If this keeps happening, try clearing your browser cache or{' '}
+              <a className="aeb-link" href="mailto:support@bwcarculture.com">contact support</a>.
             </p>
           </div>
         </div>
