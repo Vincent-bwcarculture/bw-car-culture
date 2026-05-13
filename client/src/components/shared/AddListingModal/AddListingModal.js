@@ -738,7 +738,8 @@ const handleSubmit = async (e) => {
         logo: selectedDealer.profile?.logo
       } : null,
       
-      price: Number(formData.price) || 0,
+      price: formData.priceOptions?.showPriceAsPOA ? 0 : (Number(formData.price) || 0),
+      listingQuality: Number(formData.listingQuality) || 50,
       priceType: formData.priceType || 'fixed',
       priceOptions: {
         includesVAT: Boolean(formData.priceOptions?.includesVAT),

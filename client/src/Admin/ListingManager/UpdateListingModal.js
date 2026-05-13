@@ -720,7 +720,7 @@ const handleSubmit = async (e) => {
       }
     }
     
-    if (formData.price) {
+    if (formData.price && !formData.priceOptions?.showPriceAsPOA) {
       const price = parseFloat(formData.price);
       if (isNaN(price) || price <= 0) {
         newErrors.price = 'Please enter a valid price';
@@ -751,7 +751,8 @@ const handleSubmit = async (e) => {
       // Basic fields
       title: formData.title?.trim(),
       description: formData.description?.trim(),
-      price: parseFloat(formData.price),
+      price: formData.priceOptions?.showPriceAsPOA ? 0 : (parseFloat(formData.price) || 0),
+      listingQuality: Number(formData.listingQuality) || 50,
       
       // CRITICAL: Map from nested specifications to flat structure for backend
       make: formData.specifications?.make?.trim(),  // ← Map nested to flat

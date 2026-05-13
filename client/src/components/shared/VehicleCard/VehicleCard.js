@@ -1300,7 +1300,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             )}
             <div className="vc-price">
               {(car.priceType === 'poa' || car.priceOptions?.showPriceAsPOA)
-                ? 'Price on Application'
+                ? 'POA'
                 : car.priceType === 'call'
                 ? 'Call for Price'
                 : `P${car.price?.toLocaleString() || '0'}`}
