@@ -1253,7 +1253,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               );
             }
             const deliveryDays = {
-              'South Africa': '3–5 day delivery',
+              'South Africa': '5–7 day delivery',
               'Japan': '60–70 day delivery',
             };
             const raw = dealer?.location?.country || car?.location?.country || '';
