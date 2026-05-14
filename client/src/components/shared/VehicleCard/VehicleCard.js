@@ -3,11 +3,14 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useAnalytics } from '../../../hooks/useAnalytics.js';
 import { trackClick as trackPref } from '../../../utils/userPrefs.js';
+import { listingService } from '../../../services/listingService.js';
+import { useAuth } from '../../../context/AuthContext.js';
 import './VehicleCard.css';
 
 const VehicleCard = ({ car, onShare, compact = false }) => {
   const navigate = useNavigate();
   const analytics = useAnalytics();
+  const { user } = useAuth();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [imageLoadError, setImageLoadError] = useState(false);
   const [hasBeenViewed, setHasBeenViewed] = useState(false);
@@ -30,6 +33,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   // Refs for zoom functionality
   const imageRef = useRef(null);
   const containerRef = useRef(null);
+  const cardRef = useRef(null);
   const dragTimeoutRef = useRef(null);
   const resizeObserverRef = useRef(null);
   const navigationTimeoutRef = useRef(null);
@@ -694,33 +698,52 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     };
   }, [car, safeGetStringId]);
 
-  // Track listing view when component becomes visible
+  // Track listing view: card must be ≥70% visible for 1.5 s before counting.
+  // Admin users are excluded — their views should not affect listing metrics.
   useEffect(() => {
-    if (car && !hasBeenViewed) {
-      const timer = setTimeout(() => {
-        try {
-          analytics.trackListingView(car._id, {
-            title: car.title,
-            price: car.price,
-            make: car.specifications?.make,
-            model: car.specifications?.model,
-            year: car.specifications?.year,
-            dealerId: dealer?.id,
-            sellerType: dealer?.sellerType,
-            savings: calculateSavings?.amount || 0,
-            category: 'vehicle_sales',
-            source: 'marketplace_card',
-            compact: compact
-          });
-          setHasBeenViewed(true);
-        } catch (error) {
-          console.warn('Analytics tracking failed:', error);
-        }
-      }, 1000);
+    if (!car || hasBeenViewed || user?.role === 'admin') return;
+    const el = cardRef.current;
+    if (!el) return;
 
-      return () => clearTimeout(timer);
-    }
-  }, [car, hasBeenViewed, analytics, dealer, calculateSavings, compact]);
+    let visibilityTimer = null;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          visibilityTimer = setTimeout(async () => {
+            try {
+              await listingService.incrementViewCount(car._id);
+              analytics.trackListingView(car._id, {
+                title: car.title,
+                price: car.price,
+                make: car.specifications?.make,
+                model: car.specifications?.model,
+                year: car.specifications?.year,
+                dealerId: dealer?.id,
+                sellerType: dealer?.sellerType,
+                savings: calculateSavings?.amount || 0,
+                category: 'vehicle_sales',
+                source: 'marketplace_card',
+                compact: compact
+              });
+              setHasBeenViewed(true);
+            } catch (error) {
+              console.warn('View tracking failed:', error);
+            }
+          }, 1500);
+        } else {
+          clearTimeout(visibilityTimer);
+        }
+      },
+      { threshold: 0.7 }
+    );
+
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      clearTimeout(visibilityTimer);
+    };
+  }, [car, hasBeenViewed, user, analytics, dealer, calculateSavings, compact]);
 
   useEffect(() => {
     setImageLoadError(false);
@@ -1041,8 +1064,9 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   if (!car) return null;
 
   return (
-    <div 
-      className={`vc-card ${compact ? 'compact' : ''}`} 
+    <div
+      ref={cardRef}
+      className={`vc-card ${compact ? 'compact' : ''}`}
       onClick={handleCardClick}
       data-status={car.status || 'active'}
     >

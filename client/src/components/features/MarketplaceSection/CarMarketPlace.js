@@ -534,6 +534,7 @@ const CarMarketplace = () => {
   }, [car, selectedImage]);
 
   const recordView = useCallback(async (id) => {
+    if (user?.role === 'admin') return;
     try {
       await listingService.incrementViewCount(id);
       setViews(prev => prev + 1);
@@ -541,7 +542,7 @@ const CarMarketplace = () => {
     } catch (error) {
       if (process.env.NODE_ENV === 'development') console.error('Error recording view:', error);
     }
-  }, [trackListingView]);
+  }, [trackListingView, user]);
 
   const loadRelatedContent = useCallback(async (carData) => {
     try {
