@@ -789,8 +789,9 @@ const DealerDashboard = () => {
     try {
       let url;
       if (isAdmin) {
-        const query = targetId ? `dealerId=${targetId}&limit=200` : 'limit=200';
-        url = `${API_BASE}/listings?${query}`;
+        // Always filter by a specific dealer — never fetch all listings unfiltered
+        const effectiveId = targetId || userId;
+        url = `${API_BASE}/listings?dealerId=${effectiveId}&limit=200`;
       } else {
         // Dealer-scoped endpoint — server resolves ownership by JWT, no manual dealerId needed
         url = `${API_BASE}/api/dealer/listings`;
