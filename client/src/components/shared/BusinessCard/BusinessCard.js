@@ -234,6 +234,7 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
   };
 
   return (
+    <div className="bcc-card-wrapper">
     <div
       className={`bcc-business-card ${compact ? 'compact' : ''} ${isFlipped ? 'bcc-flipped' : ''}`}
       onClick={!isFlipped ? handleActionClick : undefined}
@@ -452,16 +453,17 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
 
       </div>
 
-      {/* Vertical REVIEW tab on right edge */}
-      <button
-        className={`bcc-review-tab ${getBusinessTypeClass(business.businessType, business.providerType)}`}
-        onClick={handleFlip}
-        title="Reviews"
-      >
-        REVIEW
-      </button>
-
       <div className="bcc-card-hover-effect"></div>
+    </div>
+
+    {/* Vertical REVIEW tab — outside card so it can protrude without clipping */}
+    <button
+      className={`bcc-review-tab ${getBusinessTypeClass(business.businessType, business.providerType)}`}
+      onClick={handleFlip}
+      title="Reviews"
+    >
+      REVIEW
+    </button>
     </div>
   );
 };

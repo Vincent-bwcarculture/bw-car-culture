@@ -1,8 +1,14 @@
 /* src/components/shared/BusinessCard/BusinessCard.css */
-.bcc-business-card {
+/* Wrapper sits outside the card so the REVIEW tab can protrude */
+  .bcc-card-wrapper {
+    position: relative;
+    height: 100%;
+  }
+
+  .bcc-business-card {
     position: relative;
     border-radius: 16px;
-    /* overflow: hidden removed — breaks 3D flip */
+    overflow: clip; /* clips content without flattening preserve-3d children */
     height: 100%;
     min-height: 360px;
     color: #ffffff;
@@ -452,11 +458,11 @@
     box-shadow: 0 2px 5px rgba(255, 51, 0, 0.2);
   }
 
-  /* ── Vertical REVIEW tab on right edge ── */
+  /* ── Vertical REVIEW tab — right: -30px puts ~30% outside ── */
   .bcc-review-tab {
     position: absolute;
     top: 50%;
-    right: -1px;
+    right: -30px;
     transform: translateY(-50%) rotate(90deg);
     transform-origin: center center;
     background: rgba(54, 162, 235, 0.85);
@@ -465,13 +471,13 @@
     font-size: 0.6rem;
     font-weight: 700;
     letter-spacing: 0.12em;
-    padding: 0.18rem 0.55rem;
+    padding: 0.2rem 0.6rem;
     border-radius: 4px 4px 0 0;
     cursor: pointer;
     z-index: 10;
     white-space: nowrap;
     transition: background 0.2s ease, opacity 0.2s ease;
-    opacity: 0.82;
+    opacity: 0.85;
     pointer-events: all;
   }
 
