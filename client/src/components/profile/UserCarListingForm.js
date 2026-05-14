@@ -183,6 +183,11 @@ const UserCarListingForm = ({
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Existing images for edit mode
+  const [existingImages, setExistingImages] = useState(
+    isEdit && initialData?.images?.length ? initialData.images : []
+  );
+
   // Social media boost (BWP 200)
   const [wantsBoost, setWantsBoost] = useState(false);
   const [boostProofFile, setBoostProofFile] = useState(null);
@@ -336,6 +341,9 @@ const UserCarListingForm = ({
             }));
           }
           
+          // Show the prompt so users can opt into filling sellerType, businessInfo, social, etc.
+          setShowAutoFillPrompt(true);
+
           console.log('✅ User profile data loaded for auto-fill:', {
             hasContact: !!result.data.contact?.phone,
             hasLocation: !!result.data.contact?.location?.city,
@@ -455,18 +463,17 @@ const UserCarListingForm = ({
     // Apply updates to form
     if (Object.keys(updates).length > 0) {
       const updatedFormData = { ...formData };
-      
+
       Object.keys(updates).forEach(key => {
         const keys = key.split('.');
         let current = updatedFormData;
-        
+
         for (let i = 0; i < keys.length - 1; i++) {
-          if (!current[keys[i]]) {
-            current[keys[i]] = {};
-          }
+          // Always create a new copy at each level to avoid mutating existing state objects
+          current[keys[i]] = { ...(current[keys[i]] || {}) };
           current = current[keys[i]];
         }
-        
+
         current[keys[keys.length - 1]] = updates[key];
       });
 
@@ -502,7 +509,7 @@ const UserCarListingForm = ({
         social: formData.social
       };
 
-      const response = await fetch('/api/user/profile/update-from-listing', {
+      const response = await fetch(`${API_BASE}/api/user/profile/update-from-listing`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -785,6 +792,7 @@ const handleFormSubmit = async (e) => {
 
     if (wantsBoost && !boostProofFile) {
       showMessage('error', 'Please upload your proof of payment on the Promote tab, or click "Cancel Boost" to submit without the boost.');
+      setCurrentTab('promote');
       return;
     }
 
@@ -811,7 +819,7 @@ const handleFormSubmit = async (e) => {
         const uploadResponse = await fetch(`${API_BASE}/api/user/upload-images`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
+            'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('authToken')}`
           },
           body: formDataUpload
         });
@@ -866,6 +874,9 @@ const handleFormSubmit = async (e) => {
         showMessage('error', `Image upload failed: ${uploadError.message}`);
         return;
       }
+    } else if (isEdit && existingImages.length > 0) {
+      // Edit mode with no new files selected — keep the existing images
+      uploadedImages = existingImages;
     }
 
     // ========================================
@@ -880,7 +891,7 @@ const handleFormSubmit = async (e) => {
         boostFormData.append('folder', 'boost-payment-proofs');
         const boostRes = await fetch(`${API_BASE}/api/user/upload-images`, {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}` },
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('authToken')}` },
           body: boostFormData
         });
         if (boostRes.ok) {
@@ -964,14 +975,10 @@ const handleFormSubmit = async (e) => {
         country: 'Botswana'
       },
       
-      // Enhanced Features - Support multiple feature categories
+      // Features — keyed to match formData.features exactly
       features: {
-        safetyFeatures: Array.isArray(formData.features?.safetyFeatures) ? formData.features.safetyFeatures : [],
-        comfortFeatures: Array.isArray(formData.features?.comfortFeatures) ? formData.features.comfortFeatures : [],
-        entertainmentFeatures: Array.isArray(formData.features?.entertainmentFeatures) ? formData.features.entertainmentFeatures : [],
-        exteriorFeatures: Array.isArray(formData.features?.exteriorFeatures) ? formData.features.exteriorFeatures : [],
-        comfort: Array.isArray(formData.features?.comfort) ? formData.features.comfort : [],
         safety: Array.isArray(formData.features?.safety) ? formData.features.safety : [],
+        comfort: Array.isArray(formData.features?.comfort) ? formData.features.comfort : [],
         technology: Array.isArray(formData.features?.technology) ? formData.features.technology : [],
         performance: Array.isArray(formData.features?.performance) ? formData.features.performance : [],
         exterior: Array.isArray(formData.features?.exterior) ? formData.features.exterior : [],
@@ -1051,10 +1058,17 @@ const handleFormSubmit = async (e) => {
       // Images with enhanced metadata - REORDERED with primary first
       images: uploadedImages || [],
 
+      // Transit status
+      transit: {
+        isInTransit: formData.transit?.isInTransit || false,
+        destinationCountry: formData.transit?.destinationCountry || 'Botswana',
+        eta: formData.transit?.eta || ''
+      },
+
       // Social media boost request
       featuredBoost: wantsBoost ? {
         requested: true,
-        amount: 300,
+        amount: 200,
         currency: 'BWP',
         proofUrl: boostProofUrl,
         status: boostProofUrl ? 'pending_verification' : 'awaiting_proof',
@@ -1088,7 +1102,7 @@ const handleFormSubmit = async (e) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authToken') || localStorage.getItem('token')}`
+        'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('authToken')}`
       },
       body: JSON.stringify({ listingData })
     });
@@ -1143,6 +1157,7 @@ const handleFormSubmit = async (e) => {
     setImageFiles([]);
     setImagePreviews([]);
     setPrimaryImageIndex(0);
+    setExistingImages([]);
 
     // Clear boost state
     if (boostProofPreview?.type === 'image' && boostProofPreview?.url) URL.revokeObjectURL(boostProofPreview.url);
@@ -1384,7 +1399,7 @@ const handleFormSubmit = async (e) => {
                 onChange={handleInputChange}
                 placeholder="e.g., 2020"
                 min="1900"
-                max="2027"
+                max={new Date().getFullYear() + 2}
                 className={errors['specifications.year'] ? 'error' : ''}
               />
               {errors['specifications.year'] && <span className="ulisting-error-message">{errors['specifications.year']}</span>}
@@ -1647,8 +1662,10 @@ const handleFormSubmit = async (e) => {
               >
                 <option value="">Select seats</option>
                 <option value="2">2 seats</option>
+                <option value="3">3 seats</option>
                 <option value="4">4 seats</option>
                 <option value="5">5 seats</option>
+                <option value="6">6 seats</option>
                 <option value="7">7 seats</option>
                 <option value="8">8+ seats</option>
               </select>
@@ -1792,7 +1809,7 @@ const handleFormSubmit = async (e) => {
             </div>
 
             <div className="ulisting-form-group">
-              <label htmlFor="location.city">Vehicle Location - City *</label>
+              <label htmlFor="location.city">Vehicle Location - City</label>
               <input
                 type="text"
                 id="location.city"
@@ -1836,6 +1853,37 @@ const handleFormSubmit = async (e) => {
             Great photos sell cars faster. Upload clear, well-lit images from multiple angles — exterior front, back, sides, interior, dashboard, and engine bay. Aim for at least 6 photos. Avoid blurry, dark, or heavily filtered shots.
           </div>
 
+          {/* Existing images in edit mode */}
+          {isEdit && existingImages.length > 0 && imagePreviews.length === 0 && (
+            <div className="ulisting-image-previews">
+              <h5>Current Images ({existingImages.length}) — uploading new photos will replace these</h5>
+              <div className="ulisting-image-grid">
+                {existingImages.map((img, index) => (
+                  <div key={index} className={`ulisting-image-preview ${index === 0 ? 'primary' : ''}`}>
+                    <img
+                      src={img.url || img}
+                      alt={`Existing ${index + 1}`}
+                      onError={(e) => { e.target.src = '/images/placeholders/car.jpg'; }}
+                    />
+                    <div className="ulisting-image-overlay">
+                      <button
+                        type="button"
+                        className="ulisting-remove-btn"
+                        onClick={() => setExistingImages(prev => prev.filter((_, i) => i !== index))}
+                        title="Remove image"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div className="ulisting-image-info">
+                      <span>{index === 0 ? 'Primary' : `#${index + 1}`}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="ulisting-form-group">
   <label htmlFor="images">Upload Images (Max 15, 8MB per image) *</label>
   <input
@@ -1849,8 +1897,8 @@ const handleFormSubmit = async (e) => {
   />
   {errors.images && <span className="ulisting-error-message">{errors.images}</span>}
   <p className="ulisting-form-help">
-    <strong>Tip:</strong> Images will appear in the order you select them. 
-    The first image you select will be the main image.
+    <strong>Tip:</strong> Images appear in the order you select them — the first is the main photo.{' '}
+    {imagePreviews.length > 0 && <strong>Opening the picker again will replace all current images.</strong>}
   </p>
 </div>
 
@@ -2268,7 +2316,8 @@ const handleFormSubmit = async (e) => {
                 !!formData.price,
                 !!(formData.contact?.sellerName && formData.contact?.phone),
                 imageFiles.length > 0,
-                !!formData.title && formData.title.length >= 5
+                !!formData.title && formData.title.length >= 5,
+                !!formData.description && formData.description.length >= 10
               ];
               const pct = Math.round((steps.filter(Boolean).length / steps.length) * 100);
               return (
