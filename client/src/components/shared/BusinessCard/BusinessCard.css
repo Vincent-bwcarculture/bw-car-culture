@@ -720,10 +720,8 @@
   }
 
   @media (max-width: 480px) {
-    .bcc-business-footer { flex-direction: column; gap: 0.4rem; }
-    .bcc-business-metrics { width: 100%; justify-content: space-around; }
-    .bcc-business-actions { width: 100%; }
-    .bcc-business-cta { width: 100%; text-align: center; }
+    .bcc-business-footer { flex-direction: row; flex-wrap: nowrap; }
+    .bcc-business-cta { padding: 0.4rem 0.7rem; font-size: 0.76rem; }
   }
 
   /* ── Desktop compact (1024px+) ── */
