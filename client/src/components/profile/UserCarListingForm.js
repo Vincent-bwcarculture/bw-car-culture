@@ -287,14 +287,14 @@ const UserCarListingForm = ({
   const loadUserProfileData = useCallback(async () => {
     try {
       setAutoFillLoading(true);
-      
-      const token = localStorage.getItem('authToken');
+
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       if (!token) {
         console.log('No auth token found');
         return;
       }
 
-      const response = await fetch('/api/user/profile/form-data', {
+      const response = await fetch(`${API_BASE}/api/user/profile/form-data`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -486,7 +486,7 @@ const UserCarListingForm = ({
     if (!autoFillData) return;
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       if (!token) return;
 
       const profileUpdateData = {
@@ -783,9 +783,8 @@ const handleFormSubmit = async (e) => {
       return;
     }
 
-    // Require proof of payment when boost is selected
     if (wantsBoost && !boostProofFile) {
-      showMessage('error', 'Please upload your proof of payment (BWP 200) before submitting with the Social Media Feature.');
+      showMessage('error', 'Please upload your proof of payment on the Promote tab, or click "Cancel Boost" to submit without the boost.');
       return;
     }
 
@@ -2283,7 +2282,7 @@ const handleFormSubmit = async (e) => {
             })()}
           </div>
           
-          {!wantsBoost && (
+          {!wantsBoost ? (
             <div className="ulisting-boost-reminder">
               <div className="ulisting-boost-reminder-text">
                 <strong>Boost your listing — BWP 200</strong>
@@ -2291,6 +2290,16 @@ const handleFormSubmit = async (e) => {
               </div>
               <button type="button" className="ulisting-boost-reminder-btn" onClick={() => { setWantsBoost(true); setCurrentTab('promote'); }}>
                 Add Boost — BWP 200
+              </button>
+            </div>
+          ) : (
+            <div className="ulisting-boost-reminder ulisting-boost-active">
+              <div className="ulisting-boost-reminder-text">
+                <strong>Social Media Boost added</strong>
+                <span>{boostProofFile ? 'Proof of payment uploaded.' : 'Upload proof of payment on the Promote tab, or cancel to submit without boost.'}</span>
+              </div>
+              <button type="button" className="ulisting-boost-cancel-btn" onClick={() => { setWantsBoost(false); removeBoostProof(); }}>
+                Cancel Boost
               </button>
             </div>
           )}
