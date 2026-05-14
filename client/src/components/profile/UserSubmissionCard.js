@@ -574,6 +574,21 @@ const UserSubmissionCard = ({
     
     // REJECTED STATUS
     if (submission.status === 'rejected') {
+      // Calculate days remaining before auto-deletion
+      let expiryText = null;
+      const expiresAt = submission.expiresAt
+        ? new Date(submission.expiresAt)
+        : submission.rejectedAt
+          ? new Date(new Date(submission.rejectedAt).getTime() + 10 * 24 * 60 * 60 * 1000)
+          : null;
+
+      if (expiresAt) {
+        const daysLeft = Math.ceil((expiresAt - Date.now()) / (1000 * 60 * 60 * 24));
+        expiryText = daysLeft <= 0
+          ? 'Expired — this submission will be removed shortly.'
+          : `Auto-deleted in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} — edit and resubmit to keep it.`;
+      }
+
       return (
         <div className="usc-status-message usc-status-rejected">
           <AlertCircle size={14} />
@@ -585,6 +600,9 @@ const UserSubmissionCard = ({
                 <span className="usc-admin-notes"> Reason: {submission.adminReview.adminNotes}</span>
               )}
             </span>
+            {expiryText && (
+              <span className="usc-expiry-warning">{expiryText}</span>
+            )}
           </div>
         </div>
       );

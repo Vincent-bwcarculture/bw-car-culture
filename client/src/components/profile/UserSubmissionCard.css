@@ -696,6 +696,14 @@
   padding: 1rem;
 }
 
+.usc-expiry-warning {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #f59e0b;
+}
+
 .usc-message-content {
   flex: 1;
   display: flex;
