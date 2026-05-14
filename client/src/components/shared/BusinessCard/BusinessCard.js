@@ -4,9 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import BusinessGallery from './BusinessGallery.js';
 import './BusinessCard.css';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
+
 const BusinessCard = ({ business, onAction, compact = false }) => {
   const [itemCount, setItemCount] = useState(business?.metrics?.totalListings || 0);
   const [imageError, setImageError] = useState({ banner: false, logo: false });
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsError, setReviewsError] = useState(null);
+  const [newRating, setNewRating] = useState(0);
+  const [newComment, setNewComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
   const navigate = useNavigate();
   
   // UPDATED: Better business type detection
@@ -142,6 +152,62 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
     navigate(path);
   };
 
+  const fetchReviews = async () => {
+    if (!business._id) return;
+    setReviewsLoading(true);
+    setReviewsError(null);
+    try {
+      const res = await fetch(`${API_BASE}/reviews/business/${business._id}`);
+      const data = await res.json();
+      if (data.success) {
+        setReviews(data.data?.reviews || []);
+      } else {
+        setReviewsError('Could not load reviews.');
+      }
+    } catch {
+      setReviewsError('Could not load reviews.');
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const handleFlip = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!isFlipped) fetchReviews();
+    setIsFlipped(f => !f);
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!newRating || newComment.trim().length < 10) return;
+    setIsSubmitting(true);
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+      const res = await fetch(`${API_BASE}/reviews/general`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ businessId: business._id, rating: newRating, review: newComment.trim() })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSubmitSuccess(true);
+        setNewRating(0);
+        setNewComment('');
+        await fetchReviews();
+        setTimeout(() => setSubmitSuccess(false), 3000);
+      }
+    } catch {
+      // silent fail
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Function to get the correct image URL for banner and logo
   const getImageUrl = (imagePath, type) => {
     if (!imagePath) return null;
@@ -168,150 +234,227 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
   };
 
   return (
-    <div className={`bcc-business-card ${compact ? 'compact' : ''}`} onClick={handleActionClick}>
+    <div
+      className={`bcc-business-card ${compact ? 'compact' : ''} ${isFlipped ? 'bcc-flipped' : ''}`}
+      onClick={!isFlipped ? handleActionClick : undefined}
+    >
       <div className="bcc-business-card-inner">
-        <div className="bcc-business-banner">
-          {(!business.profile?.banner || imageError.banner) ? (
-            <div className="bcc-business-banner-placeholder">
-              <div className="bcc-banner-gradient"></div>
-            </div>
-          ) : (
-            <img
-              src={getImageUrl(business.profile.banner, 'banner')}
-              alt={`${business.businessName} banner`}
-              onError={(e) => {
-                console.log('Banner image failed to load:', e.target.src);
-                handleImageError('banner');
-              }}
-              loading="lazy"
-            />
-          )}
-        </div>
 
-        <div className="bcc-business-content">
-          <div className="bcc-business-header">
-            <div className="bcc-business-logo">
-              {(!business.profile?.logo || imageError.logo) ? (
-                <div className="bcc-business-logo-placeholder">
-                  {business.businessName.charAt(0)}
-                </div>
-              ) : (
-                <img
-                  src={getImageUrl(business.profile.logo, 'logo')}
-                  alt={`${business.businessName} logo`}
-                  onError={(e) => {
-                    console.log('Logo image failed to load:', e.target.src);
-                    handleImageError('logo');
-                  }}
-                  loading="lazy"
-                />
-              )}
-            </div>
-
-            <div className="bcc-business-info">
-              <div className="bcc-name-row">
-                <h3 title={business.businessName}>{business.businessName}</h3>
-                {isVerified && (
-                  <span className="bcc-verified-inline" title="Verified Business">✓</span>
-                )}
+        {/* ── FRONT FACE ── */}
+        <div className="bcc-card-face bcc-card-front">
+          <div className="bcc-business-banner">
+            {(!business.profile?.banner || imageError.banner) ? (
+              <div className="bcc-business-banner-placeholder">
+                <div className="bcc-banner-gradient"></div>
               </div>
-              
-              <div className="bcc-business-details">
-                <span className={`bcc-business-badge ${getBusinessTypeClass(business.businessType, business.providerType)}`}>
-                  {getBusinessTypeLabel(business.businessType, business.providerType)}
-                </span>
-              </div>
-              
-              {business.location && (
-                <div className="bcc-business-location">
-                  <span>
-                    {business.location?.city || 'Unknown'}
-                    {business.location?.country ? `, ${business.location.country}` : ''}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {!compact && business.profile?.description && (
-            <div className="bcc-business-description">
-              {business.profile.description.length > 150
-                ? `${business.profile.description.substring(0, 150)}...`
-                : business.profile.description}
-            </div>
-          )}
-
-          {!compact && business.profile?.specialties && business.profile.specialties.length > 0 && (
-            <div className="bcc-business-specialties">
-              <span className="bcc-specialties-label">Specialties</span>
-              <div className="bcc-specialty-tags">
-                {business.profile.specialties.slice(0, 3).map((specialty, index) => (
-                  <span key={index} className="bcc-specialty-tag">
-                    {specialty}
-                  </span>
-                ))}
-                {business.profile.specialties.length > 3 && (
-                  <span className="bcc-more-specialties">
-                    +{business.profile.specialties.length - 3} more
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* UPDATED: Pass correct businessType to BusinessGallery */}
-          {!compact && (
-            <BusinessGallery 
-              businessId={business._id} 
-              businessType={businessType}
-              onCountUpdate={handleItemCountUpdate}
-            />
-          )}
-        </div>
-
-        <div className="bcc-business-footer">
-          <div className="bcc-business-metrics">
-            {/* UPDATED: Show correct label based on business type */}
-            <div className="bcc-business-metric">
-              <span className="bcc-business-metric-value">{itemCount}</span>
-              <span className="bcc-business-metric-label">
-                {businessType === 'dealer' ? "Listings" : 
-                businessType === 'car_rental' ? "Rentals" : 
-                businessType === 'trailer_rental' ? "Trailers" : 
-                businessType === 'public_transport' ? "Routes" : 
-                "Items"}
-              </span>
-            </div>
-            
-            {business.metrics?.totalReviews > 0 && (
-              <div className="bcc-business-metric">
-                <span className="bcc-business-metric-value">
-                  <span className="bcc-business-stars">
-                    {"★".repeat(Math.floor(business.metrics.averageRating || 0))}
-                    {business.metrics.averageRating % 1 >= 0.5 ? "½" : ""}
-                  </span>
-                  <span className="bcc-business-rating-value">
-                    {business.metrics.averageRating?.toFixed(1) || '0.0'}
-                  </span>
-                </span>
-                <span className="bcc-business-metric-label">
-                  {business.metrics.totalReviews} reviews
-                </span>
-              </div>
+            ) : (
+              <img
+                src={getImageUrl(business.profile.banner, 'banner')}
+                alt={`${business.businessName} banner`}
+                onError={(e) => {
+                  console.log('Banner image failed to load:', e.target.src);
+                  handleImageError('banner');
+                }}
+                loading="lazy"
+              />
             )}
           </div>
 
-          <div className="bcc-business-actions">
-            <button className="bcc-business-cta" onClick={handleActionClick}>
-              {businessType === 'dealer' ? 'View Dealership' :
-                businessType === 'car_rental' ? 'View Car Rentals' :
-                businessType === 'trailer_rental' ? 'View Trailer Rentals' :
-                businessType === 'public_transport' ? 'View Transport' : 'View Details'}
+          <div className="bcc-business-content">
+            <div className="bcc-business-header">
+              <div className="bcc-business-logo">
+                {(!business.profile?.logo || imageError.logo) ? (
+                  <div className="bcc-business-logo-placeholder">
+                    {business.businessName.charAt(0)}
+                  </div>
+                ) : (
+                  <img
+                    src={getImageUrl(business.profile.logo, 'logo')}
+                    alt={`${business.businessName} logo`}
+                    onError={(e) => {
+                      console.log('Logo image failed to load:', e.target.src);
+                      handleImageError('logo');
+                    }}
+                    loading="lazy"
+                  />
+                )}
+              </div>
+
+              <div className="bcc-business-info">
+                <div className="bcc-name-row">
+                  <h3 title={business.businessName}>{business.businessName}</h3>
+                  {isVerified && (
+                    <span className="bcc-verified-inline" title="Verified Business">✓</span>
+                  )}
+                </div>
+
+                <div className="bcc-business-details">
+                  <span className={`bcc-business-badge ${getBusinessTypeClass(business.businessType, business.providerType)}`}>
+                    {getBusinessTypeLabel(business.businessType, business.providerType)}
+                  </span>
+                </div>
+
+                {business.location && (
+                  <div className="bcc-business-location">
+                    <span>
+                      {business.location?.city || 'Unknown'}
+                      {business.location?.country ? `, ${business.location.country}` : ''}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {!compact && business.profile?.description && (
+              <div className="bcc-business-description">
+                {business.profile.description.length > 150
+                  ? `${business.profile.description.substring(0, 150)}...`
+                  : business.profile.description}
+              </div>
+            )}
+
+            {!compact && business.profile?.specialties && business.profile.specialties.length > 0 && (
+              <div className="bcc-business-specialties">
+                <span className="bcc-specialties-label">Specialties</span>
+                <div className="bcc-specialty-tags">
+                  {business.profile.specialties.slice(0, 3).map((specialty, index) => (
+                    <span key={index} className="bcc-specialty-tag">
+                      {specialty}
+                    </span>
+                  ))}
+                  {business.profile.specialties.length > 3 && (
+                    <span className="bcc-more-specialties">
+                      +{business.profile.specialties.length - 3} more
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {!compact && (
+              <BusinessGallery
+                businessId={business._id}
+                businessType={businessType}
+                onCountUpdate={handleItemCountUpdate}
+              />
+            )}
+          </div>
+
+          <div className="bcc-business-footer">
+            <div className="bcc-business-metrics">
+              <div className="bcc-business-metric">
+                <span className="bcc-business-metric-value">{itemCount}</span>
+                <span className="bcc-business-metric-label">
+                  {businessType === 'dealer' ? 'Listings' :
+                    businessType === 'car_rental' ? 'Rentals' :
+                    businessType === 'trailer_rental' ? 'Trailers' :
+                    businessType === 'public_transport' ? 'Routes' :
+                    'Items'}
+                </span>
+              </div>
+
+              {business.metrics?.totalReviews > 0 && (
+                <div className="bcc-business-metric">
+                  <span className="bcc-business-metric-value">
+                    <span className="bcc-business-stars">
+                      {'★'.repeat(Math.floor(business.metrics.averageRating || 0))}
+                      {business.metrics.averageRating % 1 >= 0.5 ? '½' : ''}
+                    </span>
+                    <span className="bcc-business-rating-value">
+                      {business.metrics.averageRating?.toFixed(1) || '0.0'}
+                    </span>
+                  </span>
+                  <span className="bcc-business-metric-label">
+                    {business.metrics.totalReviews} reviews
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="bcc-business-actions">
+              <button className="bcc-flip-btn" onClick={handleFlip} title="Read & leave reviews">
+                ★ Reviews
+              </button>
+              <button className="bcc-business-cta" onClick={handleActionClick}>
+                {businessType === 'dealer' ? 'View Dealership' :
+                  businessType === 'car_rental' ? 'View Car Rentals' :
+                  businessType === 'trailer_rental' ? 'View Trailer Rentals' :
+                  businessType === 'public_transport' ? 'View Transport' : 'View Details'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── BACK FACE ── */}
+        <div className="bcc-card-face bcc-card-back" onClick={e => e.stopPropagation()}>
+          <div className="bcc-back-top-bar">
+            <button className="bcc-flip-back-btn" onClick={handleFlip}>← Back</button>
+            <div className="bcc-back-title">
+              <span>{business.businessName}</span>
+              {business.metrics?.averageRating > 0 && (
+                <span className="bcc-back-avg">
+                  ★ {business.metrics.averageRating.toFixed(1)} · {business.metrics.totalReviews} review{business.metrics.totalReviews !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="bcc-reviews-scroll">
+            {reviewsLoading && <div className="bcc-reviews-loading">Loading reviews…</div>}
+            {reviewsError && <div className="bcc-reviews-error">{reviewsError}</div>}
+            {!reviewsLoading && !reviewsError && reviews.length === 0 && (
+              <div className="bcc-no-reviews">No reviews yet — be the first!</div>
+            )}
+            {reviews.map((review, i) => (
+              <div key={i} className="bcc-review-item">
+                <div className="bcc-review-header">
+                  <span className="bcc-review-author">{review.reviewer?.name || 'Anonymous'}</span>
+                  <span className="bcc-review-stars">
+                    {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                  </span>
+                </div>
+                {review.review && <p className="bcc-review-text">{review.review}</p>}
+                {review.date && (
+                  <span className="bcc-review-date">
+                    {new Date(review.date).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="bcc-review-form">
+            <div className="bcc-star-picker">
+              {[1, 2, 3, 4, 5].map(s => (
+                <button
+                  key={s}
+                  className={`bcc-star-btn ${s <= newRating ? 'active' : ''}`}
+                  onClick={e => { e.stopPropagation(); setNewRating(s); }}
+                  title={`${s} star${s !== 1 ? 's' : ''}`}
+                >★</button>
+              ))}
+            </div>
+            <textarea
+              className="bcc-review-textarea"
+              placeholder="Share your experience… (min 10 chars)"
+              value={newComment}
+              onChange={e => setNewComment(e.target.value)}
+              rows={2}
+              onClick={e => e.stopPropagation()}
+            />
+            {submitSuccess && <span className="bcc-submit-success">✓ Review submitted!</span>}
+            <button
+              className="bcc-review-submit"
+              onClick={handleSubmitReview}
+              disabled={isSubmitting || !newRating || newComment.trim().length < 10}
+            >
+              {isSubmitting ? 'Submitting…' : 'Submit Review'}
             </button>
           </div>
         </div>
+
       </div>
-      
+
       <div className="bcc-card-hover-effect"></div>
     </div>
   );
