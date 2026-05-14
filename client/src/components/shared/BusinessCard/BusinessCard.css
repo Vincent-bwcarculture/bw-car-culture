@@ -452,27 +452,41 @@
     box-shadow: 0 2px 5px rgba(255, 51, 0, 0.2);
   }
 
-  /* ── Flip button (front footer) ── */
-  .bcc-flip-btn {
-    background: rgba(255, 51, 0, 0.12);
-    border: 1px solid rgba(255, 51, 0, 0.3);
-    color: rgba(255, 255, 255, 0.75);
-    padding: 0.4rem 0.65rem;
-    border-radius: 6px;
+  /* ── Vertical REVIEW tab on right edge ── */
+  .bcc-review-tab {
+    position: absolute;
+    top: 50%;
+    right: -1px;
+    transform: translateY(-50%) rotate(90deg);
+    transform-origin: center center;
+    background: rgba(54, 162, 235, 0.85);
+    border: none;
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 0.18rem 0.55rem;
+    border-radius: 4px 4px 0 0;
     cursor: pointer;
-    font-size: 0.75rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    margin-right: 0.4rem;
+    z-index: 10;
     white-space: nowrap;
-    flex-shrink: 0;
+    transition: background 0.2s ease, opacity 0.2s ease;
+    opacity: 0.82;
+    pointer-events: all;
   }
 
-  .bcc-flip-btn:hover {
-    background: rgba(255, 51, 0, 0.22);
-    border-color: rgba(255, 51, 0, 0.55);
-    color: #fff;
-  }
+  .bcc-review-tab:hover { opacity: 1; }
+
+  /* Tint the tab to match the business type badge */
+  .bcc-review-tab.bcc-business-workshop    { background: rgba(46, 213, 115, 0.85); }
+  .bcc-review-tab.bcc-business-transport   { background: rgba(54, 162, 235, 0.85); }
+  .bcc-review-tab.bcc-business-authorized  { background: rgba(255, 159, 64, 0.85); }
+  .bcc-review-tab.bcc-business-independent { background: rgba(46, 213, 115, 0.85); }
+  .bcc-review-tab.bcc-business-franchise   { background: rgba(54, 162, 235, 0.85); }
+  .bcc-review-tab.bcc-business-certified   { background: rgba(255, 159, 64, 0.85); }
+  .bcc-review-tab.bcc-business-car-rental  { background: rgba(153, 102, 255, 0.85); }
+  .bcc-review-tab.bcc-business-trailer-rental { background: rgba(153, 102, 255, 0.85); }
+  .bcc-review-tab.bcc-business-other       { background: rgba(153, 102, 255, 0.85); }
 
   /* ── Back face layout ── */
   .bcc-back-top-bar {

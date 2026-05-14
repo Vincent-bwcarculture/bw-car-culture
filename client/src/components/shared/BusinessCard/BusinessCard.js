@@ -372,9 +372,6 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
             </div>
 
             <div className="bcc-business-actions">
-              <button className="bcc-flip-btn" onClick={handleFlip} title="Read & leave reviews">
-                ★ Reviews
-              </button>
               <button className="bcc-business-cta" onClick={handleActionClick}>
                 {businessType === 'dealer' ? 'View Dealership' :
                   businessType === 'car_rental' ? 'View Car Rentals' :
@@ -454,6 +451,15 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
         </div>
 
       </div>
+
+      {/* Vertical REVIEW tab on right edge */}
+      <button
+        className={`bcc-review-tab ${getBusinessTypeClass(business.businessType, business.providerType)}`}
+        onClick={handleFlip}
+        title="Reviews"
+      >
+        REVIEW
+      </button>
 
       <div className="bcc-card-hover-effect"></div>
     </div>
