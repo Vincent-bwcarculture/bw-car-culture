@@ -277,14 +277,32 @@ const UserCarListingForm = ({
     { value: 'commercial', label: 'Commercial Vehicle' }
   ];
 
-  // Show message utility
+  // Classify fetch/network errors into user-friendly messages
+  const formatSubmitError = (error) => {
+    const msg = (error?.message || '').toLowerCase();
+    if (error instanceof TypeError || /failed to fetch|networkerror|network request failed|err_internet|err_network/i.test(msg)) {
+      return 'Network error — please check your internet connection and try again.';
+    }
+    if (/timeout|timed out/i.test(msg)) {
+      return 'The request timed out. Your connection may be slow — please try again.';
+    }
+    if (/401|403|unauthorized|forbidden/i.test(msg)) {
+      return 'Your session has expired. Please log in again and retry.';
+    }
+    if (/5\d{2}|server error|internal server/i.test(msg)) {
+      return 'The server encountered an error. Please try again in a moment.';
+    }
+    return error?.message || 'An unexpected error occurred. Please try again.';
+  };
+
+  // Show message utility — errors stay visible longer so users can read them
   const showMessage = useCallback((type, text) => {
     setMessage(text);
     setMessageType(type);
     setTimeout(() => {
       setMessage('');
       setMessageType('');
-    }, 5000);
+    }, type === 'error' ? 8000 : 5000);
   }, []);
 
   // ===== AUTO-FILL FUNCTIONALITY =====
@@ -871,7 +889,7 @@ const handleFormSubmit = async (e) => {
 
       } catch (uploadError) {
         console.error('📤 ❌ Image upload failed:', uploadError);
-        showMessage('error', `Image upload failed: ${uploadError.message}`);
+        showMessage('error', `Image upload failed: ${formatSubmitError(uploadError)}`);
         return;
       }
     } else if (isEdit && existingImages.length > 0) {
@@ -1138,7 +1156,7 @@ const handleFormSubmit = async (e) => {
 
   } catch (error) {
     console.error('❌ Form submission failed:', error);
-    showMessage('error', `Submission failed: ${error.message}`);
+    showMessage('error', formatSubmitError(error));
   } finally {
     setLoading(false);
     setIsSubmitting(false);
