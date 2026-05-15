@@ -7,6 +7,8 @@ import { listingService } from '../../../services/listingService.js';
 import { useAuth } from '../../../context/AuthContext.js';
 import './VehicleCard.css';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
+
 const VehicleCard = ({ car, onShare, compact = false }) => {
   const navigate = useNavigate();
   const analytics = useAnalytics();
@@ -37,6 +39,16 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const dragTimeoutRef = useRef(null);
   const resizeObserverRef = useRef(null);
   const navigationTimeoutRef = useRef(null);
+
+  // Review flip state
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsError, setReviewsError] = useState(null);
+  const [newRating, setNewRating] = useState(0);
+  const [newComment, setNewComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   // FIXED: Enhanced checkFailedImage function to include type
   const checkFailedImage = useCallback((url, type = 'general') => {
@@ -1061,15 +1073,75 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     };
   }, []);
 
+  const fetchReviews = useCallback(async () => {
+    const targetId = dealer?.id;
+    if (!targetId) return;
+    setReviewsLoading(true);
+    setReviewsError(null);
+    try {
+      const res = await fetch(`${API_BASE}/reviews/business/${targetId}`);
+      const data = await res.json();
+      if (data.success) {
+        setReviews(data.data?.reviews || []);
+      } else {
+        setReviewsError('Could not load reviews.');
+      }
+    } catch {
+      setReviewsError('Could not load reviews.');
+    } finally {
+      setReviewsLoading(false);
+    }
+  }, [dealer]);
+
+  const handleFlip = useCallback((e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!isFlipped) fetchReviews();
+    setIsFlipped(f => !f);
+  }, [isFlipped, fetchReviews]);
+
+  const handleSubmitReview = useCallback(async (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!newRating || newComment.trim().length < 10 || !dealer?.id) return;
+    setIsSubmitting(true);
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+      const res = await fetch(`${API_BASE}/reviews/general`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ businessId: dealer.id, rating: newRating, review: newComment.trim() })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSubmitSuccess(true);
+        setNewRating(0);
+        setNewComment('');
+        await fetchReviews();
+        setTimeout(() => setSubmitSuccess(false), 3000);
+      }
+    } catch {
+      // silent fail
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [newRating, newComment, dealer, fetchReviews]);
+
   if (!car) return null;
 
   return (
+    <div className="vc-card-wrapper">
     <div
       ref={cardRef}
-      className={`vc-card ${compact ? 'compact' : ''}`}
-      onClick={handleCardClick}
+      className={`vc-card ${compact ? 'compact' : ''} ${isFlipped ? 'vc-flipped' : ''}`}
+      onClick={!isFlipped ? handleCardClick : undefined}
       data-status={car.status || 'active'}
     >
+      <div className="vc-card-flipper">
+      <div className="vc-card-face vc-card-front">
       <div 
         className={`vc-image-container ${showNavigation ? 'show-navigation' : ''} ${showZoomControls ? 'show-zoom-controls' : ''} ${isDragging ? 'dragging' : ''}`}
         onClick={handleImageContainerClick}
@@ -1516,8 +1588,85 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </div>{/* vc-card-front */}
+
+      {/* ── BACK FACE: Seller reviews ── */}
+      <div className="vc-card-face vc-card-back" onClick={e => e.stopPropagation()}>
+        <div className="vc-back-top-bar">
+          <button className="vc-flip-back-btn" onClick={handleFlip}>← Back</button>
+          <div className="vc-back-title">
+            <span>{dealer?.businessName || dealer?.name || 'Seller'}</span>
+            <span className="vc-back-subtitle">Seller reviews</span>
+          </div>
+        </div>
+
+        <div className="vc-reviews-scroll">
+          {!dealer?.id && (
+            <div className="vc-no-reviews">No seller linked — reviews unavailable.</div>
+          )}
+          {dealer?.id && reviewsLoading && (
+            <div className="vc-reviews-loading">Loading reviews…</div>
+          )}
+          {dealer?.id && reviewsError && (
+            <div className="vc-reviews-error">{reviewsError}</div>
+          )}
+          {dealer?.id && !reviewsLoading && !reviewsError && reviews.length === 0 && (
+            <div className="vc-no-reviews">No reviews yet — be the first!</div>
+          )}
+          {reviews.map((review, i) => (
+            <div key={i} className="vc-review-item">
+              <div className="vc-review-header">
+                <span className="vc-review-author">{review.reviewer?.name || 'Anonymous'}</span>
+                <span className="vc-review-stars">
+                  {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                </span>
+              </div>
+              {review.review && <p className="vc-review-text">{review.review}</p>}
+              {review.date && (
+                <span className="vc-review-date">{new Date(review.date).toLocaleDateString()}</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {dealer?.id && (
+          <div className="vc-review-form">
+            <div className="vc-star-picker">
+              {[1, 2, 3, 4, 5].map(s => (
+                <button
+                  key={s}
+                  className={`vc-star-btn ${s <= newRating ? 'active' : ''}`}
+                  onClick={e => { e.stopPropagation(); setNewRating(s); }}
+                >★</button>
+              ))}
+            </div>
+            <textarea
+              className="vc-review-textarea"
+              placeholder="Share your experience… (min 10 chars)"
+              value={newComment}
+              onChange={e => setNewComment(e.target.value)}
+              rows={2}
+              onClick={e => e.stopPropagation()}
+            />
+            {submitSuccess && <span className="vc-submit-success">✓ Review submitted!</span>}
+            <button
+              className="vc-review-submit"
+              onClick={handleSubmitReview}
+              disabled={isSubmitting || !newRating || newComment.trim().length < 10}
+            >
+              {isSubmitting ? 'Submitting…' : 'Submit Review'}
+            </button>
+          </div>
+        )}
+      </div>{/* vc-card-back */}
+
+      </div>{/* vc-card-flipper */}
+    </div>{/* vc-card */}
+
+    <button className="vc-review-tab" onClick={handleFlip} title="Seller reviews">
+      REVIEW
+    </button>
+    </div>{/* vc-card-wrapper */}
   );
 };
 

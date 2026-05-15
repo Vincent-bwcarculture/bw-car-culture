@@ -88,24 +88,233 @@
 }
 
 /* === VEHICLE CARD BASE STYLES === */
+/* Wrapper allows the REVIEW tab to protrude outside the card */
+.vc-card-wrapper {
+  position: relative;
+  height: 100%;
+}
+
 .vc-card {
   background: var(--vc-bg-card);
   border: 1px solid var(--vc-border-color);
   border-radius: 12px;
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
+  overflow: clip; /* clips content without flattening preserve-3d */
+  perspective: 1200px;
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
 }
 
-.vc-card:hover {
+.vc-card:not(.vc-flipped) {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.vc-card:not(.vc-flipped):hover {
   transform: translateY(-5px);
   box-shadow: var(--vc-shadow-hover);
   border-color: var(--vc-accent-primary);
 }
+
+/* ── Flip mechanics ── */
+.vc-card-flipper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.vc-flipped .vc-card-flipper {
+  transform: rotateY(180deg);
+}
+
+.vc-card-face {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.vc-card-front {
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+}
+
+.vc-card-back {
+  transform: rotateY(180deg);
+  background: rgba(12, 12, 12, 0.98);
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+}
+
+/* ── Vertical REVIEW tab ── */
+.vc-review-tab {
+  position: absolute;
+  top: 50%;
+  right: -30px;
+  transform: translateY(-50%) rotate(90deg);
+  transform-origin: center center;
+  background: rgba(54, 162, 235, 0.85);
+  border: none;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  z-index: 10;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+  opacity: 0.85;
+  pointer-events: all;
+}
+
+.vc-review-tab:hover { opacity: 1; }
+
+/* ── Back face layout ── */
+.vc-back-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 51, 0, 0.07);
+  flex-shrink: 0;
+}
+
+.vc-flip-back-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.65);
+  padding: 0.22rem 0.55rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  flex-shrink: 0;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.vc-flip-back-btn:hover { border-color: rgba(255, 51, 0, 0.5); color: #fff; }
+
+.vc-back-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.06rem;
+}
+
+.vc-back-title > span:first-child {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vc-back-subtitle {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── Reviews list ── */
+.vc-reviews-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 51, 0, 0.3) transparent;
+}
+
+.vc-reviews-scroll::-webkit-scrollbar { width: 4px; }
+.vc-reviews-scroll::-webkit-scrollbar-track { background: transparent; }
+.vc-reviews-scroll::-webkit-scrollbar-thumb { background: rgba(255, 51, 0, 0.3); border-radius: 2px; }
+
+.vc-review-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 7px;
+  padding: 0.3rem 0.55rem;
+}
+
+.vc-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.05rem;
+}
+
+.vc-review-author { font-size: 0.72rem; font-weight: 600; color: rgba(255,255,255,0.85); }
+.vc-review-stars  { font-size: 0.7rem; color: #ffc107; letter-spacing: -1px; }
+.vc-review-text   { font-size: 0.72rem; color: rgba(255,255,255,0.6); line-height: 1.3; margin: 0.04rem 0 0.05rem; }
+.vc-review-date   { font-size: 0.65rem; color: rgba(255,255,255,0.3); }
+
+.vc-reviews-loading,
+.vc-reviews-error,
+.vc-no-reviews {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.4);
+  text-align: center;
+  padding: 1.2rem 0.5rem;
+}
+
+.vc-reviews-error { color: rgba(255,100,80,0.7); }
+
+/* ── Review form ── */
+.vc-review-form {
+  padding: 0.5rem 0.7rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: rgba(0,0,0,0.25);
+  flex-shrink: 0;
+}
+
+.vc-star-picker { display: flex; gap: 0.15rem; }
+
+.vc-star-btn {
+  background: none; border: none;
+  color: rgba(255,255,255,0.2);
+  font-size: 1.25rem; cursor: pointer; padding: 0; line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.vc-star-btn.active,
+.vc-star-btn:hover { color: #ffc107; transform: scale(1.18); }
+
+.vc-review-textarea {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff; border-radius: 6px;
+  padding: 0.4rem 0.5rem; font-size: 0.76rem;
+  resize: none; line-height: 1.45; width: 100%;
+  box-sizing: border-box; font-family: inherit;
+}
+
+.vc-review-textarea::placeholder { color: rgba(255,255,255,0.28); }
+.vc-review-textarea:focus { outline: none; border-color: rgba(255,51,0,0.4); background: rgba(255,255,255,0.08); }
+
+.vc-submit-success { font-size: 0.73rem; color: #4ade80; font-weight: 500; }
+
+.vc-review-submit {
+  background: linear-gradient(to right, #ff3300, #ff5500);
+  color: #fff; border: none; border-radius: 5px;
+  padding: 0.4rem 0.7rem; font-size: 0.77rem; font-weight: 600;
+  cursor: pointer; transition: opacity 0.2s; width: 100%;
+}
+
+.vc-review-submit:disabled { opacity: 0.38; cursor: not-allowed; }
+.vc-review-submit:not(:disabled):hover { opacity: 0.88; }
 
 /* Image Container */
 .vc-image-container {
@@ -141,13 +350,13 @@
   transform-origin: center center;
 }
 
-.vc-card:hover .vc-image {
+.vc-card:not(.vc-flipped):hover .vc-image {
   transform: scale(1.05);
 }
 
 /* .vc-image[style*="position: absolute"] — hover transform disabled when true zoom is active (handled by .vc-card:hover override below) */
 
-.vc-card:hover .vc-image[style*="position: absolute"] {
+.vc-card:not(.vc-flipped):hover .vc-image[style*="position: absolute"] {
   transform: var(--image-transform, none) !important;
 }
 
@@ -1150,7 +1359,7 @@
   z-index: 1;
 }
 
-.vc-card:hover .vc-sold-badge {
+.vc-card:not(.vc-flipped):hover .vc-sold-badge {
   transform: scale(1.05);
   box-shadow: 
     0 12px 35px rgba(74, 144, 226, 0.5),
@@ -1426,8 +1635,8 @@
     z-index: 2;
   }
   
-  .vc-card:hover .vc-image-container::after,
-  .vc-card:focus-within .vc-image-container::after {
+  .vc-card:not(.vc-flipped):hover .vc-image-container::after,
+  .vc-card:not(.vc-flipped):focus-within .vc-image-container::after {
     opacity: 0.8;
   }
   
