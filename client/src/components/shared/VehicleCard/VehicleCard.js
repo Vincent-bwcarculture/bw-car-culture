@@ -49,6 +49,13 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  // Replies
+  const [replyingTo, setReplyingTo] = useState(null); // reviewId
+  const [replyText, setReplyText] = useState('');
+  const [submittingReply, setSubmittingReply] = useState(false);
+  // Reactions
+  const [reactingTo, setReactingTo] = useState(null); // prevent double-tap
 
   // FIXED: Enhanced checkFailedImage function to include type
   const checkFailedImage = useCallback((url, type = 'general') => {
@@ -1103,15 +1110,14 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     e.stopPropagation();
     e.preventDefault();
     if (!newRating || newComment.trim().length < 10 || !car?._id) return;
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+    if (!token) { setSubmitError('Please log in to leave a review.'); return; }
     setIsSubmitting(true);
+    setSubmitError('');
     try {
-      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       const res = await fetch(`${API_BASE}/reviews/listing`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ listingId: car._id, rating: newRating, review: newComment.trim() })
       });
       const data = await res.json();
@@ -1121,13 +1127,58 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         setNewComment('');
         await fetchReviews();
         setTimeout(() => setSubmitSuccess(false), 3000);
+      } else {
+        setSubmitError(data.message || 'Failed to submit review.');
       }
     } catch {
-      // silent fail
+      setSubmitError('Network error — please try again.');
     } finally {
       setIsSubmitting(false);
     }
   }, [newRating, newComment, car, fetchReviews]);
+
+  const handleSubmitReply = useCallback(async (reviewId) => {
+    if (!replyText.trim() || !reviewId) return;
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+    if (!token) { setSubmitError('Please log in to reply.'); return; }
+    setSubmittingReply(true);
+    try {
+      const res = await fetch(`${API_BASE}/reviews/listing/${reviewId}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text: replyText.trim() })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setReplyingTo(null);
+        setReplyText('');
+        await fetchReviews();
+      }
+    } catch { /* silent */ } finally {
+      setSubmittingReply(false);
+    }
+  }, [replyText, fetchReviews]);
+
+  const handleReact = useCallback(async (reviewId, type, replyId = null) => {
+    const key = `${reviewId}-${replyId || ''}-${type}`;
+    if (reactingTo === key) return;
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+    if (!token) { setSubmitError('Please log in to react.'); return; }
+    setReactingTo(key);
+    try {
+      const url = replyId
+        ? `${API_BASE}/reviews/listing/${reviewId}/replies/${replyId}/react`
+        : `${API_BASE}/reviews/listing/${reviewId}/react`;
+      await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ type })
+      });
+      await fetchReviews();
+    } catch { /* silent */ } finally {
+      setReactingTo(null);
+    }
+  }, [reactingTo, fetchReviews]);
 
   if (!car) return null;
 
@@ -1601,22 +1652,91 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         </div>
 
         <div className="vc-reviews-scroll">
-          {reviewsLoading && <div className="vc-reviews-loading">Loading reviews…</div>}
+          {reviewsLoading && <div className="vc-reviews-loading">Loading…</div>}
           {reviewsError && <div className="vc-reviews-error">{reviewsError}</div>}
           {!reviewsLoading && !reviewsError && reviews.length === 0 && (
             <div className="vc-no-reviews">No reviews yet — be the first!</div>
           )}
-          {reviews.map((review, i) => (
-            <div key={i} className="vc-review-item">
+          {reviews.map((review) => (
+            <div key={review._id} className="vc-review-item">
+              {/* Review header */}
               <div className="vc-review-header">
-                <span className="vc-review-author">{review.reviewer?.name || 'Anonymous'}</span>
-                <span className="vc-review-stars">
-                  {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                </span>
+                <div className="vc-review-author-row">
+                  <span className="vc-review-author">{review.userName || 'Anonymous'}</span>
+                  {review.isOwner && <span className="vc-owner-badge">Owner</span>}
+                </div>
+                <span className="vc-review-stars">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
               </div>
               {review.review && <p className="vc-review-text">{review.review}</p>}
-              {review.date && (
-                <span className="vc-review-date">{new Date(review.date).toLocaleDateString()}</span>
+              {/* Reactions + Reply row */}
+              <div className="vc-review-actions">
+                <div className="vc-react-group">
+                  <button
+                    className={`vc-react-btn ${review.likes?.includes(user?._id) ? 'active-like' : ''}`}
+                    onClick={e => { e.stopPropagation(); handleReact(review._id, 'like'); }}
+                    title="Helpful"
+                  >👍 <span>{review.likes?.length || 0}</span></button>
+                  <button
+                    className={`vc-react-btn ${review.dislikes?.includes(user?._id) ? 'active-dislike' : ''}`}
+                    onClick={e => { e.stopPropagation(); handleReact(review._id, 'dislike'); }}
+                    title="Not helpful"
+                  >👎 <span>{review.dislikes?.length || 0}</span></button>
+                </div>
+                <button
+                  className="vc-reply-btn"
+                  onClick={e => { e.stopPropagation(); setReplyingTo(replyingTo === review._id ? null : review._id); setReplyText(''); }}
+                >Reply</button>
+                {review.date && <span className="vc-review-date">{new Date(review.date).toLocaleDateString()}</span>}
+              </div>
+
+              {/* Replies */}
+              {review.replies?.length > 0 && (
+                <div className="vc-replies-list">
+                  {review.replies.map(rep => (
+                    <div key={rep._id} className={`vc-reply-item ${rep.isOwner ? 'vc-reply-owner' : ''}`}>
+                      <div className="vc-reply-header">
+                        <div className="vc-review-author-row">
+                          <span className="vc-reply-author">{rep.userName || 'Anonymous'}</span>
+                          {rep.isOwner && <span className="vc-owner-badge">Owner</span>}
+                        </div>
+                        <span className="vc-review-date">{new Date(rep.date).toLocaleDateString()}</span>
+                      </div>
+                      <p className="vc-reply-text">{rep.text}</p>
+                      <div className="vc-react-group vc-react-group--small">
+                        <button
+                          className={`vc-react-btn vc-react-btn--sm ${rep.likes?.includes(user?._id) ? 'active-like' : ''}`}
+                          onClick={e => { e.stopPropagation(); handleReact(review._id, 'like', rep._id); }}
+                        >👍 <span>{rep.likes?.length || 0}</span></button>
+                        <button
+                          className={`vc-react-btn vc-react-btn--sm ${rep.dislikes?.includes(user?._id) ? 'active-dislike' : ''}`}
+                          onClick={e => { e.stopPropagation(); handleReact(review._id, 'dislike', rep._id); }}
+                        >👎 <span>{rep.dislikes?.length || 0}</span></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Inline reply form */}
+              {replyingTo === review._id && (
+                <div className="vc-reply-form" onClick={e => e.stopPropagation()}>
+                  <textarea
+                    className="vc-review-textarea"
+                    placeholder="Write a reply…"
+                    value={replyText}
+                    onChange={e => setReplyText(e.target.value)}
+                    rows={2}
+                    onClick={e => e.stopPropagation()}
+                  />
+                  <div className="vc-reply-form-actions">
+                    <button className="vc-reply-cancel-btn" onClick={e => { e.stopPropagation(); setReplyingTo(null); }}>Cancel</button>
+                    <button
+                      className="vc-reply-submit-btn"
+                      onClick={e => { e.stopPropagation(); handleSubmitReply(review._id); }}
+                      disabled={submittingReply || replyText.trim().length < 2}
+                    >{submittingReply ? 'Posting…' : 'Post Reply'}</button>
+                  </div>
+                </div>
               )}
             </div>
           ))}
@@ -1625,11 +1745,8 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         <div className="vc-review-form">
           <div className="vc-star-picker">
             {[1, 2, 3, 4, 5].map(s => (
-              <button
-                key={s}
-                className={`vc-star-btn ${s <= newRating ? 'active' : ''}`}
-                onClick={e => { e.stopPropagation(); setNewRating(s); }}
-              >★</button>
+              <button key={s} className={`vc-star-btn ${s <= newRating ? 'active' : ''}`}
+                onClick={e => { e.stopPropagation(); setNewRating(s); }}>★</button>
             ))}
           </div>
           <textarea
@@ -1640,14 +1757,13 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             rows={2}
             onClick={e => e.stopPropagation()}
           />
+          {submitError && <span className="vc-submit-error">{submitError}</span>}
           {submitSuccess && <span className="vc-submit-success">✓ Review submitted!</span>}
           <button
             className="vc-review-submit"
             onClick={handleSubmitReview}
             disabled={isSubmitting || !newRating || newComment.trim().length < 10}
-          >
-            {isSubmitting ? 'Submitting…' : 'Submit Review'}
-          </button>
+          >{isSubmitting ? 'Submitting…' : 'Submit Review'}</button>
         </div>
       </div>{/* vc-card-back */}
 

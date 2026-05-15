@@ -261,6 +261,141 @@
 .vc-review-text   { font-size: 0.72rem; color: rgba(255,255,255,0.6); line-height: 1.3; margin: 0.04rem 0 0.05rem; }
 .vc-review-date   { font-size: 0.65rem; color: rgba(255,255,255,0.3); }
 
+/* Author row (name + owner badge) */
+.vc-review-author-row {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.vc-owner-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  background: rgba(251,191,36,0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(251,191,36,0.35);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Reactions + Reply bar */
+.vc-review-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.2rem;
+  flex-wrap: wrap;
+}
+
+.vc-react-group {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.vc-react-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  color: rgba(255,255,255,0.45);
+  font-size: 0.68rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.vc-react-btn:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.8); }
+.vc-react-btn.active-like  { border-color: #4ade80; color: #4ade80; background: rgba(74,222,128,0.08); }
+.vc-react-btn.active-dislike { border-color: #f87171; color: #f87171; background: rgba(248,113,113,0.08); }
+.vc-react-btn--sm { font-size: 0.62rem; padding: 0.08rem 0.28rem; }
+
+.vc-reply-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.35);
+  font-size: 0.68rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+  margin-left: auto;
+}
+.vc-reply-btn:hover { color: rgba(255,51,0,0.8); }
+
+/* Replies */
+.vc-replies-list {
+  margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-left: 0.6rem;
+  border-left: 2px solid rgba(255,255,255,0.08);
+}
+
+.vc-reply-item {
+  background: rgba(255,255,255,0.025);
+  border-radius: 5px;
+  padding: 0.25rem 0.4rem;
+}
+
+.vc-reply-item.vc-reply-owner {
+  background: rgba(251,191,36,0.06);
+  border-left: 2px solid rgba(251,191,36,0.35);
+}
+
+.vc-reply-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.1rem;
+}
+
+.vc-reply-author { font-size: 0.7rem; font-weight: 600; color: rgba(255,255,255,0.8); }
+.vc-reply-text   { font-size: 0.7rem; color: rgba(255,255,255,0.55); line-height: 1.3; margin: 0 0 0.15rem; }
+
+/* Inline reply form */
+.vc-reply-form {
+  margin-top: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.vc-reply-form-actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.vc-reply-cancel-btn {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.5);
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+.vc-reply-cancel-btn:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+
+.vc-reply-submit-btn {
+  background: rgba(255,51,0,0.75);
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.vc-reply-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.vc-reply-submit-btn:not(:disabled):hover { opacity: 0.88; }
+
+.vc-submit-error { font-size: 0.72rem; color: #f87171; font-weight: 500; }
+
 .vc-reviews-loading,
 .vc-reviews-error,
 .vc-no-reviews {
