@@ -1588,6 +1588,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             </button>
           </div>
         </div>
+      </div>{/* vc-content */}
       </div>{/* vc-card-front */}
 
       {/* ── BACK FACE: Seller reviews ── */}
@@ -1666,7 +1667,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     <button className="vc-review-tab" onClick={handleFlip} title="Seller reviews">
       REVIEW
     </button>
-    </div>{/* vc-card-wrapper */}
+    </div>
   );
 };
 
