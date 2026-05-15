@@ -157,7 +157,7 @@
 /* ── Vertical REVIEW tab ── */
 .vc-review-tab {
   position: absolute;
-  top: 50%;
+  top: 70%;
   right: -30px;
   transform: translateY(-50%) rotate(90deg);
   transform-origin: center center;

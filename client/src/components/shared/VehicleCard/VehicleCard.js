@@ -1074,12 +1074,11 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   }, []);
 
   const fetchReviews = useCallback(async () => {
-    const targetId = dealer?.id;
-    if (!targetId) return;
+    if (!car?._id) return;
     setReviewsLoading(true);
     setReviewsError(null);
     try {
-      const res = await fetch(`${API_BASE}/reviews/business/${targetId}`);
+      const res = await fetch(`${API_BASE}/reviews/listing/${car._id}`);
       const data = await res.json();
       if (data.success) {
         setReviews(data.data?.reviews || []);
@@ -1091,7 +1090,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     } finally {
       setReviewsLoading(false);
     }
-  }, [dealer]);
+  }, [car]);
 
   const handleFlip = useCallback((e) => {
     e.stopPropagation();
@@ -1103,17 +1102,17 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const handleSubmitReview = useCallback(async (e) => {
     e.stopPropagation();
     e.preventDefault();
-    if (!newRating || newComment.trim().length < 10 || !dealer?.id) return;
+    if (!newRating || newComment.trim().length < 10 || !car?._id) return;
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('authToken');
-      const res = await fetch(`${API_BASE}/reviews/general`, {
+      const res = await fetch(`${API_BASE}/reviews/listing`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         },
-        body: JSON.stringify({ businessId: dealer.id, rating: newRating, review: newComment.trim() })
+        body: JSON.stringify({ listingId: car._id, rating: newRating, review: newComment.trim() })
       });
       const data = await res.json();
       if (data.success) {
@@ -1128,7 +1127,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [newRating, newComment, dealer, fetchReviews]);
+  }, [newRating, newComment, car, fetchReviews]);
 
   if (!car) return null;
 
@@ -1596,22 +1595,15 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         <div className="vc-back-top-bar">
           <button className="vc-flip-back-btn" onClick={handleFlip}>← Back</button>
           <div className="vc-back-title">
-            <span>{dealer?.businessName || dealer?.name || 'Seller'}</span>
-            <span className="vc-back-subtitle">Seller reviews</span>
+            <span>{car.title || 'Vehicle'}</span>
+            <span className="vc-back-subtitle">Listing reviews</span>
           </div>
         </div>
 
         <div className="vc-reviews-scroll">
-          {!dealer?.id && (
-            <div className="vc-no-reviews">No seller linked — reviews unavailable.</div>
-          )}
-          {dealer?.id && reviewsLoading && (
-            <div className="vc-reviews-loading">Loading reviews…</div>
-          )}
-          {dealer?.id && reviewsError && (
-            <div className="vc-reviews-error">{reviewsError}</div>
-          )}
-          {dealer?.id && !reviewsLoading && !reviewsError && reviews.length === 0 && (
+          {reviewsLoading && <div className="vc-reviews-loading">Loading reviews…</div>}
+          {reviewsError && <div className="vc-reviews-error">{reviewsError}</div>}
+          {!reviewsLoading && !reviewsError && reviews.length === 0 && (
             <div className="vc-no-reviews">No reviews yet — be the first!</div>
           )}
           {reviews.map((review, i) => (
@@ -1630,41 +1622,39 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           ))}
         </div>
 
-        {dealer?.id && (
-          <div className="vc-review-form">
-            <div className="vc-star-picker">
-              {[1, 2, 3, 4, 5].map(s => (
-                <button
-                  key={s}
-                  className={`vc-star-btn ${s <= newRating ? 'active' : ''}`}
-                  onClick={e => { e.stopPropagation(); setNewRating(s); }}
-                >★</button>
-              ))}
-            </div>
-            <textarea
-              className="vc-review-textarea"
-              placeholder="Share your experience… (min 10 chars)"
-              value={newComment}
-              onChange={e => setNewComment(e.target.value)}
-              rows={2}
-              onClick={e => e.stopPropagation()}
-            />
-            {submitSuccess && <span className="vc-submit-success">✓ Review submitted!</span>}
-            <button
-              className="vc-review-submit"
-              onClick={handleSubmitReview}
-              disabled={isSubmitting || !newRating || newComment.trim().length < 10}
-            >
-              {isSubmitting ? 'Submitting…' : 'Submit Review'}
-            </button>
+        <div className="vc-review-form">
+          <div className="vc-star-picker">
+            {[1, 2, 3, 4, 5].map(s => (
+              <button
+                key={s}
+                className={`vc-star-btn ${s <= newRating ? 'active' : ''}`}
+                onClick={e => { e.stopPropagation(); setNewRating(s); }}
+              >★</button>
+            ))}
           </div>
-        )}
+          <textarea
+            className="vc-review-textarea"
+            placeholder="Share your experience… (min 10 chars)"
+            value={newComment}
+            onChange={e => setNewComment(e.target.value)}
+            rows={2}
+            onClick={e => e.stopPropagation()}
+          />
+          {submitSuccess && <span className="vc-submit-success">✓ Review submitted!</span>}
+          <button
+            className="vc-review-submit"
+            onClick={handleSubmitReview}
+            disabled={isSubmitting || !newRating || newComment.trim().length < 10}
+          >
+            {isSubmitting ? 'Submitting…' : 'Submit Review'}
+          </button>
+        </div>
       </div>{/* vc-card-back */}
 
       </div>{/* vc-card-flipper */}
     </div>{/* vc-card */}
 
-    <button className="vc-review-tab" onClick={handleFlip} title="Seller reviews">
+    <button className="vc-review-tab" onClick={handleFlip} title="Listing reviews">
       REVIEW
     </button>
     </div>
