@@ -2,13 +2,13 @@
 // COMPLETE VERSION - With Manual Payment Integration + Tier/Addon Display + Professional Listing Assistance
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Eye, CheckCircle, XCircle, Clock, User, Car, 
+import {
+  Eye, CheckCircle, XCircle, Clock, User, Car,
   DollarSign, Phone, MapPin, Calendar, Star,
   Search, Filter, RefreshCw, ExternalLink,
   MessageSquare, AlertCircle, Info, Image,
   Award, Shield, TrendingUp, BarChart3, Camera,
-  MessageCircle, Bell, Headphones, CreditCard, FileText 
+  MessageCircle, Bell, Headphones, CreditCard, FileText, RotateCcw
 } from 'lucide-react';
 import axios from '../../config/axios.js';
 import AdminManualPaymentApproval from './AdminManualPaymentApproval.js'; // Manual payment approval component
@@ -480,6 +480,33 @@ const AdminUserSubmissions = () => {
       setError(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRestoreSubmission = async (submission) => {
+    if (!window.confirm(`Restore "${submission.listingData?.title || 'this submission'}" to pending review?`)) return;
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+      const response = await axios.put(
+        `/api/admin/user-listings/${submission._id}/restore`,
+        {},
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+      if (response.data.success) {
+        setSubmissions(prev => prev.map(s =>
+          s._id === submission._id ? { ...s, status: 'pending_review', adminReview: null } : s
+        ));
+        setStats(prev => ({
+          ...prev,
+          pending: prev.pending + 1,
+          rejected: Math.max(0, prev.rejected - 1)
+        }));
+        showMessage('success', 'Submission restored to pending review.');
+      } else {
+        showMessage('error', response.data.message || 'Failed to restore submission.');
+      }
+    } catch (err) {
+      showMessage('error', err.response?.data?.message || 'Failed to restore submission.');
     }
   };
 
@@ -1035,6 +1062,14 @@ const AdminUserSubmissions = () => {
                       <div className="admin-submissions-rejected-info">
                         <XCircle size={16} />
                         <span>Rejected</span>
+                        <button
+                          className="admin-submissions-restore-btn"
+                          onClick={() => handleRestoreSubmission(submission)}
+                          title="Restore to pending review"
+                        >
+                          <RotateCcw size={14} />
+                          Restore
+                        </button>
                       </div>
                     )}
                   </div>
