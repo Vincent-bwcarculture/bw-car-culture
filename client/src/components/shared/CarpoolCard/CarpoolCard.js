@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import './CarpoolCard.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'https://api.i3wcarculture.com/api';
@@ -61,7 +61,7 @@ const CarpoolCard = ({ ride, onReserved }) => {
 
   const handleWhatsApp = () => {
     const text = encodeURIComponent(
-      `Hi, I found your ride on BW Car Culture — ${ride.origin} → ${ride.destination} on ${formatTime(ride.departureTime)}. Is a seat still available?`
+      `Hi, I found your ride on Bw Car Culture — ${ride.origin} → ${ride.destination} on ${formatTime(ride.departureTime)}. Is a seat still available?`
     );
     const num = ride.driverPhone?.replace(/\D/g, '');
     const wa = num ? `https://wa.me/267${num.replace(/^267/, '')}?text=${text}` : `https://wa.me/26774122453?text=${text}`;

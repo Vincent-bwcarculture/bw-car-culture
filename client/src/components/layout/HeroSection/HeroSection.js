@@ -1,4 +1,4 @@
-// src/components/layout/HeroSection/HeroSection.js - With authentication integration
+﻿// src/components/layout/HeroSection/HeroSection.js - With authentication integration
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.js'; // NEW: Added authentication
@@ -209,7 +209,7 @@ const HeroSection = () => {
       // Fallback to WhatsApp if there's an error
       const whatsappNumber = '+26774122453';
       const message = encodeURIComponent(
-        'Hi! I would like to list my car for sale on BW Car Culture.\n\n' +
+        'Hi! I would like to list my car for sale on Bw Car Culture.\n\n' +
         'I have prepared:\n' +
         '✓ Quality photos from multiple angles\n' +
         '✓ Complete vehicle details and documents\n' +

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+﻿import React, { useState, useRef } from 'react';
 import { imageService } from '../../services/imageService.js';
 import './AssistedListingModal.css';
 
@@ -44,7 +44,7 @@ const INITIAL_VEHICLE = {
 const DEFAULT_SHARE_MSG = (name, title, claimUrl) =>
 `Hi ${name},
 
-Your vehicle "${title}" has been successfully listed on BW Car Culture! 🎉
+Your vehicle "${title}" has been successfully listed on Bw Car Culture! 🎉
 
 To access your profile and manage your listing, use the link below to set up your account password:
 ${claimUrl}
@@ -55,7 +55,7 @@ ${claimUrl}
 
 Visit the platform or reply to this message to learn more.
 
-– BW Car Culture Team`;
+– Bw Car Culture Team`;
 
 const AssistedListingModal = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);

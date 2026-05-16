@@ -1,4 +1,4 @@
-// client/src/components/profile/EnhancedRoleSelection.js
+﻿// client/src/components/profile/EnhancedRoleSelection.js
 import React, { useState, useEffect } from 'react';
 import { 
   User, 
@@ -267,7 +267,7 @@ const EnhancedRoleSelection = ({ profileData, refreshProfile, onClose }) => {
     <div className="enhanced-role-step">
       <div className="enhanced-role-header">
         <h3>Select Your Basic Roles</h3>
-        <p>Choose how you participate in the BW Car Culture platform. You can select multiple roles.</p>
+        <p>Choose how you participate in the Bw Car Culture platform. You can select multiple roles.</p>
       </div>
 
       <div className="enhanced-roles-grid">

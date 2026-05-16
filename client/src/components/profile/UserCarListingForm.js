@@ -1,4 +1,4 @@
-// client/src/components/profile/UserCarListingForm.js
+﻿// client/src/components/profile/UserCarListingForm.js
 // ABSOLUTELY COMPLETE PRODUCTION VERSION - EVERY SINGLE SECTION INCLUDED
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -1283,7 +1283,7 @@ const handleFormSubmit = async (e) => {
             <div className="ulisting-success-icon">✓</div>
             <h3>Listing Submitted!</h3>
             <p className="ulisting-success-vehicle">{successModal.year} {successModal.make} {successModal.model}{successModal.price ? ` — BWP ${parseFloat(successModal.price).toLocaleString()}` : ''}</p>
-            <p className="ulisting-success-message">Thank you for choosing BW Car Culture! Our team will review your listing and get it live on the website shortly.</p>
+            <p className="ulisting-success-message">Thank you for choosing Bw Car Culture! Our team will review your listing and get it live on the website shortly.</p>
             {successModal.hasBoost && (
               <p className="ulisting-success-boost">Your social media boost request has been received — once your payment is verified, your vehicle will be featured across all our platforms.</p>
             )}

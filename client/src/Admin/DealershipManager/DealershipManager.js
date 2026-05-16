@@ -1,4 +1,4 @@
-// src/components/admin/DealershipManager/DealershipManager.js - Updated for Private Sellers
+﻿// src/components/admin/DealershipManager/DealershipManager.js - Updated for Private Sellers
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.js';
 import DealershipForm from './DealershipForm.js';
@@ -65,7 +65,7 @@ const DealershipManager = () => {
 
   const generateWelcomeMessage = (seller) => {
     const name = seller.businessName || `${seller.privateSeller?.firstName || ''} ${seller.privateSeller?.lastName || ''}`.trim() || 'Valued Partner';
-    return `BW CAR CULTURE
+    return `Bw Car Culture
 Botswana's Default Digital Mobility Platform
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

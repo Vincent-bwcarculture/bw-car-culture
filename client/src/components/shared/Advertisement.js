@@ -1,4 +1,4 @@
-// src/components/shared/Advertisement/Advertisement.js - Redesigned Professional Version
+﻿// src/components/shared/Advertisement/Advertisement.js - Redesigned Professional Version
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronsLeft, ChevronsRight, ArrowRight, Facebook, Instagram, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

@@ -1,4 +1,4 @@
-// Enhanced ProcessSection.js - Converted to a carousel
+﻿// Enhanced ProcessSection.js - Converted to a carousel
 import React, { useState, useRef, useEffect } from 'react';
 import './ProcessSection.css';
 

@@ -1,4 +1,4 @@
-// src/App.js - COMPLETE VERSION with all fixes integrated including enhanced error boundary
+﻿// src/App.js - COMPLETE VERSION with all fixes integrated including enhanced error boundary
 
 // React Core Imports
 import React, { Suspense, useState, useEffect } from 'react';
@@ -387,7 +387,7 @@ class AppErrorBoundary extends React.Component {
       return (
         <div className="aeb-wrap">
           <div className="aeb-card">
-            <div className="aeb-eyebrow">BW Car Culture</div>
+            <div className="aeb-eyebrow">Bw Car Culture</div>
             <div className="aeb-code">500</div>
             <h2 className="aeb-title">Something went wrong</h2>
             <p className="aeb-desc">
@@ -1108,7 +1108,7 @@ const AppRoutes = () => {
 
         <Route path="/about" element={
           <MainLayout>
-            <PlaceholderPage title="About BW Car Culture" />
+            <PlaceholderPage title="About Bw Car Culture" />
           </MainLayout>
         } />
 

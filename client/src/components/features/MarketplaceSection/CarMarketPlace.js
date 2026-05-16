@@ -1,4 +1,4 @@
-// src/components/features/MarketplaceSection/CarMarketPlace.js
+﻿// src/components/features/MarketplaceSection/CarMarketPlace.js
 // COMPLETE VERSION WITH IMPROVED FULLSCREEN & BUTTON LAYOUT
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -787,7 +787,7 @@ const CarMarketplace = () => {
     const year = car.specifications?.year || '';
     const title = car.title || `${year} ${make} ${model}`.trim() || 'Vehicle';
     const savingsInfo = calculateSavings ? 
-      `\n*EXCLUSIVE BW CAR CULTURE SAVINGS*\n` +
+      `\n*EXCLUSIVE Bw Car Culture SAVINGS*\n` +
       `Original ${isPrivateSeller ? 'Seller' : 'Dealer'} Price: P${calculateSavings.originalPrice.toLocaleString()}\n` +
       `Bw Car Culture Discounted Price: P${car.price.toLocaleString()}\n` +
       `Your Total Savings: P${calculateSavings.amount.toLocaleString()}\n` +
@@ -822,7 +822,7 @@ const CarMarketplace = () => {
     const closingNote = isPrivateSeller ?
       `I'm interested in learning more about the vehicle and arranging a viewing at your convenience.` :
       `Please let me know about availability, financing options, and viewing arrangements.`;
-    const message = `🚗 *VEHICLE INQUIRY - BW CAR CULTURE - ${sellerTitle}*\n\n${greeting}${preferenceNote}\n\n${calculateSavings ? 'I would like to take advantage of this exclusive Bw Car Culture savings offer:\n\n' : 'I\'m interested in this vehicle:\n\n'}${vehicleDetails}${vehicleLink}\n\n${closingNote}\n\nThank you!`;
+    const message = `🚗 *VEHICLE INQUIRY - Bw Car Culture - ${sellerTitle}*\n\n${greeting}${preferenceNote}\n\n${calculateSavings ? 'I would like to take advantage of this exclusive Bw Car Culture savings offer:\n\n' : 'I\'m interested in this vehicle:\n\n'}${vehicleDetails}${vehicleLink}\n\n${closingNote}\n\nThank you!`;
     const phone = resolvedPhone;
     const formattedPhone = phone.startsWith('+') ? phone.replace(/\s+/g, '') : `+267${phone.replace(/\s+/g, '')}`;
     const encodedMessage = encodeURIComponent(message);
@@ -976,7 +976,7 @@ const CarMarketplace = () => {
     <ErrorBoundary showDetails={process.env.NODE_ENV !== 'production'}>
       {buildHelmet({
         title: carTitle,
-        description: carDesc || `View details for ${carTitle} on BW Car Culture — Botswana's car marketplace.`,
+        description: carDesc || `View details for ${carTitle} on Bw Car Culture — Botswana's car marketplace.`,
         image: carImage,
         url: `${SITE_URL}/marketplace/${car._id}`,
         type: 'product',
@@ -1430,7 +1430,7 @@ const CarMarketplace = () => {
                     <div className="news-card-content">
                       <h3 className="news-card-title">{article.title}</h3>
                       <div className="news-card-author">
-                        <div className="author-logo"><img src="/images/BW CAR CULTURE.png" alt="BW Car Culture" className="logo-icon" loading="lazy" /></div>
+                        <div className="author-logo"><img src="/images/Bw Car Culture.png" alt="Bw Car Culture" className="logo-icon" loading="lazy" /></div>
                         <span className="author-name">Admin User</span>
                         <span className="publication-date">{new Date(article.publishDate || article.createdAt || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).split('/').join('/')}</span>
                       </div>

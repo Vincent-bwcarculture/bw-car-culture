@@ -1,4 +1,4 @@
-// src/components/shared/VehicleCard/VehicleCard.js
+﻿// src/components/shared/VehicleCard/VehicleCard.js
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAnalytics } from '../../../hooks/useAnalytics.js';
@@ -961,7 +961,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       window.open(`tel:${formatNumber(phoneNum)}`, '_self');
     } else {
       // No seller contact — open Mpho AI to assist with drafting + forwarding
-      const draftMessage = `Hi! I found a vehicle on BW Car Culture that I'm interested in:\n\n${vehicleDetails}\n\nI'd like to enquire about this vehicle. Please help me get in touch with the seller or provide more details. Thank you!`;
+      const draftMessage = `Hi! I found a vehicle on Bw Car Culture that I'm interested in:\n\n${vehicleDetails}\n\nI'd like to enquire about this vehicle. Please help me get in touch with the seller or provide more details. Thank you!`;
       window.dispatchEvent(new CustomEvent('mpho:contact-assist', {
         detail: { vehicleTitle: car.title, draftMessage }
       }));

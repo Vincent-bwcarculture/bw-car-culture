@@ -1,4 +1,4 @@
-// src/components/pages/BusinessDetailPage/BusinessDetailPage.js
+﻿// src/components/pages/BusinessDetailPage/BusinessDetailPage.js
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { debounce } from 'lodash';
@@ -1148,7 +1148,7 @@ return (
   <div className="bcc-business-detail-page">
     {buildHelmet({
       title: business.businessName,
-      description: bizDesc || `View ${business.businessName} on BW Car Culture — Botswana's automotive services directory.`,
+      description: bizDesc || `View ${business.businessName} on Bw Car Culture — Botswana's automotive services directory.`,
       image: bizImage,
       url: `${SITE_URL}/business/${business._id}`,
       jsonLd: {
@@ -2793,7 +2793,7 @@ const SUB_TIERS = [
     sub: 'Free forever',
     accent: '#6b7280',
     features: [
-      'Listed on BW Car Culture',
+      'Listed on Bw Car Culture',
       'Public dealer profile page',
       'Text-only business updates',
       'Customer reviews & ratings',
@@ -2849,7 +2849,7 @@ const SUB_TIERS = [
   },
 ];
 
-// WhatsApp number for BW Car Culture bookings
+// WhatsApp number for Bw Car Culture bookings
 const BWCC_WHATSAPP = '26774122453';
 
 const SUB_ADDONS = [
@@ -2881,7 +2881,7 @@ const SUB_ADDONS = [
     name: 'Social Media Coverage — 1 post',
     price: 'P400',
     priceNum: 400,
-    detail: '1 dedicated post on BW Car Culture pages & channel',
+    detail: '1 dedicated post on Bw Car Culture pages & channel',
     platforms: ['Facebook', 'Instagram', 'WhatsApp'],
     media: true,
   },
@@ -2889,7 +2889,7 @@ const SUB_ADDONS = [
     name: 'Social Media Coverage — 2 posts',
     price: 'P700',
     priceNum: 700,
-    detail: '2 dedicated posts on BW Car Culture pages & channel',
+    detail: '2 dedicated posts on Bw Car Culture pages & channel',
     platforms: ['Facebook', 'Instagram', 'WhatsApp'],
     media: true,
   },
@@ -2936,7 +2936,7 @@ const PostUpdateModal = ({ business, newUpdate, setNewUpdate, submittingUpdate, 
     const selected = [...selectedAddons].map(name => SUB_ADDONS.find(a => a.name === name)).filter(Boolean);
     const lines = selected.map(a => `  • ${a.name} — ${a.price}`).join('\n');
     const message = [
-      `Hi BW Car Culture! 👋`,
+      `Hi Bw Car Culture! 👋`,
       ``,
       `I'd like to book the following service(s) for my dealership:`,
       ``,
@@ -2959,7 +2959,7 @@ const PostUpdateModal = ({ business, newUpdate, setNewUpdate, submittingUpdate, 
   const handleUpgradeClick = (targetTier) => {
     const subject = encodeURIComponent(`Subscription Upgrade Request — ${targetTier.charAt(0).toUpperCase() + targetTier.slice(1)} Plan`);
     const body = encodeURIComponent(
-      `Hi BW Car Culture,\n\nI'd like to upgrade my dealership "${business.businessName}" to the ${targetTier} plan.\n\nDealer ID: ${business._id}\n\nPlease get in touch to process the upgrade.\n\nThank you.`
+      `Hi Bw Car Culture,\n\nI'd like to upgrade my dealership "${business.businessName}" to the ${targetTier} plan.\n\nDealer ID: ${business._id}\n\nPlease get in touch to process the upgrade.\n\nThank you.`
     );
     window.open(`mailto:${UPGRADE_EMAIL}?subject=${subject}&body=${body}`, '_blank');
   };

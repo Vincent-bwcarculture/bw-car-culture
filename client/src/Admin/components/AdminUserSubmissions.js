@@ -1,4 +1,4 @@
-// client/src/Admin/components/AdminUserSubmissions.js
+﻿// client/src/Admin/components/AdminUserSubmissions.js
 // COMPLETE VERSION - With Manual Payment Integration + Tier/Addon Display + Professional Listing Assistance
 
 import React, { useState, useEffect } from 'react';
@@ -292,7 +292,7 @@ const AdminUserSubmissions = () => {
     
     const message = encodeURIComponent(
       `Hi ${submission.userName || 'there'}! 👋\n\n` +
-      `Thank you for requesting Professional Listing Assistance from BW Car Culture.\n\n` +
+      `Thank you for requesting Professional Listing Assistance from Bw Car Culture.\n\n` +
       `I'm here to help you create an outstanding listing for your ${vehicleInfo || 'vehicle'}.\n\n` +
       `Let's discuss:\n` +
       `🚗 Vehicle details and specifications\n` +
@@ -300,7 +300,7 @@ const AdminUserSubmissions = () => {
       `✨ Listing optimization strategy\n` +
       `📅 Timeline and next steps\n\n` +
       `When would be a good time to connect? I'm excited to help you get the best results! 🚗✨\n\n` +
-      `Best regards,\nBW Car Culture Team`
+      `Best regards,\nBw Car Culture Team`
     );
     
     const cleanNumber = whatsapp.replace(/[^\d]/g, '');

@@ -1,4 +1,4 @@
-// src/components/features/CarDetailsGallery/CarDetailsGallery.js
+﻿// src/components/features/CarDetailsGallery/CarDetailsGallery.js
 // COMPLETE UNIFIED: Detail Gallery + Similar Vehicles + TRUE ZOOM
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';

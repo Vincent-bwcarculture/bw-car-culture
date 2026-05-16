@@ -1,4 +1,4 @@
-// components/GION/GIONMainScreen.js
+﻿// components/GION/GIONMainScreen.js
 import { useState, useEffect, useRef } from 'react';
 import { 
   QrCode, 

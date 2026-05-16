@@ -1,4 +1,4 @@
-// components/GION/GIONSuccessScreen.js
+﻿// components/GION/GIONSuccessScreen.js
 import React, { useEffect, useState, useRef } from 'react';
 import { Check, Award, Share2, BarChart2 } from 'lucide-react';
 import './GIONSuccessScreen.css';

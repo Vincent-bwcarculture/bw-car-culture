@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { 
   AlertCircle, Info, Phone, Building, Smartphone, 
   MessageSquare, Upload, X, Check, Copy, ExternalLink,
@@ -159,7 +159,7 @@ const ManualPaymentModal = ({
   };
 
   const getWhatsAppLink = () => {
-    const message = `Hi, I have made a payment for my car listing on BW Car Culture.\n\nListing Details:\n- Amount: P${paymentInfo.amount}\n- Tier: ${paymentInfo.subscriptionTier}\n- Transaction Ref: ${paymentInfo.transactionRef || 'N/A'}\n\nPlease find attached proof of payment.`;
+    const message = `Hi, I have made a payment for my car listing on Bw Car Culture.\n\nListing Details:\n- Amount: P${paymentInfo.amount}\n- Tier: ${paymentInfo.subscriptionTier}\n- Transaction Ref: ${paymentInfo.transactionRef || 'N/A'}\n\nPlease find attached proof of payment.`;
     return `https://wa.me/${paymentDetails.whatsapp.replace(/\s+/g, '')}?text=${encodeURIComponent(message)}`;
   };
 

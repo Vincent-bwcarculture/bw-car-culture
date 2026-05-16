@@ -1,4 +1,4 @@
-// src/components/features/CarNews/NewsArticle.js
+﻿// src/components/features/CarNews/NewsArticle.js
 // COMPLETE FIXED VERSION - All API endpoints corrected to include /api prefix
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -684,7 +684,7 @@ const NewsArticle = () => {
           datePublished: article.publishDate || article.createdAt,
           dateModified: article.updatedAt || article.publishDate,
           url: articleUrl,
-          publisher: { '@type': 'Organization', name: 'BW Car Culture', url: SITE_URL }
+          publisher: { '@type': 'Organization', name: 'Bw Car Culture', url: SITE_URL }
         }
       })}
       {/* Full-screen gallery view */}

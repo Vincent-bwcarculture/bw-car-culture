@@ -1,4 +1,4 @@
-// client/src/components/profile/RoleSelectionComponent.js
+﻿// client/src/components/profile/RoleSelectionComponent.js
 // COMPLETE VERSION - Fixed API calls to use correct API server
 
 import React, { useState, useEffect } from 'react';
@@ -880,7 +880,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                   <textarea
                     value={formData.motivation}
                     onChange={(e) => handleInputChange('motivation', e.target.value)}
-                    placeholder="Why do you want to write for BW Car Culture? What type of content do you plan to create? How will you contribute to the automotive community?"
+                    placeholder="Why do you want to write for Bw Car Culture? What type of content do you plan to create? How will you contribute to the automotive community?"
                     rows="4"
                   />
                 </div>

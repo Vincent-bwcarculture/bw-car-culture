@@ -1,9 +1,9 @@
-// src/hooks/useSEO.js — centralised SEO helper
+﻿// src/hooks/useSEO.js — centralised SEO helper
 // Usage: useSEO({ title, description, image, url, type, jsonLd })
 import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 
-const SITE_NAME  = 'BW Car Culture';
+const SITE_NAME  = 'Bw Car Culture';
 const SITE_URL   = 'https://www.i3wcarculture.com';
 const DEFAULT_IMG = `${SITE_URL}/bcc-logo.png`;
 
@@ -12,7 +12,7 @@ const DEFAULT_IMG = `${SITE_URL}/bcc-logo.png`;
  * Import and render this where you need per-page SEO.
  *
  * @param {object} opts
- * @param {string}  opts.title       — page title (will be appended with " | BW Car Culture")
+ * @param {string}  opts.title       — page title (will be appended with " | Bw Car Culture")
  * @param {string}  opts.description — meta description (max ~160 chars)
  * @param {string}  [opts.image]     — absolute URL for OG image
  * @param {string}  [opts.url]       — canonical URL (defaults to current href)

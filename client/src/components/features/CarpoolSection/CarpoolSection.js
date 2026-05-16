@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CarpoolCard from '../../shared/CarpoolCard/CarpoolCard.js';
 import CreateRideModal from '../../modals/CreateRideModal/CreateRideModal.js';
@@ -41,7 +41,7 @@ const CarpoolSection = () => {
             <div className="cps-eyebrow">Community Rides</div>
             <h2 className="cps-title">Share a Ride</h2>
             <p className="cps-subtitle">
-              With public transport disruptions, BW Car Culture connects drivers with passengers
+              With public transport disruptions, Bw Car Culture connects drivers with passengers
               heading the same way. Split costs, share the road.
             </p>
           </div>

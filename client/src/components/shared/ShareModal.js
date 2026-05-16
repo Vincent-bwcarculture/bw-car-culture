@@ -1,4 +1,4 @@
-// src/components/shared/ShareModal.js - Modified for Direct Native Share
+﻿// src/components/shared/ShareModal.js - Modified for Direct Native Share
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import './ShareModal.css';
@@ -26,17 +26,17 @@ const ShareModal = ({ car, dealer, onClose, buttonRef }) => {
     if (isShareDealer && dealer) {
       shareUrl = `${baseUrl}/dealerships/${dealer._id || dealer.id}`;
       shareTitle = dealer.businessName || 'Dealership';
-      shareText = `Check out ${dealer.businessName} on BW Car Culture - Your trusted automotive marketplace in Botswana`;
+      shareText = `Check out ${dealer.businessName} on Bw Car Culture - Your trusted automotive marketplace in Botswana`;
     } else if (car) {
       shareUrl = `${baseUrl}/marketplace/${car._id || car.id}`;
       const title = car.title || 'Vehicle';
       shareTitle = title;
       const price = car.price ? `P${car.price.toLocaleString()}` : 'POA';
-      shareText = `${title} for ${price} on BW Car Culture - Botswana's leading car marketplace`;
+      shareText = `${title} for ${price} on Bw Car Culture - Botswana's leading car marketplace`;
     } else {
       shareUrl = baseUrl;
-      shareTitle = 'BW Car Culture';
-      shareText = 'Discover quality vehicles on BW Car Culture - Botswana\'s premier automotive marketplace';
+      shareTitle = 'Bw Car Culture';
+      shareText = 'Discover quality vehicles on Bw Car Culture - Botswana\'s premier automotive marketplace';
     }
 
     return { shareUrl, shareText, shareTitle };

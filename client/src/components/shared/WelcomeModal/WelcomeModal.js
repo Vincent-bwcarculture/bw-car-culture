@@ -1,4 +1,4 @@
-// src/components/shared/WelcomeModal/WelcomeModal.js
+﻿// src/components/shared/WelcomeModal/WelcomeModal.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './WelcomeModal.css';

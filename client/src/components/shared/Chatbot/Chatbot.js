@@ -1,4 +1,4 @@
-// src/components/shared/Chatbot/Chatbot.js — Mpho AI Assistant
+﻿// src/components/shared/Chatbot/Chatbot.js — Mpho AI Assistant
 import { useState, useRef, useEffect, useCallback, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, X as CloseIcon } from 'lucide-react';
@@ -10,7 +10,7 @@ const API_BASE = process.env.REACT_APP_API_URL || 'https://api.i3wcarculture.com
 
 const WELCOME_MSG = {
   role: 'assistant',
-  content: "Hi, I'm **Mpho AI** — your BW Car Culture assistant.\n\nI can help you:\n• Find cars on the marketplace\n• Discover workshops, rentals & transport\n• Create a listing through chat\n• Navigate the site\n\nWhat can I do for you today?"
+  content: "Hi, I'm **Mpho AI** — your Bw Car Culture assistant.\n\nI can help you:\n• Find cars on the marketplace\n• Discover workshops, rentals & transport\n• Create a listing through chat\n• Navigate the site\n\nWhat can I do for you today?"
 };
 
 const QUICK_REPLIES = [
@@ -31,7 +31,7 @@ const EV_QUICK_REPLIES = [
 // Local EV responses — work without login (no API call)
 const EV_REPLIES = {
   'Show me electric vehicles': {
-    text: "Taking you to the marketplace.\n\nFilter by the **Electric** category to see all EV listings on BW Car Culture. Log in to get personalised recommendations.",
+    text: "Taking you to the marketplace.\n\nFilter by the **Electric** category to see all EV listings on Bw Car Culture. Log in to get personalised recommendations.",
     nav: '/marketplace'
   },
   'How does EV charging work?': {
@@ -108,7 +108,7 @@ const ContactDraftCard = ({ draftMessage, onSent }) => {
   if (sent) {
     return (
       <div className="kb-draft-sent">
-        <span>Enquiry sent to the BW Car Culture team. They'll connect you with the seller shortly.</span>
+        <span>Enquiry sent to the Bw Car Culture team. They'll connect you with the seller shortly.</span>
       </div>
     );
   }
@@ -230,7 +230,7 @@ const Chatbot = () => {
             ...prev,
             {
               role: 'assistant',
-              content: `I wasn't able to retrieve the seller's contact number for **${vehicleTitle || 'this vehicle'}**.\n\nI've drafted an enquiry below that will go directly to the **BW Car Culture team**, who will forward it to the seller on your behalf. Feel free to edit it before sending.`
+              content: `I wasn't able to retrieve the seller's contact number for **${vehicleTitle || 'this vehicle'}**.\n\nI've drafted an enquiry below that will go directly to the **Bw Car Culture team**, who will forward it to the seller on your behalf. Feel free to edit it before sending.`
             },
             { role: 'contact_assist', draftMessage, vehicleTitle }
           ];
@@ -351,7 +351,7 @@ const Chatbot = () => {
   }, [input, sendMessage]);
 
   const handleWhatsApp = () => {
-    const msg = encodeURIComponent('Hi! I was browsing BW Car Culture and need some help.');
+    const msg = encodeURIComponent('Hi! I was browsing Bw Car Culture and need some help.');
     window.open(`https://wa.me/26774122453?text=${msg}`, '_blank');
   };
 
@@ -377,7 +377,7 @@ const Chatbot = () => {
         <div key={idx} className="kb-action-cards">
           <ContactDraftCard
             draftMessage={msg.draftMessage}
-            onSent={() => appendMsg({ role: 'assistant', content: "Your enquiry has been sent. The BW Car Culture team will be in touch shortly. You can also reach us directly at +26774122453." })}
+            onSent={() => appendMsg({ role: 'assistant', content: "Your enquiry has been sent. The Bw Car Culture team will be in touch shortly. You can also reach us directly at +26774122453." })}
           />
         </div>
       );
@@ -411,7 +411,7 @@ const Chatbot = () => {
             <span>Avg: {formatPrice(v.avg)}</span>
             <span>High: {formatPrice(v.high)}</span>
           </div>
-          <div className="kb-val-sample">Based on {v.sampleSize} similar listings on BW Car Culture</div>
+          <div className="kb-val-sample">Based on {v.sampleSize} similar listings on Bw Car Culture</div>
         </div>
       );
     }
@@ -635,7 +635,7 @@ const Chatbot = () => {
               <div>
                 <div className="kb-header-name">Mpho AI</div>
                 <div className="kb-header-status">
-                  BW Car Culture AI · Online
+                  Bw Car Culture AI · Online
                   {isPro && <span className="kb-pro-badge">MPHO</span>}
                 </div>
               </div>
