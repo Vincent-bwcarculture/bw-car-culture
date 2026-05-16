@@ -483,24 +483,13 @@ const BusinessDetailPage = () => {
     }
   };
 
- // Load business reviews
-  // Load business reviews
+// Load business reviews from the unified businessreviews collection
 const loadBusinessReviews = async () => {
   if (!business?._id) return;
-  
+
   try {
     setReviewsLoading(true);
-    
-    // Use the correct endpoint based on business type
-    const endpoint = businessType === 'dealer' 
-      ? `/reviews/dealer/${business._id}`
-      : `/reviews/service/${business._id}`;
-      
-    console.log('Loading reviews from endpoint:', endpoint);
-    console.log('Business ID:', business._id);
-    console.log('Business type:', businessType);
-        
-    const response = await http.get(endpoint);
+    const response = await http.get(`/reviews/business/${business._id}`);
     
     if (response.data.success) {
       const reviewsData = response.data.data.reviews || [];
@@ -510,13 +499,9 @@ const loadBusinessReviews = async () => {
         ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
       };
       
-      console.log('Reviews loaded:', reviewsData.length);
-      console.log('Review stats:', statsData);
-      
       setReviews(reviewsData);
       setReviewStats(statsData);
     } else {
-      console.log('Failed to load reviews:', response.data.message);
       setReviews([]);
       setReviewStats({
         totalReviews: 0,

@@ -119,7 +119,7 @@ const ReviewForm = ({
         submitData.serviceType = 'public_transport';
         break;
       case 'general': // Add support for 'general' from BusinessDetailPage
-        endpoint = '/reviews/general';
+        endpoint = '/reviews/business';
         // businessId is already included in submitData above
         break;
       default:
