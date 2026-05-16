@@ -822,6 +822,27 @@
   border-color: rgba(251, 191, 36, 0.7);
 }
 
+.admin-submissions-rereview-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.6rem;
+  background: rgba(99, 179, 237, 0.12);
+  border: 1px solid rgba(99, 179, 237, 0.35);
+  border-radius: 5px;
+  color: #63b3ed;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.admin-submissions-rereview-btn:hover {
+  background: rgba(99, 179, 237, 0.22);
+  border-color: rgba(99, 179, 237, 0.6);
+}
+
 /* ===== IMPROVED MODAL STYLES ===== */
 
 .admin-submissions-modal-overlay {

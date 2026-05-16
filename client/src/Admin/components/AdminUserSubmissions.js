@@ -44,7 +44,7 @@ const AdminUserSubmissions = () => {
   const [reviewData, setReviewData] = useState({
     action: 'approve',
     adminNotes: '',
-    subscriptionTier: 'basic'
+    subscriptionTier: 'free'
   });
 
   // NEW: Manual Payment Approval State
@@ -109,53 +109,29 @@ const AdminUserSubmissions = () => {
     showMessage('success', 'Payment approved successfully! Listing has been activated.');
   };
 
-  // NEW: Check if submission needs payment approval
-  const needsPaymentApproval = (submission) => {
-    return (
-      submission.status === 'approved' && 
-      submission.adminReview?.subscriptionTier !== 'free' && 
-      (!submission.paymentProof?.status || submission.paymentProof?.status === 'pending_admin_review')
-    );
-  };
+  // Boost payment approval is handled pre-submission; no post-approval payment flow exists
+  const needsPaymentApproval = (_submission) => false;
 
-  // NEW: Get payment status display
+  // Show boost proof status if the user submitted one
   const getPaymentStatusDisplay = (submission) => {
-    if (submission.adminReview?.subscriptionTier === 'free') {
-      return (
-        <div className="admin-submissions-payment-status free">
-          <CheckCircle size={14} />
-          <span>Free Tier - No Payment Required</span>
-        </div>
-      );
-    }
-    
     if (submission.paymentProof?.status === 'approved') {
       return (
         <div className="admin-submissions-payment-status approved">
           <CheckCircle size={14} />
-          <span>Payment Approved</span>
+          <span>Boost Payment Approved</span>
         </div>
       );
     }
-    
+
     if (submission.paymentProof?.submitted) {
       return (
         <div className="admin-submissions-payment-status pending">
           <Clock size={14} />
-          <span>Payment Proof Submitted - Needs Review</span>
+          <span>Boost Proof Submitted - Needs Review</span>
         </div>
       );
     }
-    
-    if (submission.status === 'approved' && submission.adminReview?.subscriptionTier !== 'free') {
-      return (
-        <div className="admin-submissions-payment-status awaiting">
-          <FileText size={14} />
-          <span>Awaiting Payment from User</span>
-        </div>
-      );
-    }
-    
+
     return null;
   };
 
@@ -335,10 +311,11 @@ const AdminUserSubmissions = () => {
     console.log('Opening review modal for submission:', submission._id);
     setSelectedSubmission(submission);
     setGalleryIndex(0);
+    // Pre-fill with existing decision if already reviewed
     setReviewData({
-      action: 'approve',
-      adminNotes: '',
-      subscriptionTier: Object.keys(pricingData.tiers)[0] || 'basic'
+      action: submission.adminReview?.action || 'approve',
+      adminNotes: submission.adminReview?.adminNotes || '',
+      subscriptionTier: 'free'
     });
     setShowReviewModal(true);
     setError('');
@@ -427,7 +404,7 @@ const AdminUserSubmissions = () => {
         setReviewData({
           action: 'approve',
           adminNotes: '',
-          subscriptionTier: 'basic'
+          subscriptionTier: 'free'
         });
         setSelectedSubmission(null);
         setShowReviewModal(false);
@@ -1029,7 +1006,7 @@ const AdminUserSubmissions = () => {
                   {/* Actions */}
                   <div className="admin-submissions-submission-actions">
                     {submission.status === 'pending_review' && (
-                      <button 
+                      <button
                         className="admin-submissions-review-btn"
                         onClick={() => handleReviewSubmission(submission)}
                       >
@@ -1050,14 +1027,22 @@ const AdminUserSubmissions = () => {
                         Contact for Assistance
                       </a>
                     )}
-                    
+
                     {submission.status === 'approved' && (
                       <div className="admin-submissions-approved-info">
                         <CheckCircle size={16} />
-                        <span>Approved - Ready for payment</span>
+                        <span>Approved</span>
+                        <button
+                          className="admin-submissions-rereview-btn"
+                          onClick={() => handleReviewSubmission(submission)}
+                          title="Re-review this submission or add notes"
+                        >
+                          <Eye size={14} />
+                          Re-review
+                        </button>
                       </div>
                     )}
-                    
+
                     {submission.status === 'rejected' && (
                       <div className="admin-submissions-rejected-info">
                         <XCircle size={16} />
@@ -1069,6 +1054,14 @@ const AdminUserSubmissions = () => {
                         >
                           <RotateCcw size={14} />
                           Restore
+                        </button>
+                        <button
+                          className="admin-submissions-rereview-btn"
+                          onClick={() => handleReviewSubmission(submission)}
+                          title="View full submission details"
+                        >
+                          <Eye size={14} />
+                          View
                         </button>
                       </div>
                     )}
@@ -1085,8 +1078,12 @@ const AdminUserSubmissions = () => {
         <div className="admin-submissions-modal-overlay">
           <div className="admin-submissions-modal-content">
             <div className="admin-submissions-modal-header">
-              <h2>Review Submission</h2>
-              <button 
+              <h2>
+                {selectedSubmission.status === 'pending_review'
+                  ? 'Review Submission'
+                  : `Re-reviewing Submission (currently: ${selectedSubmission.status.replace(/_/g, ' ')})`}
+              </h2>
+              <button
                 className="admin-submissions-modal-close"
                 onClick={() => setShowReviewModal(false)}
               >
@@ -1324,22 +1321,6 @@ const AdminUserSubmissions = () => {
                     </label>
                   </div>
                 </div>
-
-                {reviewData.action === 'approve' && pricingData.loaded && (
-                  <div className="admin-submissions-form-group">
-                    <label>Subscription Tier</label>
-                    <select
-                      value={reviewData.subscriptionTier}
-                      onChange={(e) => setReviewData({...reviewData, subscriptionTier: e.target.value})}
-                    >
-                      {Object.entries(pricingData.tiers).map(([tierId, tierData]) => (
-                        <option key={tierId} value={tierId}>
-                          {tierData.name} (P{tierData.price})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
 
                 <div className="admin-submissions-form-group">
                   <label>Admin Notes</label>
