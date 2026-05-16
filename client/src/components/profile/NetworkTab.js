@@ -68,12 +68,13 @@ const NetworkTab = ({ profileData }) => {
       if (response.data.success) {
         let fetchedUsers = response.data.data || response.data.available || [];
 
-        // Filter out current user; only show profiles explicitly set to public
+        // Filter out current user and anyone who has explicitly set their profile to private
         const currentUserId = profileData?.id || profileData?._id;
-        fetchedUsers = fetchedUsers.filter(user =>
-          (user._id || user.id) !== currentUserId &&
-          (user.profileVisibility === 'public' || user?.profile?.privacy?.profileVisibility === 'public')
-        );
+        fetchedUsers = fetchedUsers.filter(user => {
+          if ((user._id || user.id)?.toString() === currentUserId?.toString()) return false;
+          const vis = user.profileVisibility || user?.profile?.privacy?.profileVisibility;
+          return vis !== 'private'; // treat missing/unset as public by default
+        });
 
         // Apply client-side filtering if using fallback endpoint
         if (response.config?.url?.includes('/auth/users')) {
