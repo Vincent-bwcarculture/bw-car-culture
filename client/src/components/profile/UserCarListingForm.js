@@ -277,6 +277,40 @@ const UserCarListingForm = ({
     { value: 'commercial', label: 'Commercial Vehicle' }
   ];
 
+  // Compress an image file using Canvas before upload.
+  // Mobile cameras produce 4-10MB photos; Vercel serverless has a 4.5MB body limit.
+  // Target: ≤1MB per image (1400px wide, JPEG 82%) so even 4 images stay safe.
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const MAX_WIDTH = 1400;
+      const QUALITY = 0.82;
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const scale = Math.min(1, MAX_WIDTH / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(
+          (blob) => {
+            const compressed = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+              type: 'image/jpeg',
+              lastModified: Date.now()
+            });
+            resolve(compressed);
+          },
+          'image/jpeg',
+          QUALITY
+        );
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); }; // fallback: use original
+      img.src = url;
+    });
+  };
+
   // Classify fetch/network errors into user-friendly messages
   const formatSubmitError = (error) => {
     const msg = (error?.message || '').toLowerCase();
@@ -822,11 +856,16 @@ const handleFormSubmit = async (e) => {
     let uploadedImages = [];
     
     if (imageFiles && imageFiles.length > 0) {
-      showMessage('info', `Uploading ${imageFiles.length} images...`);
-      
+      showMessage('info', `Preparing ${imageFiles.length} image${imageFiles.length > 1 ? 's' : ''}…`);
+
       try {
+        // Compress each image to stay under Vercel's 4.5MB body limit
+        const compressedFiles = await Promise.all(imageFiles.map(f => compressImage(f)));
+
+        showMessage('info', `Uploading ${compressedFiles.length} image${compressedFiles.length > 1 ? 's' : ''}…`);
+
         const formDataUpload = new FormData();
-        imageFiles.forEach((file, index) => {
+        compressedFiles.forEach((file, index) => {
           formDataUpload.append(`image${index}`, file);
           console.log(`📎 Added file ${index}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
         });
