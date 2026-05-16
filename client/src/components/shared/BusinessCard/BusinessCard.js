@@ -1,12 +1,14 @@
 // src/components/shared/BusinessCard/BusinessCard.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext.js';
 import BusinessGallery from './BusinessGallery.js';
 import './BusinessCard.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
 
 const BusinessCard = ({ business, onAction, compact = false }) => {
+  const { user } = useAuth();
   const [itemCount, setItemCount] = useState(business?.metrics?.totalListings || 0);
   const [imageError, setImageError] = useState({ banner: false, logo: false });
   const [isFlipped, setIsFlipped] = useState(false);
@@ -17,6 +19,11 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [submittingReply, setSubmittingReply] = useState(false);
+  const [reactingTo, setReactingTo] = useState(null);
   const navigate = useNavigate();
   
   // UPDATED: Better business type detection
@@ -171,6 +178,47 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
     }
   };
 
+  const handleSubmitReply = async (reviewId) => {
+    if (!replyText.trim() || replyText.trim().length < 2) return;
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+    if (!token) { setSubmitError('Please log in to reply.'); return; }
+    setSubmittingReply(true);
+    try {
+      const res = await fetch(`${API_BASE}/reviews/business/${reviewId}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text: replyText.trim() })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setReplyText('');
+        setReplyingTo(null);
+        await fetchReviews();
+      }
+    } catch { }
+    finally { setSubmittingReply(false); }
+  };
+
+  const handleReact = async (reviewId, type, replyId = null) => {
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+    if (!token) { setSubmitError('Please log in to react.'); return; }
+    const key = replyId ? `${reviewId}-${replyId}-${type}` : `${reviewId}-${type}`;
+    if (reactingTo === key) return;
+    setReactingTo(key);
+    try {
+      const url = replyId
+        ? `${API_BASE}/reviews/business/${reviewId}/replies/${replyId}/react`
+        : `${API_BASE}/reviews/business/${reviewId}/react`;
+      await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ type })
+      });
+      await fetchReviews();
+    } catch { }
+    finally { setReactingTo(null); }
+  };
+
   const handleFlip = (e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -182,15 +230,17 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
     e.stopPropagation();
     e.preventDefault();
     if (!newRating || newComment.trim().length < 10) return;
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+    if (!token) {
+      setSubmitError('Please log in to leave a review.');
+      return;
+    }
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
-      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
-      const res = await fetch(`${API_BASE}/reviews/general`, {
+      const res = await fetch(`${API_BASE}/reviews/business`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ businessId: business._id, rating: newRating, review: newComment.trim() })
       });
       const data = await res.json();
@@ -200,9 +250,11 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
         setNewComment('');
         await fetchReviews();
         setTimeout(() => setSubmitSuccess(false), 3000);
+      } else {
+        setSubmitError(data.message || 'Failed to submit review.');
       }
     } catch {
-      // silent fail
+      setSubmitError('Network error — please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -403,22 +455,89 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
             {!reviewsLoading && !reviewsError && reviews.length === 0 && (
               <div className="bcc-no-reviews">No reviews yet — be the first!</div>
             )}
-            {reviews.map((review, i) => (
-              <div key={i} className="bcc-review-item">
-                <div className="bcc-review-header">
-                  <span className="bcc-review-author">{review.reviewer?.name || 'Anonymous'}</span>
-                  <span className="bcc-review-stars">
-                    {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                  </span>
+            {reviews.map((review, i) => {
+              const reviewId = review._id;
+              const userLiked = review.likes?.includes(user?._id);
+              const userDisliked = review.dislikes?.includes(user?._id);
+              return (
+                <div key={i} className="bcc-review-item">
+                  <div className="bcc-review-author-row">
+                    <span className="bcc-review-author">{review.reviewer?.name || review.fromUserId?.name || 'Anonymous'}</span>
+                    {review.isOwner && <span className="bcc-owner-badge">Owner</span>}
+                    <span className="bcc-review-stars">
+                      {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                    </span>
+                  </div>
+                  {review.review && <p className="bcc-review-text">{review.review}</p>}
+                  {review.date && (
+                    <span className="bcc-review-date">{new Date(review.date).toLocaleDateString()}</span>
+                  )}
+                  <div className="bcc-review-actions">
+                    <div className="bcc-react-group">
+                      <button
+                        className={`bcc-react-btn ${userLiked ? 'active-like' : ''}`}
+                        onClick={e => { e.stopPropagation(); handleReact(reviewId, 'like'); }}
+                      >👍 {review.likes?.length || 0}</button>
+                      <button
+                        className={`bcc-react-btn ${userDisliked ? 'active-dislike' : ''}`}
+                        onClick={e => { e.stopPropagation(); handleReact(reviewId, 'dislike'); }}
+                      >👎 {review.dislikes?.length || 0}</button>
+                    </div>
+                    <button className="bcc-reply-btn" onClick={e => { e.stopPropagation(); setReplyingTo(replyingTo === reviewId ? null : reviewId); setReplyText(''); }}>
+                      Reply
+                    </button>
+                  </div>
+                  {replyingTo === reviewId && (
+                    <div className="bcc-reply-form" onClick={e => e.stopPropagation()}>
+                      <textarea
+                        className="bcc-review-textarea"
+                        placeholder="Write a reply…"
+                        value={replyText}
+                        onChange={e => setReplyText(e.target.value)}
+                        rows={2}
+                      />
+                      <div className="bcc-reply-form-actions">
+                        <button className="bcc-reply-cancel-btn" onClick={e => { e.stopPropagation(); setReplyingTo(null); }}>Cancel</button>
+                        <button
+                          className="bcc-reply-submit-btn"
+                          onClick={e => { e.stopPropagation(); handleSubmitReply(reviewId); }}
+                          disabled={submittingReply || replyText.trim().length < 2}
+                        >{submittingReply ? 'Posting…' : 'Post Reply'}</button>
+                      </div>
+                    </div>
+                  )}
+                  {(review.replies || []).length > 0 && (
+                    <div className="bcc-replies-list">
+                      {review.replies.map((rep, ri) => {
+                        const repLiked = rep.likes?.includes(user?._id);
+                        const repDisliked = rep.dislikes?.includes(user?._id);
+                        return (
+                          <div key={ri} className={`bcc-reply-item${rep.isOwner ? ' bcc-reply-owner' : ''}`}>
+                            <div className="bcc-review-author-row">
+                              <span className="bcc-review-author">{rep.authorName || 'Anonymous'}</span>
+                              {rep.isOwner && <span className="bcc-owner-badge">Owner</span>}
+                            </div>
+                            <p className="bcc-review-text">{rep.text}</p>
+                            <div className="bcc-review-actions">
+                              <div className="bcc-react-group">
+                                <button
+                                  className={`bcc-react-btn ${repLiked ? 'active-like' : ''}`}
+                                  onClick={e => { e.stopPropagation(); handleReact(reviewId, 'like', rep._id); }}
+                                >👍 {rep.likes?.length || 0}</button>
+                                <button
+                                  className={`bcc-react-btn ${repDisliked ? 'active-dislike' : ''}`}
+                                  onClick={e => { e.stopPropagation(); handleReact(reviewId, 'dislike', rep._id); }}
+                                >👎 {rep.dislikes?.length || 0}</button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-                {review.review && <p className="bcc-review-text">{review.review}</p>}
-                {review.date && (
-                  <span className="bcc-review-date">
-                    {new Date(review.date).toLocaleDateString()}
-                  </span>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="bcc-review-form">
@@ -441,6 +560,7 @@ const BusinessCard = ({ business, onAction, compact = false }) => {
               onClick={e => e.stopPropagation()}
             />
             {submitSuccess && <span className="bcc-submit-success">✓ Review submitted!</span>}
+            {submitError && <span className="bcc-submit-error">{submitError}</span>}
             <button
               className="bcc-review-submit"
               onClick={handleSubmitReview}
