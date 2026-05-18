@@ -568,9 +568,6 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
             <div className="cdg-import-notice-icon">🌍</div>
             <div className="cdg-import-notice-body">
               <strong>This vehicle is located in {countryName}</strong>
-              <p>
-                Bw Car Culture assists you with clearance, registration and logistics to get your vehicle delivered to Botswana.
-              </p>
             </div>
           </div>
         );
