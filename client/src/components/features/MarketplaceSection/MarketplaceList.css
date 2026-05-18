@@ -215,29 +215,31 @@ body.section-transitioning * {
 }
 
 /* ── Light theme dealer strip (warm parchment palette) ── */
-[data-theme="light"] .fdstrip-wrapper { border-bottom-color: rgba(139, 110, 80, 0.15); }
-[data-theme="light"] .fdstrip-label { color: #857568; }
+[data-theme="light"] .fdstrip-wrapper { border-bottom-color: rgba(139, 110, 80, 0.18); }
+[data-theme="light"] .fdstrip-label { color: #665849; }
 [data-theme="light"] .fdstrip-card {
-  background: transparent;
-  border-color: rgba(139, 110, 80, 0.22);
+  background: #fdfaf6;
+  border-color: rgba(139, 110, 80, 0.32);
+  box-shadow: 0 1px 4px rgba(60, 40, 20, 0.07);
 }
 [data-theme="light"] .fdstrip-card:hover {
-  background: rgba(139, 110, 80, 0.06);
-  border-color: rgba(255, 51, 0, 0.35);
+  background: #fff;
+  border-color: rgba(255, 51, 0, 0.40);
+  box-shadow: 0 3px 10px rgba(60, 40, 20, 0.12);
 }
 [data-theme="light"] .fdstrip-logo-wrap {
-  border-color: rgba(139, 110, 80, 0.28);
-  background: rgba(139, 110, 80, 0.06);
+  border-color: rgba(139, 110, 80, 0.30);
+  background: #ffffff;
 }
 [data-theme="light"] .fdstrip-logo-placeholder {
-  background: linear-gradient(135deg, rgba(255,51,0,0.08), rgba(139,110,80,0.08));
-  color: #4a3f35;
+  background: linear-gradient(135deg, rgba(255,51,0,0.10), rgba(139,110,80,0.08));
+  color: #2d2419;
 }
-[data-theme="light"] .fdstrip-name-text { color: #1a1510; }
+[data-theme="light"] .fdstrip-name-text { color: #0d0a07; }
 [data-theme="light"] .fdstrip-arrow {
-  background: transparent;
-  border-color: rgba(139, 110, 80, 0.22);
-  color: #4a3f35;
+  background: #fdfaf6;
+  border-color: rgba(139, 110, 80, 0.32);
+  color: #2d2419;
 }
 
 
