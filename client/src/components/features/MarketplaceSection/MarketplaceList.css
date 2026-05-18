@@ -45,6 +45,16 @@ body.section-transitioning * {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+[data-theme="blue"] .marketplace-header {
+  background: rgba(13, 17, 23, 0.97);
+  border-bottom-color: #21262d;
+}
+
+[data-theme="light"] .marketplace-header {
+  background: rgba(245, 240, 235, 0.97);
+  border-bottom-color: rgba(139, 110, 80, 0.25);
+}
+
 /* ===== FEATURED DEALERSHIPS STRIP ===== */
 .fdstrip-wrapper {
   padding: 8px 0 6px;
@@ -178,28 +188,57 @@ body.section-transitioning * {
   flex-shrink: 0;
   font-weight: 700;
 }
-/* Light mode dealer strip */
-[data-theme="light"] .fdstrip-wrapper { border-bottom-color: rgba(0,0,0,0.08); }
-[data-theme="light"] .fdstrip-label { color: rgba(0,0,0,0.35); }
+/* ── Blue theme dealer strip (GitHub dark palette) ── */
+[data-theme="blue"] .fdstrip-wrapper { border-bottom-color: #21262d; }
+[data-theme="blue"] .fdstrip-label { color: #8b949e; }
+[data-theme="blue"] .fdstrip-card {
+  background: rgba(22, 27, 34, 0.9);
+  border-color: #21262d;
+}
+[data-theme="blue"] .fdstrip-card:hover {
+  background: rgba(255, 51, 0, 0.07);
+  border-color: rgba(255, 51, 0, 0.4);
+}
+[data-theme="blue"] .fdstrip-logo-wrap {
+  border-color: #30363d;
+  background: rgba(22, 27, 34, 0.8);
+}
+[data-theme="blue"] .fdstrip-logo-placeholder {
+  background: linear-gradient(135deg, rgba(255,51,0,0.15), rgba(22,27,34,0.8));
+  color: #8b949e;
+}
+[data-theme="blue"] .fdstrip-name-text { color: #c9d1d9; }
+[data-theme="blue"] .fdstrip-arrow {
+  background: rgba(22, 27, 34, 0.8);
+  border-color: #21262d;
+  color: #8b949e;
+}
+
+/* ── Light theme dealer strip (warm parchment palette) ── */
+[data-theme="light"] .fdstrip-wrapper { border-bottom-color: rgba(139, 110, 80, 0.15); }
+[data-theme="light"] .fdstrip-label { color: #857568; }
 [data-theme="light"] .fdstrip-card {
-  background: #f9fafb;
-  border-color: #e5e7eb;
+  background: #ccc8c2;
+  border-color: #a09890;
 }
 [data-theme="light"] .fdstrip-card:hover {
-  background: #fff0ed;
-  border-color: rgba(255,51,0,0.35);
+  background: #bfbbb5;
+  border-color: rgba(255, 51, 0, 0.4);
+}
+[data-theme="light"] .fdstrip-logo-wrap {
+  border-color: #a09890;
+  background: #d5d1cb;
 }
 [data-theme="light"] .fdstrip-logo-placeholder {
-  background: linear-gradient(135deg, rgba(255,51,0,0.12), #f3f4f6);
-  color: #6b7280;
+  background: linear-gradient(135deg, rgba(255,51,0,0.1), #d5d1cb);
+  color: #4a3f35;
 }
-[data-theme="light"] .fdstrip-name-text { color: #374151; }
+[data-theme="light"] .fdstrip-name-text { color: #1a1510; }
 [data-theme="light"] .fdstrip-arrow {
-  background: #f3f4f6;
-  border-color: #e5e7eb;
-  color: #6b7280;
+  background: #d5d1cb;
+  border-color: #a09890;
+  color: #4a3f35;
 }
-[data-theme="light"] .fdstrip-logo-wrap { border-color: #e5e7eb; background: #f3f4f6; }
 
 
 .marketplace-header h1 {
@@ -214,12 +253,29 @@ body.section-transitioning * {
   -webkit-text-fill-color: transparent;
 }
 
+[data-theme="blue"] .marketplace-header h1 {
+  background: linear-gradient(135deg, #e6edf3, #c9d1d9);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .marketplace-header h1 {
+  background: linear-gradient(135deg, #1a1510, #4a3f35);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .marketplace-stats {
   color: #aaaaaa;
   font-size: 14px;
   line-height: 1.4;
   transition: color 0.3s ease;
 }
+
+[data-theme="blue"] .marketplace-stats { color: #8b949e; }
+[data-theme="light"] .marketplace-stats { color: #857568; }
 
 .marketplace-stats .loading-text {
   color: #ff3300;
