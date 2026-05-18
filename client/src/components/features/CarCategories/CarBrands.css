@@ -14,15 +14,14 @@
   font-weight: 700;
   position: relative;
   padding-bottom: 0.6rem;
-  text-align: center;
+  text-align: left;
 }
 
 .car-brands-section h2::after {
   content: '';
   position: absolute;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
   width: 50px;
   height: 3px;
   background: #ff3300;
@@ -104,7 +103,9 @@
   border-color: rgba(255, 51, 0, 0.45);
 }
 
-/* Gradient overlay via pseudo-element — sits above image, below info */
+/* Gradient overlay — uses dominant color extracted from the card image.
+   --card-dc is set inline as "r, g, b" triplet by CarBrands.js.
+   Falls back to pure black if no color is extracted yet. */
 .brand-card::after {
   content: '';
   position: absolute;
@@ -112,13 +113,14 @@
   background: linear-gradient(
     180deg,
     rgba(0, 0, 0, 0.04) 0%,
-    rgba(0, 0, 0, 0.18) 38%,
-    rgba(0, 0, 0, 0.82) 72%,
-    rgba(0, 0, 0, 0.96) 100%
+    rgba(0, 0, 0, 0.20) 36%,
+    rgba(var(--card-dc, 0, 0, 0), 0.86) 68%,
+    rgba(var(--card-dc, 0, 0, 0), 0.97) 100%
   );
   z-index: 1;
   pointer-events: none;
   border-radius: 12px;
+  transition: background 0.4s ease;
 }
 
 /* Selected state */

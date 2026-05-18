@@ -11,8 +11,36 @@ const CarBrands = () => {
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [dominantColors, setDominantColors] = useState({});
   const navigate = useNavigate();
   const location = useLocation();
+
+  const extractDominantColor = (imgEl, brandId) => {
+    try {
+      const canvas = document.createElement('canvas');
+      const W = 60, H = 30;
+      canvas.width = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+      // Sample the bottom 40% of the image where the car body usually is
+      const srcY = imgEl.naturalHeight * 0.6;
+      const srcH = imgEl.naturalHeight * 0.4;
+      ctx.drawImage(imgEl, 0, srcY, imgEl.naturalWidth, srcH, 0, 0, W, H);
+      const { data } = ctx.getImageData(0, 0, W, H);
+      let r = 0, g = 0, b = 0, count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        r += data[i]; g += data[i + 1]; b += data[i + 2]; count++;
+      }
+      // Darken the averaged color so the gradient reads well over text
+      const darken = 0.5;
+      r = Math.round((r / count) * darken);
+      g = Math.round((g / count) * darken);
+      b = Math.round((b / count) * darken);
+      setDominantColors(prev => ({ ...prev, [brandId]: `${r}, ${g}, ${b}` }));
+    } catch {
+      // Silently fall back to default black gradient (CORS or tainted canvas)
+    }
+  };
   
   // Fetch brands data from API
   useEffect(() => {
@@ -192,10 +220,12 @@ const CarBrands = () => {
 
     return (
       <div className="brand-vehicle-image">
-        <img 
-          src={brand.image} 
+        <img
+          src={brand.image}
           alt={`${brand.name} vehicle`}
           loading="lazy"
+          crossOrigin="anonymous"
+          onLoad={(e) => extractDominantColor(e.target, brand.id)}
           onError={(e) => {
             console.log(`Brand vehicle image failed to load: ${e.target.src}`);
             
@@ -261,10 +291,11 @@ const CarBrands = () => {
         )}
         <div className="brands-wrapper" ref={sliderRef}>
           {brands.map(brand => (
-            <div 
-              key={brand.id} 
+            <div
+              key={brand.id}
               className={`brand-card ${activeBrand === brand.filter ? 'brand-active' : ''}`}
               onClick={() => handleBrandSelect(brand)}
+              style={dominantColors[brand.id] ? { '--card-dc': dominantColors[brand.id] } : undefined}
             >
               <div className="brand-logo">
                 {renderBrandImage(brand)}
