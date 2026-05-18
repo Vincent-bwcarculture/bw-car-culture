@@ -87,27 +87,27 @@
   --vc-shadow-hover: 0 5px 15px rgba(255, 51, 0, 0.2);
 }
 
-/* Blue Mode Theme */
+/* Blue Mode Theme (Admin Panel palette) */
 [data-theme="blue"] {
-  --vc-text-primary: #e2e8f0;
-  --vc-text-secondary: #94a3b8;
-  --vc-text-muted: #64748b;
-  --vc-text-light: #475569;
+  --vc-text-primary: #e6edf3;
+  --vc-text-secondary: #c9d1d9;
+  --vc-text-muted: #8b949e;
+  --vc-text-light: #6e7681;
 
-  --vc-bg-card: #0f1d36;
-  --vc-bg-overlay: rgba(10, 22, 50, 0.88);
-  --vc-bg-tooltip: #0d1a30;
-  --vc-bg-hover: rgba(59, 130, 246, 0.07);
-  --vc-bg-button: rgba(59, 130, 246, 0.12);
-  --vc-bg-button-hover: rgba(59, 130, 246, 0.22);
+  --vc-bg-card: #161b22;
+  --vc-bg-overlay: rgba(22, 27, 34, 0.92);
+  --vc-bg-tooltip: #1c2128;
+  --vc-bg-hover: rgba(255, 255, 255, 0.05);
+  --vc-bg-button: rgba(255, 255, 255, 0.08);
+  --vc-bg-button-hover: rgba(255, 255, 255, 0.14);
 
-  --vc-border-color: rgba(59, 130, 246, 0.18);
-  --vc-border-light: rgba(59, 130, 246, 0.1);
-  --vc-border-medium: rgba(59, 130, 246, 0.22);
-  --vc-border-strong: rgba(59, 130, 246, 0.38);
+  --vc-border-color: #21262d;
+  --vc-border-light: rgba(255, 255, 255, 0.07);
+  --vc-border-medium: rgba(255, 255, 255, 0.12);
+  --vc-border-strong: rgba(255, 255, 255, 0.22);
 
-  --vc-shadow-sm: 0 2px 8px rgba(0, 10, 40, 0.4);
-  --vc-shadow-hover: 0 5px 18px rgba(0, 10, 40, 0.5);
+  --vc-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --vc-shadow-hover: 0 5px 18px rgba(0, 0, 0, 0.5);
 }
 
 /* === VEHICLE CARD BASE STYLES === */

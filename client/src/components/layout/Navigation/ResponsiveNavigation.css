@@ -16,15 +16,15 @@
     --fab-offset: 15px;
 }
 
-/* Blue Mode Variables */
+/* Blue Mode Variables (Admin Panel palette) */
 [data-theme="blue"] {
-    --nav-bg: rgba(8, 13, 26, 0.92);
-    --nav-border: rgba(59, 130, 246, 0.18);
-    --nav-text: #e2e8f0;
-    --nav-text-muted: #64748b;
-    --dropdown-bg: rgba(11, 18, 38, 0.98);
-    --hover-bg: rgba(59, 130, 246, 0.1);
-    --shadow-color: rgba(0, 10, 40, 0.35);
+    --nav-bg: rgba(22, 27, 34, 0.97);
+    --nav-border: #21262d;
+    --nav-text: #e6edf3;
+    --nav-text-muted: #8b949e;
+    --dropdown-bg: rgba(13, 17, 23, 0.99);
+    --hover-bg: rgba(255, 255, 255, 0.06);
+    --shadow-color: rgba(0, 0, 0, 0.4);
 }
 
 /* Light Mode Variables (premium warm) */
