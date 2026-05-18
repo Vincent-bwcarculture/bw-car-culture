@@ -218,25 +218,25 @@ body.section-transitioning * {
 [data-theme="light"] .fdstrip-wrapper { border-bottom-color: rgba(139, 110, 80, 0.15); }
 [data-theme="light"] .fdstrip-label { color: #857568; }
 [data-theme="light"] .fdstrip-card {
-  background: #ccc8c2;
-  border-color: #a09890;
+  background: transparent;
+  border-color: rgba(139, 110, 80, 0.22);
 }
 [data-theme="light"] .fdstrip-card:hover {
-  background: #bfbbb5;
-  border-color: rgba(255, 51, 0, 0.4);
+  background: rgba(139, 110, 80, 0.06);
+  border-color: rgba(255, 51, 0, 0.35);
 }
 [data-theme="light"] .fdstrip-logo-wrap {
-  border-color: #a09890;
-  background: #d5d1cb;
+  border-color: rgba(139, 110, 80, 0.28);
+  background: rgba(139, 110, 80, 0.06);
 }
 [data-theme="light"] .fdstrip-logo-placeholder {
-  background: linear-gradient(135deg, rgba(255,51,0,0.1), #d5d1cb);
+  background: linear-gradient(135deg, rgba(255,51,0,0.08), rgba(139,110,80,0.08));
   color: #4a3f35;
 }
 [data-theme="light"] .fdstrip-name-text { color: #1a1510; }
 [data-theme="light"] .fdstrip-arrow {
-  background: #d5d1cb;
-  border-color: #a09890;
+  background: transparent;
+  border-color: rgba(139, 110, 80, 0.22);
   color: #4a3f35;
 }
 

@@ -48,20 +48,20 @@
   --vc-text-muted: #6b5e52;
   --vc-text-light: #8b7d72;
 
-  --vc-bg-card: #c5c1ba;
-  --vc-bg-overlay: rgba(180, 175, 168, 0.92);
-  --vc-bg-tooltip: #dedad4;
-  --vc-bg-hover: rgba(0, 0, 0, 0.06);
-  --vc-bg-button: rgba(0, 0, 0, 0.09);
-  --vc-bg-button-hover: rgba(0, 0, 0, 0.17);
+  --vc-bg-card: transparent;
+  --vc-bg-overlay: rgba(245, 240, 235, 0.92);
+  --vc-bg-tooltip: #ede8e1;
+  --vc-bg-hover: rgba(0, 0, 0, 0.04);
+  --vc-bg-button: rgba(0, 0, 0, 0.06);
+  --vc-bg-button-hover: rgba(0, 0, 0, 0.11);
 
-  --vc-border-color: #a09890;
-  --vc-border-light: rgba(0, 0, 0, 0.09);
-  --vc-border-medium: rgba(0, 0, 0, 0.17);
-  --vc-border-strong: rgba(0, 0, 0, 0.28);
+  --vc-border-color: rgba(139, 110, 80, 0.22);
+  --vc-border-light: rgba(139, 110, 80, 0.10);
+  --vc-border-medium: rgba(139, 110, 80, 0.18);
+  --vc-border-strong: rgba(139, 110, 80, 0.32);
 
-  --vc-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.16);
-  --vc-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.22);
+  --vc-shadow-sm: 0 2px 12px rgba(60, 40, 20, 0.10);
+  --vc-shadow-hover: 0 8px 28px rgba(60, 40, 20, 0.16);
 }
 
 /* Dark Mode Explicit (mirrors default) */
