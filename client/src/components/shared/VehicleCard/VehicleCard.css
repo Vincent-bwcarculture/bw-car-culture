@@ -1442,28 +1442,26 @@
   color: var(--vc-text-primary);
 }
 
-/* Muted outlined green — professional, not cartoonish */
+/* Solid muted green — mature, not neon */
 .vc-reserve-btn {
-  background: rgba(37, 211, 102, 0.07);
-  color: #16a34a;
-  border: 1px solid rgba(37, 211, 102, 0.30);
+  background: #1e8449;
+  color: #ffffff;
+  border: none;
 }
 
 .vc-reserve-btn:hover {
-  background: rgba(37, 211, 102, 0.14);
-  border-color: rgba(37, 211, 102, 0.52);
+  background: #176b3a;
 }
 
-/* Muted outlined red — toned down from solid fill */
+/* Solid muted red — deep brick, not loud orange */
 .vc-details-btn {
-  background: rgba(255, 51, 0, 0.07);
-  color: #c73300;
-  border: 1px solid rgba(255, 51, 0, 0.28);
+  background: #c0392b;
+  color: #ffffff;
+  border: none;
 }
 
 .vc-details-btn:hover {
-  background: rgba(255, 51, 0, 0.13);
-  border-color: rgba(255, 51, 0, 0.50);
+  background: #a93226;
 }
 
 /* SOLD BADGE OVERLAY STYLES */
