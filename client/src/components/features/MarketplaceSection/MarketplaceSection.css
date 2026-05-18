@@ -173,3 +173,32 @@
     font-size: 18px;
   }
 }
+
+/* ── Theme overrides ── */
+[data-theme="blue"] .marketplace-section {
+  background: rgba(13, 17, 23, 0.97);
+  border-color: #21262d;
+}
+[data-theme="blue"] .marketplace-header h2 { color: #e6edf3; }
+[data-theme="blue"] .scroll-button {
+  background: rgba(22, 27, 34, 0.9);
+  border-color: #21262d;
+  color: #c9d1d9;
+}
+
+[data-theme="light"] .marketplace-section {
+  background: rgba(245, 240, 235, 0.97);
+  border-color: rgba(139, 110, 80, 0.18);
+  box-shadow: 0 4px 20px rgba(60, 40, 20, 0.08);
+}
+[data-theme="light"] .marketplace-header h2 { color: #1a1510; }
+[data-theme="light"] .marketplace-header {
+  border-bottom-color: rgba(139, 110, 80, 0.2);
+}
+[data-theme="light"] .scroll-button {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(139, 110, 80, 0.2);
+  color: #3d342a;
+}
+[data-theme="light"] .loading-indicator,
+[data-theme="light"] .no-listings { color: #857568; }

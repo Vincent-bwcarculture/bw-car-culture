@@ -291,3 +291,51 @@
 .similar-vehicles-list.debug * {
   color: #000 !important;
 }
+
+/* ── Theme overrides ── */
+[data-theme="blue"] .similar-vehicles-list {
+  background: rgba(22, 27, 34, 0.97);
+  border-color: #21262d;
+}
+[data-theme="blue"] .similar-vehicles-header h3 { color: #e6edf3; }
+[data-theme="blue"] .vehicle-count {
+  color: #c9d1d9;
+  background: rgba(255, 51, 0, 0.15);
+}
+[data-theme="blue"] .vehicle-title { color: #e6edf3; }
+[data-theme="blue"] .vehicle-specs .spec { color: #8b949e; background: rgba(255,255,255,0.04); }
+[data-theme="blue"] .similar-vehicle-item {
+  background: rgba(13, 17, 23, 0.6);
+  border-color: #21262d;
+}
+[data-theme="blue"] .view-all-dealer {
+  background: rgba(13, 17, 23, 0.6);
+  border-color: #21262d;
+  color: #c9d1d9;
+}
+[data-theme="blue"] .view-arrow { color: #8b949e; }
+
+[data-theme="light"] .similar-vehicles-list {
+  background: rgba(245, 240, 235, 0.97);
+  border-color: rgba(139, 110, 80, 0.2);
+}
+[data-theme="light"] .similar-vehicles-header h3 { color: #1a1510; }
+[data-theme="light"] .similar-vehicles-header { border-bottom-color: rgba(139, 110, 80, 0.3); }
+[data-theme="light"] .vehicle-count {
+  color: #3d342a;
+  background: rgba(255, 51, 0, 0.08);
+}
+[data-theme="light"] .vehicle-title { color: #1a1510; }
+[data-theme="light"] .vehicle-specs .spec { color: #6b5e52; background: rgba(0,0,0,0.05); }
+[data-theme="light"] .similar-vehicle-item {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(139, 110, 80, 0.18);
+}
+[data-theme="light"] .view-all-action { border-top-color: rgba(139, 110, 80, 0.2); }
+[data-theme="light"] .view-all-dealer {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(139, 110, 80, 0.2);
+  color: #1a1510;
+}
+[data-theme="light"] .view-arrow { color: #857568; }
+[data-theme="light"] .additional-similar { color: #6b5e52; }
