@@ -13,6 +13,12 @@ const HIDE_KEYWORDS = [
 const HIDE_OBJECT_RE   = /^object_([2-9]|10)$/i;
 const HIDE_ROOTNODE_RE = /^rootnode\.\d{3,}$/i;
 
+const PAINT_KEYWORDS     = ['paint', 'body', 'chassis', 'exterior', 'shell', 'car_mat'];
+const NOT_PAINT_KEYWORDS = ['glass', 'chrome', 'wheel', 'tire', 'rubber', 'light',
+                            'lamp', 'interior', 'seat', 'dash', 'leather', 'carpet',
+                            'fabric', 'trim', 'window', 'windshield', 'mirror_glass'];
+const BLUE_PAINT_HEX = 0x1a4fad;
+
 const DOOR_OPEN_ANGLE = Math.PI * 0.30;   // ~54° — feels natural on a hatchback
 
 const CarBackground3D = ({ sellMode = false }) => {
@@ -104,6 +110,22 @@ const CarBackground3D = ({ sellMode = false }) => {
     // Each entry: { node, openAngle, closedAngle, currentAngle }
     const doorEntries = [];
 
+    // Paint mesh tracking for theme-based colour changes
+    const paintMeshes = []; // { mat, originalColor }
+    let themeObserver = null;
+
+    const applyPaintColor = () => {
+      const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+      paintMeshes.forEach(({ mat, originalColor }) => {
+        if (theme === 'light' || theme === 'blue') {
+          mat.color.setHex(BLUE_PAINT_HEX);
+        } else {
+          mat.color.copy(originalColor);
+        }
+        mat.needsUpdate = true;
+      });
+    };
+
     // ── Load & filter ─────────────────────────────────────────────────────
     loadCarModel(null)
       .then(gltf => {
@@ -175,6 +197,30 @@ const CarBackground3D = ({ sellMode = false }) => {
         });
 
         console.log('[3D] total door entries found:', doorEntries.length);
+
+        // Pass 3: collect paint meshes for theme-based colour
+        car.traverse(node => {
+          if (!node.isMesh) return;
+          const matName = (Array.isArray(node.material)
+            ? node.material[0]?.name : node.material?.name) || '';
+          const combined = (node.name + ' ' + matName).toLowerCase();
+          if (
+            NOT_PAINT_KEYWORDS.some(k => combined.includes(k))
+          ) return;
+          if (PAINT_KEYWORDS.some(k => combined.includes(k))) {
+            const mat = Array.isArray(node.material) ? node.material[0] : node.material;
+            if (mat?.color) {
+              paintMeshes.push({ mat, originalColor: mat.color.clone() });
+            }
+          }
+        });
+
+        applyPaintColor(); // apply immediately based on current theme
+
+        themeObserver = new MutationObserver(applyPaintColor);
+        themeObserver.observe(document.documentElement, {
+          attributes: true, attributeFilter: ['data-theme'],
+        });
 
         carGroup.add(car);
         modelReady = true;
@@ -258,6 +304,7 @@ const CarBackground3D = ({ sellMode = false }) => {
 
     // ── Cleanup ───────────────────────────────────────────────────────────
     return () => {
+      if (themeObserver) themeObserver.disconnect();
       clearTimeout(idleTimer);
       cancelAnimationFrame(animId);
       canvas.removeEventListener('webglcontextlost',     onContextLost);

@@ -493,6 +493,14 @@
   color: var(--vc-text-primary);
 }
 
+/* Force dark text on card body elements — overrides high-specificity App.css span/h4 rules */
+[data-theme="light"] .vc-title { color: #1a1510 !important; }
+[data-theme="light"] .vc-spec-value { color: #1a1510 !important; }
+[data-theme="light"] .vc-spec-label { color: #6b5e52 !important; }
+[data-theme="light"] .vc-dealer-name { color: #1a1510 !important; }
+[data-theme="light"] .vc-original-price { color: #6b5e52 !important; }
+[data-theme="light"] .vc-content { color: #1a1510 !important; }
+
 [data-theme="light"] .vc-monthly-payment {
   color: #1e40af;
 }
