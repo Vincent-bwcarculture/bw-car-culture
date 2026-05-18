@@ -200,7 +200,8 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
           city: clonedData.location?.city || '',
           state: clonedData.location?.state || '',
           country: clonedData.location?.country || '',
-          postalCode: clonedData.location?.postalCode || ''
+          postalCode: clonedData.location?.postalCode || '',
+          deliveryDays: clonedData.location?.deliveryDays || ''
         },
 
         // SEO
@@ -1899,6 +1900,22 @@ const validateImageState = () => {
                   placeholder="Postal Code"
                   disabled={isSubmitting}
                 />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="deliveryDays">Delivery Time (from this country)</label>
+                <input
+                  type="text"
+                  id="deliveryDays"
+                  name="deliveryDays"
+                  value={formData.location?.deliveryDays || ''}
+                  onChange={handleLocationChange}
+                  placeholder="e.g. 5–7 days, 3–5 business days"
+                  disabled={isSubmitting}
+                />
+                <small style={{ color: '#888', marginTop: '4px', display: 'block' }}>
+                  Shown on the listing card. Leave blank to use default for country.
+                </small>
               </div>
 
               <div className="form-group full-width">

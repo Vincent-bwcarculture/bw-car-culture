@@ -289,6 +289,7 @@ const listingSchema = new mongoose.Schema({
       required: [true, 'Please add the country']
     },
     postalCode: String,
+    deliveryDays: String,
     coordinates: {
       type: {
         type: String,
