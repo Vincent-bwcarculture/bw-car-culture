@@ -577,6 +577,80 @@
   }
 }
 
+/* ── Theme overrides ── */
+
+[data-theme="blue"] .bcc-dealership-card {
+  background: rgba(22, 27, 34, 0.9);
+  border-color: #21262d;
+  color: #e6edf3;
+}
+[data-theme="blue"] .bcc-dealership-info h3 { color: #e6edf3; text-shadow: none; }
+[data-theme="blue"] .bcc-dealership-location {
+  color: rgba(201, 209, 217, 0.85);
+  background: rgba(13, 17, 23, 0.5);
+}
+[data-theme="blue"] .bcc-dealership-description {
+  color: rgba(201, 209, 217, 0.75);
+  background: rgba(13, 17, 23, 0.3);
+  border-left-color: rgba(255, 51, 0, 0.4);
+}
+[data-theme="blue"] .bcc-dealership-metric-value { color: #e6edf3; }
+[data-theme="blue"] .bcc-dealership-metric-label { color: rgba(201, 209, 217, 0.65); }
+[data-theme="blue"] .bcc-dealership-footer {
+  border-top-color: #21262d;
+  background: rgba(13, 17, 23, 0.2);
+}
+[data-theme="blue"] .bcc-dealership-vehicle-gallery {
+  background: rgba(13, 17, 23, 0.3);
+  border-color: #21262d;
+}
+[data-theme="blue"] .bcc-specialty-tag {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: #21262d;
+  color: #8b949e;
+}
+[data-theme="blue"] .bcc-specialties-label { color: #c9d1d9; }
+[data-theme="blue"] .bcc-dealership-logo { border-color: #161b22; background-color: #21262d; }
+[data-theme="blue"] .bcc-banner-gradient {
+  background: linear-gradient(120deg, #161b22 0%, #0d1117 50%, #1c2128 100%);
+}
+
+[data-theme="light"] .bcc-dealership-card {
+  background: #fdfaf6;
+  border-color: rgba(139, 110, 80, 0.18);
+  color: #0d0a07;
+}
+[data-theme="light"] .bcc-dealership-info h3 { color: #0d0a07; text-shadow: none; }
+[data-theme="light"] .bcc-dealership-location {
+  color: #2d2419;
+  background: rgba(139, 110, 80, 0.06);
+}
+[data-theme="light"] .bcc-dealership-description {
+  color: #2d2419;
+  background: rgba(139, 110, 80, 0.04);
+  border-left-color: rgba(255, 51, 0, 0.3);
+}
+[data-theme="light"] .bcc-dealership-metric-value { color: #0d0a07; }
+[data-theme="light"] .bcc-dealership-metric-label { color: #665849; }
+[data-theme="light"] .bcc-dealership-footer {
+  border-top-color: rgba(139, 110, 80, 0.12);
+  background: rgba(139, 110, 80, 0.04);
+}
+[data-theme="light"] .bcc-dealership-vehicle-gallery {
+  background: rgba(139, 110, 80, 0.04);
+  border-color: rgba(139, 110, 80, 0.10);
+}
+[data-theme="light"] .bcc-specialty-tag {
+  background: rgba(139, 110, 80, 0.06);
+  border-color: rgba(139, 110, 80, 0.15);
+  color: #2d2419;
+}
+[data-theme="light"] .bcc-specialties-label { color: #0d0a07; }
+[data-theme="light"] .bcc-dealership-logo { border-color: #fdfaf6; background-color: #ede8e1; }
+[data-theme="light"] .bcc-banner-gradient {
+  background: linear-gradient(120deg, #ede8e1 0%, #e5dfd8 50%, #e9e3dd 100%);
+}
+
 /* ===== GLOBAL DESKTOP COMPACT SIZE (1024px+) ===== */
 @media (min-width: 1024px) {
   .bcc-dealership-banner {

@@ -39,13 +39,13 @@
 /* ===== LIGHT THEME (Premium Warm) ===== */
 [data-theme="light"] {
   --app-bg: linear-gradient(150deg, #f5f0eb 0%, #ede8e1 100%);
-  --app-color: #1a1510;
+  --app-color: #0d0a07;
   --page-bg: #f8f4ef;
   --card-bg: #fdfaf6;
   --section-bg: #f2ede7;
-  --text-primary: #1a1510;
-  --text-secondary: #4a3f35;
-  --text-muted: #857568;
+  --text-primary: #0d0a07;
+  --text-secondary: #2d2419;
+  --text-muted: #665849;
   --border-color: rgba(139, 110, 80, 0.14);
   --border-light: rgba(139, 110, 80, 0.08);
   --input-bg: rgba(139, 110, 80, 0.05);

@@ -2532,3 +2532,124 @@
 [data-theme="light"] .bcc-hero-sell-pricing-dealer-note { border-top-color: rgba(139, 110, 80, 0.15); }
 [data-theme="light"] .bcc-hero-sell-dealer-notice strong { color: #1a1510; }
 [data-theme="light"] .bcc-hero-sell-dealer-notice p { color: rgba(26, 21, 16, 0.65); }
+
+/* ===== HERO BLUE MODE — OVERRIDES ===== */
+
+[data-theme="blue"] .bcc-hero-section {
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+}
+@media (max-width: 899px) {
+  [data-theme="blue"] .bcc-hero-section {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  }
+}
+[data-theme="blue"] .bcc-hero-section::after {
+  background: linear-gradient(to bottom, transparent 0%, #0d1117 100%);
+}
+[data-theme="blue"] .bcc-hero-nav-overlay {
+  background: rgba(13, 17, 23, 0.92);
+  border-bottom-color: #21262d;
+}
+[data-theme="blue"] .bcc-hero-brand-text { color: #e6edf3; }
+[data-theme="blue"] .bcc-hero-nav-link { color: rgba(201, 209, 217, 0.75); }
+[data-theme="blue"] .bcc-hero-nav-link:hover,
+[data-theme="blue"] .bcc-hero-nav-link.active { color: #e6edf3; }
+[data-theme="blue"] .bcc-hero-nav-login {
+  color: rgba(201, 209, 217, 0.75);
+  border-color: #21262d;
+}
+[data-theme="blue"] .bcc-hero-buy h1,
+[data-theme="blue"] .bcc-hero-sell h1,
+[data-theme="blue"] .bcc-hero-quickform h1 { color: #e6edf3; }
+[data-theme="blue"] .bcc-hero-buy p,
+[data-theme="blue"] .bcc-hero-sell p { color: rgba(201, 209, 217, 0.72); }
+[data-theme="blue"] .bcc-hero-section span { color: #8b949e; }
+[data-theme="blue"] .bcc-hero-feature {
+  background: rgba(22, 27, 34, 0.85);
+  border-color: #21262d;
+  color: #c9d1d9;
+}
+[data-theme="blue"] .bcc-hero-popular-searches span { color: rgba(201, 209, 217, 0.60); }
+[data-theme="blue"] .bcc-hero-popular-searches button {
+  background: rgba(22, 27, 34, 0.85);
+  border-color: #21262d;
+  color: #c9d1d9;
+}
+[data-theme="blue"] .bcc-savings-subtitle { color: rgba(201, 209, 217, 0.60); }
+[data-theme="blue"] .bcc-hero-slogan { color: rgba(201, 209, 217, 0.38); }
+[data-theme="blue"] .bcc-hero-sell-option {
+  background: rgba(22, 27, 34, 0.85);
+  border-color: #21262d;
+}
+[data-theme="blue"] .bcc-hero-option-header h3 { color: #e6edf3; }
+[data-theme="blue"] .bcc-hero-sell-option p { color: rgba(201, 209, 217, 0.65); }
+[data-theme="blue"] .bcc-sell-path {
+  background: rgba(22, 27, 34, 0.85);
+  border-color: #21262d;
+}
+[data-theme="blue"] .bcc-sell-path-amount { color: #e6edf3; }
+[data-theme="blue"] .bcc-sell-path-title { color: #c9d1d9; }
+[data-theme="blue"] .bcc-sell-path-features li { color: rgba(201, 209, 217, 0.55); }
+[data-theme="blue"] .bcc-sell-path-cta--free {
+  background: rgba(22, 27, 34, 0.85);
+  color: #c9d1d9;
+  border-color: #21262d;
+}
+[data-theme="blue"] .bcc-sell-path-period { color: rgba(201, 209, 217, 0.40); }
+[data-theme="blue"] .bcc-sell-path-pay { color: rgba(201, 209, 217, 0.35); }
+[data-theme="blue"] .bcc-sell-dealer-strip span { color: rgba(201, 209, 217, 0.40); }
+[data-theme="blue"] .bcc-sell-dealer-strip button { color: rgba(201, 209, 217, 0.55); }
+[data-theme="blue"] .bcc-sell-dealer-strip button:hover { color: #e6edf3; }
+[data-theme="blue"] .bcc-hero-dealers-label { color: rgba(201, 209, 217, 0.42); }
+[data-theme="blue"] .bcc-hero-dealer-card {
+  background: rgba(22, 27, 34, 0.6);
+  border-color: #21262d;
+}
+[data-theme="blue"] .bcc-hero-dealer-card:hover {
+  background: rgba(22, 27, 34, 0.9);
+  border-color: rgba(255, 51, 0, 0.35);
+}
+[data-theme="blue"] .bcc-hero-dealer-logo {
+  border-color: #21262d;
+  background: rgba(22, 27, 34, 0.9);
+}
+[data-theme="blue"] .bcc-hero-dealer-initials { color: rgba(201, 209, 217, 0.55); }
+[data-theme="blue"] .bcc-hero-dealer-name span:first-child { color: rgba(201, 209, 217, 0.78); }
+[data-theme="blue"] .bcc-hero-dealers-arrow {
+  background: rgba(22, 27, 34, 0.6);
+  border-color: #21262d;
+  color: rgba(201, 209, 217, 0.55);
+}
+[data-theme="blue"] .bcc-import-dropdown { background: #1c2128; border-color: #21262d; }
+[data-theme="blue"] .bcc-import-option { color: #c9d1d9; }
+[data-theme="blue"] .bcc-hero-sell-info-section {
+  background: rgba(22, 27, 34, 0.6);
+  border-color: #21262d;
+}
+[data-theme="blue"] .bcc-hero-sell-info-content h4 { color: #e6edf3; }
+[data-theme="blue"] .bcc-hero-sell-info-content p { color: rgba(201, 209, 217, 0.65); }
+[data-theme="blue"] .bcc-hero-info-button {
+  background: rgba(22, 27, 34, 0.85);
+  border-color: #21262d;
+  color: #c9d1d9;
+}
+[data-theme="blue"] .bcc-prep-secondary {
+  background: rgba(22, 27, 34, 0.85);
+  border-color: #21262d;
+  color: #c9d1d9;
+}
+[data-theme="blue"] .bcc-hero-sell-pricing-section {
+  background: rgba(22, 27, 34, 0.6);
+  border-color: #21262d;
+}
+[data-theme="blue"] .bcc-hero-sell-pricing-header h3 { color: #e6edf3; }
+[data-theme="blue"] .bcc-hero-sell-pricing-header p { color: rgba(201, 209, 217, 0.65); }
+[data-theme="blue"] .bcc-hero-sell-pricing-tier {
+  background: rgba(22, 27, 34, 0.6);
+  border-color: #21262d;
+}
+[data-theme="blue"] .bcc-hero-sell-tier-price { color: #e6edf3; }
+[data-theme="blue"] .bcc-hero-sell-tier-period { color: rgba(201, 209, 217, 0.55); }
+[data-theme="blue"] .bcc-hero-sell-tier-value { color: #e6edf3; }
+[data-theme="blue"] .bcc-hero-sell-tier-features span { color: rgba(201, 209, 217, 0.60); }
+[data-theme="blue"] .bcc-hero-sell-pricing-dealer-note { border-top-color: #21262d; }

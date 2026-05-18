@@ -43,10 +43,10 @@
 
 /* Light Mode Theme */
 [data-theme="light"] {
-  --vc-text-primary: #1a1510;
-  --vc-text-secondary: #3d342a;
-  --vc-text-muted: #6b5e52;
-  --vc-text-light: #8b7d72;
+  --vc-text-primary: #0d0a07;
+  --vc-text-secondary: #2d2419;
+  --vc-text-muted: #574d44;
+  --vc-text-light: #6b5e52;
 
   --vc-bg-card: transparent;
   --vc-bg-overlay: rgba(245, 240, 235, 0.92);
@@ -494,12 +494,12 @@
 }
 
 /* Force dark text on card body elements — overrides high-specificity App.css span/h4 rules */
-[data-theme="light"] .vc-title { color: #1a1510 !important; }
-[data-theme="light"] .vc-spec-value { color: #1a1510 !important; }
-[data-theme="light"] .vc-spec-label { color: #6b5e52 !important; }
-[data-theme="light"] .vc-dealer-name { color: #1a1510 !important; }
-[data-theme="light"] .vc-original-price { color: #6b5e52 !important; }
-[data-theme="light"] .vc-content { color: #1a1510 !important; }
+[data-theme="light"] .vc-title { color: #0d0a07 !important; }
+[data-theme="light"] .vc-spec-value { color: #0d0a07 !important; }
+[data-theme="light"] .vc-spec-label { color: #574d44 !important; }
+[data-theme="light"] .vc-dealer-name { color: #0d0a07 !important; }
+[data-theme="light"] .vc-original-price { color: #574d44 !important; }
+[data-theme="light"] .vc-content { color: #0d0a07 !important; }
 
 [data-theme="light"] .vc-monthly-payment {
   color: #1e40af;
@@ -1236,8 +1236,9 @@
 
 /* Light mode: private seller type */
 [data-theme="light"] .vc-seller-type.private {
-  background-color: #c8e6c9;
+  background-color: #a5d6a7;
   color: #1b5e20;
+  border-color: #81c784;
 }
 
 .vc-seller-type.dealership {
@@ -1248,8 +1249,9 @@
 
 /* Light mode: dealership seller type */
 [data-theme="light"] .vc-seller-type.dealership {
-  background-color: #bbdefb;
+  background-color: #90caf9;
   color: #0d47a1;
+  border-color: #64b5f6;
 }
 
 .vc-dealer-location {

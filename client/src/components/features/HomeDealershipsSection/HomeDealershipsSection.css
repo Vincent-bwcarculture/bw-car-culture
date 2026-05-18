@@ -231,28 +231,25 @@
   }
 
 /* ===== LIGHT MODE OVERRIDES ===== */
-[data-theme="light"] .home-dealerships-section {
-  color: #1a1a1a;
-}
-
-[data-theme="light"] .home-dealerships-header h2 {
-  color: #1a1a1a !important;
-}
-
-[data-theme="light"] .pagination-info {
-  color: #555 !important;
-}
-
-[data-theme="light"] .pagination-dot {
-  background-color: rgba(0, 0, 0, 0.15) !important;
-}
-
+[data-theme="light"] .home-dealerships-section { color: #0d0a07; }
+[data-theme="light"] .home-dealerships-header h2 { color: #0d0a07 !important; }
+[data-theme="light"] .pagination-info { color: #665849 !important; }
+[data-theme="light"] .pagination-dot { background-color: rgba(0, 0, 0, 0.15) !important; }
 [data-theme="light"] .carousel-nav {
   background: rgba(255, 255, 255, 0.9) !important;
-  border-color: #d0d0d0 !important;
-  color: #333 !important;
+  border-color: rgba(139, 110, 80, 0.25) !important;
+  color: #2d2419 !important;
 }
+[data-theme="light"] .home-dealerships-loading { color: #2d2419 !important; }
 
-[data-theme="light"] .home-dealerships-loading {
-  color: #333 !important;
+/* ===== BLUE MODE OVERRIDES ===== */
+[data-theme="blue"] .home-dealerships-section { color: #e6edf3; }
+[data-theme="blue"] .home-dealerships-header h2 { color: #e6edf3 !important; }
+[data-theme="blue"] .pagination-info { color: #8b949e !important; }
+[data-theme="blue"] .pagination-dot { background-color: rgba(255,255,255,0.1) !important; }
+[data-theme="blue"] .carousel-nav {
+  background: rgba(22, 27, 34, 0.9) !important;
+  border-color: #21262d !important;
+  color: #c9d1d9 !important;
 }
+[data-theme="blue"] .home-dealerships-loading { color: #8b949e !important; }

@@ -687,3 +687,97 @@
       font-size: 0.85rem;
     }
   }
+
+/* ── Theme overrides ── */
+
+/* Blue mode */
+[data-theme="blue"] .video-section-header h2 { color: #e6edf3; }
+[data-theme="blue"] .featured-video {
+  background: #161b22;
+  border-color: #21262d;
+}
+[data-theme="blue"] .featured-video-title { color: #e6edf3; }
+[data-theme="blue"] .featured-video-description { color: #8b949e; }
+[data-theme="blue"] .featured-video-meta { color: #6e7681; }
+[data-theme="blue"] .video-thumbnails-list {
+  background: #161b22;
+  border-color: #21262d;
+}
+[data-theme="blue"] .list-title {
+  color: #e6edf3;
+  border-bottom-color: #21262d;
+  background: rgba(13, 17, 23, 0.3);
+}
+[data-theme="blue"] .video-thumbnail-item { border-bottom-color: #21262d; }
+[data-theme="blue"] .video-thumbnail-item:hover { background: rgba(255,255,255,0.04); }
+[data-theme="blue"] .thumbnail-title { color: #e6edf3; }
+[data-theme="blue"] .thumbnail-date { color: #6e7681; }
+[data-theme="blue"] .filter-icon {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: #21262d;
+  color: #8b949e;
+}
+[data-theme="blue"] .category-btn {
+  background: #161b22;
+  border-color: #21262d;
+  color: #8b949e;
+}
+[data-theme="blue"] .category-btn:hover,
+[data-theme="blue"] .category-btn.active { color: #ff3300; border-color: rgba(255,51,0,0.3); }
+[data-theme="blue"] .no-videos h3 { color: #e6edf3; }
+[data-theme="blue"] .no-videos p { color: #8b949e; }
+[data-theme="blue"] .video-spinner,
+[data-theme="blue"] .thumbnails-spinner { border-color: rgba(201,209,217,0.3); border-top-color: #ff3300; }
+[data-theme="blue"] .video-loading p { color: #8b949e; }
+[data-theme="blue"] .categories-filter::-webkit-scrollbar-track { background: #21262d; }
+@media (max-width: 768px) {
+  [data-theme="blue"] .video-thumbnail-item {
+    background: #161b22;
+    border-color: #21262d;
+  }
+}
+
+/* Light mode */
+[data-theme="light"] .video-section-header h2 { color: #0d0a07; }
+[data-theme="light"] .featured-video {
+  background: #fdfaf6;
+  border-color: rgba(139, 110, 80, 0.15);
+}
+[data-theme="light"] .featured-video-title { color: #0d0a07; }
+[data-theme="light"] .featured-video-description { color: #2d2419; }
+[data-theme="light"] .featured-video-meta { color: #665849; }
+[data-theme="light"] .video-thumbnails-list {
+  background: #fdfaf6;
+  border-color: rgba(139, 110, 80, 0.15);
+}
+[data-theme="light"] .list-title {
+  color: #0d0a07;
+  border-bottom-color: rgba(139, 110, 80, 0.15);
+  background: rgba(139, 110, 80, 0.04);
+}
+[data-theme="light"] .video-thumbnail-item { border-bottom-color: rgba(139, 110, 80, 0.12); }
+[data-theme="light"] .video-thumbnail-item:hover { background: rgba(139, 110, 80, 0.04); }
+[data-theme="light"] .thumbnail-title { color: #0d0a07; }
+[data-theme="light"] .thumbnail-date { color: #665849; }
+[data-theme="light"] .filter-icon {
+  background: rgba(139, 110, 80, 0.06);
+  border-color: rgba(139, 110, 80, 0.18);
+  color: #2d2419;
+}
+[data-theme="light"] .category-btn {
+  background: #fdfaf6;
+  border-color: rgba(139, 110, 80, 0.18);
+  color: #2d2419;
+}
+[data-theme="light"] .no-videos h3 { color: #0d0a07; }
+[data-theme="light"] .no-videos p { color: #665849; }
+[data-theme="light"] .video-spinner,
+[data-theme="light"] .thumbnails-spinner { border-color: rgba(0,0,0,0.15); border-top-color: #ff3300; }
+[data-theme="light"] .video-loading p { color: #665849; }
+[data-theme="light"] .categories-filter::-webkit-scrollbar-track { background: rgba(139,110,80,0.1); }
+@media (max-width: 768px) {
+  [data-theme="light"] .video-thumbnail-item {
+    background: #fdfaf6;
+    border-color: rgba(139, 110, 80, 0.15);
+  }
+}
