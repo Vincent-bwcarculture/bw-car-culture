@@ -48,14 +48,14 @@
   --vc-text-muted: #6b7280;
   --vc-text-light: #9ca3af;
 
-  --vc-bg-card: #ffffff;
-  --vc-bg-overlay: rgba(255, 255, 255, 0.92);
-  --vc-bg-tooltip: #ffffff;
-  --vc-bg-hover: rgba(0, 0, 0, 0.025);
-  --vc-bg-button: rgba(0, 0, 0, 0.06);
-  --vc-bg-button-hover: rgba(0, 0, 0, 0.12);
+  --vc-bg-card: #e4e4e4;
+  --vc-bg-overlay: rgba(235, 235, 235, 0.92);
+  --vc-bg-tooltip: #f0f0f0;
+  --vc-bg-hover: rgba(0, 0, 0, 0.04);
+  --vc-bg-button: rgba(0, 0, 0, 0.07);
+  --vc-bg-button-hover: rgba(0, 0, 0, 0.13);
 
-  --vc-border-color: #e5e7eb;
+  --vc-border-color: #cccccc;
   --vc-border-light: rgba(0, 0, 0, 0.07);
   --vc-border-medium: rgba(0, 0, 0, 0.13);
   --vc-border-strong: rgba(0, 0, 0, 0.22);
@@ -85,6 +85,29 @@
   
   --vc-shadow-sm: 0 2px 8px rgba(255, 51, 0, 0.3);
   --vc-shadow-hover: 0 5px 15px rgba(255, 51, 0, 0.2);
+}
+
+/* Blue Mode Theme */
+[data-theme="blue"] {
+  --vc-text-primary: #e2e8f0;
+  --vc-text-secondary: #94a3b8;
+  --vc-text-muted: #64748b;
+  --vc-text-light: #475569;
+
+  --vc-bg-card: #0f1d36;
+  --vc-bg-overlay: rgba(10, 22, 50, 0.88);
+  --vc-bg-tooltip: #0d1a30;
+  --vc-bg-hover: rgba(59, 130, 246, 0.07);
+  --vc-bg-button: rgba(59, 130, 246, 0.12);
+  --vc-bg-button-hover: rgba(59, 130, 246, 0.22);
+
+  --vc-border-color: rgba(59, 130, 246, 0.18);
+  --vc-border-light: rgba(59, 130, 246, 0.1);
+  --vc-border-medium: rgba(59, 130, 246, 0.22);
+  --vc-border-strong: rgba(59, 130, 246, 0.38);
+
+  --vc-shadow-sm: 0 2px 8px rgba(0, 10, 40, 0.4);
+  --vc-shadow-hover: 0 5px 18px rgba(0, 10, 40, 0.5);
 }
 
 /* === VEHICLE CARD BASE STYLES === */
