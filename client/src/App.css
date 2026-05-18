@@ -14,23 +14,45 @@
   --input-border: rgba(255, 255, 255, 0.15);
   --shadow-color: rgba(0, 0, 0, 0.3);
   --accent: #ff3300;
+  --surface-raised: rgba(30, 30, 30, 0.95);
 }
 
-[data-theme="light"] {
-  --app-bg: radial-gradient(#f0f0f0, #e8e8e8);
-  --app-color: #1a1a1a;
-  --page-bg: rgba(245, 245, 245, 0.98);
-  --card-bg: rgba(255, 255, 255, 0.98);
-  --section-bg: rgba(240, 240, 240, 0.95);
-  --text-primary: #1a1a1a;
-  --text-secondary: #333333;
-  --text-muted: #666666;
-  --border-color: #d0d0d0;
-  --border-light: rgba(0, 0, 0, 0.1);
-  --input-bg: rgba(0, 0, 0, 0.04);
-  --input-border: rgba(0, 0, 0, 0.18);
-  --shadow-color: rgba(0, 0, 0, 0.12);
+/* ===== BLUE THEME (Professional Navy) ===== */
+[data-theme="blue"] {
+  --app-bg: #080d1a;
+  --app-color: #e2e8f0;
+  --page-bg: #0d1426;
+  --card-bg: #111c30;
+  --section-bg: #0a1525;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: rgba(59, 130, 246, 0.15);
+  --border-light: rgba(59, 130, 246, 0.08);
+  --input-bg: rgba(59, 130, 246, 0.06);
+  --input-border: rgba(59, 130, 246, 0.22);
+  --shadow-color: rgba(0, 10, 40, 0.45);
   --accent: #ff3300;
+  --surface-raised: #172035;
+}
+
+/* ===== LIGHT THEME (Premium Warm) ===== */
+[data-theme="light"] {
+  --app-bg: linear-gradient(150deg, #f5f0eb 0%, #ede8e1 100%);
+  --app-color: #1a1510;
+  --page-bg: #f8f4ef;
+  --card-bg: #fdfaf6;
+  --section-bg: #f2ede7;
+  --text-primary: #1a1510;
+  --text-secondary: #4a3f35;
+  --text-muted: #857568;
+  --border-color: rgba(139, 110, 80, 0.14);
+  --border-light: rgba(139, 110, 80, 0.08);
+  --input-bg: rgba(139, 110, 80, 0.05);
+  --input-border: rgba(139, 110, 80, 0.18);
+  --shadow-color: rgba(60, 40, 20, 0.09);
+  --accent: #ff3300;
+  --surface-raised: #fffcf8;
 }
 
 * {
@@ -51,6 +73,79 @@ body {
 .App {
   min-height: 100vh;
   background: var(--app-bg);
+}
+
+/* ===== BLUE MODE: GLOBAL OVERRIDES ===== */
+[data-theme="blue"] .marketplace-section,
+[data-theme="blue"] .marketplace-list-section,
+[data-theme="blue"] .marketplace-grid-section,
+[data-theme="blue"] .car-detail-container,
+[data-theme="blue"] .main-content,
+[data-theme="blue"] .dealer-sidebar,
+[data-theme="blue"] .dealer-section,
+[data-theme="blue"] .car-info,
+[data-theme="blue"] .cdg-container,
+[data-theme="blue"] .cdg-details,
+[data-theme="blue"] .home-section,
+[data-theme="blue"] .section-container {
+  background: var(--page-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="blue"] .car-card,
+[data-theme="blue"] .vehicle-card,
+[data-theme="blue"] .listing-card,
+[data-theme="blue"] .news-card,
+[data-theme="blue"] .dealer-card,
+[data-theme="blue"] .service-card,
+[data-theme="blue"] .bcc-business-card,
+[data-theme="blue"] .rental-card,
+[data-theme="blue"] .inventory-card {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="blue"] h1,
+[data-theme="blue"] h2,
+[data-theme="blue"] h3,
+[data-theme="blue"] h4,
+[data-theme="blue"] h5 {
+  color: var(--text-primary);
+}
+
+[data-theme="blue"] input,
+[data-theme="blue"] select,
+[data-theme="blue"] textarea {
+  background: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="blue"] .filters-container,
+[data-theme="blue"] .marketplace-filters,
+[data-theme="blue"] .search-section {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="blue"] .similar-vehicles-section,
+[data-theme="blue"] .related-section,
+[data-theme="blue"] .carousel-section {
+  background: var(--section-bg) !important;
+}
+
+[data-theme="blue"] .carousel-item,
+[data-theme="blue"] .similar-item {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+[data-theme="blue"] .home-dealerships-section,
+[data-theme="blue"] .home-services-section,
+[data-theme="blue"] .home-rentals-section,
+[data-theme="blue"] .home-inventory-section {
+  color: var(--text-primary);
 }
 
 /* ===== LIGHT MODE: GLOBAL OVERRIDES FOR PUBLIC PAGES ===== */
@@ -152,7 +247,13 @@ body {
 [data-theme="light"] .car-gallery,
 [data-theme="light"] .main-image-container,
 [data-theme="light"] .main-image {
-  background: #1a1a1a !important;
+  background: #2a2015 !important;
+}
+
+/* Warm tint for spec items */
+[data-theme="light"] .spec-item {
+  background: rgba(139, 110, 80, 0.06) !important;
+  border-color: var(--border-color) !important;
 }
 
 /* Similar / related sections */

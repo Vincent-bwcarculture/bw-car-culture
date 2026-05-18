@@ -11,6 +11,7 @@ import { useAuth } from '../../../context/AuthContext.js';
 import useUnreadNotifCount from '../../../hooks/useUnreadNotifCount.js';
 import EnhancedFABModal from './EnhancedFABModal.js';
 import { useSiteSettings } from '../../../Admin/AdminSettings/useSiteSettings.js';
+import ThemeToggle from '../../shared/ThemeToggle/ThemeToggle.js';
 import './ResponsiveNavigation.css';
 
 // Updated navigation categories - News added for desktop, Profile kept for mobile
@@ -714,6 +715,9 @@ const ResponsiveNavigation = () => {
               </li>
             ))}
           </ul>
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
 
           {/* Desktop User Menu */}
           <DesktopUserMenu />

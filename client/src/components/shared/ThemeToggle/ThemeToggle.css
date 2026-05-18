@@ -1,0 +1,93 @@
+/* ThemeToggle.css */
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  background: var(--border-color, rgba(255,255,255,0.08));
+  border-radius: 20px;
+  padding: 2px;
+  border: 1px solid var(--border-light, rgba(255,255,255,0.08));
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--nav-text-muted, #888);
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--hover-bg, rgba(255,255,255,0.08));
+  color: var(--nav-text, #fff);
+  transform: scale(1.1);
+}
+
+/* Active states per theme */
+.theme-toggle-dark.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #c9d1d9;
+}
+
+.theme-toggle-blue.active {
+  background: rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
+}
+
+.theme-toggle-light.active {
+  background: rgba(255, 180, 50, 0.22);
+  color: #f59e0b;
+}
+
+/* Light mode adjustments */
+[data-theme="light"] .theme-toggle {
+  background: rgba(139, 110, 80, 0.08);
+  border-color: rgba(139, 110, 80, 0.14);
+}
+
+[data-theme="light"] .theme-toggle-btn {
+  color: var(--text-muted, #857568);
+}
+
+[data-theme="light"] .theme-toggle-btn:hover {
+  background: rgba(139, 110, 80, 0.1);
+  color: var(--text-primary, #1a1510);
+}
+
+[data-theme="light"] .theme-toggle-dark.active {
+  background: rgba(30, 20, 10, 0.12);
+  color: #4a3f35;
+}
+
+[data-theme="light"] .theme-toggle-blue.active {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+[data-theme="light"] .theme-toggle-light.active {
+  background: rgba(255, 180, 50, 0.15);
+  color: #d97706;
+}
+
+/* Blue mode adjustments */
+[data-theme="blue"] .theme-toggle {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.18);
+}
+
+[data-theme="blue"] .theme-toggle-btn {
+  color: var(--text-muted, #64748b);
+}
+
+[data-theme="blue"] .theme-toggle-btn:hover {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--text-primary, #e2e8f0);
+}

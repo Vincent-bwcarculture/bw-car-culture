@@ -10,6 +10,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.js';
 import { useAuth } from './context/AuthContext.js';
 import { NewsProvider } from './context/NewsContext.js';
+import { ThemeProvider } from './context/ThemeContext.js';
 
 // Layout Components
 import Chatbot from './components/shared/Chatbot/Chatbot.js';
@@ -1689,6 +1690,7 @@ function App() {
   }
 
   return (
+    <ThemeProvider>
     <HelmetProvider>
     <AppErrorBoundary>
       <Router>
@@ -1709,6 +1711,7 @@ function App() {
       </Router>
     </AppErrorBoundary>
     </HelmetProvider>
+    </ThemeProvider>
   );
 }
 
