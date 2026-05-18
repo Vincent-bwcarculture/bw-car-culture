@@ -2361,3 +2361,173 @@
 [data-theme="light"] .bcc-hero-slogan-dot {
   background: rgba(255,51,0,0.45);
 }
+
+/* ===== HERO LIGHT MODE — FULL OVERRIDES ===== */
+
+/* Section background → warm parchment gradient */
+[data-theme="light"] .bcc-hero-section {
+  background: linear-gradient(135deg, #f5f0eb 0%, #ede8e1 50%, #f0ebe4 100%);
+}
+
+/* Mobile base background */
+@media (max-width: 899px) {
+  [data-theme="light"] .bcc-hero-section {
+    background: linear-gradient(135deg, #f5f0eb 0%, #ede8e1 100%);
+  }
+}
+
+/* Left-side CTA overlay — warm tint instead of dark black */
+[data-theme="light"] .bcc-hero-section::before {
+  background: linear-gradient(
+    to right,
+    rgba(245, 240, 235, 0.88) 0%,
+    rgba(245, 240, 235, 0.62) 38%,
+    rgba(245, 240, 235, 0.22) 62%,
+    rgba(245, 240, 235, 0.00) 100%
+  );
+}
+
+/* Bottom fade → matches warm page bg */
+[data-theme="light"] .bcc-hero-section::after {
+  background: linear-gradient(to bottom, transparent 0%, #f5f0eb 100%);
+}
+
+/* Dark canvas overlay → very light warm tint */
+[data-theme="light"] .bcc-hero-dark-overlay {
+  background: radial-gradient(
+    ellipse 90% 80% at 50% 50%,
+    rgba(245, 240, 235, 0.12) 0%,
+    rgba(245, 240, 235, 0.30) 100%
+  );
+}
+
+/* Nav overlay */
+[data-theme="light"] .bcc-hero-nav-overlay {
+  background: rgba(245, 240, 235, 0.88);
+  border-bottom-color: rgba(139, 110, 80, 0.15);
+}
+[data-theme="light"] .bcc-hero-brand-text { color: #1a1510; }
+[data-theme="light"] .bcc-hero-nav-link { color: rgba(26, 21, 16, 0.75); }
+[data-theme="light"] .bcc-hero-nav-link:hover,
+[data-theme="light"] .bcc-hero-nav-link.active { color: #1a1510; }
+[data-theme="light"] .bcc-hero-nav-login {
+  color: rgba(26, 21, 16, 0.75);
+  border-color: rgba(139, 110, 80, 0.3);
+}
+[data-theme="light"] .bcc-hero-nav-login:hover {
+  background: rgba(139, 110, 80, 0.08);
+  color: #1a1510;
+}
+
+/* Hero headings + body text */
+[data-theme="light"] .bcc-hero-buy h1,
+[data-theme="light"] .bcc-hero-sell h1,
+[data-theme="light"] .bcc-hero-quickform h1 { color: #1a1510; }
+
+[data-theme="light"] .bcc-hero-buy p,
+[data-theme="light"] .bcc-hero-sell p { color: rgba(26, 21, 16, 0.68); }
+
+[data-theme="light"] .bcc-hero-section span { color: #4a3f35; }
+
+/* Feature pills */
+[data-theme="light"] .bcc-hero-feature {
+  background: rgba(139, 110, 80, 0.07);
+  border-color: rgba(139, 110, 80, 0.15);
+  color: #1a1510;
+}
+
+/* Popular search */
+[data-theme="light"] .bcc-hero-popular-searches span { color: rgba(26, 21, 16, 0.60); }
+[data-theme="light"] .bcc-hero-popular-searches button {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(139, 110, 80, 0.22);
+  color: #1a1510;
+}
+[data-theme="light"] .bcc-hero-popular-searches button:hover {
+  background: rgba(0, 0, 0, 0.11);
+  border-color: rgba(139, 110, 80, 0.38);
+}
+
+/* Savings subtitle */
+[data-theme="light"] .bcc-savings-subtitle { color: rgba(26, 21, 16, 0.60); }
+
+/* Sell options */
+[data-theme="light"] .bcc-hero-sell-option {
+  background: rgba(139, 110, 80, 0.06);
+  border-color: rgba(139, 110, 80, 0.14);
+}
+[data-theme="light"] .bcc-hero-sell-option:hover {
+  background: rgba(139, 110, 80, 0.11);
+  border-color: rgba(139, 110, 80, 0.26);
+}
+[data-theme="light"] .bcc-hero-option-header h3 { color: #1a1510; }
+[data-theme="light"] .bcc-hero-sell-option p { color: rgba(26, 21, 16, 0.65); }
+
+/* Sell-path extra text */
+[data-theme="light"] .bcc-sell-path-period { color: rgba(26, 21, 16, 0.40); }
+[data-theme="light"] .bcc-sell-path-pay { color: rgba(26, 21, 16, 0.35); }
+
+/* Dealer strip in hero */
+[data-theme="light"] .bcc-hero-dealers-label { color: rgba(26, 21, 16, 0.42); }
+[data-theme="light"] .bcc-hero-dealer-card {
+  background: rgba(139, 110, 80, 0.06);
+  border-color: rgba(139, 110, 80, 0.18);
+}
+[data-theme="light"] .bcc-hero-dealer-card:hover {
+  background: rgba(139, 110, 80, 0.12);
+  border-color: rgba(255, 51, 0, 0.35);
+}
+[data-theme="light"] .bcc-hero-dealer-logo {
+  border-color: rgba(139, 110, 80, 0.22);
+  background: rgba(139, 110, 80, 0.07);
+}
+[data-theme="light"] .bcc-hero-dealer-initials { color: rgba(26, 21, 16, 0.55); }
+[data-theme="light"] .bcc-hero-dealer-name span:first-child { color: rgba(26, 21, 16, 0.78); }
+[data-theme="light"] .bcc-hero-dealers-arrow {
+  background: rgba(139, 110, 80, 0.07);
+  border-color: rgba(139, 110, 80, 0.20);
+  color: rgba(26, 21, 16, 0.55);
+}
+
+/* Import dropdown */
+[data-theme="light"] .bcc-import-dropdown {
+  background: rgba(253, 250, 246, 0.99);
+}
+[data-theme="light"] .bcc-import-option { color: #3d342a; }
+
+/* Info / prep sections */
+[data-theme="light"] .bcc-hero-sell-info-section {
+  background: rgba(139, 110, 80, 0.06);
+  border-color: rgba(139, 110, 80, 0.14);
+}
+[data-theme="light"] .bcc-hero-sell-info-content h4 { color: #1a1510; }
+[data-theme="light"] .bcc-hero-sell-info-content p { color: rgba(26, 21, 16, 0.65); }
+[data-theme="light"] .bcc-hero-info-button {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(139, 110, 80, 0.22);
+  color: #1a1510;
+}
+[data-theme="light"] .bcc-prep-secondary {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(139, 110, 80, 0.22);
+  color: #1a1510;
+}
+
+/* Pricing section */
+[data-theme="light"] .bcc-hero-sell-pricing-section {
+  background: rgba(139, 110, 80, 0.05);
+  border-color: rgba(139, 110, 80, 0.14);
+}
+[data-theme="light"] .bcc-hero-sell-pricing-header h3 { color: #1a1510; }
+[data-theme="light"] .bcc-hero-sell-pricing-header p { color: rgba(26, 21, 16, 0.65); }
+[data-theme="light"] .bcc-hero-sell-pricing-tier {
+  background: rgba(139, 110, 80, 0.06);
+  border-color: rgba(139, 110, 80, 0.14);
+}
+[data-theme="light"] .bcc-hero-sell-tier-price { color: #1a1510; }
+[data-theme="light"] .bcc-hero-sell-tier-period { color: rgba(26, 21, 16, 0.55); }
+[data-theme="light"] .bcc-hero-sell-tier-value { color: #1a1510; }
+[data-theme="light"] .bcc-hero-sell-tier-features span { color: rgba(26, 21, 16, 0.60); }
+[data-theme="light"] .bcc-hero-sell-pricing-dealer-note { border-top-color: rgba(139, 110, 80, 0.15); }
+[data-theme="light"] .bcc-hero-sell-dealer-notice strong { color: #1a1510; }
+[data-theme="light"] .bcc-hero-sell-dealer-notice p { color: rgba(26, 21, 16, 0.65); }
