@@ -224,7 +224,6 @@ const CarBrands = () => {
           src={brand.image}
           alt={`${brand.name} vehicle`}
           loading="lazy"
-          crossOrigin="anonymous"
           onLoad={(e) => extractDominantColor(e.target, brand.id)}
           onError={(e) => {
             console.log(`Brand vehicle image failed to load: ${e.target.src}`);
