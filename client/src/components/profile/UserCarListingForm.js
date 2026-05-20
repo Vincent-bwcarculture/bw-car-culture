@@ -824,21 +824,18 @@ const handleFormSubmit = async (e) => {
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      const firstKey = Object.keys(validationErrors)[0];
-      const firstMsg = validationErrors[firstKey];
-      const tabMap = {
-        'specifications.make': { tab: 'basic', label: 'Basic Info' },
-        'specifications.model': { tab: 'basic', label: 'Basic Info' },
-        'specifications.year': { tab: 'basic', label: 'Basic Info' },
-        'price': { tab: 'basic', label: 'Basic Info' },
-        'title': { tab: 'basic', label: 'Basic Info' },
-        'description': { tab: 'basic', label: 'Basic Info' },
+      const fieldTabMap = {
+        'specifications.make': { tab: 'basic', label: 'Vehicle Info' },
+        'specifications.model': { tab: 'basic', label: 'Vehicle Info' },
+        'specifications.year': { tab: 'basic', label: 'Vehicle Info' },
+        'price': { tab: 'basic', label: 'Vehicle Info' },
+        'title': { tab: 'basic', label: 'Vehicle Info' },
+        'description': { tab: 'basic', label: 'Vehicle Info' },
         'contact.phone': { tab: 'contact', label: 'Contact' },
         'contact.sellerName': { tab: 'contact', label: 'Contact' },
-        'images': { tab: 'images', label: 'Images' },
+        'images': { tab: 'images', label: 'Photos' },
       };
-      const dest = tabMap[firstKey] || { tab: 'basic', label: 'Basic Info' };
-      setValidationModal({ message: firstMsg, tab: dest.tab, tabLabel: dest.label });
+      setValidationModal({ errors: validationErrors, fieldTabMap });
       return;
     }
 
@@ -1246,15 +1243,42 @@ const handleFormSubmit = async (e) => {
       {/* Validation error modal — rendered via portal so fixed overlay always works */}
       {validationModal && createPortal(
         <div className="ulisting-modal-overlay" onClick={() => setValidationModal(null)}>
-          <div className="ulisting-modal" onClick={e => e.stopPropagation()}>
-            <h4>Missing Required Info</h4>
-            <p>{validationModal.message}</p>
-            <div className="ulisting-modal-actions">
-              <button className="ulisting-modal-btn-primary" onClick={() => { setCurrentTab(validationModal.tab); setValidationModal(null); }}>
-                Go to {validationModal.tabLabel}
-              </button>
-              <button className="ulisting-modal-btn-secondary" onClick={() => setValidationModal(null)}>Dismiss</button>
+          <div className="ulisting-modal ulisting-error-modal" onClick={e => e.stopPropagation()}>
+            <div className="ulisting-error-modal-icon">!</div>
+            <h4>Please fix these issues</h4>
+            <p className="ulisting-error-modal-subtitle">
+              {Object.keys(validationModal.errors).length} field{Object.keys(validationModal.errors).length > 1 ? 's' : ''} need{Object.keys(validationModal.errors).length === 1 ? 's' : ''} attention before you can submit.
+            </p>
+            <div className="ulisting-error-list">
+              {(() => {
+                // Group errors by tab
+                const groups = {};
+                Object.entries(validationModal.errors).forEach(([field, msg]) => {
+                  const dest = validationModal.fieldTabMap[field] || { tab: 'basic', label: 'Vehicle Info' };
+                  if (!groups[dest.tab]) groups[dest.tab] = { label: dest.label, tab: dest.tab, items: [] };
+                  groups[dest.tab].items.push(msg);
+                });
+                return Object.values(groups).map(group => (
+                  <div key={group.tab} className="ulisting-error-group">
+                    <button
+                      className="ulisting-error-group-header"
+                      onClick={() => { setCurrentTab(group.tab); setValidationModal(null); }}
+                    >
+                      <span className="ulisting-error-section-name">{group.label}</span>
+                      <span className="ulisting-error-go">Go to section →</span>
+                    </button>
+                    <ul className="ulisting-error-items">
+                      {group.items.map((msg, i) => (
+                        <li key={i}>{msg}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ));
+              })()}
             </div>
+            <button className="ulisting-modal-btn-secondary ulisting-error-dismiss" onClick={() => setValidationModal(null)}>
+              Dismiss
+            </button>
           </div>
         </div>,
         document.body

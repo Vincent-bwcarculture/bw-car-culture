@@ -2032,6 +2032,112 @@
   cursor: pointer;
 }
 
+/* Error modal specifics */
+.ulisting-error-modal {
+  border-color: #ef4444;
+  max-width: 540px;
+  text-align: left;
+}
+
+.ulisting-error-modal h4 {
+  color: #ef4444 !important;
+  font-size: 1.15rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.ulisting-error-modal-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.15);
+  border: 2px solid #ef4444;
+  color: #ef4444;
+  font-size: 1.6rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.ulisting-error-modal-subtitle {
+  color: var(--uprofile-text-secondary, #94a3b8);
+  font-size: 0.85rem !important;
+  margin: 0 0 1.25rem !important;
+  text-align: center;
+}
+
+.ulisting-error-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.ulisting-error-group {
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ulisting-error-group-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.ulisting-error-group-header:hover {
+  background: rgba(239, 68, 68, 0.18);
+}
+
+.ulisting-error-section-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #ef4444;
+}
+
+.ulisting-error-go {
+  font-size: 0.78rem;
+  color: #ff3300;
+  font-weight: 500;
+}
+
+.ulisting-error-items {
+  list-style: none;
+  margin: 0;
+  padding: 0.6rem 1rem 0.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ulisting-error-items li {
+  font-size: 0.85rem;
+  color: var(--uprofile-text-secondary, #94a3b8);
+  position: relative;
+  padding-left: 1rem;
+}
+
+.ulisting-error-items li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #ef4444;
+}
+
+.ulisting-error-dismiss {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
 /* Success modal specifics */
 .ulisting-success-modal { border-color: #10b981; }
 
