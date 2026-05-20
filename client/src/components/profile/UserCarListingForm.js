@@ -601,8 +601,8 @@ const UserCarListingForm = ({
     }
     if (!price || price <= 0) errors.price = 'Asking price is required';
 
-    if (!formData.title?.trim() || formData.title.length < 5) {
-      errors.title = 'Title must be at least 5 characters';
+    if (!formData.title?.trim() || formData.title.length < 10) {
+      errors.title = 'Title must be at least 10 characters';
     }
     if (!formData.description?.trim() || formData.description.length < 10) {
       errors.description = 'Description must be at least 10 characters';
@@ -1566,7 +1566,7 @@ const handleFormSubmit = async (e) => {
                 <option value="automatic">Automatic</option>
                 <option value="manual">Manual</option>
                 <option value="cvt">CVT</option>
-                <option value="semi-automatic">Semi-Automatic</option>
+                <option value="semi-auto">Semi-Automatic</option>
               </select>
             </div>
 
