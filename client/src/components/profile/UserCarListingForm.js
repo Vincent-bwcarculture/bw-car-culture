@@ -851,79 +851,63 @@ const handleFormSubmit = async (e) => {
     console.log(`📤 Starting submission with ${imageFiles?.length || 0} images`);
 
     // ========================================
-    // STEP 1: Upload images if any - WITH PRIMARY IMAGE REORDERING
+    // STEP 1: Upload images one at a time to stay under Vercel's 4.5MB body limit.
+    // Sending all images in one request causes silent body truncation beyond ~3-4 images.
     // ========================================
     let uploadedImages = [];
-    
+
     if (imageFiles && imageFiles.length > 0) {
       showMessage('info', `Preparing ${imageFiles.length} image${imageFiles.length > 1 ? 's' : ''}…`);
 
       try {
-        // Compress each image to stay under Vercel's 4.5MB body limit
         const compressedFiles = await Promise.all(imageFiles.map(f => compressImage(f)));
+        const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+        const rawUploaded = [];
 
-        showMessage('info', `Uploading ${compressedFiles.length} image${compressedFiles.length > 1 ? 's' : ''}…`);
+        for (let idx = 0; idx < compressedFiles.length; idx++) {
+          const file = compressedFiles[idx];
+          showMessage('info', `Uploading image ${idx + 1} of ${compressedFiles.length}…`);
+          console.log(`📎 Uploading file ${idx}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
 
-        const formDataUpload = new FormData();
-        compressedFiles.forEach((file, index) => {
-          formDataUpload.append(`image${index}`, file);
-          console.log(`📎 Added file ${index}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
-        });
-        formDataUpload.append('folder', 'user-listings');
+          const fd = new FormData();
+          fd.append('image0', file);
+          fd.append('folder', 'user-listings');
 
-        console.log('🔄 Uploading to /api/user/upload-images...');
-        
-        const uploadResponse = await fetch(`${API_BASE}/api/user/upload-images`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('authToken')}`
-          },
-          body: formDataUpload
-        });
-
-        console.log(`📤 Upload response status: ${uploadResponse.status}`);
-
-        if (!uploadResponse.ok) {
-          const errorText = await uploadResponse.text();
-          console.error('📤 Upload failed response:', errorText);
-          throw new Error(`Image upload failed: ${uploadResponse.status} - ${errorText}`);
-        }
-
-        const uploadResult = await uploadResponse.json();
-        console.log('📤 Upload result:', uploadResult);
-        
-        if (!uploadResult.success || !uploadResult.images) {
-          throw new Error(uploadResult.message || 'Image upload failed - no images returned');
-        }
-
-        // FIXED: Reorder images so primary image comes first
-        const reorderedImages = [];
-        
-        // Add primary image first (this becomes the main/thumbnail image)
-        if (uploadResult.images[primaryImageIndex]) {
-          reorderedImages.push({
-            ...uploadResult.images[primaryImageIndex],
-            isPrimary: true,
-            displayOrder: 0,
-            originalIndex: primaryImageIndex
+          const res = await fetch(`${API_BASE}/api/user/upload-images`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: fd
           });
-          console.log(`🏆 Primary image (now main): ${uploadResult.images[primaryImageIndex].url}`);
+
+          console.log(`📤 Image ${idx + 1} response: ${res.status}`);
+
+          if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`Image ${idx + 1} upload failed: ${res.status} - ${errorText}`);
+          }
+
+          const result = await res.json();
+          if (!result.success || !result.images?.[0]) {
+            throw new Error(result.message || `Image ${idx + 1} upload returned no data`);
+          }
+
+          rawUploaded.push(result.images[0]);
         }
-        
-        // Add all other images in their original order (except the primary one)
-        uploadResult.images.forEach((img, index) => {
+
+        // Reorder so primary image is first
+        const reorderedImages = [];
+        if (rawUploaded[primaryImageIndex]) {
+          reorderedImages.push({ ...rawUploaded[primaryImageIndex], isPrimary: true, displayOrder: 0 });
+          console.log(`🏆 Primary image: ${rawUploaded[primaryImageIndex].url}`);
+        }
+        rawUploaded.forEach((img, index) => {
           if (index !== primaryImageIndex) {
-            reorderedImages.push({
-              ...img,
-              isPrimary: false,
-              displayOrder: reorderedImages.length,
-              originalIndex: index
-            });
+            reorderedImages.push({ ...img, isPrimary: false, displayOrder: reorderedImages.length });
           }
         });
 
         uploadedImages = reorderedImages;
-        console.log(`✅ Images uploaded successfully: ${uploadedImages.length} images`);
+        console.log(`✅ All ${uploadedImages.length} images uploaded`);
         showMessage('success', `${uploadedImages.length} images uploaded successfully!`);
 
       } catch (uploadError) {
