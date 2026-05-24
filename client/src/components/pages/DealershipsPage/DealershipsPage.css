@@ -212,7 +212,7 @@
   /* Dealership Grid */
   .bcc-dealerships-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 1.25rem;
   }
   
@@ -264,64 +264,68 @@
   /* Responsive Styles */
   @media (max-width: 1200px) {
     .bcc-dealerships-grid {
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
     }
-    
+
     .bcc-dealerships-container {
       padding: 1.5rem;
     }
   }
-  
+
   @media (max-width: 992px) {
     .bcc-dealerships-hero {
       padding: 3rem 1.5rem;
     }
-    
+
     .bcc-dealerships-hero h1 {
       font-size: 2.2rem;
     }
-    
+
     .bcc-dealerships-hero p {
       font-size: 1.1rem;
     }
-    
+
+    .bcc-dealerships-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
     .bcc-dealership-filter-row {
       flex-direction: column;
     }
-    
+
     .bcc-dealership-search-container,
     .bcc-dealership-filter-selects {
       width: 100%;
     }
   }
-  
+
   @media (max-width: 768px) {
     .bcc-dealerships-grid {
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
     }
-    
+
     .bcc-dealerships-hero {
       padding: 2.5rem 1rem;
     }
-    
+
     .bcc-dealerships-hero h1 {
       font-size: 2rem;
     }
-    
+
     .bcc-dealerships-hero p {
       font-size: 1rem;
     }
-    
+
     .bcc-dealership-filter-container {
       padding: 1.2rem;
     }
   }
-  
+
   @media (max-width: 576px) {
     .bcc-dealerships-grid {
-      grid-template-columns: 1fr;
-      gap: 0.75rem;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.6rem;
     }
 
     .bcc-dealerships-hero h1 {
@@ -329,7 +333,7 @@
     }
 
     .bcc-dealerships-container {
-      padding: 1rem;
+      padding: 0.75rem;
     }
 
     .bcc-dealership-filter-selects {
