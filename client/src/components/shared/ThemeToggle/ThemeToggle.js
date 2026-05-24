@@ -1,13 +1,12 @@
 // client/src/components/shared/ThemeToggle/ThemeToggle.js
 import React from 'react';
-import { Moon, Sun, Layers } from 'lucide-react';
+import { Moon, Layers } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext.js';
 import './ThemeToggle.css';
 
 const THEME_CONFIG = [
-  { id: 'dark',  icon: Moon,   label: 'Dark'  },
-  { id: 'blue',  icon: Layers, label: 'Blue'  },
-  { id: 'light', icon: Sun,    label: 'Light' },
+  { id: 'dark',  icon: Moon,   label: 'Dark' },
+  { id: 'blue',  icon: Layers, label: 'Blue' },
 ];
 
 const ThemeToggle = () => {
