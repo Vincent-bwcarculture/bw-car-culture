@@ -633,8 +633,8 @@ const HomeContent = () => {
         onSearchPerformed={handleSearchPerformed}
       />
       <Advertisement />
-      <BudgetSearch />
       <MarketplaceSection />
+      <BudgetSearch />
       {/* <CarCategories /> */}
       <CarBrands />
       {/* <CarpoolSection /> */}
