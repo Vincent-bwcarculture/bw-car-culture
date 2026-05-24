@@ -340,6 +340,31 @@
     margin: 0.5rem 0;
 }
 
+/* Theme row inside Explore dropdown — mobile only */
+.menu-theme-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 0.75rem 0.6rem;
+    border-top: 1px solid var(--nav-border);
+    margin-top: 0.25rem;
+}
+
+.menu-theme-label {
+    font-size: 0.72rem;
+    color: var(--nav-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+/* Hide theme row on desktop — the nav bar already has ThemeToggle there */
+@media (min-width: 768px) {
+    .menu-theme-row {
+        display: none;
+    }
+}
+
 /* Vehicle Type Search */
 .menu-vehicle-search {
     display: flex;

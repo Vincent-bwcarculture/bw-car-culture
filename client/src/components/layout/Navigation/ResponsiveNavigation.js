@@ -313,6 +313,12 @@ const NavigationMenu = () => {
             <span className="menu-item-icon"><MessageCircle size={12} /></span>
             <span className="menu-item-text">Feedback</span>
           </button>
+
+          {/* Theme toggle — mobile only (desktop nav already has it) */}
+          <div className="menu-theme-row" onClick={e => e.stopPropagation()}>
+            <span className="menu-theme-label">Theme</span>
+            <ThemeToggle />
+          </div>
         </div>
         , document.body
       )}
