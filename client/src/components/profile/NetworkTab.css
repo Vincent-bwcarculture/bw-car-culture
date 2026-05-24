@@ -321,6 +321,35 @@
   max-width: 300px;
 }
 
+/* Load More */
+.network-load-more {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0 0.5rem;
+}
+
+.network-load-more-btn {
+  padding: 0.7rem 2rem;
+  background: rgba(255, 51, 0, 0.1);
+  border: 1px solid rgba(255, 51, 0, 0.4);
+  border-radius: 8px;
+  color: #ff3300;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.network-load-more-btn:hover:not(:disabled) {
+  background: rgba(255, 51, 0, 0.18);
+  border-color: #ff3300;
+}
+
+.network-load-more-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* === RESPONSIVE DESIGN === */
 /* Mobile First - optimized for smartphone users */
 @media (max-width: 767px) {

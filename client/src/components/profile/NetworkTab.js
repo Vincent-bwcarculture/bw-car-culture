@@ -1,146 +1,103 @@
 // client/src/components/profile/NetworkTab.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, Filter, Grid, List } from 'lucide-react';
 import axios from '../../config/axios.js';
 import UserCard from '../shared/UserCard/UserCard.js';
 import './NetworkTab.css';
 
+const PAGE_SIZE = 50;
+
 const NetworkTab = ({ profileData }) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
-  const [filters, setFilters] = useState({
-    userType: 'all',
-    location: 'all',
-    verified: 'all'
-  });
+  const [viewMode, setViewMode] = useState('grid');
+  const [filters, setFilters] = useState({ userType: 'all', verified: 'all' });
   const [following, setFollowing] = useState(new Set());
   const [showFilters, setShowFilters] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
-  // Fetch network users on component mount
-  useEffect(() => {
-    fetchNetworkUsers();
-  }, []);
+  const searchDebounce = useRef(null);
 
-  // Debounce search and re-fetch for filters (but not search since we do client-side filtering for fallback)
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (filters.userType !== 'all' || filters.verified !== 'all') {
-        fetchNetworkUsers();
-      }
-    }, 300); // 300ms debounce for filters
-
-    return () => clearTimeout(timeoutId);
-  }, [filters]); // Only re-fetch on filter changes, not search
-
-  const fetchNetworkUsers = async () => {
+  const fetchNetworkUsers = useCallback(async (overridePage = 1, append = false) => {
     try {
-      setLoading(true);
+      append ? setLoadingMore(true) : setLoading(true);
       setError('');
 
-      // Try the existing auth/users endpoint first as a fallback
+      const params = new URLSearchParams({
+        page: String(overridePage),
+        limit: String(PAGE_SIZE),
+      });
+      if (searchTerm.trim()) params.append('search', searchTerm.trim());
+      if (filters.userType !== 'all') params.append('userType', filters.userType);
+      if (filters.verified !== 'all') params.append('verified', filters.verified);
+
       let response;
       try {
-        // Try the dedicated network endpoint first
-        const params = new URLSearchParams({
-          page: '1',
-          limit: '50'
-        });
-
-        if (filters.userType !== 'all') {
-          params.append('userType', filters.userType);
-        }
-        if (filters.verified !== 'all') {
-          params.append('verified', filters.verified);
-        }
-        if (searchTerm.trim()) {
-          params.append('search', searchTerm.trim());
-        }
-
         response = await axios.get(`/api/users/network?${params.toString()}`);
-      } catch (networkError) {
-        console.log('Network endpoint not available, trying fallback:', networkError.message);
+      } catch {
         response = await axios.get('/auth/users');
       }
 
       if (response.data.success) {
-        let fetchedUsers = response.data.data || response.data.available || [];
-
-        // Filter out current user and anyone who has explicitly set their profile to private
         const currentUserId = profileData?.id || profileData?._id;
-        fetchedUsers = fetchedUsers.filter(user => {
-          if ((user._id || user.id)?.toString() === currentUserId?.toString()) return false;
-          const vis = user.profileVisibility || user?.profile?.privacy?.profileVisibility;
-          return vis !== 'private'; // treat missing/unset as public by default
+        let fetched = (response.data.data || response.data.available || []).filter(u => {
+          if ((u._id || u.id)?.toString() === currentUserId?.toString()) return false;
+          const vis = u.profileVisibility || u?.profile?.privacy?.profileVisibility;
+          return vis !== 'private';
         });
 
-        // Apply client-side filtering if using fallback endpoint
-        if (response.config?.url?.includes('/auth/users')) {
-          fetchedUsers = fetchedUsers.filter(user => {
-            const matchesSearch = !searchTerm ||
-              user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              user.role?.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesUserType = filters.userType === 'all' || user.role === filters.userType;
-            const matchesVerified = filters.verified === 'all' ||
-              (filters.verified === 'verified' && user.emailVerified) ||
-              (filters.verified === 'unverified' && !user.emailVerified);
-            return matchesSearch && matchesUserType && matchesVerified;
-          });
-        }
+        setUsers(prev => append ? [...prev, ...fetched] : fetched);
+        setTotal(response.data.total ?? fetched.length);
+        setHasMore(response.data.hasMore ?? false);
+        setPage(overridePage);
 
-        setUsers(fetchedUsers);
-
-        // Seed following state from server-returned isFollowedByCurrentUser flag
         const initialFollowing = new Set(
-          fetchedUsers
-            .filter(u => u.isFollowedByCurrentUser)
-            .map(u => (u._id || u.id).toString())
+          fetched.filter(u => u.isFollowedByCurrentUser).map(u => (u._id || u.id).toString())
         );
-        setFollowing(initialFollowing);
+        setFollowing(prev => append ? new Set([...prev, ...initialFollowing]) : initialFollowing);
       } else {
         throw new Error(response.data.message || 'Failed to fetch users');
       }
-    } catch (error) {
-      console.error('Failed to fetch network users:', error);
-      
-      // Handle different error types
-      if (error.response?.status === 401) {
-        setError('Please log in to view the network.');
-      } else if (error.response?.status === 403) {
-        setError('You do not have permission to view the user network.');
-      } else if (error.response?.status === 404) {
-        setError('Network feature is temporarily unavailable. The endpoint needs to be added to the API.');
-      } else {
-        setError('Failed to load network users. Please try again later.');
-      }
+    } catch (err) {
+      if (err.response?.status === 401) setError('Please log in to view the network.');
+      else if (err.response?.status === 403) setError('You do not have permission to view the network.');
+      else setError('Failed to load network users. Please try again.');
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
+  }, [searchTerm, filters, profileData]);
+
+  // Initial load
+  useEffect(() => {
+    fetchNetworkUsers(1, false);
+  }, [filters]); // refetch from page 1 when filters change
+
+  // Debounce search
+  useEffect(() => {
+    if (searchDebounce.current) clearTimeout(searchDebounce.current);
+    searchDebounce.current = setTimeout(() => {
+      fetchNetworkUsers(1, false);
+    }, 350);
+    return () => clearTimeout(searchDebounce.current);
+  }, [searchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleLoadMore = () => {
+    fetchNetworkUsers(page + 1, true);
   };
-
-  // Filter users (handles both server-side filtered and client-side fallback)
-  const filteredUsers = users.filter(user => {
-    // Apply search filter (always client-side for responsive UI)
-    const matchesSearch = !searchTerm || 
-      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.role?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    return matchesSearch;
-  });
 
   const handleFollowToggle = async (userId) => {
     const idStr = userId.toString();
-    // Optimistic update
     setFollowing(prev => {
       const next = new Set(prev);
       next.has(idStr) ? next.delete(idStr) : next.add(idStr);
       return next;
     });
-    // Also update followerCount on the user in local state
     setUsers(prev => prev.map(u => {
       if ((u._id || u.id).toString() !== idStr) return u;
       const wasFollowing = following.has(idStr);
@@ -148,9 +105,7 @@ const NetworkTab = ({ profileData }) => {
     }));
     try {
       await axios.post(`/api/users/${idStr}/follow`);
-    } catch (error) {
-      console.error('Follow toggle error:', error);
-      // Revert optimistic update on failure
+    } catch {
       setFollowing(prev => {
         const next = new Set(prev);
         next.has(idStr) ? next.delete(idStr) : next.add(idStr);
@@ -159,7 +114,6 @@ const NetworkTab = ({ profileData }) => {
     }
   };
 
-  // Handle loading state
   if (loading) {
     return (
       <div className="network-tab">
@@ -171,14 +125,13 @@ const NetworkTab = ({ profileData }) => {
     );
   }
 
-  // Handle error state
   if (error) {
     return (
       <div className="network-tab">
         <div className="network-error">
           <h3>Network Unavailable</h3>
           <p>{error}</p>
-          <button onClick={fetchNetworkUsers} className="network-retry-btn">
+          <button onClick={() => fetchNetworkUsers(1, false)} className="network-retry-btn">
             Try Again
           </button>
         </div>
@@ -194,10 +147,9 @@ const NetworkTab = ({ profileData }) => {
           <h2>Network</h2>
           <p>Connect with automotive professionals and enthusiasts</p>
         </div>
-
         <div className="network-stats">
           <div className="network-stat">
-            <span className="network-stat-number">{users.length}</span>
+            <span className="network-stat-number">{total}</span>
             <span className="network-stat-label">Members</span>
           </div>
           <div className="network-stat">
@@ -218,27 +170,19 @@ const NetworkTab = ({ profileData }) => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-
         <div className="network-actions">
-          <button 
+          <button
             className={`network-filter-btn ${showFilters ? 'active' : ''}`}
             onClick={() => setShowFilters(!showFilters)}
           >
             <Filter size={18} />
             Filters
           </button>
-
           <div className="network-view-toggle">
-            <button 
-              className={viewMode === 'grid' ? 'active' : ''}
-              onClick={() => setViewMode('grid')}
-            >
+            <button className={viewMode === 'grid' ? 'active' : ''} onClick={() => setViewMode('grid')}>
               <Grid size={18} />
             </button>
-            <button 
-              className={viewMode === 'list' ? 'active' : ''}
-              onClick={() => setViewMode('list')}
-            >
+            <button className={viewMode === 'list' ? 'active' : ''} onClick={() => setViewMode('list')}>
               <List size={18} />
             </button>
           </div>
@@ -250,63 +194,70 @@ const NetworkTab = ({ profileData }) => {
         <div className="network-filters-panel">
           <div className="network-filter-group">
             <label>User Type:</label>
-            <select 
-              value={filters.userType} 
-              onChange={(e) => setFilters({...filters, userType: e.target.value})}
-            >
+            <select value={filters.userType} onChange={(e) => setFilters({ ...filters, userType: e.target.value })}>
               <option value="all">All Users</option>
               <option value="admin">Admin</option>
               <option value="user">Members</option>
             </select>
           </div>
-
           <div className="network-filter-group">
             <label>Verification:</label>
-            <select 
-              value={filters.verified} 
-              onChange={(e) => setFilters({...filters, verified: e.target.value})}
-            >
+            <select value={filters.verified} onChange={(e) => setFilters({ ...filters, verified: e.target.value })}>
               <option value="all">All Users</option>
               <option value="verified">Verified Only</option>
               <option value="unverified">Unverified</option>
             </select>
           </div>
-
-          <button 
+          <button
             className="network-clear-filters"
-            onClick={() => setFilters({userType: 'all', location: 'all', verified: 'all'})}
+            onClick={() => setFilters({ userType: 'all', verified: 'all' })}
           >
             Clear Filters
           </button>
         </div>
       )}
 
-      {/* Results Header */}
+      {/* Results count */}
       <div className="network-results-header">
-        <span>{filteredUsers.length} member{filteredUsers.length !== 1 ? 's' : ''}</span>
+        <span>
+          Showing {users.length} of {total} member{total !== 1 ? 's' : ''}
+        </span>
       </div>
 
       {/* Users Grid/List */}
       <div className={`network-users ${viewMode}`}>
-        {filteredUsers.length === 0 ? (
+        {users.length === 0 ? (
           <div className="network-empty">
             <h3>No users found</h3>
             <p>No members match your current search criteria.</p>
           </div>
         ) : (
-          filteredUsers.map(user => (
-            <UserCard 
+          users.map(user => (
+            <UserCard
               key={user._id || user.id}
               user={user}
-              isFollowing={following.has(user._id || user.id)}
+              isFollowing={following.has((user._id || user.id)?.toString())}
               onFollowToggle={() => handleFollowToggle(user._id || user.id)}
               viewMode={viewMode}
-              onMessage={(user) => console.log('Message user:', user)}
-              onViewProfile={(user) => console.log('View profile:', user)}
+              onMessage={(u) => console.log('Message user:', u)}
+              onViewProfile={(u) => console.log('View profile:', u)}
             />
           ))
         )}
       </div>
+
+      {/* Load More */}
+      {hasMore && (
+        <div className="network-load-more">
+          <button
+            className="network-load-more-btn"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore ? 'Loading...' : `Load More (${total - users.length} remaining)`}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
