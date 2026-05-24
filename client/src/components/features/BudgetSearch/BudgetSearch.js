@@ -23,7 +23,7 @@ const BudgetSearch = () => {
   const [showControls, setShowControls] = useState({ left: false, right: false });
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Most expensive car state
+  // Featured promo car (random pick from top 3 by listingQuality)
   const [mostExpensiveCar, setMostExpensiveCar] = useState(null);
   const [promoLoading, setPromoLoading] = useState(true);
 
@@ -140,22 +140,22 @@ const BudgetSearch = () => {
     }
   };
 
-  // Fetch most expensive car for promo image
+  // Fetch top 3 by listingQuality and randomly display one
   const fetchMostExpensiveCar = async () => {
     setPromoLoading(true);
     try {
       const response = await listingService.getListings({
-        sort: '-price',
+        sort: '-listingQuality,-featured,-createdAt',
         status: 'active',
-        limit: 1
+        limit: 3
       }, 1);
-      
+
       if (response.listings && response.listings.length > 0) {
-        setMostExpensiveCar(response.listings[0]);
-        console.log('Most expensive car fetched:', response.listings[0]);
+        const pick = response.listings[Math.floor(Math.random() * response.listings.length)];
+        setMostExpensiveCar(pick);
       }
     } catch (err) {
-      console.error('Error fetching most expensive car:', err);
+      console.error('Error fetching featured car:', err);
     } finally {
       setPromoLoading(false);
     }
