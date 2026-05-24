@@ -144,14 +144,9 @@ const BudgetSearch = () => {
   const fetchMostExpensiveCar = async () => {
     setPromoLoading(true);
     try {
-      const response = await listingService.getListings({
-        sort: '-listingQuality,-featured,-createdAt',
-        status: 'active',
-        limit: 3
-      }, 1);
-
-      if (response.listings && response.listings.length > 0) {
-        const pick = response.listings[Math.floor(Math.random() * response.listings.length)];
+      const listings = await listingService.getFeaturedListings(3);
+      if (listings && listings.length > 0) {
+        const pick = listings[Math.floor(Math.random() * listings.length)];
         setMostExpensiveCar(pick);
       }
     } catch (err) {
