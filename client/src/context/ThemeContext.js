@@ -1,7 +1,7 @@
 // client/src/context/ThemeContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-const THEMES = ['dark', 'blue', 'light'];
+const THEMES = ['dark', 'blue'];
 
 const ThemeContext = createContext();
 
@@ -15,7 +15,7 @@ export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('bwcc-theme');
     if (saved && THEMES.includes(saved)) return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return 'dark'; // default to dark (light mode removed)
   });
 
   useEffect(() => {
