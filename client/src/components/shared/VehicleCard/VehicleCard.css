@@ -1646,11 +1646,27 @@
 
 /* Mobile adjustments - INCREASED HEIGHTS */
 @media (max-width: 768px) {
+  /* Remove backdrop-filter on mobile — it forces per-frame GPU resampling during
+     scroll and is the primary cause of carousel flicker on touch devices. */
+  .vc-image-nav {
+    backdrop-filter: none;
+    background: rgba(0, 0, 0, 0.62);
+  }
+  .vc-zoom-controls {
+    backdrop-filter: none;
+    background: rgba(0, 0, 0, 0.62);
+  }
+
+  /* Disable hover lift on touch — avoids stale transition state on tap */
+  .vc-card:not(.vc-flipped) {
+    transition: none;
+  }
+
   .vc-image-container {
     height: 240px;
     cursor: pointer;
   }
-  
+
   .vc-zoom-controls {
     top: 8px;
     right: 8px;

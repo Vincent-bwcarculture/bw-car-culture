@@ -8,6 +8,7 @@ import './MarketplaceSection.css';
 
 const MarketplaceSection = () => {
   const scrollRef = useRef(null);
+  const rafRef = useRef(null);
   const [showControls, setShowControls] = useState({ left: false, right: true });
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,13 +57,19 @@ const MarketplaceSection = () => {
   };
 
   const handleScroll = () => {
-    if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      setShowControls({
-        left: scrollLeft > 0,
-        right: scrollLeft < scrollWidth - clientWidth - 1
-      });
-    }
+    if (rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => {
+      if (scrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        const newLeft = scrollLeft > 0;
+        const newRight = scrollLeft < scrollWidth - clientWidth - 1;
+        setShowControls(prev => {
+          if (prev.left === newLeft && prev.right === newRight) return prev;
+          return { left: newLeft, right: newRight };
+        });
+      }
+      rafRef.current = null;
+    });
   };
 
   const scroll = (direction) => {
@@ -87,6 +94,7 @@ const MarketplaceSection = () => {
       return () => {
         slider.removeEventListener('scroll', handleScroll);
         resizeObserver.disconnect();
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
       };
     }
   }, []);
