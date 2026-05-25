@@ -99,6 +99,7 @@ const BusinessDetailPage = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [sharingBusiness, setSharingBusiness] = useState(false);
   const shareButtonRef = useRef(null);
+  const listingsScrollRef = useRef(null);
   const [imageErrors, setImageErrors] = useState({ banner: false, logo: false });
 
   // ── Owner edit state ──────────────────────────────────────────────────────
@@ -169,7 +170,7 @@ const BusinessDetailPage = () => {
     
     if (path.includes('/dealerships/')) {
       setBusinessType('dealer');
-      setActiveTab('about');
+      setActiveTab('listings');
     } else if (path.includes('/services/')) {
       setBusinessType('service');
       setActiveTab('about');
@@ -1986,7 +1987,13 @@ return (
               </div>
             ) : (
               <>
-                <div className="bcc-business-detail-listings-grid">
+                <div className="bcc-business-detail-listings-scroll-wrapper">
+                  <button
+                    className="bcc-listings-scroll-btn bcc-listings-scroll-left"
+                    onClick={() => listingsScrollRef.current?.scrollBy({ left: -310, behavior: 'smooth' })}
+                    aria-label="Scroll left"
+                  >&#10094;</button>
+                  <div className="bcc-business-detail-listings-grid" ref={listingsScrollRef}>
                   {filteredListings.map(item => (
                     <div className="bcc-business-detail-vehicle-card-wrapper" key={item._id || item.id}>
                       {isDealer ? (
@@ -2054,7 +2061,13 @@ return (
                     </div>
                   ))}
                 </div>
-                
+                  <button
+                    className="bcc-listings-scroll-btn bcc-listings-scroll-right"
+                    onClick={() => listingsScrollRef.current?.scrollBy({ left: 310, behavior: 'smooth' })}
+                    aria-label="Scroll right"
+                  >&#10095;</button>
+                </div>
+
                 {listingsPagination.totalPages > 1 && (
                   <div className="bcc-business-detail-pagination">
                     <button 
