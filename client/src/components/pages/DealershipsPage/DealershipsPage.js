@@ -1,5 +1,5 @@
 // src/components/pages/DealershipsPage/DealershipsPage.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { http } from '../../../config/axios.js';
 import BusinessCard from '../../shared/BusinessCard/BusinessCard.js';
@@ -177,6 +177,15 @@ const DealershipsPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const scrollRef = useRef(null);
+
+  const scrollLeft = () => {
+    if (scrollRef.current) scrollRef.current.scrollBy({ left: -280, behavior: 'smooth' });
+  };
+  const scrollRight = () => {
+    if (scrollRef.current) scrollRef.current.scrollBy({ left: 280, behavior: 'smooth' });
+  };
+
   // Handle dealership action - navigate to detail page
   const handleDealershipAction = (dealer) => {
     navigate(`/dealerships/${dealer._id}`);
@@ -269,17 +278,20 @@ const DealershipsPage = () => {
               Found {pagination.total} dealership{pagination.total !== 1 ? 's' : ''}
             </div>
             
-            {/* UPDATED: Using BusinessCard instead of DealershipCard */}
-            <div className="bcc-dealerships-grid">
-              {dealers.map(dealer => (
-                <BusinessCard 
-                  key={dealer._id || Math.random().toString()}
-                  business={dealer}
-                  onAction={() => handleDealershipAction(dealer)}
-                />
-              ))}
+            <div className="bcc-dealerships-scroll-wrapper">
+              <button className="bcc-dealerships-scroll-btn bcc-scroll-left" onClick={scrollLeft} aria-label="Scroll left">&#10094;</button>
+              <div className="bcc-dealerships-grid" ref={scrollRef}>
+                {dealers.map(dealer => (
+                  <BusinessCard
+                    key={dealer._id || Math.random().toString()}
+                    business={dealer}
+                    onAction={() => handleDealershipAction(dealer)}
+                  />
+                ))}
+              </div>
+              <button className="bcc-dealerships-scroll-btn bcc-scroll-right" onClick={scrollRight} aria-label="Scroll right">&#10095;</button>
             </div>
-            
+
             {pagination.totalPages > 1 && (
               <div className="bcc-dealership-pagination">
                 <button 
