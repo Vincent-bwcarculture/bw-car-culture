@@ -236,8 +236,8 @@
   }
 
   .bcc-dealerships-grid > * {
-    flex: 0 0 260px;
-    width: 260px;
+    flex: 0 0 310px;
+    width: 310px;
     scroll-snap-align: start;
     min-width: 0;
   }
@@ -362,8 +362,8 @@
     }
 
     .bcc-dealerships-grid > * {
-      flex: 0 0 240px;
-      width: 240px;
+      flex: 0 0 285px;
+      width: 285px;
     }
 
     .bcc-dealerships-scroll-btn {
@@ -387,8 +387,8 @@
     }
 
     .bcc-dealerships-grid > * {
-      flex: 0 0 220px;
-      width: 220px;
+      flex: 0 0 260px;
+      width: 260px;
     }
 
     .bcc-dealership-filter-selects {
