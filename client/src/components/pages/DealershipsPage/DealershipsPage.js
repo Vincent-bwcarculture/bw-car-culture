@@ -15,7 +15,7 @@ const DealershipsPage = () => {
     businessType: 'all',
     search: '',
     city: '',
-    sortBy: 'newest'
+    sortBy: 'mostListings'
   });
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -36,7 +36,7 @@ const DealershipsPage = () => {
       businessType: searchParams.get('businessType') || 'all',
       search: searchParams.get('search') || '',
       city: searchParams.get('city') || '',
-      sortBy: searchParams.get('sortBy') || 'newest'
+      sortBy: searchParams.get('sortBy') || 'mostListings'
     };
     
     const page = parseInt(searchParams.get('page'), 10) || 1;
@@ -82,6 +82,9 @@ const DealershipsPage = () => {
       // Convert sortBy filter to API sort parameter
       let sort;
       switch (currentFilters.sortBy) {
+        case 'mostListings':
+          sort = '-metrics.totalListings';
+          break;
         case 'newest':
           sort = '-createdAt';
           break;
@@ -92,7 +95,7 @@ const DealershipsPage = () => {
           sort = 'businessName';
           break;
         default:
-          sort = '-createdAt';
+          sort = '-metrics.totalListings';
       }
 
       // Prepare API filter parameters
@@ -243,6 +246,7 @@ const DealershipsPage = () => {
                 onChange={(e) => handleFilterChange('sortBy', e.target.value)}
                 className="bcc-dealership-filter-select"
               >
+                <option value="mostListings">Most Listings</option>
                 <option value="newest">Newest</option>
                 <option value="oldest">Oldest</option>
                 <option value="businessName">Name (A-Z)</option>
