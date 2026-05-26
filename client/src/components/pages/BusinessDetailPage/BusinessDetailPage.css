@@ -1805,13 +1805,37 @@
 
   /* Mobile Content */
   .bcc-business-detail-content {
-    padding: 1.25rem 1rem;
+    padding: 0.9rem 0.6rem;
   }
 
   .bcc-business-detail-tab-button {
-    padding: 0.55rem 0.9rem;
-    font-size: 0.85rem;
-    min-height: 36px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    min-height: 32px;
+  }
+
+  .bcc-business-detail-description h2,
+  .bcc-business-detail-listings-tab h2,
+  .bcc-business-detail-reviews-tab h2,
+  .bcc-business-detail-contact-tab h2,
+  .bcc-business-detail-inventory-tab h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .bcc-business-detail-business-hours {
+    padding: 1.25rem 1rem;
+    border-radius: 12px;
+  }
+
+  .bcc-business-detail-business-hours h3 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .bcc-business-detail-hours-table td {
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
   }
 
   .bcc-business-detail-inventory-grid {
@@ -1918,7 +1942,7 @@
   }
 
   .bcc-business-detail-content {
-    padding: 1rem 0.85rem;
+    padding: 0.75rem 0.4rem;
   }
 
   .bcc-business-detail-tabs {
@@ -1949,12 +1973,31 @@
   }
 
   .bcc-business-detail-business-hours {
-    padding: 2rem 1.5rem;
+    padding: 1rem 0.75rem;
+  }
+
+  .bcc-business-detail-business-hours h3 {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .bcc-business-detail-hours-table td {
+    padding: 0.4rem 0;
+    font-size: 0.82rem;
+  }
+
+  .bcc-business-detail-description h2,
+  .bcc-business-detail-listings-tab h2,
+  .bcc-business-detail-reviews-tab h2,
+  .bcc-business-detail-contact-tab h2,
+  .bcc-business-detail-inventory-tab h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
   }
 
   .bcc-business-detail-contact-info,
   .bcc-business-detail-contact-location {
-    padding: 2rem 1.5rem;
+    padding: 1.25rem 1rem;
   }
 
   .bcc-business-detail-form-group input,
