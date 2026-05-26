@@ -19,7 +19,7 @@ body.is-scrolling {
   pointer-events: none;
 }
 
-body.is-scrolling * {
+body.is-scrolling *:not(.fdstrip-track):not(.fdstrip-card):not(.fdstrip-arrow) {
   pointer-events: none;
 }
 
@@ -104,7 +104,10 @@ body.section-transitioning * {
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
   flex: 1;
+  min-width: 0;
   padding: 2px 2px 4px;
 }
 .fdstrip-track::-webkit-scrollbar { display: none; }
@@ -644,6 +647,16 @@ body.section-transitioning * {
 
 /* Only apply horizontal scrolling on mobile */
 @media (max-width: 768px) {
+  /* Hide arrow buttons — touch swipe handles scrolling */
+  .fdstrip-arrow {
+    display: none;
+  }
+
+  /* Cards slightly wider on mobile for better tap targets */
+  .fdstrip-card {
+    width: 84px;
+  }
+
   .marketplace-grid.mobile-horizontal {
     display: block;
     gap: 0;
