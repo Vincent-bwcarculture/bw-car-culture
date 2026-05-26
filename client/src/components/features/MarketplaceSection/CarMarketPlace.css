@@ -1893,6 +1893,7 @@
   }
   
   .dealer-sidebar {
+    display: block;
     position: static;
     margin-top: 1.5rem;
   }
@@ -2062,8 +2063,31 @@
     flex: 0 0 auto;
   }
 
+  .related-listings-section, .related-news-section {
+    padding: 0.75rem 0.4rem;
+  }
+
   .news-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .news-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .news-card {
+    flex: 0 0 260px;
+    min-width: 0;
+    scroll-snap-align: start;
+    height: auto;
   }
 
   .carousel-slide {

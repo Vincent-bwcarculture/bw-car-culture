@@ -1209,7 +1209,7 @@
 
 @media (max-width: 600px) {
   .bcc-business-detail-listings-grid {
-    grid-template-columns: repeat(2, 250px);
+    grid-template-columns: repeat(2, 280px);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
