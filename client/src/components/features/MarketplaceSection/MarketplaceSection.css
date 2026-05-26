@@ -61,7 +61,6 @@
   scroll-behavior: smooth;
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
-  will-change: scroll-position;
 }
 
 .listings-scroll::-webkit-scrollbar {
