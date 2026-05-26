@@ -43,8 +43,8 @@ const MarketplaceList = () => {
   const [isRetrying, setIsRetrying] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   
-  // Performance state
-  const [isScrolling, setIsScrolling] = useState(false);
+  // Performance state — use ref so scroll never triggers a re-render
+  const isScrollingRef = useRef(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= MOBILE_BREAKPOINT);
   
   // Pagination state
@@ -1048,28 +1048,26 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
     });
   }, [isMobile, allCars.length]);
 
-  // Smooth scroll handler for better UX
+  // Smooth scroll handler — DOM-only, no setState so cards never remount
   const handleScrollOptimization = useMemo(
     () => throttle(() => {
-      const currentScrollY = window.scrollY;
-      
-      if (!isScrolling) {
-        setIsScrolling(true);
+      if (!isScrollingRef.current) {
+        isScrollingRef.current = true;
         document.body.classList.add('is-scrolling');
       }
-      
+
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
-      
+
       scrollTimeoutRef.current = setTimeout(() => {
-        setIsScrolling(false);
+        isScrollingRef.current = false;
         document.body.classList.remove('is-scrolling');
       }, 150);
-      
-      lastScrollY.current = currentScrollY;
+
+      lastScrollY.current = window.scrollY;
     }, 16),
-    [isScrolling]
+    [] // stable — no state deps
   );
 
   useEffect(() => {
