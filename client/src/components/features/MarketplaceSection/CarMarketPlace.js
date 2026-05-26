@@ -1431,7 +1431,7 @@ const CarMarketplace = () => {
                       <h3 className="news-card-title">{article.title}</h3>
                       <div className="news-card-author">
                         <div className="author-logo"><img src="/images/Bw Car Culture.png" alt="Bw Car Culture" className="logo-icon" loading="lazy" /></div>
-                        <span className="author-name">Admin User</span>
+                        <span className="author-name">{article.author?.name || article.authorName || 'Car Culture'}</span>
                         <span className="publication-date">{new Date(article.publishDate || article.createdAt || new Date()).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).split('/').join('/')}</span>
                       </div>
                     </div>

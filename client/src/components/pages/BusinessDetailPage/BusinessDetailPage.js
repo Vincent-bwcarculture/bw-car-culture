@@ -499,7 +499,7 @@ const loadBusinessReviews = async () => {
         ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
       };
       
-      setReviews(reviewsData);
+      setReviews(Array.isArray(reviewsData) ? reviewsData : []);
       setReviewStats(statsData);
     } else {
       setReviews([]);
@@ -2252,12 +2252,12 @@ return (
                     <div className="bcc-business-detail-spinner"></div>
                     <p>Loading reviews...</p>
                   </div>
-                ) : reviews.length === 0 ? (
+                ) : !Array.isArray(reviews) || reviews.length === 0 ? (
                   <div className="bcc-no-reviews">
                     <MessageSquare size={48} />
                     <h3>No reviews yet</h3>
                     <p>Be the first to review this business!</p>
-                    <button 
+                    <button
                       className="bcc-first-review-button"
                       onClick={handleStartReview}
                       disabled={!isAuthenticated}
@@ -2266,7 +2266,7 @@ return (
                     </button>
                   </div>
                 ) : (
-                  reviews.map(review => (
+                  (Array.isArray(reviews) ? reviews : []).map(review => (
                     <ReviewCard key={review._id} review={review} business={business} />
                   ))
                 )}

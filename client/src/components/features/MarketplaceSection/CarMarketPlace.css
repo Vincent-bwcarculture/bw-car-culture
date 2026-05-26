@@ -1188,20 +1188,34 @@
   margin-top: 2px;
 }
 
-/* Sidebar — Other dealerships */
-.sidebar-dealerships { padding-bottom: 0.5rem; }
+/* Sidebar — Other dealerships (horizontal pill strip) */
+.sidebar-dealerships {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  padding: 4px 2px 8px;
+}
+.sidebar-dealerships::-webkit-scrollbar { display: none; }
 
 .sidebar-dealership-item {
   display: flex;
+  flex: 0 0 80px;
+  flex-direction: column;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.4rem 0.8rem;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 4px;
   cursor: pointer;
   transition: background 0.15s;
-  border-radius: 6px;
-  margin: 0 0.3rem;
+  text-align: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
-.sidebar-dealership-item:hover { background: rgba(255,255,255,0.05); }
+.sidebar-dealership-item:hover { background: rgba(255, 255, 255, 0.09); border-color: rgba(255,51,0,0.4); }
 
 .sidebar-dealer-logo {
   width: 32px;
@@ -1214,12 +1228,14 @@
 }
 
 .sidebar-dealer-name {
-  font-size: 0.78rem;
-  color: #d0d0d0;
-  font-weight: 500;
-  white-space: nowrap;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60px;
+  text-align: center;
 }
 
 .dealer-section {
@@ -1450,7 +1466,7 @@
   border: 1px solid #2c2c2c;
   border-radius: 15px;
   padding: 1.2rem;
-  margin-top: 1.5rem;
+  margin-top: 0.75rem;
   width: 100%;
 }
 
@@ -1635,7 +1651,7 @@
 .carousel-container {
   position: relative;
   width: 100%;
-  margin: 1.2rem 0;
+  margin: 0.5rem 0;
   overflow: hidden;
 }
 
@@ -1927,11 +1943,11 @@
   }
   
   .contact-buttons {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
-  
+
   .contact-button.whatsapp {
-    grid-column: span 1;
+    grid-column: span 2;
   }
 
   .news-grid {
@@ -2203,6 +2219,11 @@
     width: 44px;
     height: 44px;
   }
+
+  .related-section-title { font-size: 1.05rem; margin-bottom: 0.6rem; }
+  .dealer-header h2 { font-size: 1rem; }
+
+  .carousel-slide { flex: 0 0 88%; }
 }
 
 /* Mobile Small */
