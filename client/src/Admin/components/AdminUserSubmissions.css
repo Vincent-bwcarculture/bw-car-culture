@@ -1810,18 +1810,61 @@
   backdrop-filter: blur(4px);
 }
 
+/* Visibility / Quality Score Slider */
+.admin-submissions-visibility-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  color: #c9d1d9;
+  margin-bottom: 0.5rem;
+}
+
+.admin-submissions-visibility-tier {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #f0b429;
+  background: rgba(240, 180, 41, 0.12);
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+}
+
+.admin-submissions-visibility-slider {
+  width: 100%;
+  accent-color: #f0b429;
+  height: 6px;
+  cursor: pointer;
+  margin-bottom: 0.4rem;
+}
+
+.admin-submissions-visibility-hints {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #6e7681;
+  margin-bottom: 0.5rem;
+}
+
+.admin-submissions-visibility-info {
+  font-size: 0.78rem;
+  color: #6e7681;
+  margin: 0;
+  line-height: 1.4;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .admin-submissions-payment-section {
     margin-top: 0.75rem;
     padding-top: 0.75rem;
   }
-  
+
   .admin-submissions-manual-payment-btn {
     width: 100%;
     justify-content: center;
   }
-  
+
   .admin-submissions-payment-status {
     font-size: 0.8rem;
     width: 100%;

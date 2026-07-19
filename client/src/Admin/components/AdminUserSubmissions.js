@@ -44,7 +44,8 @@ const AdminUserSubmissions = () => {
   const [reviewData, setReviewData] = useState({
     action: 'approve',
     adminNotes: '',
-    subscriptionTier: 'free'
+    subscriptionTier: 'free',
+    visibilityScore: 50
   });
 
   // NEW: Manual Payment Approval State
@@ -315,7 +316,8 @@ const AdminUserSubmissions = () => {
     setReviewData({
       action: submission.adminReview?.action || 'approve',
       adminNotes: submission.adminReview?.adminNotes || '',
-      subscriptionTier: 'free'
+      subscriptionTier: 'free',
+      visibilityScore: 50
     });
     setShowReviewModal(true);
     setError('');
@@ -353,7 +355,8 @@ const AdminUserSubmissions = () => {
       const requestData = {
         action: reviewData.action,
         adminNotes: reviewData.adminNotes.trim(),
-        subscriptionTier: reviewData.action === 'approve' ? reviewData.subscriptionTier : null
+        subscriptionTier: reviewData.action === 'approve' ? reviewData.subscriptionTier : null,
+        visibilityScore: reviewData.action === 'approve' ? reviewData.visibilityScore : 0
       };
 
       console.log('📤 Sending review request:', requestData);
@@ -404,7 +407,8 @@ const AdminUserSubmissions = () => {
         setReviewData({
           action: 'approve',
           adminNotes: '',
-          subscriptionTier: 'free'
+          subscriptionTier: 'free',
+          visibilityScore: 50
         });
         setSelectedSubmission(null);
         setShowReviewModal(false);
@@ -1333,6 +1337,35 @@ const AdminUserSubmissions = () => {
                     rows={4}
                   />
                 </div>
+
+                {reviewData.action === 'approve' && (
+                  <div className="admin-submissions-form-group">
+                    <label className="admin-submissions-visibility-label">
+                      <TrendingUp size={14} />
+                      Listing Quality Score: <strong>{reviewData.visibilityScore}</strong>/100
+                      <span className="admin-submissions-visibility-tier">
+                        {reviewData.visibilityScore >= 80 ? '⭐ Featured' : reviewData.visibilityScore >= 50 ? '✓ Standard' : '↓ Basic'}
+                      </span>
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={reviewData.visibilityScore}
+                      onChange={(e) => setReviewData({...reviewData, visibilityScore: Number(e.target.value)})}
+                      className="admin-submissions-visibility-slider"
+                    />
+                    <div className="admin-submissions-visibility-hints">
+                      <span>0 — Low quality</span>
+                      <span>50 — Good</span>
+                      <span>100 — Excellent</span>
+                    </div>
+                    <p className="admin-submissions-visibility-info">
+                      Higher scores rank this listing higher in search results. Scores ≥ 80 mark the listing as featured.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
