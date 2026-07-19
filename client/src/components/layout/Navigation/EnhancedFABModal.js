@@ -720,94 +720,69 @@ const EnhancedFABModal = ({
     );
   };
 
+  const BWCC_WHATSAPP = '26774122453';
+
+  const navItems = [
+    { label: 'Browse Cars', desc: 'Search marketplace listings', path: '/marketplace', icon: <Car size={22} /> },
+    { label: 'Find Dealerships', desc: 'View verified dealerships', path: '/dealerships', icon: <Trophy size={22} /> },
+    { label: 'Services', desc: 'Workshops, rentals & transport', path: '/services', icon: <ChevronRight size={22} /> },
+    { label: 'Car News', desc: 'Latest automotive news', path: '/news', icon: <MessageSquare size={22} /> },
+  ];
+
+  const handleWhatsAppUs = () => {
+    const msg = encodeURIComponent('Hi Bw Car Culture! I need some help.');
+    window.open(`https://wa.me/${BWCC_WHATSAPP}?text=${msg}`, '_blank');
+    handleCloseAll();
+  };
+
   return (
     <div className="efab-modal-overlay" onClick={handleOverlayClick}>
-      {showQRScanner && (
-        <div className="efab-qr-scanner-container">
-          <QRCodeScanner
-            onResult={handleQRScanResult}
-            onCancel={() => { setShowQRScanner(false); setReviewMethod(null); }}
-          />
+      <div className="efab-modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="efab-modal-header">
+          <h3>Quick Actions</h3>
+          <button className="efab-close-button" onClick={handleCloseAll}>
+            <X size={20} />
+          </button>
         </div>
-      )}
 
-      {!showQRScanner && (
-        <div className="efab-modal-content" onClick={(e) => e.stopPropagation()}>
-          <div className="efab-modal-header">
-            <h3>Share Your Experience</h3>
-            <button className="efab-close-button" onClick={handleCloseAll}>
-              <X size={20} />
+        {/* WhatsApp contact */}
+        <div className="efab-methods-section">
+          <h4>Contact Us</h4>
+          <div className="efab-method-buttons">
+            <button className="efab-method-button efab-whatsapp-btn" onClick={handleWhatsAppUs}>
+              <div className="efab-method-icon" style={{ color: '#25d366' }}>
+                <MessageSquare size={24} />
+              </div>
+              <div className="efab-method-info">
+                <span className="efab-method-title">WhatsApp Us</span>
+                <span className="efab-method-desc">Chat with Bw Car Culture directly</span>
+              </div>
+              <ChevronRight size={16} className="efab-method-arrow" />
             </button>
           </div>
-
-          <div className="efab-info-section">
-            <div className="efab-info-badge">
-              <Info size={16} />
-            </div>
-            <div className="efab-info-content">
-              <p>Your reviews help other customers make informed decisions and help businesses improve their services. Every review counts!</p>
-            </div>
-          </div>
-
-          {!reviewMethod && (
-            <>
-              <div className="efab-methods-section">
-                <h4>How would you like to review?</h4>
-                <div className="efab-method-buttons">
-                  <button className="efab-method-button" onClick={() => handleMethodSelect('qr')}>
-                    <div className="efab-method-icon"><QrCode size={24} /></div>
-                    <div className="efab-method-info">
-                      <span className="efab-method-title">Scan QR Code</span>
-                      <span className="efab-method-desc">Quick service verification</span>
-                    </div>
-                    <ChevronRight size={16} className="efab-method-arrow" />
-                  </button>
-
-                  <button className="efab-method-button" onClick={() => handleMethodSelect('service_code')}>
-                    <div className="efab-method-icon"><Hash size={24} /></div>
-                    <div className="efab-method-info">
-                      <span className="efab-method-title">Service Code</span>
-                      <span className="efab-method-desc">Enter code from receipt</span>
-                    </div>
-                    <ChevronRight size={16} className="efab-method-arrow" />
-                  </button>
-
-                  <button className="efab-method-button" onClick={() => handleMethodSelect('plate_number')}>
-                    <div className="efab-method-icon"><Car size={24} /></div>
-                    <div className="efab-method-info">
-                      <span className="efab-method-title">Number Plate</span>
-                      <span className="efab-method-desc">Review transport service</span>
-                    </div>
-                    <ChevronRight size={16} className="efab-method-arrow" />
-                  </button>
-
-                  <button className="efab-method-button" onClick={() => handleMethodSelect('general')}>
-                    <div className="efab-method-icon"><MessageSquare size={24} /></div>
-                    <div className="efab-method-info">
-                      <span className="efab-method-title">General Review</span>
-                      <span className="efab-method-desc">Share general feedback</span>
-                    </div>
-                    <ChevronRight size={16} className="efab-method-arrow" />
-                  </button>
-                </div>
-              </div>
-              {renderLeaderboard()}
-            </>
-          )}
-
-          {/* QR Code — multi-step */}
-          {reviewMethod === 'qr' && !showQRScanner && renderQRFlow()}
-
-          {/* Service Code — multi-step */}
-          {reviewMethod === 'service_code' && renderServiceCodeFlow()}
-
-          {/* Plate Number — multi-step */}
-          {reviewMethod === 'plate_number' && renderPlateFlow()}
-
-          {/* General Review */}
-          {reviewMethod === 'general' && renderGeneralFlow()}
         </div>
-      )}
+
+        {/* Site navigation */}
+        <div className="efab-methods-section">
+          <h4>Navigate</h4>
+          <div className="efab-method-buttons">
+            {navItems.map(item => (
+              <button
+                key={item.path}
+                className="efab-method-button"
+                onClick={() => { navigate(item.path); handleCloseAll(); }}
+              >
+                <div className="efab-method-icon">{item.icon}</div>
+                <div className="efab-method-info">
+                  <span className="efab-method-title">{item.label}</span>
+                  <span className="efab-method-desc">{item.desc}</span>
+                </div>
+                <ChevronRight size={16} className="efab-method-arrow" />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

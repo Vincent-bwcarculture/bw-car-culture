@@ -638,9 +638,10 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           isVerified: !!car.dealer.verification?.isVerified || car.dealer.verification?.status === 'verified'
         },
         contact: {
-          phone: [car.dealer.contact?.phone, car.dealer.phone, car.dealer.contactPhone, car.contact?.phone, car.contact?.whatsapp].find(v => v && v !== 'N/A' && v.trim() !== '') || null,
-          email: [car.dealer.contact?.email, car.dealer.email, car.dealer.contactEmail, car.contact?.email].find(v => v && v !== 'N/A' && v.trim() !== '') || null,
-          website: !isPrivateSeller ? ([car.dealer.contact?.website, car.dealer.website].find(v => v && v !== 'N/A' && v.trim() !== '') || null) : null
+          phone: [car.dealer.contact?.phone, car.dealerId?.contact?.phone, car.dealer.phone, car.dealerId?.phone, car.dealer.contactPhone, car.contact?.phone, car.contact?.whatsapp].find(v => v && v !== 'N/A' && v.trim() !== '') || null,
+          whatsapp: [car.dealer.contact?.whatsapp, car.dealerId?.contact?.whatsapp, car.dealer.contact?.phone, car.dealerId?.contact?.phone, car.contact?.whatsapp, car.contact?.phone].find(v => v && v !== 'N/A' && v.trim() !== '') || null,
+          email: [car.dealer.contact?.email, car.dealerId?.contact?.email, car.dealer.email, car.dealer.contactEmail, car.contact?.email].find(v => v && v !== 'N/A' && v.trim() !== '') || null,
+          website: !isPrivateSeller ? ([car.dealer.contact?.website, car.dealerId?.contact?.website, car.dealer.website].find(v => v && v !== 'N/A' && v.trim() !== '') || null) : null
         },
         privateSeller: isPrivateSeller ? {
           firstName: car.dealer.privateSeller?.firstName || null,
@@ -931,9 +932,13 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     const whatsappNum = [
       dealer?.contact?.whatsapp,
       car.contact?.whatsapp,
+      car.dealer?.contact?.whatsapp,
+      // populated dealerId (available on detail page)
+      car.dealerId?.contact?.whatsapp,
       car.dealer?.contact?.phone,
       car.dealer?.phone,
       car.dealer?.contactPhone,
+      car.dealerId?.contact?.phone,
       dealer?.contact?.phone,
       car.contact?.phone
     ].map(cleanVal).find(Boolean) || null;
@@ -941,6 +946,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     const phoneNum = [
       car.contact?.phone,
       car.dealer?.contact?.phone,
+      car.dealerId?.contact?.phone,
       car.dealer?.phone,
       car.dealer?.contactPhone,
       dealer?.contact?.phone,
@@ -1626,13 +1632,10 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             <button 
               className="vc-reserve-btn"
               onClick={handleReserveClick}
-              aria-label={dealer?.sellerType === 'private' ? 'Contact Seller' : 'Reserve Vehicle'}
+              aria-label="WhatsApp"
               disabled={car.status === 'sold'}
             >
-              {car.status === 'sold' 
-                ? 'Sold' 
-                : (dealer?.sellerType === 'private' ? 'Contact' : 'Reserve')
-              }
+              {car.status === 'sold' ? 'Sold' : 'WhatsApp'}
             </button>
             <button className="vc-details-btn">
               View Details

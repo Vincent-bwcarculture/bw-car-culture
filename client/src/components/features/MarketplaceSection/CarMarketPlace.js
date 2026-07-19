@@ -758,15 +758,16 @@ const CarMarketplace = () => {
   }, [car, isSaved, isPrivateSeller]);
 
   const handleWhatsAppClick = useCallback(() => {
-    // Resolve contact — check listing snapshot, populated dealer doc, and top-level contact fields
+    // Resolve contact — whatsapp-specific first, then phone.
+    // dealerId is populated (live) so prefer it over the stale embedded snapshot.
     const cleanPhone = (v) => (v && typeof v === 'string' && v.trim() !== '' && v.trim().toUpperCase() !== 'N/A') ? v.trim() : null;
     const resolvedPhone =
-      cleanPhone(car?.dealer?.contact?.whatsapp)        // prefer whatsapp-specific field first
-      || cleanPhone(car?.dealerId?.contact?.whatsapp)   // current dealer profile whatsapp
+      cleanPhone(car?.dealer?.contact?.whatsapp)        // listing snapshot whatsapp
+      || cleanPhone(car?.dealerId?.contact?.whatsapp)   // current dealer profile whatsapp (live)
       || cleanPhone(car?.contact?.whatsapp)             // user-submission top-level whatsapp
-      || cleanPhone(car?.dealer?.contact?.phone)        // listing snapshot phone
-      || cleanPhone(car?.dealerId?.contact?.phone)      // current dealer profile phone (live, always up-to-date)
+      || cleanPhone(car?.dealerId?.contact?.phone)      // current dealer profile phone (live, takes priority over stale snapshot)
       || cleanPhone(car?.contact?.phone)                // user-submission top-level phone
+      || cleanPhone(car?.dealer?.contact?.phone)        // listing snapshot phone (fallback)
       || cleanPhone(car?.dealer?.phone)                 // legacy flat phone field
       || cleanPhone(car?.dealerId?.phone);              // legacy on populated dealer
     if (!resolvedPhone) {
