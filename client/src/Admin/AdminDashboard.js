@@ -13,6 +13,7 @@ import GIONAdminDashboard from '../components/GION/GIONAdminDashboard/GIONAdminD
 import BroadcastNotification from './BroadcastNotification/BroadcastNotification.js';
 import AdminOpsDashboardWidget from './AdminOps/AdminOpsDashboardWidget.js';
 import CheckinReminderModal from './AdminOps/CheckinReminderModal.js';
+import InventoryManager from './InventoryManager/InventoryManager.js';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -160,6 +161,28 @@ const AdminDashboard = () => {
               </button>
             </div>
             <BroadcastNotification />
+          </>
+        );
+      case 'inventory':
+        return (
+          <>
+            <div className="section-header">
+              <h2>Inventory Manager</h2>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <a
+                  href="/inventory"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize: '0.82rem', color: '#58a6ff', textDecoration: 'none' }}
+                >
+                  ↗ Preview Public Page
+                </a>
+                <button className="back-button" onClick={() => setActiveSection('dashboard')}>
+                  ← Back to Dashboard
+                </button>
+              </div>
+            </div>
+            <InventoryManager />
           </>
         );
       default:

@@ -14,7 +14,8 @@ import {
   UserCheck,
   Users,
   PenTool,
-  Bell
+  Bell,
+  Package
 } from 'lucide-react';
 // Bell used for Notifications tab
 import axios from '../config/axios.js';
@@ -35,6 +36,7 @@ import RegisterVehicleTab from '../components/profile/RegisterVehicleTab.js';
 import CoordinatorManagement from '../components/profile/CoordinatorManagement.js';
 import RealTimeCoordinatorDashboard from '../components/profile/RealTimeCoordinatorDashboard.js';
 import DriverOperatorDashboard from '../components/profile/DriverOperatorDashboard.js';
+import InventoryManagement from '../components/profile/InventoryManagement.js';
 
 import { useAuth } from '../context/AuthContext.js';
 import './UserProfilePage.css';
@@ -213,6 +215,11 @@ const getAvailableTabs = () => {
     { id: 'register-vehicle', label: 'Register Vehicle', icon: Car },
     { id: 'notifications', label: 'Notifications', icon: Bell }
   ];
+
+  // Admin-only: Sell Inventory (hidden from public until ready)
+  if (profileData?.role === 'admin') {
+    tabs.push({ id: 'inventory', label: 'Sell Inventory', icon: Package });
+  }
 
   // === NEW: JOURNALIST ARTICLES TAB ===
   // Show Articles tab for journalists (primary OR additional role)
@@ -401,10 +408,17 @@ const getAvailableTabs = () => {
 
         {/* Use VehicleManagement with urlAction for Hero section integration */}
         {activeTab === 'vehicles' && (
-          <VehicleManagement 
+          <VehicleManagement
             profileData={displayData}
             refreshProfile={fetchUserProfile}
             urlAction={urlAction}
+          />
+        )}
+
+        {/* Admin-only: Inventory listing management */}
+        {activeTab === 'inventory' && (
+          <InventoryManagement
+            profileData={displayData}
           />
         )}
 

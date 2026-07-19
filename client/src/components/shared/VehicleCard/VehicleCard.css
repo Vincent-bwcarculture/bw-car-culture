@@ -1424,8 +1424,9 @@
   flex-shrink: 0;
 }
 
-/* Shared base for all three action buttons — fixed size, no inflation */
+/* Shared base for all action buttons — fixed size, no inflation */
 .vc-share-btn,
+.vc-review-btn,
 .vc-reserve-btn,
 .vc-details-btn {
   flex: 0 0 auto;
@@ -1450,6 +1451,50 @@
   background: var(--vc-bg-button-hover);
   border-color: rgba(255, 51, 0, 0.35);
   color: var(--vc-text-primary);
+}
+
+/* Reviews button — neutral with badge */
+.vc-review-btn {
+  background: var(--vc-bg-button);
+  color: var(--vc-text-muted);
+  border: 1px solid var(--vc-border-color);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+.vc-review-btn:hover {
+  background: var(--vc-bg-button-hover);
+  border-color: rgba(255, 193, 7, 0.4);
+  color: var(--vc-text-primary);
+}
+
+.vc-review-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.08);
+  color: #aaa;
+  line-height: 1;
+}
+
+.vc-review-badge.has-reviews {
+  background: rgba(255, 193, 7, 0.15);
+  color: #f0b429;
+}
+
+.vc-review-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #f0b429;
+  flex-shrink: 0;
 }
 
 /* Solid muted green — mature, not neon */
@@ -2197,6 +2242,7 @@
 .vc-zoom-btn:focus-visible,
 .vc-image-nav:focus-visible,
 .vc-share-btn:focus-visible,
+.vc-review-btn:focus-visible,
 .vc-reserve-btn:focus-visible,
 .vc-details-btn:focus-visible {
   outline: 2px solid var(--vc-accent-primary);

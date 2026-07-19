@@ -1,0 +1,369 @@
+/* client/src/components/profile/InventoryManagement.css */
+
+.inv-mgmt-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+  color: #c9d1d9;
+}
+
+/* Toast */
+.inv-mgmt-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+.inv-mgmt-toast.success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #10b981; }
+.inv-mgmt-toast.error   { background: rgba(239,68,68,0.12);  border: 1px solid rgba(239,68,68,0.3);  color: #ef4444; }
+.inv-mgmt-toast button  { margin-left: auto; background: none; border: none; cursor: pointer; color: inherit; display: flex; }
+
+/* Header */
+.inv-mgmt-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.inv-mgmt-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #c9d1d9;
+}
+
+.inv-mgmt-header-left h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #e6edf3;
+}
+
+.inv-mgmt-header-left p {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: #6e7681;
+}
+
+.inv-mgmt-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.inv-mgmt-refresh-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid #30363d;
+  color: #8b949e;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+.inv-mgmt-refresh-btn:hover { background: rgba(255,255,255,0.1); }
+
+.inv-mgmt-preview-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid #30363d;
+  color: #8b949e;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+.inv-mgmt-preview-btn:hover { background: rgba(255,255,255,0.1); color: #c9d1d9; }
+
+.inv-mgmt-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #ff3300;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.inv-mgmt-add-btn:hover { background: #cc2900; }
+.inv-mgmt-add-btn.large { padding: 0.65rem 1.4rem; font-size: 0.9rem; margin-top: 1rem; }
+
+/* Admin note banner */
+.inv-mgmt-admin-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  background: rgba(240,180,41,0.08);
+  border: 1px solid rgba(240,180,41,0.2);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: #d4a017;
+  margin-bottom: 1.25rem;
+}
+
+/* Error / Loading / Empty */
+.inv-mgmt-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 8px;
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.inv-mgmt-loading,
+.inv-mgmt-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #6e7681;
+}
+.inv-mgmt-empty h3 { color: #8b949e; margin: 0; }
+.inv-mgmt-empty p  { margin: 0; font-size: 0.88rem; }
+
+/* Grid */
+.inv-mgmt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+/* Card */
+.inv-mgmt-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s;
+}
+.inv-mgmt-card:hover { border-color: #ff3300; }
+
+.inv-mgmt-card-img {
+  position: relative;
+  height: 150px;
+  background: #0d1117;
+}
+.inv-mgmt-card-img img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.inv-mgmt-img-placeholder {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #30363d;
+}
+
+.inv-mgmt-condition-tag {
+  position: absolute;
+  top: 8px; left: 8px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  background: rgba(0,0,0,0.65);
+  color: #e6edf3;
+}
+.inv-mgmt-condition-tag.new       { background: rgba(16,185,129,0.75); }
+.inv-mgmt-condition-tag.used      { background: rgba(59,130,246,0.75); }
+.inv-mgmt-condition-tag.refurbished { background: rgba(245,158,11,0.75); }
+
+.inv-mgmt-card-body {
+  padding: 0.75rem;
+  flex: 1;
+}
+
+.inv-mgmt-item-name {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e6edf3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inv-mgmt-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.inv-mgmt-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.72rem;
+  color: #8b949e;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid #30363d;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.inv-mgmt-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ff3300;
+  margin-bottom: 0.25rem;
+}
+
+.inv-mgmt-stock {
+  font-size: 0.75rem;
+}
+.inv-mgmt-stock .in-stock    { color: #10b981; }
+.inv-mgmt-stock .out-of-stock { color: #6e7681; }
+
+.inv-mgmt-card-actions {
+  display: flex;
+  border-top: 1px solid #21262d;
+}
+
+.inv-mgmt-edit-btn,
+.inv-mgmt-delete-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: background 0.2s;
+}
+
+.inv-mgmt-edit-btn {
+  color: #58a6ff;
+  border-right: 1px solid #21262d;
+}
+.inv-mgmt-edit-btn:hover   { background: rgba(88,166,255,0.08); }
+.inv-mgmt-delete-btn       { color: #f85149; }
+.inv-mgmt-delete-btn:hover { background: rgba(248,81,73,0.08); }
+
+/* Modals */
+.inv-mgmt-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.inv-mgmt-modal {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.inv-mgmt-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #21262d;
+}
+.inv-mgmt-modal-header h3 { margin: 0; font-size: 1rem; color: #e6edf3; }
+.inv-mgmt-modal-header button {
+  background: none; border: none; color: #8b949e; cursor: pointer;
+  display: flex; padding: 2px;
+}
+.inv-mgmt-modal-header button:hover { color: #e6edf3; }
+
+.inv-mgmt-modal-body {
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+  flex: 1;
+}
+
+/* Confirm delete modal */
+.inv-mgmt-confirm-modal {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+}
+.inv-mgmt-confirm-icon { color: #f85149; margin-bottom: 0.75rem; }
+.inv-mgmt-confirm-modal h3 { margin: 0 0 0.5rem; color: #e6edf3; }
+.inv-mgmt-confirm-modal p  { margin: 0 0 1.5rem; font-size: 0.88rem; color: #8b949e; }
+
+.inv-mgmt-confirm-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.inv-mgmt-cancel-btn,
+.inv-mgmt-delete-confirm-btn {
+  padding: 0.55rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+.inv-mgmt-cancel-btn         { background: #21262d; color: #8b949e; }
+.inv-mgmt-cancel-btn:hover   { background: #30363d; }
+.inv-mgmt-delete-confirm-btn { background: #f85149; color: #fff; }
+.inv-mgmt-delete-confirm-btn:hover { background: #da3633; }
+
+/* Spinner */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .inv-mgmt-header { flex-direction: column; }
+  .inv-mgmt-header-actions { width: 100%; }
+  .inv-mgmt-add-btn { flex: 1; justify-content: center; }
+  .inv-mgmt-grid { grid-template-columns: 1fr; }
+}

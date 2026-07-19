@@ -45,6 +45,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsError, setReviewsError] = useState(null);
+  const [previewCount, setPreviewCount] = useState(null); // null = not yet loaded
   const [newRating, setNewRating] = useState(0);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1105,6 +1106,22 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     }
   }, [car]);
 
+  // Fetch review count once on mount so the badge shows before flip
+  useEffect(() => {
+    if (!car?._id) return;
+    const controller = new AbortController();
+    fetch(`${API_BASE}/reviews/listing/${car._id}`, { signal: controller.signal })
+      .then(r => r.json())
+      .then(data => setPreviewCount(data.data?.reviews?.length ?? 0))
+      .catch(() => {});
+    return () => controller.abort();
+  }, [car?._id]);
+
+  // Keep previewCount in sync after reviews are loaded from flip
+  useEffect(() => {
+    if (reviews.length > 0) setPreviewCount(reviews.length);
+  }, [reviews]);
+
   const handleFlip = useCallback((e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -1622,14 +1639,27 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               'Used'}
           </span>
           <div className="vc-actions">
-            <button 
+            <button
               className="vc-share-btn"
               onClick={handleShareClick}
               aria-label="Share"
             >
               Share
             </button>
-            <button 
+            <button
+              className="vc-review-btn"
+              onClick={handleFlip}
+              aria-label="Reviews"
+            >
+              ★ Reviews
+              {previewCount !== null && (
+                <span className={`vc-review-badge ${previewCount > 0 ? 'has-reviews' : 'no-reviews'}`}>
+                  {previewCount > 0 && <span className="vc-review-dot" />}
+                  {previewCount}
+                </span>
+              )}
+            </button>
+            <button
               className="vc-reserve-btn"
               onClick={handleReserveClick}
               aria-label="WhatsApp"
