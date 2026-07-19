@@ -1647,19 +1647,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               Share
             </button>
             <button
-              className="vc-review-btn"
-              onClick={handleFlip}
-              aria-label="Reviews"
-            >
-              ★ Reviews
-              {previewCount !== null && (
-                <span className={`vc-review-badge ${previewCount > 0 ? 'has-reviews' : 'no-reviews'}`}>
-                  {previewCount > 0 && <span className="vc-review-dot" />}
-                  {previewCount}
-                </span>
-              )}
-            </button>
-            <button
               className="vc-reserve-btn"
               onClick={handleReserveClick}
               aria-label="WhatsApp"
@@ -1806,6 +1793,12 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
 
     <button className="vc-review-tab" onClick={handleFlip} title="Listing reviews">
       REVIEW
+      {previewCount !== null && (
+        <span className={`vc-review-tab-badge ${previewCount > 0 ? 'has-reviews' : ''}`}>
+          {previewCount > 0 && <span className="vc-review-tab-dot" />}
+          {previewCount}
+        </span>
+      )}
     </button>
     </div>
   );
