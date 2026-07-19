@@ -779,21 +779,28 @@ const CarDetailsGallery = ({ car, onSave, onShare, showDealerLink = true }) => {
           const rawPhone = [
             car.contact?.phone,
             car.dealer?.contact?.phone,
+            car.dealerId?.contact?.phone,
             car.dealer?.phone,
+            car.dealerId?.phone,
             car.dealer?.contactPhone
           ].map(cleanContact).find(Boolean) || null;
           const rawWhatsapp = [
             car.contact?.whatsapp,
             car.dealer?.contact?.whatsapp,
+            car.dealerId?.contact?.whatsapp,
             car.contact?.phone,
             car.dealer?.contact?.phone,
+            car.dealerId?.contact?.phone,
             car.dealer?.phone,
+            car.dealerId?.phone,
             car.dealer?.contactPhone
           ].map(cleanContact).find(Boolean) || null;
           const rawEmail = [
             car.contact?.email,
             car.dealer?.contact?.email,
+            car.dealerId?.contact?.email,
             car.dealer?.email,
+            car.dealerId?.email,
             car.dealer?.contactEmail
           ].map(cleanContact).find(Boolean) || null;
 

@@ -299,9 +299,11 @@ export const createListing = asyncHandler(async (req, res, next) => {
         sellerType: dealer.sellerType || 'dealership',
         
         contact: {
-          phone: dealer.contact?.phone || 'N/A',
-          email: dealer.contact?.email || 'N/A',
-          website: (!isPrivateSeller && dealer.contact?.website) ? dealer.contact.website : null
+          // Prefer the phone/whatsapp submitted per-listing (admin override) over the dealer profile default
+          phone: listingData.dealer?.contact?.phone || dealer.contact?.phone || 'N/A',
+          whatsapp: listingData.dealer?.contact?.whatsapp || dealer.contact?.whatsapp || listingData.dealer?.contact?.phone || dealer.contact?.phone || null,
+          email: listingData.dealer?.contact?.email || dealer.contact?.email || 'N/A',
+          website: (!isPrivateSeller && (listingData.dealer?.contact?.website || dealer.contact?.website)) ? (listingData.dealer?.contact?.website || dealer.contact?.website) : null
         },
         
         location: {
@@ -862,12 +864,12 @@ export const getListing = asyncHandler(async (req, res, next) => {
     // Try ObjectId lookup first, then fall back to slug
     if (mongoose.Types.ObjectId.isValid(id)) {
       listing = await Listing.findById(id)
-        .populate('dealerId', 'businessName location contact verification profile');
+        .populate('dealerId', 'businessName location contact verification profile sellerType privateSeller');
     }
 
     if (!listing) {
       listing = await Listing.findOne({ slug: id })
-        .populate('dealerId', 'businessName location contact verification profile');
+        .populate('dealerId', 'businessName location contact verification profile sellerType privateSeller');
     }
 
     if (!listing) {
@@ -1068,10 +1070,22 @@ export const updateListing = asyncHandler(async (req, res) => {
     const previousStatus = listing.status;
     const newStatus = listingData.status || previousStatus;
 
+    // Build update: spread all non-dealer fields, then patch dealer.contact selectively
+    const { dealer: dealerOverride, ...restListingData } = listingData;
+    const updateDoc = { ...restListingData, lastUpdated: Date.now() };
+
+    // If the caller provided dealer contact overrides, patch only those sub-fields
+    if (dealerOverride?.contact?.phone) {
+      updateDoc['dealer.contact.phone'] = dealerOverride.contact.phone;
+    }
+    if (dealerOverride?.contact?.whatsapp) {
+      updateDoc['dealer.contact.whatsapp'] = dealerOverride.contact.whatsapp;
+    }
+
     // Update the listing
     listing = await Listing.findByIdAndUpdate(
       req.params.id,
-      { ...listingData, lastUpdated: Date.now() },
+      { $set: updateDoc },
       { new: true, runValidators: true }
     );
 

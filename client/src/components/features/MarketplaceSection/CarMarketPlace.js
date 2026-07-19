@@ -758,13 +758,17 @@ const CarMarketplace = () => {
   }, [car, isSaved, isPrivateSeller]);
 
   const handleWhatsAppClick = useCallback(() => {
-    // Resolve contact from all storage locations (dealership listings vs user-submission listings)
+    // Resolve contact — check listing snapshot, populated dealer doc, and top-level contact fields
     const cleanPhone = (v) => (v && typeof v === 'string' && v.trim() !== '' && v.trim().toUpperCase() !== 'N/A') ? v.trim() : null;
-    const resolvedPhone = cleanPhone(car?.dealer?.contact?.phone)
-      || cleanPhone(car?.contact?.phone)
-      || cleanPhone(car?.dealer?.phone)
-      || cleanPhone(car?.contact?.whatsapp)
-      || cleanPhone(car?.dealer?.contact?.whatsapp);
+    const resolvedPhone =
+      cleanPhone(car?.dealer?.contact?.whatsapp)        // prefer whatsapp-specific field first
+      || cleanPhone(car?.dealerId?.contact?.whatsapp)   // current dealer profile whatsapp
+      || cleanPhone(car?.contact?.whatsapp)             // user-submission top-level whatsapp
+      || cleanPhone(car?.dealer?.contact?.phone)        // listing snapshot phone
+      || cleanPhone(car?.dealerId?.contact?.phone)      // current dealer profile phone (live, always up-to-date)
+      || cleanPhone(car?.contact?.phone)                // user-submission top-level phone
+      || cleanPhone(car?.dealer?.phone)                 // legacy flat phone field
+      || cleanPhone(car?.dealerId?.phone);              // legacy on populated dealer
     if (!resolvedPhone) {
       dispatch(addNotification({
         type: 'warning',
@@ -1329,7 +1333,7 @@ const CarMarketplace = () => {
                 )}
                 <div className="contact-buttons">
                   <button className="contact-button whatsapp" onClick={handleWhatsAppClick}>{calculateSavings ? `Claim Bw Car Culture Savings via WhatsApp` : `Contact ${isPrivateSeller ? 'Seller' : 'Dealer'} via WhatsApp`}</button>
-                  <button className="contact-button contact-dealer" onClick={() => { const callPhone = car.dealer?.contact?.phone || car.contact?.phone || car.dealer?.phone; if (callPhone) { window.open(`tel:${callPhone.startsWith('+') ? callPhone.replace(/\s+/g,'') : '+267'+callPhone.replace(/\s+/g,'')}`); } else { dispatch(addNotification({ type: 'warning', message: `${isPrivateSeller ? 'Seller' : 'Dealer'} phone number is not available.` })); } }}>📞 Call {isPrivateSeller ? 'Seller' : 'Dealer'}</button>
+                  <button className="contact-button contact-dealer" onClick={() => { const cp = (v) => (v && typeof v === 'string' && v.trim() !== '' && v.trim().toUpperCase() !== 'N/A') ? v.trim() : null; const callPhone = cp(car?.dealer?.contact?.phone) || cp(car?.dealerId?.contact?.phone) || cp(car?.contact?.phone) || cp(car?.dealer?.phone) || cp(car?.dealerId?.phone); if (callPhone) { window.open(`tel:${callPhone.startsWith('+') ? callPhone.replace(/\s+/g,'') : '+267'+callPhone.replace(/\s+/g,'')}`); } else { dispatch(addNotification({ type: 'warning', message: `${isPrivateSeller ? 'Seller' : 'Dealer'} phone number is not available.` })); } }}>📞 Call {isPrivateSeller ? 'Seller' : 'Dealer'}</button>
                   {car.dealer && !isPrivateSeller && (
                     <button className="contact-button view-dealer" onClick={() => { let dealerId = null; if (car.dealer && car.dealer._id) { dealerId = safeGetStringId(car.dealer._id); } else if (car.dealer && car.dealer.id) { dealerId = safeGetStringId(car.dealer.id); } else if (car.dealerId) { dealerId = safeGetStringId(car.dealerId); } if (process.env.NODE_ENV === 'development') console.log('Navigating to dealer with ID:', dealerId); if (dealerId) { navigate(`/dealerships/${dealerId}`); } else { if (process.env.NODE_ENV === 'development') console.error('Failed to get valid dealer ID for navigation'); dispatch(addNotification({ type: 'error', message: 'Unable to view dealership details at this time.' })); } }}>View Dealership</button>
                   )}

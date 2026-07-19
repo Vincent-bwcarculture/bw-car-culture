@@ -145,6 +145,8 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
         bodyStyle: clonedData.bodyStyle || '',
         featured: clonedData.featured || false,
         dealer: clonedData.dealerId || clonedData.dealer?.id || '',
+        sellerPhone: clonedData.dealer?.contact?.phone || '',
+        sellerWhatsapp: clonedData.dealer?.contact?.whatsapp || '',
         category: clonedData.category || '',
         
         // Specifications
@@ -810,6 +812,14 @@ const handleSubmit = async (e) => {
         notes: formData.adminNotes?.notes || ''
       },
 
+      // Seller contact override (so admin can correct phone/whatsapp per-listing)
+      dealer: {
+        contact: {
+          phone: formData.sellerPhone || undefined,
+          whatsapp: formData.sellerWhatsapp || formData.sellerPhone || undefined
+        }
+      },
+
       // Images
       existingImages: images.filter(img => {
         return img.isExisting && !imagesToDelete.find(del => 
@@ -1057,6 +1067,34 @@ const validateImageState = () => {
                   )}
                 </select>
                 {errors.dealer && <span className="error-message">{errors.dealer}</span>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="sellerPhone">Seller Contact Phone</label>
+                <input
+                  type="tel"
+                  id="sellerPhone"
+                  name="sellerPhone"
+                  value={formData.sellerPhone || ''}
+                  onChange={handleChange}
+                  placeholder="e.g. 71234567 or +26771234567"
+                  disabled={isSubmitting}
+                />
+                <small>Overrides the dealer profile's default phone for this listing</small>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="sellerWhatsapp">Seller WhatsApp Number</label>
+                <input
+                  type="tel"
+                  id="sellerWhatsapp"
+                  name="sellerWhatsapp"
+                  value={formData.sellerWhatsapp || ''}
+                  onChange={handleChange}
+                  placeholder="Leave blank to use phone above"
+                  disabled={isSubmitting}
+                />
+                <small>Specific WhatsApp if different from phone</small>
               </div>
 
               <div className="form-group checkbox">

@@ -53,8 +53,10 @@ const AddListingModal = ({ isOpen, onClose, onSubmit }) => {
     featured: false,
     listingQuality: 50,
     dealer: '',
+    sellerPhone: '',
+    sellerWhatsapp: '',
     category: '',
-    
+
     // Specifications
     specifications: {
       make: '',
@@ -729,7 +731,13 @@ const handleSubmit = async (e) => {
         name: selectedDealer.name || selectedDealer.displayName,
         businessName: selectedDealer.businessName,
         sellerType: selectedDealer.sellerType,
-        contact: selectedDealer.contact,
+        contact: {
+          ...selectedDealer.contact,
+          // Per-listing overrides take priority over dealer profile defaults
+          ...(formData.sellerPhone && { phone: formData.sellerPhone }),
+          ...(formData.sellerWhatsapp && { whatsapp: formData.sellerWhatsapp }),
+          ...(!formData.sellerWhatsapp && formData.sellerPhone && { whatsapp: formData.sellerPhone })
+        },
         location: selectedDealer.location,
         verification: selectedDealer.verification,
         profile: selectedDealer.profile,
@@ -996,7 +1004,17 @@ const handleSubmit = async (e) => {
     id="dealer"
     name="dealer"
     value={formData.dealer || ''}
-    onChange={handleChange}
+    onChange={(e) => {
+      handleChange(e);
+      const picked = dealers.find(d => d._id === e.target.value);
+      if (picked) {
+        setFormData(prev => ({
+          ...prev,
+          sellerPhone: prev.sellerPhone || picked.contact?.phone || '',
+          sellerWhatsapp: prev.sellerWhatsapp || picked.contact?.whatsapp || picked.contact?.phone || ''
+        }));
+      }
+    }}
     className={errors.dealer ? 'error' : ''}
     disabled={isSubmitting || loadingDealers}
   >
@@ -1005,14 +1023,11 @@ const handleSubmit = async (e) => {
       <option disabled>Loading sellers...</option>
     ) : (
       dealers.map(dealer => {
-        // Create display name based on seller type
-           const displayName = dealer.sellerType === 'private' 
+        const displayName = dealer.sellerType === 'private'
           ? (dealer.displayName || `${dealer.privateSeller?.firstName || ''} ${dealer.privateSeller?.lastName || ''}`.trim() || dealer.businessName)
           : dealer.businessName || 'Unnamed Seller';
-        
         const sellerTypeLabel = dealer.sellerType === 'private' ? '(Private Seller)' : '(Dealership)';
-        
-            return (
+        return (
           <option key={dealer._id} value={dealer._id}>
             {displayName} {sellerTypeLabel}
           </option>
@@ -1022,6 +1037,34 @@ const handleSubmit = async (e) => {
   </select>
   {errors.dealer && <span className="error-message">{errors.dealer}</span>}
   <small>Choose the dealership or private seller for this listing</small>
+</div>
+
+<div className="form-group">
+  <label htmlFor="sellerPhone">Seller Contact Phone</label>
+  <input
+    type="tel"
+    id="sellerPhone"
+    name="sellerPhone"
+    value={formData.sellerPhone || ''}
+    onChange={handleChange}
+    placeholder="e.g. 71234567 or +26771234567"
+    disabled={isSubmitting}
+  />
+  <small>Overrides the dealer profile's default phone for this listing</small>
+</div>
+
+<div className="form-group">
+  <label htmlFor="sellerWhatsapp">Seller WhatsApp Number</label>
+  <input
+    type="tel"
+    id="sellerWhatsapp"
+    name="sellerWhatsapp"
+    value={formData.sellerWhatsapp || ''}
+    onChange={handleChange}
+    placeholder="e.g. 71234567 or +26771234567 (leave blank to use phone)"
+    disabled={isSubmitting}
+  />
+  <small>Specific WhatsApp number if different from phone</small>
 </div>
 
               <div className="form-group checkbox">
