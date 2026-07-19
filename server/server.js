@@ -107,6 +107,7 @@ import trailerListingRoutes from './routes/trailerListingRoutes.js';
 import transportRouteRoutes from './routes/transportRouteRoutes.js';
 import videoRoutes from './routes/videoRoutes.js';
 import inventoryRoutes from './routes/inventoryRoutes.js';
+import inventorySubmissionRoutes from './routes/inventorySubmissionRoutes.js';
 import providerRequestRoutes from './routes/providerRequestRoutes.js';
 import ministryRequestRoutes from './routes/ministryRequestRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
@@ -747,6 +748,7 @@ app.post('/api/test-upload-memory', (req, res) => {
 app.use('/api/stats', statsRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/inventory-submissions', inventorySubmissionRoutes);
 
 // IMPORTANT: Register imageRoutes AFTER the direct emergency handler
 app.use('/api/images', imageRoutes);

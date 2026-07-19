@@ -88,16 +88,24 @@ const inventoryItemSchema = new mongoose.Schema({
     type: [Object],
     default: []
   },
+  // Optional for private sellers; required for dealership/service listings
   businessId: {
     type: mongoose.Schema.Types.ObjectId,
-    required: [true, 'Please specify the business'],
-    ref: 'ServiceProvider'
+    ref: 'ServiceProvider',
+    default: null
   },
   businessType: {
     type: String,
-    enum: ['dealer', 'service'],
-    required: [true, 'Please specify business type']
+    enum: ['dealer', 'service', null],
+    default: null
   },
+  // Private seller / submission tracking fields
+  sellerType:   { type: String, enum: ['private', 'dealership'], default: 'private' },
+  userId:       { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  dealerId:     { type: mongoose.Schema.Types.ObjectId, ref: 'Dealer', default: null },
+  submissionId: { type: mongoose.Schema.Types.ObjectId, default: null },
+  contact:      { type: Object, default: {} },
+  location:     { type: Object, default: {} },
   status: {
     type: String,
     enum: ['active', 'inactive', 'pending', 'rejected'],

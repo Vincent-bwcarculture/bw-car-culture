@@ -72,13 +72,6 @@ const validateInventoryData = (req, res, next) => {
     });
   }
 
-  if (!data.businessId) {
-    return res.status(400).json({
-      success: false,
-      message: 'Business ID is required'
-    });
-  }
-
   next();
 };
 

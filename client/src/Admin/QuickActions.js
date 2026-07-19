@@ -301,12 +301,20 @@ const QuickActions = ({ onActionSelected }) => {
             </button>
             
             {/* New Inventory Manager button */}
-            <button 
+            <button
               className="qa-action-button"
               onClick={handleInventoryManagerClick}
             >
               <span className="qa-icon">▦</span>
               Inventory Manager
+            </button>
+
+            <button
+              className="qa-action-button"
+              onClick={() => onActionSelected && onActionSelected('inventory-submissions')}
+            >
+              <span className="qa-icon">📦</span>
+              Inventory Submissions
             </button>
             
             <button 

@@ -14,6 +14,7 @@ import BroadcastNotification from './BroadcastNotification/BroadcastNotification
 import AdminOpsDashboardWidget from './AdminOps/AdminOpsDashboardWidget.js';
 import CheckinReminderModal from './AdminOps/CheckinReminderModal.js';
 import InventoryManager from './InventoryManager/InventoryManager.js';
+import AdminInventorySubmissions from './components/AdminInventorySubmissions.js';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -183,6 +184,18 @@ const AdminDashboard = () => {
               </div>
             </div>
             <InventoryManager />
+          </>
+        );
+      case 'inventory-submissions':
+        return (
+          <>
+            <div className="section-header">
+              <h2>Inventory Submissions</h2>
+              <button className="back-button" onClick={() => setActiveSection('dashboard')}>
+                ← Back to Dashboard
+              </button>
+            </div>
+            <AdminInventorySubmissions />
           </>
         );
       default:

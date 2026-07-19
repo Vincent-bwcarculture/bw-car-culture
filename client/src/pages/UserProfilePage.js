@@ -212,14 +212,13 @@ const getAvailableTabs = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Eye },
     { id: 'vehicles', label: 'Sell My Vehicle', icon: Car },
+    // Admin-only: Sell Inventory sits right next to Sell My Vehicle
+    ...(profileData?.role === 'admin'
+      ? [{ id: 'inventory', label: 'Sell Inventory', icon: Package }]
+      : []),
     { id: 'register-vehicle', label: 'Register Vehicle', icon: Car },
     { id: 'notifications', label: 'Notifications', icon: Bell }
   ];
-
-  // Admin-only: Sell Inventory (hidden from public until ready)
-  if (profileData?.role === 'admin') {
-    tabs.push({ id: 'inventory', label: 'Sell Inventory', icon: Package });
-  }
 
   // === NEW: JOURNALIST ARTICLES TAB ===
   // Show Articles tab for journalists (primary OR additional role)
