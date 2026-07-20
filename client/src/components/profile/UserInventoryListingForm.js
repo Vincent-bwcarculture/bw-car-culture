@@ -62,17 +62,17 @@ const UserInventoryListingForm = ({ onSuccess, onCancel }) => {
 
   const uploadImagesToServer = async () => {
     const results = [];
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
     for (const img of form.images) {
       if (img.url) { results.push({ url: img.url }); continue; }
       if (!img.file) continue;
       try {
         const fd = new FormData();
-        fd.append('images', img.file);
-        const token = localStorage.getItem('token') || localStorage.getItem('authToken');
-        const res = await axios.post('/api/images/upload', fd, {
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+        fd.append('image0', img.file);
+        const res = await axios.post('/api/user/upload-images', fd, {
+          headers: { Authorization: `Bearer ${token}` }
         });
-        const uploadedUrl = res.data?.data?.[0]?.url || res.data?.url || null;
+        const uploadedUrl = res.data?.images?.[0]?.url || res.data?.data?.url || res.data?.imageUrl || null;
         if (uploadedUrl) results.push({ url: uploadedUrl });
       } catch {
         // skip failed uploads silently
