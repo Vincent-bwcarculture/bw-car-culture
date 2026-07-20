@@ -316,6 +316,14 @@ const QuickActions = ({ onActionSelected }) => {
               <span className="qa-icon">📦</span>
               Inventory Submissions
             </button>
+
+            <button
+              className="qa-action-button"
+              onClick={() => onActionSelected && onActionSelected('inventory-listings')}
+            >
+              <span className="qa-icon">🗂️</span>
+              Manage Inventory
+            </button>
             
             <button 
               className="qa-action-button"

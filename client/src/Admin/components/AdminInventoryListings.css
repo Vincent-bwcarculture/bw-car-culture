@@ -1,0 +1,202 @@
+/* src/Admin/components/AdminInventoryListings.css */
+
+.ail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  color: #c9d1d9;
+}
+
+/* Toast */
+.ail-toast {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.7rem 1rem; border-radius: 8px; margin-bottom: 1rem;
+  font-size: 0.85rem; font-weight: 500;
+}
+.ail-toast button { margin-left: auto; background: none; border: none; cursor: pointer; color: inherit; display: flex; }
+.ail-toast.success { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #10b981; }
+.ail-toast.error   { background: rgba(239,68,68,0.12);  border: 1px solid rgba(239,68,68,0.3);  color: #ef4444; }
+
+/* Header */
+.ail-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1rem; gap: 1rem;
+}
+.ail-header-info {
+  display: flex; align-items: center; gap: 0.75rem;
+}
+.ail-header-info h3 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #e6edf3; }
+.ail-header-info p  { margin: 0.1rem 0 0; font-size: 0.8rem; color: #6e7681; }
+
+.ail-refresh-btn {
+  background: rgba(255,255,255,0.06); border: 1px solid #30363d; color: #8b949e;
+  padding: 0.45rem 0.6rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center;
+}
+.ail-refresh-btn:hover { background: rgba(255,255,255,0.1); }
+
+/* Filters */
+.ail-filters {
+  display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.25rem; align-items: center;
+}
+
+.ail-search-form {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: #0d1117; border: 1px solid #30363d; border-radius: 8px;
+  padding: 0.4rem 0.75rem; flex: 1; min-width: 200px;
+}
+.ail-search-form svg { color: #6e7681; flex-shrink: 0; }
+.ail-search-form input {
+  flex: 1; background: none; border: none; outline: none; color: #e6edf3; font-size: 0.85rem;
+}
+.ail-search-form button {
+  background: none; border: none; cursor: pointer; color: #8b949e; display: flex; align-items: center;
+  font-size: 0.8rem;
+}
+.ail-search-form button[type="submit"] { color: #ff3300; font-weight: 600; }
+
+.ail-select {
+  background: #0d1117; border: 1px solid #30363d; border-radius: 8px;
+  color: #e6edf3; padding: 0.45rem 0.75rem; font-size: 0.83rem; cursor: pointer; outline: none;
+}
+.ail-select:focus { border-color: #ff3300; }
+
+/* Error / Loading / Empty */
+.ail-error {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.7rem 1rem; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 8px; color: #ef4444; font-size: 0.85rem; margin-bottom: 1rem;
+}
+
+.ail-loading, .ail-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+  padding: 4rem 2rem; color: #6e7681; text-align: center;
+}
+
+/* Table */
+.ail-table-wrapper { overflow-x: auto; border: 1px solid #21262d; border-radius: 10px; }
+
+.ail-table {
+  width: 100%; border-collapse: collapse; font-size: 0.85rem;
+}
+.ail-table th {
+  background: #161b22; color: #8b949e; padding: 0.65rem 1rem;
+  text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.04em; border-bottom: 1px solid #21262d; white-space: nowrap;
+}
+.ail-table td {
+  padding: 0.7rem 1rem; border-bottom: 1px solid #21262d; vertical-align: middle; color: #c9d1d9;
+}
+.ail-table tr:last-child td { border-bottom: none; }
+.ail-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* Item cell */
+.ail-item-cell { display: flex; align-items: center; gap: 0.75rem; }
+
+.ail-item-thumb {
+  width: 44px; height: 44px; border-radius: 6px; overflow: hidden;
+  background: #0d1117; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  color: #30363d;
+}
+.ail-item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.ail-item-info { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+.ail-item-title {
+  font-weight: 600; color: #e6edf3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 200px;
+}
+.ail-featured-badge {
+  display: inline-block; padding: 1px 6px; border-radius: 8px; font-size: 0.68rem;
+  background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3);
+  font-weight: 600;
+}
+
+/* Category tag */
+.ail-category-tag {
+  display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem;
+  background: rgba(255,255,255,0.06); border: 1px solid #30363d; color: #8b949e;
+}
+
+/* Price */
+.ail-price { font-weight: 700; color: #ff3300; white-space: nowrap; }
+
+/* Stock */
+.ail-stock-ok  { color: #10b981; font-size: 0.8rem; }
+.ail-stock-low { color: #f59e0b; font-size: 0.8rem; }
+.ail-stock-out { color: #6e7681; font-size: 0.8rem; }
+
+/* Status badge */
+.ail-status-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 600;
+  text-transform: capitalize;
+}
+.ail-status-badge.active   { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+.ail-status-badge.inactive { background: rgba(100,100,100,0.15); color: #6e7681; border: 1px solid #30363d; }
+
+/* Seller cell */
+.ail-seller-cell { font-size: 0.8rem; color: #8b949e; }
+
+/* Row actions */
+.ail-row-actions { display: flex; gap: 0.3rem; }
+
+.ail-action-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 6px; border: 1px solid #30363d;
+  background: none; cursor: pointer; color: #8b949e; transition: all 0.15s;
+  text-decoration: none;
+}
+.ail-action-btn:hover       { background: rgba(255,255,255,0.06); }
+.ail-action-btn:disabled    { opacity: 0.4; cursor: not-allowed; }
+.ail-action-btn.delete:hover   { background: rgba(248,81,73,0.12); color: #f85149; border-color: rgba(248,81,73,0.3); }
+.ail-action-btn.deactivate:hover { background: rgba(100,100,100,0.12); color: #6e7681; }
+.ail-action-btn.activate:hover   { background: rgba(16,185,129,0.12); color: #10b981; border-color: rgba(16,185,129,0.3); }
+.ail-action-btn.feature:hover    { background: rgba(245,158,11,0.12); color: #f59e0b; border-color: rgba(245,158,11,0.3); }
+.ail-action-btn.unfeature:hover  { background: rgba(100,100,100,0.12); color: #6e7681; }
+.ail-action-btn.view             { color: #58a6ff; }
+.ail-action-btn.view:hover       { background: rgba(88,166,255,0.12); border-color: rgba(88,166,255,0.3); }
+
+/* Pagination */
+.ail-pagination {
+  display: flex; align-items: center; justify-content: center; gap: 1rem;
+  margin-top: 1.25rem; font-size: 0.85rem; color: #8b949e;
+}
+.ail-pagination button {
+  display: flex; align-items: center; padding: 0.4rem 0.6rem; border-radius: 6px;
+  border: 1px solid #30363d; background: none; color: #c9d1d9; cursor: pointer;
+}
+.ail-pagination button:hover:not(:disabled) { background: rgba(255,255,255,0.06); }
+.ail-pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Delete confirm modal */
+.ail-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000;
+  display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.ail-confirm-modal {
+  background: #161b22; border: 1px solid #30363d; border-radius: 12px;
+  padding: 2rem; max-width: 400px; width: 100%; text-align: center;
+}
+.ail-confirm-icon { color: #f85149; margin-bottom: 0.75rem; }
+.ail-confirm-modal h4 { margin: 0 0 0.5rem; color: #e6edf3; font-size: 1rem; }
+.ail-confirm-modal p  { margin: 0 0 1.5rem; font-size: 0.87rem; color: #8b949e; }
+.ail-confirm-actions  { display: flex; gap: 0.75rem; justify-content: center; }
+.ail-cancel-btn {
+  padding: 0.55rem 1.25rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: 1px solid #30363d; background: #21262d; color: #8b949e;
+}
+.ail-cancel-btn:hover { background: #30363d; }
+.ail-delete-btn {
+  padding: 0.55rem 1.25rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; border: none; background: #f85149; color: #fff;
+}
+.ail-delete-btn:hover:not(:disabled) { background: #da3633; }
+.ail-delete-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Spinner */
+.spinning { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 700px) {
+  .ail-table th:nth-child(6),
+  .ail-table td:nth-child(6) { display: none; }
+  .ail-item-title { max-width: 130px; }
+}

@@ -1,6 +1,6 @@
 // client/src/components/profile/UserInventoryListingForm.js
 import React, { useState } from 'react';
-import { Upload, X, AlertCircle, CheckCircle } from 'lucide-react';
+import { Upload, X, AlertCircle } from 'lucide-react';
 import axios from '../../config/axios.js';
 import './UserInventoryListingForm.css';
 
@@ -10,14 +10,63 @@ const CATEGORIES = [
 ];
 const CONDITIONS = ['New', 'Used', 'Refurbished'];
 
+// Spec fields per category
+const CATEGORY_SPECS = {
+  Parts:        [
+    { key: 'brand',          label: 'Brand',            placeholder: 'e.g. KYB, Bosch' },
+    { key: 'partNumber',     label: 'Part Number',      placeholder: 'e.g. 334222' },
+    { key: 'compatibleMake', label: 'Compatible Make',  placeholder: 'e.g. Toyota' },
+    { key: 'compatibleModel',label: 'Compatible Model', placeholder: 'e.g. Hilux' },
+  ],
+  Accessories:  [
+    { key: 'brand',          label: 'Brand',            placeholder: 'e.g. Thule, Rhino' },
+    { key: 'partNumber',     label: 'Part Number',      placeholder: 'Optional' },
+    { key: 'compatibleMake', label: 'Compatible Make',  placeholder: 'e.g. Toyota' },
+    { key: 'compatibleModel',label: 'Compatible Model', placeholder: 'e.g. Prado' },
+  ],
+  Electronics:  [
+    { key: 'brand',          label: 'Brand',            placeholder: 'e.g. Pioneer, Sony' },
+    { key: 'partNumber',     label: 'Model Number',     placeholder: 'e.g. AVH-A315BT' },
+    { key: 'compatibleMake', label: 'Compatible Make',  placeholder: 'e.g. Universal' },
+    { key: 'compatibleModel',label: 'Compatible Model', placeholder: 'Optional' },
+  ],
+  Tools:        [
+    { key: 'brand',          label: 'Brand',            placeholder: 'e.g. Snap-on, Stanley' },
+    { key: 'partNumber',     label: 'Model / SKU',      placeholder: 'Optional' },
+  ],
+  Fluids:       [
+    { key: 'brand',          label: 'Brand',            placeholder: 'e.g. Castrol, Motul' },
+    { key: 'partNumber',     label: 'Grade / Spec',     placeholder: 'e.g. 5W-30, DOT4' },
+  ],
+  Apparel:      [
+    { key: 'brand',  label: 'Brand',  placeholder: 'e.g. BW Car Culture' },
+    { key: 'size',   label: 'Size',   placeholder: 'e.g. M, L, XL, Custom' },
+    { key: 'color',  label: 'Colour', placeholder: 'e.g. Black, Red/Black' },
+  ],
+  Collectibles: [
+    { key: 'brand',   label: 'Brand / Maker', placeholder: 'e.g. Hot Wheels, Corgi' },
+    { key: 'year',    label: 'Year / Era',    placeholder: 'e.g. 1969, Vintage' },
+    { key: 'edition', label: 'Edition',       placeholder: 'e.g. Limited, Signed' },
+  ],
+  Other:        [
+    { key: 'brand', label: 'Brand', placeholder: 'Optional' },
+  ],
+};
+
+const emptySpecs = () => ({
+  brand: '', partNumber: '', compatibleMake: '', compatibleModel: '',
+  size: '', color: '', year: '', edition: '',
+});
+
 const emptyForm = {
   title: '', description: '', category: '', price: '', condition: 'Used',
   quantity: '1',
+  stockLevel: 'in-stock',
   contactPhone: '', contactWhatsapp: '', contactEmail: '',
   city: '', country: 'Botswana',
   sellerType: 'private',
-  brand: '', partNumber: '', compatibleMake: '', compatibleModel: '',
-  images: []   // array of { url, file, preview } — urls are from upload, previews from local
+  specs: emptySpecs(),
+  images: [],
 };
 
 const UserInventoryListingForm = ({ onSuccess, onCancel }) => {
@@ -27,6 +76,9 @@ const UserInventoryListingForm = ({ onSuccess, onCancel }) => {
   const [uploadingImages, setUploadingImages] = useState(false);
 
   const set = (field, value) => setForm(f => ({ ...f, [field]: value }));
+  const setSpec = (key, value) => setForm(f => ({ ...f, specs: { ...f.specs, [key]: value } }));
+
+  const currentSpecFields = CATEGORY_SPECS[form.category] || CATEGORY_SPECS.Other;
 
   const validate = () => {
     const e = {};
@@ -81,6 +133,13 @@ const UserInventoryListingForm = ({ onSuccess, onCancel }) => {
     return results;
   };
 
+  // Build quantity from stockLevel if user picks a level rather than an exact number
+  const resolveQuantity = () => {
+    const q = Number(form.quantity) || 1;
+    if (form.stockLevel === 'out-of-stock') return 0;
+    return q;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const e2 = validate();
@@ -88,11 +147,15 @@ const UserInventoryListingForm = ({ onSuccess, onCancel }) => {
     setErrors({});
     setSubmitting(true);
     try {
-      // Upload images first
       let uploadedImages = [];
-      if (form.images.length) {
-        uploadedImages = await uploadImagesToServer();
-      }
+      if (form.images.length) uploadedImages = await uploadImagesToServer();
+
+      // Build specs object — only include keys relevant to the category (skip empty strings)
+      const specsForCategory = {};
+      currentSpecFields.forEach(({ key }) => {
+        const v = (form.specs[key] || '').trim();
+        if (v) specsForCategory[key] = v;
+      });
 
       const listingData = {
         title:       form.title.trim(),
@@ -100,14 +163,9 @@ const UserInventoryListingForm = ({ onSuccess, onCancel }) => {
         category:    form.category,
         price:       Number(form.price),
         condition:   form.condition,
-        quantity:    Number(form.quantity) || 1,
+        quantity:    resolveQuantity(),
         images:      uploadedImages,
-        specifications: {
-          brand:          form.brand.trim(),
-          partNumber:     form.partNumber.trim(),
-          compatibleMake: form.compatibleMake.trim(),
-          compatibleModel: form.compatibleModel.trim()
-        },
+        specifications: specsForCategory,
         contact: {
           phone:    form.contactPhone.trim(),
           whatsapp: form.contactWhatsapp.trim() || form.contactPhone.trim(),
@@ -160,7 +218,7 @@ const UserInventoryListingForm = ({ onSuccess, onCancel }) => {
         <div className="uif-field">
           <label className="uif-label">Title *</label>
           <input className={`uif-input ${errors.title ? 'error' : ''}`}
-            placeholder="e.g. Toyota Hilux Rear Shock Absorbers (pair)"
+            placeholder="e.g. BW Car Culture Hoodie (Black)"
             value={form.title} onChange={e => set('title', e.target.value)} />
           {errors.title && <span className="uif-field-error">{errors.title}</span>}
         </div>
@@ -192,48 +250,49 @@ const UserInventoryListingForm = ({ onSuccess, onCancel }) => {
             {errors.price && <span className="uif-field-error">{errors.price}</span>}
           </div>
           <div className="uif-field">
+            <label className="uif-label">Stock Status</label>
+            <select className="uif-input" value={form.stockLevel}
+              onChange={e => set('stockLevel', e.target.value)}>
+              <option value="in-stock">In Stock</option>
+              <option value="low-stock">Low Stock (few left)</option>
+              <option value="limited">Limited Stock</option>
+              <option value="out-of-stock">Out of Stock</option>
+            </select>
+          </div>
+        </div>
+
+        {form.stockLevel !== 'out-of-stock' && (
+          <div className="uif-field">
             <label className="uif-label">Quantity</label>
             <input className="uif-input" type="number" min="1"
               value={form.quantity} onChange={e => set('quantity', e.target.value)} />
           </div>
-        </div>
+        )}
 
         <div className="uif-field">
           <label className="uif-label">Description</label>
           <textarea className="uif-textarea" rows={4}
-            placeholder="Describe the item — condition, compatibility, any defects, etc."
+            placeholder="Describe the item — condition, sizing, compatibility, any defects, etc."
             value={form.description} onChange={e => set('description', e.target.value)} />
         </div>
       </div>
 
-      {/* Specifications */}
-      <div className="uif-section">
-        <h4 className="uif-section-title">Specifications (optional)</h4>
-        <div className="uif-row">
-          <div className="uif-field">
-            <label className="uif-label">Brand</label>
-            <input className="uif-input" placeholder="e.g. KYB, Bosch"
-              value={form.brand} onChange={e => set('brand', e.target.value)} />
-          </div>
-          <div className="uif-field">
-            <label className="uif-label">Part Number</label>
-            <input className="uif-input" placeholder="e.g. 334222"
-              value={form.partNumber} onChange={e => set('partNumber', e.target.value)} />
-          </div>
-        </div>
-        <div className="uif-row">
-          <div className="uif-field">
-            <label className="uif-label">Compatible Make</label>
-            <input className="uif-input" placeholder="e.g. Toyota"
-              value={form.compatibleMake} onChange={e => set('compatibleMake', e.target.value)} />
-          </div>
-          <div className="uif-field">
-            <label className="uif-label">Compatible Model</label>
-            <input className="uif-input" placeholder="e.g. Hilux"
-              value={form.compatibleModel} onChange={e => set('compatibleModel', e.target.value)} />
+      {/* Category-adaptive specifications */}
+      {form.category && (
+        <div className="uif-section">
+          <h4 className="uif-section-title">Specifications (optional)</h4>
+          <div className="uif-row">
+            {currentSpecFields.map(({ key, label, placeholder }) => (
+              <div className="uif-field" key={key}>
+                <label className="uif-label">{label}</label>
+                <input className="uif-input" placeholder={placeholder}
+                  value={form.specs[key] || ''}
+                  onChange={e => setSpec(key, e.target.value)} />
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
 
       {/* Photos */}
       <div className="uif-section">

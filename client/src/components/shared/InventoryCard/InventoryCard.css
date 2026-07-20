@@ -467,8 +467,8 @@
 }
 
 .inventory-card-share-btn,
-.inventory-card-call-btn,
-.inventory-card-whatsapp-btn {
+.inventory-card-whatsapp-btn,
+.inventory-card-details-btn {
   padding: 0.4rem 0.6rem;
   border-radius: 6px;
   cursor: pointer;
@@ -476,7 +476,6 @@
   font-size: 0.75rem;
   font-weight: 500;
   border: none;
-  /* Ensure minimum touch target */
   min-height: 32px;
   display: flex;
   align-items: center;
@@ -488,35 +487,25 @@
   color: #ffffff;
   border: 1px solid #2c2c2c;
 }
-
 .inventory-card-share-btn:hover {
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 51, 0, 0.5);
-}
-
-.inventory-card-call-btn {
-  background: #36a2eb;
-  color: white;
-}
-
-.inventory-card-call-btn:hover:not(:disabled) {
-  background: #0040cc;
 }
 
 .inventory-card-whatsapp-btn {
   background: #25D366;
   color: white;
 }
-
-.inventory-card-whatsapp-btn:hover:not(:disabled) {
+.inventory-card-whatsapp-btn:hover {
   background: #128C7E;
 }
 
-.inventory-card-call-btn:disabled,
-.inventory-card-whatsapp-btn:disabled {
-  background: #666;
-  cursor: not-allowed;
-  opacity: 0.5;
+.inventory-card-details-btn {
+  background: #ff3300;
+  color: white;
+}
+.inventory-card-details-btn:hover {
+  background: #cc2900;
 }
 
 /* Compact mode - Smaller cards in carousels */
@@ -557,7 +546,7 @@
 }
 
 .inventory-card.compact .inventory-card-share-btn,
-.inventory-card.compact .inventory-card-call-btn,
+.inventory-card.compact .inventory-card-details-btn,
 .inventory-card.compact .inventory-card-whatsapp-btn {
   padding: 0.3rem 0.5rem;
   font-size: 0.7rem;
@@ -597,7 +586,7 @@
   }
   
   .inventory-card-share-btn,
-  .inventory-card-call-btn,
+  .inventory-card-details-btn,
   .inventory-card-whatsapp-btn {
     padding: 0.5rem 0.8rem;
     font-size: 0.8rem;
@@ -649,7 +638,7 @@
   .inventory-card-image,
   .inventory-card-image-nav,
   .inventory-card-share-btn,
-  .inventory-card-call-btn,
+  .inventory-card-details-btn,
   .inventory-card-whatsapp-btn {
     transition: none;
   }
