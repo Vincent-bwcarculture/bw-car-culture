@@ -94,13 +94,14 @@ const InventoryCard = ({
     };
   }, [item]);
 
-  // Contact: prefer item.contact for private sellers, fall back to business phone
+  // Contact: prefer item.contact for private sellers, fall back to business contact
   const contactInfo = useMemo(() => {
     const c = item?.contact;
-    const phone    = c?.phone    || c?.whatsapp || businessInfo?.phone || null;
-    const whatsapp = c?.whatsapp || c?.phone    || businessInfo?.phone || null;
+    const biz = item?.business?.contact;
+    const whatsapp = c?.whatsapp || c?.phone || biz?.whatsapp || biz?.phone || null;
+    const phone    = c?.phone    || c?.whatsapp || biz?.phone || biz?.whatsapp || null;
     return { phone, whatsapp };
-  }, [item, businessInfo]);
+  }, [item]);
 
   const pricingInfo = useMemo(() => {
     const price = item?.price || 0;

@@ -5,6 +5,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 1rem;
+  padding-bottom: 5rem; /* space for sticky contact bar on mobile */
   background: var(--background-dark, #000000bb);
   min-height: 100vh;
   contain: layout style;
@@ -292,23 +293,36 @@
 
 .item-header {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .title-container {
   flex: 1;
 }
 
+.title-section {
+  flex: 1;
+}
+
 .title {
   font-size: 1.5rem;
   color: #ffffff;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem 0;
   line-height: 1.3;
   font-weight: 600;
 }
 
+.title-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* keep old name for backward compat */
 .badges-container {
   display: flex;
   flex-wrap: wrap;
@@ -361,10 +375,11 @@
 }
 
 .item-price {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #ff3300;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #0051ff;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .original-price {
@@ -482,18 +497,25 @@
   background: #ff3300;
 }
 
-/* Specifications grid - Mobile optimized */
+/* Specifications grid — matches car detail spec-item style */
 .specs-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Compact specs shown inline under title (like car detail page) */
+.compact-specs {
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 1rem;
 }
 
 .spec-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem;
+  padding: 0.6rem 0.75rem;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 6px;
   border-left: 3px solid #ff3300;
@@ -501,15 +523,80 @@
 
 .spec-label {
   color: #888;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 500;
 }
 
 .spec-value {
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 600;
   text-align: right;
+}
+
+/* Private seller tag */
+.private-seller-tag {
+  display: inline-block;
+  margin-top: 0.25rem;
+  padding: 2px 8px;
+  background: rgba(255, 159, 64, 0.1);
+  color: #ff9f40;
+  border: 1px solid rgba(255, 159, 64, 0.3);
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* Sticky mobile contact bar */
+.sticky-contact-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(15, 15, 15, 0.97);
+  border-top: 1px solid #2c2c2c;
+  padding: 0.75rem 1rem;
+  z-index: 100;
+  gap: 1rem;
+  backdrop-filter: blur(8px);
+}
+
+.sticky-price {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #0051ff;
+  white-space: nowrap;
+}
+
+.sticky-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sticky-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  min-height: 44px;
+}
+
+.sticky-btn.call-btn {
+  background: #36a2eb;
+  color: #fff;
+}
+
+.sticky-btn.whatsapp-btn {
+  background: #25D366;
+  color: #fff;
 }
 
 /* Description */
@@ -944,61 +1031,64 @@
 /* Tablet Styles */
 @media (min-width: 768px) {
   .inventory-detail-container {
-    padding: 1.5rem;
+    padding: 1.5rem; /* reset — no sticky bar on tablet */
   }
-  
+
   .inventory-content {
     display: grid;
     grid-template-columns: 1fr 350px;
     gap: 2rem;
     align-items: start;
   }
-  
+
   .business-sidebar {
     position: sticky;
     top: 2rem;
   }
-  
-  .item-header {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-  }
-  
+
   .title {
     font-size: 1.8rem;
   }
-  
+
   .item-price {
     font-size: 2rem;
   }
-  
+
   .thumbnail-strip {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   }
-  
+
   .specs-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
+  .compact-specs {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   .features-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .compatible-vehicles-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .contact-buttons {
     flex-direction: row;
   }
-  
+
   .carousel-slide {
     flex: 0 0 50%;
   }
-  
+
   .business-stats {
     grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Hide sticky bar on tablet/desktop — sidebar handles contact */
+  .sticky-contact-bar {
+    display: none;
   }
 }
 

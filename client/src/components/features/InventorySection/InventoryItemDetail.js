@@ -134,6 +134,15 @@ const InventoryItemDetail = () => {
     };
   }, [item]);
 
+  // Contact: private sellers store contact on item.contact; businesses store it on businessInfo
+  const sellerContact = useMemo(() => {
+    const c = item?.contact;
+    const biz = businessInfo?.contact;
+    const whatsapp = c?.whatsapp || c?.phone || biz?.phone || biz?.whatsapp || null;
+    const phone    = c?.phone    || c?.whatsapp || biz?.phone || biz?.whatsapp || null;
+    return { whatsapp, phone };
+  }, [item, businessInfo]);
+
   // Memoized stock information
   const stockInfo = useMemo(() => {
     if (!item?.stock) return null;
@@ -481,28 +490,21 @@ const InventoryItemDetail = () => {
     }
   }, [item, isSaved]);
 
-  // Handle contact actions
+  // Handle contact actions — works for both business and private sellers
   const handleContactClick = useCallback((method) => {
-    if (!businessInfo?.contact) return;
-    
     if (method === 'whatsapp') {
-      const phone = businessInfo.contact.phone?.replace(/\D/g, '');
-      if (!phone) {
-        alert('No WhatsApp number available');
-        return;
-      }
-      
-      const message = `Hi ${businessInfo.name}, I'm interested in the ${item.title} (${stockInfo?.sku || 'Item'}) listed for ${pricingInfo?.price} on I3W Car Culture.`;
-      const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
+      const number = sellerContact.whatsapp;
+      if (!number) { alert('No WhatsApp number available for this seller.'); return; }
+      const phone = number.replace(/\D/g, '');
+      const sellerName = businessInfo?.name || 'there';
+      const message = `Hi ${sellerName}, I'm interested in "${item?.title}" listed for ${pricingInfo?.price} on BW Car Culture. Is it still available?`;
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
     } else if (method === 'phone') {
-      if (businessInfo.contact.phone) {
-        window.location.href = `tel:${businessInfo.contact.phone}`;
-      } else {
-        alert('No phone number available');
-      }
+      const number = sellerContact.phone;
+      if (!number) { alert('No phone number available for this seller.'); return; }
+      window.location.href = `tel:${number}`;
     }
-  }, [businessInfo, item, stockInfo, pricingInfo]);
+  }, [sellerContact, businessInfo, item, pricingInfo]);
 
   // Handle image error with retry logic
   const handleImageError = useCallback((e, imageIndex) => {
@@ -689,52 +691,53 @@ const InventoryItemDetail = () => {
 
             {/* Item information */}
             <div className="item-info">
-              {/* Header */}
+              {/* Header — title left, price right (matches car detail layout) */}
               <div className="item-header">
-                <div className="title-container">
+                <div className="title-section">
                   <h1 className="title">{item.title}</h1>
-                  <div className="badges-container">
+                  <div className="title-badges">
                     {item.category && (
-                      <span className="category-badge">
-                        {item.category}
-                      </span>
+                      <span className="category-badge">{item.category}</span>
                     )}
                     <span className={`condition-badge ${(item.condition || 'new').toLowerCase()}`}>
                       {item.condition || 'New'}
                     </span>
                     {stockInfo && (
-                      <span 
-                        className={`stock-badge ${stockInfo.status}`}
-                        style={{ color: stockInfo.color }}
-                      >
+                      <span className={`stock-badge ${stockInfo.status}`} style={{ color: stockInfo.color }}>
                         {stockInfo.label}
                       </span>
                     )}
                   </div>
                 </div>
-                
+
                 {/* Price container */}
                 <div className="price-container">
-                  <div className="item-price">
-                    {pricingInfo?.price}
-                  </div>
                   {pricingInfo?.originalPrice && pricingInfo.hasDiscount && (
-                    <div className="original-price">
-                      {pricingInfo.originalPrice}
-                    </div>
+                    <div className="original-price">{pricingInfo.originalPrice}</div>
                   )}
+                  <div className="item-price">{pricingInfo?.price}</div>
                   {pricingInfo?.discountPercent && (
-                    <div className="discount-badge">
-                      {pricingInfo.discountPercent}
-                    </div>
+                    <div className="discount-badge">{pricingInfo.discountPercent}</div>
                   )}
                   {stockInfo?.sku && (
-                    <div className="sku-info">
-                      SKU: {stockInfo.sku}
-                    </div>
+                    <div className="sku-info">SKU: {stockInfo.sku}</div>
                   )}
                 </div>
               </div>
+
+              {/* Compact specs grid — matches car detail specs-grid placement */}
+              {item.specifications && Object.keys(item.specifications).some(k => item.specifications[k]) && (
+                <div className="specs-grid compact-specs">
+                  {Object.entries(item.specifications)
+                    .filter(([, v]) => v && v !== 'N/A' && v !== '')
+                    .map(([key, value]) => (
+                      <div className="spec-item" key={key}>
+                        <span className="spec-label">{key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}</span>
+                        <span className="spec-value">{String(value)}</span>
+                      </div>
+                    ))}
+                </div>
+              )}
 
               {/* Quick actions bar */}
               <div className="quick-actions-bar">
@@ -742,45 +745,30 @@ const InventoryItemDetail = () => {
                   <Eye size={16} />
                   <span>{views.toLocaleString()} views</span>
                 </div>
-                
-                {businessInfo?.contact?.phone && (
+
+                {(sellerContact.whatsapp || sellerContact.phone) && (
                   <div className="contact-actions">
-                    <button 
-                      className="quick-contact-btn phone-btn"
-                      onClick={() => handleContactClick('phone')}
-                    >
-                      <Phone size={16} />
-                      Call
-                    </button>
-                    <button 
-                      className="quick-contact-btn whatsapp-btn"
-                      onClick={() => handleContactClick('whatsapp')}
-                    >
-                      <MessageCircle size={16} />
-                      WhatsApp
-                    </button>
+                    {sellerContact.phone && (
+                      <button
+                        className="quick-contact-btn phone-btn"
+                        onClick={() => handleContactClick('phone')}
+                      >
+                        <Phone size={16} />
+                        Call
+                      </button>
+                    )}
+                    {sellerContact.whatsapp && (
+                      <button
+                        className="quick-contact-btn whatsapp-btn"
+                        onClick={() => handleContactClick('whatsapp')}
+                      >
+                        <MessageCircle size={16} />
+                        WhatsApp
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
-
-              {/* Specifications grid */}
-              {item.specifications && Object.keys(item.specifications).length > 0 && (
-                <div className="specs-section">
-                  <h2>Specifications</h2>
-                  <div className="specs-grid">
-                    {Object.entries(item.specifications).map(([key, value], index) => (
-                      <div className="spec-item" key={index}>
-                        <span className="spec-label">
-                          {key.charAt(0).toUpperCase() + key.slice(1)}
-                        </span>
-                        <span className="spec-value">
-                          {value !== null && value !== undefined ? value.toString() : 'N/A'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {/* Description */}
               {item.description && (
@@ -867,90 +855,88 @@ const InventoryItemDetail = () => {
             </div>
           </div>
 
-          {/* Business sidebar */}
-          {businessInfo && (
+          {/* Seller sidebar — shows for both business sellers and private sellers with contact info */}
+          {(businessInfo || sellerContact.whatsapp || sellerContact.phone) && (
             <div className="business-sidebar">
               <div className="business-section">
                 <div className="business-header">
                   <h2>Seller Information</h2>
                 </div>
                 <div className="business-card">
-                  {/* Business header */}
+                  {/* Seller header */}
                   <div className="business-header-compact">
-                    <img 
-                      src={businessInfo.logo} 
-                      alt={businessInfo.name}
+                    <img
+                      src={businessInfo?.logo || '/images/placeholders/dealer-avatar.jpg'}
+                      alt={businessInfo?.name || 'Seller'}
                       className="business-avatar"
                       loading="lazy"
-                      onError={(e) => {
-                        e.target.src = '/images/placeholders/dealer-avatar.jpg';
-                      }}
+                      onError={(e) => { e.target.src = '/images/placeholders/dealer-avatar.jpg'; }}
                     />
                     <div className="business-details">
                       <h3 className="business-name">
-                        {businessInfo.name}
-                        {businessInfo.verification.isVerified && (
+                        {businessInfo?.name || item?.contact?.name || 'Private Seller'}
+                        {businessInfo?.verification?.isVerified && (
                           <span className="verified-badge" title="Verified Business">✓</span>
                         )}
                       </h3>
                       <p className="business-location">
-                        {businessInfo.location.city}
-                        {businessInfo.location.state && `, ${businessInfo.location.state}`}
-                        {businessInfo.location.country && `, ${businessInfo.location.country}`}
+                        {businessInfo
+                          ? [businessInfo.location.city, businessInfo.location.state, businessInfo.location.country].filter(Boolean).join(', ')
+                          : (item?.location?.city || 'Botswana')
+                        }
                       </p>
+                      {!businessInfo && (
+                        <span className="private-seller-tag">Private Seller</span>
+                      )}
                     </div>
                   </div>
-                  
-                  {/* Business stats */}
-                  <div className="business-stats">
-                    <div className="stat-item">
-                      <div className="stat-value">{businessInfo.metrics.totalListings}</div>
-                      <div className="stat-label">Listings</div>
-                    </div>
-                    <div className="stat-item">
-                      <div className="stat-value">
-                        {businessInfo.metrics.rating > 0 
-                          ? businessInfo.metrics.rating.toFixed(1) 
-                          : 'N/A'
-                        }
-                      </div>
-                      <div className="stat-label">Rating</div>
-                    </div>
-                    {businessInfo.metrics.activeSales > 0 && (
+
+                  {/* Business stats — only for business sellers */}
+                  {businessInfo && (
+                    <div className="business-stats">
                       <div className="stat-item">
-                        <div className="stat-value">{businessInfo.metrics.activeSales}</div>
-                        <div className="stat-label">Active</div>
+                        <div className="stat-value">{businessInfo.metrics.totalListings}</div>
+                        <div className="stat-label">Listings</div>
+                      </div>
+                      <div className="stat-item">
+                        <div className="stat-value">
+                          {businessInfo.metrics.rating > 0 ? businessInfo.metrics.rating.toFixed(1) : 'N/A'}
+                        </div>
+                        <div className="stat-label">Rating</div>
+                      </div>
+                      {businessInfo.metrics.activeSales > 0 && (
+                        <div className="stat-item">
+                          <div className="stat-value">{businessInfo.metrics.activeSales}</div>
+                          <div className="stat-label">Active</div>
+                        </div>
+                      )}
+                      <div className="stat-item">
+                        <div className="stat-value">{views}</div>
+                        <div className="stat-label">Views</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Contact info grid */}
+                  <div className="business-contact-grid">
+                    {sellerContact.phone && (
+                      <div className="contact-grid-item">
+                        <span className="contact-icon">📞</span>
+                        <span className="contact-info">{sellerContact.phone}</span>
                       </div>
                     )}
-                    <div className="stat-item">
-                      <div className="stat-value">{views}</div>
-                      <div className="stat-label">Views</div>
-                    </div>
-                  </div>
-                  
-                  {/* Contact info */}
-                  <div className="business-contact-grid">
-                    {businessInfo.contact.email && (
+                    {businessInfo?.contact?.email && (
                       <div className="contact-grid-item">
                         <span className="contact-icon">✉️</span>
                         <span className="contact-info">{businessInfo.contact.email}</span>
                       </div>
                     )}
-                    {businessInfo.contact.phone && (
-                      <div className="contact-grid-item">
-                        <span className="contact-icon">📞</span>
-                        <span className="contact-info">{businessInfo.contact.phone}</span>
-                      </div>
-                    )}
-                    {businessInfo.contact.website && (
+                    {businessInfo?.contact?.website && (
                       <div className="contact-grid-item">
                         <span className="contact-icon">🌐</span>
-                        <a 
-                          href={businessInfo.contact.website.startsWith('http') 
-                            ? businessInfo.contact.website 
-                            : `https://${businessInfo.contact.website}`
-                          } 
-                          target="_blank" 
+                        <a
+                          href={businessInfo.contact.website.startsWith('http') ? businessInfo.contact.website : `https://${businessInfo.contact.website}`}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="contact-info website-link"
                         >
@@ -962,33 +948,35 @@ const InventoryItemDetail = () => {
 
                   {/* Contact buttons */}
                   <div className="contact-buttons">
-                    {businessInfo.contact.phone && (
-                      <>
-                        <button 
-                          className="contact-button whatsapp"
-                          onClick={() => handleContactClick('whatsapp')}
-                        >
-                          <MessageCircle size={16} />
-                          WhatsApp
-                        </button>
-                        <button 
-                          className="contact-button call"
-                          onClick={() => handleContactClick('phone')}
-                        >
-                          <Phone size={16} />
-                          Call Now
-                        </button>
-                      </>
+                    {sellerContact.whatsapp && (
+                      <button
+                        className="contact-button whatsapp"
+                        onClick={() => handleContactClick('whatsapp')}
+                      >
+                        <MessageCircle size={16} />
+                        WhatsApp
+                      </button>
                     )}
-                    <button 
-                      className="contact-button view-business"
-                      onClick={() => {
-                        const businessType = item.businessType === 'dealer' ? 'dealerships' : 'services';
-                        navigate(`/${businessType}/${businessInfo.id}`);
-                      }}
-                    >
-                      View Business
-                    </button>
+                    {sellerContact.phone && (
+                      <button
+                        className="contact-button call"
+                        onClick={() => handleContactClick('phone')}
+                      >
+                        <Phone size={16} />
+                        Call Now
+                      </button>
+                    )}
+                    {businessInfo && (
+                      <button
+                        className="contact-button view-business"
+                        onClick={() => {
+                          const businessType = item.businessType === 'dealer' ? 'dealerships' : 'services';
+                          navigate(`/${businessType}/${businessInfo.id}`);
+                        }}
+                      >
+                        View Business
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1128,16 +1116,35 @@ const InventoryItemDetail = () => {
 
         {/* Share modal */}
         {showShareModal && (
-          <ShareModal 
+          <ShareModal
             item={item}
             onClose={() => setShowShareModal(false)}
             buttonRef={shareButtonRef}
             itemType="inventory"
           />
         )}
+
+        {/* Sticky mobile contact bar */}
+        {(sellerContact.whatsapp || sellerContact.phone) && (
+          <div className="sticky-contact-bar">
+            <div className="sticky-price">{pricingInfo?.price}</div>
+            <div className="sticky-actions">
+              {sellerContact.phone && (
+                <button className="sticky-btn call-btn" onClick={() => handleContactClick('phone')}>
+                  <Phone size={16} /> Call
+                </button>
+              )}
+              {sellerContact.whatsapp && (
+                <button className="sticky-btn whatsapp-btn" onClick={() => handleContactClick('whatsapp')}>
+                  <MessageCircle size={16} /> WhatsApp
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </ErrorBoundary>
-  ); 
+  );
 };
 
 export default React.memo(InventoryItemDetail);
