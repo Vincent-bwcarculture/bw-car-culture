@@ -304,10 +304,10 @@ const InventoryPage = () => {
       <div className="inventory-hero">
         <div className="inventory-hero-content">
           <h1 className="inventory-hero-title">
-            Auto Parts & Accessories
+            BW Car Culture Marketplace
           </h1>
           <p className="inventory-hero-subtitle">
-            Find quality parts and accessories from trusted sellers across Botswana
+            Shop parts, accessories, apparel & collectibles from trusted sellers across Botswana
           </p>
           <div className="inventory-hero-stats">
             <div className="hero-stat">
@@ -335,7 +335,7 @@ const InventoryPage = () => {
               <Search size={20} className="search-icon" />
               <input
                 type="text"
-                placeholder="Search parts, brands, models..."
+                placeholder="Search items, brands, categories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="search-input"
