@@ -1,152 +1,99 @@
 // src/components/features/InventorySection/InventoryList.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { SlidersHorizontal, X, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import axios from 'axios';
 import InventoryCard from '../../shared/InventoryCard/InventoryCard.js';
 import './InventoryList.css';
 
-const InventoryList = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [inventoryItems, setInventoryItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({
-    search: '',
-    category: '',
-    minPrice: '',
-    maxPrice: '',
-    condition: '',
-    businessId: ''
-  });
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 12,
-    total: 0,
-    totalPages: 1
-  });
-  const [businesses, setBusinesses] = useState([]);
-  const [categories, setCategories] = useState([]);
+const DEFAULT_FILTERS = {
+  search: '',
+  category: '',
+  minPrice: '',
+  maxPrice: '',
+  condition: '',
+  businessId: ''
+};
 
-  // Parse query parameters on load
+const DEFAULT_CATEGORIES = ['Parts', 'Accessories', 'Apparel', 'Collectibles', 'Tools', 'Fluids', 'Electronics', 'Other'];
+
+const InventoryList = () => {
+  const navigate  = useNavigate();
+  const location  = useLocation();
+
+  const [inventoryItems, setInventoryItems] = useState([]);
+  const [loading, setLoading]               = useState(true);
+  const [error, setError]                   = useState(null);
+  const [filters, setFilters]               = useState(DEFAULT_FILTERS);
+  const [pagination, setPagination]         = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
+  const [businesses, setBusinesses]         = useState([]);
+  const [categories, setCategories]         = useState(DEFAULT_CATEGORIES);
+  const [showFilters, setShowFilters]       = useState(false);
+
+  // Sync filters from URL on mount / URL change
   useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    
-    const newFilters = {
-      search: queryParams.get('search') || '',
-      category: queryParams.get('category') || '',
-      minPrice: queryParams.get('minPrice') || '',
-      maxPrice: queryParams.get('maxPrice') || '',
-      condition: queryParams.get('condition') || '',
-      businessId: queryParams.get('businessId') || ''
-    };
-    
-    const page = parseInt(queryParams.get('page')) || 1;
-    
-    setFilters(newFilters);
-    setPagination(prev => ({ ...prev, page }));
-    
-    // Load businesses for filter dropdown
+    const qp = new URLSearchParams(location.search);
+    setFilters({
+      search:     qp.get('search')     || '',
+      category:   qp.get('category')   || '',
+      minPrice:   qp.get('minPrice')   || '',
+      maxPrice:   qp.get('maxPrice')   || '',
+      condition:  qp.get('condition')  || '',
+      businessId: qp.get('businessId') || ''
+    });
+    setPagination(prev => ({ ...prev, page: parseInt(qp.get('page')) || 1 }));
     loadBusinesses();
-    
-    // Load categories for filter dropdown
     loadCategories();
   }, [location.search]);
 
-  // Load inventory items based on filters and pagination
-  useEffect(() => {
-    loadInventoryItems();
-  }, [filters, pagination.page, pagination.limit]);
+  useEffect(() => { loadInventoryItems(); }, [filters, pagination.page]);
 
-  // Load businesses
   const loadBusinesses = async () => {
     try {
-      // Load service providers
-      const providersResponse = await axios.get('/api/providers', {
-        params: { limit: 100 }
-      });
-      
-      // Load dealers
-      const dealersResponse = await axios.get('/api/dealers', {
-        params: { limit: 100 }
-      });
-      
-      // Combine the results
-      const providers = providersResponse.data.success ? providersResponse.data.data : [];
-      const dealers = dealersResponse.data.success ? dealersResponse.data.data : [];
-      
-      // Add type indicator to each business
-      const providersWithType = providers.map(p => ({ ...p, type: 'service' }));
-      const dealersWithType = dealers.map(d => ({ ...d, type: 'dealer' }));
-      
-      // Combine and set businesses
-      const allBusinesses = [...providersWithType, ...dealersWithType];
-      setBusinesses(allBusinesses);
-    } catch (error) {
-      console.error('Error loading businesses:', error);
-    }
+      const [prov, deal] = await Promise.all([
+        axios.get('/api/providers', { params: { limit: 100 } }),
+        axios.get('/api/dealers',   { params: { limit: 100 } })
+      ]);
+      const providers = (prov.data.success ? prov.data.data : []).map(p => ({ ...p, type: 'service' }));
+      const dealers   = (deal.data.success ? deal.data.data : []).map(d => ({ ...d, type: 'dealer'  }));
+      setBusinesses([...providers, ...dealers]);
+    } catch {}
   };
 
-  // Load categories
   const loadCategories = async () => {
     try {
-      const response = await axios.get('/api/inventory/categories');
-      
-      if (response.data && response.data.success) {
-        setCategories(response.data.data);
-      }
-    } catch (error) {
-      console.error('Error loading categories:', error);
-      // Set some default categories
-      setCategories([
-        'Parts',
-        'Accessories',
-        'Apparel',
-        'Collectibles',
-        'Tools',
-        'Fluids',
-        'Electronics',
-        'Other'
-      ]);
+      const res = await axios.get('/api/inventory/categories');
+      if (res.data?.success) setCategories(res.data.data);
+    } catch {
+      setCategories(DEFAULT_CATEGORIES);
     }
   };
 
-  // Load inventory items
   const loadInventoryItems = async () => {
     setLoading(true);
     setError(null);
-    
     try {
-      // Build query parameters
-      const params = {
-        page: pagination.page,
-        limit: pagination.limit
-      };
-      
-      // Add filters if they are not empty
-      if (filters.search) params.search = filters.search;
-      if (filters.category) params.category = filters.category;
-      if (filters.minPrice) params.minPrice = filters.minPrice;
-      if (filters.maxPrice) params.maxPrice = filters.maxPrice;
-      if (filters.condition) params.condition = filters.condition;
+      const params = { page: pagination.page, limit: pagination.limit };
+      if (filters.search)     params.search     = filters.search;
+      if (filters.category)   params.category   = filters.category;
+      if (filters.minPrice)   params.minPrice   = filters.minPrice;
+      if (filters.maxPrice)   params.maxPrice   = filters.maxPrice;
+      if (filters.condition)  params.condition  = filters.condition;
       if (filters.businessId) params.businessId = filters.businessId;
-      
-      // Fetch inventory items
-      const response = await axios.get('/api/inventory', { params });
-      
-      if (response.data && response.data.success) {
-        setInventoryItems(response.data.data);
+
+      const res = await axios.get('/api/inventory', { params });
+      if (res.data?.success) {
+        setInventoryItems(res.data.data);
         setPagination(prev => ({
           ...prev,
-          total: response.data.pagination.total,
-          totalPages: response.data.pagination.totalPages
+          total:      res.data.pagination.total,
+          totalPages: res.data.pagination.totalPages
         }));
       } else {
         setError('Failed to load inventory items');
         setInventoryItems([]);
       }
-    } catch (error) {
-      console.error('Error loading inventory items:', error);
+    } catch {
       setError('Error loading inventory items. Please try again.');
       setInventoryItems([]);
     } finally {
@@ -154,254 +101,269 @@ const InventoryList = () => {
     }
   };
 
-  // Handle filter change
+  const pushFilters = useCallback((nextFilters, page = 1) => {
+    const qp = new URLSearchParams();
+    Object.entries(nextFilters).forEach(([k, v]) => { if (v) qp.set(k, v); });
+    qp.set('page', String(page));
+    navigate(`${location.pathname}?${qp.toString()}`);
+  }, [location.pathname, navigate]);
+
   const handleFilterChange = (name, value) => {
-    setFilters(prev => ({ ...prev, [name]: value }));
+    const next = { ...filters, [name]: value };
+    setFilters(next);
     setPagination(prev => ({ ...prev, page: 1 }));
-    
-    // Update URL query parameters
-    const queryParams = new URLSearchParams(location.search);
-    
-    if (value) {
-      queryParams.set(name, value);
-    } else {
-      queryParams.delete(name);
-    }
-    
-    queryParams.set('page', '1');
-    
-    navigate(`${location.pathname}?${queryParams.toString()}`);
+    pushFilters(next);
   };
 
-  // Handle page change
-  const handlePageChange = (newPage) => {
-    setPagination(prev => ({ ...prev, page: newPage }));
-    
-    // Update URL query parameter
-    const queryParams = new URLSearchParams(location.search);
-    queryParams.set('page', newPage.toString());
-    
-    navigate(`${location.pathname}?${queryParams.toString()}`);
-  };
-
-  // Handle search submit
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    
-    // Update URL query parameters
-    const queryParams = new URLSearchParams(location.search);
-    
-    for (const [key, value] of Object.entries(filters)) {
-      if (value) {
-        queryParams.set(key, value);
-      } else {
-        queryParams.delete(key);
-      }
-    }
-    
-    queryParams.set('page', '1');
-    
-    navigate(`${location.pathname}?${queryParams.toString()}`);
+    setPagination(prev => ({ ...prev, page: 1 }));
+    pushFilters(filters);
   };
 
-  // Handle share
-  const handleShare = (item) => {
-    // Implement item sharing functionality
-    console.log('Share item:', item);
+  const handleClearFilters = () => {
+    setFilters(DEFAULT_FILTERS);
+    setPagination(prev => ({ ...prev, page: 1 }));
+    navigate(location.pathname);
   };
 
-  // Generate pagination range
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, page: newPage }));
+    const qp = new URLSearchParams(location.search);
+    qp.set('page', String(newPage));
+    navigate(`${location.pathname}?${qp.toString()}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const hasActiveFilters = Object.values(filters).some(v => v !== '');
+
   const getPaginationRange = () => {
-    const range = [];
     const { page, totalPages } = pagination;
-    
-    // Always show first page
-    range.push(1);
-    
-    // Show current page and surrounding pages
-    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
-      range.push(i);
-    }
-    
-    // Always show last page if there are more than 1 page
-    if (totalPages > 1) {
-      range.push(totalPages);
-    }
-    
-    // Add ellipses
+    const range = [1];
+    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) range.push(i);
+    if (totalPages > 1) range.push(totalPages);
+
     const result = [];
-    let lastAdded = 0;
-    
+    let last = 0;
     for (const i of range) {
-      if (lastAdded && i - lastAdded > 1) {
-        result.push('...');
-      }
+      if (last && i - last > 1) result.push('...');
       result.push(i);
-      lastAdded = i;
+      last = i;
     }
-    
     return result;
   };
 
-  return (
-    <div className="inventory-list-container">
-      <div className="inventory-list-header">
-        <h1>Browse Inventory</h1>
-        <p>Find parts, accessories, and more from our trusted businesses</p>
+  const FilterPanel = () => (
+    <form onSubmit={handleSearchSubmit} className="inv-filter-panel">
+      <div className="inv-filter-section">
+        <label className="inv-filter-label">Search</label>
+        <div className="inv-search-wrap">
+          <Search size={14} className="inv-search-icon" />
+          <input
+            type="text"
+            value={filters.search}
+            onChange={e => handleFilterChange('search', e.target.value)}
+            placeholder="Search inventory…"
+            className="inv-filter-input inv-search-input"
+          />
+        </div>
       </div>
-      
-      <div className="inventory-filter-container">
-        <form onSubmit={handleSearchSubmit} className="inventory-filters">
-          <div className="filter-row">
-            <div className="filter-item search-filter">
-              <input
-                type="text"
-                value={filters.search}
-                onChange={(e) => handleFilterChange('search', e.target.value)}
-                placeholder="Search inventory..."
-                className="filter-input"
-              />
-            </div>
-            
-            <div className="filter-item">
-              <select
-                value={filters.category}
-                onChange={(e) => handleFilterChange('category', e.target.value)}
-                className="filter-select"
-              >
-                <option value="">All Categories</option>
-                {categories.map((category, index) => (
-                  <option key={index} value={category}>{category}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="filter-item">
-              <select
-                value={filters.condition}
-                onChange={(e) => handleFilterChange('condition', e.target.value)}
-                className="filter-select"
-              >
-                <option value="">All Conditions</option>
-                <option value="New">New</option>
-                <option value="Used">Used</option>
-                <option value="Refurbished">Refurbished</option>
-              </select>
-            </div>
-            
-            <div className="filter-item filter-submit">
-              <button type="submit" className="search-button">Search</button>
-            </div>
-          </div>
-          
-          <div className="filter-row advanced-filters">
-            <div className="filter-item price-filter">
-              <input
-                type="number"
-                value={filters.minPrice}
-                onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                placeholder="Min Price"
-                className="filter-input price-input"
-                min="0"
-              />
-              <span className="price-separator">to</span>
-              <input
-                type="number"
-                value={filters.maxPrice}
-                onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                placeholder="Max Price"
-                className="filter-input price-input"
-                min="0"
-              />
-            </div>
-            
-            <div className="filter-item">
-              <select
-                value={filters.businessId}
-                onChange={(e) => handleFilterChange('businessId', e.target.value)}
-                className="filter-select"
-              >
-                <option value="">All Businesses</option>
-                {businesses.map((business) => (
-                  <option key={business._id} value={business._id}>
-                    {business.businessName} ({business.type === 'dealer' ? 'Dealer' : 'Service'})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </form>
+
+      <div className="inv-filter-section">
+        <label className="inv-filter-label">Category</label>
+        <select
+          value={filters.category}
+          onChange={e => handleFilterChange('category', e.target.value)}
+          className="inv-filter-select"
+        >
+          <option value="">All Categories</option>
+          {categories.map((c, i) => <option key={i} value={c}>{c}</option>)}
+        </select>
       </div>
-      
-      {loading && inventoryItems.length === 0 ? (
-        <div className="inventory-loading">
-          <div className="loader"></div>
-          <p>Loading inventory items...</p>
+
+      <div className="inv-filter-section">
+        <label className="inv-filter-label">Condition</label>
+        <select
+          value={filters.condition}
+          onChange={e => handleFilterChange('condition', e.target.value)}
+          className="inv-filter-select"
+        >
+          <option value="">All Conditions</option>
+          <option value="New">New</option>
+          <option value="Used">Used</option>
+          <option value="Refurbished">Refurbished</option>
+        </select>
+      </div>
+
+      <div className="inv-filter-section">
+        <label className="inv-filter-label">Price Range (BWP)</label>
+        <div className="inv-price-row">
+          <input
+            type="number"
+            value={filters.minPrice}
+            onChange={e => handleFilterChange('minPrice', e.target.value)}
+            placeholder="Min"
+            className="inv-filter-input inv-price-input"
+            min="0"
+          />
+          <span className="inv-price-sep">–</span>
+          <input
+            type="number"
+            value={filters.maxPrice}
+            onChange={e => handleFilterChange('maxPrice', e.target.value)}
+            placeholder="Max"
+            className="inv-filter-input inv-price-input"
+            min="0"
+          />
         </div>
-      ) : error ? (
-        <div className="inventory-error">
-          <p>{error}</p>
-          <button onClick={loadInventoryItems} className="retry-button">
-            Try Again
-          </button>
-        </div>
-      ) : inventoryItems.length === 0 ? (
-        <div className="inventory-empty">
-          <h2>No inventory items found</h2>
-          <p>Try adjusting your filters or check back later for new items.</p>
-        </div>
-      ) : (
-        <>
-          <div className="inventory-results-count">
-            Showing {inventoryItems.length} of {pagination.total} items
-          </div>
-          
-          <div className="inventory-grid">
-            {inventoryItems.map((item) => (
-              <div className="inventory-grid-item" key={item._id}>
-                <InventoryCard 
-                  item={item} 
-                  onShare={handleShare}
-                />
-              </div>
+      </div>
+
+      {businesses.length > 0 && (
+        <div className="inv-filter-section">
+          <label className="inv-filter-label">Business</label>
+          <select
+            value={filters.businessId}
+            onChange={e => handleFilterChange('businessId', e.target.value)}
+            className="inv-filter-select"
+          >
+            <option value="">All Businesses</option>
+            {businesses.map(b => (
+              <option key={b._id} value={b._id}>
+                {b.businessName} ({b.type === 'dealer' ? 'Dealer' : 'Service'})
+              </option>
             ))}
+          </select>
+        </div>
+      )}
+
+      <div className="inv-filter-actions">
+        <button type="submit" className="inv-apply-btn">Apply Filters</button>
+        {hasActiveFilters && (
+          <button type="button" className="inv-clear-btn" onClick={handleClearFilters}>
+            <X size={13} /> Clear
+          </button>
+        )}
+      </div>
+    </form>
+  );
+
+  return (
+    <div className="inv-list-container">
+      {/* Mobile filter bar */}
+      <div className="inv-mobile-bar">
+        <span className="inv-mobile-count">
+          {loading ? 'Loading…' : `${pagination.total} items`}
+        </span>
+        <button
+          className={`inv-filter-toggle ${showFilters ? 'active' : ''}`}
+          onClick={() => setShowFilters(v => !v)}
+        >
+          <SlidersHorizontal size={15} />
+          Filters
+          {hasActiveFilters && <span className="inv-filter-dot" />}
+          {showFilters ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+        </button>
+      </div>
+
+      {/* Mobile filter drawer */}
+      {showFilters && (
+        <div className="inv-mobile-filter-drawer">
+          <FilterPanel />
+        </div>
+      )}
+
+      <div className="inv-layout">
+        {/* Desktop sidebar */}
+        <aside className="inv-sidebar">
+          <div className="inv-sidebar-title">
+            <SlidersHorizontal size={15} />
+            Filters
+            {hasActiveFilters && (
+              <button className="inv-sidebar-clear" onClick={handleClearFilters}>
+                Clear all
+              </button>
+            )}
           </div>
-          
-          {pagination.totalPages > 1 && (
-            <div className="inventory-pagination">
-              <button
-                className="pagination-button prev"
-                onClick={() => handlePageChange(pagination.page - 1)}
-                disabled={pagination.page === 1}
-              >
-                Previous
-              </button>
-              
-              {getPaginationRange().map((page, index) => (
-                page === '...' ? (
-                  <span key={`ellipsis-${index}`} className="pagination-ellipsis">...</span>
-                ) : (
-                  <button
-                    key={page}
-                    className={`pagination-button ${pagination.page === page ? 'active' : ''}`}
-                    onClick={() => handlePageChange(page)}
-                  >
-                    {page}
-                  </button>
-                )
-              ))}
-              
-              <button
-                className="pagination-button next"
-                onClick={() => handlePageChange(pagination.page + 1)}
-                disabled={pagination.page === pagination.totalPages}
-              >
-                Next
-              </button>
+          <FilterPanel />
+        </aside>
+
+        {/* Main content */}
+        <div className="inv-main">
+          {/* Results bar */}
+          {!loading && !error && inventoryItems.length > 0 && (
+            <div className="inv-results-bar">
+              Showing {inventoryItems.length} of {pagination.total} items
             </div>
           )}
-        </>
-      )}
+
+          {loading && inventoryItems.length === 0 ? (
+            <div className="inv-loading">
+              <div className="inv-loader" />
+              <p>Loading inventory items…</p>
+            </div>
+          ) : error ? (
+            <div className="inv-error">
+              <p>{error}</p>
+              <button onClick={loadInventoryItems} className="inv-retry-btn">Try Again</button>
+            </div>
+          ) : inventoryItems.length === 0 ? (
+            <div className="inv-empty">
+              <h3>No items found</h3>
+              <p>Try adjusting your filters or check back later for new items.</p>
+              {hasActiveFilters && (
+                <button className="inv-retry-btn" onClick={handleClearFilters}>Clear Filters</button>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="inv-grid">
+                {inventoryItems.map(item => (
+                  <div className="inv-grid-item" key={item._id}>
+                    <InventoryCard item={item} />
+                  </div>
+                ))}
+              </div>
+
+              {pagination.totalPages > 1 && (
+                <div className="inv-pagination">
+                  <button
+                    className="inv-page-btn"
+                    onClick={() => handlePageChange(pagination.page - 1)}
+                    disabled={pagination.page === 1}
+                  >
+                    ← Previous
+                  </button>
+
+                  <div className="inv-page-numbers">
+                    {getPaginationRange().map((page, i) =>
+                      page === '...' ? (
+                        <span key={`e-${i}`} className="inv-page-ellipsis">…</span>
+                      ) : (
+                        <button
+                          key={page}
+                          className={`inv-page-btn ${pagination.page === page ? 'active' : ''}`}
+                          onClick={() => handlePageChange(page)}
+                          disabled={pagination.page === page}
+                        >
+                          {page}
+                        </button>
+                      )
+                    )}
+                  </div>
+
+                  <button
+                    className="inv-page-btn"
+                    onClick={() => handlePageChange(pagination.page + 1)}
+                    disabled={pagination.page === pagination.totalPages}
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
