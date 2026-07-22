@@ -449,10 +449,89 @@
   margin-bottom: 0.3rem;
 }
 
+.inv-mgmt-sub-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+
 .inv-mgmt-sub-date {
   font-size: 0.75rem;
   color: #6e7681;
 }
+
+.inv-mgmt-sub-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.inv-mgmt-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.32rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.inv-mgmt-action-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.inv-mgmt-action-btn.pause {
+  background: rgba(245,158,11,0.1);
+  border-color: rgba(245,158,11,0.3);
+  color: #f59e0b;
+}
+.inv-mgmt-action-btn.pause:hover:not(:disabled) {
+  background: rgba(245,158,11,0.2);
+}
+
+.inv-mgmt-action-btn.activate {
+  background: rgba(16,185,129,0.1);
+  border-color: rgba(16,185,129,0.3);
+  color: #10b981;
+}
+.inv-mgmt-action-btn.activate:hover:not(:disabled) {
+  background: rgba(16,185,129,0.2);
+}
+
+.inv-mgmt-action-btn.delete {
+  background: rgba(239,68,68,0.1);
+  border-color: rgba(239,68,68,0.3);
+  color: #ef4444;
+}
+.inv-mgmt-action-btn.delete:hover:not(:disabled) {
+  background: rgba(239,68,68,0.2);
+}
+
+/* Confirm modal — fix h4 */
+.inv-mgmt-confirm-modal h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: #e6edf3;
+}
+.inv-mgmt-confirm-modal p  { margin: 0 0 1.5rem; font-size: 0.88rem; color: #8b949e; }
+
+/* Modal confirm delete button */
+.inv-mgmt-delete-btn {
+  padding: 0.55rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: #f85149;
+  color: #fff;
+}
+.inv-mgmt-delete-btn:hover:not(:disabled) { background: #da3633; }
+.inv-mgmt-delete-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 @media (max-width: 480px) {
   .inv-mgmt-sub-card { flex-direction: column; }
