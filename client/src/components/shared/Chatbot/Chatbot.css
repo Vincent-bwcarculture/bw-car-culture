@@ -1,4 +1,4 @@
-/* Chatbot.css — Mpho AI Assistant */
+/* Chatbot.css — BW Car Culture Chatbot */
 
 /* ── CSS Variables ── */
 :root {
@@ -42,23 +42,24 @@
   width: var(--fab-size, 48px);
   height: var(--fab-size, 48px);
   border-radius: 50%;
-  background: linear-gradient(135deg, #e63000, #ff4500);
-  color: #fff;
-  border: none;
+  background: rgba(18, 18, 18, 0.97);
+  color: #ff3300;
+  border: 2px solid #ff3300;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 20px rgba(230,48,0,0.55), 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 20px rgba(255, 51, 0, 0.3), 0 2px 8px rgba(0,0,0,0.5);
   position: relative;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
   flex-shrink: 0;
   will-change: transform;
 }
 
 .kb-fab:hover {
   transform: scale(1.08);
-  box-shadow: 0 6px 28px rgba(230,48,0,0.65), 0 2px 12px rgba(0,0,0,0.4);
+  background: rgba(255, 51, 0, 0.12);
+  box-shadow: 0 6px 28px rgba(255, 51, 0, 0.45), 0 2px 12px rgba(0,0,0,0.5);
 }
 
 .kb-fab:active { transform: scale(0.94); }
@@ -68,14 +69,14 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  color: #fff;
+  color: #ff3300;
 }
 
 .kb-fab-pulse {
   position: absolute;
   inset: -4px;
   border-radius: 50%;
-  border: 2px solid rgba(230,48,0,0.4);
+  border: 2px solid rgba(255, 51, 0, 0.35);
   animation: kb-pulse 2s ease-out infinite;
   pointer-events: none;
 }
@@ -140,8 +141,9 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #e63000, #ff7043);
-  color: #fff;
+  background: rgba(18, 18, 18, 0.97);
+  border: 1.5px solid #ff3300;
+  color: #ff3300;
   font-weight: 700;
   font-size: 13px;
   display: flex;

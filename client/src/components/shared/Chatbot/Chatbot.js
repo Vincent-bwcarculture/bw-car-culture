@@ -10,7 +10,7 @@ const API_BASE = process.env.REACT_APP_API_URL || 'https://api.i3wcarculture.com
 
 const WELCOME_MSG = {
   role: 'assistant',
-  content: "Hi, I'm **Mpho AI** — your Bw Car Culture assistant.\n\nI can help you:\n• Find cars on the marketplace\n• Discover workshops, rentals & transport\n• Create a listing through chat\n• Navigate the site\n\nWhat can I do for you today?"
+  content: "Hi, I'm the **BW Car Culture Chatbot** — here to help you navigate the site.\n\nI can help you:\n• Find cars on the marketplace\n• Discover workshops, rentals & transport\n• Create a listing through chat\n• Navigate the site\n\nWhat can I do for you today?"
 };
 
 const QUICK_REPLIES = [
@@ -261,7 +261,7 @@ const Chatbot = () => {
       setInput('');
       appendMsg({
         role: 'assistant',
-        content: "To chat with Mpho AI you'll need to **log in or create a free account** first.\n\nIt only takes a minute.",
+        content: "To use the Chatbot you'll need to **log in or create a free account** first.\n\nIt only takes a minute.",
         authGate: true
       });
       return;
@@ -385,7 +385,7 @@ const Chatbot = () => {
     if (msg.role === 'upsell') {
       return (
         <div key={idx} className="kb-upsell-card">
-          <div className="kb-upsell-title">Mpho — BWP 100/month</div>
+          <div className="kb-upsell-title">Chatbot Premium — BWP 100/month</div>
           <ul className="kb-upsell-list">
             <li>50 messages/day (vs 12 free)</li>
             <li>AI fills your listing form for you</li>
@@ -394,7 +394,7 @@ const Chatbot = () => {
             <li>Priority admin review of your listings</li>
           </ul>
           <button className="kb-upsell-btn" onClick={() => setShowSubscribeModal(true)}>
-            Subscribe to Mpho — BWP 100/mo
+            Subscribe — BWP 100/mo
           </button>
         </div>
       );
@@ -532,7 +532,7 @@ const Chatbot = () => {
             ref={inputRef}
             className="kb-input"
             type="text"
-            placeholder={loading ? 'Mpho AI is thinking…' : 'Ask me anything…'}
+            placeholder={loading ? 'Chatbot is thinking…' : 'Ask me anything…'}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -618,7 +618,7 @@ const Chatbot = () => {
       <button
         className={`kb-fab ${isOpen ? 'kb-fab-open' : ''}`}
         onClick={() => setIsOpen(o => !o)}
-        aria-label={isOpen ? 'Close Mpho AI' : 'Open Mpho AI Assistant'}
+        aria-label={isOpen ? 'Close Chatbot' : 'Open Chatbot'}
       >
         <span className="kb-fab-icon">
           {isOpen ? <CloseIcon size={18} strokeWidth={2.5} /> : <Sparkles size={20} />}
@@ -631,11 +631,11 @@ const Chatbot = () => {
         <div className="kb-panel">
           <div className="kb-header">
             <div className="kb-header-info">
-              <div className="kb-header-avatar">M</div>
+              <div className="kb-header-avatar">BW</div>
               <div>
-                <div className="kb-header-name">Mpho AI</div>
+                <div className="kb-header-name">Chatbot</div>
                 <div className="kb-header-status">
-                  Bw Car Culture AI · Online
+                  Bw Car Culture · Online
                   {isPro && <span className="kb-pro-badge">MPHO</span>}
                 </div>
               </div>

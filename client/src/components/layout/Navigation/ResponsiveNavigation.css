@@ -968,14 +968,14 @@
     width: var(--fab-size);
     height: var(--fab-size);
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--nav-accent) 0%, #cc2900 100%);
-    color: white;
-    border: none;
+    background: rgba(18, 18, 18, 0.97);
+    color: #ff3300;
+    border: 2px solid #ff3300;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(255, 51, 0, 0.4);
+    box-shadow: 0 4px 16px rgba(255, 51, 0, 0.3), 0 2px 8px rgba(0,0,0,0.5);
     z-index: 998;
     transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease, visibility 0.15s ease;
     will-change: transform;
@@ -1003,7 +1003,8 @@
 
 .review-fab:hover {
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 20px rgba(255, 51, 0, 0.5);
+    background: rgba(255, 51, 0, 0.12);
+    box-shadow: 0 6px 24px rgba(255, 51, 0, 0.45), 0 2px 12px rgba(0,0,0,0.5);
 }
 
 .review-fab:active {

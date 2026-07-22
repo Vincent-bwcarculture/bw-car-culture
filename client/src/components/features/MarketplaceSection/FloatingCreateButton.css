@@ -8,18 +8,18 @@
   z-index: 1000;
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #ff3300, #ff6600);
-  border: none;
+  background: rgba(18, 18, 18, 0.97);
+  border: 2px solid #ff3300;
   border-radius: 28px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 8px 32px rgba(255, 51, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(255, 51, 0, 0.25), 0 2px 12px rgba(0,0,0,0.5);
   backdrop-filter: blur(10px);
   overflow: hidden;
   width: 56px;
   height: 56px;
   text-decoration: none;
-  color: white;
+  color: #ff3300;
   font-family: inherit;
   font-weight: 600;
   font-size: 14px;
@@ -30,8 +30,8 @@
 
 .marketplace-fab-button:hover {
   width: 160px;
-  background: linear-gradient(135deg, #e62e00, #ff4400);
-  box-shadow: 0 12px 40px rgba(255, 51, 0, 0.6);
+  background: rgba(255, 51, 0, 0.12);
+  box-shadow: 0 12px 40px rgba(255, 51, 0, 0.4), 0 2px 12px rgba(0,0,0,0.5);
   transform: translateY(-50%) translateX(2px);
 }
 
@@ -190,12 +190,13 @@
 @media (prefers-contrast: high) {
   .marketplace-fab-button {
     border: 2px solid #ffffff;
-    background: #ff3300;
+    background: #141414;
+    color: #ffffff;
   }
-  
+
   .marketplace-fab-button:hover {
-    background: #e62e00;
-    border-color: #ffffff;
+    background: #1e1e1e;
+    border-color: #ff3300;
   }
 }
 
