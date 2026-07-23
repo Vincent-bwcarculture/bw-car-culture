@@ -16,6 +16,7 @@ import CheckinReminderModal from './AdminOps/CheckinReminderModal.js';
 import InventoryManager from './InventoryManager/InventoryManager.js';
 import AdminInventorySubmissions from './components/AdminInventorySubmissions.js';
 import AdminInventoryListings from './components/AdminInventoryListings.js';
+import InvoiceManager from './InvoiceManager/InvoiceManager.js';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -215,6 +216,18 @@ const AdminDashboard = () => {
               </div>
             </div>
             <AdminInventoryListings />
+          </>
+        );
+      case 'invoices':
+        return (
+          <>
+            <div className="section-header">
+              <h2>Invoices & Quotations</h2>
+              <button className="back-button" onClick={() => setActiveSection('dashboard')}>
+                ← Back to Dashboard
+              </button>
+            </div>
+            <InvoiceManager />
           </>
         );
       default:

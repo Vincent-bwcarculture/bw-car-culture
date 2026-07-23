@@ -364,6 +364,14 @@ const QuickActions = ({ onActionSelected }) => {
               <span className="qa-icon">📢</span>
               Broadcast Notification
             </button>
+
+            <button
+              className="qa-action-button"
+              onClick={() => onActionSelected && onActionSelected('invoices')}
+            >
+              <span className="qa-icon">🧾</span>
+              Invoices & Quotations
+            </button>
           </>
         )}
 
