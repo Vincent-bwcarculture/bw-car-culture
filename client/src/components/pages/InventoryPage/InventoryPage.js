@@ -1,10 +1,11 @@
 // src/components/pages/InventoryPage/InventoryPage.js
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Filter, Grid, List, ChevronDown, X, RefreshCw, SlidersHorizontal } from 'lucide-react';
+import { Search, Filter, Grid, List, ChevronDown, X, RefreshCw, SlidersHorizontal, Tag } from 'lucide-react';
 import InventoryCard from '../../shared/InventoryCard/InventoryCard.js';
 import ShareModal from '../../shared/ShareModal.js';
 import { http } from '../../../config/axios.js';
+import { useAuth } from '../../../context/AuthContext.js';
 import './InventoryPage.css';
 
 const SORT_OPTIONS = [
@@ -41,8 +42,9 @@ const DEFAULT_FILTERS = { category: 'all', condition: 'all', minPrice: '', maxPr
 const ITEMS_PER_PAGE = 12;
 
 const InventoryPage = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate  = useNavigate();
+  const location  = useLocation();
+  const { isAuthenticated } = useAuth();
 
   const [items, setItems]               = useState([]);
   const [loading, setLoading]           = useState(true);
@@ -272,6 +274,25 @@ const InventoryPage = () => {
           <X size={12} /> Clear all filters ({activeFiltersCount})
         </button>
       )}
+
+      {/* Sell button */}
+      <div className="ip-sell-divider" />
+      <button
+        className="ip-sell-btn"
+        onClick={() => {
+          if (isAuthenticated) {
+            navigate('/profile?tab=inventory');
+          } else {
+            navigate('/login', { state: { from: '/profile?tab=inventory' } });
+          }
+        }}
+      >
+        <Tag size={14} />
+        Sell My Inventory
+      </button>
+      {!isAuthenticated && (
+        <p className="ip-sell-hint">Login required to list an item</p>
+      )}
     </div>
   );
 
@@ -298,6 +319,22 @@ const InventoryPage = () => {
           </div>
         </div>
       </div>
+
+      {/* ── Mobile sell button (always visible) ── */}
+      <button
+        className="ip-sell-btn mobile"
+        onClick={() => {
+          if (isAuthenticated) {
+            navigate('/profile?tab=inventory');
+          } else {
+            navigate('/login', { state: { from: '/profile?tab=inventory' } });
+          }
+        }}
+      >
+        <Tag size={14} />
+        Sell My Inventory
+        {!isAuthenticated && <span className="ip-sell-hint-inline"> · Login required</span>}
+      </button>
 
       {/* ── Mobile filter drawer ── */}
       {showMobileFilters && (

@@ -268,6 +268,57 @@
 }
 .ip-clear-btn:hover { background: rgba(239,68,68,0.16); }
 
+/* ── Sell button ───────────────────────────────────────────── */
+.ip-sell-divider {
+  height: 1px;
+  background: #2c2c2c;
+  margin: 0.25rem 0;
+}
+
+.ip-sell-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  background: rgba(255,51,0,0.1);
+  border: 1px solid rgba(255,51,0,0.35);
+  border-radius: 8px;
+  color: #ff3300;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  letter-spacing: 0.01em;
+}
+.ip-sell-btn:hover {
+  background: rgba(255,51,0,0.18);
+  border-color: #ff3300;
+  transform: translateY(-1px);
+}
+
+/* Mobile version — shown below the top bar, hidden on desktop */
+.ip-sell-btn.mobile {
+  margin-bottom: 0.65rem;
+}
+@media (min-width: 1024px) {
+  .ip-sell-btn.mobile { display: none; }
+}
+
+.ip-sell-hint {
+  font-size: 0.72rem;
+  color: #6e7681;
+  text-align: center;
+  margin: 0;
+}
+
+.ip-sell-hint-inline {
+  font-size: 0.72rem;
+  opacity: 0.7;
+  font-weight: 400;
+}
+
 /* ── Main content ──────────────────────────────────────────── */
 .ip-main { min-width: 0; }
 

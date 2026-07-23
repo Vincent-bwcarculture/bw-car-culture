@@ -71,7 +71,7 @@ const [articleAction, setArticleAction] = useState(null);
       if (tab === 'sell-car' || tab === 'sell_car') {
         setActiveTab('vehicles'); // Redirect to vehicles tab
         setUrlAction('sell'); // Set action to sell
-      } else if (['register-vehicle', 'overview', 'notifications', 'services', 'routes', 'vehicles', 'articles', 'business', 'network', 'settings'].includes(tab)) {
+      } else if (['register-vehicle', 'overview', 'notifications', 'services', 'routes', 'vehicles', 'inventory', 'articles', 'business', 'network', 'settings'].includes(tab)) {
         setActiveTab(tab);
       }
     }
@@ -212,10 +212,7 @@ const getAvailableTabs = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Eye },
     { id: 'vehicles', label: 'Sell My Vehicle', icon: Car },
-    // Admin-only: Sell Inventory sits right next to Sell My Vehicle
-    ...(profileData?.role === 'admin'
-      ? [{ id: 'inventory', label: 'Sell Inventory', icon: Package }]
-      : []),
+    { id: 'inventory', label: 'Sell Inventory', icon: Package },
     { id: 'register-vehicle', label: 'Register Vehicle', icon: Car },
     { id: 'notifications', label: 'Notifications', icon: Bell }
   ];
@@ -414,7 +411,7 @@ const getAvailableTabs = () => {
           />
         )}
 
-        {/* Admin-only: Inventory listing management */}
+        {/* Inventory listing management — available to all logged-in users */}
         {activeTab === 'inventory' && (
           <InventoryManagement
             profileData={displayData}
