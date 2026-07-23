@@ -1,6 +1,7 @@
 // src/Admin/InvoiceManager/InvoiceManager.js
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext.js';
+import api from '../../config/axios.js';
 import './InvoiceManager.css';
 
 const API_BASE = '/api/admin/invoices';
@@ -360,44 +361,34 @@ const InvoiceManager = () => {
   const [docs, setDocs]             = useState([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState(null);
-  const [typeTab, setTypeTab]       = useState('all');       // all | invoice | quotation
+  const [typeTab, setTypeTab]       = useState('all');
   const [statusTab, setStatusTab]   = useState('all');
-  const [form, setForm]             = useState(null);        // null | doc object (new or edit)
+  const [form, setForm]             = useState(null);
   const [printDoc, setPrintDoc]     = useState(null);
   const [saving, setSaving]         = useState(false);
-  const [actionLoading, setActionLoading] = useState(null); // id being acted on
-
-  const token = useCallback(() => {
-    return localStorage.getItem('token') || sessionStorage.getItem('token') || '';
-  }, []);
-
-  const authHeader = useCallback(() => ({
-    Authorization: `Bearer ${token()}`,
-    'Content-Type': 'application/json'
-  }), [token]);
+  const [actionLoading, setActionLoading] = useState(null);
 
   const fetchDocs = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams();
-      if (typeTab !== 'all') params.set('type', typeTab);
-      if (statusTab !== 'all') params.set('status', statusTab);
-      params.set('limit', '100');
+      const params = {};
+      if (typeTab !== 'all')   params.type   = typeTab;
+      if (statusTab !== 'all') params.status = statusTab;
+      params.limit = 100;
 
-      const res = await fetch(`${API_BASE}?${params}`, { headers: authHeader() });
-      const data = await res.json();
-      if (data.success) {
-        setDocs(data.data || []);
+      const res = await api.get(API_BASE, { params });
+      if (res.data.success) {
+        setDocs(res.data.data || []);
       } else {
-        setError(data.message || 'Failed to load');
+        setError(res.data.message || 'Failed to load');
       }
     } catch (e) {
       setError('Network error — could not load invoices');
     } finally {
       setLoading(false);
     }
-  }, [typeTab, statusTab, authHeader]);
+  }, [typeTab, statusTab]);
 
   useEffect(() => { fetchDocs(); }, [fetchDocs]);
 
@@ -405,23 +396,18 @@ const InvoiceManager = () => {
     setSaving(true);
     try {
       const isEdit = !!formData._id;
-      const url = isEdit ? `${API_BASE}/${formData._id}` : API_BASE;
-      const method = isEdit ? 'PUT' : 'POST';
+      const res = isEdit
+        ? await api.put(`${API_BASE}/${formData._id}`, formData)
+        : await api.post(API_BASE, formData);
 
-      const res = await fetch(url, {
-        method,
-        headers: authHeader(),
-        body: JSON.stringify(formData)
-      });
-      const data = await res.json();
-      if (data.success) {
+      if (res.data.success) {
         setForm(null);
         fetchDocs();
       } else {
-        alert(data.message || 'Save failed');
+        alert(res.data.message || 'Save failed');
       }
-    } catch {
-      alert('Network error — save failed');
+    } catch (e) {
+      alert(e.response?.data?.message || 'Network error — save failed');
     } finally {
       setSaving(false);
     }
@@ -430,13 +416,8 @@ const InvoiceManager = () => {
   const handleStatusChange = async (doc, newStatus) => {
     setActionLoading(doc._id);
     try {
-      const res = await fetch(`${API_BASE}/${doc._id}/status`, {
-        method: 'PATCH',
-        headers: authHeader(),
-        body: JSON.stringify({ status: newStatus })
-      });
-      const data = await res.json();
-      if (data.success) {
+      const res = await api.patch(`${API_BASE}/${doc._id}/status`, { status: newStatus });
+      if (res.data.success) {
         setDocs(prev => prev.map(d => d._id === doc._id ? { ...d, status: newStatus } : d));
       }
     } catch { /* ignore */ }
@@ -447,7 +428,7 @@ const InvoiceManager = () => {
     if (!window.confirm(`Delete ${doc.type === 'quotation' ? 'quotation' : 'invoice'} #${doc.number}? This cannot be undone.`)) return;
     setActionLoading(doc._id);
     try {
-      await fetch(`${API_BASE}/${doc._id}`, { method: 'DELETE', headers: authHeader() });
+      await api.delete(`${API_BASE}/${doc._id}`);
       setDocs(prev => prev.filter(d => d._id !== doc._id));
     } catch { /* ignore */ }
     finally { setActionLoading(null); }
