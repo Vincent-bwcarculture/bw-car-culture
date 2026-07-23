@@ -466,6 +466,72 @@ select.im-input option { background: #1a1a1a; }
 }
 .im-regen-btn:hover { background: rgba(255,51,0,0.1); border-color: rgba(255,51,0,0.4); color: #ff3300; transform: rotate(180deg); }
 
+/* ── Payment details toggle (form) ──────────────────────── */
+.im-payment-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.84rem;
+  color: #c9d1d9;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 500;
+}
+.im-payment-toggle input[type="checkbox"] { accent-color: #ff3300; width: 15px; height: 15px; cursor: pointer; }
+
+.im-payment-preview {
+  margin-top: 0.6rem;
+  background: rgba(30,30,30,0.7);
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.im-payment-preview-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+}
+.im-payment-preview-row span:first-child { color: #6e7681; }
+.im-payment-preview-row span:last-child  { font-weight: 600; font-family: monospace; color: #e6edf3; }
+
+/* ── Payment details (print) ─────────────────────────────── */
+.im-print-payment {
+  margin-top: 1.75rem;
+  padding: 1rem 1.25rem;
+  border: 1.5px solid #111;
+  border-radius: 6px;
+  background: #f9f9f9;
+}
+
+.im-print-payment-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #555;
+  margin: 0 0 0.65rem;
+}
+
+.im-print-payment-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.im-print-payment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+}
+
+.im-print-payment-label { color: #555; }
+.im-print-payment-value { font-weight: 700; font-family: monospace; color: #111; letter-spacing: 0.02em; }
+
 .im-vat-label-row {
   display: flex;
   align-items: center;

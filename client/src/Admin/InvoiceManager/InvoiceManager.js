@@ -22,6 +22,12 @@ const genRefNumber = (type) => {
   return `${prefix}-${yy}${mm}-${seq}`;
 };
 
+const PAYMENT_DETAILS = [
+  { label: 'FNB Paytocell',  value: '+267 72 573 475' },
+  { label: 'FNB Account #',  value: '62918382300'     },
+  { label: 'Orange Money',   value: '+267 72 573 475' }
+];
+
 const empty_doc = (type = 'invoice') => ({
   type,
   reference: genRefNumber(type),
@@ -30,6 +36,7 @@ const empty_doc = (type = 'invoice') => ({
   notes: '',
   taxRate: 14,
   discountRate: 0,
+  showPaymentDetails: false,
   issueDate: new Date().toISOString().slice(0, 10),
   dueDate: '',
   status: 'draft'
@@ -144,6 +151,20 @@ const PrintModal = ({ doc, onClose }) => {
             <span className="total-amount">{formatBWP(totals.total)}</span>
           </div>
         </div>
+
+        {doc.showPaymentDetails && (
+          <div className="im-print-payment">
+            <p className="im-print-payment-title">Payment Details</p>
+            <div className="im-print-payment-grid">
+              {PAYMENT_DETAILS.map(p => (
+                <div key={p.label} className="im-print-payment-row">
+                  <span className="im-print-payment-label">{p.label}</span>
+                  <span className="im-print-payment-value">{p.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <p className="im-print-footer">Thank you for your business! · I3w Proprietary Limited · +267 74 122 453 · P O Box 1473, Mahalapye, Botswana</p>
       </div>
@@ -375,6 +396,24 @@ const DocForm = ({ initial, onSave, onCancel, saving }) => {
               )}
               <div className="im-totals-row total"><span>TOTAL</span><span>{formatBWP(totals.total)}</span></div>
             </div>
+          </div>
+
+          {/* Payment details toggle */}
+          <div className="im-form-section">
+            <label className="im-payment-toggle">
+              <input type="checkbox" checked={!!form.showPaymentDetails}
+                onChange={e => setField('showPaymentDetails', e.target.checked)} />
+              Include payment details on document
+            </label>
+            {form.showPaymentDetails && (
+              <div className="im-payment-preview">
+                {PAYMENT_DETAILS.map(p => (
+                  <div key={p.label} className="im-payment-preview-row">
+                    <span>{p.label}</span><span>{p.value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Notes */}
