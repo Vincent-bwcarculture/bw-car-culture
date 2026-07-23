@@ -536,6 +536,21 @@ select.im-input option { background: #1a1a1a; }
   border-bottom: 2px solid #111;
 }
 
+.im-print-header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.im-print-logo {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.im-print-doc-type { display: flex; flex-direction: column; }
+
 .im-print-title { font-size: 1.8rem; font-weight: 800; margin: 0; color: #111; }
 .im-print-num { font-size: 0.9rem; color: #555; margin: 0.25rem 0 0; font-family: monospace; }
 

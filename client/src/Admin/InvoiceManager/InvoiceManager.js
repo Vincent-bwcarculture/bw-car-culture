@@ -55,16 +55,19 @@ const PrintModal = ({ doc, onClose }) => {
       </div>
       <div className="im-print-doc">
         <div className="im-print-header">
-          <div>
-            <h1 className="im-print-title">{doc.type === 'quotation' ? 'QUOTATION' : 'INVOICE'}</h1>
-            <p className="im-print-num"># {doc.number}</p>
+          <div className="im-print-header-left">
+            <img src="/bcc-logo.png" alt="BW Car Culture" className="im-print-logo" />
+            <div className="im-print-doc-type">
+              <h1 className="im-print-title">{doc.type === 'quotation' ? 'QUOTATION' : 'INVOICE'}</h1>
+              <p className="im-print-num"># {doc.number}</p>
+            </div>
           </div>
           <div className="im-print-meta">
             <div><span>Issue Date</span><strong>{fmtDate(doc.issueDate)}</strong></div>
             {doc.dueDate && <div><span>Due Date</span><strong>{fmtDate(doc.dueDate)}</strong></div>}
             <div>
               <span>Status</span>
-              <strong style={{ color: STATUS_COLORS[doc.status] || '#fff' }}>
+              <strong style={{ color: STATUS_COLORS[doc.status] || '#555' }}>
                 {doc.status?.toUpperCase()}
               </strong>
             </div>
@@ -74,9 +77,10 @@ const PrintModal = ({ doc, onClose }) => {
         <div className="im-print-parties">
           <div>
             <p className="im-print-party-label">FROM</p>
-            <p className="im-print-party-name">BW Car Culture</p>
-            <p>Gaborone, Botswana</p>
-            <p>hello@bwcarculture.com</p>
+            <p className="im-print-party-name">I3w Proprietary Limited</p>
+            <p>Flowertown Ward, Mahalapye</p>
+            <p>P O Box 1473, Mahalapye, Botswana</p>
+            <p>+267 74 122 453</p>
           </div>
           <div>
             <p className="im-print-party-label">BILL TO</p>
@@ -130,7 +134,7 @@ const PrintModal = ({ doc, onClose }) => {
           </div>
         </div>
 
-        <p className="im-print-footer">Thank you for your business!</p>
+        <p className="im-print-footer">Thank you for your business! · I3w Proprietary Limited · +267 74 122 453 · P O Box 1473, Mahalapye, Botswana</p>
       </div>
     </div>
   );
