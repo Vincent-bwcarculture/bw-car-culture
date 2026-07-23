@@ -435,6 +435,25 @@ select.im-input option { background: #1a1a1a; }
 .num-col  { text-align: right; }
 .act-col  { display: flex; justify-content: center; }
 
+.im-vat-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.2rem;
+}
+
+.im-no-vat-check {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.76rem;
+  color: #8b949e;
+  cursor: pointer;
+  user-select: none;
+}
+.im-no-vat-check input[type="checkbox"] { accent-color: #ff3300; cursor: pointer; }
+.im-no-vat-check:hover { color: #c9d1d9; }
+
 .im-add-item-btn {
   margin-top: 0.5rem;
   padding: 0.4rem 0.9rem;

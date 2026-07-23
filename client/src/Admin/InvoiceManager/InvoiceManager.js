@@ -314,9 +314,21 @@ const DocForm = ({ initial, onSave, onCancel, saving }) => {
               <p className="im-form-section-title">Tax & Discount</p>
               <div className="im-form-row-2">
                 <div>
-                  <label className="im-form-label">VAT %</label>
+                  <div className="im-vat-label-row">
+                    <label className="im-form-label">VAT %</label>
+                    <label className="im-no-vat-check">
+                      <input
+                        type="checkbox"
+                        checked={Number(form.taxRate) === 0}
+                        onChange={e => setField('taxRate', e.target.checked ? 0 : 14)}
+                      />
+                      No VAT
+                    </label>
+                  </div>
                   <input className="im-input" type="number" min="0" max="100" step="0.1"
-                    value={form.taxRate} onChange={e => setField('taxRate', e.target.value)} />
+                    value={form.taxRate}
+                    disabled={Number(form.taxRate) === 0}
+                    onChange={e => setField('taxRate', e.target.value)} />
                 </div>
                 <div>
                   <label className="im-form-label">Discount %</label>
