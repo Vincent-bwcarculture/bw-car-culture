@@ -13,8 +13,18 @@ const STATUS_COLORS = {
 
 const empty_item = () => ({ description: '', quantity: 1, unitPrice: '' });
 
+const genRefNumber = (type) => {
+  const prefix = type === 'quotation' ? 'QUO' : 'INV';
+  const now = new Date();
+  const yy = String(now.getFullYear()).slice(2);
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const seq = String(Math.floor(Math.random() * 900) + 100);
+  return `${prefix}-${yy}${mm}-${seq}`;
+};
+
 const empty_doc = (type = 'invoice') => ({
   type,
+  reference: genRefNumber(type),
   customer: { name: '', email: '', phone: '', address: '' },
   items: [empty_item()],
   notes: '',
@@ -59,7 +69,8 @@ const PrintModal = ({ doc, onClose }) => {
             <img src="/bcc-logo.png" alt="BW Car Culture" className="im-print-logo" />
             <div className="im-print-doc-type">
               <h1 className="im-print-title">{doc.type === 'quotation' ? 'QUOTATION' : 'INVOICE'}</h1>
-              <p className="im-print-num"># {doc.number}</p>
+              {doc.reference && <p className="im-print-num">Ref: {doc.reference}</p>}
+              {doc.number    && <p className="im-print-num" style={{ color: '#888', fontSize: '0.78rem' }}>ID: {doc.number}</p>}
             </div>
           </div>
           <div className="im-print-meta">
@@ -201,17 +212,34 @@ const DocForm = ({ initial, onSave, onCancel, saving }) => {
               <div className="im-type-toggle">
                 <button
                   className={`im-type-btn ${form.type === 'invoice' ? 'active' : ''}`}
-                  onClick={() => setField('type', 'invoice')}
+                  onClick={() => { setField('type', 'invoice'); setField('reference', genRefNumber('invoice')); }}
                   type="button"
                 >Invoice</button>
                 <button
                   className={`im-type-btn ${form.type === 'quotation' ? 'active' : ''}`}
-                  onClick={() => setField('type', 'quotation')}
+                  onClick={() => { setField('type', 'quotation'); setField('reference', genRefNumber('quotation')); }}
                   type="button"
                 >Quotation</button>
               </div>
             </div>
           )}
+
+          {/* Reference / Auto-ID */}
+          <div className="im-form-section">
+            <div className="im-ref-row">
+              <div style={{ flex: 1 }}>
+                <label className="im-form-label">Reference # (auto-generated, editable)</label>
+                <input className="im-input im-ref-input" value={form.reference || ''}
+                  onChange={e => setField('reference', e.target.value)}
+                  placeholder="e.g. INV-2607-142" />
+              </div>
+              <button type="button" className="im-regen-btn"
+                title="Regenerate reference number"
+                onClick={() => setField('reference', genRefNumber(form.type))}>
+                ↻
+              </button>
+            </div>
+          </div>
 
           {/* Dates & Status */}
           <div className="im-form-section">
@@ -536,7 +564,12 @@ const InvoiceManager = () => {
                 const transitions = nextStatuses(doc);
                 return (
                   <tr key={doc._id} className={isBusy ? 'im-row-busy' : ''}>
-                    <td><span className="im-doc-num">{doc.number}</span></td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        {doc.reference && <span className="im-doc-num">{doc.reference}</span>}
+                        {doc.number    && <span style={{ fontSize: '0.72rem', color: '#6e7681', fontFamily: 'monospace' }}>{doc.number}</span>}
+                      </div>
+                    </td>
                     <td>
                       <span className={`im-type-badge ${doc.type}`}>
                         {doc.type === 'quotation' ? 'Quote' : 'Invoice'}

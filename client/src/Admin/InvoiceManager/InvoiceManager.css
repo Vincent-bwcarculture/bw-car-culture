@@ -435,6 +435,37 @@ select.im-input option { background: #1a1a1a; }
 .num-col  { text-align: right; }
 .act-col  { display: flex; justify-content: center; }
 
+.im-ref-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.im-ref-input {
+  font-family: monospace;
+  letter-spacing: 0.03em;
+  font-weight: 600;
+  color: #ff9966;
+}
+
+.im-regen-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid #444;
+  border-radius: 7px;
+  color: #8b949e;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  margin-bottom: 1px;
+}
+.im-regen-btn:hover { background: rgba(255,51,0,0.1); border-color: rgba(255,51,0,0.4); color: #ff3300; transform: rotate(180deg); }
+
 .im-vat-label-row {
   display: flex;
   align-items: center;
@@ -566,6 +597,9 @@ select.im-input option { background: #1a1a1a; }
   width: auto;
   object-fit: contain;
   flex-shrink: 0;
+  background: #111;
+  border-radius: 6px;
+  padding: 8px 10px;
 }
 
 .im-print-doc-type { display: flex; flex-direction: column; }
