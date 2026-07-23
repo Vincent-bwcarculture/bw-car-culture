@@ -698,14 +698,29 @@ select.im-input option { background: #1a1a1a; }
 @media print {
   .no-print { display: none !important; }
 
-  body > * { display: none !important; }
-  .im-print-overlay { display: block !important; position: static !important; background: #fff; }
+  /* Hide everything via visibility so children can override */
+  body, #root { visibility: hidden !important; }
+
+  /* Re-show only the print overlay and everything inside it */
+  .im-print-overlay,
+  .im-print-overlay * { visibility: visible !important; }
+
+  .im-print-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: #fff !important;
+    overflow: visible !important;
+    z-index: 99999 !important;
+  }
+
+  .im-print-toolbar { display: none !important; }
+
   .im-print-doc {
     box-shadow: none !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     border-radius: 0 !important;
     max-width: 100% !important;
-    padding: 1rem !important;
+    padding: 1.5rem 2rem !important;
   }
 }
 
