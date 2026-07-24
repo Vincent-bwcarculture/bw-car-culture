@@ -17,6 +17,7 @@ import InventoryManager from './InventoryManager/InventoryManager.js';
 import AdminInventorySubmissions from './components/AdminInventorySubmissions.js';
 import AdminInventoryListings from './components/AdminInventoryListings.js';
 import InvoiceManager from './InvoiceManager/InvoiceManager.js';
+import FinancialRecords from './FinancialRecords/FinancialRecords.js';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -228,6 +229,18 @@ const AdminDashboard = () => {
               </button>
             </div>
             <InvoiceManager />
+          </>
+        );
+      case 'financial-records':
+        return (
+          <>
+            <div className="section-header">
+              <h2>Financial Records</h2>
+              <button className="back-button" onClick={() => setActiveSection('dashboard')}>
+                ← Back to Dashboard
+              </button>
+            </div>
+            <FinancialRecords />
           </>
         );
       default:

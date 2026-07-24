@@ -372,6 +372,14 @@ const QuickActions = ({ onActionSelected }) => {
               <span className="qa-icon">🧾</span>
               Invoices & Quotations
             </button>
+
+            <button
+              className="qa-action-button highlight-action"
+              onClick={() => onActionSelected && onActionSelected('financial-records')}
+            >
+              <span className="qa-icon">📊</span>
+              Financial Records
+            </button>
           </>
         )}
 
