@@ -46,7 +46,7 @@ const FinancialSummaryWidget = () => {
           const allRecords = res.data.data || [];
           setRecords(allRecords.filter(r => {
             const year = new Date(r.date).getFullYear();
-            return year >= 2025;
+            return year >= 2026;
           }));
         }
       } catch { /* silent */ }
@@ -62,13 +62,13 @@ const FinancialSummaryWidget = () => {
   const totalExpenses = expenses.reduce((s, r) => s + Number(r.amount || 0), 0);
   const netProfit     = totalIncome - totalExpenses;
 
-  // Top money generators: group income by customerName, then by category
-  const byCustomer = {};
+  // Top money generators: group income by category
+  const byCategory = {};
   income.forEach(r => {
-    const key = r.customerName?.trim() || INCOME_CATEGORY_LABELS[r.category] || r.category || 'Other';
-    byCustomer[key] = (byCustomer[key] || 0) + Number(r.amount || 0);
+    const key = INCOME_CATEGORY_LABELS[r.category] || r.category || 'Other';
+    byCategory[key] = (byCategory[key] || 0) + Number(r.amount || 0);
   });
-  const topGenerators = Object.entries(byCustomer)
+  const topGenerators = Object.entries(byCategory)
     .map(([name, Revenue]) => ({ name, Revenue }))
     .sort((a, b) => b.Revenue - a.Revenue)
     .slice(0, 8);
@@ -87,7 +87,7 @@ const FinancialSummaryWidget = () => {
       <div className="fsw-header">
         <div>
           <h3 className="fsw-title">Financial Overview</h3>
-          <p className="fsw-subtitle">2025 onwards · BW Car Culture</p>
+          <p className="fsw-subtitle">2026 onwards · BW Car Culture</p>
         </div>
       </div>
 
