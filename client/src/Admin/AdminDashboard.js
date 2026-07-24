@@ -18,6 +18,7 @@ import AdminInventorySubmissions from './components/AdminInventorySubmissions.js
 import AdminInventoryListings from './components/AdminInventoryListings.js';
 import InvoiceManager from './InvoiceManager/InvoiceManager.js';
 import FinancialRecords from './FinancialRecords/FinancialRecords.js';
+import FinancialSummaryWidget from './FinancialSummaryWidget/FinancialSummaryWidget.js';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -246,6 +247,7 @@ const AdminDashboard = () => {
       default:
         return (
           <>
+            <FinancialSummaryWidget />
             <AdminOpsDashboardWidget />
             <div className="dashboard-content">
               <QuickActions onActionSelected={setActiveSection} />

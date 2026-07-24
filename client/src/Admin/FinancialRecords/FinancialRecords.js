@@ -172,7 +172,7 @@ const FinancialRecords = () => {
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState(null);
   const [tab, setTab]               = useState('overview');  // overview | income | expenses
-  const [yearFilter, setYearFilter] = useState(String(new Date().getFullYear()));
+  const [yearFilter, setYearFilter] = useState('');
   const [form, setForm]             = useState(null);
   const [saving, setSaving]         = useState(false);
   const [deleting, setDeleting]     = useState(null);
@@ -244,9 +244,9 @@ const FinancialRecords = () => {
                  .reduce((s, r) => s + Number(r.amount || 0), 0)
   })).filter(d => d.value > 0);
 
-  const years = [];
+  const years = [{ value: '', label: 'All Years' }];
   const thisYear = new Date().getFullYear();
-  for (let y = 2025; y <= thisYear + 1; y++) years.push(String(y));
+  for (let y = 2025; y <= thisYear + 1; y++) years.push({ value: String(y), label: String(y) });
 
   // ── Render helpers ────────────────────────────────────
   const RecordTable = ({ rows, showCustomer }) => (
@@ -301,11 +301,11 @@ const FinancialRecords = () => {
       <div className="fr-header">
         <div>
           <h2 className="fr-heading">Financial Records</h2>
-          <p className="fr-subheading">BW Car Culture — {yearFilter}</p>
+          <p className="fr-subheading">BW Car Culture — {yearFilter || 'All Years'}</p>
         </div>
         <div className="fr-header-right">
           <select className="fr-year-select" value={yearFilter} onChange={e => setYearFilter(e.target.value)}>
-            {years.map(y => <option key={y} value={y}>{y}</option>)}
+            {years.map(y => <option key={y.value} value={y.value}>{y.label}</option>)}
           </select>
           <button className="fr-btn-expense" onClick={() => setForm(emptyEntry('expense'))}>+ Expense</button>
           <button className="fr-btn-income"  onClick={() => setForm(emptyEntry('income'))}>+ Income</button>

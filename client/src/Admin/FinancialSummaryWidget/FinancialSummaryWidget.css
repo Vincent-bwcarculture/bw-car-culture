@@ -1,0 +1,119 @@
+/* FinancialSummaryWidget.css */
+.fsw-container {
+  background: rgba(16, 16, 16, 0.9);
+  border: 1px solid #2c2c2c;
+  border-radius: 14px;
+  padding: 1.25rem 1.4rem;
+  margin-bottom: 1.25rem;
+  color: #c9d1d9;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.fsw-container.fsw-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #6e7681;
+  font-size: 0.85rem;
+  min-height: 80px;
+}
+
+.fsw-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 51, 0, 0.2);
+  border-top-color: #ff3300;
+  border-radius: 50%;
+  animation: fsw-spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes fsw-spin { to { transform: rotate(360deg); } }
+
+.fsw-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.fsw-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e6edf3;
+  margin: 0 0 0.2rem;
+}
+.fsw-subtitle {
+  font-size: 0.75rem;
+  color: #6e7681;
+  margin: 0;
+}
+
+/* Cards */
+.fsw-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+@media (max-width: 640px) { .fsw-cards { grid-template-columns: 1fr; } }
+
+.fsw-card {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #2c2c2c;
+  background: rgba(22, 22, 22, 0.8);
+}
+.fsw-card.income  { border-color: rgba(63, 185, 80, 0.3); }
+.fsw-card.expense { border-color: rgba(248, 81, 73, 0.3); }
+.fsw-card.positive{ border-color: rgba(63, 185, 80, 0.45); background: rgba(63, 185, 80, 0.05); }
+.fsw-card.negative{ border-color: rgba(248, 81, 73, 0.45); background: rgba(248, 81, 73, 0.05); }
+
+.fsw-card-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #6e7681;
+  margin: 0 0 0.35rem;
+}
+.fsw-card-amount {
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-family: monospace;
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.02em;
+}
+.fsw-card.income  .fsw-card-amount { color: #3fb950; }
+.fsw-card.expense .fsw-card-amount { color: #f85149; }
+.fsw-card.positive .fsw-card-amount { color: #3fb950; }
+.fsw-card.negative .fsw-card-amount { color: #f85149; }
+.fsw-card-sub { font-size: 0.72rem; color: #6e7681; margin: 0; }
+
+/* Chart */
+.fsw-chart-card {
+  background: rgba(20, 20, 20, 0.7);
+  border: 1px solid #2c2c2c;
+  border-radius: 10px;
+  padding: 1rem 1rem 0.75rem;
+}
+.fsw-chart-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0 0 0.85rem;
+}
+
+.fsw-tooltip {
+  background: #1c1c1c;
+  border: 1px solid #2c2c2c;
+  border-radius: 7px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.8rem;
+}
+.fsw-tooltip-label {
+  color: #8b949e;
+  margin: 0 0 0.3rem;
+  font-weight: 600;
+  font-size: 0.78rem;
+}
