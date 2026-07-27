@@ -989,12 +989,40 @@ const CarMarketplace = () => {
           '@context': 'https://schema.org',
           '@type': 'Car',
           name: carTitle,
-          description: carDesc,
+          description: carDesc || `${carTitle} for sale in Botswana`,
           image: carImage ? [carImage] : undefined,
-          offers: car.price ? { '@type': 'Offer', price: car.price, priceCurrency: 'BWP', availability: 'https://schema.org/InStock', url: `${SITE_URL}/marketplace/${car._id}` } : undefined,
+          url: `${SITE_URL}/marketplace/${car._id}`,
+          offers: car.price ? {
+            '@type': 'Offer',
+            price: car.price,
+            priceCurrency: 'BWP',
+            availability: 'https://schema.org/InStock',
+            url: `${SITE_URL}/marketplace/${car._id}`,
+            seller: { '@type': 'Organization', name: 'BW Car Culture' }
+          } : undefined,
           vehicleModelDate: car.specifications?.year,
           brand: car.specifications?.make ? { '@type': 'Brand', name: car.specifications.make } : undefined,
-          mileageFromOdometer: car.specifications?.mileage ? { '@type': 'QuantitativeValue', value: car.specifications.mileage, unitCode: 'KMT' } : undefined
+          model: car.specifications?.model || undefined,
+          mileageFromOdometer: car.specifications?.mileage
+            ? { '@type': 'QuantitativeValue', value: Number(car.specifications.mileage), unitCode: 'KMT' }
+            : undefined,
+          fuelType: car.specifications?.fuelType || undefined,
+          vehicleTransmission: car.specifications?.transmission || undefined,
+          driveWheelConfiguration: car.specifications?.drivetrain
+            ? `${car.specifications.drivetrain.toUpperCase()} drive`
+            : undefined,
+          color: car.specifications?.exteriorColor || undefined,
+          vehicleCondition: car.condition === 'new'
+            ? 'https://schema.org/NewCondition'
+            : car.condition === 'like-new'
+              ? 'https://schema.org/RefurbishedCondition'
+              : 'https://schema.org/UsedCondition',
+          itemCondition: car.condition === 'new'
+            ? 'https://schema.org/NewCondition'
+            : 'https://schema.org/UsedCondition',
+          vehicleEngine: car.specifications?.engineSize
+            ? { '@type': 'EngineSpecification', engineDisplacement: { '@type': 'QuantitativeValue', value: car.specifications.engineSize } }
+            : undefined,
         }
       })}
       <div className="car-detail-container">
