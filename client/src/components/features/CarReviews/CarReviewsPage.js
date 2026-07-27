@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.js';
 import { carReviewService } from '../../../services/carReviewService.js';
 import './CarReviews.css';
+import { buildHelmet } from '../../../hooks/useSEO.js';
 
 const CarReviewsPage = () => {
   const { carModel } = useParams();
@@ -304,6 +305,11 @@ const CarReviewsPage = () => {
 
   return (
     <div className="car-reviews-container">
+      {buildHelmet({
+        title: 'Car Owner Reviews — Real Experiences from Botswana Drivers',
+        description: 'Read honest car reviews from real vehicle owners in Botswana and Southern Africa. Share your own experience with any car model.',
+        url: 'https://www.i3wcarculture.com/reviews',
+      })}
       <div className="car-reviews-header">
         <h1>Car Owner Reviews</h1>
         <p>Real experiences from real drivers in Southern Africa</p>

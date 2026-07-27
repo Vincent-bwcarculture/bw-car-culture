@@ -7,6 +7,7 @@ import ShareModal from '../../shared/ShareModal.js';
 import { http } from '../../../config/axios.js';
 import { useAuth } from '../../../context/AuthContext.js';
 import './InventoryPage.css';
+import { buildHelmet } from '../../../hooks/useSEO.js';
 
 const SORT_OPTIONS = [
   { value: 'newest',     label: 'Newest First' },
@@ -298,6 +299,11 @@ const InventoryPage = () => {
 
   return (
     <div className="inventory-page">
+      {buildHelmet({
+        title: 'Auto Parts & Accessories Botswana — BW Car Culture Inventory',
+        description: 'Shop new and used auto parts, accessories, tools, and car electronics in Botswana. Find the best deals on BW Car Culture inventory.',
+        url: 'https://www.i3wcarculture.com/inventory',
+      })}
       {/* ── Mobile top bar ── */}
       <div className="ip-mobile-bar">
         <span className="ip-mobile-count">

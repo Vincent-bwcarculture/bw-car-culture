@@ -10,6 +10,7 @@ import ShareModal from '../../shared/ShareModal.js';
 import CreateListingPromoCard from './CreateListingPromoCard.js';
 import MarketplaceFilters from './MarketplaceFilters.js';
 import './MarketplaceList.css';
+import { buildHelmet } from '../../../hooks/useSEO.js';
 
 const ITEMS_PER_PAGE = 24;
 const PREMIUM_CARS_PER_SECTION = 9;
@@ -1218,6 +1219,11 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
 
   return (
     <div className="marketplace-container" ref={containerRef}>
+      {buildHelmet({
+        title: 'Car Marketplace Botswana — Buy & Sell Vehicles',
+        description: 'Browse thousands of new and used cars for sale in Botswana. Find your perfect vehicle on BW Car Culture — Botswana\'s #1 automotive marketplace.',
+        url: 'https://www.i3wcarculture.com/',
+      })}
       <div className="marketplace-layout">
         <aside className="marketplace-sidebar">
           <MarketplaceFilters

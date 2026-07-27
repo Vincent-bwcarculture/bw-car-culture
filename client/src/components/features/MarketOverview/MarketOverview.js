@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './MarketOverview.css';
+import { buildHelmet } from '../../../hooks/useSEO.js';
 
 const API_BASE = 'https://bw-car-culture-api.vercel.app/api';
 
@@ -550,6 +551,11 @@ const MarketOverview = () => {
 
   return (
     <div className="mo-container">
+      {buildHelmet({
+        title: 'Botswana Car Market Overview — Price Trends & Valuations',
+        description: 'Explore real-time car price trends, market valuations, and vehicle comparisons for the Botswana automotive market.',
+        url: 'https://www.i3wcarculture.com/market-overview',
+      })}
       <div className="mo-wrapper">
         {/* Header */}
         <div className="mo-header">

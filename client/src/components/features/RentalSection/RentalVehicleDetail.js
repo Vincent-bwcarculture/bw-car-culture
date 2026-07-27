@@ -9,6 +9,7 @@ import { rentalVehicleService } from '../../../services/rentalVehicleService.js'
 import { useDispatch } from 'react-redux';
 import { addNotification } from '../../../store/slices/uiSlice.js';
 import { useAuth } from '../../../context/AuthContext.js';
+import { buildHelmet, SITE_URL } from '../../../hooks/useSEO.js';
 
 const RentalVehicleDetail = () => {
   // Utility function to safely get string ID from MongoDB ObjectId or any object
@@ -450,8 +451,16 @@ Please provide information about availability and the rental process.
 
   return (
     <div className="rv-detail-container">
-      <button 
-        className="rv-detail-back-button" 
+      {rental && buildHelmet({
+        title: `${rental.name || rental.title || `${rental.specifications?.make || ''} ${rental.specifications?.model || ''}`.trim()} — Rental`,
+        description: rental.description
+          ? rental.description.slice(0, 155)
+          : `Rent this vehicle in Botswana. Available on BW Car Culture — find affordable car rentals across Botswana.`,
+        image: rental.images?.[0] ? (typeof rental.images[0] === 'string' ? rental.images[0] : rental.images[0]?.url) : undefined,
+        url: `${SITE_URL}/rentals/${rentalId}`,
+      })}
+      <button
+        className="rv-detail-back-button"
         onClick={() => navigate('/rentals')}
       >
         ← Back to Rentals

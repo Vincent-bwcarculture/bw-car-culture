@@ -7,6 +7,7 @@ import InventoryCard from '../../shared/InventoryCard/InventoryCard.js';
 import ShareModal from '../../shared/ShareModal.js';
 import { useAuth } from '../../../context/AuthContext.js';
 import ErrorBoundary from '../../shared/ErrorBoundary/ErrorBoundary.js';
+import { buildHelmet, SITE_URL } from '../../../hooks/useSEO.js';
 
 const InventoryItemDetail = () => {
   const { itemId } = useParams();
@@ -595,6 +596,15 @@ const InventoryItemDetail = () => {
   return (
     <ErrorBoundary>
       <div className="inventory-detail-container">
+        {item && buildHelmet({
+          title: item.title,
+          description: item.description
+            ? item.description.slice(0, 155)
+            : `Buy ${item.title} in Botswana — available on BW Car Culture inventory.`,
+          image: item.images?.[0],
+          url: `${SITE_URL}/inventory/${itemId}`,
+          type: 'product',
+        })}
         {/* Back button */}
         <button 
           className="back-button" 

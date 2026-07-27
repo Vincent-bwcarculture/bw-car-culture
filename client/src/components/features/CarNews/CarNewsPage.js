@@ -142,19 +142,6 @@ const markFailedImage = (url) => {
   }
 };
 
-  // Update title whenever category changes
-  useEffect(() => {
-    if (category) {
-      document.title = `${formatCategoryName(category)} - Car Culture News`;
-    } else {
-      document.title = 'Car News - Car Culture';
-    }
-    
-    return () => {
-      document.title = 'Car Culture';
-    };
-  }, [category]);
-
   // Get query parameters from URL
   useEffect(() => {
     const query = new URLSearchParams(location.search);

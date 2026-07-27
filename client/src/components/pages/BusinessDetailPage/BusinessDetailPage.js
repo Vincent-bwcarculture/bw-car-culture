@@ -1150,14 +1150,14 @@ return (
       title: business.businessName,
       description: bizDesc || `View ${business.businessName} on Bw Car Culture — Botswana's automotive services directory.`,
       image: bizImage,
-      url: `${SITE_URL}/business/${business._id}`,
+      url: `${SITE_URL}${location.pathname}`,
       jsonLd: {
         '@context': 'https://schema.org',
         '@type': 'LocalBusiness',
         name: business.businessName,
         description: bizDesc,
         image: bizImage,
-        url: `${SITE_URL}/business/${business._id}`,
+        url: `${SITE_URL}${location.pathname}`,
         telephone: business.contact?.phone,
         address: business.profile?.city ? { '@type': 'PostalAddress', addressLocality: business.profile.city, addressCountry: 'BW' } : undefined
       }
