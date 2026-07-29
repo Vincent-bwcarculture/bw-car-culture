@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, ShoppingBag, Store, Settings, User, LogIn, LogOut,
   UserCircle, Star, QrCode, Hash, X, UserPlus, Newspaper, MessageCircle,
-  Menu, BarChart3, Info, Map, Zap, Tag, MapPin
+  Menu, BarChart3, Info, Map, Zap, Tag, MapPin, Package
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
 import useUnreadNotifCount from '../../../hooks/useUnreadNotifCount.js';
@@ -27,6 +27,13 @@ const categories = [
     name: 'Car Sales',
     path: '/marketplace',
     icon: <ShoppingBag size={20} />
+  },
+  {
+    id: 'inventory',
+    name: 'Inventory',
+    path: '/inventory',
+    icon: <Package size={20} />,
+    desktopOnly: true
   },
   {
     id: 'dealerships',
@@ -95,6 +102,14 @@ const NavigationMenu = () => {
     console.log('💬 Feedback clicked, navigating to /feedback');
     setIsMenuOpen(false);
     navigate('/feedback');
+  };
+
+  // Handle Inventory click
+  const handleInventoryClick = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsMenuOpen(false);
+    navigate('/inventory');
   };
 
   // Handle Market Overview click
@@ -273,6 +288,14 @@ const NavigationMenu = () => {
               </div>
             )}
           </div>
+
+          <div className="menu-divider"></div>
+
+          {/* Inventory */}
+          <button className="menu-item inventory-item" onClick={handleInventoryClick} type="button">
+            <span className="menu-item-icon"><Package size={12} /></span>
+            <span className="menu-item-text">Inventory</span>
+          </button>
 
           <div className="menu-divider"></div>
 
@@ -590,6 +613,7 @@ const ResponsiveNavigation = () => {
   const [activePath, setActivePath] = useState([]);
   const [showScrollButtons, setShowScrollButtons] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showShopMenu, setShowShopMenu] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const navRef = useRef();
@@ -741,34 +765,73 @@ const ResponsiveNavigation = () => {
       </nav>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="mobile-bottom-nav">
-        {categories.filter(category => !category.desktopOnly).map((category) => (
-          <button
-            key={category.id}
-            className={`mobile-nav-item ${isActive(category.path) ? 'active' : ''} ${isNavigating ? 'navigating' : ''}`}
-            onClick={() => handleNavigation(category.path)}
-            disabled={isNavigating}
-          >
-            <div className="mobile-nav-icon" style={{ position: 'relative' }}>
-              {category.icon}
-              {category.id === 'profile' && unreadNotifCount > 0 && (
-                <span style={{
-                  position: 'absolute',
-                  top: '-3px',
-                  right: '-3px',
-                  width: '9px',
-                  height: '9px',
-                  borderRadius: '50%',
-                  background: '#ff6a00',
-                  border: '1.5px solid #111',
-                  display: 'block',
-                  pointerEvents: 'none'
-                }} />
-              )}
-            </div>
-            <div className="mobile-nav-label">{category.name}</div>
-          </button>
-        ))}
+      <nav className="mobile-bottom-nav" onClick={() => showShopMenu && setShowShopMenu(false)}>
+        {categories.filter(category => !category.desktopOnly).map((category) => {
+          if (category.id === 'marketplace') {
+            const shopActive = isActive('/marketplace') || isActive('/inventory');
+            return (
+              <div key="shop" style={{ position: 'relative' }}>
+                {/* Shop sub-menu popup */}
+                {showShopMenu && (
+                  <div className="mobile-shop-popup" onClick={e => e.stopPropagation()}>
+                    <button
+                      className={`shop-popup-item ${isActive('/marketplace') ? 'active' : ''}`}
+                      onClick={() => { setShowShopMenu(false); handleNavigation('/marketplace'); }}
+                    >
+                      <ShoppingBag size={15} />
+                      <span>Car Sales</span>
+                    </button>
+                    <button
+                      className={`shop-popup-item ${isActive('/inventory') ? 'active' : ''}`}
+                      onClick={() => { setShowShopMenu(false); handleNavigation('/inventory'); }}
+                    >
+                      <Package size={15} />
+                      <span>Inventory</span>
+                    </button>
+                  </div>
+                )}
+                <button
+                  className={`mobile-nav-item ${shopActive ? 'active' : ''} ${isNavigating ? 'navigating' : ''}`}
+                  onClick={(e) => { e.stopPropagation(); setShowShopMenu(prev => !prev); }}
+                  disabled={isNavigating}
+                >
+                  <div className="mobile-nav-icon">
+                    <ShoppingBag size={20} />
+                  </div>
+                  <div className="mobile-nav-label">Shop ▾</div>
+                </button>
+              </div>
+            );
+          }
+
+          return (
+            <button
+              key={category.id}
+              className={`mobile-nav-item ${isActive(category.path) ? 'active' : ''} ${isNavigating ? 'navigating' : ''}`}
+              onClick={() => handleNavigation(category.path)}
+              disabled={isNavigating}
+            >
+              <div className="mobile-nav-icon" style={{ position: 'relative' }}>
+                {category.icon}
+                {category.id === 'profile' && unreadNotifCount > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-3px',
+                    right: '-3px',
+                    width: '9px',
+                    height: '9px',
+                    borderRadius: '50%',
+                    background: '#ff6a00',
+                    border: '1.5px solid #111',
+                    display: 'block',
+                    pointerEvents: 'none'
+                  }} />
+                )}
+              </div>
+              <div className="mobile-nav-label">{category.name}</div>
+            </button>
+          );
+        })}
       </nav>
 
       {/* Enhanced Review FAB - Only show on mobile/tablet */}

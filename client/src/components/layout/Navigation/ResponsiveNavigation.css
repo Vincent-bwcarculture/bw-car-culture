@@ -960,6 +960,56 @@
     opacity: 0.5;
 }
 
+/* ========== SHOP POPUP (mobile combined Car Sales / Inventory) ========== */
+.mobile-shop-popup {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--nav-bg, #141414);
+    border: 1px solid var(--nav-border, #2c2c2c);
+    border-radius: 12px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 140px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.45);
+    z-index: 1100;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: shopPopupIn 0.15s ease;
+}
+
+@keyframes shopPopupIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0);   }
+}
+
+.shop-popup-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    color: var(--nav-text-muted, #8b949e);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.12s, color 0.12s;
+    width: 100%;
+    text-align: left;
+}
+
+.shop-popup-item:hover,
+.shop-popup-item.active {
+    background: rgba(255, 51, 0, 0.1);
+    color: var(--nav-accent, #ff3300);
+}
+
 /* ========== REVIEW FAB ========== */
 .review-fab {
     position: fixed;
