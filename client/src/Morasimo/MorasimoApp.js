@@ -940,6 +940,11 @@ function SettingsSection() {
               <option value="monthly">Monthly (end of month)</option>
             </select>
           </div>
+          <div className="mor-form-row">
+            <label>Distributor Invite Code</label>
+            <input value={form.inviteCode || ''} onChange={e => F('inviteCode', e.target.value.toUpperCase())} placeholder="e.g. MORASIMO2026" />
+            <small>Distributors who enter this code during registration are auto-activated. Default: MORASIMO2026</small>
+          </div>
         </div>
       </div>
 

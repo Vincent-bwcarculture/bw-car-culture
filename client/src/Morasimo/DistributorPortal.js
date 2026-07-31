@@ -119,12 +119,13 @@ function RegisterPage({ onBack, onSuccess }) {
     name: '', email: '', phone: '', idNumber: '',
     password: '', confirmPw: '',
     withdrawalMethod: '', accountDetails: '',
-    referralCode: '',
+    referralCode: '', inviteCode: '',
   });
   const [showPw,   setShowPw]   = useState(false);
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState('');
   const [done,     setDone]     = useState(false);
+  const [activated,setActivated]= useState(false);
 
   const F = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -143,8 +144,10 @@ function RegisterPage({ onBack, onSuccess }) {
         idNumber: form.idNumber, password: form.password,
         withdrawalMethod: form.withdrawalMethod, accountDetails: form.accountDetails,
         referralCode: form.referralCode.toUpperCase() || undefined,
+        inviteCode: form.inviteCode || undefined,
       });
       if (r.data.success) {
+        setActivated(!!r.data.activated);
         setDone(true);
       } else {
         setError(r.data.error || 'Registration failed');
@@ -155,6 +158,27 @@ function RegisterPage({ onBack, onSuccess }) {
       setLoading(false);
     }
   };
+
+  if (done && activated) {
+    return (
+      <div className="dp-auth-page">
+        <div className="dp-auth-card dp-pending-card">
+          <div className="dp-auth-logo">
+            <span className="dp-auth-logo-hex">⬡</span>
+            <span className="dp-auth-logo-name">MORASIMO</span>
+          </div>
+          <span className="dp-pending-icon">✅</span>
+          <h2 className="dp-pending-title">Account Activated!</h2>
+          <p className="dp-pending-desc">
+            Your account is ready. You can now log in with your email and password.
+          </p>
+          <button className="dp-btn-primary" style={{ marginTop: '24px' }} onClick={onBack}>
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (done) {
     return (
@@ -263,6 +287,17 @@ function RegisterPage({ onBack, onSuccess }) {
           </div>
 
           <div className="dp-divider">Optional</div>
+
+          <div className="dp-field">
+            <label>Invite Code</label>
+            <input
+              value={form.inviteCode}
+              onChange={e => F('inviteCode', e.target.value.toUpperCase())}
+              placeholder="Enter invite code to activate instantly"
+              maxLength={20}
+            />
+            <span className="dp-field-hint">Have an invite code? Enter it to skip the approval wait.</span>
+          </div>
 
           <div className="dp-field">
             <label>Preferred Referral Code</label>
