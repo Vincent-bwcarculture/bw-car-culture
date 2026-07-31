@@ -1,0 +1,903 @@
+/* MorasimoApp.css – Premium Referral Commerce Platform */
+
+:root {
+  --mor-gold:      #C9A94E;
+  --mor-gold-l:    #E0C26A;
+  --mor-gold-dim:  rgba(201,169,78,0.12);
+  --mor-gold-bdr:  rgba(201,169,78,0.3);
+  --mor-blue:      #1A6FA5;
+  --mor-blue-l:    #2589C8;
+  --mor-blue-dim:  rgba(26,111,165,0.12);
+  --mor-white:     #F7F6F2;
+  --mor-bg:        #09090D;
+  --mor-surf:      #111118;
+  --mor-surf2:     #18181F;
+  --mor-surf3:     #1E1E27;
+  --mor-border:    #22222E;
+  --mor-text:      #EDEDF0;
+  --mor-muted:     #6A6A82;
+  --mor-ok:        #28C76F;
+  --mor-bad:       #EA5455;
+  --mor-warn:      #FF9F43;
+  --mor-sidebar-w: 224px;
+}
+
+/* ── Reset & base ─────────────────────────────────────────── */
+.mor-root * { box-sizing: border-box; margin: 0; padding: 0; }
+.mor-root input, .mor-root select, .mor-root textarea, .mor-root button {
+  font-family: inherit;
+  font-size: 13px;
+}
+
+/* ── Root layout ──────────────────────────────────────────── */
+.mor-root {
+  display: flex;
+  min-height: 100vh;
+  background: var(--mor-bg);
+  color: var(--mor-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────── */
+.mor-sidebar {
+  width: var(--mor-sidebar-w);
+  min-height: 100vh;
+  background: var(--mor-surf);
+  border-right: 1px solid var(--mor-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.mor-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid var(--mor-border);
+  flex-shrink: 0;
+}
+
+.mor-logo-hex {
+  font-size: 22px;
+  color: var(--mor-gold);
+  line-height: 1;
+}
+
+.mor-logo-text { display: flex; flex-direction: column; }
+
+.mor-logo-name {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 3.5px;
+  color: var(--mor-gold);
+}
+
+.mor-logo-tag {
+  font-size: 9px;
+  color: var(--mor-muted);
+  letter-spacing: 0.5px;
+  margin-top: 1px;
+}
+
+.mor-nav {
+  flex: 1;
+  padding: 10px 0;
+  overflow-y: auto;
+}
+
+.mor-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  color: var(--mor-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.13s;
+  position: relative;
+}
+
+.mor-nav-item:hover {
+  color: var(--mor-text);
+  background: var(--mor-surf2);
+}
+
+.mor-nav-item.active {
+  color: var(--mor-gold);
+  background: var(--mor-gold-dim);
+}
+
+.mor-nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--mor-gold);
+  border-radius: 0 2px 2px 0;
+}
+
+.mor-nav-icon {
+  font-size: 14px;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.mor-back-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 20px;
+  color: var(--mor-muted);
+  text-decoration: none;
+  font-size: 12px;
+  border-top: 1px solid var(--mor-border);
+  transition: color 0.13s;
+  flex-shrink: 0;
+}
+
+.mor-back-link:hover { color: var(--mor-text); }
+
+/* ── Main area ────────────────────────────────────────────── */
+.mor-main {
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.mor-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 24px;
+  background: var(--mor-surf);
+  border-bottom: 1px solid var(--mor-border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.mor-hamburger {
+  display: none;
+  background: none;
+  border: 1px solid var(--mor-border);
+  color: var(--mor-text);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 7px;
+  transition: border-color 0.13s;
+  flex-shrink: 0;
+}
+
+.mor-hamburger:hover { border-color: var(--mor-muted); }
+
+.mor-page-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--mor-text);
+  margin: 0;
+}
+
+.mor-header-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--mor-gold);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.6;
+}
+
+.mor-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ── Section body ─────────────────────────────────────────── */
+.mor-sec-body {
+  padding: 28px 28px;
+  max-width: 1300px;
+}
+
+/* ── Stats grid ───────────────────────────────────────────── */
+.mor-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 14px;
+  margin-bottom: 32px;
+}
+
+.mor-stat {
+  background: var(--mor-surf);
+  border: 1px solid var(--mor-border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: border-color 0.2s;
+}
+
+.mor-stat.gold {
+  border-color: var(--mor-gold-bdr);
+  background: linear-gradient(135deg, var(--mor-surf) 0%, rgba(201,169,78,0.06) 100%);
+}
+
+.mor-stat.blue {
+  border-color: rgba(26,111,165,0.3);
+  background: linear-gradient(135deg, var(--mor-surf) 0%, rgba(26,111,165,0.06) 100%);
+}
+
+.mor-stat.warn {
+  border-color: rgba(255,159,67,0.25);
+  background: linear-gradient(135deg, var(--mor-surf) 0%, rgba(255,159,67,0.05) 100%);
+}
+
+.mor-stat-val {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--mor-text);
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+
+.mor-stat.gold .mor-stat-val { color: var(--mor-gold); }
+.mor-stat.blue .mor-stat-val { color: var(--mor-blue-l); }
+.mor-stat.warn .mor-stat-val { color: var(--mor-warn); }
+
+.mor-stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--mor-muted);
+  text-transform: uppercase;
+  margin-top: 7px;
+}
+
+.mor-stat-sub {
+  font-size: 11px;
+  color: var(--mor-muted);
+  margin-top: 3px;
+}
+
+/* ── Sub heading ──────────────────────────────────────────── */
+.mor-sub-head {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--mor-muted);
+  margin: 28px 0 14px;
+}
+
+/* ── Table ────────────────────────────────────────────────── */
+.mor-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--mor-border);
+}
+
+.mor-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--mor-surf);
+  font-size: 13px;
+  min-width: 600px;
+}
+
+.mor-table th {
+  padding: 11px 14px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--mor-muted);
+  background: var(--mor-surf2);
+  border-bottom: 1px solid var(--mor-border);
+  white-space: nowrap;
+}
+
+.mor-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--mor-border);
+  vertical-align: middle;
+}
+
+.mor-table tr:last-child td { border-bottom: none; }
+.mor-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+.mor-table td small { font-size: 11px; color: var(--mor-muted); display: block; margin-top: 2px; }
+.mor-table td strong { font-weight: 600; color: var(--mor-text); }
+
+/* ── Badges ───────────────────────────────────────────────── */
+.mor-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: capitalize;
+}
+
+.badge-ok   { background: rgba(40,199,111,0.12); color: #28C76F; }
+.badge-bad  { background: rgba(234,84,85,0.12);  color: #EA5455; }
+.badge-warn { background: rgba(255,159,67,0.12); color: #FF9F43; }
+.badge-blue { background: var(--mor-blue-dim);   color: var(--mor-blue-l); }
+.badge-dim  { background: var(--mor-surf3); color: var(--mor-muted); border: 1px solid var(--mor-border); }
+
+/* ── Toolbar ──────────────────────────────────────────────── */
+.mor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.mor-search {
+  flex: 1;
+  min-width: 180px;
+  max-width: 300px;
+  padding: 9px 14px;
+  background: var(--mor-surf);
+  border: 1px solid var(--mor-border);
+  border-radius: 8px;
+  color: var(--mor-text);
+  outline: none;
+  transition: border-color 0.13s;
+}
+
+.mor-search:focus { border-color: var(--mor-gold); }
+.mor-search::placeholder { color: var(--mor-muted); }
+
+.mor-select {
+  padding: 9px 12px;
+  background: var(--mor-surf);
+  border: 1px solid var(--mor-border);
+  border-radius: 8px;
+  color: var(--mor-text);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.13s;
+}
+
+.mor-select:focus { border-color: var(--mor-gold); }
+.mor-select option { background: var(--mor-surf2); }
+
+.mor-toolbar-note {
+  font-size: 11px;
+  color: var(--mor-muted);
+  margin-left: auto;
+}
+
+/* ── Buttons ──────────────────────────────────────────────── */
+.mor-btn-gold {
+  padding: 9px 18px;
+  background: var(--mor-gold);
+  color: #0A0A0E;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.13s, transform 0.1s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.mor-btn-gold:hover  { opacity: 0.88; }
+.mor-btn-gold:active { transform: scale(0.98); }
+.mor-btn-gold:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.mor-btn-ghost {
+  padding: 9px 18px;
+  background: transparent;
+  border: 1px solid var(--mor-border);
+  border-radius: 8px;
+  color: var(--mor-text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.13s;
+}
+
+.mor-btn-ghost:hover { border-color: var(--mor-muted); }
+
+.mor-btn-xs {
+  padding: 4px 10px;
+  background: var(--mor-surf2);
+  border: 1px solid var(--mor-border);
+  border-radius: 6px;
+  color: var(--mor-text);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.13s;
+  white-space: nowrap;
+}
+
+.mor-btn-xs:hover  { border-color: var(--mor-muted); }
+.mor-btn-xs.ok    { border-color: rgba(40,199,111,0.35); color: #28C76F; }
+.mor-btn-xs.ok:hover   { background: rgba(40,199,111,0.1); }
+.mor-btn-xs.bad   { border-color: rgba(234,84,85,0.35);  color: #EA5455; }
+.mor-btn-xs.bad:hover  { background: rgba(234,84,85,0.1); }
+.mor-btn-xs.blue  { border-color: rgba(37,137,200,0.35); color: var(--mor-blue-l); }
+.mor-btn-xs.blue:hover { background: var(--mor-blue-dim); }
+
+.mor-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── Modal ────────────────────────────────────────────────── */
+.mor-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(5px);
+}
+
+.mor-modal {
+  background: var(--mor-surf);
+  border: 1px solid var(--mor-border);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: morUp 0.18s ease;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+}
+
+@keyframes morUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mor-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--mor-border);
+  position: sticky;
+  top: 0;
+  background: var(--mor-surf);
+  z-index: 1;
+}
+
+.mor-modal-head h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--mor-text);
+}
+
+.mor-modal-close {
+  background: none;
+  border: 1px solid var(--mor-border);
+  color: var(--mor-muted);
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.13s;
+  flex-shrink: 0;
+}
+
+.mor-modal-close:hover { color: var(--mor-text); border-color: var(--mor-muted); }
+
+.mor-modal-body { padding: 24px; }
+
+/* ── Form ─────────────────────────────────────────────────── */
+.mor-form { display: flex; flex-direction: column; gap: 14px; }
+
+.mor-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mor-form-row label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--mor-muted);
+  text-transform: uppercase;
+}
+
+.mor-form-row small {
+  font-size: 11px;
+  color: var(--mor-muted);
+  font-style: italic;
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.mor-form-row input,
+.mor-form-row select,
+.mor-form-row textarea {
+  padding: 10px 12px;
+  background: var(--mor-surf2);
+  border: 1px solid var(--mor-border);
+  border-radius: 8px;
+  color: var(--mor-text);
+  outline: none;
+  transition: border-color 0.13s;
+  width: 100%;
+}
+
+.mor-form-row input:focus,
+.mor-form-row select:focus,
+.mor-form-row textarea:focus { border-color: var(--mor-gold); }
+.mor-form-row input::placeholder { color: var(--mor-muted); }
+.mor-form-row select option { background: var(--mor-surf2); }
+.mor-form-row textarea { resize: vertical; min-height: 80px; }
+
+.mor-form-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.mor-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--mor-border);
+}
+
+/* ── Products row ─────────────────────────────────────────── */
+.mor-products-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--mor-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 0 8px;
+  border-top: 1px solid var(--mor-border);
+}
+
+.mor-product-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.mor-product-row .pr-name  { flex: 1; min-width: 0; }
+.mor-product-row .pr-price { width: 80px; flex-shrink: 0; }
+.mor-product-row .pr-pct   { width: 60px; flex-shrink: 0; }
+
+.mor-product-row input {
+  padding: 7px 9px;
+  background: var(--mor-surf2);
+  border: 1px solid var(--mor-border);
+  border-radius: 6px;
+  color: var(--mor-text);
+  outline: none;
+  width: 100%;
+  font-size: 12px;
+}
+
+.mor-product-row input:focus  { border-color: var(--mor-gold); }
+.mor-product-row input::placeholder { color: var(--mor-muted); }
+
+/* ── Commission calc preview ──────────────────────────────── */
+.mor-calc-preview {
+  background: var(--mor-surf2);
+  border: 1px solid var(--mor-border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.mor-calc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--mor-text);
+}
+
+.mor-calc-row.highlight {
+  border-top: 1px solid var(--mor-border);
+  padding-top: 9px;
+  margin-top: 2px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.mor-gold { color: var(--mor-gold); }
+.mor-dim  { color: var(--mor-muted); }
+
+/* ── Distributor detail ───────────────────────────────────── */
+.mor-dist-detail { display: flex; flex-direction: column; gap: 20px; }
+
+.mor-dist-code-big {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 5px;
+  color: var(--mor-gold);
+  text-align: center;
+  background: var(--mor-gold-dim);
+  border: 1px solid var(--mor-gold-bdr);
+  border-radius: 12px;
+  padding: 18px;
+  font-family: 'Courier New', monospace;
+}
+
+.mor-wallet-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.mor-wallet-card {
+  background: var(--mor-surf2);
+  border: 1px solid var(--mor-border);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+}
+
+.mor-wallet-card p {
+  font-size: 10px;
+  color: var(--mor-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.mor-wallet-card strong { font-size: 15px; color: var(--mor-text); }
+.mor-wallet-card strong.mor-gold { color: var(--mor-gold); }
+
+.mor-detail-table { width: 100%; border-collapse: collapse; }
+.mor-detail-table td {
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--mor-border);
+  font-size: 13px;
+}
+
+.mor-detail-table td:first-child {
+  color: var(--mor-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  width: 130px;
+}
+
+/* ── Mono / code ──────────────────────────────────────────── */
+.mor-mono { font-family: 'Courier New', monospace; font-size: 12px; }
+.mor-muted { color: var(--mor-muted); }
+
+.mor-code {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  background: var(--mor-gold-dim);
+  color: var(--mor-gold);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+}
+
+/* ── Spinner ──────────────────────────────────────────────── */
+.mor-spin {
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--mor-border);
+  border-top-color: var(--mor-gold);
+  border-radius: 50%;
+  animation: morSpin 0.65s linear infinite;
+  margin: 70px auto;
+}
+
+@keyframes morSpin { to { transform: rotate(360deg); } }
+
+/* ── Empty state ──────────────────────────────────────────── */
+.mor-empty {
+  text-align: center;
+  padding: 70px 20px;
+  color: var(--mor-muted);
+}
+
+.mor-empty span { font-size: 40px; display: block; margin-bottom: 14px; opacity: 0.35; }
+.mor-empty p { font-size: 13px; }
+
+/* ── Analytics ────────────────────────────────────────────── */
+.mor-bar-chart {
+  background: var(--mor-surf);
+  border: 1px solid var(--mor-border);
+  border-radius: 12px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.mor-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mor-bar-label {
+  width: 150px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--mor-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mor-bar-track {
+  flex: 1;
+  height: 8px;
+  background: var(--mor-surf2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.mor-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--mor-blue) 0%, var(--mor-blue-l) 100%);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.mor-bar-val {
+  width: 110px;
+  text-align: right;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--mor-gold);
+  flex-shrink: 0;
+}
+
+.mor-status-breakdown {
+  background: var(--mor-surf);
+  border: 1px solid var(--mor-border);
+  border-radius: 12px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mor-breakdown-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mor-breakdown-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--mor-surf2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.mor-breakdown-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.mor-breakdown-count {
+  width: 36px;
+  text-align: right;
+  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  color: var(--mor-muted);
+}
+
+/* ── Settings ─────────────────────────────────────────────── */
+.mor-settings-card {
+  background: var(--mor-surf);
+  border: 1px solid var(--mor-border);
+  border-radius: 14px;
+  padding: 28px;
+  max-width: 580px;
+  margin-bottom: 20px;
+}
+
+.mor-settings-head {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mor-text);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--mor-border);
+}
+
+.mor-save-msg {
+  font-size: 12px;
+  color: var(--mor-ok);
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Overlay (mobile sidebar) ─────────────────────────────── */
+.mor-overlay-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 90;
+}
+
+/* ── Mobile ───────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .mor-sidebar {
+    position: fixed;
+    left: 0; top: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    z-index: 200;
+    box-shadow: 4px 0 32px rgba(0,0,0,0.5);
+  }
+
+  .mor-sidebar.open { transform: translateX(0); }
+  .mor-hamburger { display: flex; }
+  .mor-header-badge { display: none; }
+
+  .mor-stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .mor-form-2col { grid-template-columns: 1fr; }
+  .mor-sec-body  { padding: 16px; }
+
+  .mor-table { font-size: 12px; min-width: 500px; }
+  .mor-table th, .mor-table td { padding: 10px 10px; }
+
+  .mor-settings-card { padding: 18px; }
+}
+
+@media (max-width: 480px) {
+  .mor-stat-grid { grid-template-columns: 1fr; }
+  .mor-dist-code-big { font-size: 20px; letter-spacing: 3px; }
+  .mor-wallet-grid { grid-template-columns: repeat(2, 1fr); }
+  .mor-product-row .pr-price, .mor-product-row .pr-pct { width: 50px; }
+}
