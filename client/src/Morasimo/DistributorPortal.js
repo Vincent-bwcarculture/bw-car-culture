@@ -436,7 +436,7 @@ function Dashboard({ dist: initDist, onLogout }) {
         {dist.status !== 'active' && (
           <div className={`dp-status-bar ${dist.status}`}>
             {dist.status === 'pending'
-              ? '⏳ Your account is pending admin approval. You'll be able to use your referral code once activated.'
+              ? "⏳ Your account is pending admin approval. You'll be able to use your referral code once activated."
               : '⚠ Your account has been suspended. Please contact support.'}
           </div>
         )}
