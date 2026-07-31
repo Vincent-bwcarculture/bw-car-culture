@@ -1,0 +1,749 @@
+/* DistributorPortal.css – Morasimo Distributor-facing UI */
+
+.dp-root {
+  min-height: 100vh;
+  background: #09090D;
+  color: #EDEDF0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Auth pages (login / register) ───────────────────────── */
+.dp-auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(201,169,78,0.08) 0%, transparent 60%),
+              #09090D;
+}
+
+.dp-auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: #111118;
+  border: 1px solid #22222E;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+  animation: dpFadeUp 0.22s ease;
+}
+
+@keyframes dpFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dp-auth-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.dp-auth-logo-hex {
+  font-size: 36px;
+  color: #C9A94E;
+  line-height: 1;
+  display: block;
+}
+
+.dp-auth-logo-name {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: #C9A94E;
+}
+
+.dp-auth-logo-sub {
+  font-size: 11px;
+  color: #6A6A82;
+  letter-spacing: 0.3px;
+}
+
+.dp-auth-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #EDEDF0;
+  margin-bottom: 6px;
+}
+
+.dp-auth-desc {
+  font-size: 13px;
+  color: #6A6A82;
+  margin-bottom: 28px;
+}
+
+/* ── Form fields ──────────────────────────────────────────── */
+.dp-form { display: flex; flex-direction: column; gap: 14px; }
+
+.dp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dp-field label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #6A6A82;
+}
+
+.dp-field input,
+.dp-field select {
+  padding: 11px 14px;
+  background: #18181F;
+  border: 1px solid #22222E;
+  border-radius: 9px;
+  color: #EDEDF0;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.13s;
+  width: 100%;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.dp-field input:focus,
+.dp-field select:focus { border-color: #C9A94E; }
+.dp-field input::placeholder { color: #4A4A5E; }
+.dp-field select option { background: #18181F; }
+
+.dp-field-hint {
+  font-size: 11px;
+  color: #6A6A82;
+  font-style: italic;
+}
+
+.dp-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Password visibility toggle */
+.dp-field-pw {
+  position: relative;
+}
+
+.dp-field-pw input { padding-right: 44px; }
+
+.dp-pw-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6A6A82;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px;
+  transition: color 0.13s;
+}
+
+.dp-pw-toggle:hover { color: #EDEDF0; }
+
+/* Error message */
+.dp-error {
+  background: rgba(234,84,85,0.1);
+  border: 1px solid rgba(234,84,85,0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #EA5455;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.dp-success {
+  background: rgba(40,199,111,0.1);
+  border: 1px solid rgba(40,199,111,0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #28C76F;
+}
+
+/* Buttons */
+.dp-btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: #C9A94E;
+  color: #0A0A0E;
+  border: none;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.13s, transform 0.1s;
+  margin-top: 6px;
+}
+
+.dp-btn-primary:hover  { opacity: 0.88; }
+.dp-btn-primary:active { transform: scale(0.99); }
+.dp-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.dp-auth-foot {
+  text-align: center;
+  font-size: 13px;
+  color: #6A6A82;
+  margin-top: 20px;
+}
+
+.dp-auth-foot button {
+  background: none;
+  border: none;
+  color: #C9A94E;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.dp-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #333340;
+  font-size: 11px;
+  margin: 4px 0;
+}
+
+.dp-divider::before,
+.dp-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #22222E;
+}
+
+/* Pending state after register */
+.dp-pending-card {
+  text-align: center;
+}
+
+.dp-pending-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.dp-pending-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #EDEDF0;
+  margin-bottom: 8px;
+}
+
+.dp-pending-desc {
+  font-size: 13px;
+  color: #6A6A82;
+  line-height: 1.7;
+}
+
+/* ── Dashboard layout ─────────────────────────────────────── */
+.dp-dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #09090D;
+}
+
+.dp-topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 24px;
+  background: #111118;
+  border-bottom: 1px solid #22222E;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.dp-topbar-logo {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: #C9A94E;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.dp-topbar-logo span { font-size: 18px; }
+
+.dp-topbar-greeting {
+  font-size: 13px;
+  color: #6A6A82;
+}
+
+.dp-topbar-greeting strong {
+  color: #EDEDF0;
+  font-weight: 600;
+}
+
+.dp-topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dp-btn-logout {
+  padding: 7px 14px;
+  background: transparent;
+  border: 1px solid #22222E;
+  border-radius: 7px;
+  color: #6A6A82;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.13s;
+}
+
+.dp-btn-logout:hover { border-color: #6A6A82; color: #EDEDF0; }
+
+/* ── Dashboard body ───────────────────────────────────────── */
+.dp-body {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ── Referral code card ───────────────────────────────────── */
+.dp-code-card {
+  background: #111118;
+  border: 1px solid rgba(201,169,78,0.3);
+  border-radius: 16px;
+  padding: 28px;
+  background: linear-gradient(135deg, #111118 0%, rgba(201,169,78,0.05) 100%);
+}
+
+.dp-code-card-head {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #6A6A82;
+  margin-bottom: 20px;
+}
+
+.dp-code-layout {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.dp-code-left { flex: 1; min-width: 0; }
+
+.dp-code-label {
+  font-size: 11px;
+  color: #6A6A82;
+  margin-bottom: 10px;
+}
+
+.dp-code-value {
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: #C9A94E;
+  font-family: 'Courier New', monospace;
+  line-height: 1.1;
+  word-break: break-all;
+}
+
+.dp-code-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.dp-btn-copy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  background: rgba(201,169,78,0.12);
+  border: 1px solid rgba(201,169,78,0.4);
+  border-radius: 8px;
+  color: #C9A94E;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.13s;
+}
+
+.dp-btn-copy:hover { background: rgba(201,169,78,0.2); }
+.dp-btn-copy.copied { color: #28C76F; border-color: rgba(40,199,111,0.4); background: rgba(40,199,111,0.08); }
+
+.dp-btn-share {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  background: transparent;
+  border: 1px solid #22222E;
+  border-radius: 8px;
+  color: #EDEDF0;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.13s;
+}
+
+.dp-btn-share:hover { border-color: #6A6A82; }
+
+.dp-qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dp-qr-box {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dp-qr-label {
+  font-size: 10px;
+  color: #6A6A82;
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+/* ── Wallet grid ──────────────────────────────────────────── */
+.dp-wallet-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.dp-wallet-card {
+  background: #111118;
+  border: 1px solid #22222E;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.2s;
+}
+
+.dp-wallet-card.available {
+  border-color: rgba(201,169,78,0.3);
+  background: linear-gradient(135deg, #111118 0%, rgba(201,169,78,0.05) 100%);
+}
+
+.dp-wallet-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #6A6A82;
+}
+
+.dp-wallet-val {
+  font-size: 22px;
+  font-weight: 700;
+  color: #EDEDF0;
+  font-family: 'Courier New', monospace;
+  letter-spacing: -0.5px;
+}
+
+.dp-wallet-card.available .dp-wallet-val { color: #C9A94E; }
+
+.dp-wallet-sub {
+  font-size: 11px;
+  color: #6A6A82;
+}
+
+/* ── Withdraw button ──────────────────────────────────────── */
+.dp-withdraw-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dp-withdraw-bar h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #EDEDF0;
+  margin: 0;
+}
+
+.dp-btn-gold {
+  padding: 10px 20px;
+  background: #C9A94E;
+  color: #0A0A0E;
+  border: none;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.13s;
+  white-space: nowrap;
+}
+
+.dp-btn-gold:hover { opacity: 0.88; }
+.dp-btn-gold:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Transaction / Withdrawal tables ─────────────────────── */
+.dp-section-card {
+  background: #111118;
+  border: 1px solid #22222E;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.dp-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #22222E;
+}
+
+.dp-section-head h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #EDEDF0;
+  margin: 0;
+}
+
+.dp-section-count {
+  font-size: 11px;
+  color: #6A6A82;
+}
+
+.dp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.dp-table th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #6A6A82;
+  background: #18181F;
+  border-bottom: 1px solid #22222E;
+  white-space: nowrap;
+}
+
+.dp-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #22222E;
+  vertical-align: middle;
+  color: #EDEDF0;
+}
+
+.dp-table tr:last-child td { border-bottom: none; }
+.dp-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+
+.dp-mono { font-family: 'Courier New', monospace; font-size: 12px; }
+.dp-muted { color: #6A6A82; }
+
+.dp-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.dp-badge.ok   { background: rgba(40,199,111,0.12); color: #28C76F; }
+.dp-badge.bad  { background: rgba(234,84,85,0.12);  color: #EA5455; }
+.dp-badge.warn { background: rgba(255,159,67,0.12); color: #FF9F43; }
+.dp-badge.blue { background: rgba(26,111,165,0.12); color: #2589C8; }
+.dp-badge.dim  { background: #1E1E27; color: #6A6A82; }
+
+.dp-empty {
+  padding: 40px;
+  text-align: center;
+  color: #6A6A82;
+  font-size: 13px;
+}
+
+/* ── Modal ────────────────────────────────────────────────── */
+.dp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(5px);
+}
+
+.dp-modal {
+  background: #111118;
+  border: 1px solid #22222E;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  animation: dpFadeUp 0.18s ease;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+}
+
+.dp-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid #22222E;
+}
+
+.dp-modal-head h3 { font-size: 15px; font-weight: 700; margin: 0; }
+
+.dp-modal-close {
+  background: none;
+  border: 1px solid #22222E;
+  color: #6A6A82;
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.13s;
+}
+
+.dp-modal-close:hover { color: #EDEDF0; border-color: #6A6A82; }
+
+.dp-modal-body { padding: 22px; }
+
+.dp-modal-amount {
+  background: #18181F;
+  border: 1px solid rgba(201,169,78,0.3);
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.dp-modal-amount p {
+  font-size: 11px;
+  color: #6A6A82;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.dp-modal-amount strong {
+  font-size: 24px;
+  font-weight: 700;
+  color: #C9A94E;
+  font-family: 'Courier New', monospace;
+}
+
+.dp-modal-note {
+  font-size: 11px;
+  color: #6A6A82;
+  margin-top: 4px;
+  display: block;
+}
+
+.dp-modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px;
+  border-top: 1px solid #22222E;
+}
+
+.dp-btn-ghost {
+  padding: 9px 16px;
+  background: transparent;
+  border: 1px solid #22222E;
+  border-radius: 8px;
+  color: #EDEDF0;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.13s;
+}
+
+.dp-btn-ghost:hover { border-color: #6A6A82; }
+
+/* ── Spinner ──────────────────────────────────────────────── */
+.dp-spin {
+  width: 30px; height: 30px;
+  border: 2px solid #22222E;
+  border-top-color: #C9A94E;
+  border-radius: 50%;
+  animation: dpSpin 0.65s linear infinite;
+  margin: 60px auto;
+}
+
+@keyframes dpSpin { to { transform: rotate(360deg); } }
+
+/* ── Status note ──────────────────────────────────────────── */
+.dp-status-bar {
+  background: #111118;
+  border: 1px solid #22222E;
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 13px;
+  color: #6A6A82;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dp-status-bar.pending { border-color: rgba(255,159,67,0.3); color: #FF9F43; }
+.dp-status-bar.suspended { border-color: rgba(234,84,85,0.3); color: #EA5455; }
+
+/* ── Mobile ───────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .dp-auth-card { padding: 28px 22px; }
+
+  .dp-wallet-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .dp-code-layout { flex-direction: column; align-items: flex-start; gap: 24px; }
+  .dp-qr-section { align-items: flex-start; flex-direction: row; }
+  .dp-code-value { font-size: 26px; letter-spacing: 4px; }
+
+  .dp-topbar-greeting { display: none; }
+  .dp-body { padding: 20px 16px; gap: 20px; }
+
+  .dp-field-row { grid-template-columns: 1fr; }
+
+  .dp-table { font-size: 12px; }
+  .dp-table th, .dp-table td { padding: 9px 12px; }
+}
+
+@media (max-width: 440px) {
+  .dp-wallet-grid { grid-template-columns: 1fr 1fr; }
+  .dp-code-value { font-size: 22px; letter-spacing: 3px; }
+}

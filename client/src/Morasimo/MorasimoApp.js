@@ -1036,6 +1036,9 @@ export default function MorasimoApp() {
             </button>
           ))}
         </nav>
+        <a href="/morasimo/distributor" target="_blank" rel="noopener noreferrer" className="mor-back-link" style={{ borderBottom: '1px solid #22222E' }}>
+          ↗ Distributor Portal
+        </a>
         <a href="/admin" className="mor-back-link">← Back to Admin</a>
       </aside>
 

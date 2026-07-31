@@ -13,6 +13,7 @@
     "leaflet": "^1.9.4",
     "lucide-react": "^0.473.0",
     "node-cron": "^4.0.7",
+    "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-ga4": "^2.1.0",
