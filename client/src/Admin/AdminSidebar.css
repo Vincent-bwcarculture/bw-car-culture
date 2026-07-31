@@ -278,3 +278,23 @@
   border-color: rgba(255, 180, 0, 0.6);
   color: #ffe066 !important;
 }
+
+.morasimo-dist-btn {
+  background: rgba(26, 111, 165, 0.1);
+  border: 1px solid rgba(26, 111, 165, 0.3);
+  color: #2589C8 !important;
+  font-weight: 500;
+  font-size: 0.82em;
+  margin-top: 4px;
+}
+
+.morasimo-dist-btn .nav-icon {
+  color: #2589C8;
+  font-size: 12px;
+}
+
+.morasimo-dist-btn:hover {
+  background: rgba(26, 111, 165, 0.2);
+  border-color: rgba(37, 137, 200, 0.5);
+  color: #4aa8e8 !important;
+}
