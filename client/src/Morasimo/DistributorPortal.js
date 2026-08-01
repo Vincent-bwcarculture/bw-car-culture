@@ -32,11 +32,14 @@ const dApi = {
 
 // ── Login page ────────────────────────────────────────────────
 function LoginPage({ onSuccess, onRegister }) {
-  const [email,   setEmail]   = useState('');
-  const [pw,      setPw]      = useState('');
-  const [showPw,  setShowPw]  = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState('');
+  const [email,      setEmail]      = useState('');
+  const [pw,         setPw]         = useState('');
+  const [showPw,     setShowPw]     = useState(false);
+  const [loading,    setLoading]    = useState(false);
+  const [error,      setError]      = useState('');
+  const [accessCode, setAccessCode] = useState('');
+  const [accessErr,  setAccessErr]  = useState('');
+  const [accessLoad, setAccessLoad] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -54,6 +57,27 @@ function LoginPage({ onSuccess, onRegister }) {
       setError(err.response?.data?.error || 'Invalid email or password');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const quickAccess = async (e) => {
+    e.preventDefault();
+    if (!accessCode.trim()) return setAccessErr('Enter your access code');
+    setAccessErr(''); setAccessLoad(true);
+    try {
+      const r = await api.post('/api/morasimo/distributor/admin-access', {
+        accessCode: accessCode.trim().toUpperCase(),
+      });
+      if (r.data.success) {
+        localStorage.setItem(TOKEN_KEY, r.data.token);
+        onSuccess(r.data.distributor);
+      } else {
+        setAccessErr(r.data.error || 'Invalid access code');
+      }
+    } catch (err) {
+      setAccessErr(err.response?.data?.error || 'Invalid access code');
+    } finally {
+      setAccessLoad(false);
     }
   };
 
@@ -104,8 +128,30 @@ function LoginPage({ onSuccess, onRegister }) {
           </button>
         </form>
 
+        <div className="dp-divider">or</div>
+
+        {/* Admin quick-access — bypasses registration entirely */}
+        <form className="dp-form" onSubmit={quickAccess}>
+          {accessErr && <div className="dp-error">⚠ {accessErr}</div>}
+          <div className="dp-field">
+            <label>Access Code</label>
+            <input
+              value={accessCode}
+              onChange={e => setAccessCode(e.target.value.toUpperCase())}
+              placeholder="Enter your access code"
+              autoComplete="off"
+              style={{ letterSpacing: '2px', fontFamily: 'monospace' }}
+            />
+            <span className="dp-field-hint">Have an access code? Enter it to go straight to your dashboard.</span>
+          </div>
+          <button type="submit" className="dp-btn-primary" disabled={accessLoad}
+            style={{ background: 'transparent', border: '1px solid #C9A94E', color: '#C9A94E' }}>
+            {accessLoad ? 'Checking…' : 'Enter with Code →'}
+          </button>
+        </form>
+
         <p className="dp-auth-foot">
-          Don't have an account?{' '}
+          New distributor?{' '}
           <button onClick={onRegister}>Register here</button>
         </p>
       </div>
