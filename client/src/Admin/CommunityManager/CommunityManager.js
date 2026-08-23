@@ -170,7 +170,7 @@ function CompetitionsTab() {
   const [comps, setComps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCompForm, setShowCompForm] = useState(false);
-  const [compForm, setCompForm] = useState({ title: '', description: '', sponsor: '', sponsorLogo: '', prize: '', endDate: '', status: 'draft' });
+  const [compForm, setCompForm] = useState({ title: '', description: '', sponsor: '', sponsorLogo: '', sponsorBanner: '', sponsorDescription: '', sponsorWhatsapp: '', prize: '', endDate: '', status: 'draft' });
   const [editCompId, setEditCompId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [activeComp, setActiveComp] = useState(null);
@@ -185,7 +185,7 @@ function CompetitionsTab() {
   useEffect(() => { load(); }, []);
 
   const openNewComp = () => { setCompForm({ title: '', description: '', sponsor: '', sponsorLogo: '', prize: '', endDate: '', status: 'draft' }); setEditCompId(null); setShowCompForm(true); };
-  const openEditComp = (c) => { setCompForm({ title: c.title, description: c.description || '', sponsor: c.sponsor || '', sponsorLogo: c.sponsorLogo || '', prize: c.prize || '', endDate: c.endDate ? c.endDate.slice(0, 10) : '', status: c.status }); setEditCompId(c._id); setShowCompForm(true); };
+  const openEditComp = (c) => { setCompForm({ title: c.title, description: c.description || '', sponsor: c.sponsor || '', sponsorLogo: c.sponsorLogo || '', sponsorBanner: c.sponsorBanner || '', sponsorDescription: c.sponsorDescription || '', sponsorWhatsapp: c.sponsorWhatsapp || '', prize: c.prize || '', endDate: c.endDate ? c.endDate.slice(0, 10) : '', status: c.status }); setEditCompId(c._id); setShowCompForm(true); };
 
   const saveComp = async (e) => {
     e.preventDefault();
@@ -269,6 +269,33 @@ function CompetitionsTab() {
             <label>End Date</label>
             <input type="date" value={compForm.endDate} onChange={e => setCompForm(f => ({ ...f, endDate: e.target.value }))} />
           </div>
+
+          <div className="cm-form-section-label">Sponsor Details (shown as banner in the Feed)</div>
+          <div className="cm-field-row">
+            <div className="cm-field">
+              <label>Sponsor Name</label>
+              <input value={compForm.sponsor} onChange={e => setCompForm(f => ({ ...f, sponsor: e.target.value }))} placeholder="e.g. XYZ Motors" />
+            </div>
+            <div className="cm-field">
+              <label>Sponsor WhatsApp (for "Become a Sponsor" btn)</label>
+              <input value={compForm.sponsorWhatsapp} onChange={e => setCompForm(f => ({ ...f, sponsorWhatsapp: e.target.value }))} placeholder="+267 7X XXX XXX" />
+            </div>
+          </div>
+          <div className="cm-field-row">
+            <div className="cm-field">
+              <label>Sponsor Logo URL</label>
+              <input value={compForm.sponsorLogo} onChange={e => setCompForm(f => ({ ...f, sponsorLogo: e.target.value }))} placeholder="https://…" />
+            </div>
+            <div className="cm-field">
+              <label>Sponsor Banner Image URL</label>
+              <input value={compForm.sponsorBanner} onChange={e => setCompForm(f => ({ ...f, sponsorBanner: e.target.value }))} placeholder="https://… (background image)" />
+            </div>
+          </div>
+          <div className="cm-field">
+            <label>Sponsor Description / Services</label>
+            <textarea value={compForm.sponsorDescription} onChange={e => setCompForm(f => ({ ...f, sponsorDescription: e.target.value }))} rows={2} placeholder="What does the sponsor offer? e.g. Premium car audio, tinting, custom wraps…" />
+          </div>
+
           <div className="cm-form-footer">
             <button type="submit" className="cm-btn-gold" disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>
             <button type="button" className="cm-btn-ghost" onClick={() => setShowCompForm(false)}>Cancel</button>
@@ -350,6 +377,75 @@ function CompetitionsTab() {
   );
 }
 
+// ── Reports tab ───────────────────────────────────────────────
+const REPORT_STATUSES = ['pending', 'reviewed', 'actioned', 'dismissed'];
+const STATUS_COLORS = { pending: '#ff9800', reviewed: '#4aa8e8', actioned: '#E05C5C', dismissed: '#888' };
+
+function ReportsTab() {
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('pending');
+  const [updating, setUpdating] = useState({});
+
+  const load = async (s) => {
+    setLoading(true);
+    try {
+      const r = await axios.get(`/api/admin/feed/reports?status=${s || filter}`);
+      setReports(r.data.data || []);
+    } catch {}
+    setLoading(false);
+  };
+
+  useEffect(() => { load(filter); }, [filter]); // eslint-disable-line
+
+  const updateStatus = async (id, status) => {
+    setUpdating(u => ({ ...u, [id]: true }));
+    try {
+      await axios.patch(`/api/admin/feed/reports/${id}`, { status });
+      setReports(prev => prev.map(r => r._id === id ? { ...r, status } : r));
+    } catch (err) { alert(err?.response?.data?.error || 'Update failed'); }
+    setUpdating(u => ({ ...u, [id]: false }));
+  };
+
+  return (
+    <div className="cm-tab">
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        {REPORT_STATUSES.map(s => (
+          <button key={s} className={`cm-btn-ghost${filter === s ? ' active' : ''}`} style={filter === s ? { borderColor: STATUS_COLORS[s], color: STATUS_COLORS[s] } : {}} onClick={() => setFilter(s)}>
+            {s.charAt(0).toUpperCase() + s.slice(1)}
+          </button>
+        ))}
+      </div>
+      {loading ? <div className="cm-loading">Loading…</div> : reports.length === 0 ? <div className="cm-empty">No {filter} reports</div> : (
+        <div className="cm-table">
+          <div className="cm-table-head" style={{ gridTemplateColumns: '80px 80px 1fr 1fr 180px' }}>
+            <span>Type</span><span>Status</span><span>Target ID</span><span>Reason / Reporter</span><span>Actions</span>
+          </div>
+          {reports.map(r => (
+            <div className="cm-table-row" key={r._id} style={{ gridTemplateColumns: '80px 80px 1fr 1fr 180px' }}>
+              <span style={{ textTransform: 'capitalize', fontWeight: 600, color: 'var(--text-primary, #fff)' }}>{r.targetType}</span>
+              <span style={{ color: STATUS_COLORS[r.status] || '#888', fontSize: '0.78rem', fontWeight: 600 }}>{r.status}</span>
+              <span style={{ fontFamily: 'monospace', fontSize: '0.73rem', wordBreak: 'break-all' }}>{r.targetId}</span>
+              <div>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted, #bbb)' }}>{r.reason || <em>No reason given</em>}</div>
+                <div style={{ fontSize: '0.73rem', color: 'var(--text-muted, #666)', marginTop: '0.1rem' }}>by {r.reporterName} · {new Date(r.createdAt).toLocaleDateString()}</div>
+              </div>
+              <div className="cm-row-actions">
+                {r.status === 'pending' && <>
+                  <button className="cm-btn-sm" disabled={updating[r._id]} onClick={() => updateStatus(r._id, 'reviewed')}>Review</button>
+                  <button className="cm-btn-danger-sm" disabled={updating[r._id]} onClick={() => updateStatus(r._id, 'actioned')}>Action</button>
+                  <button className="cm-btn-ghost" style={{ fontSize: '0.73rem', padding: '0.25rem 0.5rem' }} disabled={updating[r._id]} onClick={() => updateStatus(r._id, 'dismissed')}>Dismiss</button>
+                </>}
+                {r.status !== 'pending' && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted, #666)' }}>Reviewed {r.reviewedAt ? new Date(r.reviewedAt).toLocaleDateString() : ''}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────
 export default function CommunityManager() {
   const [tab, setTab] = useState('groups');
@@ -364,10 +460,12 @@ export default function CommunityManager() {
       <div className="cm-tabs">
         <button className={`cm-tab-btn${tab === 'groups' ? ' active' : ''}`} onClick={() => setTab('groups')}>◈ Groups</button>
         <button className={`cm-tab-btn${tab === 'competitions' ? ' active' : ''}`} onClick={() => setTab('competitions')}>🏆 Show Car Competitions</button>
+        <button className={`cm-tab-btn${tab === 'reports' ? ' active' : ''}`} onClick={() => setTab('reports')}>⚑ Reports</button>
       </div>
 
       {tab === 'groups' && <GroupsTab />}
       {tab === 'competitions' && <CompetitionsTab />}
+      {tab === 'reports' && <ReportsTab />}
     </div>
   );
 }

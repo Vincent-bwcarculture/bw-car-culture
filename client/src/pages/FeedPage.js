@@ -6,6 +6,12 @@ import './FeedPage.css';
 const AVATAR_COLORS = ['#C9A94E','#1A6FA5','#E05C5C','#4CAF50','#9C27B0','#FF6F00'];
 const avatarColor = (name = '') => AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
 const initials = (name = '') => name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?';
+const getAvatarUrl = (avatarData) => {
+  if (!avatarData) return null;
+  if (typeof avatarData === 'object' && avatarData.url) return avatarData.url;
+  if (typeof avatarData === 'string' && avatarData.startsWith('http')) return avatarData;
+  return null;
+};
 const timeAgo = (d) => {
   const s = Math.floor((Date.now() - new Date(d)) / 1000);
   if (s < 60) return 'just now';
@@ -13,6 +19,52 @@ const timeAgo = (d) => {
   if (s < 86400) return `${Math.floor(s/3600)}h ago`;
   return `${Math.floor(s/86400)}d ago`;
 };
+
+// ── Sponsor banner ───────────────────────────────────────────
+function SponsorBanner({ comp }) {
+  const hasSponsor = comp && comp.sponsor;
+  const whatsappLink = comp?.sponsorWhatsapp
+    ? `https://wa.me/${comp.sponsorWhatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Hi, I would like to become a sponsor for the BW Car Culture Show Car Competition.')}`
+    : null;
+
+  if (hasSponsor) {
+    return (
+      <div className="fp-sponsor-banner fp-sponsor-banner--active">
+        {comp.sponsorBanner && (
+          <img src={comp.sponsorBanner} alt={comp.sponsor} className="fp-sponsor-bg" />
+        )}
+        <div className="fp-sponsor-content">
+          {comp.sponsorLogo && <img src={comp.sponsorLogo} alt={comp.sponsor} className="fp-sponsor-logo" />}
+          <div className="fp-sponsor-text">
+            <div className="fp-sponsor-label">Official Competition Sponsor</div>
+            <div className="fp-sponsor-name">{comp.sponsor}</div>
+            {comp.sponsorDescription && <div className="fp-sponsor-desc">{comp.sponsorDescription}</div>}
+          </div>
+          {comp.prize && <div className="fp-sponsor-prize">🏆 Prize: <strong>{comp.prize}</strong></div>}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fp-sponsor-banner fp-sponsor-banner--empty">
+      <div className="fp-sponsor-empty-left">
+        <span className="fp-sponsor-empty-icon">📢</span>
+        <div>
+          <div className="fp-sponsor-empty-title">No sponsor recorded for this competition</div>
+          <div className="fp-sponsor-empty-sub">Be the first to support our show car community</div>
+        </div>
+      </div>
+      {whatsappLink ? (
+        <a href={whatsappLink} target="_blank" rel="noreferrer" className="fp-sponsor-cta">
+          💬 Become a Sponsor
+        </a>
+      ) : (
+        <span className="fp-sponsor-empty-badge">Sponsorship open</span>
+      )}
+    </div>
+  );
+}
 
 // ── Competition carousel ─────────────────────────────────────
 function CompetitionCarousel({ user }) {
@@ -54,13 +106,14 @@ function CompetitionCarousel({ user }) {
   const shareUrl = (carId) => `${window.location.origin}/feed?vote=${comp._id}/${carId}`;
 
   return (
-    <div className="fp-competition">
+    <>
+      <SponsorBanner comp={comp} />
+      <div className="fp-competition">
       <div className="fp-comp-header">
         <div className="fp-comp-title-row">
           <span className="fp-comp-badge">🏆 Show Car Competition</span>
           <span className="fp-comp-name">{comp.title}</span>
         </div>
-        {comp.sponsor && <div className="fp-comp-sponsor">Sponsored by <strong>{comp.sponsor}</strong>{comp.prize ? ` · Prize: ${comp.prize}` : ''}</div>}
       </div>
       <div className="fp-comp-scroll" ref={scrollRef}>
         {(comp.cars || []).sort((a, b) => (b.points||0) - (a.points||0)).map((car, i) => (
@@ -92,11 +145,12 @@ function CompetitionCarousel({ user }) {
         ))}
       </div>
     </div>
+    </>
   );
 }
 
 // ── Single post ──────────────────────────────────────────────
-function FeedPost({ post: initialPost, user }) {
+function FeedPost({ post: initialPost, user, onDelete }) {
   const [post, setPost] = useState(initialPost);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);
@@ -105,6 +159,10 @@ function FeedPost({ post: initialPost, user }) {
   const [submittingComment, setSubmittingComment] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
   const [replyText, setReplyText] = useState('');
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
+  const isOwner = user && post.userId === user.id;
 
   const loadComments = async () => {
     if (commentsLoaded) return;
@@ -151,18 +209,73 @@ function FeedPost({ post: initialPost, user }) {
     } catch {}
   };
 
+  const startEdit = () => { setEditText(post.content); setEditing(true); };
+  const cancelEdit = () => setEditing(false);
+  const saveEdit = async () => {
+    if (!editText.trim()) return;
+    setSavingEdit(true);
+    try {
+      await axios.put(`/api/feed/${post._id}`, { content: editText });
+      setPost(p => ({ ...p, content: editText.trim(), editedAt: new Date() }));
+      setEditing(false);
+    } catch {}
+    setSavingEdit(false);
+  };
+
+  const deletePost = async () => {
+    if (!window.confirm('Delete this post?')) return;
+    try {
+      await axios.delete(`/api/feed/${post._id}`);
+      onDelete(post._id);
+    } catch {}
+  };
+
+  const report = async (targetType, targetId) => {
+    const reason = window.prompt('Reason for reporting (optional):');
+    if (reason === null) return;
+    try {
+      await axios.post('/api/feed/reports', { targetType, targetId, reason });
+      alert('Report submitted. Thank you.');
+    } catch {}
+  };
+
+  const postAvatarUrl = getAvatarUrl(post.userAvatar);
+  const myAvatarUrl = user ? (getAvatarUrl(user.avatar) || getAvatarUrl(user.profilePicture)) : null;
+
   return (
     <div className="fp-post">
       <div className="fp-post-header">
-        <div className="fp-avatar" style={{ background: avatarColor(post.userName) }}>
-          {initials(post.userName)}
+        <div className="fp-avatar" style={postAvatarUrl ? {} : { background: avatarColor(post.userName) }}>
+          {postAvatarUrl ? <img src={postAvatarUrl} alt={post.userName} /> : initials(post.userName)}
         </div>
         <div className="fp-post-meta">
           <span className="fp-post-author">{post.userName}</span>
-          <span className="fp-post-time">{timeAgo(post.createdAt)}</span>
+          <span className="fp-post-time">{timeAgo(post.createdAt)}{post.editedAt ? ' · edited' : ''}</span>
         </div>
+        {isOwner && (
+          <div className="fp-post-owner-actions">
+            <button className="fp-action-btn" onClick={startEdit} title="Edit">✏️</button>
+            <button className="fp-action-btn fp-action-btn--danger" onClick={deletePost} title="Delete">🗑️</button>
+          </div>
+        )}
+        {user && !isOwner && (
+          <button className="fp-action-btn fp-action-btn--report" onClick={() => report('post', post._id)} title="Report">⚑</button>
+        )}
       </div>
-      <p className="fp-post-content">{post.content}</p>
+
+      {editing ? (
+        <div className="fp-edit-area">
+          <textarea className="fp-composer-input" value={editText} onChange={e => setEditText(e.target.value)} rows={4} maxLength={2000} autoFocus />
+          <div className="fp-edit-footer">
+            <span className="fp-char-count">{editText.length}/2000</span>
+            <button className="fp-btn-sm" onClick={cancelEdit}>Cancel</button>
+            <button className="fp-btn-primary" onClick={saveEdit} disabled={savingEdit || !editText.trim()}>{savingEdit ? 'Saving…' : 'Save'}</button>
+          </div>
+        </div>
+      ) : (
+        <p className="fp-post-content">{post.content}</p>
+      )}
+
       <div className="fp-post-actions">
         <button className={`fp-react-btn${post.userReaction === 'up' ? ' active-up' : ''}`} onClick={() => react('up')} disabled={!user} title={user ? '' : 'Log in to react'}>
           👍 <span>{post.likes || 0}</span>
@@ -177,21 +290,40 @@ function FeedPost({ post: initialPost, user }) {
 
       {showComments && (
         <div className="fp-comments">
-          {comments.map(cm => (
+          {comments.map(cm => {
+            const cmAv = getAvatarUrl(cm.userAvatar);
+            return (
             <div className="fp-comment" key={cm._id}>
-              <div className="fp-avatar fp-avatar-sm" style={{ background: avatarColor(cm.userName) }}>{initials(cm.userName)}</div>
+              <div className="fp-avatar fp-avatar-sm" style={cmAv ? {} : { background: avatarColor(cm.userName) }}>
+                {cmAv ? <img src={cmAv} alt={cm.userName} /> : initials(cm.userName)}
+              </div>
               <div className="fp-comment-body">
-                <div className="fp-comment-author">{cm.userName} <span className="fp-post-time">{timeAgo(cm.createdAt)}</span></div>
+                <div className="fp-comment-header-row">
+                  <span className="fp-comment-author">{cm.userName} <span className="fp-post-time">{timeAgo(cm.createdAt)}</span></span>
+                  {user && cm.userId !== user.id && (
+                    <button className="fp-action-btn fp-action-btn--report fp-action-btn--xs" onClick={() => report('comment', cm._id)} title="Report">⚑</button>
+                  )}
+                </div>
                 <div className="fp-comment-text">{cm.content}</div>
-                {(cm.replies || []).map(r => (
+                {(cm.replies || []).map(r => {
+                  const rAv = getAvatarUrl(r.userAvatar);
+                  return (
                   <div className="fp-reply" key={r._id}>
-                    <div className="fp-avatar fp-avatar-xs" style={{ background: avatarColor(r.userName) }}>{initials(r.userName)}</div>
+                    <div className="fp-avatar fp-avatar-xs" style={rAv ? {} : { background: avatarColor(r.userName) }}>
+                      {rAv ? <img src={rAv} alt={r.userName} /> : initials(r.userName)}
+                    </div>
                     <div className="fp-comment-body">
-                      <div className="fp-comment-author">{r.userName}</div>
+                      <div className="fp-comment-header-row">
+                        <span className="fp-comment-author">{r.userName}</span>
+                        {user && r.userId !== user.id && (
+                          <button className="fp-action-btn fp-action-btn--report fp-action-btn--xs" onClick={() => report('reply', r._id)} title="Report">⚑</button>
+                        )}
+                      </div>
                       <div className="fp-comment-text">{r.content}</div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
                 {user && (
                   replyTo === cm._id
                     ? <div className="fp-reply-form">
@@ -203,10 +335,13 @@ function FeedPost({ post: initialPost, user }) {
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
           {user && (
             <form className="fp-comment-form" onSubmit={submitComment}>
-              <div className="fp-avatar fp-avatar-sm" style={{ background: avatarColor(user.name) }}>{initials(user.name)}</div>
+              <div className="fp-avatar fp-avatar-sm" style={myAvatarUrl ? {} : { background: avatarColor(user.name) }}>
+                {myAvatarUrl ? <img src={myAvatarUrl} alt={user.name} /> : initials(user.name)}
+              </div>
               <input value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="Add a comment…" className="fp-input" />
               <button type="submit" disabled={submittingComment || !commentText.trim()} className="fp-btn-sm">
                 {submittingComment ? '…' : 'Post'}
@@ -258,6 +393,7 @@ export default function FeedPage() {
   };
 
   const loadMore = () => { const next = page + 1; setPage(next); loadFeed(next); };
+  const handleDeletePost = (id) => setPosts(prev => prev.filter(p => p._id !== id));
 
   return (
     <div className="fp-page">
@@ -269,9 +405,13 @@ export default function FeedPage() {
 
         <CompetitionCarousel user={user} />
 
-        {isAuthenticated && (
+        {isAuthenticated && (() => {
+          const composerAv = user ? (getAvatarUrl(user.avatar) || getAvatarUrl(user.profilePicture)) : null;
+          return (
           <form className="fp-composer" onSubmit={submitPost}>
-            <div className="fp-avatar" style={{ background: avatarColor(user?.name) }}>{initials(user?.name)}</div>
+            <div className="fp-avatar" style={composerAv ? {} : { background: avatarColor(user?.name) }}>
+              {composerAv ? <img src={composerAv} alt={user?.name} /> : initials(user?.name)}
+            </div>
             <div className="fp-composer-right">
               <textarea
                 value={postText}
@@ -290,7 +430,8 @@ export default function FeedPage() {
               {error && <div className="fp-error">{error}</div>}
             </div>
           </form>
-        )}
+          );
+        })()}
 
         {!isAuthenticated && (
           <div className="fp-login-prompt">
@@ -303,7 +444,7 @@ export default function FeedPage() {
           ? <div className="fp-loading">Loading feed…</div>
           : posts.length === 0
             ? <div className="fp-empty">No posts yet. Be the first to share something!</div>
-            : posts.map(p => <FeedPost key={p._id} post={p} user={user} />)
+            : posts.map(p => <FeedPost key={p._id} post={p} user={user} onDelete={handleDeletePost} />)
         }
 
         {page < pages && (
