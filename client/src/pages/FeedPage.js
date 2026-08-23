@@ -3,6 +3,41 @@ import { useAuth } from '../context/AuthContext.js';
 import axios from '../config/axios.js';
 import './FeedPage.css';
 
+// ── Follow button ─────────────────────────────────────────────
+function FollowButton({ targetUserId, currentUserId }) {
+  const [following, setFollowing] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!currentUserId || !targetUserId || currentUserId === targetUserId) return;
+    axios.get(`/api/users/${targetUserId}/follow-status`)
+      .then(r => setFollowing(r.data.following))
+      .catch(() => {});
+  }, [targetUserId, currentUserId]);
+
+  if (!currentUserId || currentUserId === targetUserId || following === null) return null;
+
+  const toggle = async () => {
+    setLoading(true);
+    try {
+      if (following) {
+        await axios.delete(`/api/users/${targetUserId}/follow`);
+        setFollowing(false);
+      } else {
+        await axios.post(`/api/users/${targetUserId}/follow`);
+        setFollowing(true);
+      }
+    } catch {}
+    setLoading(false);
+  };
+
+  return (
+    <button className={`fp-follow-btn${following ? ' fp-follow-btn--following' : ''}`} onClick={toggle} disabled={loading}>
+      {loading ? '…' : following ? 'Following' : 'Follow'}
+    </button>
+  );
+}
+
 const AVATAR_COLORS = ['#C9A94E','#1A6FA5','#E05C5C','#4CAF50','#9C27B0','#FF6F00'];
 const avatarColor = (name = '') => AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
 const initials = (name = '') => name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() || '?';
@@ -227,7 +262,9 @@ function FeedPost({ post: initialPost, user, onDelete }) {
     try {
       await axios.delete(`/api/feed/${post._id}`);
       onDelete(post._id);
-    } catch {}
+    } catch (err) {
+      alert(err?.response?.data?.error || 'Failed to delete post. Please try again.');
+    }
   };
 
   const report = async (targetType, targetId) => {
@@ -249,7 +286,10 @@ function FeedPost({ post: initialPost, user, onDelete }) {
           {postAvatarUrl ? <img src={postAvatarUrl} alt={post.userName} /> : initials(post.userName)}
         </div>
         <div className="fp-post-meta">
-          <span className="fp-post-author">{post.userName}</span>
+          <div className="fp-post-author-row">
+            <span className="fp-post-author">{post.userName}</span>
+            <FollowButton targetUserId={post.userId} currentUserId={user?.id} />
+          </div>
           <span className="fp-post-time">{timeAgo(post.createdAt)}{post.editedAt ? ' · edited' : ''}</span>
         </div>
         {isOwner && (
@@ -299,7 +339,11 @@ function FeedPost({ post: initialPost, user, onDelete }) {
               </div>
               <div className="fp-comment-body">
                 <div className="fp-comment-header-row">
-                  <span className="fp-comment-author">{cm.userName} <span className="fp-post-time">{timeAgo(cm.createdAt)}</span></span>
+                  <span className="fp-comment-author">
+                    {cm.userName}
+                    <FollowButton targetUserId={cm.userId} currentUserId={user?.id} />
+                    <span className="fp-post-time">{timeAgo(cm.createdAt)}</span>
+                  </span>
                   {user && cm.userId !== user.id && (
                     <button className="fp-action-btn fp-action-btn--report fp-action-btn--xs" onClick={() => report('comment', cm._id)} title="Report">⚑</button>
                   )}
@@ -314,7 +358,10 @@ function FeedPost({ post: initialPost, user, onDelete }) {
                     </div>
                     <div className="fp-comment-body">
                       <div className="fp-comment-header-row">
-                        <span className="fp-comment-author">{r.userName}</span>
+                        <span className="fp-comment-author">
+                          {r.userName}
+                          <FollowButton targetUserId={r.userId} currentUserId={user?.id} />
+                        </span>
                         {user && r.userId !== user.id && (
                           <button className="fp-action-btn fp-action-btn--report fp-action-btn--xs" onClick={() => report('reply', r._id)} title="Report">⚑</button>
                         )}

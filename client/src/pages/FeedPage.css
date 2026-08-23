@@ -325,9 +325,33 @@
 
 .fp-post-header { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.75rem; }
 
-.fp-post-meta { display: flex; flex-direction: column; }
+.fp-post-meta { display: flex; flex-direction: column; flex: 1; }
+.fp-post-author-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .fp-post-author { font-weight: 600; font-size: 0.9rem; color: var(--text-primary, #fff); }
 .fp-post-time { font-size: 0.75rem; color: var(--text-muted, #666); }
+
+/* ── Follow button ── */
+.fp-follow-btn {
+  background: transparent;
+  border: 1px solid rgba(255,51,0,0.4);
+  color: var(--accent, #ff3300);
+  border-radius: 20px;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.fp-follow-btn:hover:not(:disabled) { background: rgba(255,51,0,0.1); }
+.fp-follow-btn:disabled { opacity: 0.5; cursor: default; }
+.fp-follow-btn--following {
+  background: rgba(255,51,0,0.08);
+  border-color: rgba(255,51,0,0.2);
+  color: var(--text-muted, #888);
+}
+.fp-follow-btn--following:hover:not(:disabled) { background: rgba(224,92,92,0.12); border-color: rgba(224,92,92,0.35); color: #E05C5C; }
 
 .fp-post-content {
   font-size: 0.95rem;
