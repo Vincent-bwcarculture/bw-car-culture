@@ -89,6 +89,11 @@ const AdminSettings = React.lazy(() => import('./Admin/AdminSettings/AdminSettin
 const PriceCalculator = React.lazy(() => import('./Admin/PriceCalculator/PriceCalculator.js'));
 const MorasimoApp         = React.lazy(() => import('./Morasimo/MorasimoApp.js'));
 const DistributorPortal   = React.lazy(() => import('./Morasimo/DistributorPortal.js'));
+// — Community
+const FeedPage      = React.lazy(() => import('./pages/FeedPage.js'));
+const GroupsPage    = React.lazy(() => import('./pages/GroupsPage.js'));
+const GroupPage     = React.lazy(() => import('./pages/GroupPage.js'));
+const CommunityManager = React.lazy(() => import('./Admin/CommunityManager/CommunityManager.js'));
 // — Journalist
 const CreateArticle = React.lazy(() => import('./components/journalist/CreateArticle.js'));
 // — User pages
@@ -874,6 +879,28 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
+        <Route path="/admin/community" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <AdminLayout>
+              <CommunityManager />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/community/groups" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <AdminLayout>
+              <CommunityManager />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/community/competitions" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <AdminLayout>
+              <CommunityManager />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
         <Route
           path="/admin/user-submissions"
           element={
@@ -1071,6 +1098,23 @@ const AppRoutes = () => {
 
         {/* Morasimo Distributor Portal — public (own auth) */}
         <Route path="/morasimo/distributor" element={<DistributorPortal />} />
+
+        {/* Community — Feed & Groups */}
+        <Route path="/feed" element={
+          <MainLayout>
+            <FeedPage />
+          </MainLayout>
+        } />
+        <Route path="/groups" element={
+          <MainLayout>
+            <GroupsPage />
+          </MainLayout>
+        } />
+        <Route path="/groups/:slug" element={
+          <MainLayout>
+            <GroupPage />
+          </MainLayout>
+        } />
 
         {/* Main Website Routes */}
         <Route path="/inventory" element={

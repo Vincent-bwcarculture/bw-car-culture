@@ -307,6 +307,22 @@ const NavigationMenu = () => {
 
           <div className="menu-divider"></div>
 
+          {/* Feed */}
+          <button className="menu-item feed-item" onClick={() => { setIsMenuOpen(false); navigate('/feed'); }} type="button">
+            <span className="menu-item-icon"><span style={{fontSize:'12px'}}>◈</span></span>
+            <span className="menu-item-text">Feed</span>
+          </button>
+
+          <div className="menu-divider"></div>
+
+          {/* Groups */}
+          <button className="menu-item groups-item" onClick={() => { setIsMenuOpen(false); navigate('/groups'); }} type="button">
+            <span className="menu-item-icon"><span style={{fontSize:'12px'}}>◉</span></span>
+            <span className="menu-item-text">Groups</span>
+          </button>
+
+          <div className="menu-divider"></div>
+
           {/* News */}
           <button className="menu-item news-item" onClick={handleNewsClick} type="button">
             <span className="menu-item-icon"><Newspaper size={12} /></span>

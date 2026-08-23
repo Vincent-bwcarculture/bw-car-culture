@@ -1,0 +1,91 @@
+/* GroupsPage.css */
+.gp-page {
+  min-height: 100vh;
+  background: var(--bg-primary, #0f0f0f);
+  padding: 2rem 1rem 4rem;
+}
+
+.gp-container {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.gp-header { margin-bottom: 1.5rem; }
+.gp-title { font-size: 1.8rem; font-weight: 700; color: var(--text-primary, #fff); margin: 0 0 0.25rem; }
+.gp-subtitle { color: var(--text-secondary, #888); font-size: 0.9rem; margin: 0; }
+
+.gp-loading, .gp-empty {
+  text-align: center;
+  color: var(--text-secondary, #666);
+  padding: 3rem 1rem;
+}
+
+.gp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.gp-card {
+  background: var(--bg-secondary, #161616);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.gp-card:hover {
+  border-color: rgba(201,169,78,0.3);
+  transform: translateY(-2px);
+}
+
+.gp-card-icon { font-size: 2rem; line-height: 1; }
+.gp-card-name { font-size: 1.1rem; font-weight: 700; color: var(--text-primary, #fff); margin-bottom: 0.25rem; }
+.gp-card-desc { font-size: 0.85rem; color: var(--text-secondary, #888); line-height: 1.45; }
+
+.gp-card-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary, #777);
+}
+
+.gp-card-actions { display: flex; align-items: center; gap: 0.5rem; margin-top: auto; }
+
+.gp-view-btn {
+  flex: 1;
+  background: rgba(201,169,78,0.12);
+  border: 1px solid rgba(201,169,78,0.3);
+  color: #C9A94E;
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.gp-view-btn:hover { background: rgba(201,169,78,0.22); }
+
+.gp-join-btn {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text-primary, #fff);
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.83rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.gp-join-btn:hover:not(:disabled) { background: rgba(255,255,255,0.13); }
+.gp-join-btn:disabled { opacity: 0.5; cursor: default; }
+
+.gp-member-badge {
+  font-size: 0.78rem;
+  color: #4CAF50;
+  font-weight: 600;
+}

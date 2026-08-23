@@ -61,6 +61,13 @@ const menuItems = [
       { title: 'Pending Reviews', path: '/admin/role-requests' },
     ]
   },
+  {
+    title: 'Community', icon: '◈',
+    submenu: [
+      { title: 'Groups',       path: '/admin/community/groups' },
+      { title: 'Competitions', path: '/admin/community/competitions' },
+    ]
+  },
   { title: 'Operations', icon: '✎', path: '/admin/ops' },
   { title: 'GION',     icon: '◉', path: '/admin/gion' },
   { title: 'Settings', icon: '◌', path: '/admin/settings' },
