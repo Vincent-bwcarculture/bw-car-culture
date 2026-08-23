@@ -23,6 +23,12 @@ const categories = [
     icon: <Home size={20} />
   },
   {
+    id: 'feed',
+    name: 'Feed',
+    path: '/feed',
+    icon: <Hash size={20} />
+  },
+  {
     id: 'marketplace',
     name: 'Car Sales',
     path: '/marketplace',

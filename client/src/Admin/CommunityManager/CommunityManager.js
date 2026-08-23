@@ -446,6 +446,143 @@ function ReportsTab() {
   );
 }
 
+// ── Showcase submissions review tab ───────────────────────────
+const SUB_STATUSES = ['pending', 'approved', 'rejected'];
+const SUB_STATUS_COLORS = { pending: '#ff9800', approved: '#4CAF50', rejected: '#E05C5C' };
+
+function ShowcaseSubmissionsTab() {
+  const [subs, setSubs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('pending');
+  const [updating, setUpdating] = useState({});
+  const [expanded, setExpanded] = useState(null);
+  const [rejectNote, setRejectNote] = useState({});
+
+  const load = async (s) => {
+    setLoading(true);
+    try {
+      const r = await axios.get(`/api/admin/competitions/submissions?status=${s || filter}`);
+      setSubs(r.data.data || []);
+    } catch {}
+    setLoading(false);
+  };
+
+  useEffect(() => { load(filter); }, [filter]); // eslint-disable-line
+
+  const updateSub = async (id, status) => {
+    setUpdating(u => ({ ...u, [id]: true }));
+    try {
+      await axios.patch(`/api/admin/competitions/submissions/${id}`, { status, rejectionReason: rejectNote[id] || '' });
+      setSubs(prev => prev.map(s => s._id === id ? { ...s, status } : s));
+      if (expanded === id) setExpanded(null);
+    } catch (err) { alert(err?.response?.data?.error || 'Update failed'); }
+    setUpdating(u => ({ ...u, [id]: false }));
+  };
+
+  return (
+    <div className="cm-tab">
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        {SUB_STATUSES.map(s => (
+          <button key={s} className={`cm-btn-ghost${filter === s ? ' active' : ''}`}
+            style={filter === s ? { borderColor: SUB_STATUS_COLORS[s], color: SUB_STATUS_COLORS[s] } : {}}
+            onClick={() => setFilter(s)}>
+            {s.charAt(0).toUpperCase() + s.slice(1)}
+          </button>
+        ))}
+      </div>
+      {loading ? <div className="cm-loading">Loading…</div> : subs.length === 0 ? <div className="cm-empty">No {filter} submissions</div> : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {subs.map(sub => (
+            <div key={sub._id} className="cm-table-row" style={{ display: 'block', padding: '1rem', background: 'var(--card-bg, #1a1a1a)', borderRadius: '10px', border: '1px solid var(--border-light, rgba(255,255,255,0.08))' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                {(sub.mainImages||[])[0]?.url && (
+                  <img src={sub.mainImages[0].url} alt={sub.vehicleName} style={{ width: 80, height: 60, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }} />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, color: 'var(--text-primary, #fff)', fontSize: '0.95rem' }}>{sub.vehicleName}</div>
+                  {sub.vehicleDetails && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted, #888)', marginTop: '0.1rem' }}>{sub.vehicleDetails}</div>}
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted, #666)', marginTop: '0.2rem' }}>
+                    Owner: {sub.ownerName} · Submitted by: {sub.userName} · {new Date(sub.createdAt).toLocaleDateString()}
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                    <span style={{ color: SUB_STATUS_COLORS[sub.status], fontSize: '0.75rem', fontWeight: 700 }}>{sub.status.toUpperCase()}</span>
+                    <span style={{ color: 'var(--text-muted, #888)', fontSize: '0.75rem' }}>{(sub.mainImages||[]).length} photos · {(sub.modImages||[]).length} mods</span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
+                  <button className="cm-btn-sm" onClick={() => setExpanded(e => e === sub._id ? null : sub._id)}>
+                    {expanded === sub._id ? 'Collapse' : 'View'}
+                  </button>
+                  {sub.status === 'pending' && <>
+                    <button className="cm-btn-sm" style={{ background: 'rgba(76,175,80,0.15)', borderColor: 'rgba(76,175,80,0.3)', color: '#4CAF50' }}
+                      disabled={updating[sub._id]} onClick={() => updateSub(sub._id, 'approved')}>
+                      Approve
+                    </button>
+                    <button className="cm-btn-danger-sm" disabled={updating[sub._id]} onClick={() => updateSub(sub._id, 'rejected')}>
+                      Reject
+                    </button>
+                  </>}
+                </div>
+              </div>
+
+              {expanded === sub._id && (
+                <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border-light, rgba(255,255,255,0.08))', paddingTop: '0.75rem' }}>
+                  {(sub.mainImages||[]).length > 0 && (
+                    <>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted, #aaa)', marginBottom: '0.4rem' }}>OVERVIEW PHOTOS</div>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {sub.mainImages.map((img, i) => (
+                          <div key={i} style={{ width: 110 }}>
+                            <img src={img.url} alt="" style={{ width: '100%', height: 75, objectFit: 'cover', borderRadius: 6 }} />
+                            {img.description && <div style={{ fontSize: '0.7rem', color: 'var(--text-muted, #888)', marginTop: '0.2rem' }}>{img.description}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  {(sub.modImages||[]).length > 0 && (
+                    <>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted, #aaa)', marginTop: '0.75rem', marginBottom: '0.4rem' }}>MODIFICATIONS</div>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {sub.modImages.map((img, i) => (
+                          <div key={i} style={{ width: 110 }}>
+                            <img src={img.url} alt="" style={{ width: '100%', height: 75, objectFit: 'cover', borderRadius: 6 }} />
+                            {img.description && <div style={{ fontSize: '0.7rem', color: 'var(--text-muted, #888)', marginTop: '0.2rem' }}>{img.description}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  {sub.status === 'pending' && (
+                    <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                      <input
+                        placeholder="Rejection reason (optional)"
+                        value={rejectNote[sub._id] || ''}
+                        onChange={e => setRejectNote(n => ({ ...n, [sub._id]: e.target.value }))}
+                        style={{ background: 'var(--input-bg, #111)', border: '1px solid var(--input-border, rgba(255,255,255,0.1))', borderRadius: 6, padding: '0.35rem 0.6rem', color: 'var(--text-primary, #fff)', fontSize: '0.82rem' }}
+                      />
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button className="cm-btn-sm" style={{ background: 'rgba(76,175,80,0.15)', borderColor: 'rgba(76,175,80,0.3)', color: '#4CAF50' }}
+                          disabled={updating[sub._id]} onClick={() => updateSub(sub._id, 'approved')}>
+                          ✓ Approve
+                        </button>
+                        <button className="cm-btn-danger-sm" disabled={updating[sub._id]} onClick={() => updateSub(sub._id, 'rejected')}>
+                          ✕ Reject
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {sub.rejectionReason && <div style={{ marginTop: '0.5rem', fontSize: '0.78rem', color: '#E05C5C' }}>Rejected: {sub.rejectionReason}</div>}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────
 export default function CommunityManager() {
   const [tab, setTab] = useState('groups');
@@ -454,17 +591,19 @@ export default function CommunityManager() {
     <div className="cm-page">
       <div className="cm-header">
         <h1>Community</h1>
-        <p>Manage groups, competitions, and the social feed</p>
+        <p>Manage groups, showcases, submissions, and the social feed</p>
       </div>
 
       <div className="cm-tabs">
         <button className={`cm-tab-btn${tab === 'groups' ? ' active' : ''}`} onClick={() => setTab('groups')}>◈ Groups</button>
-        <button className={`cm-tab-btn${tab === 'competitions' ? ' active' : ''}`} onClick={() => setTab('competitions')}>🏆 Show Car Competitions</button>
+        <button className={`cm-tab-btn${tab === 'competitions' ? ' active' : ''}`} onClick={() => setTab('competitions')}>✨ Showcases</button>
+        <button className={`cm-tab-btn${tab === 'submissions' ? ' active' : ''}`} onClick={() => setTab('submissions')}>📋 Submissions</button>
         <button className={`cm-tab-btn${tab === 'reports' ? ' active' : ''}`} onClick={() => setTab('reports')}>⚑ Reports</button>
       </div>
 
       {tab === 'groups' && <GroupsTab />}
       {tab === 'competitions' && <CompetitionsTab />}
+      {tab === 'submissions' && <ShowcaseSubmissionsTab />}
       {tab === 'reports' && <ReportsTab />}
     </div>
   );

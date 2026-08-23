@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../context/AuthContext.js';
+import { useNavigate } from 'react-router-dom';
 import axios from '../config/axios.js';
 import './FeedPage.css';
 
@@ -101,11 +102,332 @@ function SponsorBanner({ comp }) {
   );
 }
 
+// ── Image comment section (for submission detail) ─────────────
+function ImageComments({ submissionId, imageType, imageIdx, user }) {
+  const [comments, setComments] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  const [text, setText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [replyTo, setReplyTo] = useState(null);
+  const [replyText, setReplyText] = useState('');
+
+  useEffect(() => {
+    axios.get(`/api/competitions/submissions/${submissionId}/images/${imageType}/${imageIdx}/comments`)
+      .then(r => { setComments(r.data.data || []); setLoaded(true); })
+      .catch(() => setLoaded(true));
+  }, [submissionId, imageType, imageIdx]);
+
+  const submitComment = async (e) => {
+    e.preventDefault();
+    if (!text.trim() || !user) return;
+    setSubmitting(true);
+    try {
+      const r = await axios.post(`/api/competitions/submissions/${submissionId}/images/${imageType}/${imageIdx}/comments`, { content: text });
+      setComments(c => [...c, r.data.data]);
+      setText('');
+    } catch {}
+    setSubmitting(false);
+  };
+
+  const submitReply = async (commentId) => {
+    if (!replyText.trim() || !user) return;
+    try {
+      const r = await axios.post(`/api/competitions/submissions/image-comments/${commentId}/replies`, { content: replyText });
+      setComments(c => c.map(cm => cm._id === commentId ? { ...cm, replies: [...(cm.replies||[]), r.data.data] } : cm));
+      setReplyText(''); setReplyTo(null);
+    } catch {}
+  };
+
+  if (!loaded) return <div className="fp-loading" style={{ padding: '1rem', fontSize: '0.8rem' }}>Loading comments…</div>;
+
+  return (
+    <div className="fp-comments" style={{ marginTop: '0.5rem' }}>
+      {comments.map(cm => (
+        <div className="fp-comment" key={cm._id}>
+          <div className="fp-avatar fp-avatar-sm" style={{ background: avatarColor(cm.userName) }}>
+            {cm.userAvatar ? <img src={cm.userAvatar.url || cm.userAvatar} alt={cm.userName} style={{ width:'100%',height:'100%',objectFit:'cover',borderRadius:'50%' }} /> : initials(cm.userName)}
+          </div>
+          <div className="fp-comment-body">
+            <div className="fp-comment-header-row">
+              <span className="fp-comment-author">{cm.userName} <span className="fp-post-time">{timeAgo(cm.createdAt)}</span></span>
+            </div>
+            <div className="fp-comment-text">{cm.content}</div>
+            {(cm.replies||[]).map(r => (
+              <div className="fp-reply" key={r._id}>
+                <div className="fp-avatar fp-avatar-xs" style={{ background: avatarColor(r.userName) }}>{initials(r.userName)}</div>
+                <div className="fp-comment-body">
+                  <span className="fp-comment-author">{r.userName}</span>
+                  <div className="fp-comment-text">{r.content}</div>
+                </div>
+              </div>
+            ))}
+            {user && (replyTo === cm._id
+              ? <div className="fp-reply-form">
+                  <input value={replyText} onChange={e => setReplyText(e.target.value)} placeholder="Reply…" className="fp-input" autoFocus />
+                  <button onClick={() => submitReply(cm._id)} className="fp-btn-sm">Reply</button>
+                  <button onClick={() => setReplyTo(null)} className="fp-btn-sm fp-btn-ghost">Cancel</button>
+                </div>
+              : <button className="fp-reply-toggle" onClick={() => { setReplyTo(cm._id); setReplyText(''); }}>Reply</button>
+            )}
+          </div>
+        </div>
+      ))}
+      {user && (
+        <form className="fp-comment-form" onSubmit={submitComment}>
+          <div className="fp-avatar fp-avatar-sm" style={{ background: avatarColor(user.name) }}>{initials(user.name)}</div>
+          <input value={text} onChange={e => setText(e.target.value)} placeholder="Comment on this image…" className="fp-input" />
+          <button type="submit" disabled={submitting || !text.trim()} className="fp-btn-sm">{submitting ? '…' : 'Post'}</button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+// ── Submission detail modal ────────────────────────────────────
+function SubmissionDetailModal({ carId, car, user, onClose }) {
+  const [sub, setSub] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeImg, setActiveImg] = useState({ type: 'main', idx: 0 });
+  const [reacting, setReacting] = useState({});
+  const [reactions, setReactions] = useState({});
+  const [showComments, setShowComments] = useState({});
+
+  useEffect(() => {
+    axios.get(`/api/competitions/submissions/${carId}`)
+      .then(r => setSub(r.data.data))
+      .catch(() => setSub(null))
+      .finally(() => setLoading(false));
+  }, [carId]);
+
+  const allImages = sub ? [
+    ...(sub.mainImages || []).map((img, i) => ({ ...img, type: 'main', idx: i })),
+    ...(sub.modImages || []).map((img, i) => ({ ...img, type: 'mod', idx: i })),
+  ] : [];
+
+  const curImg = allImages.find(img => img.type === activeImg.type && img.idx === activeImg.idx);
+  const curKey = `${activeImg.type}-${activeImg.idx}`;
+
+  const nav = (dir) => {
+    const pos = allImages.findIndex(img => img.type === activeImg.type && img.idx === activeImg.idx);
+    const next = (pos + dir + allImages.length) % allImages.length;
+    setActiveImg({ type: allImages[next].type, idx: allImages[next].idx });
+  };
+
+  const getReaction = (type, idx) => reactions[`${type}-${idx}`] || { likes: 0, dislikes: 0, userReaction: null };
+
+  const reactToImage = async (type, idx, reaction) => {
+    if (!user) return alert('Log in to react');
+    const key = `${type}-${idx}`;
+    setReacting(r => ({ ...r, [key]: true }));
+    try {
+      const r = await axios.post(`/api/competitions/submissions/${carId}/images/${type}/${idx}/react`, { type: reaction });
+      const imgData = type === 'main' ? sub.mainImages[idx] : sub.modImages[idx];
+      setReactions(prev => ({ ...prev, [key]: { likes: r.data.likes, dislikes: r.data.dislikes, userReaction: r.data.userReaction } }));
+    } catch {}
+    setReacting(r => ({ ...r, [key]: false }));
+  };
+
+  const imgReact = (img) => {
+    const saved = reactions[`${img.type}-${img.idx}`];
+    return {
+      likes: saved?.likes ?? img.likes ?? 0,
+      dislikes: saved?.dislikes ?? img.dislikes ?? 0,
+      userReaction: saved?.userReaction ?? null,
+    };
+  };
+
+  return (
+    <div className="fp-modal-overlay" onClick={onClose}>
+      <div className="fp-modal fp-modal--full" onClick={e => e.stopPropagation()}>
+        <div className="fp-modal-header">
+          <button className="fp-modal-back" onClick={onClose}>← Close</button>
+          <h2 className="fp-modal-title">{car.vehicleName}</h2>
+          <div className="fp-modal-sub">Owner: {car.ownerName} · {car.points || 0} pts · {(car.votes||[]).length} votes</div>
+        </div>
+        <div className="fp-modal-body">
+          {loading && <div className="fp-loading">Loading details…</div>}
+          {!loading && !sub && (
+            <div className="fp-empty" style={{ padding: '1rem' }}>
+              {car.vehicleImage && <img src={car.vehicleImage} alt={car.vehicleName} style={{ width:'100%',maxHeight:'220px',objectFit:'cover',borderRadius:'10px',marginBottom:'1rem' }} />}
+              <p style={{ color: 'var(--text-muted)' }}>{car.vehicleDetails}</p>
+            </div>
+          )}
+          {!loading && sub && allImages.length > 0 && (
+            <>
+              <div className="fp-detail-img-viewer">
+                {curImg?.url && <img src={curImg.url} alt="Vehicle" />}
+                {allImages.length > 1 && <>
+                  <button className="fp-detail-img-nav fp-detail-img-nav--left" onClick={() => nav(-1)}>‹</button>
+                  <button className="fp-detail-img-nav fp-detail-img-nav--right" onClick={() => nav(1)}>›</button>
+                </>}
+                {curImg?.type === 'main'
+                  ? <div className="fp-detail-img-section-badge">Overview</div>
+                  : <div className="fp-detail-img-section-badge fp-detail-img-section-badge--mod">Modification {curImg.idx + 1}</div>
+                }
+              </div>
+              <div className="fp-detail-img-dots">
+                {allImages.map((img, i) => (
+                  <button key={i} className={`fp-detail-img-dot${img.type === activeImg.type && img.idx === activeImg.idx ? ' active' : ''}`} onClick={() => setActiveImg({ type: img.type, idx: img.idx })} />
+                ))}
+              </div>
+              {curImg?.description && <p className="fp-detail-img-desc">{curImg.description}</p>}
+              <div className="fp-detail-img-reactions">
+                <button className={`fp-react-btn${imgReact(curImg).userReaction === 'up' ? ' active-up' : ''}`} onClick={() => reactToImage(curImg.type, curImg.idx, 'up')} disabled={reacting[curKey] || !user}>
+                  👍 {imgReact(curImg).likes}
+                </button>
+                <button className={`fp-react-btn${imgReact(curImg).userReaction === 'down' ? ' active-down' : ''}`} onClick={() => reactToImage(curImg.type, curImg.idx, 'down')} disabled={reacting[curKey] || !user}>
+                  👎 {imgReact(curImg).dislikes}
+                </button>
+                <button className="fp-comment-toggle" onClick={() => setShowComments(s => ({ ...s, [curKey]: !s[curKey] }))}>
+                  💬 Comments
+                </button>
+              </div>
+              {showComments[curKey] && (
+                <ImageComments submissionId={carId} imageType={curImg.type} imageIdx={curImg.idx} user={user} />
+              )}
+
+              {sub.modImages?.length > 0 && (
+                <>
+                  <div className="fp-detail-section-title">Modifications ({sub.modImages.length})</div>
+                  <div className="fp-mods-grid">
+                    {sub.modImages.map((img, i) => {
+                      const modKey = `mod-${i}`;
+                      const r = imgReact({ ...img, type: 'mod', idx: i });
+                      return (
+                        <div key={i} className={`fp-mod-card${activeImg.type === 'mod' && activeImg.idx === i ? ' active' : ''}`} onClick={() => setActiveImg({ type: 'mod', idx: i })}>
+                          {img.url && <img src={img.url} alt={`Mod ${i+1}`} />}
+                          {img.description && <div className="fp-mod-card-desc">{img.description}</div>}
+                          <div className="fp-mod-card-reactions">
+                            <button className={`fp-react-btn${r.userReaction === 'up' ? ' active-up' : ''}`} onClick={e => { e.stopPropagation(); reactToImage('mod', i, 'up'); }} disabled={reacting[modKey] || !user} style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem' }}>👍 {r.likes}</button>
+                            <button className={`fp-react-btn${r.userReaction === 'down' ? ' active-down' : ''}`} onClick={e => { e.stopPropagation(); reactToImage('mod', i, 'down'); }} disabled={reacting[modKey] || !user} style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem' }}>👎 {r.dislikes}</button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Showcase modal ────────────────────────────────────────────
+function ShowcaseModal({ comp, user, onClose }) {
+  const [form, setForm] = useState({
+    vehicleName: '', vehicleDetails: '', ownerName: user?.name || '',
+    mainImages: [{ url: '', description: '' }, { url: '', description: '' }, { url: '', description: '' }, { url: '', description: '' }],
+    modImages: [],
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+
+  const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const updateMain = (i, k, v) => setForm(f => { const a = [...f.mainImages]; a[i] = { ...a[i], [k]: v }; return { ...f, mainImages: a }; });
+  const updateMod = (i, k, v) => setForm(f => { const a = [...f.modImages]; a[i] = { ...a[i], [k]: v }; return { ...f, modImages: a }; });
+  const addMod = () => setForm(f => ({ ...f, modImages: [...f.modImages, { url: '', description: '' }] }));
+  const removeMod = (i) => setForm(f => ({ ...f, modImages: f.modImages.filter((_, idx) => idx !== i) }));
+
+  const submit = async () => {
+    if (!form.vehicleName.trim()) return setError('Vehicle name required');
+    if (!form.ownerName.trim()) return setError('Owner name required');
+    if (!form.mainImages.some(img => img.url.trim())) return setError('At least one vehicle image required');
+    setSubmitting(true); setError('');
+    try {
+      await axios.post(`/api/competitions/${comp._id}/submit`, {
+        ...form,
+        mainImages: form.mainImages.filter(img => img.url.trim()),
+        modImages: form.modImages.filter(img => img.url.trim()),
+      });
+      setSubmitted(true);
+    } catch (err) { setError(err?.response?.data?.error || 'Submission failed'); }
+    setSubmitting(false);
+  };
+
+  if (submitted) return (
+    <div className="fp-modal-overlay" onClick={onClose}>
+      <div className="fp-modal" onClick={e => e.stopPropagation()}>
+        <div className="fp-modal-body fp-modal-success">
+          <div style={{ fontSize: '3rem' }}>✨</div>
+          <h2 style={{ color: 'var(--text-primary,#fff)', margin: 0 }}>Submitted!</h2>
+          <p style={{ color: 'var(--text-muted,#888)', textAlign: 'center' }}>Your vehicle has been submitted for review. Once approved, it will appear in the showcase.</p>
+          <button className="fp-btn-primary" onClick={onClose}>Back to Feed</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="fp-modal-overlay">
+      <div className="fp-modal fp-modal--full">
+        <div className="fp-modal-header">
+          <button className="fp-modal-back" onClick={onClose}>← Cancel</button>
+          <h2 className="fp-modal-title">✨ Showcase Your Ride</h2>
+          <div className="fp-modal-sub">{comp.title}</div>
+        </div>
+        <div className="fp-modal-body">
+          {error && <div className="fp-error">{error}</div>}
+
+          <div className="fp-form-section">
+            <div className="fp-form-section-title">Vehicle Details</div>
+            <input className="fp-composer-input fp-form-input" placeholder="Vehicle name *" value={form.vehicleName} onChange={e => setField('vehicleName', e.target.value)} />
+            <input className="fp-composer-input fp-form-input" placeholder="Year, make & model (e.g. 2019 Toyota Supra)" value={form.vehicleDetails} onChange={e => setField('vehicleDetails', e.target.value)} />
+            <input className="fp-composer-input fp-form-input" placeholder="Owner name *" value={form.ownerName} onChange={e => setField('ownerName', e.target.value)} />
+          </div>
+
+          <div className="fp-form-section">
+            <div className="fp-form-section-title">Main Vehicle Photos <span className="fp-form-hint">up to 4 — each with a description</span></div>
+            {form.mainImages.map((img, i) => (
+              <div className="fp-img-slot" key={i}>
+                <div className="fp-img-slot-label">Photo {i + 1}</div>
+                <input className="fp-composer-input fp-form-input" placeholder="Paste image URL" value={img.url} onChange={e => updateMain(i, 'url', e.target.value)} />
+                {img.url && <img src={img.url} alt="" className="fp-img-preview" onError={e => { e.target.style.display = 'none'; }} />}
+                <input className="fp-composer-input fp-form-input" placeholder="Describe this view…" value={img.description} onChange={e => updateMain(i, 'description', e.target.value)} />
+              </div>
+            ))}
+          </div>
+
+          <div className="fp-form-section">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div className="fp-form-section-title">Modifications <span className="fp-form-hint">optional</span></div>
+              <button className="fp-btn-sm" onClick={addMod}>+ Add</button>
+            </div>
+            {form.modImages.length === 0 && <div className="fp-empty-hint">No modifications added yet.</div>}
+            {form.modImages.map((img, i) => (
+              <div className="fp-img-slot" key={i}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div className="fp-img-slot-label">Mod {i + 1}</div>
+                  <button className="fp-action-btn fp-action-btn--danger" onClick={() => removeMod(i)}>✕ Remove</button>
+                </div>
+                <input className="fp-composer-input fp-form-input" placeholder="Paste image URL" value={img.url} onChange={e => updateMod(i, 'url', e.target.value)} />
+                {img.url && <img src={img.url} alt="" className="fp-img-preview" onError={e => { e.target.style.display = 'none'; }} />}
+                <input className="fp-composer-input fp-form-input" placeholder="Describe this modification…" value={img.description} onChange={e => updateMod(i, 'description', e.target.value)} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="fp-modal-footer">
+          <button className="fp-btn-sm fp-btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="fp-btn-primary" onClick={submit} disabled={submitting}>
+            {submitting ? 'Submitting…' : 'Submit for Review'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Competition carousel ─────────────────────────────────────
 function CompetitionCarousel({ user }) {
   const [competitions, setCompetitions] = useState([]);
   const [voting, setVoting] = useState({});
   const [voted, setVoted] = useState({});
+  const [showShowcase, setShowShowcase] = useState(false);
+  const [detailCar, setDetailCar] = useState(null);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -118,7 +440,8 @@ function CompetitionCarousel({ user }) {
   if (!competitions.length) return null;
   const comp = competitions[0];
 
-  const handleVote = async (carId) => {
+  const handleVote = async (carId, e) => {
+    e.stopPropagation();
     if (!user) return alert('Please log in to vote');
     if (voted[carId]) return;
     setVoting(v => ({ ...v, [carId]: true }));
@@ -144,42 +467,53 @@ function CompetitionCarousel({ user }) {
     <>
       <SponsorBanner comp={comp} />
       <div className="fp-competition">
-      <div className="fp-comp-header">
-        <div className="fp-comp-title-row">
-          <span className="fp-comp-badge">🏆 Show Car Competition</span>
-          <span className="fp-comp-name">{comp.title}</span>
+        <div className="fp-comp-header">
+          <div className="fp-comp-title-row">
+            <span className="fp-comp-badge">✨ Car Showcase</span>
+            <span className="fp-comp-name">{comp.title}</span>
+          </div>
+          <button className="fp-compete-btn" onClick={() => { if (!user) return alert('Log in to showcase your vehicle'); setShowShowcase(true); }}>
+            ✨ Showcase
+          </button>
+        </div>
+        <div className="fp-comp-scroll" ref={scrollRef}>
+          {(comp.cars || []).sort((a, b) => (b.points||0) - (a.points||0)).map((car, i) => (
+            <div className="fp-car-card" key={car.carId} onClick={() => setDetailCar(car)} style={{ cursor: 'pointer' }}>
+              <div className="fp-car-rank">{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`}</div>
+              {car.vehicleImage
+                ? <img src={car.vehicleImage} alt={car.vehicleName} className="fp-car-img" />
+                : <div className="fp-car-img fp-car-img-placeholder">🚗</div>
+              }
+              <div className="fp-car-info">
+                <div className="fp-car-name">{car.vehicleName}</div>
+                {car.vehicleDetails && <div className="fp-car-details">{car.vehicleDetails}</div>}
+                <div className="fp-car-owner">Owner: {car.ownerName}</div>
+                <div className="fp-car-points">{car.points || 0} pts · {(car.votes||[]).length} votes</div>
+              </div>
+              <div className="fp-car-actions">
+                <button
+                  className={`fp-car-vote${voted[car.carId] ? ' voted' : ''}`}
+                  onClick={(e) => handleVote(car.carId, e)}
+                  disabled={voting[car.carId] || voted[car.carId]}
+                >
+                  {voted[car.carId] ? '✓ Voted' : voting[car.carId] ? '…' : '👍 Vote (+2 pts)'}
+                </button>
+                <button className="fp-car-share" onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(shareUrl(car.carId)); alert('Share link copied!'); }}>
+                  🔗 Share
+                </button>
+                <button className="fp-car-details-btn" onClick={e => { e.stopPropagation(); setDetailCar(car); }}>
+                  View Details
+                </button>
+              </div>
+            </div>
+          ))}
+          {!(comp.cars||[]).length && (
+            <div className="fp-empty" style={{ padding: '1.5rem', width: '100%' }}>No showcases yet — be the first to showcase your ride!</div>
+          )}
         </div>
       </div>
-      <div className="fp-comp-scroll" ref={scrollRef}>
-        {(comp.cars || []).sort((a, b) => (b.points||0) - (a.points||0)).map((car, i) => (
-          <div className="fp-car-card" key={car.carId}>
-            <div className="fp-car-rank">{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`}</div>
-            {car.vehicleImage
-              ? <img src={car.vehicleImage} alt={car.vehicleName} className="fp-car-img" />
-              : <div className="fp-car-img fp-car-img-placeholder">🚗</div>
-            }
-            <div className="fp-car-info">
-              <div className="fp-car-name">{car.vehicleName}</div>
-              {car.vehicleDetails && <div className="fp-car-details">{car.vehicleDetails}</div>}
-              <div className="fp-car-owner">Owner: {car.ownerName}</div>
-              <div className="fp-car-points">{car.points || 0} pts · {(car.votes||[]).length} votes</div>
-            </div>
-            <div className="fp-car-actions">
-              <button
-                className={`fp-car-vote${voted[car.carId] ? ' voted' : ''}`}
-                onClick={() => handleVote(car.carId)}
-                disabled={voting[car.carId] || voted[car.carId]}
-              >
-                {voted[car.carId] ? '✓ Voted' : voting[car.carId] ? '…' : '👍 Vote (+2 pts)'}
-              </button>
-              <button className="fp-car-share" onClick={() => { navigator.clipboard.writeText(shareUrl(car.carId)); alert('Share link copied!'); }}>
-                🔗 Share
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+      {showShowcase && <ShowcaseModal comp={comp} user={user} onClose={() => setShowShowcase(false)} />}
+      {detailCar && <SubmissionDetailModal carId={detailCar.carId} car={detailCar} user={user} onClose={() => setDetailCar(null)} />}
     </>
   );
 }
@@ -404,6 +738,7 @@ function FeedPost({ post: initialPost, user, onDelete }) {
 // ── Main feed page ───────────────────────────────────────────
 export default function FeedPage() {
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [postText, setPostText] = useState('');
@@ -470,6 +805,17 @@ export default function FeedPage() {
               />
               <div className="fp-composer-footer">
                 <span className="fp-char-count">{postText.length}/2000</span>
+                <button
+                  type="button"
+                  className="fp-btn-sell"
+                  onClick={() => {
+                    if (window.confirm('You\'re about to leave the feed to list your car for sale. Continue?')) {
+                      navigate('/profile?tab=sell-car');
+                    }
+                  }}
+                >
+                  🚗 Sell My Car
+                </button>
                 <button type="submit" disabled={submitting || !postText.trim()} className="fp-btn-primary">
                   {submitting ? 'Posting…' : 'Post'}
                 </button>
