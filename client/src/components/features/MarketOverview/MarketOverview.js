@@ -1,44 +1,73 @@
 // client/src/components/features/MarketOverview/MarketOverview.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import './MarketOverview.css';
 import { buildHelmet } from '../../../hooks/useSEO.js';
 
 const API_BASE = 'https://bw-car-culture-api.vercel.app/api';
 
+const formatPrice = (price) => `P${Math.round(price || 0).toLocaleString()}`;
+
+const formatDate = (date) =>
+  new Date(date).toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
+
+const CHART_COLORS = ['#ff3300', '#2ed573', '#3498db', '#ffc107'];
+const getChartColor = (i) => CHART_COLORS[i % CHART_COLORS.length];
+
+const getTrend = (prices) => {
+  if (prices.length < 2) return 'stable';
+  const recent = prices.slice(-3);
+  const older = prices.slice(0, -3);
+  if (!older.length) return 'stable';
+  const rAvg = recent.reduce((s, p) => s + p, 0) / recent.length;
+  const oAvg = older.reduce((s, p) => s + p, 0) / older.length;
+  const pct = ((rAvg - oAvg) / oAvg) * 100;
+  if (pct > 5) return 'increasing';
+  if (pct < -5) return 'decreasing';
+  return 'stable';
+};
+
+const TrendBadge = ({ trend }) => {
+  const map = { increasing: { icon: '↗', label: 'Rising', cls: 'mo-trend--up' }, decreasing: { icon: '↘', label: 'Falling', cls: 'mo-trend--down' }, stable: { icon: '→', label: 'Stable', cls: 'mo-trend--stable' } };
+  const t = map[trend] || map.stable;
+  return <span className={`mo-trend-badge ${t.cls}`}>{t.icon} {t.label}</span>;
+};
+
 const MarketOverview = () => {
-  const [filterOptions, setFilterOptions] = useState({
-    makes: [],
-    models: [],
-    years: [],
-    conditions: ['all', 'new', 'used', 'certified'],
-    countries: []
-  });
   const [allPrices, setAllPrices] = useState([]);
+  const [filterOptions, setFilterOptions] = useState({ makes: [], years: [], conditions: ['all', 'new', 'used', 'certified'], countries: [] });
   const [selectedVehicles, setSelectedVehicles] = useState([]);
   const [comparisonData, setComparisonData] = useState([]);
   const [relatedListings, setRelatedListings] = useState([]);
   const [relatedArticles, setRelatedArticles] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [loadingListings, setLoadingListings] = useState(false);
   const [loadingArticles, setLoadingArticles] = useState(false);
-  const [viewMode, setViewMode] = useState('overview'); // 'overview' or 'compare'
-  const [searchFilters, setSearchFilters] = useState({
-    make: '',
-    model: '',
-    year: '',
-    condition: 'all',
-    country: ''
-  });
-  const [carValueQuery, setCarValueQuery] = useState({ make: '', model: '', year: '', condition: 'all' });
-  const [carValueResult, setCarValueResult] = useState(null);
+
+  const [searchFilters, setSearchFilters] = useState({ make: '', model: '', year: '', condition: 'all', country: '' });
+  const [searchError, setSearchError] = useState('');
+
+  const [valueQuery, setValueQuery] = useState({ make: '', model: '', year: '', condition: 'all' });
+  const [valueResult, setValueResult] = useState(null);
+  const [valueError, setValueError] = useState('');
+
+  // Derived: models for whichever make is selected
+  const modelsForSearchMake = useMemo(() => {
+    if (!searchFilters.make || !allPrices.length) return [];
+    const set = new Set(allPrices.filter(p => p.make === searchFilters.make).map(p => p.model));
+    return [...set].sort();
+  }, [searchFilters.make, allPrices]);
+
+  const modelsForValueMake = useMemo(() => {
+    if (!valueQuery.make || !allPrices.length) return [];
+    const set = new Set(allPrices.filter(p => p.make === valueQuery.make).map(p => p.model));
+    return [...set].sort();
+  }, [valueQuery.make, allPrices]);
 
   useEffect(() => {
-    fetchFilterOptions();
-    fetchMarketOverview();
+    fetchAll();
   }, []);
 
-  // Fetch related listings and articles when vehicles change
   useEffect(() => {
     if (selectedVehicles.length > 0) {
       fetchRelatedListings();
@@ -49,76 +78,92 @@ const MarketOverview = () => {
     }
   }, [selectedVehicles]);
 
-  const fetchFilterOptions = async () => {
+  const fetchAll = async () => {
+    setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/market-prices/filters`);
-      const data = await response.json();
+      const [filtersRes, pricesRes] = await Promise.all([
+        fetch(`${API_BASE}/market-prices/filters`),
+        fetch(`${API_BASE}/market-prices?limit=100`)
+      ]);
+      const [filtersData, pricesData] = await Promise.all([filtersRes.json(), pricesRes.json()]);
 
-      if (data.success) {
+      if (filtersData.success) {
         setFilterOptions({
-          ...data.data,
-          conditions: ['all', ...(data.data.conditions || [])],
-          countries: data.data.countries || []
+          ...filtersData.data,
+          conditions: ['all', ...(filtersData.data.conditions || [])],
+          countries: filtersData.data.countries || []
         });
       }
-    } catch (error) {
-      console.error('Error fetching filter options:', error);
-    }
-  };
-
-  const fetchMarketOverview = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE}/market-prices?limit=100`);
-      const data = await response.json();
-
-      if (data.success) {
-        setAllPrices(data.data);
-        // Auto-select similar vehicles for initial display
-        const autoSelected = autoSelectSimilarVehicles(data.data, 4);
-        setSelectedVehicles(autoSelected);
-        updateComparisonData(autoSelected, data.data);
+      if (pricesData.success) {
+        setAllPrices(pricesData.data);
+        const auto = autoSelect(pricesData.data, 4);
+        setSelectedVehicles(auto);
+        setComparisonData(buildComparison(auto));
       }
-    } catch (error) {
-      console.error('Error fetching market overview:', error);
+    } catch (e) {
+      console.error('Market overview fetch error:', e);
     } finally {
       setLoading(false);
     }
   };
 
+  const autoSelect = (prices, n) => {
+    const groups = {};
+    prices.forEach(p => {
+      const k = `${p.make}-${p.model}-${p.year}`;
+      if (!groups[k]) groups[k] = { make: p.make, model: p.model, year: p.year, prices: [] };
+      groups[k].prices.push(p);
+    });
+    const arr = Object.values(groups);
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr.slice(0, n);
+  };
+
+  const buildComparison = (vehicles) =>
+    (vehicles || []).map(v => {
+      const pts = v.prices;
+      if (!pts?.length) return null;
+      const sorted = [...pts].sort((a, b) => new Date(a.recordedDate) - new Date(b.recordedDate));
+      const vals = sorted.map(p => p.price);
+      const avg = Math.round(vals.reduce((s, x) => s + x, 0) / vals.length);
+      const byCountry = {};
+      pts.forEach(p => {
+        const c = p.country || 'Botswana';
+        if (!byCountry[c]) byCountry[c] = [];
+        byCountry[c].push(p.price);
+      });
+      return {
+        make: v.make, model: v.model, year: v.year,
+        pricePoints: pts.map(p => ({ date: new Date(p.recordedDate), price: p.price })),
+        avgPrice: avg,
+        minPrice: Math.min(...vals),
+        maxPrice: Math.max(...vals),
+        trend: getTrend(vals),
+        dataPoints: vals.length,
+        countryBreakdown: Object.entries(byCountry)
+          .map(([c, cp]) => ({ country: c, avg: Math.round(cp.reduce((s, x) => s + x, 0) / cp.length), count: cp.length }))
+          .sort((a, b) => a.avg - b.avg)
+      };
+    }).filter(Boolean);
+
   const fetchRelatedListings = async () => {
+    setLoadingListings(true);
     try {
-      setLoadingListings(true);
-      const listings = [];
-
-      // Fetch listings for each selected vehicle
-      for (const vehicle of selectedVehicles) {
-        const params = new URLSearchParams({
-          make: vehicle.make,
-          model: vehicle.model,
-          limit: '3' // Get 3 listings per vehicle
-        });
-
-        if (vehicle.year) {
-          params.append('year', vehicle.year);
-        }
-
-        const response = await fetch(`${API_BASE}/listings?${params.toString()}`);
-        const data = await response.json();
-
-        if (data.success && data.data) {
-          listings.push(...data.data);
-        }
-      }
-
-      // Remove duplicates and limit to 10 total
-      const uniqueListings = Array.from(
-        new Map(listings.map(item => [item._id, item])).values()
-      ).slice(0, 10);
-
-      setRelatedListings(uniqueListings);
-    } catch (error) {
-      console.error('Error fetching related listings:', error);
+      const results = await Promise.all(
+        selectedVehicles.slice(0, 3).map(v =>
+          fetch(`${API_BASE}/listings?make=${encodeURIComponent(v.make)}&model=${encodeURIComponent(v.model)}&limit=3`)
+            .then(r => r.json())
+            .then(d => d.success ? d.data : [])
+            .catch(() => [])
+        )
+      );
+      const all = results.flat();
+      const unique = Array.from(new Map(all.map(l => [l._id, l])).values()).slice(0, 9);
+      setRelatedListings(unique);
+    } catch (e) {
       setRelatedListings([]);
     } finally {
       setLoadingListings(false);
@@ -126,393 +171,152 @@ const MarketOverview = () => {
   };
 
   const fetchRelatedArticles = async () => {
+    setLoadingArticles(true);
     try {
-      setLoadingArticles(true);
-      const articles = [];
-
-      // Fetch articles related to each selected vehicle
-      for (const vehicle of selectedVehicles) {
-        // Create search query with vehicle make and model
-        const searchQuery = `${vehicle.make} ${vehicle.model}`;
-        
-        const response = await fetch(`${API_BASE}/news?search=${encodeURIComponent(searchQuery)}&limit=2`);
-        const data = await response.json();
-
-        if (data.success && data.data) {
-          articles.push(...data.data);
-        }
-      }
-
-      // Remove duplicates and limit to 6 total
-      const uniqueArticles = Array.from(
-        new Map(articles.map(item => [item._id, item])).values()
-      ).slice(0, 6);
-
-      setRelatedArticles(uniqueArticles);
-    } catch (error) {
-      console.error('Error fetching related articles:', error);
+      const results = await Promise.all(
+        selectedVehicles.slice(0, 2).map(v =>
+          fetch(`${API_BASE}/news?search=${encodeURIComponent(`${v.make} ${v.model}`)}&limit=3`)
+            .then(r => r.json())
+            .then(d => d.success ? d.data : [])
+            .catch(() => [])
+        )
+      );
+      const all = results.flat();
+      setRelatedArticles(Array.from(new Map(all.map(a => [a._id, a])).values()).slice(0, 6));
+    } catch (e) {
       setRelatedArticles([]);
     } finally {
       setLoadingArticles(false);
     }
   };
 
-  // Auto-select vehicles randomly
-  const autoSelectSimilarVehicles = (prices, maxCount) => {
-    if (!prices || prices.length === 0) return [];
-
-    // Group by make-model-year combination
-    const vehicleGroups = {};
-    prices.forEach(price => {
-      const key = `${price.make}-${price.model}-${price.year}`;
-      if (!vehicleGroups[key]) {
-        vehicleGroups[key] = { make: price.make, model: price.model, year: price.year, prices: [] };
-      }
-      vehicleGroups[key].prices.push(price);
-    });
-
-    // Shuffle randomly
-    const vehicles = Object.values(vehicleGroups);
-    for (let i = vehicles.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [vehicles[i], vehicles[j]] = [vehicles[j], vehicles[i]];
-    }
-    return vehicles.slice(0, maxCount);
-  };
-
-  const updateComparisonData = (vehicles, allPricesData) => {
-    if (!vehicles || vehicles.length === 0) {
-      setComparisonData([]);
-      return;
-    }
-
-    const comparison = vehicles.map(vehicle => {
-      const vehiclePrices = vehicle.prices;
-      
-      if (!vehiclePrices || vehiclePrices.length === 0) {
-        return null;
-      }
-
-      // Sort by date
-      const sortedPrices = [...vehiclePrices].sort((a, b) => 
-        new Date(a.recordedDate) - new Date(b.recordedDate)
-      );
-
-      // Calculate statistics
-      const prices = sortedPrices.map(p => p.price);
-      const avgPrice = prices.reduce((sum, p) => sum + p, 0) / prices.length;
-      const minPrice = Math.min(...prices);
-      const maxPrice = Math.max(...prices);
-
-      // Determine trend
-      let trend = 'stable';
-      if (prices.length >= 2) {
-        const recentPrices = prices.slice(-3);
-        const olderPrices = prices.slice(0, -3);
-        
-        if (olderPrices.length > 0) {
-          const recentAvg = recentPrices.reduce((sum, p) => sum + p, 0) / recentPrices.length;
-          const olderAvg = olderPrices.reduce((sum, p) => sum + p, 0) / olderPrices.length;
-          
-          const changePercent = ((recentAvg - olderAvg) / olderAvg) * 100;
-          
-          if (changePercent > 5) trend = 'increasing';
-          else if (changePercent < -5) trend = 'decreasing';
-        }
-      }
-
-      // Group prices by country for breakdown
-      const byCountry = {};
-      vehiclePrices.forEach(p => {
-        const c = p.country || (p.location ? p.location.split(',').pop().trim() : 'Botswana');
-        if (!byCountry[c]) byCountry[c] = [];
-        byCountry[c].push(p.price);
-      });
-      const countryBreakdown = Object.entries(byCountry).map(([c, cPrices]) => ({
-        country: c,
-        avg: Math.round(cPrices.reduce((s, v) => s + v, 0) / cPrices.length),
-        count: cPrices.length
-      })).sort((a, b) => a.avg - b.avg);
-
-      return {
-        make: vehicle.make,
-        model: vehicle.model,
-        year: vehicle.year,
-        pricePoints: vehiclePrices.map(p => ({
-          date: new Date(p.recordedDate),
-          price: p.price,
-          condition: p.condition,
-          country: p.country || '',
-          location: p.location || ''
-        })),
-        avgPrice: Math.round(avgPrice),
-        minPrice,
-        maxPrice,
-        trend,
-        dataPoints: prices.length,
-        countryBreakdown
-      };
-    }).filter(Boolean);
-
-    setComparisonData(comparison);
-  };
-
-  const handleCarValueCheck = () => {
-    if (!carValueQuery.make || !carValueQuery.model) {
-      alert('Please select at least a make and model');
-      return;
-    }
-
-    const filtered = allPrices.filter(p => {
-      const makeMatch = p.make.toLowerCase() === carValueQuery.make.toLowerCase();
-      const modelMatch = p.model.toLowerCase() === carValueQuery.model.toLowerCase();
-      const yearMatch = !carValueQuery.year || p.year === parseInt(carValueQuery.year);
-      const conditionMatch = carValueQuery.condition === 'all' || p.condition === carValueQuery.condition;
-      return makeMatch && modelMatch && yearMatch && conditionMatch;
-    });
-
-    if (filtered.length === 0) {
-      setCarValueResult({ notFound: true, make: carValueQuery.make, model: carValueQuery.model });
-      return;
-    }
-
-    const prices = filtered.map(p => p.price);
-    const avg = Math.round(prices.reduce((s, v) => s + v, 0) / prices.length);
-    const min = Math.min(...prices);
-    const max = Math.max(...prices);
-
-    const allMarketPrices = allPrices.map(p => p.price);
-    const marketAvg = Math.round(allMarketPrices.reduce((s, v) => s + v, 0) / allMarketPrices.length);
-    const vsMarket = avg - marketAvg;
-    const vsMarketPct = Math.round((vsMarket / marketAvg) * 100);
-
-    setCarValueResult({
-      make: carValueQuery.make,
-      model: carValueQuery.model,
-      year: carValueQuery.year,
-      condition: carValueQuery.condition,
-      avg, min, max,
-      dataPoints: filtered.length,
-      marketAvg,
-      vsMarket,
-      vsMarketPct
-    });
-
-    // Add to comparison chart if not already there
-    const exists = selectedVehicles.some(v =>
-      v.make === carValueQuery.make &&
-      v.model === carValueQuery.model
-    );
-    if (!exists && selectedVehicles.length < 4) {
-      const vehicle = {
-        make: carValueQuery.make,
-        model: carValueQuery.model,
-        year: carValueQuery.year || filtered[0].year,
-        prices: filtered
-      };
-      const updated = [...selectedVehicles, vehicle];
-      setSelectedVehicles(updated);
-      updateComparisonData(updated, allPrices);
-    }
-  };
-
   const handleSearch = () => {
-    if (!searchFilters.make || !searchFilters.model) {
-      alert('Please select at least a make and model');
-      return;
-    }
+    setSearchError('');
+    if (!searchFilters.make || !searchFilters.model) { setSearchError('Select a make and model first.'); return; }
+    if (selectedVehicles.length >= 4) { setSearchError('Maximum 4 vehicles on chart. Remove one first.'); return; }
 
-    const filtered = allPrices.filter(price => {
-      const makeMatch = price.make.toLowerCase() === searchFilters.make.toLowerCase();
-      const modelMatch = price.model.toLowerCase() === searchFilters.model.toLowerCase();
-      const yearMatch = !searchFilters.year || price.year === parseInt(searchFilters.year);
-      const conditionMatch = searchFilters.condition === 'all' || price.condition === searchFilters.condition;
-      const countryMatch = !searchFilters.country ||
-        (price.country || '').toLowerCase() === searchFilters.country.toLowerCase() ||
-        (price.location || '').toLowerCase().includes(searchFilters.country.toLowerCase());
-
-      return makeMatch && modelMatch && yearMatch && conditionMatch && countryMatch;
-    });
-
-    if (filtered.length === 0) {
-      alert('No data found for the selected vehicle');
-      return;
-    }
-
-    // Create vehicle object from filtered results
-    const vehicle = {
-      make: searchFilters.make,
-      model: searchFilters.model,
-      year: searchFilters.year || filtered[0].year,
-      prices: filtered
-    };
-
-    // Add to selected vehicles if not already there
-    const exists = selectedVehicles.some(v => 
-      v.make === vehicle.make && 
-      v.model === vehicle.model && 
-      v.year === vehicle.year
+    const filtered = allPrices.filter(p =>
+      p.make.toLowerCase() === searchFilters.make.toLowerCase() &&
+      p.model.toLowerCase() === searchFilters.model.toLowerCase() &&
+      (!searchFilters.year || p.year === parseInt(searchFilters.year)) &&
+      (searchFilters.condition === 'all' || p.condition === searchFilters.condition) &&
+      (!searchFilters.country || (p.country || '').toLowerCase().includes(searchFilters.country.toLowerCase()))
     );
 
-    if (!exists && selectedVehicles.length < 4) {
-      const updated = [...selectedVehicles, vehicle];
-      setSelectedVehicles(updated);
-      updateComparisonData(updated, allPrices);
-    } else if (selectedVehicles.length >= 4) {
-      alert('Maximum 4 vehicles can be shown at once. Remove one first.');
-    }
-  };
+    if (!filtered.length) { setSearchError('No data found for that vehicle.'); return; }
 
-  const removeVehicle = (index) => {
-    const updated = selectedVehicles.filter((_, i) => i !== index);
+    const vehicle = { make: searchFilters.make, model: searchFilters.model, year: searchFilters.year || filtered[0].year, prices: filtered };
+    const exists = selectedVehicles.some(v => v.make === vehicle.make && v.model === vehicle.model && v.year === vehicle.year);
+    if (exists) { setSearchError('That vehicle is already on the chart.'); return; }
+
+    const updated = [...selectedVehicles, vehicle];
     setSelectedVehicles(updated);
-    updateComparisonData(updated, allPrices);
+    setComparisonData(buildComparison(updated));
+    setSearchFilters({ make: '', model: '', year: '', condition: 'all', country: '' });
   };
 
-  const getTrendIcon = (trend) => {
-    switch (trend) {
-      case 'increasing': return '↗';
-      case 'decreasing': return '↘';
-      default: return '→';
-    }
-  };
+  const handleValueCheck = () => {
+    setValueError('');
+    setValueResult(null);
+    if (!valueQuery.make || !valueQuery.model) { setValueError('Select a make and model.'); return; }
 
-  const getTrendColor = (trend) => {
-    switch (trend) {
-      case 'increasing': return '#2ed573';
-      case 'decreasing': return '#ff3838';
-      default: return '#ffc107';
-    }
-  };
+    const filtered = allPrices.filter(p =>
+      p.make.toLowerCase() === valueQuery.make.toLowerCase() &&
+      p.model.toLowerCase() === valueQuery.model.toLowerCase() &&
+      (!valueQuery.year || p.year === parseInt(valueQuery.year)) &&
+      (valueQuery.condition === 'all' || p.condition === valueQuery.condition)
+    );
 
-  const getChartColor = (index) => {
-    const colors = ['#ff3300', '#2ed573', '#3498db', '#ffc107'];
-    return colors[index % colors.length];
-  };
+    if (!filtered.length) { setValueError('No data found. Try removing the year or condition filter.'); return; }
 
-  const formatPrice = (price) => {
-    return `P${Math.round(price).toLocaleString()}`;
-  };
+    const vals = filtered.map(p => p.price);
+    const avg = Math.round(vals.reduce((s, x) => s + x, 0) / vals.length);
+    const marketVals = allPrices.map(p => p.price);
+    const marketAvg = Math.round(marketVals.reduce((s, x) => s + x, 0) / marketVals.length);
+    const vsMarketPct = Math.round(((avg - marketAvg) / marketAvg) * 100);
 
-  const formatDate = (date) => {
-    return date.toLocaleDateString('en-GB', {
-      month: 'short',
-      day: 'numeric'
+    setValueResult({
+      make: valueQuery.make, model: valueQuery.model, year: valueQuery.year, condition: valueQuery.condition,
+      avg, min: Math.min(...vals), max: Math.max(...vals),
+      dataPoints: filtered.length, marketAvg, vsMarketPct
     });
   };
 
-  // Render the line chart with date X-axis and inline vehicle name labels
+  const removeVehicle = (i) => {
+    const updated = selectedVehicles.filter((_, idx) => idx !== i);
+    setSelectedVehicles(updated);
+    setComparisonData(buildComparison(updated));
+  };
+
+  // Chart render
   const renderChart = () => {
-    if (comparisonData.length === 0) {
+    if (!comparisonData.length) {
       return (
         <div className="mo-chart-empty">
-          <div className="mo-empty-icon">📊</div>
+          <div className="mo-chart-empty-icon">📊</div>
           <p>No market data available yet</p>
+          <span>Add vehicles using the panel on the right</span>
         </div>
       );
     }
 
-    const allPoints = comparisonData.flatMap(v => v.pricePoints);
+    const allPts = comparisonData.flatMap(v => v.pricePoints);
+    const allVals = allPts.map(p => p.price);
+    const minV = Math.min(...allVals), maxV = Math.max(...allVals);
+    const pad = (maxV - minV || 1) * 0.15;
+    const yMin = Math.max(0, minV - pad), yMax = maxV + pad;
 
-    // Price range
-    const allPriceValues = allPoints.map(p => p.price);
-    const minPriceVal = Math.min(...allPriceValues);
-    const maxPriceVal = Math.max(...allPriceValues);
-    const pad = (maxPriceVal - minPriceVal || 1) * 0.15;
-    const yMin = Math.max(0, minPriceVal - pad);
-    const yMax = maxPriceVal + pad;
-
-    // Date range
-    const timestamps = allPoints.map(p => new Date(p.date).getTime()).filter(t => !isNaN(t));
-    const minDate = timestamps.length > 0 ? Math.min(...timestamps) : Date.now() - 180 * 86400000;
-    const maxDate = timestamps.length > 0 ? Math.max(...timestamps) : Date.now();
+    const timestamps = allPts.map(p => new Date(p.date).getTime()).filter(t => !isNaN(t));
+    const minDate = timestamps.length ? Math.min(...timestamps) : Date.now() - 180 * 86400000;
+    const maxDate = timestamps.length ? Math.max(...timestamps) : Date.now();
     const dateRange = maxDate - minDate || 1;
 
-    // Y-axis labels
-    const yLabels = [];
-    for (let i = 0; i < 6; i++) {
-      yLabels.push(Math.round(yMax - ((yMax - yMin) / 5) * i));
-    }
-
-    // X-axis date labels (5 evenly spaced)
+    const yLabels = Array.from({ length: 5 }, (_, i) => Math.round(yMax - ((yMax - yMin) / 4) * i));
     const xCount = 5;
-    const xDates = Array.from({ length: xCount }, (_, i) =>
-      new Date(minDate + (dateRange / (xCount - 1)) * i)
-    );
+    const xDates = Array.from({ length: xCount }, (_, i) => new Date(minDate + (dateRange / (xCount - 1)) * i));
 
-    const toX = (date) => {
-      const t = new Date(date).getTime();
-      return isNaN(t) ? 500 : ((t - minDate) / dateRange) * 1000;
-    };
-    const toY = (price) => 280 - ((price - yMin) / (yMax - yMin)) * 280;
-    // Y position as % from top (for HTML overlay)
-    const toYPct = (price) => ((price - yMin) / (yMax - yMin)) === 0
-      ? 100
-      : 100 - ((price - yMin) / (yMax - yMin)) * 100;
+    const toX = (d) => { const t = new Date(d).getTime(); return isNaN(t) ? 500 : ((t - minDate) / dateRange) * 940; };
+    const toY = (p) => 260 - ((p - yMin) / (yMax - yMin)) * 260;
+    const toYPct = (p) => 100 - ((p - yMin) / (yMax - yMin)) * 100;
 
-    // Build label positions with collision avoidance
-    const rawLabels = comparisonData.map((vehicle, vIndex) => {
-      const sorted = [...vehicle.pricePoints]
-        .filter(p => !isNaN(new Date(p.date).getTime()))
-        .sort((a, b) => new Date(a.date) - new Date(b.date));
-      if (sorted.length === 0) return null;
-      const lastPrice = sorted[sorted.length - 1].price;
-      return { vIndex, yPct: toYPct(lastPrice), make: vehicle.make, model: vehicle.model };
-    }).filter(Boolean);
+    const rawLabels = comparisonData.map((v, vi) => {
+      const sorted = [...v.pricePoints].filter(p => !isNaN(new Date(p.date).getTime())).sort((a, b) => new Date(a.date) - new Date(b.date));
+      if (!sorted.length) return null;
+      return { vi, yPct: toYPct(sorted[sorted.length - 1].price), label: `${v.make} ${v.model}` };
+    }).filter(Boolean).sort((a, b) => a.yPct - b.yPct);
 
-    // Sort by Y and push overlapping labels apart (min 9% gap)
-    const sortedLabels = [...rawLabels].sort((a, b) => a.yPct - b.yPct);
-    for (let i = 1; i < sortedLabels.length; i++) {
-      if (sortedLabels[i].yPct - sortedLabels[i - 1].yPct < 9) {
-        sortedLabels[i].yPct = sortedLabels[i - 1].yPct + 9;
-      }
+    for (let i = 1; i < rawLabels.length; i++) {
+      if (rawLabels[i].yPct - rawLabels[i - 1].yPct < 10) rawLabels[i].yPct = rawLabels[i - 1].yPct + 10;
     }
-    sortedLabels.forEach(l => { l.yPct = Math.max(3, Math.min(93, l.yPct)); });
+    rawLabels.forEach(l => { l.yPct = Math.max(3, Math.min(92, l.yPct)); });
 
     return (
       <div className="mo-line-chart">
-        {/* Y-Axis */}
         <div className="mo-chart-y-axis">
-          {yLabels.map((label, i) => (
-            <div key={i} className="mo-y-label">{formatPrice(label)}</div>
-          ))}
+          {yLabels.map((v, i) => <div key={i} className="mo-y-label">{formatPrice(v)}</div>)}
         </div>
-
-        {/* Chart plot + X-axis */}
         <div className="mo-chart-area">
           <div className="mo-chart-plot">
-            {/* SVG wrapper */}
             <div className="mo-chart-svg-wrapper">
-              <svg className="mo-chart-svg" viewBox="0 0 1000 280" preserveAspectRatio="none">
-                {/* Horizontal grid lines */}
+              <svg className="mo-chart-svg" viewBox="0 0 940 260" preserveAspectRatio="none">
                 {yLabels.map((_, i) => (
-                  <line key={i} x1="0" y1={(i / 5) * 280} x2="1000" y2={(i / 5) * 280}
-                    stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                  <line key={i} x1="0" y1={(i / 4) * 260} x2="940" y2={(i / 4) * 260} stroke="currentColor" strokeWidth="0.5" opacity="0.15" />
                 ))}
-                {/* Vertical grid lines at date ticks */}
                 {xDates.map((_, i) => (
-                  <line key={i} x1={(i / (xCount - 1)) * 1000} y1="0"
-                    x2={(i / (xCount - 1)) * 1000} y2="280"
-                    stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+                  <line key={i} x1={(i / (xCount - 1)) * 940} y1="0" x2={(i / (xCount - 1)) * 940} y2="260" stroke="currentColor" strokeWidth="0.5" opacity="0.1" />
                 ))}
-                {/* Vehicle lines */}
-                {comparisonData.map((vehicle, vIndex) => {
-                  const sorted = [...vehicle.pricePoints]
-                    .filter(p => !isNaN(new Date(p.date).getTime()))
-                    .sort((a, b) => new Date(a.date) - new Date(b.date));
-                  if (sorted.length === 0) return null;
-                  const color = getChartColor(vIndex);
-                  const points = sorted.map(p => ({ x: toX(p.date), y: toY(p.price), price: p.price }));
+                {comparisonData.map((v, vi) => {
+                  const sorted = [...v.pricePoints].filter(p => !isNaN(new Date(p.date).getTime())).sort((a, b) => new Date(a.date) - new Date(b.date));
+                  if (!sorted.length) return null;
+                  const color = getChartColor(vi);
+                  const pts = sorted.map(p => ({ x: toX(p.date), y: toY(p.price), price: p.price }));
+                  const pathD = pts.map((p, pi) => `${pi === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
                   return (
-                    <g key={vIndex}>
-                      <polyline
-                        points={points.map(p => `${p.x},${p.y}`).join(' ')}
-                        fill="none" stroke={color} strokeWidth="2.5"
-                        strokeLinecap="round" strokeLinejoin="round"
-                      />
-                      {points.map((pt, pi) => (
-                        <circle key={pi} cx={pt.x} cy={pt.y} r="5" fill={color} className="mo-chart-point">
-                          <title>{`${vehicle.make} ${vehicle.model}: ${formatPrice(pt.price)}`}</title>
+                    <g key={vi}>
+                      <path d={pathD} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      {pts.map((pt, pi) => (
+                        <circle key={pi} cx={pt.x} cy={pt.y} r="4.5" fill={color} stroke="var(--mo-bg)" strokeWidth="1.5">
+                          <title>{`${v.make} ${v.model}: ${formatPrice(pt.price)}`}</title>
                         </circle>
                       ))}
                     </g>
@@ -520,34 +324,33 @@ const MarketOverview = () => {
                 })}
               </svg>
             </div>
-
-            {/* Inline vehicle name labels — positioned at end of each line */}
             <div className="mo-chart-end-labels">
-              {sortedLabels.map(label => (
-                <div
-                  key={label.vIndex}
-                  className="mo-chart-end-label"
-                  style={{ top: `${label.yPct}%`, color: getChartColor(label.vIndex) }}
-                >
-                  <span className="mo-chart-end-label-tick"></span>
-                  {label.make} {label.model}
+              {rawLabels.map(l => (
+                <div key={l.vi} className="mo-chart-end-label" style={{ top: `${l.yPct}%`, color: getChartColor(l.vi) }}>
+                  <span className="mo-chart-end-label-tick" />
+                  {l.label}
                 </div>
               ))}
             </div>
           </div>
-
-          {/* X-axis date labels */}
           <div className="mo-x-axis">
-            {xDates.map((date, i) => (
-              <div key={i} className="mo-x-label">
-                {date.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' })}
-              </div>
-            ))}
+            {xDates.map((d, i) => <div key={i} className="mo-x-label">{formatDate(d)}</div>)}
           </div>
         </div>
       </div>
     );
   };
+
+  const marketStats = useMemo(() => {
+    if (!comparisonData.length) return null;
+    const avg = Math.round(comparisonData.reduce((s, v) => s + v.avgPrice, 0) / comparisonData.length);
+    return {
+      tracked: comparisonData.length,
+      avg,
+      rising: comparisonData.filter(v => v.trend === 'increasing').length,
+      falling: comparisonData.filter(v => v.trend === 'decreasing').length
+    };
+  }, [comparisonData]);
 
   return (
     <div className="mo-container">
@@ -556,624 +359,333 @@ const MarketOverview = () => {
         description: 'Explore real-time car price trends, market valuations, and vehicle comparisons for the Botswana automotive market.',
         url: 'https://www.i3wcarculture.com/market-overview',
       })}
-      <div className="mo-wrapper">
-        {/* Header */}
-        <div className="mo-header">
-          <div className="mo-header-content">
-            <h1 className="mo-title">Market Overview</h1>
-            <p className="mo-subtitle">Real-time market valuations and price trends</p>
-          </div>
-          <div className="mo-view-toggle">
-            <button
-              className={`mo-toggle-btn ${viewMode === 'overview' ? 'mo-active' : ''}`}
-              onClick={() => setViewMode('overview')}
-            >
-              Overview
-            </button>
-            <button
-              className={`mo-toggle-btn ${viewMode === 'compare' ? 'mo-active' : ''}`}
-              onClick={() => setViewMode('compare')}
-            >
-              Compare
-            </button>
-          </div>
+
+      {/* ─── HERO HEADER ─── */}
+      <div className="mo-hero">
+        <div className="mo-wrapper">
+          <h1 className="mo-hero-title">Market Overview</h1>
+          <p className="mo-hero-sub">Real-time price trends & valuations for the Botswana car market</p>
+
+          {marketStats && !loading && (
+            <div className="mo-stats-bar">
+              <div className="mo-stat-pill">
+                <span className="mo-stat-pill-val">{marketStats.tracked}</span>
+                <span className="mo-stat-pill-lbl">Tracked</span>
+              </div>
+              <div className="mo-stat-pill">
+                <span className="mo-stat-pill-val">{formatPrice(marketStats.avg)}</span>
+                <span className="mo-stat-pill-lbl">Avg Value</span>
+              </div>
+              <div className="mo-stat-pill mo-stat-pill--up">
+                <span className="mo-stat-pill-val">↗ {marketStats.rising}</span>
+                <span className="mo-stat-pill-lbl">Rising</span>
+              </div>
+              <div className="mo-stat-pill mo-stat-pill--down">
+                <span className="mo-stat-pill-val">↘ {marketStats.falling}</span>
+                <span className="mo-stat-pill-lbl">Falling</span>
+              </div>
+            </div>
+          )}
         </div>
+      </div>
 
-        {loading && (
+      <div className="mo-wrapper">
+        {loading ? (
           <div className="mo-loading">
-            <div className="mo-spinner"></div>
-            <p>Loading market data...</p>
+            <div className="mo-spinner" />
+            <p>Loading market data…</p>
           </div>
-        )}
-
-        {!loading && viewMode === 'overview' && (
+        ) : (
           <>
-            {/* Check Your Car Value */}
-            <div className="mo-car-value-section">
-              <div className="mo-car-value-header">
-                <h2 className="mo-car-value-title">Check Your Car's Value</h2>
-                <p className="mo-car-value-desc">Enter your vehicle details to see its estimated market value and how it compares</p>
-              </div>
-              <div className="mo-car-value-inputs">
-                <div className="mo-filter-group">
-                  <label className="mo-filter-label">Make</label>
-                  <select
-                    value={carValueQuery.make}
-                    onChange={(e) => setCarValueQuery({ ...carValueQuery, make: e.target.value, model: '' })}
-                    className="mo-filter-select"
-                  >
-                    <option value="">Select Make</option>
-                    {filterOptions.makes.map(make => (
-                      <option key={make} value={make}>{make}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mo-filter-group">
-                  <label className="mo-filter-label">Model</label>
-                  <select
-                    value={carValueQuery.model}
-                    onChange={(e) => setCarValueQuery({ ...carValueQuery, model: e.target.value })}
-                    className="mo-filter-select"
-                    disabled={!carValueQuery.make}
-                  >
-                    <option value="">Select Model</option>
-                    {filterOptions.models.map(model => (
-                      <option key={model} value={model}>{model}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mo-filter-group">
-                  <label className="mo-filter-label">Year</label>
-                  <select
-                    value={carValueQuery.year}
-                    onChange={(e) => setCarValueQuery({ ...carValueQuery, year: e.target.value })}
-                    className="mo-filter-select"
-                  >
-                    <option value="">Any Year</option>
-                    {filterOptions.years.map(year => (
-                      <option key={year} value={year}>{year}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mo-filter-group">
-                  <label className="mo-filter-label">Condition</label>
-                  <select
-                    value={carValueQuery.condition}
-                    onChange={(e) => setCarValueQuery({ ...carValueQuery, condition: e.target.value })}
-                    className="mo-filter-select"
-                  >
-                    {filterOptions.conditions.map(condition => (
-                      <option key={condition} value={condition}>
-                        {condition.charAt(0).toUpperCase() + condition.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button
-                  className="mo-btn-check-value"
-                  onClick={handleCarValueCheck}
-                  disabled={!carValueQuery.make || !carValueQuery.model}
-                >
-                  Check Value
-                </button>
-              </div>
+            {/* ─── TWO-COLUMN MAIN LAYOUT ─── */}
+            <div className="mo-main-grid">
 
-              {carValueResult && (
-                carValueResult.notFound ? (
-                  <div className="mo-car-value-result mo-car-value-not-found">
-                    <p>No market data found for {carValueResult.make} {carValueResult.model}. Try a different make or model.</p>
-                  </div>
-                ) : (
-                  <div className="mo-car-value-result">
-                    <div className="mo-car-value-main">
-                      <div className="mo-car-value-label">Estimated Market Value</div>
-                      <div className="mo-car-value-price">{formatPrice(carValueResult.avg)}</div>
-                      <div className="mo-car-value-vehicle">
-                        {carValueResult.make} {carValueResult.model}
-                        {carValueResult.year ? ` ${carValueResult.year}` : ''}
-                        {carValueResult.condition !== 'all' ? ` • ${carValueResult.condition}` : ''}
-                      </div>
-                    </div>
-                    <div className="mo-car-value-stats">
-                      <div className="mo-car-value-stat">
-                        <span className="mo-car-value-stat-label">Min</span>
-                        <span className="mo-car-value-stat-value">{formatPrice(carValueResult.min)}</span>
-                      </div>
-                      <div className="mo-car-value-stat">
-                        <span className="mo-car-value-stat-label">Max</span>
-                        <span className="mo-car-value-stat-value">{formatPrice(carValueResult.max)}</span>
-                      </div>
-                      <div className="mo-car-value-stat">
-                        <span className="mo-car-value-stat-label">Listings</span>
-                        <span className="mo-car-value-stat-value">{carValueResult.dataPoints}</span>
-                      </div>
-                      <div className="mo-car-value-stat">
-                        <span className="mo-car-value-stat-label">vs Market Avg</span>
-                        <span
-                          className="mo-car-value-stat-value"
-                          style={{ color: carValueResult.vsMarket > 0 ? '#ff3838' : '#2ed573' }}
-                        >
-                          {carValueResult.vsMarket > 0 ? '+' : ''}{carValueResult.vsMarketPct}%
-                        </span>
-                      </div>
+              {/* LEFT: Chart + Vehicle Cards */}
+              <div className="mo-left-col">
+
+                {/* Chart */}
+                <div className="mo-card mo-chart-card">
+                  <div className="mo-card-header">
+                    <div>
+                      <h2 className="mo-card-title">Price Trends</h2>
+                      <p className="mo-card-sub">{comparisonData.length} vehicle{comparisonData.length !== 1 ? 's' : ''} · values over time</p>
                     </div>
                   </div>
-                )
-              )}
-            </div>
-
-            {/* Market Summary - NO EMOJIS */}
-            <div className="mo-summary-grid">
-              <div className="mo-summary-card">
-                <div className="mo-summary-content">
-                  <div className="mo-summary-label">Vehicles Tracked</div>
-                  <div className="mo-summary-value">{selectedVehicles.length}</div>
-                </div>
-              </div>
-              <div className="mo-summary-card">
-                <div className="mo-summary-content">
-                  <div className="mo-summary-label">Avg Market Value</div>
-                  <div className="mo-summary-value">
-                    {comparisonData.length > 0 
-                      ? formatPrice(comparisonData.reduce((sum, v) => sum + v.avgPrice, 0) / comparisonData.length)
-                      : 'P0'}
+                  <div className="mo-chart-wrapper">
+                    {renderChart()}
                   </div>
                 </div>
-              </div>
-              <div className="mo-summary-card">
-                <div className="mo-summary-content">
-                  <div className="mo-summary-label">Trending Up</div>
-                  <div className="mo-summary-value" style={{ color: '#2ed573' }}>
-                    {comparisonData.filter(v => v.trend === 'increasing').length}
-                  </div>
-                </div>
-              </div>
-              <div className="mo-summary-card">
-                <div className="mo-summary-content">
-                  <div className="mo-summary-label">Trending Down</div>
-                  <div className="mo-summary-value" style={{ color: '#ff3838' }}>
-                    {comparisonData.filter(v => v.trend === 'decreasing').length}
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* FILTER SECTION */}
-            <div className="mo-search-panel">
-              <h2 className="mo-section-title">Explore Car Values</h2>
-              <p className="mo-section-desc" style={{ marginBottom: '1rem', color: '#888' }}>
-                Search any vehicle to see its market value and add it to the chart
-              </p>
-              
-              <div className="mo-filters-grid">
-                <div className="mo-filter-group">
-                  <label className="mo-filter-label">Make</label>
-                  <select
-                    value={searchFilters.make}
-                    onChange={(e) => setSearchFilters({ ...searchFilters, make: e.target.value, model: '' })}
-                    className="mo-filter-select"
-                  >
-                    <option value="">Select Make</option>
-                    {filterOptions.makes.map(make => (
-                      <option key={make} value={make}>{make}</option>
+                {/* Vehicle Value Cards */}
+                {comparisonData.length > 0 && (
+                  <div className="mo-vehicle-cards-grid">
+                    {comparisonData.map((v, i) => (
+                      <div key={i} className="mo-vehicle-card" style={{ '--vc-color': getChartColor(i) }}>
+                        <div className="mo-vehicle-card-top">
+                          <div className="mo-vehicle-card-dot" />
+                          <div>
+                            <div className="mo-vehicle-card-name">{v.make} {v.model}</div>
+                            {v.year && <div className="mo-vehicle-card-year">{v.year}</div>}
+                          </div>
+                          <TrendBadge trend={v.trend} />
+                        </div>
+
+                        <div className="mo-vehicle-card-price">{formatPrice(v.avgPrice)}</div>
+                        <div className="mo-vehicle-card-label">Average Market Value</div>
+
+                        <div className="mo-vehicle-card-range">
+                          <span className="mo-vcr-item"><span className="mo-vcr-lbl">Min</span><span className="mo-vcr-val">{formatPrice(v.minPrice)}</span></span>
+                          <div className="mo-vcr-bar">
+                            <div className="mo-vcr-fill" style={{ left: '0%', right: `${100 - Math.round(((v.avgPrice - v.minPrice) / (v.maxPrice - v.minPrice || 1)) * 100)}%` }} />
+                            <div className="mo-vcr-thumb" style={{ left: `${Math.round(((v.avgPrice - v.minPrice) / (v.maxPrice - v.minPrice || 1)) * 100)}%` }} />
+                          </div>
+                          <span className="mo-vcr-item mo-vcr-right"><span className="mo-vcr-lbl">Max</span><span className="mo-vcr-val">{formatPrice(v.maxPrice)}</span></span>
+                        </div>
+
+                        <div className="mo-vehicle-card-footer">
+                          <span>{v.dataPoints} data point{v.dataPoints !== 1 ? 's' : ''}</span>
+                          <button className="mo-vcf-remove" onClick={() => removeVehicle(i)}>Remove</button>
+                        </div>
+
+                        {v.countryBreakdown?.length > 1 && (
+                          <div className="mo-country-breakdown">
+                            {v.countryBreakdown.map(cb => (
+                              <div key={cb.country} className="mo-country-row">
+                                <span className="mo-country-name">{cb.country}</span>
+                                <span className="mo-country-price">{formatPrice(cb.avg)}</span>
+                                <span className="mo-country-count">{cb.count}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     ))}
-                  </select>
-                </div>
-
-                <div className="mo-filter-group">
-                  <label className="mo-filter-label">Model</label>
-                  <select
-                    value={searchFilters.model}
-                    onChange={(e) => setSearchFilters({ ...searchFilters, model: e.target.value })}
-                    className="mo-filter-select"
-                    disabled={!searchFilters.make}
-                  >
-                    <option value="">Select Model</option>
-                    {filterOptions.models.map(model => (
-                      <option key={model} value={model}>{model}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mo-filter-group">
-                  <label className="mo-filter-label">Year</label>
-                  <select
-                    value={searchFilters.year}
-                    onChange={(e) => setSearchFilters({ ...searchFilters, year: e.target.value })}
-                    className="mo-filter-select"
-                  >
-                    <option value="">All Years</option>
-                    {filterOptions.years.map(year => (
-                      <option key={year} value={year}>{year}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mo-filter-group">
-                  <label className="mo-filter-label">Condition</label>
-                  <select
-                    value={searchFilters.condition}
-                    onChange={(e) => setSearchFilters({ ...searchFilters, condition: e.target.value })}
-                    className="mo-filter-select"
-                  >
-                    {filterOptions.conditions.map(condition => (
-                      <option key={condition} value={condition}>
-                        {condition.charAt(0).toUpperCase() + condition.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {filterOptions.countries.length > 0 && (
-                  <div className="mo-filter-group">
-                    <label className="mo-filter-label">Country</label>
-                    <select
-                      value={searchFilters.country}
-                      onChange={(e) => setSearchFilters({ ...searchFilters, country: e.target.value })}
-                      className="mo-filter-select"
-                    >
-                      <option value="">All Countries</option>
-                      {filterOptions.countries.map(c => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
                   </div>
                 )}
               </div>
 
-              <button
-                className="mo-btn-search"
-                onClick={handleSearch}
-                disabled={!searchFilters.make || !searchFilters.model}
-              >
-                Add to Chart ({selectedVehicles.length}/4)
-              </button>
+              {/* RIGHT: Controls Panel */}
+              <div className="mo-right-col">
 
-              {/* Selected Vehicles */}
-              {selectedVehicles.length > 0 && (
-                <div className="mo-selected-vehicles" style={{ marginTop: '1.5rem' }}>
-                  <h3 className="mo-section-title" style={{ fontSize: '1rem', marginBottom: '0.8rem' }}>
-                    Vehicles on Chart
-                  </h3>
-                  <div className="mo-selected-list">
-                    {selectedVehicles.map((vehicle, index) => (
-                      <div key={index} className="mo-selected-item">
-                        <div 
-                          className="mo-selected-color"
-                          style={{ backgroundColor: getChartColor(index) }}
-                        ></div>
-                        <span className="mo-selected-name">
-                          {vehicle.make} {vehicle.model} {vehicle.year}
-                        </span>
-                        <button
-                          className="mo-selected-remove"
-                          onClick={() => removeVehicle(index)}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
+                {/* Check Your Car's Value */}
+                <div className="mo-card mo-value-card">
+                  <div className="mo-card-header">
+                    <h2 className="mo-card-title">Check Your Car's Value</h2>
+                    <p className="mo-card-sub">See what your car is worth in today's market</p>
                   </div>
+
+                  <div className="mo-controls-stack">
+                    <div className="mo-filter-row">
+                      <div className="mo-filter-group">
+                        <label className="mo-filter-label">Make</label>
+                        <select className="mo-filter-select" value={valueQuery.make}
+                          onChange={e => setValueQuery({ ...valueQuery, make: e.target.value, model: '' })}>
+                          <option value="">Select Make</option>
+                          {filterOptions.makes.map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                      </div>
+                      <div className="mo-filter-group">
+                        <label className="mo-filter-label">Model</label>
+                        <select className="mo-filter-select" value={valueQuery.model} disabled={!valueQuery.make}
+                          onChange={e => setValueQuery({ ...valueQuery, model: e.target.value })}>
+                          <option value="">{valueQuery.make ? 'Select Model' : '— pick make first —'}</option>
+                          {modelsForValueMake.map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="mo-filter-row">
+                      <div className="mo-filter-group">
+                        <label className="mo-filter-label">Year</label>
+                        <select className="mo-filter-select" value={valueQuery.year}
+                          onChange={e => setValueQuery({ ...valueQuery, year: e.target.value })}>
+                          <option value="">Any</option>
+                          {filterOptions.years.map(y => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                      </div>
+                      <div className="mo-filter-group">
+                        <label className="mo-filter-label">Condition</label>
+                        <select className="mo-filter-select" value={valueQuery.condition}
+                          onChange={e => setValueQuery({ ...valueQuery, condition: e.target.value })}>
+                          {filterOptions.conditions.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    {valueError && <p className="mo-inline-error">{valueError}</p>}
+                    <button className="mo-btn-primary" onClick={handleValueCheck} disabled={!valueQuery.make || !valueQuery.model}>
+                      Check Value
+                    </button>
+                  </div>
+
+                  {valueResult && (
+                    <div className="mo-value-result">
+                      <div className="mo-value-result-name">{valueResult.make} {valueResult.model}{valueResult.year ? ` ${valueResult.year}` : ''}</div>
+                      <div className="mo-value-result-price">{formatPrice(valueResult.avg)}</div>
+                      <div className="mo-value-result-label">Estimated Market Value</div>
+                      <div className="mo-value-result-stats">
+                        <div className="mo-vrs-item"><span>Min</span><strong>{formatPrice(valueResult.min)}</strong></div>
+                        <div className="mo-vrs-item"><span>Max</span><strong>{formatPrice(valueResult.max)}</strong></div>
+                        <div className="mo-vrs-item"><span>Listings</span><strong>{valueResult.dataPoints}</strong></div>
+                        <div className="mo-vrs-item">
+                          <span>vs Market</span>
+                          <strong style={{ color: valueResult.vsMarketPct > 0 ? '#ef4444' : '#22c55e' }}>
+                            {valueResult.vsMarketPct > 0 ? '+' : ''}{valueResult.vsMarketPct}%
+                          </strong>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+
+                {/* Add to Chart */}
+                <div className="mo-card">
+                  <div className="mo-card-header">
+                    <h2 className="mo-card-title">Add to Chart</h2>
+                    <p className="mo-card-sub">Compare up to 4 vehicles ({selectedVehicles.length}/4 selected)</p>
+                  </div>
+
+                  <div className="mo-controls-stack">
+                    <div className="mo-filter-row">
+                      <div className="mo-filter-group">
+                        <label className="mo-filter-label">Make</label>
+                        <select className="mo-filter-select" value={searchFilters.make}
+                          onChange={e => setSearchFilters({ ...searchFilters, make: e.target.value, model: '' })}>
+                          <option value="">Select Make</option>
+                          {filterOptions.makes.map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                      </div>
+                      <div className="mo-filter-group">
+                        <label className="mo-filter-label">Model</label>
+                        <select className="mo-filter-select" value={searchFilters.model} disabled={!searchFilters.make}
+                          onChange={e => setSearchFilters({ ...searchFilters, model: e.target.value })}>
+                          <option value="">{searchFilters.make ? 'Select Model' : '— pick make first —'}</option>
+                          {modelsForSearchMake.map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="mo-filter-row">
+                      <div className="mo-filter-group">
+                        <label className="mo-filter-label">Year</label>
+                        <select className="mo-filter-select" value={searchFilters.year}
+                          onChange={e => setSearchFilters({ ...searchFilters, year: e.target.value })}>
+                          <option value="">Any</option>
+                          {filterOptions.years.map(y => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                      </div>
+                      <div className="mo-filter-group">
+                        <label className="mo-filter-label">Condition</label>
+                        <select className="mo-filter-select" value={searchFilters.condition}
+                          onChange={e => setSearchFilters({ ...searchFilters, condition: e.target.value })}>
+                          {filterOptions.conditions.map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    {filterOptions.countries.length > 0 && (
+                      <div className="mo-filter-group">
+                        <label className="mo-filter-label">Country</label>
+                        <select className="mo-filter-select" value={searchFilters.country}
+                          onChange={e => setSearchFilters({ ...searchFilters, country: e.target.value })}>
+                          <option value="">All Countries</option>
+                          {filterOptions.countries.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </div>
+                    )}
+                    {searchError && <p className="mo-inline-error">{searchError}</p>}
+                    <button className="mo-btn-secondary" onClick={handleSearch}
+                      disabled={!searchFilters.make || !searchFilters.model || selectedVehicles.length >= 4}>
+                      + Add to Chart
+                    </button>
+                  </div>
+
+                  {/* Vehicles on Chart */}
+                  {selectedVehicles.length > 0 && (
+                    <div className="mo-chart-legend">
+                      <div className="mo-chart-legend-title">On Chart</div>
+                      {selectedVehicles.map((v, i) => (
+                        <div key={i} className="mo-legend-item">
+                          <span className="mo-legend-dot" style={{ background: getChartColor(i) }} />
+                          <span className="mo-legend-name">{v.make} {v.model} {v.year}</span>
+                          <button className="mo-legend-remove" onClick={() => removeVehicle(i)}>✕</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+              </div>
             </div>
 
-            {/* Price Trends Chart */}
-            <div className="mo-chart-section">
-              <div className="mo-section-header">
-                <h2 className="mo-section-title">Market Price Trends</h2>
-                <p className="mo-section-desc">Showing {comparisonData.length} vehicle(s) — values over time</p>
-              </div>
-
-              <div className="mo-chart-wrapper">
-                <div className="mo-chart-canvas">
-                  {renderChart()}
-                </div>
-              </div>
-            </div>
-
-            {/* AVAILABLE LISTINGS SECTION */}
+            {/* ─── LISTINGS SECTION ─── */}
             {selectedVehicles.length > 0 && (
-              <div className="mo-listings-section">
-                <div className="mo-section-header">
+              <div className="mo-section">
+                <div className="mo-section-hd">
                   <h2 className="mo-section-title">Available Listings</h2>
-                  <p className="mo-section-desc">
-                    Cars currently for sale matching your selected vehicles
-                  </p>
+                  <p className="mo-section-sub">Vehicles currently for sale matching your selection</p>
+                  <Link to="/marketplace" className="mo-section-link">View all →</Link>
                 </div>
 
                 {loadingListings ? (
-                  <div className="mo-loading-inline">
-                    <div className="mo-spinner-small"></div>
-                    <p>Loading listings...</p>
-                  </div>
+                  <div className="mo-loading-inline"><div className="mo-spinner-small" /><p>Loading listings…</p></div>
                 ) : relatedListings.length > 0 ? (
-                  <div className="mo-carousel">
-                    <div className="mo-carousel-track">
-                    {relatedListings.map((listing) => (
-                      <Link
-                        key={listing._id}
-                        to={`/listing/${listing._id}`}
-                        className="mo-carousel-item mo-listing-card"
-                      >
-                        <div className="mo-listing-image">
-                          {listing.images && listing.images.length > 0 ? (
-                            <img 
-                              src={listing.images[0].url || listing.images[0]} 
-                              alt={listing.title}
-                              onError={(e) => {
-                                e.target.src = '/placeholder-car.jpg';
-                              }}
-                            />
-                          ) : (
-                            <div className="mo-listing-placeholder">No Image</div>
-                          )}
-                          {listing.condition && (
-                            <div className="mo-listing-badge">{listing.condition}</div>
-                          )}
+                  <div className="mo-listings-grid">
+                    {relatedListings.map(l => (
+                      <Link key={l._id} to={`/listing/${l._id}`} className="mo-listing-card">
+                        <div className="mo-listing-img">
+                          {l.images?.length > 0
+                            ? <img src={l.images.find(i => i.isPrimary)?.url || l.images[0]?.url || l.images[0]} alt={l.title} onError={e => { e.target.src = '/placeholder-car.jpg'; }} />
+                            : <div className="mo-listing-no-img">No Image</div>}
+                          {l.condition && <span className="mo-listing-badge">{l.condition}</span>}
                         </div>
-                        <div className="mo-listing-content">
-                          <h3 className="mo-listing-title">{listing.title}</h3>
-                          <p className="mo-listing-specs">
-                            {listing.specifications?.year} • {listing.specifications?.mileage} km
-                          </p>
-                          <div className="mo-listing-price">
-                            {formatPrice(listing.price || listing.pricing?.price)}
-                          </div>
+                        <div className="mo-listing-body">
+                          <div className="mo-listing-title">{l.title}</div>
+                          <div className="mo-listing-specs">{[l.specifications?.year, l.specifications?.mileage && `${Number(l.specifications.mileage).toLocaleString()} km`].filter(Boolean).join(' · ')}</div>
+                          <div className="mo-listing-price">{formatPrice(l.price || l.pricing?.price)}</div>
                         </div>
                       </Link>
                     ))}
-                    </div>
                   </div>
                 ) : (
-                  <div className="mo-empty-state">
-                    <p>No listings found for the selected vehicles</p>
-                  </div>
+                  <div className="mo-empty-state"><p>No listings found for the selected vehicles</p></div>
                 )}
               </div>
             )}
 
-            {/* RELATED ARTICLES SECTION */}
-            {selectedVehicles.length > 0 && (
-              <div className="mo-articles-section">
-                <div className="mo-section-header">
-                  <h2 className="mo-section-title">Related News & Articles</h2>
-                  <p className="mo-section-desc">
-                    Latest news about your selected vehicles
-                  </p>
+            {/* ─── ARTICLES SECTION ─── */}
+            {relatedArticles.length > 0 && (
+              <div className="mo-section">
+                <div className="mo-section-hd">
+                  <h2 className="mo-section-title">Related News</h2>
+                  <p className="mo-section-sub">Latest articles about your selected vehicles</p>
+                  <Link to="/news" className="mo-section-link">All news →</Link>
                 </div>
 
                 {loadingArticles ? (
-                  <div className="mo-loading-inline">
-                    <div className="mo-spinner-small"></div>
-                    <p>Loading articles...</p>
-                  </div>
-                ) : relatedArticles.length > 0 ? (
-                  <div className="mo-carousel">
-                    <div className="mo-carousel-track">
-                      {relatedArticles.map((article) => (
-                        <Link
-                          key={article._id}
-                          to={`/news/${article._id}`}
-                          className="mo-carousel-item mo-article-card"
-                        >
-                          {article.coverImage || (article.images && article.images.length > 0) ? (
-                            <div className="mo-article-image">
-                              <img
-                                src={article.coverImage || article.images[0]?.url || article.images[0]}
-                                alt={article.title}
-                                onError={(e) => { e.target.src = '/placeholder-news.jpg'; }}
-                              />
-                            </div>
-                          ) : null}
-                          <div className="mo-article-content">
-                            {article.category && (
-                              <span className="mo-article-category">{article.category}</span>
-                            )}
-                            <h3 className="mo-article-title">{article.title}</h3>
-                            {article.summary && (
-                              <p className="mo-article-summary">{article.summary}</p>
-                            )}
-                            <div className="mo-article-meta">
-                              {article.publishedAt && (
-                                <span>{new Date(article.publishedAt).toLocaleDateString()}</span>
-                              )}
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
+                  <div className="mo-loading-inline"><div className="mo-spinner-small" /><p>Loading articles…</p></div>
                 ) : (
-                  <div className="mo-empty-state">
-                    <p>No articles found for the selected vehicles</p>
+                  <div className="mo-articles-grid">
+                    {relatedArticles.map(a => (
+                      <Link key={a._id} to={`/news/${a._id}`} className="mo-article-card">
+                        {(a.coverImage || a.images?.length > 0) && (
+                          <div className="mo-article-img">
+                            <img src={a.coverImage || a.images[0]?.url || a.images[0]} alt={a.title} onError={e => { e.target.src = '/placeholder-news.jpg'; }} />
+                          </div>
+                        )}
+                        <div className="mo-article-body">
+                          {a.category && <span className="mo-article-cat">{a.category}</span>}
+                          <div className="mo-article-title">{a.title}</div>
+                          {a.summary && <p className="mo-article-summary">{a.summary}</p>}
+                          {a.publishedAt && <span className="mo-article-date">{new Date(a.publishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
+                        </div>
+                      </Link>
+                    ))}
                   </div>
                 )}
               </div>
             )}
 
-            {/* Vehicle Value Cards */}
-            {comparisonData.length > 0 && (
-              <div className="mo-carousel">
-                <div className="mo-carousel-track">
-                  {comparisonData.map((vehicle, index) => (
-                    <div key={index} className="mo-carousel-item mo-vehicle-card">
-                      <div
-                        className="mo-vehicle-color-bar"
-                        style={{ backgroundColor: getChartColor(index) }}
-                      ></div>
-
-                      <h3 className="mo-vehicle-name">
-                        {vehicle.make} {vehicle.model}
-                      </h3>
-                      <p className="mo-vehicle-year">{vehicle.year}</p>
-
-                      <div
-                        className="mo-vehicle-trend"
-                        style={{ color: getTrendColor(vehicle.trend) }}
-                      >
-                        {getTrendIcon(vehicle.trend)} {vehicle.trend.toUpperCase()}
-                      </div>
-
-                      <div className="mo-vehicle-stats">
-                        <div className="mo-stat-item">
-                          <span className="mo-stat-label">Market Value</span>
-                          <span className="mo-stat-value">{formatPrice(vehicle.avgPrice)}</span>
-                        </div>
-                        <div className="mo-stat-item">
-                          <span className="mo-stat-label">Min</span>
-                          <span className="mo-stat-value">{formatPrice(vehicle.minPrice)}</span>
-                        </div>
-                        <div className="mo-stat-item">
-                          <span className="mo-stat-label">Max</span>
-                          <span className="mo-stat-value">{formatPrice(vehicle.maxPrice)}</span>
-                        </div>
-                        <div className="mo-stat-item">
-                          <span className="mo-stat-label">Data Points</span>
-                          <span className="mo-stat-value">{vehicle.dataPoints}</span>
-                        </div>
-                      </div>
-
-                      {vehicle.countryBreakdown && vehicle.countryBreakdown.length > 1 && (
-                        <div className="mo-country-breakdown">
-                          <div className="mo-country-breakdown-title">Price by Country</div>
-                          {vehicle.countryBreakdown.map(cb => (
-                            <div key={cb.country} className="mo-country-row">
-                              <span className="mo-country-name">{cb.country}</span>
-                              <span className="mo-country-price">{formatPrice(cb.avg)}</span>
-                              <span className="mo-country-count">{cb.count} listing{cb.count !== 1 ? 's' : ''}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            {/* Data disclaimer */}
-            <div className="mo-data-note">
-              Market valuations are based on real-time data aggregated from trusted partner dealerships, verified listings, and publicly available market sources across the region. Prices are indicative and may vary based on vehicle condition, mileage, and location.
-            </div>
+            <p className="mo-disclaimer">
+              Market valuations are aggregated from verified listings and partner dealerships across the region. Prices are indicative and may vary based on condition, mileage, and location.
+            </p>
           </>
-        )}
-
-        {!loading && viewMode === 'compare' && (
-          <div className="mo-compare-section">
-            {/* Search Panel for Compare Mode */}
-            <div className="mo-search-panel">
-              <h2 className="mo-section-title">Add Vehicle to Compare</h2>
-              <div className="mo-filters-grid">
-                <div className="mo-filter-group">
-                  <label className="mo-filter-label">Make</label>
-                  <select
-                    value={searchFilters.make}
-                    onChange={(e) => setSearchFilters({ ...searchFilters, make: e.target.value, model: '' })}
-                    className="mo-filter-select"
-                  >
-                    <option value="">Select Make</option>
-                    {filterOptions.makes.map(make => (
-                      <option key={make} value={make}>{make}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mo-filter-group">
-                  <label className="mo-filter-label">Model</label>
-                  <select
-                    value={searchFilters.model}
-                    onChange={(e) => setSearchFilters({ ...searchFilters, model: e.target.value })}
-                    className="mo-filter-select"
-                    disabled={!searchFilters.make}
-                  >
-                    <option value="">Select Model</option>
-                    {filterOptions.models.map(model => (
-                      <option key={model} value={model}>{model}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mo-filter-group">
-                  <label className="mo-filter-label">Year</label>
-                  <select
-                    value={searchFilters.year}
-                    onChange={(e) => setSearchFilters({ ...searchFilters, year: e.target.value })}
-                    className="mo-filter-select"
-                  >
-                    <option value="">All Years</option>
-                    {filterOptions.years.map(year => (
-                      <option key={year} value={year}>{year}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mo-filter-group">
-                  <label className="mo-filter-label">Condition</label>
-                  <select
-                    value={searchFilters.condition}
-                    onChange={(e) => setSearchFilters({ ...searchFilters, condition: e.target.value })}
-                    className="mo-filter-select"
-                  >
-                    {filterOptions.conditions.map(condition => (
-                      <option key={condition} value={condition}>
-                        {condition.charAt(0).toUpperCase() + condition.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {filterOptions.countries.length > 0 && (
-                  <div className="mo-filter-group">
-                    <label className="mo-filter-label">Country</label>
-                    <select
-                      value={searchFilters.country}
-                      onChange={(e) => setSearchFilters({ ...searchFilters, country: e.target.value })}
-                      className="mo-filter-select"
-                    >
-                      <option value="">All Countries</option>
-                      {filterOptions.countries.map(c => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-
-              <button
-                className="mo-btn-search"
-                onClick={handleSearch}
-                disabled={!searchFilters.make || !searchFilters.model}
-              >
-                + Add to Comparison ({selectedVehicles.length}/5)
-              </button>
-            </div>
-
-            {/* Selected Vehicles for Comparison */}
-            {selectedVehicles.length > 0 && (
-              <div className="mo-selected-vehicles">
-                <h3 className="mo-section-title">Currently Comparing</h3>
-                <div className="mo-selected-list">
-                  {selectedVehicles.map((vehicle, index) => (
-                    <div key={index} className="mo-selected-item">
-                      <div 
-                        className="mo-selected-color"
-                        style={{ backgroundColor: getChartColor(index) }}
-                      ></div>
-                      <span className="mo-selected-name">
-                        {vehicle.make} {vehicle.model} {vehicle.year}
-                      </span>
-                      <button
-                        className="mo-selected-remove"
-                        onClick={() => removeVehicle(index)}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
         )}
       </div>
     </div>
