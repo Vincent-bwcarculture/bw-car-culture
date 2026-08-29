@@ -47,15 +47,22 @@ const SmallVehicleCard = ({
     };
   }, [car]);
 
-  // Get the main image
+  // Get the main image — supports both string and object image formats
   const mainImage = useMemo(() => {
     if (!processedCar?.images?.length) return null;
-    
-    const validImages = processedCar.images.filter(img => 
-      img && typeof img === 'string' && img.trim() !== ''
-    );
-    
-    return validImages[0] || null;
+    const toUrl = (img) => {
+      if (!img) return null;
+      if (typeof img === 'string') return img.trim() || null;
+      if (typeof img === 'object' && img.url) return img.url;
+      return null;
+    };
+    const primary = processedCar.images.find(img => img && img.isPrimary);
+    if (primary) { const u = toUrl(primary); if (u) return u; }
+    for (const img of processedCar.images) {
+      const u = toUrl(img);
+      if (u) return u;
+    }
+    return null;
   }, [processedCar?.images]);
 
   // Format price
