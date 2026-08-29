@@ -25,6 +25,8 @@ import { preloadCarModel } from './utils/modelCache.js';
 import { analyticsService } from './services/analyticsService.js';
 import { InternalAnalyticsProvider } from './components/shared/InternalAnalyticsProvider.js';
 import internalAnalytics from './utils/internalAnalytics.js';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 // Home page components (always needed — used in HomeContent)
 import CarFilter from './components/features/CarFilters/CarFilter.js';
@@ -1759,6 +1761,8 @@ function App() {
                 {false && (
                   <GIONApp withChatbot={false} />
                 )}
+                <Analytics />
+                <SpeedInsights />
               </div>
             </AnalyticsWrapper>
           </InternalAnalyticsProvider>

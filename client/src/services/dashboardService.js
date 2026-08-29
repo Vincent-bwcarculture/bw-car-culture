@@ -8,7 +8,7 @@ export const dashboardService = {
    */
   async getDashboardStats() {
     try {
-      const response = await http.get('/dashboard/stats');
+      const response = await http.get('/api/stats/dashboard');
       
       if (response.data.success) {
         return response.data.data;
