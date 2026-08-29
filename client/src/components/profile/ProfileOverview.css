@@ -551,3 +551,65 @@
   background: var(--uprofile-bg-tertiary);
   border-color: var(--uprofile-border-dark);
 }
+
+/* === MARKETPLACE QUICK LINK === */
+.poverview-marketplace-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--uprofile-bg-secondary, var(--card-bg));
+  border: 1px solid var(--uprofile-border, var(--border-light));
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.poverview-marketplace-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--accent, #ff3300);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.poverview-marketplace-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.poverview-marketplace-content h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.poverview-marketplace-content p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.poverview-marketplace-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  background: var(--accent, #ff3300);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.poverview-marketplace-btn:hover {
+  opacity: 0.85;
+}

@@ -1,22 +1,24 @@
 // client/src/components/profile/ProfileOverview.js
 import React, { useState, useEffect } from 'react';
-import { 
-  User, 
-  Calendar, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Award, 
-  Heart, 
-  Settings, 
-  Car, 
+import { Link } from 'react-router-dom';
+import {
+  User,
+  Calendar,
+  MapPin,
+  Phone,
+  Mail,
+  Award,
+  Heart,
+  Settings,
+  Car,
   Route,
   ChevronRight,
   Plus,
-  Eye
+  Eye,
+  ShoppingBag
 } from 'lucide-react';
 import './ProfileOverview.css';
-import RoleSelectionComponent from './RoleSelectionComponent.js'; // Import the new component
+import RoleSelectionComponent from './RoleSelectionComponent.js';
 
 const ProfileOverview = ({ profileData, refreshProfile }) => {
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
@@ -301,6 +303,20 @@ const ProfileOverview = ({ profileData, refreshProfile }) => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Car Sales Marketplace Quick Link */}
+      <div className="poverview-marketplace-card">
+        <div className="poverview-marketplace-icon">
+          <ShoppingBag size={28} />
+        </div>
+        <div className="poverview-marketplace-content">
+          <h3>Car Sales</h3>
+          <p>Browse vehicles listed for sale by dealers and private sellers.</p>
+        </div>
+        <Link to="/marketplace" className="poverview-marketplace-btn">
+          Browse <ChevronRight size={16} />
+        </Link>
       </div>
 
       {/* Profile Improvement Suggestions */}

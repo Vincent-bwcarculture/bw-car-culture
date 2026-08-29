@@ -1,16 +1,16 @@
 /* GroupPage.css */
 .grp-loading {
   min-height: 100vh;
-  background: var(--bg-primary, #0f0f0f);
+  background: var(--app-bg, #0a0a0a);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary, #888);
+  color: var(--text-muted, #888);
 }
 
 .grp-page {
   min-height: 100vh;
-  background: var(--bg-primary, #0f0f0f);
+  background: var(--app-bg, #0a0a0a);
   padding: 2rem 1rem 4rem;
 }
 
@@ -25,7 +25,7 @@
 .grp-back {
   background: none;
   border: none;
-  color: var(--text-secondary, #888);
+  color: var(--text-muted, #888);
   font-size: 0.85rem;
   cursor: pointer;
   padding: 0;
@@ -37,8 +37,8 @@
 .grp-back:hover { color: var(--text-primary, #fff); }
 
 .grp-header {
-  background: var(--bg-secondary, #161616);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--card-bg, rgba(20,20,20,0.9));
+  border: 1px solid var(--border-light, rgba(255,255,255,0.08));
   border-radius: 14px;
   padding: 1.25rem;
 }
@@ -53,21 +53,21 @@
 .grp-icon { font-size: 2.5rem; line-height: 1; flex-shrink: 0; }
 
 .grp-name { font-size: 1.4rem; font-weight: 700; color: var(--text-primary, #fff); margin: 0 0 0.2rem; }
-.grp-desc { font-size: 0.88rem; color: var(--text-secondary, #888); margin: 0 0 0.5rem; line-height: 1.45; }
+.grp-desc { font-size: 0.88rem; color: var(--text-muted, #888); margin: 0 0 0.5rem; line-height: 1.45; }
 
 .grp-meta {
   display: flex;
   gap: 1rem;
   font-size: 0.8rem;
-  color: var(--text-secondary, #777);
+  color: var(--text-muted, #777);
 }
 
 .grp-join-row { display: flex; gap: 0.5rem; }
 
 .grp-join-btn {
-  background: #C9A94E;
+  background: var(--accent, #ff3300);
   border: none;
-  color: #0f0f0f;
+  color: #fff;
   border-radius: 8px;
   padding: 0.5rem 1.2rem;
   font-weight: 700;
@@ -94,8 +94,8 @@
 
 /* ── Composer ── */
 .grp-composer {
-  background: var(--bg-secondary, #161616);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--card-bg, rgba(20,20,20,0.9));
+  border: 1px solid var(--border-light, rgba(255,255,255,0.08));
   border-radius: 12px;
   padding: 1rem 1.25rem;
   display: flex;
@@ -107,8 +107,8 @@
 
 .grp-input {
   width: 100%;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--input-bg, rgba(255,255,255,0.05));
+  border: 1px solid var(--input-border, rgba(255,255,255,0.1));
   border-radius: 8px;
   color: var(--text-primary, #fff);
   font-size: 0.92rem;
@@ -119,16 +119,16 @@
   transition: border-color 0.2s;
 }
 
-.grp-input:focus { outline: none; border-color: rgba(255,255,255,0.25); }
-.grp-input::placeholder { color: var(--text-secondary, #555); }
+.grp-input:focus { outline: none; border-color: rgba(255,51,0,0.4); }
+.grp-input::placeholder { color: var(--text-muted, #555); }
 
 .grp-composer-footer { display: flex; align-items: center; justify-content: space-between; }
-.grp-char { font-size: 0.75rem; color: var(--text-secondary, #666); }
+.grp-char { font-size: 0.75rem; color: var(--text-muted, #666); }
 .grp-error { color: #E05C5C; font-size: 0.8rem; }
 
 .grp-btn-primary {
-  background: #C9A94E;
-  color: #0f0f0f;
+  background: var(--accent, #ff3300);
+  color: #fff;
   border: none;
   border-radius: 8px;
   padding: 0.45rem 1.2rem;
@@ -143,31 +143,31 @@
 
 .grp-prompt {
   text-align: center;
-  color: var(--text-secondary, #888);
+  color: var(--text-muted, #888);
   font-size: 0.88rem;
   padding: 0.75rem;
-  background: var(--bg-secondary, #161616);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--card-bg, rgba(20,20,20,0.9));
+  border: 1px solid var(--border-light, rgba(255,255,255,0.08));
   border-radius: 10px;
 }
 
-.grp-prompt a { color: #C9A94E; text-decoration: none; font-weight: 600; }
+.grp-prompt a { color: var(--accent, #ff3300); text-decoration: none; font-weight: 600; }
 
 /* ── Posts ── */
 .grp-posts { display: flex; flex-direction: column; gap: 0.75rem; }
 
 .grp-empty {
   text-align: center;
-  color: var(--text-secondary, #666);
+  color: var(--text-muted, #666);
   padding: 2.5rem 1rem;
-  background: var(--bg-secondary, #161616);
-  border: 1px dashed rgba(255,255,255,0.08);
+  background: var(--card-bg, rgba(20,20,20,0.9));
+  border: 1px dashed var(--border-light, rgba(255,255,255,0.08));
   border-radius: 12px;
 }
 
 .grp-post {
-  background: var(--bg-secondary, #161616);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--card-bg, rgba(20,20,20,0.9));
+  border: 1px solid var(--border-light, rgba(255,255,255,0.08));
   border-radius: 12px;
   padding: 1rem 1.25rem;
   display: flex;
@@ -188,7 +188,7 @@
 }
 
 .grp-post-author { font-weight: 600; font-size: 0.88rem; color: var(--text-primary, #fff); }
-.grp-post-time { font-size: 0.75rem; color: var(--text-secondary, #666); }
+.grp-post-time { font-size: 0.75rem; color: var(--text-muted, #666); }
 
 .grp-post-content {
   font-size: 0.9rem;
