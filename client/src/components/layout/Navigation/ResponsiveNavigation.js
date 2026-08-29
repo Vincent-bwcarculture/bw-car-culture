@@ -35,13 +35,6 @@ const categories = [
     icon: <ShoppingBag size={20} />
   },
   {
-    id: 'inventory',
-    name: 'Inventory',
-    path: '/inventory',
-    icon: <Package size={20} />,
-    desktopOnly: true
-  },
-  {
     id: 'dealerships',
     name: 'Dealerships',
     path: '/dealerships',
@@ -108,14 +101,6 @@ const NavigationMenu = () => {
     console.log('💬 Feedback clicked, navigating to /feedback');
     setIsMenuOpen(false);
     navigate('/feedback');
-  };
-
-  // Handle Inventory click
-  const handleInventoryClick = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setIsMenuOpen(false);
-    navigate('/inventory');
   };
 
   // Handle Market Overview click
@@ -297,18 +282,18 @@ const NavigationMenu = () => {
 
           <div className="menu-divider"></div>
 
-          {/* Inventory */}
-          <button className="menu-item inventory-item" onClick={handleInventoryClick} type="button">
-            <span className="menu-item-icon"><Package size={12} /></span>
-            <span className="menu-item-text">Inventory</span>
-          </button>
-
-          <div className="menu-divider"></div>
-
           {/* Market Overview */}
           <button className="menu-item market-overview-item" onClick={handleMarketOverviewClick} type="button">
             <span className="menu-item-icon"><BarChart3 size={12} /></span>
             <span className="menu-item-text">Market Overview</span>
+          </button>
+
+          <div className="menu-divider"></div>
+
+          {/* Inventory */}
+          <button className="menu-item" onClick={() => { setIsMenuOpen(false); navigate('/inventory'); }} type="button">
+            <span className="menu-item-icon"><Package size={12} /></span>
+            <span className="menu-item-text">Inventory</span>
           </button>
 
           <div className="menu-divider"></div>
@@ -790,37 +775,17 @@ const ResponsiveNavigation = () => {
       <nav className="mobile-bottom-nav" onClick={() => showShopMenu && setShowShopMenu(false)}>
         {categories.filter(category => !category.desktopOnly).map((category) => {
           if (category.id === 'marketplace') {
-            const shopActive = isActive('/marketplace') || isActive('/inventory');
             return (
               <div key="shop" style={{ position: 'relative' }}>
-                {/* Shop sub-menu popup */}
-                {showShopMenu && (
-                  <div className="mobile-shop-popup" onClick={e => e.stopPropagation()}>
-                    <button
-                      className={`shop-popup-item ${isActive('/marketplace') ? 'active' : ''}`}
-                      onClick={() => { setShowShopMenu(false); handleNavigation('/marketplace'); }}
-                    >
-                      <ShoppingBag size={15} />
-                      <span>Car Sales</span>
-                    </button>
-                    <button
-                      className={`shop-popup-item ${isActive('/inventory') ? 'active' : ''}`}
-                      onClick={() => { setShowShopMenu(false); handleNavigation('/inventory'); }}
-                    >
-                      <Package size={15} />
-                      <span>Inventory</span>
-                    </button>
-                  </div>
-                )}
                 <button
-                  className={`mobile-nav-item ${shopActive ? 'active' : ''} ${isNavigating ? 'navigating' : ''}`}
-                  onClick={(e) => { e.stopPropagation(); setShowShopMenu(prev => !prev); }}
+                  className={`mobile-nav-item ${isActive('/marketplace') ? 'active' : ''} ${isNavigating ? 'navigating' : ''}`}
+                  onClick={() => handleNavigation('/marketplace')}
                   disabled={isNavigating}
                 >
                   <div className="mobile-nav-icon">
                     <ShoppingBag size={20} />
                   </div>
-                  <div className="mobile-nav-label">Shop ▾</div>
+                  <div className="mobile-nav-label">Car Sales</div>
                 </button>
               </div>
             );
