@@ -819,7 +819,8 @@ const MarketplaceList = () => {
       const fuelLower = filters.fuelType.toLowerCase();
       filterFunctions.push(car => {
         if (car.isPromoCard) return true;
-        const fuel = (car.fuelType || car.specifications?.fuelType || '').toLowerCase();
+        // Prefer specifications.fuelType (authoritative) over legacy top-level fuelType
+        const fuel = (car.specifications?.fuelType || car.fuelType || '').toLowerCase();
         return fuel === fuelLower;
       });
     }
