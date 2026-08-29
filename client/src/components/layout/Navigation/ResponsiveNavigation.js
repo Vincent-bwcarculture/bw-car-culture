@@ -4,8 +4,8 @@ import ReactDOM from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, ShoppingBag, Store, Settings, User, LogIn, LogOut,
-  UserCircle, Star, QrCode, Hash, X, UserPlus, Newspaper, MessageCircle,
-  Menu, BarChart3, Info, Map, Zap, Tag, MapPin, Package
+  UserCircle, Star, QrCode, X, UserPlus, Newspaper, MessageCircle,
+  Menu, BarChart3, Info, Map, Zap, Tag, MapPin
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
 import useUnreadNotifCount from '../../../hooks/useUnreadNotifCount.js';
@@ -21,12 +21,6 @@ const categories = [
     name: 'Home',
     path: '/home',
     icon: <Home size={20} />
-  },
-  {
-    id: 'feed',
-    name: 'Feed',
-    path: '/feed',
-    icon: <Hash size={20} />
   },
   {
     id: 'marketplace',
@@ -286,22 +280,6 @@ const NavigationMenu = () => {
           <button className="menu-item market-overview-item" onClick={handleMarketOverviewClick} type="button">
             <span className="menu-item-icon"><BarChart3 size={12} /></span>
             <span className="menu-item-text">Market Overview</span>
-          </button>
-
-          <div className="menu-divider"></div>
-
-          {/* Inventory */}
-          <button className="menu-item" onClick={() => { setIsMenuOpen(false); navigate('/inventory'); }} type="button">
-            <span className="menu-item-icon"><Package size={12} /></span>
-            <span className="menu-item-text">Inventory</span>
-          </button>
-
-          <div className="menu-divider"></div>
-
-          {/* Feed */}
-          <button className="menu-item feed-item" onClick={() => { setIsMenuOpen(false); navigate('/feed'); }} type="button">
-            <span className="menu-item-icon"><span style={{fontSize:'12px'}}>◈</span></span>
-            <span className="menu-item-text">Feed</span>
           </button>
 
           <div className="menu-divider"></div>

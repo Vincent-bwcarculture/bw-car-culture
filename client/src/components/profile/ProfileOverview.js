@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Plus,
   Eye,
-  ShoppingBag
+  ShoppingBag,
+  Hash
 } from 'lucide-react';
 import './ProfileOverview.css';
 import RoleSelectionComponent from './RoleSelectionComponent.js';
@@ -305,6 +306,23 @@ const ProfileOverview = ({ profileData, refreshProfile }) => {
         </div>
       </div>
 
+      {/* Quick Links Row */}
+      <div className="poverview-quicklinks-row">
+
+      {/* Feed Quick Link */}
+      <div className="poverview-marketplace-card poverview-ql-feed">
+        <div className="poverview-marketplace-icon" style={{background:'#6c63ff'}}>
+          <Hash size={28} />
+        </div>
+        <div className="poverview-marketplace-content">
+          <h3>Feed</h3>
+          <p>Community posts, showcases & discussions.</p>
+        </div>
+        <Link to="/feed" className="poverview-marketplace-btn" style={{background:'#6c63ff'}}>
+          Open <ChevronRight size={16} />
+        </Link>
+      </div>
+
       {/* Car Sales Marketplace Quick Link */}
       <div className="poverview-marketplace-card">
         <div className="poverview-marketplace-icon">
@@ -318,6 +336,8 @@ const ProfileOverview = ({ profileData, refreshProfile }) => {
           Browse <ChevronRight size={16} />
         </Link>
       </div>
+
+      </div>{/* end poverview-quicklinks-row */}
 
       {/* Profile Improvement Suggestions */}
       {suggestions.length > 0 && (

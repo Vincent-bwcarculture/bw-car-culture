@@ -613,3 +613,15 @@
 .poverview-marketplace-btn:hover {
   opacity: 0.85;
 }
+
+/* === QUICK LINKS ROW === */
+.poverview-quicklinks-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.poverview-quicklinks-row .poverview-marketplace-card {
+  margin-bottom: 0;
+}

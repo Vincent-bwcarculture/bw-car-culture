@@ -723,6 +723,7 @@ const EnhancedFABModal = ({
   const BWCC_WHATSAPP = '26774122453';
 
   const navItems = [
+    { label: 'Feed', desc: 'Community posts & showcases', path: '/feed', icon: <Hash size={22} /> },
     { label: 'Browse Cars', desc: 'Search marketplace listings', path: '/marketplace', icon: <Car size={22} /> },
     { label: 'Find Dealerships', desc: 'View verified dealerships', path: '/dealerships', icon: <Trophy size={22} /> },
     { label: 'Services', desc: 'Workshops, rentals & transport', path: '/services', icon: <ChevronRight size={22} /> },

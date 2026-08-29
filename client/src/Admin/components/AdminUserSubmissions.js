@@ -322,13 +322,13 @@ const AdminUserSubmissions = () => {
       visibilityScore: 50
     });
 
-    // Pre-select primary images from submission's isPrimary flags, fallback to [0, 1]
-    const imgs = submission?.listingData?.images || [];
-    const existingPrimaries = imgs.reduce((acc, img, i) => {
+    // Pre-select primary images from submission's isPrimary flags (using original indices)
+    const rawImgs = submission?.listingData?.images || [];
+    const existingPrimaries = rawImgs.reduce((acc, img, i) => {
       if ((typeof img === 'object' ? img.isPrimary : i === 0) && acc.length < 2) acc.push(i);
       return acc;
     }, []);
-    setAdminPrimaryImages(existingPrimaries.length ? existingPrimaries : imgs.length > 0 ? [0] : []);
+    setAdminPrimaryImages(existingPrimaries.length ? existingPrimaries : rawImgs.length > 0 ? [0] : []);
 
     setShowReviewModal(true);
     setError('');
@@ -342,9 +342,12 @@ const AdminUserSubmissions = () => {
     });
   };
 
+  // Returns array of {url, origIdx} preserving original indices for adminPrimaryIndices mapping
   const getAllImages = (submission) => {
     const images = submission?.listingData?.images || [];
-    return images.map(img => (typeof img === 'string' ? img : img?.url)).filter(Boolean);
+    return images
+      .map((img, origIdx) => ({ url: typeof img === 'string' ? img : img?.url, origIdx }))
+      .filter(item => item.url);
   };
 
   const submitReview = async () => {
@@ -1119,18 +1122,19 @@ const AdminUserSubmissions = () => {
 
               {/* ── Image Gallery + Primary Picker ── */}
               {(() => {
-                const imgs = getAllImages(selectedSubmission);
+                const imgs = getAllImages(selectedSubmission); // [{url, origIdx}]
                 if (imgs.length === 0) return (
                   <div className="review-gallery-empty">
                     <Image size={32} />
                     <span>No photos uploaded</span>
                   </div>
                 );
+                const currentOrigIdx = imgs[galleryIndex]?.origIdx;
                 return (
                   <div className="review-gallery">
                     {/* Main viewer */}
                     <div className="review-gallery-main">
-                      <img src={imgs[galleryIndex]} alt={`Vehicle photo ${galleryIndex + 1}`} />
+                      <img src={imgs[galleryIndex]?.url} alt={`Vehicle photo ${galleryIndex + 1}`} />
                       <span className="review-gallery-counter">{galleryIndex + 1} / {imgs.length}</span>
                       {galleryIndex > 0 && (
                         <button className="review-gallery-nav review-gallery-prev" onClick={() => setGalleryIndex(i => i - 1)}>‹</button>
@@ -1138,10 +1142,10 @@ const AdminUserSubmissions = () => {
                       {galleryIndex < imgs.length - 1 && (
                         <button className="review-gallery-nav review-gallery-next" onClick={() => setGalleryIndex(i => i + 1)}>›</button>
                       )}
-                      {/* Primary badge on main viewer */}
-                      {adminPrimaryImages.includes(galleryIndex) && (
+                      {/* Primary badge on main viewer — keyed by origIdx */}
+                      {adminPrimaryImages.includes(currentOrigIdx) && (
                         <div className="review-gallery-primary-badge">
-                          ★ Primary {adminPrimaryImages.indexOf(galleryIndex) + 1}
+                          ★ Primary {adminPrimaryImages.indexOf(currentOrigIdx) + 1}
                         </div>
                       )}
                     </div>
@@ -1156,18 +1160,18 @@ const AdminUserSubmissions = () => {
                       </span>
                     </div>
 
-                    {/* Thumbnails with primary toggle */}
+                    {/* Thumbnails with primary toggle — use origIdx for selection */}
                     <div className="review-gallery-thumbs">
-                      {imgs.map((url, i) => {
-                        const primaryPos = adminPrimaryImages.indexOf(i);
+                      {imgs.map((item, i) => {
+                        const primaryPos = adminPrimaryImages.indexOf(item.origIdx);
                         const isPrimary = primaryPos !== -1;
                         return (
-                          <div key={i} className={`review-gallery-thumb-wrap${i === galleryIndex ? ' viewing' : ''}`}>
+                          <div key={item.origIdx} className={`review-gallery-thumb-wrap${i === galleryIndex ? ' viewing' : ''}`}>
                             <button
                               className={`review-gallery-thumb${i === galleryIndex ? ' active' : ''}${isPrimary ? ' is-primary' : ''}`}
                               onClick={() => setGalleryIndex(i)}
                             >
-                              <img src={url} alt={`Thumb ${i + 1}`} />
+                              <img src={item.url} alt={`Thumb ${i + 1}`} />
                               {isPrimary && (
                                 <span className="review-thumb-primary-badge">
                                   ★ {primaryPos + 1}
@@ -1176,7 +1180,7 @@ const AdminUserSubmissions = () => {
                             </button>
                             <button
                               className={`review-thumb-select-btn${isPrimary ? ' selected' : ''}`}
-                              onClick={() => toggleAdminPrimary(i)}
+                              onClick={() => toggleAdminPrimary(item.origIdx)}
                               title={isPrimary ? 'Remove as primary' : 'Set as primary'}
                             >
                               {isPrimary ? `★ Primary ${primaryPos + 1}` : '☆ Set Primary'}
