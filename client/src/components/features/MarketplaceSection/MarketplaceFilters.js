@@ -437,18 +437,31 @@ const MarketplaceFilters = ({
         
         {/* UPDATED: Quick Search and Filters Row - Mobile Optimized */}
         <div className="filters-quick-row">
-          {/* Search Row - Full Width */}
-          <div className="filter-control search-filter">
-            <input
-              type="text"
-              placeholder={currentSectionConfig.searchPlaceholder}
-              value={filters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              aria-label="Search vehicles"
-            />
+          {/* Search input + Search button on the same row */}
+          <div className="filters-search-row">
+            <div className="filter-control search-filter">
+              <input
+                type="text"
+                placeholder={currentSectionConfig.searchPlaceholder}
+                value={filters.search}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
+                aria-label="Search vehicles"
+              />
+            </div>
+            <div className="quick-action-buttons">
+              <button
+                className="apply-filters-btn"
+                onClick={applyFilters}
+                type="button"
+                disabled={loading}
+                aria-label="Apply search filters"
+              >
+                {loading ? '...' : 'Search'}
+              </button>
+            </div>
           </div>
-          
-          {/* NEW: Horizontal Filters Row - Three dropdowns side by side on mobile */}
+
+          {/* Horizontal Filters Row - all dropdowns in a 2×2 grid on mobile */}
           <div className="filters-horizontal-row">
             <div className="filter-control">
               <select
@@ -462,7 +475,7 @@ const MarketplaceFilters = ({
                 ))}
               </select>
             </div>
-            
+
             <div className="filter-control">
               <select
                 value={filters.model}
@@ -510,19 +523,6 @@ const MarketplaceFilters = ({
                 )}
               </select>
             </div>
-          </div>
-          
-          {/* Action Buttons Row */}
-          <div className="quick-action-buttons">
-            <button 
-              className="apply-filters-btn" 
-              onClick={applyFilters}
-              type="button"
-              disabled={loading}
-              aria-label="Apply search filters"
-            >
-              {loading ? 'Searching...' : 'Search'}
-            </button>
           </div>
         </div>
         

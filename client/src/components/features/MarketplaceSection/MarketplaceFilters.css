@@ -184,6 +184,11 @@
   margin-bottom: 0.75rem;
 }
 
+/* Desktop: search row wrapper is transparent — items join the flex flow */
+.filters-search-row {
+  display: contents;
+}
+
 /* NEW: Horizontal filters container for mobile */
 .filters-horizontal-row {
   display: contents; /* On desktop, act as if this div doesn't exist */
@@ -784,76 +789,82 @@
     display: none;
   }
   
-  /* UPDATED: Mobile layout for horizontal filters */
+  /* UPDATED: Mobile layout — search + button on same row, dropdowns in 2×2 grid */
   .filters-quick-row {
-    display: grid;
-    grid-template-columns: 1fr; /* Single column for mobile */
+    display: flex;
+    flex-direction: column;
     gap: 0.25rem;
   }
-  
+
+  /* Search input + button inline */
+  .filters-search-row {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+  }
+
   .filter-control {
     width: 100%;
     min-width: auto;
   }
-  
+
   .filter-control input,
   .filter-control select {
-    padding: 0.2rem 0.4rem;
+    padding: 0.22rem 0.4rem;
     font-size: 0.75rem;
-    min-height: 28px;
+    min-height: 30px;
   }
-  
+
   .filter-control label {
     margin-bottom: 0.1rem;
     font-size: 0.7rem;
   }
-  
-  /* Search takes full width on first row */
+
+  /* Search takes remaining width */
   .search-filter {
-    grid-column: 1;
-    grid-row: 1;
+    flex: 1;
   }
-  
+
   .search-filter input {
     padding-left: 1.3rem;
     background-size: 0.6rem;
     background-position: left 0.4rem center;
   }
-  
-  /* NEW: Horizontal filters container for the three dropdowns */
+
+  /* Button sits inline with search on mobile */
+  .quick-action-buttons {
+    flex-shrink: 0;
+    min-width: 0;
+    align-items: center;
+    margin-top: 0;
+  }
+
+  .apply-filters-btn {
+    padding: 0.22rem 0.9rem;
+    font-size: 0.72rem;
+    white-space: nowrap;
+    min-height: 30px;
+  }
+
+  /* NEW: Horizontal filters container — 2×2 grid for all 4 dropdowns */
   .filters-horizontal-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr; /* Three equal columns */
+    grid-template-columns: 1fr 1fr;
     gap: 0.2rem;
-    grid-column: 1;
-    grid-row: 2;
-    margin-top: 0.25rem;
+    margin-top: 0;
   }
-  
-  /* Apply specific styling to the three filter dropdowns */
+
   .filters-horizontal-row .filter-control {
-    min-width: 0; /* Allow shrinking */
+    min-width: 0;
   }
-  
+
   .filters-horizontal-row .filter-control select {
-    padding: 0.3rem 0.25rem;
-    padding-right: 1.2rem; /* Space for dropdown arrow */
+    padding: 0.22rem 0.25rem;
+    padding-right: 1.1rem;
     font-size: 0.7rem;
-    min-height: 32px;
+    min-height: 30px;
     background-size: 0.5rem;
     background-position: right 0.3rem center;
-  }
-  
-  /* Button takes full width on third row */
-  .quick-action-buttons {
-    grid-column: 1;
-    grid-row: 3;
-    margin-top: 0.25rem;
-  }
-  
-  .apply-filters-btn {
-    padding: 0.28rem 0.8rem;
-    font-size: 0.75rem;
   }
   
   .advanced-filters {
