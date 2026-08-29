@@ -752,6 +752,35 @@ const handleImageUpload = (e) => {
   showMessage('success', `Primary image updated to: ${imagePreviews[index]?.name}`);
 };
 
+  // Append more images without replacing existing ones
+  const handleAddMoreImages = (e) => {
+    const newFiles = Array.from(e.target.files);
+    if (!newFiles.length) return;
+
+    const maxSize = 8 * 1024 * 1024;
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const invalid = newFiles.filter(f => f.size > maxSize || !validTypes.includes(f.type.toLowerCase()));
+    if (invalid.length) { showMessage('error', 'Some files are invalid. Use JPEG/PNG/WebP under 8MB each.'); return; }
+
+    const combined = [...imageFiles, ...newFiles];
+    if (combined.length > 15) { showMessage('error', `Maximum 15 images. You already have ${imageFiles.length}.`); return; }
+
+    const startIdx = imagePreviews.length;
+    const newPreviews = newFiles.map((file, i) => ({
+      file,
+      preview: URL.createObjectURL(file),
+      name: file.name,
+      size: file.size,
+      isPrimary: false,
+      originalIndex: startIdx + i,
+    }));
+
+    setImageFiles(combined);
+    setImagePreviews(prev => [...prev, ...newPreviews]);
+    e.target.value = ''; // reset so same files can be added again if needed
+    showMessage('success', `${newFiles.length} more image${newFiles.length > 1 ? 's' : ''} added.`);
+  };
+
   // Remove image
 const removeImage = (index) => {
   console.log(`🗑️ Removing image at index ${index}`);
@@ -1950,47 +1979,74 @@ const handleFormSubmit = async (e) => {
           )}
 
           <div className="ulisting-form-group">
-  <label htmlFor="images">Upload Images (Max 15, 8MB per image) *</label>
-  <input
-    type="file"
-    id="images"
-    name="images"
-    multiple
-    accept="image/*"
-    onChange={handleImageUpload}
-    className={errors.images ? 'error' : ''}
-  />
+  <label htmlFor="images">Photos (Max 15, 8MB each) *</label>
+  <div className="ulisting-upload-row">
+    <label htmlFor="images" className="ulisting-upload-btn">
+      📁 {imagePreviews.length === 0 ? 'Choose Photos' : 'Replace All Photos'}
+    </label>
+    <input
+      type="file"
+      id="images"
+      name="images"
+      multiple
+      accept="image/*"
+      onChange={handleImageUpload}
+      className={errors.images ? 'error' : ''}
+      style={{ display: 'none' }}
+    />
+    {imagePreviews.length > 0 && imagePreviews.length < 15 && (
+      <>
+        <label htmlFor="images-add-more" className="ulisting-upload-btn ulisting-upload-btn--add">
+          ➕ Add More ({imagePreviews.length}/15)
+        </label>
+        <input
+          type="file"
+          id="images-add-more"
+          multiple
+          accept="image/*"
+          onChange={handleAddMoreImages}
+          style={{ display: 'none' }}
+        />
+      </>
+    )}
+  </div>
   {errors.images && <span className="ulisting-error-message">{errors.images}</span>}
   <p className="ulisting-form-help">
-    <strong>Tip:</strong> Images appear in the order you select them — the first is the main photo.{' '}
-    {imagePreviews.length > 0 && <strong>Opening the picker again will replace all current images.</strong>}
+    Select photos one by one or all at once. The <strong>★ Primary</strong> photo is the main listing image — tap any photo below to make it primary.
   </p>
 </div>
 
           {/* Image previews */}
 {imagePreviews.length > 0 && (
   <div className="ulisting-image-previews">
-    <h5>Selected Images ({imagePreviews.length}/15) — first is primary</h5>
+    <h5>
+      {imagePreviews.length}/15 photos — tap ★ to set primary
+    </h5>
     <div className="ulisting-image-grid">
       {imagePreviews.map((previewObj, index) => (
         <div
           key={previewObj.name + "_" + index}
           className={`ulisting-image-preview ${primaryImageIndex === index ? 'primary' : ''}`}
         >
+          {primaryImageIndex === index && (
+            <div className="ulisting-primary-badge">★ Primary</div>
+          )}
           <img
             src={previewObj.preview}
             alt={`Preview ${index + 1}`}
             onError={(e) => { e.target.src = '/images/placeholders/car.jpg'; }}
           />
           <div className="ulisting-image-overlay">
-            <button
-              type="button"
-              className="ulisting-primary-btn"
-              onClick={() => handlePrimaryImageSelect(index)}
-              title="Set as primary image"
-            >
-              {primaryImageIndex === index ? 'Primary' : 'Set Primary'}
-            </button>
+            {primaryImageIndex !== index && (
+              <button
+                type="button"
+                className="ulisting-primary-btn"
+                onClick={() => handlePrimaryImageSelect(index)}
+                title="Set as primary image"
+              >
+                ★ Set Primary
+              </button>
+            )}
             <button
               type="button"
               className="ulisting-remove-btn"
@@ -2001,9 +2057,7 @@ const handleFormSubmit = async (e) => {
             </button>
           </div>
           <div className="ulisting-image-info">
-            <span>
-              {primaryImageIndex === index ? 'Primary' : `#${index + 1}`} · {(previewObj.size / 1024 / 1024).toFixed(1)}MB
-            </span>
+            <span>#{index + 1} · {(previewObj.size / 1024 / 1024).toFixed(1)}MB</span>
           </div>
         </div>
       ))}

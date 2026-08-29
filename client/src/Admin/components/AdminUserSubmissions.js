@@ -48,6 +48,9 @@ const AdminUserSubmissions = () => {
     visibilityScore: 50
   });
 
+  // Admin-selected primary image indices (up to 2)
+  const [adminPrimaryImages, setAdminPrimaryImages] = useState([]);
+
   // NEW: Manual Payment Approval State
   const [showPaymentApproval, setShowPaymentApproval] = useState(false);
   const [selectedPaymentSubmission, setSelectedPaymentSubmission] = useState(null);
@@ -312,15 +315,31 @@ const AdminUserSubmissions = () => {
     console.log('Opening review modal for submission:', submission._id);
     setSelectedSubmission(submission);
     setGalleryIndex(0);
-    // Pre-fill with existing decision if already reviewed
     setReviewData({
       action: submission.adminReview?.action || 'approve',
       adminNotes: submission.adminReview?.adminNotes || '',
       subscriptionTier: 'free',
       visibilityScore: 50
     });
+
+    // Pre-select primary images from submission's isPrimary flags, fallback to [0, 1]
+    const imgs = submission?.listingData?.images || [];
+    const existingPrimaries = imgs.reduce((acc, img, i) => {
+      if ((typeof img === 'object' ? img.isPrimary : i === 0) && acc.length < 2) acc.push(i);
+      return acc;
+    }, []);
+    setAdminPrimaryImages(existingPrimaries.length ? existingPrimaries : imgs.length > 0 ? [0] : []);
+
     setShowReviewModal(true);
     setError('');
+  };
+
+  const toggleAdminPrimary = (index) => {
+    setAdminPrimaryImages(prev => {
+      if (prev.includes(index)) return prev.filter(i => i !== index);
+      if (prev.length >= 2) return [prev[1], index]; // drop oldest, add new
+      return [...prev, index];
+    });
   };
 
   const getAllImages = (submission) => {
@@ -356,7 +375,8 @@ const AdminUserSubmissions = () => {
         action: reviewData.action,
         adminNotes: reviewData.adminNotes.trim(),
         subscriptionTier: reviewData.action === 'approve' ? reviewData.subscriptionTier : null,
-        visibilityScore: reviewData.action === 'approve' ? reviewData.visibilityScore : 0
+        visibilityScore: reviewData.action === 'approve' ? reviewData.visibilityScore : 0,
+        adminPrimaryIndices: reviewData.action === 'approve' ? adminPrimaryImages : [],
       };
 
       console.log('📤 Sending review request:', requestData);
@@ -1097,7 +1117,7 @@ const AdminUserSubmissions = () => {
             
             <div className="admin-submissions-modal-body">
 
-              {/* ── Image Gallery ── */}
+              {/* ── Image Gallery + Primary Picker ── */}
               {(() => {
                 const imgs = getAllImages(selectedSubmission);
                 if (imgs.length === 0) return (
@@ -1108,6 +1128,7 @@ const AdminUserSubmissions = () => {
                 );
                 return (
                   <div className="review-gallery">
+                    {/* Main viewer */}
                     <div className="review-gallery-main">
                       <img src={imgs[galleryIndex]} alt={`Vehicle photo ${galleryIndex + 1}`} />
                       <span className="review-gallery-counter">{galleryIndex + 1} / {imgs.length}</span>
@@ -1117,19 +1138,56 @@ const AdminUserSubmissions = () => {
                       {galleryIndex < imgs.length - 1 && (
                         <button className="review-gallery-nav review-gallery-next" onClick={() => setGalleryIndex(i => i + 1)}>›</button>
                       )}
+                      {/* Primary badge on main viewer */}
+                      {adminPrimaryImages.includes(galleryIndex) && (
+                        <div className="review-gallery-primary-badge">
+                          ★ Primary {adminPrimaryImages.indexOf(galleryIndex) + 1}
+                        </div>
+                      )}
                     </div>
-                    {imgs.length > 1 && (
-                      <div className="review-gallery-thumbs">
-                        {imgs.map((url, i) => (
-                          <button
-                            key={i}
-                            className={`review-gallery-thumb${i === galleryIndex ? ' active' : ''}`}
-                            onClick={() => setGalleryIndex(i)}
-                          >
-                            <img src={url} alt={`Thumb ${i + 1}`} />
-                          </button>
-                        ))}
-                      </div>
+
+                    {/* Primary image selector header */}
+                    <div className="review-primary-picker-header">
+                      <span className="review-primary-picker-label">
+                        <Camera size={13} /> Select up to 2 primary images
+                      </span>
+                      <span className={`review-primary-picker-count ${adminPrimaryImages.length === 0 ? 'warn' : ''}`}>
+                        {adminPrimaryImages.length}/2 selected
+                      </span>
+                    </div>
+
+                    {/* Thumbnails with primary toggle */}
+                    <div className="review-gallery-thumbs">
+                      {imgs.map((url, i) => {
+                        const primaryPos = adminPrimaryImages.indexOf(i);
+                        const isPrimary = primaryPos !== -1;
+                        return (
+                          <div key={i} className={`review-gallery-thumb-wrap${i === galleryIndex ? ' viewing' : ''}`}>
+                            <button
+                              className={`review-gallery-thumb${i === galleryIndex ? ' active' : ''}${isPrimary ? ' is-primary' : ''}`}
+                              onClick={() => setGalleryIndex(i)}
+                            >
+                              <img src={url} alt={`Thumb ${i + 1}`} />
+                              {isPrimary && (
+                                <span className="review-thumb-primary-badge">
+                                  ★ {primaryPos + 1}
+                                </span>
+                              )}
+                            </button>
+                            <button
+                              className={`review-thumb-select-btn${isPrimary ? ' selected' : ''}`}
+                              onClick={() => toggleAdminPrimary(i)}
+                              title={isPrimary ? 'Remove as primary' : 'Set as primary'}
+                            >
+                              {isPrimary ? `★ Primary ${primaryPos + 1}` : '☆ Set Primary'}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {adminPrimaryImages.length === 0 && (
+                      <p className="review-primary-warn">⚠ Select at least 1 primary image before approving</p>
                     )}
                   </div>
                 );
@@ -1379,7 +1437,8 @@ const AdminUserSubmissions = () => {
               <button 
                 className="admin-submissions-submit-review-btn"
                 onClick={submitReview}
-                disabled={loading}
+                disabled={loading || (reviewData.action === 'approve' && adminPrimaryImages.length === 0)}
+                title={reviewData.action === 'approve' && adminPrimaryImages.length === 0 ? 'Select at least 1 primary image first' : ''}
               >
                 {loading ? 'Processing...' : `${reviewData.action === 'approve' ? 'Approve' : 'Reject'} Submission`}
               </button>

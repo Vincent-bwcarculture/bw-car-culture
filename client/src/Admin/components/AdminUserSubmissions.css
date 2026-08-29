@@ -1200,25 +1200,35 @@
 
 .review-gallery-thumbs {
   display: flex;
-  gap: 4px;
-  padding: 6px;
+  gap: 6px;
+  padding: 8px;
   background: rgba(0,0,0,0.3);
   overflow-x: auto;
   scrollbar-width: thin;
+  flex-wrap: wrap;
+}
+
+.review-gallery-thumb-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
 }
 
 .review-gallery-thumb {
   flex-shrink: 0;
-  width: 60px;
-  height: 45px;
+  width: 72px;
+  height: 54px;
   border: 2px solid transparent;
   border-radius: 5px;
   overflow: hidden;
   cursor: pointer;
   padding: 0;
   background: none;
-  opacity: 0.6;
+  opacity: 0.65;
   transition: opacity 0.15s, border-color 0.15s;
+  position: relative;
 }
 
 .review-gallery-thumb.active {
@@ -1226,10 +1236,108 @@
   opacity: 1;
 }
 
+.review-gallery-thumb.is-primary {
+  border-color: #f5c518;
+  opacity: 1;
+}
+
+.review-gallery-thumb.active.is-primary {
+  border-color: #f5c518;
+}
+
 .review-gallery-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.review-thumb-primary-badge {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  background: #f5c518;
+  color: #000;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 3px;
+  line-height: 1.3;
+  pointer-events: none;
+}
+
+.review-thumb-select-btn {
+  font-size: 0.62rem;
+  padding: 2px 5px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: #8b949e;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  width: 72px;
+  text-align: center;
+}
+
+.review-thumb-select-btn:hover {
+  background: rgba(245,197,24,0.12);
+  border-color: rgba(245,197,24,0.4);
+  color: #f5c518;
+}
+
+.review-thumb-select-btn.selected {
+  background: rgba(245,197,24,0.15);
+  border-color: rgba(245,197,24,0.5);
+  color: #f5c518;
+  font-weight: 700;
+}
+
+/* Primary picker header */
+.review-primary-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: rgba(245,197,24,0.06);
+  border-top: 1px solid rgba(245,197,24,0.12);
+  font-size: 0.75rem;
+}
+
+.review-primary-picker-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #8b949e;
+}
+
+.review-primary-picker-count {
+  font-weight: 700;
+  color: #f5c518;
+}
+
+.review-primary-picker-count.warn {
+  color: #ff9800;
+}
+
+.review-primary-warn {
+  font-size: 0.75rem;
+  color: #ff9800;
+  padding: 4px 10px 6px;
+  margin: 0;
+}
+
+/* Primary badge on the main viewer */
+.review-gallery-primary-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #f5c518;
+  color: #000;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 5px;
+  pointer-events: none;
 }
 
 .review-gallery-empty {

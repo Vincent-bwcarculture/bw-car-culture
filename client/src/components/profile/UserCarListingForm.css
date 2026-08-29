@@ -697,7 +697,61 @@
 }
 
 .ulisting-image-preview.primary {
-  box-shadow: 0 0 0 3px var(--uprofile-primary-accent), 0 0 0 3px rgba(255, 51, 0, 0.3);
+  box-shadow: 0 0 0 3px #f5c518, 0 4px 16px rgba(245,197,24,0.25);
+}
+
+/* Upload row with choose + add more buttons */
+.ulisting-upload-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.ulisting-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: var(--uprofile-card-bg, #1a1a1a);
+  border: 1.5px dashed rgba(255,255,255,0.25);
+  color: var(--uprofile-text-primary, #fff);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.ulisting-upload-btn:hover {
+  border-color: var(--uprofile-primary-accent, #ff3300);
+  background: rgba(255,51,0,0.06);
+}
+
+.ulisting-upload-btn--add {
+  border-color: rgba(245,197,24,0.35);
+  color: #f5c518;
+}
+
+.ulisting-upload-btn--add:hover {
+  border-color: #f5c518;
+  background: rgba(245,197,24,0.08);
+}
+
+/* Primary badge — always visible on top of image */
+.ulisting-primary-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 2;
+  background: #f5c518;
+  color: #000;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 3px 7px;
+  border-radius: 4px;
+  pointer-events: none;
+  letter-spacing: 0.02em;
 }
 
 .ulisting-image-preview img {
