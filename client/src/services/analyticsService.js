@@ -11,6 +11,51 @@ class AnalyticsService {
     this.isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
     this.requestQueue = [];
     this.isProcessingQueue = false;
+
+    // Batch queue — flush every 10 s or when 10 events accumulate
+    this.batchQueue = [];
+    this.batchFlushTimer = null;
+    this.BATCH_SIZE = 10;
+    this.BATCH_INTERVAL = 10000;
+  }
+
+  // ── Batching ─────────────────────────────────────────────────
+
+  _enqueue(endpoint, payload) {
+    this.batchQueue.push({ endpoint, payload, queuedAt: Date.now() });
+    if (this.batchQueue.length >= this.BATCH_SIZE) {
+      this._flush();
+    } else if (!this.batchFlushTimer) {
+      this.batchFlushTimer = setTimeout(() => this._flush(), this.BATCH_INTERVAL);
+    }
+  }
+
+  async _flush() {
+    if (this.batchFlushTimer) {
+      clearTimeout(this.batchFlushTimer);
+      this.batchFlushTimer = null;
+    }
+    if (!this.batchQueue.length || !this.isOnline) return;
+
+    const events = this.batchQueue.splice(0, 50); // take up to 50
+    try {
+      await fetch(`${this.baseURL}/track/batch`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ events }),
+      });
+    } catch {
+      // silently drop — Vercel Analytics is the primary truth source
+    }
+  }
+
+  _flushBeacon() {
+    if (!this.batchQueue.length) return;
+    const events = this.batchQueue.splice(0);
+    const url = `${this.baseURL}/track/batch`;
+    try {
+      navigator.sendBeacon(url, new Blob([JSON.stringify({ events })], { type: 'application/json' }));
+    } catch {}
   }
 
   // Track page performance automatically
@@ -110,6 +155,14 @@ class AnalyticsService {
       });
     }
     
+    // Flush batch queue before page unloads
+    if (typeof window !== 'undefined') {
+      window.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') this._flushBeacon();
+      });
+      window.addEventListener('pagehide', () => this._flushBeacon());
+    }
+
     this.isInitialized = true;
   }
 
@@ -371,12 +424,11 @@ class AnalyticsService {
         }
       };
       
-      // Ensure we pass the correct endpoint
-      return await this.sendEvent('/track', payload);
-      
+      this._enqueue('/track', payload);
+      return null;
+
     } catch (error) {
       console.error('❌ Analytics trackEvent failed:', error.message);
-      this.storeFailedEvent('/track', eventData);
       return null;
     }
   }
@@ -414,11 +466,11 @@ class AnalyticsService {
       
       console.log('🔍 Tracking search:', searchData.query);
       
-      return await this.sendEvent('/track/search', payload);
-      
+      this._enqueue('/track/search', payload);
+      return null;
+
     } catch (error) {
       console.error('❌ Analytics trackSearch failed:', error.message);
-      this.storeFailedEvent('/track/search', searchData);
       return null;
     }
   }
@@ -441,11 +493,11 @@ class AnalyticsService {
       
       console.log('⚡ Tracking performance:', performanceData.page);
       
-      return await this.sendEvent('/track/performance', payload);
-      
+      this._enqueue('/track/performance', payload);
+      return null;
+
     } catch (error) {
       console.error('❌ Analytics trackPerformance failed:', error.message);
-      this.storeFailedEvent('/track/performance', performanceData);
       return null;
     }
   }
