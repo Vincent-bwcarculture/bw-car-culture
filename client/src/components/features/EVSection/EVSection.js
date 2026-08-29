@@ -9,7 +9,7 @@ const evTypes = [
     title: 'Full Electric',
     subtitle: 'Zero emissions',
     description: 'Battery-only, zero tailpipe emissions.',
-    search: 'electric',
+    fuelType: 'electric',
     badge: 'BEV',
     badgeColor: '#00c37c'
   },
@@ -18,7 +18,7 @@ const evTypes = [
     title: 'Plug-in Hybrid',
     subtitle: 'Best of both worlds',
     description: 'Electric + petrol for maximum range.',
-    search: 'plug-in hybrid',
+    fuelType: 'plugin_hybrid',
     badge: 'PHEV',
     badgeColor: '#0078ff'
   },
@@ -28,7 +28,7 @@ const evTypes = [
     title: 'Self-charging Hybrid',
     subtitle: 'No plug needed',
     description: 'Charges itself while driving.',
-    search: 'hybrid',
+    fuelType: 'hybrid',
     badge: 'HEV',
     badgeColor: '#ff8c00'
   }
@@ -78,7 +78,7 @@ const EVSection = () => {
 
             <button
               className="ev-cta-btn"
-              onClick={() => navigate('/marketplace?search=electric')}
+              onClick={() => navigate('/marketplace?fuelType=electric')}
             >
               Browse All EVs
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -93,7 +93,7 @@ const EVSection = () => {
               <button
                 key={type.id}
                 className="ev-type-card"
-                onClick={() => navigate(`/marketplace?search=${encodeURIComponent(type.search)}`)}
+                onClick={() => navigate(`/marketplace?fuelType=${encodeURIComponent(type.fuelType)}`)}
               >
                 <div className="ev-type-card-top">
                   {type.icon && <span className="ev-type-icon">{type.icon}</span>}

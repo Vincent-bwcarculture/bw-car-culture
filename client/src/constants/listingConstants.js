@@ -35,14 +35,21 @@ export const LISTING_STATUS = {
   export const VEHICLE_CATEGORIES = [
     'Sedan',
     'SUV',
+    'Hatchback',
+    'Crossover',
     'Sports Car',
     'Luxury',
     'Electric',
     'Hybrid',
     'Truck',
+    'Pickup Truck',
     'Van',
+    'Minibus',
+    'Bus',
     'Wagon',
     'Convertible',
+    'Motorcycle',
+    'Quad Bike',
     'Classic'
   ];
   

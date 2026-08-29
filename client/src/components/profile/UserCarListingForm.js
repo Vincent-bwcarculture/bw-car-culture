@@ -265,16 +265,21 @@ const UserCarListingForm = ({
     { value: 'coupe', label: 'Coupe' },
     { value: 'wagon', label: 'Station Wagon' },
     { value: 'convertible', label: 'Convertible' },
+    { value: 'crossover', label: 'Crossover' },
     { value: 'pickup', label: 'Pickup Truck' },
+    { value: 'truck', label: 'Truck' },
     { value: 'van', label: 'Van' },
     { value: 'minivan', label: 'Minivan' },
-    { value: 'crossover', label: 'Crossover' },
+    { value: 'minibus', label: 'Minibus / Combi' },
+    { value: 'bus', label: 'Bus' },
     { value: 'luxury', label: 'Luxury Car' },
     { value: 'sports', label: 'Sports Car' },
     { value: 'electric', label: 'Electric Vehicle' },
     { value: 'hybrid', label: 'Hybrid' },
-    { value: 'motorcycle', label: 'Motorcycle' },
-    { value: 'commercial', label: 'Commercial Vehicle' }
+    { value: 'motorcycle', label: 'Motorcycle / Bike' },
+    { value: 'quad_bike', label: 'Quad Bike / ATV' },
+    { value: 'commercial', label: 'Commercial Vehicle' },
+    { value: 'classic', label: 'Classic / Vintage' }
   ];
 
   // Compress an image file using Canvas before upload.
