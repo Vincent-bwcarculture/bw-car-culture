@@ -15,7 +15,9 @@ import {
   Users,
   PenTool,
   Bell,
-  Package
+  Package,
+  Hash,
+  Layers
 } from 'lucide-react';
 // Bell used for Notifications tab
 import axios from '../config/axios.js';
@@ -37,6 +39,7 @@ import CoordinatorManagement from '../components/profile/CoordinatorManagement.j
 import RealTimeCoordinatorDashboard from '../components/profile/RealTimeCoordinatorDashboard.js';
 import DriverOperatorDashboard from '../components/profile/DriverOperatorDashboard.js';
 import InventoryManagement from '../components/profile/InventoryManagement.js';
+import RoleSelectionComponent from '../components/profile/RoleSelectionComponent.js';
 
 import { useAuth } from '../context/AuthContext.js';
 import './UserProfilePage.css';
@@ -71,7 +74,7 @@ const [articleAction, setArticleAction] = useState(null);
       if (tab === 'sell-car' || tab === 'sell_car') {
         setActiveTab('vehicles'); // Redirect to vehicles tab
         setUrlAction('sell'); // Set action to sell
-      } else if (['register-vehicle', 'overview', 'notifications', 'services', 'routes', 'vehicles', 'inventory', 'articles', 'business', 'network', 'settings'].includes(tab)) {
+      } else if (['register-vehicle', 'overview', 'feed', 'roles', 'notifications', 'services', 'routes', 'vehicles', 'inventory', 'articles', 'business', 'network', 'settings'].includes(tab)) {
         setActiveTab(tab);
       }
     }
@@ -211,9 +214,11 @@ const getProfileHints = (userType) => {
 const getAvailableTabs = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Eye },
+    { id: 'feed', label: 'Feed', icon: Hash },
     { id: 'vehicles', label: 'Sell My Vehicle', icon: Car },
     { id: 'inventory', label: 'Sell Inventory', icon: Package },
     { id: 'register-vehicle', label: 'Register Vehicle', icon: Car },
+    { id: 'roles', label: 'Roles', icon: Layers },
     { id: 'notifications', label: 'Notifications', icon: Bell }
   ];
 
@@ -379,6 +384,23 @@ const getAvailableTabs = () => {
 
         {activeTab === 'overview' && (
           <ProfileOverview
+            profileData={displayData}
+            refreshProfile={fetchUserProfile}
+            onTabSwitch={setActiveTab}
+          />
+        )}
+
+        {activeTab === 'feed' && (
+          <div style={{ padding: '1.5rem', textAlign: 'center' }}>
+            <p style={{ color: '#aaa', marginBottom: '1rem' }}>View the community feed</p>
+            <a href="/feed" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1.4rem', background: '#6c63ff', color: '#fff', borderRadius: '8px', fontWeight: 700, textDecoration: 'none', fontSize: '0.9rem' }}>
+              Open Feed →
+            </a>
+          </div>
+        )}
+
+        {activeTab === 'roles' && (
+          <RoleSelectionComponent
             profileData={displayData}
             refreshProfile={fetchUserProfile}
           />

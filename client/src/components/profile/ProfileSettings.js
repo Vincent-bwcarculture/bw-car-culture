@@ -123,184 +123,117 @@ const ProfileSettings = ({ profileData, refreshProfile }) => {
     setTimeout(() => setMessage({ type: '', text: '' }), 5000);
   };
 
-  // FIXED: Handle Profile Updates - Uses production URL like working image uploads
+  const API = 'https://bw-car-culture-api.vercel.app';
+  const authHeader = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` });
+
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      console.log('Profile update data:', profileForm);
-
-      // FIXED: Use production URL like working image uploads
-      const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/basic', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
+      const response = await fetch(`${API}/user/profile/update`, {
+        method: 'POST',
+        headers: authHeader(),
         body: JSON.stringify({
           name: profileForm.name,
-          'profile.firstName': profileForm.firstName,
-          'profile.lastName': profileForm.lastName,
-          'profile.phone': profileForm.phone,
-          'profile.bio': profileForm.bio,
-          'profile.location': profileForm.location,
-          'profile.dateOfBirth': profileForm.dateOfBirth,
-          'profile.gender': profileForm.gender,
-          'profile.nationality': profileForm.nationality,
-          'profile.website': profileForm.website
+          bio: profileForm.bio,
+          phone: profileForm.phone,
+          location: profileForm.location,
+          firstName: profileForm.firstName,
+          lastName: profileForm.lastName,
+          gender: profileForm.gender,
+          nationality: profileForm.nationality,
+          website: profileForm.website,
+          dateOfBirth: profileForm.dateOfBirth
         })
       });
-
-      console.log('Profile update response status:', response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Profile update error response:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
       const result = await response.json();
-
       if (result.success) {
-        console.log('Profile update successful:', result.data);
-        
-        if (refreshProfile) {
-          refreshProfile();
+        if (refreshProfile) refreshProfile();
+        if (user && setUser && result.data?.user) {
+          setUser({ ...user, name: result.data.user.name, profile: result.data.user.profile });
         }
-        
-        if (user && setUser && result.data) {
-          setUser({
-            ...user,
-            name: result.data.name,
-            profile: result.data.profile
-          });
-        }
-        
         showMessage('success', 'Profile updated successfully! ✨');
       } else {
         showMessage('error', result.message || 'Failed to update profile');
       }
     } catch (error) {
-      console.error('Profile update error:', error);
       showMessage('error', 'Failed to update profile. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // FIXED: Handle Notification Updates - Uses production URL like working image uploads
   const handleNotificationSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      // FIXED: Use production URL like working image uploads
-      const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/notifications', {
+      const response = await fetch(`${API}/user/profile/notifications`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
+        headers: authHeader(),
         body: JSON.stringify(notificationForm)
       });
-
       const result = await response.json();
-
       if (result.success) {
-        if (refreshProfile) {
-          refreshProfile();
-        }
-        showMessage('success', 'Notification preferences updated! ✨');
+        if (refreshProfile) refreshProfile();
+        showMessage('success', 'Notification preferences saved! ✨');
       } else {
         showMessage('error', result.message || 'Failed to update notifications');
       }
     } catch (error) {
-      console.error('Notification update error:', error);
       showMessage('error', 'Failed to update notifications. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // FIXED: Handle Privacy Updates - Uses production URL like working image uploads
   const handlePrivacySubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      // FIXED: Use production URL like working image uploads
-      const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/privacy', {
+      const response = await fetch(`${API}/user/profile/privacy`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
+        headers: authHeader(),
         body: JSON.stringify(privacyForm)
       });
-
       const result = await response.json();
-
       if (result.success) {
-        if (refreshProfile) {
-          refreshProfile();
-        }
+        if (refreshProfile) refreshProfile();
         showMessage('success', 'Privacy settings updated! ✨');
       } else {
         showMessage('error', result.message || 'Failed to update privacy settings');
       }
     } catch (error) {
-      console.error('Privacy update error:', error);
       showMessage('error', 'Failed to update privacy settings. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // FIXED: Handle Password Updates - Uses production URL like working image uploads
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       showMessage('error', 'New passwords do not match');
       return;
     }
-    
     if (passwordForm.newPassword.length < 6) {
       showMessage('error', 'New password must be at least 6 characters long');
       return;
     }
-
     setLoading(true);
-
     try {
-      // FIXED: Use production URL like working image uploads
-      const response = await fetch('https://bw-car-culture-api.vercel.app/user/profile/password', {
+      const response = await fetch(`${API}/user/profile/password`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          currentPassword: passwordForm.currentPassword,
-          newPassword: passwordForm.newPassword
-        })
+        headers: authHeader(),
+        body: JSON.stringify({ currentPassword: passwordForm.currentPassword, newPassword: passwordForm.newPassword })
       });
-
       const result = await response.json();
-
       if (result.success) {
-        setPasswordForm({
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: ''
-        });
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
         showMessage('success', 'Password updated successfully! ✨');
       } else {
         showMessage('error', result.message || 'Failed to update password');
       }
     } catch (error) {
-      console.error('Password update error:', error);
       showMessage('error', 'Failed to update password. Please try again.');
     } finally {
       setLoading(false);
