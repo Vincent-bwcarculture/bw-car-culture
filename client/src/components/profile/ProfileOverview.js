@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   User, Calendar, MapPin, Phone, Mail, Award, Heart,
   Settings, Car, Route, ChevronRight, Plus, Eye,
-  ShoppingBag, Hash, Shield, Star, FileText, Wrench
+  ShoppingBag, Hash, Shield, Star, FileText, Wrench, X, Loader
 } from 'lucide-react';
 import './ProfileOverview.css';
+
+const API = 'https://bw-car-culture-api.vercel.app';
+const authHdr = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` });
+
+const MAKES = ['Alfa Romeo','Audi','BMW','Chery','Chevrolet','Citroën','Datsun','Fiat','Ford','GWM','Honda','Hyundai','Isuzu','JAC','Jeep','Kia','Land Rover','Lexus','Mahindra','Mazda','Mercedes-Benz','Mitsubishi','Nissan','Opel','Peugeot','Renault','Subaru','Suzuki','Toyota','Volkswagen','Volvo','Other'];
+const COLORS = ['Black','White','Silver','Grey','Red','Blue','Green','Brown','Orange','Yellow','Gold','Maroon','Other'];
 
 const ROLE_LABELS = {
   admin: 'Administrator', provider: 'Service Provider', dealer: 'Dealer',
@@ -20,6 +26,51 @@ const ProfileOverview = ({ profileData, refreshProfile, onTabSwitch }) => {
   const navigate = useNavigate();
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
 
+  // ── Owned Cars ──────────────────────────────────────────────────────────────
+  const [ownedCars, setOwnedCars]       = useState([]);
+  const [loadingCars, setLoadingCars]   = useState(true);
+  const [showAddCar, setShowAddCar]     = useState(false);
+  const [savingCar, setSavingCar]       = useState(false);
+  const [carError, setCarError]         = useState('');
+  const [newCar, setNewCar]             = useState({ make: '', model: '', year: '', trim: '', color: '' });
+
+  const fetchCars = useCallback(async () => {
+    try {
+      setLoadingCars(true);
+      const r = await fetch(`${API}/api/user/owned-cars`, { headers: authHdr() });
+      if (r.ok) { const d = await r.json(); setOwnedCars(d.data || []); }
+    } catch (_) {}
+    finally { setLoadingCars(false); }
+  }, []);
+
+  useEffect(() => { fetchCars(); }, [fetchCars]);
+
+  const handleAddCar = async (e) => {
+    e.preventDefault();
+    if (!newCar.make || !newCar.model) { setCarError('Make and model are required.'); return; }
+    setSavingCar(true); setCarError('');
+    try {
+      const r = await fetch(`${API}/api/user/owned-cars`, {
+        method: 'POST', headers: authHdr(), body: JSON.stringify(newCar)
+      });
+      const d = await r.json();
+      if (r.ok && d.success) {
+        setOwnedCars(prev => [...prev, d.data]);
+        setNewCar({ make: '', model: '', year: '', trim: '', color: '' });
+        setShowAddCar(false);
+      } else { setCarError(d.message || 'Failed to save car.'); }
+    } catch (_) { setCarError('Network error.'); }
+    finally { setSavingCar(false); }
+  };
+
+  const handleDeleteCar = async (id) => {
+    try {
+      const r = await fetch(`${API}/api/user/owned-cars/${id}`, { method: 'DELETE', headers: authHdr() });
+      if (r.ok) setOwnedCars(prev => prev.filter(c => c._id !== id));
+    } catch (_) {}
+  };
+  // ───────────────────────────────────────────────────────────────────────────
+
   // ── Profile strength ────────────────────────────────────────────────────────
   const profileStrength = (() => {
     let s = 0;
@@ -31,7 +82,7 @@ const ProfileOverview = ({ profileData, refreshProfile, onTabSwitch }) => {
     if (profileData.profile?.location)          s += 10;
     if (profileData.profile?.dateOfBirth)       s += 5;
     if (profileData.businessProfile?.services?.length > 0) s += 10;
-    if (profileData.vehicles?.length > 0)       s += 10;
+    if (profileData.vehicles?.length > 0 || ownedCars.length > 0) s += 10;
     return s;
   })();
 
@@ -58,10 +109,11 @@ const ProfileOverview = ({ profileData, refreshProfile, onTabSwitch }) => {
 
   // ── Suggestions ────────────────────────────────────────────────────────────
   const suggestions = [];
-  if (!profileData.avatar?.url)          suggestions.push({ title: 'Add photo',     tab: 'settings', icon: User });
-  if (!profileData.profile?.bio)         suggestions.push({ title: 'Write a bio',   tab: 'settings', icon: FileText });
-  if (!profileData.profile?.phone)       suggestions.push({ title: 'Add phone',     tab: 'settings', icon: Phone });
-  if (!profileData.profile?.location)    suggestions.push({ title: 'Add location',  tab: 'settings', icon: MapPin });
+  if (!profileData.avatar?.url)          suggestions.push({ title: 'Add photo',        tab: 'settings', icon: User });
+  if (!profileData.profile?.bio)         suggestions.push({ title: 'Write a bio',      tab: 'settings', icon: FileText });
+  if (!profileData.profile?.phone)       suggestions.push({ title: 'Add phone',        tab: 'settings', icon: Phone });
+  if (!profileData.profile?.location)    suggestions.push({ title: 'Add location',     tab: 'settings', icon: MapPin });
+  if (!loadingCars && ownedCars.length === 0) suggestions.push({ title: 'Add your car', tab: 'overview', icon: Car, action: () => setShowAddCar(true) });
 
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-BW', { year: 'numeric', month: 'long', day: 'numeric' }) : '—';
 
@@ -205,7 +257,7 @@ const ProfileOverview = ({ profileData, refreshProfile, onTabSwitch }) => {
                     <button
                       key={i}
                       className="poverview-nudge-item"
-                      onClick={() => onTabSwitch?.('settings')}
+                      onClick={() => s.action ? s.action() : onTabSwitch?.(s.tab || 'settings')}
                     >
                       <span className="poverview-nudge-icon"><Icon size={14} /></span>
                       <span className="poverview-nudge-label">{s.title}</span>
@@ -219,6 +271,99 @@ const ProfileOverview = ({ profileData, refreshProfile, onTabSwitch }) => {
         </div>
 
       </div>{/* end columns */}
+
+      {/* ── My Cars / Garage ── */}
+      <div className="poverview-card poverview-garage-card">
+        <div className="poverview-card-title-row">
+          <h4 className="poverview-card-title"><Car size={14} /> My Cars</h4>
+          {!showAddCar && (
+            <button className="poverview-garage-add-btn" onClick={() => { setShowAddCar(true); setCarError(''); }}>
+              <Plus size={13} /> Add car
+            </button>
+          )}
+        </div>
+
+        {/* Add car form */}
+        {showAddCar && (
+          <form className="poverview-car-form" onSubmit={handleAddCar}>
+            <div className="poverview-car-form-grid">
+              <div className="poverview-car-field">
+                <label>Make *</label>
+                <select value={newCar.make} onChange={e => setNewCar(p => ({ ...p, make: e.target.value }))} required>
+                  <option value="">Select make</option>
+                  {MAKES.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+              <div className="poverview-car-field">
+                <label>Model *</label>
+                <input type="text" placeholder="e.g. Hilux, Golf, X3" value={newCar.model} onChange={e => setNewCar(p => ({ ...p, model: e.target.value }))} required />
+              </div>
+              <div className="poverview-car-field">
+                <label>Year</label>
+                <input type="number" placeholder="e.g. 2020" min="1960" max={new Date().getFullYear() + 1} value={newCar.year} onChange={e => setNewCar(p => ({ ...p, year: e.target.value }))} />
+              </div>
+              <div className="poverview-car-field">
+                <label>Trim / Variant</label>
+                <input type="text" placeholder="e.g. 2.8 GD-6 4×4" value={newCar.trim} onChange={e => setNewCar(p => ({ ...p, trim: e.target.value }))} />
+              </div>
+              <div className="poverview-car-field">
+                <label>Color</label>
+                <select value={newCar.color} onChange={e => setNewCar(p => ({ ...p, color: e.target.value }))}>
+                  <option value="">Select color</option>
+                  {COLORS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+            {carError && <p className="poverview-car-error">{carError}</p>}
+            <div className="poverview-car-form-actions">
+              <button type="button" className="poverview-car-cancel" onClick={() => { setShowAddCar(false); setCarError(''); }}>Cancel</button>
+              <button type="submit" className="poverview-car-save" disabled={savingCar}>
+                {savingCar ? <><Loader size={13} className="poverview-spin" /> Saving…</> : 'Add to garage'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Car list */}
+        {loadingCars ? (
+          <div className="poverview-garage-empty"><Loader size={18} className="poverview-spin" /> Loading your cars…</div>
+        ) : ownedCars.length === 0 && !showAddCar ? (
+          <div className="poverview-garage-empty">
+            <Car size={28} style={{ opacity: 0.3 }} />
+            <p>No cars added yet.</p>
+            <button className="poverview-garage-add-btn" onClick={() => setShowAddCar(true)}>
+              <Plus size={13} /> Add your first car
+            </button>
+          </div>
+        ) : (
+          <div className="poverview-garage-grid">
+            {ownedCars.map(car => (
+              <div key={car._id} className="poverview-garage-chip">
+                <Car size={13} className="poverview-garage-chip-icon" />
+                <div className="poverview-garage-chip-text">
+                  <span className="poverview-garage-chip-name">
+                    {[car.year, car.make, car.model].filter(Boolean).join(' ')}
+                  </span>
+                  {(car.trim || car.color) && (
+                    <span className="poverview-garage-chip-sub">
+                      {[car.trim, car.color].filter(Boolean).join(' · ')}
+                    </span>
+                  )}
+                </div>
+                <button
+                  className="poverview-garage-chip-del"
+                  title="Remove"
+                  onClick={() => handleDeleteCar(car._id)}
+                ><X size={11} /></button>
+              </div>
+            ))}
+          </div>
+        )}
+        <p className="poverview-garage-hint">
+          Your cars are shown next to your name in the community feed and help us recommend relevant listings and events.
+        </p>
+      </div>
+
     </div>
   );
 };

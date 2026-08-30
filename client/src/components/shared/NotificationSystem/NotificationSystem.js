@@ -110,7 +110,12 @@ const NotificationSystem = ({ userId, userSettings }) => {
     }
   };
 
-  const getNotificationIcon = (type) => {
+  const getNotificationIcon = (type, icon) => {
+    // Contextual system prompts
+    if (icon === 'car'    || type === 'system_add_car')  return <Car size={16} className="notification-icon warning" />;
+    if (icon === 'avatar' || type === 'system_avatar')   return <CheckCircle size={16} className="notification-icon info" />;
+    if (icon === 'profile'|| type === 'system_bio')      return <Info size={16} className="notification-icon info" />;
+    if (icon === 'phone'  || type === 'system_phone')    return <Settings size={16} className="notification-icon service" />;
     switch (type) {
       case 'service_reminder':
         return <Settings size={16} className="notification-icon service" />;
@@ -147,33 +152,23 @@ const NotificationSystem = ({ userId, userSettings }) => {
   };
 
   const handleNotificationClick = (notification) => {
-    if (!notification.isRead) {
-      markAsRead(notification._id);
-    }
-    
-    // Handle navigation based on notification type
-    switch (notification.type) {
-      case 'service_reminder':
-        window.location.href = '/profile?tab=vehicles';
-        break;
-      case 'vehicle_expiry':
-        window.location.href = '/profile?tab=vehicles';
-        break;
-      case 'listing_update':
-        if (notification.data?.listingId) {
-          window.location.href = `/listings/${notification.data.listingId}`;
-        }
-        break;
-      case 'route_inquiry':
-        window.location.href = '/profile?tab=routes';
-        break;
-      case 'booking_confirmation':
-        window.location.href = '/profile?tab=routes';
-        break;
-      default:
-        window.location.href = '/profile';
-    }
-    
+    if (!notification.isRead) markAsRead(notification._id);
+    // Deep link: use stored link field first, fall back to type-based routing
+    const dest = notification.link || (() => {
+      switch (notification.type) {
+        case 'service_reminder':
+        case 'vehicle_expiry':    return '/profile?tab=vehicles';
+        case 'listing_update':    return notification.data?.listingId ? `/listings/${notification.data.listingId}` : '/profile';
+        case 'route_inquiry':
+        case 'booking_confirmation': return '/profile?tab=routes';
+        case 'system_add_car':    return '/profile?tab=overview';
+        case 'system_bio':
+        case 'system_avatar':
+        case 'system_phone':      return '/profile?tab=settings';
+        default:                  return '/profile?tab=notifications';
+      }
+    })();
+    window.location.href = dest;
     setShowDropdown(false);
   };
 
@@ -228,7 +223,7 @@ const NotificationSystem = ({ userId, userSettings }) => {
                 >
                   <div className="notification-content">
                     <div className="notification-icon-wrapper">
-                      {getNotificationIcon(notification.type)}
+                      {getNotificationIcon(notification.type, notification.icon)}
                     </div>
                     <div className="notification-body">
                       <h4 className="notification-title">
@@ -237,9 +232,12 @@ const NotificationSystem = ({ userId, userSettings }) => {
                       <p className="notification-message">
                         {notification.message}
                       </p>
-                      <span className="notification-time">
-                        {formatTimeAgo(notification.createdAt)}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span className="notification-time">{formatTimeAgo(notification.createdAt)}</span>
+                        {(notification.link || notification.category === 'system') && (
+                          <span style={{ fontSize: '0.7rem', color: '#ff3300', fontWeight: 500 }}>→</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <button 
@@ -267,7 +265,7 @@ const NotificationSystem = ({ userId, userSettings }) => {
               <button 
                 className="view-all-btn"
                 onClick={() => {
-                  window.location.href = '/notifications';
+                  window.location.href = '/profile?tab=notifications';
                   setShowDropdown(false);
                 }}
               >

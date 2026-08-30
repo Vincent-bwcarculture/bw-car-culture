@@ -17,7 +17,7 @@ const NotificationsTab = ({ profileData }) => {
   const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE}/api/notifications`, {
+      const response = await fetch(`${API_BASE}/api/user/notifications`, {
         headers: authHeader()
       });
       if (response.ok) {
@@ -38,7 +38,7 @@ const NotificationsTab = ({ profileData }) => {
 
   const markAsRead = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/api/notifications/${id}/read`, {
+      const res = await fetch(`${API_BASE}/api/user/notifications/${id}/read`, {
         method: 'PUT',
         headers: authHeader()
       });
@@ -53,7 +53,7 @@ const NotificationsTab = ({ profileData }) => {
 
   const markAllAsRead = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/notifications/read-all`, {
+      const res = await fetch(`${API_BASE}/api/user/notifications/read-all`, {
         method: 'PUT',
         headers: authHeader()
       });
@@ -68,7 +68,7 @@ const NotificationsTab = ({ profileData }) => {
 
   const deleteNotification = async (id) => {
     try {
-      const res = await fetch(`${API_BASE}/api/notifications/${id}`, {
+      const res = await fetch(`${API_BASE}/api/user/notifications/${id}`, {
         method: 'DELETE',
         headers: authHeader()
       });
@@ -82,8 +82,13 @@ const NotificationsTab = ({ profileData }) => {
     }
   };
 
-  const getIcon = (type) => {
+  const getIcon = (type, icon) => {
     const props = { size: 18 };
+    // System/contextual prompt icons (keyed by icon field or type)
+    if (icon === 'car'    || type === 'system_add_car')  return <Car {...props} style={{ color: '#ff9f40' }} />;
+    if (icon === 'avatar' || type === 'system_avatar')   return <CheckCircle {...props} style={{ color: '#a78bfa' }} />;
+    if (icon === 'profile'|| type === 'system_bio')      return <Info {...props} style={{ color: '#34d399' }} />;
+    if (icon === 'phone'  || type === 'system_phone')    return <Settings {...props} style={{ color: '#60a5fa' }} />;
     switch (type) {
       case 'new_follower':     return <CheckCircle {...props} style={{ color: '#a78bfa' }} />;
       case 'new_comment':      return <AlertCircle {...props} style={{ color: '#60a5fa' }} />;
@@ -98,6 +103,11 @@ const NotificationsTab = ({ profileData }) => {
       case 'system_alert':     return <AlertTriangle {...props} style={{ color: '#ff9f40' }} />;
       default:                 return <Bell {...props} style={{ color: '#aaaaaa' }} />;
     }
+  };
+
+  const handleItemClick = async (n) => {
+    if (!n.isRead) await markAsRead(n._id);
+    if (n.link) window.location.href = n.link;
   };
 
   const formatTime = (date) => {
@@ -234,7 +244,7 @@ const NotificationsTab = ({ profileData }) => {
                 cursor: 'pointer',
                 transition: 'background 0.2s'
               }}
-              onClick={() => !n.isRead && markAsRead(n._id)}
+              onClick={() => handleItemClick(n)}
             >
               {/* Unread dot */}
               <div style={{ flexShrink: 0, paddingTop: '3px' }}>
@@ -255,7 +265,7 @@ const NotificationsTab = ({ profileData }) => {
                 background: 'rgba(255,255,255,0.06)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}>
-                {getIcon(n.type)}
+                {getIcon(n.type, n.icon)}
               </div>
 
               {/* Body */}
@@ -272,8 +282,9 @@ const NotificationsTab = ({ profileData }) => {
                   lineHeight: 1.4,
                   marginBottom: '0.3rem'
                 }}>{n.message}</div>
-                <div style={{ fontSize: '0.75rem', color: '#666666' }}>
-                  {formatTime(n.createdAt)}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#666666' }}>{formatTime(n.createdAt)}</span>
+                  {n.link && <span style={{ fontSize: '0.72rem', color: '#ff3300', fontWeight: 500 }}>Tap to go →</span>}
                 </div>
               </div>
 
