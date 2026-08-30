@@ -23,6 +23,14 @@ body.is-scrolling *:not(.fdstrip-track):not(.fdstrip-card):not(.fdstrip-arrow) {
   pointer-events: none;
 }
 
+/* Explicitly restore pointer events on fdstrip — the :not() above only prevents
+   re-applying none, but they still inherit none from body. This overrides that. */
+body.is-scrolling .fdstrip-track,
+body.is-scrolling .fdstrip-card,
+body.is-scrolling .fdstrip-arrow {
+  pointer-events: auto;
+}
+
 body.section-transitioning {
   overflow: hidden;
 }
@@ -74,6 +82,8 @@ body.section-transitioning * {
   display: flex;
   align-items: center;
   gap: 4px;
+  overflow: hidden;
+  min-width: 0;
 }
 .fdstrip-arrow {
   flex-shrink: 0;
@@ -102,6 +112,8 @@ body.section-transitioning * {
   gap: 8px;
   overflow-x: auto;
   scroll-behavior: smooth;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
