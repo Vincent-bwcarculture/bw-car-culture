@@ -2,7 +2,7 @@
 .fp-page {
   min-height: 100vh;
   background: var(--app-bg, #0a0a0a);
-  padding: 2rem 1rem 4rem;
+  padding: 1rem 1rem 2rem;
 }
 
 .fp-container {
@@ -525,7 +525,7 @@
 .fp-load-more:hover { background: rgba(255,255,255,0.09); color: var(--text-primary, #fff); }
 
 @media (max-width: 600px) {
-  .fp-page { padding: 1rem 0.5rem 3rem; }
+  .fp-page { padding: 0.75rem 0.5rem 2rem; }
   .fp-composer { padding: 0.75rem; }
   .fp-post { padding: 0.75rem; }
 }

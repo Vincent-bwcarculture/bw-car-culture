@@ -117,7 +117,7 @@
   flex: 0 0 260px;
   width: 260px;
   transition: all 0.3s ease;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.4rem;
 }
 
 /* Add a subtle scale effect for active slide */
@@ -203,7 +203,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 300px;
+  min-height: 160px;
 }
 
 .home-services-spinner {
@@ -231,7 +231,7 @@
 /* Empty state */
 .home-services-empty {
   text-align: center;
-  padding: 3rem 1rem;
+  padding: 1.25rem 1rem;
   background: rgba(25, 25, 25, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;

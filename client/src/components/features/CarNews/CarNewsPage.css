@@ -4,7 +4,7 @@
 .cc-newspage-container {
   max-width: 1800px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   min-height: 100vh;
   background: radial-gradient(#000000bb, rgba(0, 0, 0, 0.979));
 }
@@ -13,7 +13,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   flex-wrap: wrap;
   gap: 1rem;
 }
@@ -130,8 +130,8 @@
   background: rgba(20, 20, 20, 0.95);
   border: 1px solid #2c2c2c;
   border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
   display: flex;
   gap: 2rem;
   animation: cc-newspage-slideDown 0.3s ease;
@@ -193,7 +193,7 @@
 .cc-newspage-container .cc-newspage-categories {
   display: flex;
   gap: 0.8rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0.75rem;
   overflow-x: auto;
   padding-bottom: 0.5rem;
   scrollbar-width: thin;
@@ -270,7 +270,7 @@
 
 /* Featured Section */
 .cc-newspage-container .cc-newspage-featured-section {
-  margin-bottom: 3rem;
+  margin-bottom: 1.25rem;
 }
 
 .cc-newspage-container .cc-newspage-featured-article-card {
@@ -370,13 +370,13 @@
 
 /* Articles Section */
 .cc-newspage-container .cc-newspage-articles {
-  margin-bottom: 3rem;
+  margin-bottom: 1.25rem;
 }
 
 .cc-newspage-container .cc-newspage-section-title {
   font-size: 1.8rem;
   color: #ffffff;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
   border-bottom: 2px solid #ff3300;
   padding-bottom: 0.5rem;
   display: inline-block;
@@ -386,7 +386,7 @@
   background: rgba(20, 20, 20, 0.9);
   border: 1px solid #2c2c2c;
   border-radius: 12px;
-  padding: 3rem;
+  padding: 1.5rem;
   text-align: center;
 }
 
@@ -420,7 +420,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.25rem;
-  min-height: 400px;
+  min-height: 200px;
 }
 
 .cc-newspage-container .cc-newspage-articles-container.list {

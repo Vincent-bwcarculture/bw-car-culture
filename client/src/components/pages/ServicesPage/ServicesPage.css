@@ -61,7 +61,7 @@
  .bcc-services-hero-content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 3rem 2rem 2rem;
+    padding: 1.5rem 1.5rem 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -84,7 +84,7 @@
   .bcc-services-hero-subtitle {
     font-size: clamp(1rem, 1.5vw, 1.2rem);
     color: rgba(255, 255, 255, 0.85);
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     line-height: 1.5;
     max-width: 600px;
     margin-left: auto;
@@ -319,7 +319,7 @@
 .bcc-services-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 2rem 4rem;
+    padding: 1rem 1.5rem 2rem;
     background: var(--background-dark);
   }
   
@@ -550,7 +550,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 300px;
+    min-height: 160px;
   }
   
   .bcc-service-no-results {
@@ -696,11 +696,11 @@
     }
     
     .bcc-services-container {
-      padding: 0 1.5rem 3rem;
+      padding: 0 1rem 1.5rem;
     }
-    
+
     .bcc-services-hero-content {
-      padding: 3rem 1.5rem;
+      padding: 1.25rem 1rem;
     }
   }
   
