@@ -7,7 +7,7 @@ import {
   MapPin, Phone, Mail, FileText, Upload,
   Clock, CheckCircle, XCircle, AlertCircle,
   ArrowRight, ChevronDown, ChevronUp, Package, PenTool,
-  Network  // Network icon for Association role
+  Network, Wrench
 } from 'lucide-react';
 import './RoleSelectionComponent.css';
 
@@ -70,6 +70,15 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     areaOfOperation: '',
     memberCount: '',
     associationDescription: '',
+
+    // Mechanic-specific fields
+    workshopName: '',
+    workshopType: '',
+    yearsExperience: '',
+    mechanicSpecializations: [],
+    certifications: '',
+    mobileService: false,
+    workshopCapacity: '',
 
     // Additional Information
     experience: '',
@@ -241,6 +250,24 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
       ],
       requiredFields: [],
       requiredDocs: []
+    },
+    'mechanic': {
+      id: 'mechanic',
+      title: 'Mechanic / Workshop',
+      icon: Wrench,
+      color: '#e67e22',
+      description: 'Register your garage or mobile mechanic service to get found by vehicle owners',
+      requiresApproval: true,
+      benefits: [
+        'Professional workshop profile page',
+        'Get found by vehicle owners needing repairs',
+        'Showcase specializations and certifications',
+        'Customer reviews and ratings',
+        'Service booking and inquiry management',
+        'List mobile or walk-in services'
+      ],
+      requiredFields: [],
+      requiredDocs: []
     }
   };
 
@@ -348,9 +375,19 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
   const handleSpecializationChange = (specialization, isChecked) => {
     setFormData(prev => ({
       ...prev,
-      specializations: isChecked 
+      specializations: isChecked
         ? [...prev.specializations, specialization]
         : prev.specializations.filter(s => s !== specialization)
+    }));
+  };
+
+  // Handle mechanic specializations
+  const handleMechanicSpecializationChange = (spec, isChecked) => {
+    setFormData(prev => ({
+      ...prev,
+      mechanicSpecializations: isChecked
+        ? [...prev.mechanicSpecializations, spec]
+        : prev.mechanicSpecializations.filter(s => s !== spec)
     }));
   };
 
@@ -417,6 +454,14 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         areaOfOperation: formData.areaOfOperation,
         memberCount: formData.memberCount,
         associationDescription: formData.associationDescription,
+        // Mechanic-specific data
+        workshopName: formData.workshopName,
+        workshopType: formData.workshopType,
+        yearsExperience: formData.yearsExperience,
+        mechanicSpecializations: formData.mechanicSpecializations,
+        certifications: formData.certifications,
+        mobileService: formData.mobileService,
+        workshopCapacity: formData.workshopCapacity,
         // Access code (bypass)
         accessCode: formData.accessCode,
         // Existing business claim
@@ -489,6 +534,9 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
           // Reset association fields
           associationName: '', associationType: '', associationRegistrationNumber: '',
           areaOfOperation: '', memberCount: '', associationDescription: '',
+          // Reset mechanic fields
+          workshopName: '', workshopType: '', yearsExperience: '', mechanicSpecializations: [],
+          certifications: '', mobileService: false, workshopCapacity: '',
           businessLicense: null, taxCertificate: null, idDocument: null, proofOfAddress: null,
           accessCode: '',
           claimedBusinessId: ''
@@ -697,13 +745,13 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                 />
               </div>
               
-              {(selectedRole === 'dealership_admin' || selectedRole === 'transport_admin' || selectedRole === 'rental_admin' || selectedRole === 'association') && (
+              {(selectedRole === 'dealership_admin' || selectedRole === 'transport_admin' || selectedRole === 'rental_admin' || selectedRole === 'association' || selectedRole === 'mechanic') && (
                 <div className="role-form-field role-form-field-full">
-                  <label>Business Address</label>
+                  <label>Business / Workshop Address</label>
                   <textarea
                     value={formData.businessAddress}
                     onChange={(e) => handleInputChange('businessAddress', e.target.value)}
-                    placeholder="Enter complete business address"
+                    placeholder="Enter complete workshop address (leave blank if fully mobile)"
                     rows="3"
                   />
                 </div>
@@ -966,6 +1014,124 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                     value={formData.associationDescription}
                     onChange={(e) => handleInputChange('associationDescription', e.target.value)}
                     placeholder="Describe your association's purpose, goals, and how you oversee your members"
+                    rows="4"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Mechanic / Workshop Section */}
+          {selectedRole === 'mechanic' && (
+            <div className="role-form-section">
+              <h5>Workshop / Service Details</h5>
+              <div className="role-form-grid">
+                <div className="role-form-field">
+                  <label>Workshop / Business Name</label>
+                  <input
+                    type="text"
+                    value={formData.workshopName}
+                    onChange={(e) => handleInputChange('workshopName', e.target.value)}
+                    placeholder="e.g. Kagiso Auto Repairs"
+                  />
+                </div>
+
+                <div className="role-form-field">
+                  <label>Workshop Type</label>
+                  <select
+                    value={formData.workshopType}
+                    onChange={(e) => handleInputChange('workshopType', e.target.value)}
+                  >
+                    <option value="">Select type</option>
+                    <option value="independent">Independent Workshop</option>
+                    <option value="authorized">Authorized / Franchise Workshop</option>
+                    <option value="mobile">Mobile Mechanic (no fixed location)</option>
+                    <option value="home_based">Home-based Workshop</option>
+                    <option value="dealership_workshop">Dealership Workshop</option>
+                  </select>
+                </div>
+
+                <div className="role-form-field">
+                  <label>Years of Experience</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="60"
+                    value={formData.yearsExperience}
+                    onChange={(e) => handleInputChange('yearsExperience', e.target.value)}
+                    placeholder="e.g. 5"
+                  />
+                </div>
+
+                <div className="role-form-field">
+                  <label>Workshop Capacity (number of bays/lifts)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.workshopCapacity}
+                    onChange={(e) => handleInputChange('workshopCapacity', e.target.value)}
+                    placeholder="e.g. 3"
+                  />
+                </div>
+
+                <div className="role-form-field role-form-field-full">
+                  <label>Certifications / Qualifications</label>
+                  <textarea
+                    value={formData.certifications}
+                    onChange={(e) => handleInputChange('certifications', e.target.value)}
+                    placeholder="List any formal trade certificates, manufacturer certifications, or training (e.g. City & Guilds, Toyota certified, etc.)"
+                    rows="3"
+                  />
+                </div>
+
+                <div className="role-form-field role-form-field-full">
+                  <label>Specializations</label>
+                  <div className="role-checkbox-group">
+                    {[
+                      { value: 'engine_repair', label: 'Engine Repair & Rebuild' },
+                      { value: 'transmission', label: 'Transmission & Gearbox' },
+                      { value: 'electrical', label: 'Electrical & Electronics' },
+                      { value: 'brakes', label: 'Brake Systems' },
+                      { value: 'suspension', label: 'Suspension & Steering' },
+                      { value: 'aircon', label: 'Air Conditioning (HVAC)' },
+                      { value: 'diagnostics', label: 'Diagnostics & Scanning' },
+                      { value: 'body_panel', label: 'Body & Panel Work' },
+                      { value: 'tyres', label: 'Tyres & Wheel Alignment' },
+                      { value: 'exhaust', label: 'Exhaust & Emissions' },
+                      { value: 'auto_glass', label: 'Auto Glass & Windscreens' },
+                      { value: 'detailing', label: 'Detailing & Polishing' },
+                      { value: '4x4_offroad', label: '4×4 & Off-road' },
+                      { value: 'performance', label: 'Performance & Tuning' },
+                    ].map(spec => (
+                      <label key={spec.value} className="role-checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={formData.mechanicSpecializations.includes(spec.value)}
+                          onChange={(e) => handleMechanicSpecializationChange(spec.value, e.target.checked)}
+                        />
+                        <span>{spec.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="role-form-field role-form-field-full">
+                  <label className="role-checkbox-item" style={{ cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={formData.mobileService}
+                      onChange={(e) => handleInputChange('mobileService', e.target.checked)}
+                    />
+                    <span>I offer mobile / call-out services (come to the customer's location)</span>
+                  </label>
+                </div>
+
+                <div className="role-form-field role-form-field-full">
+                  <label>Tell us about your workshop</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    placeholder="Describe your experience, the types of vehicles you work on, what makes your service stand out, and any additional information you'd like potential customers to know."
                     rows="4"
                   />
                 </div>
