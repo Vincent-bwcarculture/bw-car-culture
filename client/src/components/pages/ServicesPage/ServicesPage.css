@@ -73,7 +73,7 @@
   }
   
   .bcc-services-hero-title {
-    font-size: clamp(2rem, 4vw, 3rem);
+    font-size: clamp(1.4rem, 3vw, 2rem);
     font-weight: 600;
     margin-bottom: 1rem;
     color: #ffffff;
@@ -582,7 +582,7 @@
   }
   
   .bcc-service-providers-heading {
-    font-size: 1.6rem;
+    font-size: 1.2rem;
     margin-bottom: 1.2rem;
     color: #ffffff;
     position: relative;
@@ -806,7 +806,7 @@
     }
 
     .bcc-service-providers-heading {
-      font-size: 1.5rem;
+      font-size: 1.1rem;
     }
 
     .bcc-service-providers-heading::after {
@@ -859,7 +859,7 @@
   
   @media (max-width: 480px) {
     .bcc-services-hero-title {
-      font-size: 1.6rem;
+      font-size: 1.2rem;
     }
 
     .bcc-services-hero-visual {

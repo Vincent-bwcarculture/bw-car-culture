@@ -1520,7 +1520,7 @@ const ServicesPage = () => {
                 </div>
                 <div className="bcc-service-filter-selects">
                   <div className="bcc-service-filter-item">
-                    <label className="bcc-service-filter-label">📍 Pickup location</label>
+                    <label className="bcc-service-filter-label">Pickup location</label>
                     <input
                       type="text"
                       placeholder="City or area…"
@@ -1601,7 +1601,7 @@ const ServicesPage = () => {
               </div>
               <div className="bcc-service-filter-selects">
                 <div className="bcc-service-filter-item">
-                  <label className="bcc-service-filter-label">📍 {selectedCategoryObject.filterOptions?.locationLabel?.replace(/…$/, '') || 'Location'}</label>
+                  <label className="bcc-service-filter-label">{selectedCategoryObject.filterOptions?.locationLabel?.replace(/…$/, '') || 'Location'}</label>
                   <input
                     type="text"
                     placeholder={selectedCategoryObject.filterOptions?.locationLabel || "City or area…"}
@@ -1770,7 +1770,7 @@ const ServicesPage = () => {
         {/* ── Mechanics section ── */}
         {selectedCategory === 'mechanics' && (
           <>
-            <h2 className="bcc-service-providers-heading" style={{ marginTop: '2rem' }}>
+            <h2 className="bcc-service-providers-heading" style={{ marginTop: '0.75rem' }}>
               Available Mechanics &amp; Workshops
               {mechanicsTotal > 0 && <span className="bcc-service-results-count" style={{ marginLeft: '0.75rem', fontSize: '0.85rem', fontWeight: 400 }}>({mechanicsTotal} found)</span>}
             </h2>
@@ -1795,7 +1795,7 @@ const ServicesPage = () => {
         {/* Service Providers section — hidden for mechanics tab */}
         {selectedCategory !== 'mechanics' && (
         <>
-        <h2 className="bcc-service-providers-heading" style={{marginTop: '3rem'}}>
+        <h2 className="bcc-service-providers-heading" style={{marginTop: '0.75rem'}}>
           {selectedCategory !== 'all'
             ? `${selectedCategoryObject.name} Providers`
             : "Service Providers"}
