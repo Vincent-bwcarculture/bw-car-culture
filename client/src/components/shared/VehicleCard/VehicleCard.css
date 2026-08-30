@@ -2261,3 +2261,211 @@
     padding: 0.4rem;
   }
 }
+
+/* ── Finance badge clickable ── */
+.vc-finance-badge--clickable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.18s, transform 0.12s;
+}
+.vc-finance-badge--clickable:hover {
+  background-color: rgba(46, 213, 115, 0.22);
+  transform: scale(1.04);
+}
+.vc-finance-badge--clickable:active { transform: scale(0.97); }
+
+/* ── Back face tab bar ── */
+.vc-back-tabs {
+  display: flex;
+  flex: 1;
+  gap: 0.25rem;
+  overflow: hidden;
+}
+.vc-back-tab {
+  flex: 1;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.55);
+  padding: 0.2rem 0.3rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+.vc-back-tab:hover {
+  color: #fff;
+  border-color: rgba(255, 51, 0, 0.4);
+}
+.vc-back-tab.active {
+  background: rgba(255, 51, 0, 0.18);
+  color: #fff;
+  border-color: rgba(255, 51, 0, 0.55);
+  font-weight: 600;
+}
+
+/* ── Finance panel ── */
+.vc-finance-panel {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.vc-finance-header {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.vc-finance-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(46, 213, 115, 0.15);
+  color: var(--vc-success);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1px solid rgba(46, 213, 115, 0.3);
+}
+.vc-finance-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+}
+.vc-finance-sub {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.45);
+  margin: 0;
+}
+.vc-finance-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.vc-finance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0.5rem;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.04);
+}
+.vc-finance-row--highlight {
+  background: rgba(46, 213, 115, 0.08);
+  border: 1px solid rgba(46, 213, 115, 0.18);
+}
+.vc-finance-label {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.55);
+}
+.vc-finance-value {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+}
+.vc-finance-unit {
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.5);
+  margin-left: 2px;
+}
+.vc-finance-green { color: var(--vc-success) !important; }
+.vc-finance-disclaimer {
+  font-size: 0.67rem;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.4;
+  margin: 0;
+}
+.vc-finance-cta {
+  display: block;
+  text-align: center;
+  background: rgba(46, 213, 115, 0.18);
+  color: var(--vc-success);
+  border: 1px solid rgba(46, 213, 115, 0.35);
+  border-radius: 6px;
+  padding: 0.45rem;
+  font-size: 0.73rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.18s;
+  margin-top: auto;
+}
+.vc-finance-cta:hover { background: rgba(46, 213, 115, 0.28); }
+
+/* ── Service History panel ── */
+.vc-sh-panel {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.vc-sh-records {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  overflow-y: auto;
+  max-height: 180px;
+}
+.vc-sh-record {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 0.4rem 0.55rem;
+}
+.vc-sh-record-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.15rem;
+}
+.vc-sh-date {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+}
+.vc-sh-mileage {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+}
+.vc-sh-type {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 0.1rem;
+}
+.vc-sh-provider {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  margin: 0;
+}
+.vc-sh-notes {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.4);
+  margin: 0.1rem 0 0;
+  font-style: italic;
+}
+
+/* Light mode overrides */
+[data-theme="light"] .vc-back-tab {
+  border-color: rgba(0,0,0,0.15);
+  color: rgba(0,0,0,0.55);
+}
+[data-theme="light"] .vc-back-tab:hover { color: #000; }
+[data-theme="light"] .vc-back-tab.active {
+  background: rgba(255,51,0,0.1);
+  color: #c62800;
+}
+[data-theme="light"] .vc-finance-row { background: rgba(0,0,0,0.03); }
+[data-theme="light"] .vc-finance-label { color: rgba(0,0,0,0.5); }
+[data-theme="light"] .vc-finance-value { color: #111; }
+[data-theme="light"] .vc-finance-disclaimer { color: rgba(0,0,0,0.4); }
+[data-theme="light"] .vc-sh-record { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .vc-sh-date,
+[data-theme="light"] .vc-sh-mileage,
+[data-theme="light"] .vc-sh-provider { color: rgba(0,0,0,0.45); }
+[data-theme="light"] .vc-sh-type { color: #111; }

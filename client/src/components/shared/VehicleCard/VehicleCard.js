@@ -42,6 +42,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
 
   // Review flip state
   const [isFlipped, setIsFlipped] = useState(false);
+  const [backTab, setBackTab] = useState('reviews'); // 'reviews' | 'finance' | 'service-history'
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsError, setReviewsError] = useState(null);
@@ -1129,6 +1130,13 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     setIsFlipped(f => !f);
   }, [isFlipped, fetchReviews]);
 
+  const handleFlipToTab = useCallback((tab, e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setBackTab(tab);
+    if (!isFlipped) { fetchReviews(); setIsFlipped(true); }
+  }, [isFlipped, fetchReviews]);
+
   const handleSubmitReview = useCallback(async (e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -1451,7 +1459,14 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
                 <div className="vc-negotiable-badge">Call for Price</div>
               )}
               {car.priceOptions?.financeAvailable && dealer?.sellerType === 'dealership' && (
-                <div className="vc-finance-badge">Finance Available</div>
+                <div
+                  className="vc-finance-badge vc-finance-badge--clickable"
+                  onClick={e => handleFlipToTab('finance', e)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => e.key === 'Enter' && handleFlipToTab('finance', e)}
+                  title="View finance details"
+                >Finance Available ›</div>
               )}
               {car.priceOptions?.leaseAvailable && dealer?.sellerType === 'dealership' && (
                 <div className="vc-lease-badge">Lease Available</div>
@@ -1662,16 +1677,122 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       </div>{/* vc-content */}
       </div>{/* vc-card-front */}
 
-      {/* ── BACK FACE: Seller reviews ── */}
+      {/* ── BACK FACE: Reviews / Finance / Service History ── */}
       <div className="vc-card-face vc-card-back" onClick={e => e.stopPropagation()}>
         <div className="vc-back-top-bar">
           <button className="vc-flip-back-btn" onClick={handleFlip}>← Back</button>
-          <div className="vc-back-title">
-            <span>{car.title || 'Vehicle'}</span>
-            <span className="vc-back-subtitle">Listing reviews</span>
+          <div className="vc-back-tabs">
+            <button
+              className={`vc-back-tab${backTab === 'reviews' ? ' active' : ''}`}
+              onClick={e => { e.stopPropagation(); setBackTab('reviews'); }}
+            >Reviews</button>
+            <button
+              className={`vc-back-tab${backTab === 'finance' ? ' active' : ''}`}
+              onClick={e => { e.stopPropagation(); setBackTab('finance'); }}
+            >Finance</button>
+            <button
+              className={`vc-back-tab${backTab === 'service-history' ? ' active' : ''}`}
+              onClick={e => { e.stopPropagation(); setBackTab('service-history'); }}
+            >Service History</button>
           </div>
         </div>
 
+        {/* ── Finance tab ── */}
+        {backTab === 'finance' && (
+          <div className="vc-reviews-scroll vc-finance-panel">
+            {car.priceOptions?.financeAvailable ? (
+              <>
+                <div className="vc-finance-header">
+                  <span className="vc-finance-icon">%</span>
+                  <div>
+                    <p className="vc-finance-title">Finance Available</p>
+                    <p className="vc-finance-sub">Through this dealership</p>
+                  </div>
+                </div>
+                <div className="vc-finance-rows">
+                  <div className="vc-finance-row">
+                    <span className="vc-finance-label">Vehicle Price</span>
+                    <span className="vc-finance-value">
+                      {car.priceOptions?.showPriceAsPOA ? 'POA' : `P${(car.price || 0).toLocaleString()}`}
+                    </span>
+                  </div>
+                  {car.priceOptions?.monthlyPayment && (
+                    <div className="vc-finance-row vc-finance-row--highlight">
+                      <span className="vc-finance-label">Est. Monthly Payment</span>
+                      <span className="vc-finance-value">P{Number(car.priceOptions.monthlyPayment).toLocaleString()}<span className="vc-finance-unit">/mo</span></span>
+                    </div>
+                  )}
+                  {car.priceOptions?.includesVAT && (
+                    <div className="vc-finance-row">
+                      <span className="vc-finance-label">VAT</span>
+                      <span className="vc-finance-value vc-finance-green">Included</span>
+                    </div>
+                  )}
+                  {car.priceOptions?.leaseAvailable && (
+                    <div className="vc-finance-row">
+                      <span className="vc-finance-label">Lease</span>
+                      <span className="vc-finance-value vc-finance-green">Also available</span>
+                    </div>
+                  )}
+                </div>
+                <p className="vc-finance-disclaimer">
+                  Finance terms subject to credit approval. Contact the dealership for a personalised quote.
+                </p>
+                {(dealer?.contact?.phone || dealer?.contact?.whatsapp) && (
+                  <a
+                    href={`tel:${dealer.contact.phone || dealer.contact.whatsapp}`}
+                    className="vc-finance-cta"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    Call for Finance Quote
+                  </a>
+                )}
+              </>
+            ) : (
+              <div className="vc-no-reviews">Finance details not available for this listing.</div>
+            )}
+          </div>
+        )}
+
+        {/* ── Service History tab ── */}
+        {backTab === 'service-history' && (
+          <div className="vc-reviews-scroll vc-sh-panel">
+            {car.serviceHistory?.hasServiceHistory ? (
+              <>
+                <div className="vc-finance-header">
+                  <span className="vc-finance-icon">✓</span>
+                  <div>
+                    <p className="vc-finance-title">Full Service History</p>
+                    <p className="vc-finance-sub">{(car.serviceHistory.records || []).length} record{(car.serviceHistory.records || []).length !== 1 ? 's' : ''} on file</p>
+                  </div>
+                </div>
+                {(car.serviceHistory.records || []).length > 0 ? (
+                  <div className="vc-sh-records">
+                    {car.serviceHistory.records.map((rec, i) => (
+                      <div key={i} className="vc-sh-record">
+                        <div className="vc-sh-record-header">
+                          <span className="vc-sh-date">{rec.date ? new Date(rec.date).toLocaleDateString() : '—'}</span>
+                          {rec.mileage && <span className="vc-sh-mileage">{Number(rec.mileage).toLocaleString()} km</span>}
+                        </div>
+                        {rec.serviceType && <p className="vc-sh-type">{rec.serviceType}</p>}
+                        {rec.provider && <p className="vc-sh-provider">{rec.provider}</p>}
+                        {rec.notes && <p className="vc-sh-notes">{rec.notes}</p>}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="vc-finance-disclaimer">Service history confirmed but no individual records uploaded yet.</p>
+                )}
+              </>
+            ) : (
+              <div className="vc-no-reviews">No service history recorded for this vehicle.</div>
+            )}
+          </div>
+        )}
+
+        {/* ── Reviews tab ── */}
+        {backTab === 'reviews' && (
+        <>
         <div className="vc-reviews-scroll">
           {reviewsLoading && <div className="vc-reviews-loading">Loading…</div>}
           {reviewsError && <div className="vc-reviews-error">{reviewsError}</div>}
@@ -1786,6 +1907,8 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             disabled={isSubmitting || !newRating || newComment.trim().length < 10}
           >{isSubmitting ? 'Submitting…' : 'Submit Review'}</button>
         </div>
+        </>
+        )}
       </div>{/* vc-card-back */}
 
       </div>{/* vc-card-flipper */}
