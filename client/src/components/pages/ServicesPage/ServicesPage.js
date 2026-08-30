@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import BusinessCard from '../../shared/BusinessCard/BusinessCard.js';
 import RentalCard from '../../shared/RentalCard/RentalCard.js';
 import PublicTransportCard from '../../shared/PublicTransportCard/PublicTransportCard.js';
+import MechanicCard from '../../shared/MechanicCard/MechanicCard.js';
 // import CarpoolCard from '../../shared/CarpoolCard/CarpoolCard.js'; // hidden until launch
 // import CreateRideModal from '../../modals/CreateRideModal/CreateRideModal.js'; // hidden until launch
 import { http } from '../../../config/axios.js';
@@ -243,6 +244,33 @@ const SERVICE_CATEGORIES = [
     ]
   },
   {
+    id: 'mechanics',
+    name: 'Mechanics',
+    description: 'Book trusted mechanics for all vehicle makes. Filter by brand specialization, service type, and location.',
+    shortDescription: 'Qualified mechanics for every make and repair type',
+    heroTitle: 'Find a Mechanic Near You',
+    heroSubtitle: 'Book trusted, approved mechanics for any vehicle make and repair',
+    image: '/images/categories/mechanics-banner.jpg',
+    icon: '🔩',
+    gradient: 'linear-gradient(135deg,rgb(0,0,0) 0%,rgb(30,20,0) 100%)',
+    filterOptions: {
+      placeholder: 'Search by workshop name or mechanic…',
+      locationLabel: 'City or area (e.g. Gaborone)…',
+      filters: [
+        {
+          name: 'brand',
+          label: 'Vehicle Brand',
+          options: ['All Brands','Toyota','Volkswagen','BMW','Mercedes-Benz','Ford','Hyundai','Kia','Nissan','Mazda','Isuzu','Mitsubishi','Land Rover','Range Rover','Audi','Renault','Peugeot','Chevrolet','Opel','Lexus','Honda','Subaru','Volvo','Jeep','Suzuki']
+        },
+        {
+          name: 'specialty',
+          label: 'Service Needed',
+          options: ['All Services','Engine Repair','Transmission','Electrical','Brakes','Suspension','Air Conditioning','Diagnostics','Body Work','Tyres & Alignment','Exhaust','4×4 / Off-road','Service / Oil Change','Clutch','Auto Glass','Detailing']
+        }
+      ]
+    }
+  },
+  {
     id: 'car-rentals',
     name: 'Car Rentals',
     description: 'Browse our selection of rental vehicles from trusted providers across the country.',
@@ -366,6 +394,12 @@ const ServicesPage = () => {
   const [ridesLoading, setRidesLoading] = useState(false);
   const [showCreateRide, setShowCreateRide] = useState(false);
 
+  // Mechanics state
+  const [mechanics, setMechanics] = useState([]);
+  const [filteredMechanics, setFilteredMechanics] = useState([]);
+  const [mechanicsLoading, setMechanicsLoading] = useState(false);
+  const [mechanicsTotal, setMechanicsTotal] = useState(0);
+
   // Enhanced search suggestions for transport stops
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -488,7 +522,13 @@ const ServicesPage = () => {
         await fetchRides(search, locationFilter, filters);
         setServices([]); setFilteredServices([]);
         setListings([]); setFilteredListings([]);
+        setMechanics([]); setFilteredMechanics([]);
+      } else if (category === 'mechanics') {
+        await fetchMechanics(search, locationFilter, page, filters);
+        setServices([]); setFilteredServices([]);
+        setListings([]); setFilteredListings([]);
       } else {
+        setMechanics([]); setFilteredMechanics([]);
         await fetchServiceProviders(serviceFilters, page);
         if (['car-rentals', 'trailer-rentals', 'transport'].includes(category)) {
           await fetchListings(category, search, locationFilter, page, filters, date, time, budget);
@@ -562,6 +602,38 @@ const ServicesPage = () => {
       setServices([]);
       setFilteredServices([]);
       setTotalPages(1);
+    }
+  };
+
+  const fetchMechanics = async (search, city, page, filters = {}) => {
+    setMechanicsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set('page', String(page));
+      params.set('limit', '12');
+      if (search) params.set('search', search);
+      if (city)   params.set('city', city);
+      if (filters.brand     && filters.brand     !== 'All Brands')    params.set('brand',     filters.brand);
+      if (filters.specialty && filters.specialty !== 'All Services')  params.set('specialty', filters.specialty);
+
+      for (const ep of ['/mechanics', '/api/mechanics']) {
+        try {
+          const res = await http.get(`${ep}?${params.toString()}`);
+          if (res.data?.success) {
+            const list = res.data.data || [];
+            setMechanics(list);
+            setFilteredMechanics(list);
+            setMechanicsTotal(res.data.pagination?.total || list.length);
+            return;
+          }
+        } catch (_) {}
+      }
+      setMechanics([]); setFilteredMechanics([]); setMechanicsTotal(0);
+    } catch (err) {
+      console.error('fetchMechanics error:', err);
+      setMechanics([]); setFilteredMechanics([]); setMechanicsTotal(0);
+    } finally {
+      setMechanicsLoading(false);
     }
   };
 
@@ -1683,10 +1755,37 @@ const ServicesPage = () => {
           </>
         )}
 
-        {/* Service Providers section */}
+        {/* ── Mechanics section ── */}
+        {selectedCategory === 'mechanics' && (
+          <>
+            <h2 className="bcc-service-providers-heading" style={{ marginTop: '2rem' }}>
+              Available Mechanics &amp; Workshops
+              {mechanicsTotal > 0 && <span className="bcc-service-results-count" style={{ marginLeft: '0.75rem', fontSize: '0.85rem', fontWeight: 400 }}>({mechanicsTotal} found)</span>}
+            </h2>
+
+            {mechanicsLoading ? (
+              <div className="bcc-service-loading-container"><div className="bcc-services-spinner" /></div>
+            ) : filteredMechanics.length === 0 ? (
+              <div className="bcc-service-no-results">
+                <h3>No mechanics found</h3>
+                <p>Try a different city, brand, or service type. Mechanics join as they register on the platform.</p>
+              </div>
+            ) : (
+              <div className="bcc-mechanics-grid">
+                {filteredMechanics.map(m => (
+                  <MechanicCard key={m._id} mechanic={m} />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Service Providers section — hidden for mechanics tab */}
+        {selectedCategory !== 'mechanics' && (
+        <>
         <h2 className="bcc-service-providers-heading" style={{marginTop: '3rem'}}>
-          {selectedCategory !== 'all' 
-            ? `${selectedCategoryObject.name} Providers` 
+          {selectedCategory !== 'all'
+            ? `${selectedCategoryObject.name} Providers`
             : "Service Providers"}
         </h2>
 
@@ -1768,6 +1867,8 @@ const ServicesPage = () => {
               </div>
             )}
           </>
+        )}
+        </>
         )}
       </div>
     </div>
