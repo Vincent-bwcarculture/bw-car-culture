@@ -68,6 +68,7 @@ const AuctionManager = React.lazy(() => import('./Admin/AuctionManager/AuctionMa
 const RoleManager = React.lazy(() => import('./Admin/components/RoleRequests.js'));
 const AdminUserSubmissions = React.lazy(() => import('./Admin/components/AdminUserSubmissions.js'));
 const AdminVehicleRegistrations = React.lazy(() => import('./Admin/VehicleRegistrations/AdminVehicleRegistrations.js'));
+const VehicleRecords = React.lazy(() => import('./Admin/VehicleRecords/VehicleRecords.js'));
 const AdminPaymentDashboard = React.lazy(() => import('./Admin/components/AdminPaymentDashboard.js'));
 const AnalyticsDashboard = React.lazy(() => import('./Admin/AnalyticsDashboard/AnalyticsDashboard.js'));
 const AdminArticleManagement = React.lazy(() => import('./components/Admin/ArticleManagement.js'));
@@ -920,6 +921,17 @@ const AppRoutes = () => {
             <ProtectedRoute adminOnly={true}>
               <AdminLayout>
                 <AdminVehicleRegistrations />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/vehicle-records"
+          element={
+            <ProtectedRoute adminOnly={true}>
+              <AdminLayout>
+                <VehicleRecords />
               </AdminLayout>
             </ProtectedRoute>
           }

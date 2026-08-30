@@ -14,6 +14,7 @@ const menuItems = [
       { title: 'Listings',              path: '/admin/listings' },
       { title: 'User Submissions',      path: '/admin/user-submissions' },
       { title: 'Vehicle Registrations', path: '/admin/vehicle-registrations' },
+      { title: 'Vehicle Records', path: '/admin/vehicle-records' },
       { title: 'Requests',              path: '/admin/requests' },
       { title: 'Auctions',              path: '/admin/auctions' },
       { title: 'Inventory',             path: '/admin/inventory' },
