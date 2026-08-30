@@ -323,198 +323,218 @@
     background: var(--background-dark);
   }
   
+  /* ── Filter bar ───────────────────────────────────────────────────────── */
   .bcc-service-filter-container {
-    background: rgba(25, 25, 25, 0.8);
+    background: rgba(16, 16, 16, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
   }
-  
+
+  /* Shared input/select baseline */
+  .bcc-service-search-input,
+  .bcc-service-location-input,
+  .bcc-service-filter-select {
+    height: 40px;
+    padding: 0 0.85rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 0.875rem;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+  }
+
+  .bcc-service-search-input:focus,
+  .bcc-service-location-input:focus,
+  .bcc-service-filter-select:focus {
+    border-color: var(--primary-color, #ff3300);
+    background: rgba(255, 51, 0, 0.05);
+    box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.14);
+  }
+
+  .bcc-service-search-input::placeholder,
+  .bcc-service-location-input::placeholder { color: rgba(255, 255, 255, 0.32); }
+
+  /* date / time */
+  .bcc-service-search-input[type="date"],
+  .bcc-service-search-input[type="time"] { color-scheme: dark; padding: 0 0.5rem; }
+
+  /* Select: solid dark bg + custom arrow */
+  .bcc-service-filter-select {
+    appearance: none;
+    background-color: #1a1a1a;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%23888' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    padding-right: 1.8rem;
+    cursor: pointer;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .bcc-service-filter-select option { background: #1a1a1a; color: #fff; }
+
+  /* Search icon wrapper */
+  .bcc-search-icon-wrap {
+    position: relative;
+  }
+  .bcc-search-icon-wrap .bcc-service-search-input { padding-left: 2.1rem; }
+  .bcc-search-icon {
+    position: absolute;
+    left: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+    line-height: 1;
+    font-style: normal;
+  }
+
+  /* Filter item: small label stacked above its input/select */
+  .bcc-service-filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.22rem;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .bcc-service-filter-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.38);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* Main filter row */
   .bcc-service-filter-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: flex-start;
+    gap: 0.6rem;
+    align-items: flex-end;
+    flex-wrap: nowrap;
   }
-  
+
   .bcc-service-search-container {
-    flex: 1;
-    min-width: 280px;
+    flex: 2 1 0;
+    min-width: 0;
   }
-  
-   .bcc-service-search-input {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 5px;
-    border: 1px solid #2c2c2c;
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-  }
-  
-  .bcc-service-search-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.15);
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  .bcc-service-search-input::placeholder {
-    color: #999;
-  }
-  
+
   .bcc-service-filter-selects {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: flex-start;
+    gap: 0.6rem;
+    align-items: flex-end;
+    flex: 3 1 0;
+    min-width: 0;
   }
-  
-  .bcc-service-location-input {
-    flex: 1;
-    min-width: 180px;
-    padding: 0.75rem 1rem;
-    border-radius: 5px;
-    border: 1px solid #2c2c2c;
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-  }
-  
-  .bcc-service-location-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.15);
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  .bcc-service-location-input::placeholder {
-    color: #999;
-  }
-  
+
+  .bcc-service-location-input { min-width: 0; }
+
   .bcc-service-additional-filters {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.6rem;
+    flex: 2 1 0;
+    min-width: 0;
+    align-items: flex-end;
   }
-  
-  .bcc-service-filter-select {
-    min-width: 130px;
-    padding: 0.75rem 1rem;
-    border-radius: 5px;
-    border: 1px solid #2c2c2c;
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
-    font-size: 0.95rem;
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cccccc%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.8rem top 50%;
-    background-size: 0.6rem auto;
-    transition: all 0.3s ease;
-  }
-  
-  .bcc-service-filter-select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(255, 51, 0, 0.15);
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-  
+
+  /* Search button */
   .bcc-service-search-button {
-    background: var(--primary-color);
-    color: white;
+    height: 40px;
+    padding: 0 1.2rem;
+    border-radius: 8px;
+    background: var(--primary-color, #ff3300);
+    color: #fff;
     border: none;
-    border-radius: 5px;
-    padding: 0.75rem 1.3rem;
-    font-weight: 500;
+    font-size: 0.875rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
     white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(255, 51, 0, 0.2);
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 8px rgba(255, 51, 0, 0.28);
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
   }
-  
   .bcc-service-search-button:hover {
     background: #e62d00;
-    box-shadow: 0 3px 12px rgba(255, 51, 0, 0.3);
+    box-shadow: 0 3px 14px rgba(255, 51, 0, 0.38);
   }
-  
-  .bcc-service-search-button:active {
-    transform: translateY(1px);
-  }
-  
+  .bcc-service-search-button:active { transform: translateY(1px); }
+
+  /* Standalone button (not inside a flex row that already sets height) */
+  .bcc-search-btn--standalone { align-self: flex-end; }
+
   /* Active Filters */
-    .bcc-active-filters {
-    margin-top: 1rem;
+  .bcc-active-filters {
+    margin-top: 0.25rem;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
-  
+
   .bcc-active-filters-label {
-    color: var(--text-gray);
-    font-size: 0.85rem;
-    font-weight: 500;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
-  
+
   .bcc-active-filter-tag {
-    background-color: rgba(255, 51, 0, 0.08);
-    color: #ff5722;
-    padding: 0.3rem 0.7rem;
-    border-radius: 15px;
-    font-size: 0.8rem;
+    background: rgba(255, 51, 0, 0.1);
+    color: #ff6b45;
+    padding: 0.2rem 0.55rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(255, 51, 0, 0.2);
+    gap: 0.3rem;
+    border: 1px solid rgba(255, 51, 0, 0.22);
+    transition: background 0.15s;
   }
-  
-  .bcc-active-filter-tag:hover {
-    background-color: rgba(255, 51, 0, 0.15);
-  }
-  
+
+  .bcc-active-filter-tag:hover { background: rgba(255, 51, 0, 0.18); }
+
   .bcc-remove-filter {
     background: none;
     border: none;
-    color: #ff5722;
-    font-size: 1rem;
+    color: #ff6b45;
+    font-size: 0.9rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
-    transition: all 0.2s ease;
+    line-height: 1;
+    transition: background 0.15s;
   }
-  
-  .bcc-remove-filter:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-  }
-  
+  .bcc-remove-filter:hover { background: rgba(255, 255, 255, 0.15); }
+
   .bcc-clear-filters {
     background: none;
     border: none;
-    color: var(--text-gray);
-    font-size: 0.8rem;
+    color: rgba(255,255,255,0.38);
+    font-size: 0.72rem;
     cursor: pointer;
     text-decoration: underline;
-    margin-left: 0.5rem;
-    padding: 0.2rem 0.4rem;
-    transition: color 0.2s ease;
+    padding: 0.15rem 0.3rem;
+    transition: color 0.15s;
   }
-  
-  .bcc-clear-filters:hover {
-    color: var(--text-light);
-  }
+  .bcc-clear-filters:hover { color: #fff; }
   
   .bcc-service-error-message {
     background-color: rgba(220, 53, 69, 0.15);
@@ -705,24 +725,21 @@
     }
     
     .bcc-service-filter-row {
-      flex-direction: column;
-    }
-    
-    .bcc-service-search-container,
-    .bcc-service-filter-selects {
-      width: 100%;
-      max-width: none;
-    }
-    
-    .bcc-service-additional-filters {
-      flex-direction: row;
       flex-wrap: wrap;
-      width: 100%;
     }
-    
-    .bcc-service-filter-select {
-      flex: 1;
-      min-width: 120px;
+
+    .bcc-service-search-container {
+      flex: 0 0 100%;
+    }
+
+    .bcc-service-filter-selects {
+      flex: 0 0 100%;
+      flex-wrap: wrap;
+    }
+
+    .bcc-service-additional-filters {
+      flex: 0 0 100%;
+      flex-wrap: wrap;
     }
   }
   
@@ -796,43 +813,47 @@
       width: 40px;
     }
 
-    /* Filter row: search + location side-by-side */
+    /* Filter bar: 2-column grid on tablet/mobile */
+    .bcc-service-filter-container {
+      padding: 0.75rem;
+      gap: 0.5rem;
+    }
+
     .bcc-service-filter-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
+      gap: 0.5rem;
     }
 
+    /* Search takes full width */
     .bcc-service-search-container {
-      grid-column: 1 / -1; /* full width */
-      min-width: unset;
-    }
-
-    .bcc-service-filter-selects {
       grid-column: 1 / -1;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
+      flex: unset;
     }
 
-    .bcc-service-location-input {
-      min-width: unset;
-    }
-
+    /* filter-selects and additional-filters flatten into parent grid */
+    .bcc-service-filter-selects,
     .bcc-service-additional-filters {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-      width: 100%;
+      display: contents;
     }
 
-    .bcc-service-filter-select {
-      min-width: unset;
-      width: 100%;
+    /* Each filter-item fits naturally in the 2-col grid */
+    .bcc-service-filter-item {
+      flex: unset;
+      min-width: 0;
     }
 
+    /* Search button always full width on mobile */
     .bcc-service-search-button {
       grid-column: 1 / -1;
+      height: 44px;
+    }
+
+    /* Secondary filter row also 2-col grid */
+    .bcc-service-filter-row--secondary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
     }
   }
   

@@ -1507,7 +1507,8 @@ const ServicesPage = () => {
           {selectedCategory === 'car-rentals' && (
             <>
               <div className="bcc-service-filter-row">
-                <div className="bcc-service-search-container">
+                <div className="bcc-service-search-container bcc-search-icon-wrap">
+                  <span className="bcc-search-icon">⌕</span>
                   <input
                     type="text"
                     placeholder="Search vehicles, companies…"
@@ -1518,19 +1519,22 @@ const ServicesPage = () => {
                   />
                 </div>
                 <div className="bcc-service-filter-selects">
-                  <input
-                    type="text"
-                    placeholder="Pickup location…"
-                    value={locationFilter}
-                    onChange={handleLocationChange}
-                    onKeyPress={e => e.key === 'Enter' && handleSearchSubmit()}
-                    className="bcc-service-location-input"
-                  />
+                  <div className="bcc-service-filter-item">
+                    <label className="bcc-service-filter-label">📍 Pickup location</label>
+                    <input
+                      type="text"
+                      placeholder="City or area…"
+                      value={locationFilter}
+                      onChange={handleLocationChange}
+                      onKeyPress={e => e.key === 'Enter' && handleSearchSubmit()}
+                      className="bcc-service-location-input"
+                    />
+                  </div>
                 </div>
               </div>
               <div className="bcc-service-filter-row bcc-service-filter-row--secondary">
-                <div className="bcc-service-trip-field bcc-service-trip-field--narrow">
-                  <label className="bcc-service-trip-label">Date needed</label>
+                <div className="bcc-service-filter-item">
+                  <label className="bcc-service-filter-label">Date needed</label>
                   <input
                     type="date"
                     min={new Date().toISOString().split('T')[0]}
@@ -1539,8 +1543,8 @@ const ServicesPage = () => {
                     className="bcc-service-search-input"
                   />
                 </div>
-                <div className="bcc-service-trip-field bcc-service-trip-field--narrow">
-                  <label className="bcc-service-trip-label">Time</label>
+                <div className="bcc-service-filter-item">
+                  <label className="bcc-service-filter-label">Time</label>
                   <input
                     type="time"
                     value={bookingTime}
@@ -1548,8 +1552,8 @@ const ServicesPage = () => {
                     className="bcc-service-search-input"
                   />
                 </div>
-                <div className="bcc-service-trip-field bcc-service-trip-field--narrow">
-                  <label className="bcc-service-trip-label">Budget (BWP / day)</label>
+                <div className="bcc-service-filter-item">
+                  <label className="bcc-service-filter-label">Budget (BWP / day)</label>
                   <select
                     value={maxBudget}
                     onChange={e => handleBudgetChange(e.target.value)}
@@ -1565,16 +1569,18 @@ const ServicesPage = () => {
                   </select>
                 </div>
                 {selectedCategoryObject.filterOptions?.filters?.map((filter, i) => (
-                  <select
-                    key={i}
-                    className="bcc-service-filter-select"
-                    value={activeFilters[filter.name] || 'All'}
-                    onChange={e => handleFilterChange(filter.name, e.target.value)}
-                  >
-                    {filter.options.map((opt, oi) => <option key={oi} value={opt}>{opt}</option>)}
-                  </select>
+                  <div key={i} className="bcc-service-filter-item">
+                    <label className="bcc-service-filter-label">{filter.label}</label>
+                    <select
+                      className="bcc-service-filter-select"
+                      value={activeFilters[filter.name] || 'All'}
+                      onChange={e => handleFilterChange(filter.name, e.target.value)}
+                    >
+                      {filter.options.map((opt, oi) => <option key={oi} value={opt}>{opt}</option>)}
+                    </select>
+                  </div>
                 ))}
-                <button className="bcc-service-search-button" onClick={handleSearchSubmit}>Search</button>
+                <button className="bcc-service-search-button bcc-search-btn--standalone" onClick={handleSearchSubmit}>Search</button>
               </div>
             </>
           )}
@@ -1582,7 +1588,8 @@ const ServicesPage = () => {
           {/* All other categories: generic search + location + standard dropdowns */}
           {selectedCategory !== 'transport' && selectedCategory !== 'car-rentals' && (
             <div className="bcc-service-filter-row">
-              <div className="bcc-service-search-container">
+              <div className="bcc-service-search-container bcc-search-icon-wrap">
+                <span className="bcc-search-icon">⌕</span>
                 <input
                   type="text"
                   placeholder={selectedCategoryObject.filterOptions?.placeholder || "Search services..."}
@@ -1593,29 +1600,34 @@ const ServicesPage = () => {
                 />
               </div>
               <div className="bcc-service-filter-selects">
-                <input
-                  type="text"
-                  placeholder={selectedCategoryObject.filterOptions?.locationLabel || "Filter by location..."}
-                  value={locationFilter}
-                  onChange={handleLocationChange}
-                  onKeyPress={e => e.key === 'Enter' && handleSearchSubmit()}
-                  className="bcc-service-location-input"
-                />
+                <div className="bcc-service-filter-item">
+                  <label className="bcc-service-filter-label">📍 {selectedCategoryObject.filterOptions?.locationLabel?.replace(/…$/, '') || 'Location'}</label>
+                  <input
+                    type="text"
+                    placeholder={selectedCategoryObject.filterOptions?.locationLabel || "City or area…"}
+                    value={locationFilter}
+                    onChange={handleLocationChange}
+                    onKeyPress={e => e.key === 'Enter' && handleSearchSubmit()}
+                    className="bcc-service-location-input"
+                  />
+                </div>
                 {selectedCategory !== 'all' && selectedCategoryObject.filterOptions?.filters && (
                   <div className="bcc-service-additional-filters">
                     {selectedCategoryObject.filterOptions.filters.map((filter, index) => (
-                      <select
-                        key={index}
-                        className="bcc-service-filter-select"
-                        value={activeFilters[filter.name] || 'All'}
-                        onChange={e => handleFilterChange(filter.name, e.target.value)}
-                      >
-                        {filter.options.map((option, oi) => <option key={oi} value={option}>{option}</option>)}
-                      </select>
+                      <div key={index} className="bcc-service-filter-item">
+                        <label className="bcc-service-filter-label">{filter.label}</label>
+                        <select
+                          className="bcc-service-filter-select"
+                          value={activeFilters[filter.name] || 'All'}
+                          onChange={e => handleFilterChange(filter.name, e.target.value)}
+                        >
+                          {filter.options.map((option, oi) => <option key={oi} value={option}>{option}</option>)}
+                        </select>
+                      </div>
                     ))}
                   </div>
                 )}
-                <button className="bcc-service-search-button" onClick={handleSearchSubmit}>Search</button>
+                <button className="bcc-service-search-button bcc-search-btn--standalone" onClick={handleSearchSubmit}>Search</button>
               </div>
             </div>
           )}
