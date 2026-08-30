@@ -1,8 +1,8 @@
 /* Fixed CarResults.css - Based on HomeDealershipsSection approach */
 .car-results-container {
   width: 100%;
-  margin: 0.75rem 0;
-  padding: 0 0.5rem;
+  margin: 0.5rem 0;
+  padding: 0;
 }
 
 /* Results Header */
@@ -10,7 +10,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .results-count-header h2 {
@@ -128,15 +128,13 @@
 
 /* Featured Content */
 .featured-content {
-  padding: 1rem 0;
+  padding: 0;
 }
 
 .featured-message {
   text-align: center;
-  margin-bottom: 1rem;
+  margin: 0 auto 0.5rem;
   max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .featured-message h3 {
@@ -154,7 +152,7 @@
 .featured-cta {
   display: flex;
   justify-content: center;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 .customize-search-btn {
@@ -385,10 +383,6 @@
   
   .featured-message p {
     font-size: 1rem;
-  }
-  
-  .car-results-container {
-    width: 90%;
   }
   
   .carousel-container {
