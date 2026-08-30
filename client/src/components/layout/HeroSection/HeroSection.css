@@ -709,6 +709,8 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .bcc-hero-dealers-arrow {
@@ -740,7 +742,9 @@
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
   flex: 1;
+  min-width: 0;
   padding: 2px 2px 4px;
 }
 .bcc-hero-dealers-track::-webkit-scrollbar { display: none; }
