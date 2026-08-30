@@ -1,0 +1,185 @@
+/* src/Admin/MechanicManager/MechanicForm.css */
+
+.mf-form {
+  background: #111;
+  border-radius: 10px;
+  overflow: hidden;
+  color: #c9d1d9;
+}
+
+/* Tabs */
+.mf-tabs {
+  display: flex;
+  border-bottom: 1px solid #2c2c2c;
+  background: #0d0d0d;
+}
+.mf-tab {
+  flex: 1;
+  padding: 0.65rem 0.5rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #6e7681;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.mf-tab.active {
+  color: #ff3300;
+  border-bottom-color: #ff3300;
+}
+.mf-tab:hover:not(.active) { color: #c9d1d9; }
+
+/* Section */
+.mf-section {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Rows */
+.mf-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+@media (max-width: 600px) { .mf-row { grid-template-columns: 1fr; } }
+
+/* Fields */
+.mf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.mf-field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.mf-field input,
+.mf-field select,
+.mf-field textarea {
+  background: rgba(30,30,30,0.8);
+  border: 1px solid #2c2c2c;
+  border-radius: 6px;
+  padding: 0.55rem 0.75rem;
+  color: #e6edf3;
+  font-size: 0.85rem;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.mf-field input:focus,
+.mf-field select:focus,
+.mf-field textarea:focus {
+  outline: none;
+  border-color: #ff3300;
+  box-shadow: 0 0 0 2px rgba(255,51,0,0.15);
+}
+.mf-field select option { background: #1a1a1a; }
+.mf-field textarea { resize: vertical; min-height: 80px; }
+
+.mf-hint {
+  font-size: 0.7rem;
+  color: #444;
+}
+
+/* Checkbox field */
+.mf-field--checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+.mf-field--checkbox label {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #c9d1d9;
+}
+.mf-field--checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #ff3300;
+  flex-shrink: 0;
+}
+
+/* Image preview */
+.mf-img-preview {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #2c2c2c;
+  margin-top: 0.35rem;
+}
+
+/* Checkbox grid */
+.mf-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.5rem 1rem;
+  background: rgba(20,20,20,0.6);
+  border: 1px solid #2c2c2c;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+.mf-check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #c9d1d9;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+.mf-check-label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #ff3300;
+  flex-shrink: 0;
+  border: none;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+.mf-check-label--all {
+  font-weight: 700;
+  color: #ff3300;
+}
+
+/* Footer */
+.mf-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #2c2c2c;
+  background: rgba(0,0,0,0.2);
+}
+.mf-btn {
+  padding: 0.55rem 1.25rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+.mf-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.mf-btn-cancel {
+  background: rgba(255,255,255,0.07);
+  color: #8b949e;
+}
+.mf-btn-cancel:hover:not(:disabled) { background: rgba(255,255,255,0.12); }
+.mf-btn-save {
+  background: #ff3300;
+  color: #fff;
+}
+.mf-btn-save:hover:not(:disabled) { background: #cc2900; }

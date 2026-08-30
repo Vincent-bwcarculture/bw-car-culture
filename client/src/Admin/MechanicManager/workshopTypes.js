@@ -1,0 +1,55 @@
+// src/Admin/MechanicManager/workshopTypes.js
+
+export const WORKSHOP_TYPES = [
+  'General Workshop',
+  'Specialist',
+  'Mobile Mechanic',
+  'Dealership Workshop',
+  'Home Workshop',
+];
+
+export const MECHANIC_SPECIALIZATIONS = [
+  'Engine Repair',
+  'Transmission',
+  'Electrical',
+  'Brakes',
+  'Suspension',
+  'Air Conditioning',
+  'Diagnostics',
+  'Body Work',
+  'Tyres & Alignment',
+  'Exhaust',
+  '4x4 / Off-road',
+  'Service / Oil Change',
+  'Clutch',
+  'Auto Glass',
+  'Detailing',
+];
+
+export const BRAND_SPECIALIZATIONS = [
+  'all_brands',
+  'Toyota',
+  'Volkswagen',
+  'BMW',
+  'Mercedes-Benz',
+  'Ford',
+  'Hyundai',
+  'Kia',
+  'Nissan',
+  'Mazda',
+  'Isuzu',
+  'Mitsubishi',
+  'Land Rover',
+  'Range Rover',
+  'Audi',
+  'Renault',
+  'Peugeot',
+  'Chevrolet',
+  'Opel',
+  'Lexus',
+  'Honda',
+  'Subaru',
+  'Volvo',
+  'Jeep',
+  'Suzuki',
+];

@@ -292,7 +292,15 @@ const QuickActions = ({ onActionSelected }) => {
               Manage Dealerships
             </button>
 
-            <button 
+            <button
+              className="qa-action-button"
+              onClick={() => onActionSelected && onActionSelected('mechanics')}
+            >
+              <span className="qa-icon">🔧</span>
+              Manage Mechanics
+            </button>
+
+            <button
               className="qa-action-button"
               onClick={handleServiceProvidersClick}
             >

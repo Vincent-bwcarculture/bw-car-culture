@@ -9,6 +9,7 @@ import TrailerListingManager from './TrailerListingManager/TrailerListingManager
 import TransportRouteManager from './TransportRouteManager/TransportRouteManager.js';
 import TransitFareManager from './TransitFareManager/TransitFareManager.js';
 import ServiceProviderManager from './ServiceProviderManager/ServiceProviderManager.js';
+import MechanicManager from './MechanicManager/MechanicManager.js';
 import GIONAdminDashboard from '../components/GION/GIONAdminDashboard/GIONAdminDashboard.js';
 import BroadcastNotification from './BroadcastNotification/BroadcastNotification.js';
 import AdminOpsDashboardWidget from './AdminOps/AdminOpsDashboardWidget.js';
@@ -61,12 +62,24 @@ const AdminDashboard = () => {
             <GIONAdminDashboard />
           </>
         );
+      case 'mechanics':
+        return (
+          <>
+            <div className="section-header">
+              <h2>Mechanic Management</h2>
+              <button className="back-button" onClick={() => setActiveSection('dashboard')}>
+                ← Back to Dashboard
+              </button>
+            </div>
+            <MechanicManager />
+          </>
+        );
       case 'service-providers':
         return (
           <>
             <div className="section-header">
               <h2>Service Provider Management</h2>
-              <button 
+              <button
                 className="back-button"
                 onClick={() => setActiveSection('dashboard')}
               >
