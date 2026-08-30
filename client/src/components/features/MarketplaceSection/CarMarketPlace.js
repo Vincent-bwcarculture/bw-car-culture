@@ -277,21 +277,31 @@ const CarMarketplace = () => {
   }, []);
 
   const handleMouseDown = useCallback((e) => {
-    if (zoomLevel <= 1) return;
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
-    setLastPanPosition(panPosition);
+    if (zoomLevel > 1) setLastPanPosition(panPosition);
     if (dragTimeoutRef.current) clearTimeout(dragTimeoutRef.current);
   }, [zoomLevel, panPosition]);
 
   const handleMouseMove = useCallback((e) => {
-    if (!isDragging || zoomLevel <= 1) return;
+    if (!isDragging) return;
     e.preventDefault();
     e.stopPropagation();
     const deltaX = e.clientX - dragStart.x;
     const deltaY = e.clientY - dragStart.y;
+
+    if (zoomLevel <= 1) {
+      // Cover-pan: shift object-position at normal zoom
+      setCoverPos(prev => ({
+        x: Math.max(0, Math.min(100, prev.x - deltaX * 0.15)),
+        y: Math.max(0, Math.min(100, prev.y - deltaY * 0.15)),
+      }));
+      setDragStart({ x: e.clientX, y: e.clientY });
+      return;
+    }
+
     if (!imageDimensions.width || !containerDimensions.width) return;
     const containerAspect = containerDimensions.width / containerDimensions.height;
     const imageAspect = imageDimensions.width / imageDimensions.height;
