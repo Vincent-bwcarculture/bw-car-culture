@@ -486,7 +486,31 @@
   background: rgba(0, 0, 0, 0.2);
   touch-action: none;
   isolation: isolate;
+  cursor: grab;
 }
+.vc-image-container:active { cursor: grabbing; }
+
+/* Scroll-to-pan hint — appears on first hover, subtle pill */
+.vc-image-container::before {
+  content: 'Scroll or drag to pan';
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.62rem;
+  letter-spacing: 0.03em;
+  padding: 3px 10px;
+  border-radius: 20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+  z-index: 12;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+.vc-image-container:hover::before { opacity: 1; }
 
 /* Light mode: root text color + hardcoded-color overrides */
 [data-theme="light"] .vc-card {

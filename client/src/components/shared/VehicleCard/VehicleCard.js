@@ -22,6 +22,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   // TRUE ZOOM: Enhanced zoom functionality state
   const [zoomLevel, setZoomLevel] = useState(1); // Start at 100% (normal cropped view)
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+  const [coverPos, setCoverPos] = useState({ x: 50, y: 50 }); // object-position % at zoom=1
   const [showZoomControls, setShowZoomControls] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -39,6 +40,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const dragTimeoutRef = useRef(null);
   const resizeObserverRef = useRef(null);
   const navigationTimeoutRef = useRef(null);
+  const zoomLevelRef = useRef(1); // kept in sync for non-passive listeners
 
   // Review flip state
   const [isFlipped, setIsFlipped] = useState(false);
@@ -164,10 +166,14 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
     };
   }, []);
 
+  // Keep zoomLevelRef in sync (used by non-passive wheel/touch listeners)
+  useEffect(() => { zoomLevelRef.current = zoomLevel; }, [zoomLevel]);
+
   // TRUE ZOOM: Reset zoom when image changes
   useEffect(() => {
     setZoomLevel(1);
     setPanPosition({ x: 0, y: 0 });
+    setCoverPos({ x: 50, y: 50 });
     setShowZoomControls(false);
     setIsDragging(false);
     setIsImageFullyLoaded(false);
@@ -187,7 +193,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       };
     }
 
-    // At zoom level 1.0: normal cropped view (object-fit: cover)
+    // At zoom level 1.0: normal cropped view (object-fit: cover) — pan via objectPosition
     if (zoomLevel === 1) {
       return {
         objectFit: 'cover',
@@ -195,7 +201,9 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         height: '100%',
         transform: 'none',
         maxWidth: 'none',
-        maxHeight: 'none'
+        maxHeight: 'none',
+        objectPosition: `${coverPos.x}% ${coverPos.y}%`,
+        transition: 'object-position 0.08s ease-out'
       };
     }
 
@@ -237,7 +245,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       marginTop: `${-displayHeight / 2}px`,
       marginLeft: `${-displayWidth / 2}px`
     };
-  }, [zoomLevel, panPosition, imageDimensions, containerDimensions, isImageFullyLoaded]);
+  }, [zoomLevel, panPosition, coverPos, imageDimensions, containerDimensions, isImageFullyLoaded]);
 
   // TRUE ZOOM: Enhanced zoom functionality with 5% increments
   const handleZoomIn = useCallback((e) => {
@@ -454,6 +462,56 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
+
+  // Cover-pan: scroll wheel + single-finger drag pans object-position at zoom=1
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    let touchOrigin = null;
+
+    const onWheel = (e) => {
+      if (zoomLevelRef.current > 1) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setCoverPos(prev => ({
+        x: Math.max(0, Math.min(100, prev.x + e.deltaX * 0.1)),
+        y: Math.max(0, Math.min(100, prev.y + e.deltaY * 0.1))
+      }));
+    };
+
+    const onTouchStart = (e) => {
+      if (zoomLevelRef.current > 1 || e.touches.length !== 1) { touchOrigin = null; return; }
+      touchOrigin = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    };
+
+    const onTouchMove = (e) => {
+      if (zoomLevelRef.current > 1 || e.touches.length !== 1 || !touchOrigin) return;
+      const dx = e.touches[0].clientX - touchOrigin.x;
+      const dy = e.touches[0].clientY - touchOrigin.y;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+        e.preventDefault();
+        setCoverPos(prev => ({
+          x: Math.max(0, Math.min(100, prev.x - dx * 0.12)),
+          y: Math.max(0, Math.min(100, prev.y - dy * 0.12))
+        }));
+        touchOrigin = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    };
+
+    const onTouchEnd = () => { touchOrigin = null; };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, []); // runs once; reads zoomLevelRef for current zoom level
 
   // Get reliable image URL with fallbacks
   const getImageUrl = useCallback(() => {

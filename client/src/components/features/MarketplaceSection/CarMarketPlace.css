@@ -2758,16 +2758,36 @@
 
 /* Custom cursor for different zoom states */
 .main-image img {
-  cursor: pointer;
-}
-
-.main-image img[style*="object-fit: cover"] {
-  cursor: zoom-in;
+  cursor: grab;
 }
 
 .main-image img[style*="object-fit: contain"] {
   cursor: move;
 }
+
+.main-image-container:active img { cursor: grabbing; }
+
+/* Scroll-to-pan hint */
+.main-image-container::before {
+  content: 'Scroll or drag to pan';
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.65rem;
+  letter-spacing: 0.03em;
+  padding: 4px 12px;
+  border-radius: 20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+  z-index: 12;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+.main-image-container:hover::before { opacity: 1; }
 
 /* Ensure proper stacking context */
 .main-image {

@@ -48,6 +48,7 @@ const CarMarketplace = () => {
   
   const [zoomLevel, setZoomLevel] = useState(1);
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
+  const [coverPos, setCoverPos] = useState({ x: 50, y: 50 }); // object-position % at zoom=1
   const [showZoomControls, setShowZoomControls] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -72,6 +73,7 @@ const CarMarketplace = () => {
   const containerRef = useRef(null);
   const dragTimeoutRef = useRef(null);
   const resizeObserverRef = useRef(null);
+  const zoomLevelRef = useRef(1);
 
   const isPrivateSeller = useMemo(() => {
     if (!car || !car.dealer) return false;
@@ -203,9 +205,13 @@ const CarMarketplace = () => {
     };
   }, []);
 
+  // Keep zoomLevelRef in sync
+  useEffect(() => { zoomLevelRef.current = zoomLevel; }, [zoomLevel]);
+
   useEffect(() => {
     setZoomLevel(1);
     setPanPosition({ x: 0, y: 0 });
+    setCoverPos({ x: 50, y: 50 });
     setShowZoomControls(false);
     setIsDragging(false);
     setIsImageFullyLoaded(false);
@@ -217,7 +223,11 @@ const CarMarketplace = () => {
       return { objectFit: 'cover', width: '100%', height: '100%', transform: 'none', maxWidth: 'none', maxHeight: 'none' };
     }
     if (zoomLevel === 1) {
-      return { objectFit: 'cover', width: '100%', height: '100%', transform: 'none', maxWidth: 'none', maxHeight: 'none' };
+      return {
+        objectFit: 'cover', width: '100%', height: '100%', transform: 'none', maxWidth: 'none', maxHeight: 'none',
+        objectPosition: `${coverPos.x}% ${coverPos.y}%`,
+        transition: 'object-position 0.08s ease-out'
+      };
     }
     const containerAspect = containerDimensions.width / containerDimensions.height;
     const imageAspect = imageDimensions.width / imageDimensions.height;
@@ -246,7 +256,7 @@ const CarMarketplace = () => {
       marginTop: `${-displayHeight / 2}px`,
       marginLeft: `${-displayWidth / 2}px`
     };
-  }, [zoomLevel, panPosition, imageDimensions, containerDimensions, isImageFullyLoaded]);
+  }, [zoomLevel, panPosition, coverPos, imageDimensions, containerDimensions, isImageFullyLoaded]);
 
   const handleZoomIn = useCallback((e) => {
     e.stopPropagation();
@@ -382,6 +392,56 @@ const CarMarketplace = () => {
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
+
+  // Cover-pan: scroll wheel + single-finger drag pans object-position at zoom=1
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    let touchOrigin = null;
+
+    const onWheel = (e) => {
+      if (zoomLevelRef.current > 1) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setCoverPos(prev => ({
+        x: Math.max(0, Math.min(100, prev.x + e.deltaX * 0.1)),
+        y: Math.max(0, Math.min(100, prev.y + e.deltaY * 0.1))
+      }));
+    };
+
+    const onTouchStart = (e) => {
+      if (zoomLevelRef.current > 1 || e.touches.length !== 1) { touchOrigin = null; return; }
+      touchOrigin = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    };
+
+    const onTouchMove = (e) => {
+      if (zoomLevelRef.current > 1 || e.touches.length !== 1 || !touchOrigin) return;
+      const dx = e.touches[0].clientX - touchOrigin.x;
+      const dy = e.touches[0].clientY - touchOrigin.y;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+        e.preventDefault();
+        setCoverPos(prev => ({
+          x: Math.max(0, Math.min(100, prev.x - dx * 0.12)),
+          y: Math.max(0, Math.min(100, prev.y - dy * 0.12))
+        }));
+        touchOrigin = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    };
+
+    const onTouchEnd = () => { touchOrigin = null; };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, []);
 
   const getNewsImageUrl = useCallback((article) => {
     if (!article) return '/images/placeholders/default.jpg';

@@ -623,7 +623,7 @@ function FeedPost({ post: initialPost, user, onDelete }) {
           <div className="fp-post-author-row">
             <span className="fp-post-author">{post.userName}</span>
             {post.userPrimaryCar && (
-              <span className="fp-car-badge" title={post.userPrimaryCar}>🚗 {post.userPrimaryCar}</span>
+              <span className="fp-car-badge" title={post.userPrimaryCar}>{post.userPrimaryCar}</span>
             )}
             <FollowButton targetUserId={post.userId} currentUserId={user?.id} />
           </div>
