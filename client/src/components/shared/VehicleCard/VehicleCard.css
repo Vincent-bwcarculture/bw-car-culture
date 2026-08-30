@@ -148,6 +148,10 @@
   transform: rotateY(180deg);
 }
 
+.vc-flipped .vc-card-front {
+  pointer-events: none;
+}
+
 /* Front stays in normal flow so it provides height to the card.
    backface-visibility hides it when flipped. */
 .vc-card-face {

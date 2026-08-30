@@ -1494,11 +1494,13 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             const raw = dealer?.location?.country || car?.location?.country || '';
             const countryName = countryMap[raw] || raw;
             if (!countryName) return null;
+            const city = dealer?.location?.city || car?.location?.city;
+            const locationLabel = city ? `${city}, ${countryName}` : countryName;
             const customDays = car?.location?.deliveryDays;
             const delivery = customDays || defaultDelivery[countryName];
             return (
               <div className="vc-location-badge">
-                Vehicle in {countryName}{delivery ? <span className="vc-location-delivery"> · {delivery}</span> : null}
+                Vehicle in {locationLabel}{delivery ? <span className="vc-location-delivery"> · {delivery}</span> : null}
               </div>
             );
           })()}
