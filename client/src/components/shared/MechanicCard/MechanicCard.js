@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { http } from '../../../config/axios.js';
 import './MechanicCard.css';
 
 const BRAND_DISPLAY = {
@@ -19,49 +20,235 @@ const TYPE_COLORS = {
   'Home Workshop': '#f1c40f',
 };
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const renderStars = (rating, editable = false, onRate = null) => {
+  const full = Math.floor(rating);
+  return Array.from({ length: 5 }, (_, i) => {
+    const filled = i < full;
+    const half = !filled && rating - i >= 0.5;
+    return (
+      <span
+        key={i}
+        className={`mc-star${filled ? ' mc-star--filled' : half ? ' mc-star--half' : ''}`}
+        onClick={editable && onRate ? () => onRate(i + 1) : undefined}
+        style={editable ? { cursor: 'pointer' } : {}}
+      >
+        {filled ? '★' : half ? '⯨' : '☆'}
+      </span>
+    );
+  });
+};
+
+const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-BW', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+
 const buildBookingMsg = (m, form) => {
   const name = m.workshopName || m.mechanicName || 'Mechanic';
   return [
     `Hello *${name}*! I'd like to book an appointment.`,
     '',
+    form.issue ? `*Issue / What's needed:*\n${form.issue}` : '',
+    '',
     `*Vehicle:* ${[form.year, form.make, form.model].filter(Boolean).join(' ')}${form.plate ? ` (Reg: ${form.plate})` : ''}`,
-    `*Issue:* ${form.issue || 'General service'}`,
     form.date ? `*Preferred Date:* ${form.date}` : '',
     `*My Name:* ${form.customerName || '—'}`,
     `*My Phone:* ${form.customerPhone || '—'}`,
     '',
-    'Please let me know your availability. Thank you!'
-  ].filter(l => l !== undefined).join('\n');
+    'Please let me know your availability. Thank you!',
+  ].filter(l => l !== undefined).join('\n').replace(/\n{3,}/g, '\n\n');
 };
 
+// ── Reviews sub-component ─────────────────────────────────────────────────────
+
+function ReviewsSection({ mechanicUserId }) {
+  const [reviews, setReviews]           = useState([]);
+  const [stats, setStats]               = useState({ totalReviews: 0, averageRating: 0 });
+  const [loading, setLoading]           = useState(true);
+  const [showForm, setShowForm]         = useState(false);
+  const [newRating, setNewRating]       = useState(0);
+  const [hoverRating, setHoverRating]   = useState(0);
+  const [newText, setNewText]           = useState('');
+  const [serviceType, setServiceType]   = useState('');
+  const [submitting, setSubmitting]     = useState(false);
+  const [submitMsg, setSubmitMsg]       = useState('');
+  const [submitError, setSubmitError]   = useState('');
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await http.get(`/reviews/mechanic/${mechanicUserId}`);
+      if (res.data?.success) {
+        setReviews(res.data.data.reviews || []);
+        setStats(res.data.data.stats || { totalReviews: 0, averageRating: 0 });
+      }
+    } catch (_) {}
+    setLoading(false);
+  }, [mechanicUserId]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleSubmit = async () => {
+    if (!newRating) { setSubmitError('Please select a star rating.'); return; }
+    if (newText.trim().length < 5) { setSubmitError('Review must be at least 5 characters.'); return; }
+    setSubmitting(true); setSubmitError('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await http.post('/reviews/mechanic', {
+        mechanicUserId, rating: newRating, review: newText.trim(), serviceType
+      }, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.data?.success) {
+        setSubmitMsg('Review submitted! Thank you.');
+        setNewRating(0); setNewText(''); setServiceType(''); setShowForm(false);
+        await load();
+      } else {
+        setSubmitError(res.data?.message || 'Failed to submit.');
+      }
+    } catch (e) {
+      setSubmitError(e.response?.data?.message || 'Failed to submit. Please sign in.');
+    } finally { setSubmitting(false); }
+  };
+
+  const displayRating = hoverRating || newRating;
+
+  return (
+    <div className="mc-reviews">
+      {/* Summary bar */}
+      <div className="mc-reviews-summary">
+        <div className="mc-reviews-avg">
+          <span className="mc-reviews-avg-num">{stats.averageRating > 0 ? stats.averageRating.toFixed(1) : '—'}</span>
+          <div className="mc-reviews-stars-row">
+            {renderStars(stats.averageRating)}
+          </div>
+          <span className="mc-reviews-count">{stats.totalReviews} review{stats.totalReviews !== 1 ? 's' : ''}</span>
+        </div>
+        {!showForm && !submitMsg && (
+          <button className="mc-btn mc-btn-review-open" onClick={() => setShowForm(true)}>
+            ✍️ Write a Review
+          </button>
+        )}
+      </div>
+
+      {submitMsg && <div className="mc-review-success">{submitMsg}</div>}
+
+      {/* Review form */}
+      {showForm && (
+        <div className="mc-review-form">
+          <div className="mc-review-form-stars">
+            <span className="mc-review-form-label">Your rating:</span>
+            {Array.from({ length: 5 }, (_, i) => (
+              <span
+                key={i}
+                className={`mc-star mc-star-input${i < displayRating ? ' mc-star--filled' : ''}`}
+                onMouseEnter={() => setHoverRating(i + 1)}
+                onMouseLeave={() => setHoverRating(0)}
+                onClick={() => setNewRating(i + 1)}
+              >
+                {i < displayRating ? '★' : '☆'}
+              </span>
+            ))}
+            {displayRating > 0 && (
+              <span className="mc-review-rating-label">
+                {['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'][displayRating]}
+              </span>
+            )}
+          </div>
+          <select
+            className="mc-review-select"
+            value={serviceType}
+            onChange={e => setServiceType(e.target.value)}
+          >
+            <option value="">Service type (optional)</option>
+            {['Engine Repair','Transmission','Electrical','Brakes','Suspension','Air Conditioning','Diagnostics','Body Work','Tyres & Alignment','Service / Oil Change','Clutch','4×4 / Off-road','Detailing','Other'].map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <textarea
+            className="mc-review-textarea"
+            rows={3}
+            placeholder="Share your experience with this mechanic…"
+            value={newText}
+            onChange={e => setNewText(e.target.value)}
+          />
+          {submitError && <div className="mc-review-error">{submitError}</div>}
+          <div className="mc-review-form-actions">
+            <button className="mc-btn mc-btn-secondary" onClick={() => { setShowForm(false); setSubmitError(''); }}>Cancel</button>
+            <button className="mc-btn mc-btn-primary" onClick={handleSubmit} disabled={submitting}>
+              {submitting ? 'Submitting…' : 'Submit Review'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Review list */}
+      {loading ? (
+        <div className="mc-reviews-loading"><div className="mc-mini-spinner" /></div>
+      ) : reviews.length === 0 ? (
+        <div className="mc-reviews-empty">No reviews yet — be the first!</div>
+      ) : (
+        <div className="mc-review-list">
+          {reviews.slice(0, 5).map((r, i) => (
+            <div key={i} className="mc-review-item">
+              <div className="mc-review-item-header">
+                <div className="mc-review-avatar">{(r.reviewer?.name || 'A')[0].toUpperCase()}</div>
+                <div className="mc-review-item-meta">
+                  <span className="mc-review-name">{r.reviewer?.name || 'Anonymous'}</span>
+                  <div className="mc-review-item-stars">
+                    {renderStars(r.rating)}
+                    {r.serviceType && <span className="mc-review-service-tag">{r.serviceType}</span>}
+                  </div>
+                </div>
+                <span className="mc-review-date">{fmtDate(r.date)}</span>
+              </div>
+              <p className="mc-review-text">{r.review}</p>
+            </div>
+          ))}
+          {reviews.length > 5 && (
+            <p className="mc-reviews-more-note">{reviews.length - 5} more review{reviews.length - 5 !== 1 ? 's' : ''} not shown</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Main Card ─────────────────────────────────────────────────────────────────
+
 export default function MechanicCard({ mechanic: m }) {
-  const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ customerName: '', customerPhone: '', make: '', model: '', year: '', plate: '', issue: '', date: '' });
+  const [showModal, setShowModal]   = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
+  const [issueInput, setIssueInput] = useState('');
+  const [form, setForm] = useState({
+    customerName: '', customerPhone: '',
+    make: '', model: '', year: '', plate: '',
+    issue: '', date: '',
+  });
 
-  const brands = (m.brandSpecializations || []);
+  const brands    = m.brandSpecializations || [];
   const allBrands = brands.includes('all_brands');
-  const specs = (m.mechanicSpecializations || []).slice(0, 3);
+  const specs     = (m.mechanicSpecializations || []).slice(0, 3);
   const extraSpecs = (m.mechanicSpecializations || []).length - 3;
-  const locations = (m.locationsOfOperation || m.city || '').split(/[,;|\n]/).map(l => l.trim()).filter(Boolean).slice(0, 3);
-  const initial = (m.workshopName || m.mechanicName || 'M')[0].toUpperCase();
+  const locations = (m.locationsOfOperation || m.city || '')
+    .split(/[,;|\n]/).map(l => l.trim()).filter(Boolean).slice(0, 3);
+  const initial   = (m.workshopName || m.mechanicName || 'M')[0].toUpperCase();
   const typeColor = TYPE_COLORS[m.workshopType] || '#888';
-  const phone = m.phone || m.whatsapp || '';
+  const phone     = m.phone || m.whatsapp || '';
 
-  const handleBook = () => {
-    if (!phone) { setShowModal(true); return; }
-    const num = phone.replace(/\D/g, '');
-    const text = buildBookingMsg(m, form);
-    window.open(`https://wa.me/${num}?text=${encodeURIComponent(text)}`, '_blank');
+  const openModal = () => {
+    setForm(p => ({ ...p, issue: issueInput }));
+    setShowModal(true);
   };
 
   const handleModalSend = () => {
     if (!phone) {
-      alert(`Contact: ${m.email || 'No contact info available'}`);
+      if (m.email) {
+        window.location.href = `mailto:${m.email}?subject=Booking Request&body=${encodeURIComponent(buildBookingMsg(m, form))}`;
+      } else {
+        alert('No contact info available for this mechanic.');
+      }
       return;
     }
     const num = phone.replace(/\D/g, '');
-    const text = buildBookingMsg(m, form);
-    window.open(`https://wa.me/${num}?text=${encodeURIComponent(text)}`, '_blank');
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(buildBookingMsg(m, form))}`, '_blank');
     setShowModal(false);
   };
 
@@ -85,12 +272,12 @@ export default function MechanicCard({ mechanic: m }) {
                 {m.workshopType || 'Workshop'}
               </span>
               {m.mobileService && <span className="mc-mobile-badge">📍 Mobile</span>}
-              {m.yearsExperience && <span className="mc-exp">{m.yearsExperience}+ yrs</span>}
+              {m.yearsExperience && <span className="mc-exp">{m.yearsExperience}+ yrs exp</span>}
             </div>
           </div>
         </div>
 
-        {/* Locations */}
+        {/* Location chips */}
         {locations.length > 0 && (
           <div className="mc-locations">
             <span className="mc-section-icon">📌</span>
@@ -98,7 +285,7 @@ export default function MechanicCard({ mechanic: m }) {
           </div>
         )}
 
-        {/* Brands */}
+        {/* Brand chips */}
         <div className="mc-brands">
           <span className="mc-section-label">Brands:</span>
           {allBrands
@@ -110,7 +297,7 @@ export default function MechanicCard({ mechanic: m }) {
           {!allBrands && brands.length > 5 && <span className="mc-more">+{brands.length - 5}</span>}
         </div>
 
-        {/* Specializations */}
+        {/* Service type chips */}
         {specs.length > 0 && (
           <div className="mc-specs">
             {specs.map((s, i) => <span key={i} className="mc-spec-chip">{s}</span>)}
@@ -119,17 +306,27 @@ export default function MechanicCard({ mechanic: m }) {
         )}
 
         {/* Description */}
-        {m.description && (
-          <p className="mc-description">{m.description}</p>
-        )}
+        {m.description && <p className="mc-description">{m.description}</p>}
+
+        {/* ── Quick issue field ── */}
+        <div className="mc-issue-wrap">
+          <label className="mc-issue-label">What does your car need?</label>
+          <textarea
+            className="mc-issue-input"
+            rows={2}
+            placeholder="Briefly describe the problem or service needed… (e.g. 'engine knocking', 'brake service', 'A/C not cooling')"
+            value={issueInput}
+            onChange={e => setIssueInput(e.target.value)}
+          />
+        </div>
 
         {/* Actions */}
         <div className="mc-actions">
-          <button className="mc-btn mc-btn-book" onClick={() => setShowModal(true)}>
+          <button className="mc-btn mc-btn-book" onClick={openModal}>
             📅 Book Appointment
           </button>
           {phone && (
-            <a className="mc-btn mc-btn-wa" href={`https://wa.me/${phone.replace(/\D/g,'')}`} target="_blank" rel="noreferrer">
+            <a className="mc-btn mc-btn-wa" href={`https://wa.me/${phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer">
               📱 WhatsApp
             </a>
           )}
@@ -137,6 +334,19 @@ export default function MechanicCard({ mechanic: m }) {
             <a className="mc-btn mc-btn-email" href={`mailto:${m.email}`}>✉️ Email</a>
           )}
         </div>
+
+        {/* Reviews toggle */}
+        <button
+          className="mc-reviews-toggle"
+          onClick={() => setShowReviews(v => !v)}
+        >
+          <span className="mc-reviews-toggle-label">
+            {showReviews ? '▲ Hide Reviews' : '★ Reviews'}
+          </span>
+        </button>
+
+        {/* Reviews panel */}
+        {showReviews && <ReviewsSection mechanicUserId={m.userId || String(m._id)} />}
       </div>
 
       {/* Booking Modal */}
@@ -144,6 +354,7 @@ export default function MechanicCard({ mechanic: m }) {
         <div className="mc-modal-overlay" onClick={e => e.target === e.currentTarget && setShowModal(false)}>
           <div className="mc-modal">
             <button className="mc-modal-close" onClick={() => setShowModal(false)}>✕</button>
+
             <div className="mc-modal-header">
               <div className="mc-modal-avatar" style={{ background: typeColor }}>{initial}</div>
               <div>
@@ -153,6 +364,18 @@ export default function MechanicCard({ mechanic: m }) {
             </div>
 
             <div className="mc-modal-body">
+              {/* Issue field — prominently at the top, pre-filled from card */}
+              <div className="mc-modal-issue-block">
+                <label className="mc-modal-issue-label">What does your car need? *</label>
+                <textarea
+                  className="mc-modal-issue-textarea"
+                  rows={3}
+                  placeholder="Describe the problem or service in detail — the more you share, the better the mechanic can prepare…"
+                  value={form.issue}
+                  onChange={e => setForm(p => ({ ...p, issue: e.target.value }))}
+                />
+              </div>
+
               <div className="mc-modal-grid">
                 <div className="mc-modal-field">
                   <label>Your Name *</label>
@@ -176,7 +399,7 @@ export default function MechanicCard({ mechanic: m }) {
                 </div>
                 <div className="mc-modal-field">
                   <label>Year</label>
-                  <input type="number" placeholder="e.g. 2020" value={form.year}
+                  <input type="number" placeholder={String(new Date().getFullYear())} value={form.year}
                     onChange={e => setForm(p => ({ ...p, year: e.target.value }))} />
                 </div>
                 <div className="mc-modal-field">
@@ -185,11 +408,6 @@ export default function MechanicCard({ mechanic: m }) {
                     onChange={e => setForm(p => ({ ...p, plate: e.target.value }))} />
                 </div>
                 <div className="mc-modal-field mc-modal-field--full">
-                  <label>What needs fixing? *</label>
-                  <textarea rows={3} placeholder="Describe the issue or service needed…" value={form.issue}
-                    onChange={e => setForm(p => ({ ...p, issue: e.target.value }))} />
-                </div>
-                <div className="mc-modal-field">
                   <label>Preferred Date</label>
                   <input type="date" min={new Date().toISOString().split('T')[0]} value={form.date}
                     onChange={e => setForm(p => ({ ...p, date: e.target.value }))} />
@@ -203,7 +421,10 @@ export default function MechanicCard({ mechanic: m }) {
                 ? <button className="mc-btn mc-btn-wa mc-btn-lg" onClick={handleModalSend}>
                     📱 Send Booking via WhatsApp
                   </button>
-                : <a className="mc-btn mc-btn-email mc-btn-lg" href={`mailto:${m.email}?subject=Booking Request&body=${encodeURIComponent(buildBookingMsg(m, form))}`}>
+                : <a
+                    className="mc-btn mc-btn-email mc-btn-lg"
+                    href={`mailto:${m.email}?subject=Booking Request&body=${encodeURIComponent(buildBookingMsg(m, form))}`}
+                  >
                     ✉️ Send Booking via Email
                   </a>
               }
