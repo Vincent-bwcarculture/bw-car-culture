@@ -40,6 +40,7 @@ import RealTimeCoordinatorDashboard from '../components/profile/RealTimeCoordina
 import DriverOperatorDashboard from '../components/profile/DriverOperatorDashboard.js';
 import InventoryManagement from '../components/profile/InventoryManagement.js';
 import RoleSelectionComponent from '../components/profile/RoleSelectionComponent.js';
+import FeedEmbed from '../components/profile/FeedEmbed.js';
 
 import { useAuth } from '../context/AuthContext.js';
 import './UserProfilePage.css';
@@ -391,12 +392,7 @@ const getAvailableTabs = () => {
         )}
 
         {activeTab === 'feed' && (
-          <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-            <p style={{ color: '#aaa', marginBottom: '1rem' }}>View the community feed</p>
-            <a href="/feed" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1.4rem', background: '#6c63ff', color: '#fff', borderRadius: '8px', fontWeight: 700, textDecoration: 'none', fontSize: '0.9rem' }}>
-              Open Feed →
-            </a>
-          </div>
+          <FeedEmbed />
         )}
 
         {activeTab === 'roles' && (

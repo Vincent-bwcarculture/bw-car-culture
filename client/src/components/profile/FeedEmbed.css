@@ -1,0 +1,325 @@
+/* FeedEmbed.css — compact inline feed for profile tab */
+
+.fe-embed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────────── */
+.fe-embed-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--uprofile-border-color, #2a2a2a);
+}
+
+.fe-embed-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--uprofile-text-muted, #888);
+}
+
+.fe-expand-link {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--uprofile-primary-accent, #0078ff);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid var(--uprofile-primary-accent, #0078ff);
+  border-radius: 6px;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+.fe-expand-link:hover { opacity: 1; }
+
+/* ── Avatar ──────────────────────────────────────────────────────────────── */
+.fe-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+}
+.fe-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.fe-avatar-sm { width: 26px; height: 26px; font-size: 0.62rem; }
+
+/* ── Composer ────────────────────────────────────────────────────────────── */
+.fe-composer {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  background: var(--uprofile-bg-primary, #1a1a1a);
+  border: 1px solid var(--uprofile-border-color, #2a2a2a);
+  border-radius: 12px;
+  padding: 0.75rem;
+}
+
+.fe-composer-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.fe-composer-input {
+  width: 100%;
+  background: var(--uprofile-bg-secondary, #222);
+  border: 1px solid var(--uprofile-border-color, #2a2a2a);
+  border-radius: 8px;
+  color: var(--uprofile-text-primary, #e0e0e0);
+  padding: 0.5rem 0.65rem;
+  font-size: 0.82rem;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  line-height: 1.5;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.fe-composer-input:focus { border-color: var(--uprofile-primary-accent, #0078ff); }
+.fe-composer-input::placeholder { color: var(--uprofile-text-muted, #555); }
+
+.fe-composer-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.fe-char-count {
+  font-size: 0.65rem;
+  color: var(--uprofile-text-muted, #666);
+  margin-right: auto;
+}
+
+.fe-post-btn {
+  background: var(--uprofile-primary-accent, #0078ff);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 0.38rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.fe-post-btn:disabled { opacity: 0.45; cursor: default; }
+.fe-post-btn:not(:disabled):hover { opacity: 0.85; }
+
+.fe-login-prompt {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--uprofile-text-muted, #888);
+  padding: 0.6rem;
+}
+.fe-login-prompt a { color: var(--uprofile-primary-accent, #0078ff); }
+
+/* ── Post list ───────────────────────────────────────────────────────────── */
+.fe-post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.fe-post {
+  background: var(--uprofile-bg-primary, #1a1a1a);
+  border: 1px solid var(--uprofile-border-color, #2a2a2a);
+  border-radius: 12px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  transition: border-color 0.15s;
+}
+.fe-post:hover { border-color: rgba(255,255,255,0.12); }
+
+.fe-post-header {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.fe-post-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.fe-post-author {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--uprofile-text-primary, #e0e0e0);
+}
+
+.fe-post-time {
+  font-size: 0.65rem;
+  color: var(--uprofile-text-muted, #666);
+}
+
+.fe-delete-btn {
+  background: none;
+  border: none;
+  color: var(--uprofile-text-muted, #666);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+.fe-delete-btn:hover { color: #ef4444; background: #ef444415; }
+
+.fe-post-content {
+  font-size: 0.82rem;
+  color: var(--uprofile-text-secondary, #ccc);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.fe-expand-text {
+  background: none;
+  border: none;
+  color: var(--uprofile-primary-accent, #0078ff);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* ── Post actions ────────────────────────────────────────────────────────── */
+.fe-post-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.fe-action-btn {
+  background: var(--uprofile-bg-secondary, #222);
+  border: 1px solid var(--uprofile-border-color, #2a2a2a);
+  border-radius: 6px;
+  color: var(--uprofile-text-muted, #888);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.28rem 0.55rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.fe-action-btn:hover { border-color: rgba(255,255,255,0.15); color: var(--uprofile-text-primary, #e0e0e0); }
+.fe-action-btn--active { border-color: var(--uprofile-primary-accent, #0078ff); color: var(--uprofile-primary-accent, #0078ff); background: #0078ff15; }
+.fe-action-btn--dislike.fe-action-btn--active { border-color: #ef4444; color: #ef4444; background: #ef444415; }
+
+/* ── Comments ────────────────────────────────────────────────────────────── */
+.fe-comments {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  border-top: 1px solid var(--uprofile-border-color, #222);
+  padding-top: 0.55rem;
+}
+
+.fe-comment {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+}
+
+.fe-comment-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  flex: 1;
+}
+
+.fe-comment-author {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--uprofile-text-primary, #e0e0e0);
+  margin-right: 0.35rem;
+}
+
+.fe-comment-text {
+  font-size: 0.75rem;
+  color: var(--uprofile-text-secondary, #bbb);
+  line-height: 1.45;
+}
+
+.fe-comment-form {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.fe-comment-input {
+  flex: 1;
+  background: var(--uprofile-bg-secondary, #222);
+  border: 1px solid var(--uprofile-border-color, #2a2a2a);
+  border-radius: 6px;
+  color: var(--uprofile-text-primary, #e0e0e0);
+  padding: 0.35rem 0.55rem;
+  font-size: 0.75rem;
+  font-family: inherit;
+  outline: none;
+}
+.fe-comment-input:focus { border-color: var(--uprofile-primary-accent, #0078ff); }
+
+.fe-comment-submit {
+  background: var(--uprofile-primary-accent, #0078ff);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.fe-comment-submit:disabled { opacity: 0.45; }
+
+.fe-loading-inline {
+  font-size: 0.72rem;
+  color: var(--uprofile-text-muted, #666);
+  text-align: center;
+  padding: 0.35rem;
+}
+
+/* ── Load more / states ──────────────────────────────────────────────────── */
+.fe-loading,
+.fe-empty {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--uprofile-text-muted, #666);
+  padding: 2rem 1rem;
+  border: 1px solid var(--uprofile-border-color, #2a2a2a);
+  border-radius: 12px;
+  background: var(--uprofile-bg-primary, #1a1a1a);
+}
+
+.fe-load-more {
+  width: 100%;
+  padding: 0.6rem;
+  background: transparent;
+  border: 1px solid var(--uprofile-border-color, #2a2a2a);
+  border-radius: 8px;
+  color: var(--uprofile-text-muted, #888);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.fe-load-more:hover { border-color: var(--uprofile-primary-accent, #0078ff); color: var(--uprofile-primary-accent, #0078ff); }
+.fe-load-more:disabled { opacity: 0.45; cursor: default; }
