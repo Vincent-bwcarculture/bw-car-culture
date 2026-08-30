@@ -76,6 +76,8 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     workshopType: '',
     yearsExperience: '',
     mechanicSpecializations: [],
+    brandSpecializations: [],
+    locationsOfOperation: '',
     certifications: '',
     mobileService: false,
     workshopCapacity: '',
@@ -381,7 +383,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
     }));
   };
 
-  // Handle mechanic specializations
+  // Handle mechanic service specializations
   const handleMechanicSpecializationChange = (spec, isChecked) => {
     setFormData(prev => ({
       ...prev,
@@ -389,6 +391,18 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         ? [...prev.mechanicSpecializations, spec]
         : prev.mechanicSpecializations.filter(s => s !== spec)
     }));
+  };
+
+  // Handle mechanic brand specializations (with "All Brands" toggle)
+  const ALL_BRANDS_KEY = 'all_brands';
+  const handleBrandSpecializationChange = (brand, isChecked) => {
+    setFormData(prev => {
+      if (brand === ALL_BRANDS_KEY) {
+        return { ...prev, brandSpecializations: isChecked ? [ALL_BRANDS_KEY] : [] };
+      }
+      const without = prev.brandSpecializations.filter(b => b !== brand && b !== ALL_BRANDS_KEY);
+      return { ...prev, brandSpecializations: isChecked ? [...without, brand] : without };
+    });
   };
 
   const validateForm = () => {
@@ -459,6 +473,8 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
         workshopType: formData.workshopType,
         yearsExperience: formData.yearsExperience,
         mechanicSpecializations: formData.mechanicSpecializations,
+        brandSpecializations: formData.brandSpecializations,
+        locationsOfOperation: formData.locationsOfOperation,
         certifications: formData.certifications,
         mobileService: formData.mobileService,
         workshopCapacity: formData.workshopCapacity,
@@ -536,6 +552,7 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
           areaOfOperation: '', memberCount: '', associationDescription: '',
           // Reset mechanic fields
           workshopName: '', workshopType: '', yearsExperience: '', mechanicSpecializations: [],
+          brandSpecializations: [], locationsOfOperation: '',
           certifications: '', mobileService: false, workshopCapacity: '',
           businessLicense: null, taxCertificate: null, idDocument: null, proofOfAddress: null,
           accessCode: '',
@@ -1124,6 +1141,47 @@ const RoleSelectionComponent = ({ profileData, refreshProfile }) => {
                     />
                     <span>I offer mobile / call-out services (come to the customer's location)</span>
                   </label>
+                </div>
+
+                <div className="role-form-field role-form-field-full">
+                  <label>Vehicle Brand Specializations</label>
+                  <div className="role-checkbox-group">
+                    <label className="role-checkbox-item role-checkbox-item--highlight">
+                      <input
+                        type="checkbox"
+                        checked={formData.brandSpecializations.includes(ALL_BRANDS_KEY)}
+                        onChange={(e) => handleBrandSpecializationChange(ALL_BRANDS_KEY, e.target.checked)}
+                      />
+                      <span>All Brands (General Workshop)</span>
+                    </label>
+                    {[
+                      'Toyota', 'Volkswagen (VW)', 'BMW', 'Mercedes-Benz', 'Ford',
+                      'Hyundai', 'Kia', 'Nissan', 'Mazda', 'Isuzu', 'Mitsubishi',
+                      'Land Rover / Range Rover', 'Audi', 'Renault', 'Peugeot',
+                      'Chevrolet / Opel', 'Lexus', 'Honda', 'Subaru', 'Volvo',
+                      'Jeep', 'Suzuki', 'Fiat / Alfa Romeo', 'Other / Uncommon'
+                    ].map(brand => (
+                      <label key={brand} className="role-checkbox-item" style={formData.brandSpecializations.includes(ALL_BRANDS_KEY) ? { opacity: 0.4 } : {}}>
+                        <input
+                          type="checkbox"
+                          checked={formData.brandSpecializations.includes(brand)}
+                          disabled={formData.brandSpecializations.includes(ALL_BRANDS_KEY)}
+                          onChange={(e) => handleBrandSpecializationChange(brand, e.target.checked)}
+                        />
+                        <span>{brand}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="role-form-field role-form-field-full">
+                  <label>Locations / Areas of Operation</label>
+                  <textarea
+                    value={formData.locationsOfOperation}
+                    onChange={(e) => handleInputChange('locationsOfOperation', e.target.value)}
+                    placeholder="List the towns and areas you serve, e.g. Gaborone, Tlokweng, Mogoditshane, Francistown (if nationwide write 'Nationwide')"
+                    rows="2"
+                  />
                 </div>
 
                 <div className="role-form-field role-form-field-full">

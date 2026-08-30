@@ -130,6 +130,7 @@ const GIONApp = React.lazy(() => import('./components/GION/GIONApp.js'));
 const GIONAdminDashboard = React.lazy(() => import('./components/GION/GIONAdminDashboard/GIONAdminDashboard.js'));
 const MinistryDashboard = React.lazy(() => import('./components/GION/GorvDashboards/MinistryDashboard.js'));
 const ServiceProviderDashboard = React.lazy(() => import('./components/GION/ServiceProviderDashboards/ServiceProviderDashboard.js'));
+const MechanicDashboardPage = React.lazy(() => import('./pages/MechanicDashboardPage.js'));
 
 // Create safe Google Analytics functions to prevent errors
 const safeTrackPageView = (page) => {
@@ -1246,6 +1247,15 @@ const AppRoutes = () => {
         <Route path="/transport-admin/dashboard" element={
           <ProtectedRoute requiredRoles={['transport_admin', 'admin']}>
             <TransportAdminDashboard />
+          </ProtectedRoute>
+        } />
+
+        {/* Mechanic Dashboard — accessible to approved mechanics + admins */}
+        <Route path="/mechanic/dashboard" element={
+          <ProtectedRoute requiredRoles={['mechanic', 'admin']}>
+            <MainLayout>
+              <MechanicDashboardPage />
+            </MainLayout>
           </ProtectedRoute>
         } />
 
