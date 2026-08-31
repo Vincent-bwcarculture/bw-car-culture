@@ -58,24 +58,16 @@ const MarketplaceFilters = ({
 
   // ENHANCED: Section configurations with better descriptions and features
   const sectionConfigs = useMemo(() => ({
-    premium: {
-      title: 'Premium Collection',
-      description: 'Luxury and high-end vehicles from verified dealers and private sellers',
+    dealerships: {
+      title: 'Dealerships',
+      description: 'Vehicles from verified dealerships across Botswana',
       icon: '',
-      features: ['Premium Brands', 'Luxury Features', 'High-End Models', 'Verified Sellers'],
-      badge: 'premium',
-      searchPlaceholder: 'Search premium vehicles...'
-    },
-    savings: {
-      title: 'With Savings',
-      description: 'Exclusive deals and savings from dealers and private sellers',
-      icon: '',
-      features: ['Special Offers', 'Price Reductions', 'Exclusive Deals', 'Limited Time'],
-      badge: 'savings',
-      searchPlaceholder: 'Search savings deals...'
+      features: ['Verified Dealers', 'Warranty Options', 'Finance Available', 'Trade-ins'],
+      badge: 'dealerships',
+      searchPlaceholder: 'Search dealership listings...'
     },
     private: {
-      title: 'Private Sellers', 
+      title: 'Private Sellers',
       description: 'Connect directly with individual vehicle owners',
       icon: '',
       features: ['No Dealer Fees', 'Direct Negotiation', 'Personal Service', 'Meet the Owner'],
@@ -379,10 +371,9 @@ const MarketplaceFilters = ({
   const getSellerOptions = useMemo(() => {
     if (activeSection === 'private') {
       return filterOptions.privateSellers;
-    } else if (activeSection === 'all') {
-      return [...filterOptions.dealerships, ...filterOptions.privateSellers];
+    } else if (activeSection === 'dealerships') {
+      return filterOptions.dealerships;
     } else {
-      // For premium and savings, show all types but indicate
       return [...filterOptions.dealerships, ...filterOptions.privateSellers];
     }
   }, [activeSection, filterOptions.dealerships, filterOptions.privateSellers]);

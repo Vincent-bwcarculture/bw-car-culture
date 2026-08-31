@@ -147,12 +147,12 @@ const MarketplaceList = () => {
     const sectionParam = searchParams.get('section');
     const pageParam = parseInt(searchParams.get('page')) || 1;
     
-    if (sectionParam && ['premium', 'savings', 'private', 'all'].includes(sectionParam)) {
+    if (sectionParam && ['dealerships', 'private', 'all'].includes(sectionParam)) {
       setActiveSection(sectionParam);
     } else {
       try {
         const cachedSection = sessionStorage.getItem('preferredSection');
-        if (cachedSection && ['premium', 'savings', 'private', 'all'].includes(cachedSection)) {
+        if (cachedSection && ['dealerships', 'private', 'all'].includes(cachedSection)) {
           setActiveSection(cachedSection);
         }
       } catch (e) {
@@ -451,6 +451,15 @@ const MarketplaceList = () => {
       .slice(0, limit);
   }, [getCarClassification, calculateListingScore]);
 
+  const getDealerListings = useCallback((cars) => {
+    if (!Array.isArray(cars) || cars.length === 0) return [];
+    const dealerCars = cars.filter(car => {
+      const classification = getCarClassification(car);
+      return !classification.startsWith('private');
+    });
+    return dealerCars.sort((a, b) => calculateListingScore(b) - calculateListingScore(a));
+  }, [getCarClassification, calculateListingScore]);
+
   const getAllListings = useCallback((cars, preserveOrder = false) => {
     if (!Array.isArray(cars) || cars.length === 0) return [];
 
@@ -576,17 +585,15 @@ const MarketplaceList = () => {
     const realCars = allCars.filter(car => !car.isPromoCard);
 
     switch (activeSection) {
-      case 'premium':
-        return injectPromoCards(getPremiumListings(realCars), 6);
-      case 'savings':
-        return injectPromoCards(getSavingsListings(realCars), 7);
+      case 'dealerships':
+        return injectPromoCards(getDealerListings(realCars), 6);
       case 'private':
         return injectPromoCards(getPrivateSellerListings(realCars), 8);
       case 'all':
       default:
         return getAllListings(allCars, hasSort);
     }
-  }, [activeSection, allCars, location.search, getPremiumListings, getSavingsListings, getPrivateSellerListings, getAllListings, injectPromoCards]);
+  }, [activeSection, allCars, location.search, getDealerListings, getPrivateSellerListings, getAllListings, injectPromoCards]);
 
   // Search filters
   const prepareSearchFilters = useCallback((searchParams) => {
@@ -1332,20 +1339,9 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
         </div>
       ) : (
         <div className="marketplace-sections">
-          {activeSection === 'premium' && (
-            <div className="premium-section" id="premium-panel" role="tabpanel">
-              <div className="section-header">
-                <h2>Premium Vehicles</h2>
-                <p>
-                  Exceptional vehicles with premium features and verified quality
-                  {displayData.privatePremium > 0 && (
-                    <span className="premium-count">
-                      • {displayData.privatePremium} from trusted private sellers
-                    </span>
-                  )}
-                </p>
-              </div>
-              <div className={getGridClassName('marketplace-grid premium-grid')}>
+          {activeSection === 'dealerships' && (
+            <div className="dealerships-section" id="dealerships-panel" role="tabpanel">
+              <div className={getGridClassName('marketplace-grid dealerships-grid')}>
                 {isMobile ? (
                   displayData.displayCars.map((car, index) => {
                     if (car.isPromoCard) {
@@ -1359,10 +1355,8 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
                         </div>
                       );
                     }
-                    
                     const carId = car._id || car.id;
                     const similarCars = similarCarsData.get(carId) || [];
-                    
                     return (
                       <MobileHorizontalCarRow
                         key={carId}
@@ -1376,71 +1370,11 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
                     car.isPromoCard ? (
                       <CreateListingPromoCard key={car._id} compact={false} />
                     ) : (
-                      renderVehicleCard(car, index, 'premium')
+                      renderVehicleCard(car, index, 'dealerships')
                     )
                   ))
                 )}
               </div>
-              
-              {/* ✅ PAGINATION ADDED HERE */}
-              <PaginationControls />
-            </div>
-          )}
-
-          {activeSection === 'savings' && (
-            <div className="savings-section" id="savings-panel" role="tabpanel">
-              <div className="section-header">
-                <h2>💰 Best Savings</h2>
-                <p>
-                  Vehicles with the biggest savings and best value deals
-                  <span className="total-savings">
-                    • Total savings available: P{displayData.totalSavings.toLocaleString()}
-                  </span>
-                  {displayData.privateSavings > 0 && (
-                    <span className="private-seller-count">
-                      • {displayData.privateSavings} exclusive deals from private sellers
-                    </span>
-                  )}
-                </p>
-              </div>
-              <div className={getGridClassName('marketplace-grid savings-grid')}>
-                {isMobile ? (
-                  displayData.displayCars.map((car, index) => {
-                    if (car.isPromoCard) {
-                      return (
-                        <div key={car._id} className="mobile-horizontal-scroll">
-                          <div className="mobile-cards-row">
-                            <div className="mobile-car-card">
-                              <CreateListingPromoCard compact={true} />
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-                    
-                    const carId = car._id || car.id;
-                    const similarCars = similarCarsData.get(carId) || [];
-                    
-                    return (
-                      <MobileHorizontalCarRow
-                        key={carId}
-                        mainCar={car}
-                        similarCars={similarCars}
-                      />
-                    );
-                  })
-                ) : (
-                  displayData.displayCars.map((car, index) => (
-                    car.isPromoCard ? (
-                      <CreateListingPromoCard key={car._id} compact={false} />
-                    ) : (
-                      renderVehicleCard(car, index, 'savings')
-                    )
-                  ))
-                )}
-              </div>
-              
-              {/* ✅ PAGINATION ADDED HERE */}
               <PaginationControls />
             </div>
           )}
