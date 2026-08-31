@@ -1,6 +1,7 @@
 // AdminOps.js — Full Operations Centre (one page for everything)
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext.js';
+import StrategySection from './StrategySection.js';
 import './AdminOps.css';
 
 const API = process.env.REACT_APP_API_URL || '/api';
@@ -1582,6 +1583,7 @@ const AdminOps = () => {
         <p className="ops-page-sub">Company direction, team structure, scripts and daily coordination — all in one place.</p>
       </div>
 
+      <StrategySection />
       <CompanySection headers={headers} />
       <TeamSection currentUser={user} headers={headers} />
       <TemplatesSection headers={headers} />
