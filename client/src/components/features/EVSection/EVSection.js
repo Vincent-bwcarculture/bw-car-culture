@@ -8,8 +8,8 @@ const EVSection = () => (
       <div className="premium-banner-mission-row">
         <div className="premium-banner-rule" />
         <p className="premium-banner-mission">
-          Our mission is to make mobility and vehicle ownership as seamless, stress-free,
-          and trustworthy as possible, delivering a premium experience throughout the entire journey.
+          Making mobility and vehicle ownership seamless, stress-free, and trustworthy,
+          delivering a premium experience at every step of the journey.
         </p>
         <div className="premium-banner-rule" />
       </div>
