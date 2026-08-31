@@ -598,15 +598,20 @@ const MarketplaceList = () => {
   // Search filters
   const prepareSearchFilters = useCallback((searchParams) => {
     const filters = {};
-    
+
     const searchTerm = searchParams.get('search') || searchParams.get('q') || searchParams.get('query');
     if (searchTerm?.trim()) {
       filters.search = searchTerm.trim();
     }
-    
-    const sellerType = searchParams.get('sellerType');
-    if (sellerType && (sellerType === 'private' || sellerType === 'dealership')) {
-      filters.sellerType = sellerType;
+
+    // Derive sellerType from section when not explicitly in URL
+    const sellerTypeParam = searchParams.get('sellerType');
+    const sectionParam = searchParams.get('section');
+    const resolvedSellerType = sellerTypeParam ||
+      (sectionParam === 'dealerships' ? 'dealership' :
+       sectionParam === 'private' ? 'private' : null);
+    if (resolvedSellerType && (resolvedSellerType === 'private' || resolvedSellerType === 'dealership')) {
+      filters.sellerType = resolvedSellerType;
     }
     
     const filterMappings = {
@@ -863,8 +868,7 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
   
   try {
     const loadingMessages = {
-      premium: 'Loading premium vehicles...',
-      savings: 'Finding the best savings...',
+      dealerships: 'Loading dealership listings...',
       private: 'Loading private seller listings...',
       all: 'Loading all vehicles...'
     };
@@ -1017,19 +1021,28 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
   // Optimized section change handler
   const handleSectionChange = useCallback((section) => {
     if (section === activeSection) return;
-    
+
     setActiveSection(section);
-    setCurrentPage(1); // Reset to page 1
-    
+    setCurrentPage(1);
+
     const searchParams = new URLSearchParams(location.search);
     searchParams.set('section', section);
-    searchParams.delete('page'); // Remove page param when changing sections
-    
+    searchParams.delete('page');
+
+    // Pass sellerType to the backend so pagination is accurate for filtered views
+    if (section === 'dealerships') {
+      searchParams.set('sellerType', 'dealership');
+    } else if (section === 'private') {
+      searchParams.set('sellerType', 'private');
+    } else {
+      searchParams.delete('sellerType');
+    }
+
     navigate({
       pathname: location.pathname,
       search: searchParams.toString()
     }, { replace: true });
-    
+
   }, [activeSection, navigate, location]);
 
   // Retry handler with better UX
