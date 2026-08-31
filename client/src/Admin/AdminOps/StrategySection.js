@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './StrategySection.css';
 
 const CHAPTERS = [
   { id: 'north-star',  label: 'North Star' },
+  { id: 'blockers',    label: 'Blockers & Actions' },
   { id: 'company',     label: 'Company' },
   { id: 'strategy',    label: 'Strategy' },
   { id: 'layers',      label: 'The Four Layers' },
@@ -87,8 +88,8 @@ function NorthStarTab() {
     'REGIONAL EXPANSION',
   ];
 
-  const execNow = ['Media (Reviews, Events, Journalism)', 'Website UX + SEO', 'Social → Website conversion', 'Marketplace listings + dealers', 'Revenue: media, listings, partnerships'];
-  const execNext = ['Better vehicle presentation', 'Verification + Diagnostic reports', '360° imaging', 'Financing + Import facilitation'];
+  const execNow = ['Media (Reviews, Events, Journalism)', 'Website UX + SEO', 'Social → Website conversion', 'Marketplace listings + dealers', 'Import facilitation (China & SA)', 'Consignment sales', 'Revenue: media, listings, partnerships'];
+  const execNext = ['Better vehicle presentation', 'Verification + Diagnostic reports', '360° imaging', 'Financing partnerships'];
   const execThen = ['Mechanic network', 'Digital service records', 'Vehicle passports + history', 'Service-cost intelligence'];
   const execLater = ['Rentals + Public transport', 'Advanced mobility services', 'EV ecosystem', 'AI + Advanced intelligence'];
   const execScale = ['South Africa', 'Namibia · Zambia · Zimbabwe', 'Wider SADC'];
@@ -140,6 +141,220 @@ function NorthStarTab() {
 
       {/* One-line summary */}
       <Quote text="We establish authority through media, convert that authority into owned digital traffic, turn traffic into marketplace activity and transactions, turn activity into trusted data, and use revenue and data to build deeper roots in the automotive and mobility market." />
+    </div>
+  );
+}
+
+// ─── Blockers & Actions tab ───────────────────────────────────────────────────
+
+const BLOCKER_CATEGORIES = ['Legal & Compliance', 'Finance & Banking', 'Sales & Partnerships', 'Pricing & Product', 'Operations'];
+const BLOCKER_PRIORITY = { high: '#ef4444', medium: '#f97316', low: '#eab308' };
+
+const DEFAULT_BLOCKERS = [
+  {
+    id: 'b1', title: 'Dealership Subscription Pricing',
+    category: 'Pricing & Product', priority: 'high', done: false,
+    desc: 'Current pricing is unclear. Research what competitors charge, what value they deliver, and what we are competing against. Then set tiered pricing with clear deliverables per tier.',
+    actions: ['Research AutoTrader, Cars.co.za, OLX pricing', 'Document value delivered per competitor tier', 'Define our Basic / Standard / Premium tiers', 'Set monthly and annual pricing', 'Write pricing rationale document'],
+  },
+  {
+    id: 'b2', title: 'Consignment Plan & Legal Agreements',
+    category: 'Legal & Compliance', priority: 'high', done: false,
+    desc: 'Before accepting vehicles on consignment we need a structured plan and signed agreements that protect the company legally — covering liability, pricing authority, sale terms, and payment timelines.',
+    actions: ['Draft consignment agreement template', 'Define vehicle intake process', 'Clarify pricing authority (who sets the price)', 'Define commission structure and payment terms', 'Get agreement reviewed by a lawyer'],
+  },
+  {
+    id: 'b3', title: 'Business Licensing & Regulatory Compliance',
+    category: 'Legal & Compliance', priority: 'high', done: false,
+    desc: 'Confirm all required licenses and registrations for operating a digital automotive marketplace and media business in Botswana. Ensure we are compliant or have a clear path to compliance.',
+    actions: ['Confirm company registration is current (CIPA)', 'Identify all licenses required for our business activities', 'Check if media/advertising requires any specific licensing', 'Check if vehicle sales/facilitation requires additional licenses', 'Document compliance status and outstanding items'],
+  },
+  {
+    id: 'b4', title: 'Tax Clearance Certificate',
+    category: 'Finance & Banking', priority: 'high', done: false,
+    desc: 'Tax clearance is required for various business activities, partnerships and government contracts. This needs to be obtained and kept current.',
+    actions: ['Confirm BURS registration is current', 'File any outstanding tax returns', 'Apply for tax clearance certificate', 'Set reminder to renew annually'],
+  },
+  {
+    id: 'b5', title: 'Open Business Bank Account',
+    category: 'Finance & Banking', priority: 'high', done: false,
+    desc: 'All business revenue and expenses should flow through a dedicated business account. Using personal accounts creates legal, tax and credibility risks.',
+    actions: ['Decide on banking institution (FNB, Stanbic, Barclays, etc.)', 'Gather required documents (company reg, directors IDs, etc.)', 'Open the account', 'Update all payment details across the business', 'Set up accounting software linked to business account'],
+  },
+  {
+    id: 'b6', title: 'Dealership Cold Calling & Sales Execution',
+    category: 'Sales & Partnerships', priority: 'medium', done: false,
+    desc: 'Once subscription pricing is established, begin a structured cold-calling and outreach campaign to convert dealerships from social-media relationships into paying platform partners.',
+    actions: ['Build target dealership list (Gaborone, Francistown, etc.)', 'Write sales script and pitch deck', 'Prepare pricing sheet and proposal document', 'Begin outreach — calls, WhatsApp, in-person visits', 'Track pipeline in a CRM or spreadsheet'],
+  },
+  {
+    id: 'b7', title: 'Partnership Proposals — Banks & Brands',
+    category: 'Sales & Partnerships', priority: 'medium', done: false,
+    desc: 'Develop and pitch formal partnership proposals to potential sponsors. Example: Stanbic Bank sponsoring our vehicle review series. Other potential partners: insurance companies, tyre brands, fuel companies.',
+    actions: ['Identify 5 priority partnership targets', 'Build sponsorship proposal deck (audience, reach, format, cost)', 'Stanbic Bank — vehicle review sponsorship proposal', 'Approach automotive brands for launch coverage partnerships', 'Approach insurance companies for co-marketing'],
+  },
+];
+
+const LS_KEY = 'bwcc_strategy_blockers';
+
+function BlockersTab() {
+  const [blockers, setBlockers] = useState(() => {
+    try {
+      const saved = localStorage.getItem(LS_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (_) {}
+    return DEFAULT_BLOCKERS;
+  });
+  const [expanded, setExpanded] = useState(null);
+  const [adding, setAdding] = useState(false);
+  const [newItem, setNewItem] = useState({ title: '', category: BLOCKER_CATEGORIES[0], priority: 'high', desc: '', actions: '' });
+
+  useEffect(() => {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(blockers)); } catch (_) {}
+  }, [blockers]);
+
+  const toggle = useCallback((id) => setExpanded(p => p === id ? null : id), []);
+  const toggleDone = useCallback((id) => setBlockers(p => p.map(b => b.id === id ? { ...b, done: !b.done } : b)), []);
+  const toggleAction = useCallback((bid, ai) => {
+    setBlockers(p => p.map(b => {
+      if (b.id !== bid) return b;
+      const actions = Array.isArray(b.actions) ? b.actions : b.actions.split('\n').filter(Boolean);
+      if (typeof actions[ai] === 'object') {
+        const updated = actions.map((a, i) => i === ai ? { ...a, done: !a.done } : a);
+        return { ...b, actions: updated };
+      }
+      return b;
+    }));
+  }, []);
+  const deleteBlocker = useCallback((id) => {
+    if (!window.confirm('Remove this item?')) return;
+    setBlockers(p => p.filter(b => b.id !== id));
+  }, []);
+
+  const saveNew = useCallback(() => {
+    if (!newItem.title.trim()) return;
+    const actions = newItem.actions.split('\n').filter(s => s.trim()).map(s => ({ text: s.trim(), done: false }));
+    setBlockers(p => [...p, {
+      id: `b${Date.now()}`,
+      title: newItem.title.trim(),
+      category: newItem.category,
+      priority: newItem.priority,
+      done: false,
+      desc: newItem.desc.trim(),
+      actions,
+    }]);
+    setNewItem({ title: '', category: BLOCKER_CATEGORIES[0], priority: 'high', desc: '', actions: '' });
+    setAdding(false);
+  }, [newItem]);
+
+  const open = blockers.filter(b => !b.done);
+  const done = blockers.filter(b => b.done);
+
+  const renderBlocker = (b) => {
+    const isOpen = expanded === b.id;
+    const actions = Array.isArray(b.actions)
+      ? b.actions.map(a => typeof a === 'string' ? { text: a, done: false } : a)
+      : [];
+    const doneActions = actions.filter(a => a.done).length;
+
+    return (
+      <div key={b.id} className={`str-blocker-card${b.done ? ' done' : ''}`}>
+        <div className="str-blocker-header" onClick={() => toggle(b.id)}>
+          <div className="str-blocker-left">
+            <button
+              className={`str-blocker-check${b.done ? ' checked' : ''}`}
+              onClick={e => { e.stopPropagation(); toggleDone(b.id); }}
+              title={b.done ? 'Mark open' : 'Mark complete'}
+            >
+              {b.done ? '✓' : ''}
+            </button>
+            <div className="str-blocker-meta">
+              <span className="str-blocker-title">{b.title}</span>
+              <div className="str-blocker-tags">
+                <span className="str-bl-cat">{b.category}</span>
+                <span className="str-bl-pri" style={{ background: BLOCKER_PRIORITY[b.priority] }}>
+                  {b.priority}
+                </span>
+                {actions.length > 0 && (
+                  <span className="str-bl-progress">{doneActions}/{actions.length} actions</span>
+                )}
+              </div>
+            </div>
+          </div>
+          <span className="str-blocker-chevron">{isOpen ? '▾' : '▸'}</span>
+        </div>
+
+        {isOpen && (
+          <div className="str-blocker-body">
+            {b.desc && <p className="str-blocker-desc">{b.desc}</p>}
+            {actions.length > 0 && (
+              <div className="str-blocker-actions">
+                <div className="str-bl-actions-title">Action steps</div>
+                {actions.map((a, ai) => (
+                  <label key={ai} className={`str-bl-action${a.done ? ' done' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={a.done}
+                      onChange={() => toggleAction(b.id, ai)}
+                    />
+                    <span>{a.text}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+            <button className="str-blocker-delete" onClick={() => deleteBlocker(b.id)}>Remove</button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="str-chapter">
+      <div className="str-blockers-intro">
+        <p className="str-body">
+          Things that need to be resolved, structured or executed to unlock our NOW goals.
+          Mark items and action steps complete as they are done.
+        </p>
+        <button className="str-add-blocker-btn" onClick={() => setAdding(p => !p)}>
+          {adding ? '✕ Cancel' : '+ Add item'}
+        </button>
+      </div>
+
+      {adding && (
+        <div className="str-blocker-form">
+          <div className="str-bf-row">
+            <input className="str-bf-input" placeholder="Title" value={newItem.title} onChange={e => setNewItem(p => ({ ...p, title: e.target.value }))} />
+          </div>
+          <div className="str-bf-row two">
+            <select className="str-bf-input" value={newItem.category} onChange={e => setNewItem(p => ({ ...p, category: e.target.value }))}>
+              {BLOCKER_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+            </select>
+            <select className="str-bf-input" value={newItem.priority} onChange={e => setNewItem(p => ({ ...p, priority: e.target.value }))}>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <textarea className="str-bf-input str-bf-textarea" placeholder="Description (optional)" rows={2} value={newItem.desc} onChange={e => setNewItem(p => ({ ...p, desc: e.target.value }))} />
+          <textarea className="str-bf-input str-bf-textarea" placeholder="Action steps — one per line (optional)" rows={3} value={newItem.actions} onChange={e => setNewItem(p => ({ ...p, actions: e.target.value }))} />
+          <button className="str-bf-save" onClick={saveNew}>Add item</button>
+        </div>
+      )}
+
+      {open.length > 0 && (
+        <div className="str-blockers-group">
+          <div className="str-bg-title">Open — {open.length} item{open.length !== 1 ? 's' : ''}</div>
+          {open.map(renderBlocker)}
+        </div>
+      )}
+
+      {done.length > 0 && (
+        <div className="str-blockers-group">
+          <div className="str-bg-title done-title">Resolved — {done.length} item{done.length !== 1 ? 's' : ''}</div>
+          {done.map(renderBlocker)}
+        </div>
+      )}
     </div>
   );
 }
@@ -491,13 +706,13 @@ function RevenueTab() {
         <div className="str-rs-block">
           <Tag label="NOW" color="red" />
           <div className="str-rs-items">
-            {['Media: Sponsored reviews, Events, Brand campaigns, Partnerships', 'Marketplace: Listings, Dealer subscriptions, Featured listings', 'Commercial partnerships: Banks, Dealerships, Automotive brands'].map((x, i) => <div key={i} className="str-rs-item">{x}</div>)}
+            {['Media: Sponsored reviews, Events, Brand campaigns, Partnerships', 'Marketplace: Listings, Dealer subscriptions, Featured listings', 'Commercial partnerships: Banks, Dealerships, Automotive brands', 'Import facilitation: China & SA imports already active — formalise commissions/fees', 'Consignment sales: structure agreements and begin accepting vehicles on consignment'].map((x, i) => <div key={i} className="str-rs-item">{x}</div>)}
           </div>
         </div>
         <div className="str-rs-block">
           <Tag label="NEXT" color="orange" />
           <div className="str-rs-items">
-            {['Vehicle verification', 'Diagnostic reports', 'Import facilitation', 'Financing referrals'].map((x, i) => <div key={i} className="str-rs-item">{x}</div>)}
+            {['Vehicle verification', 'Diagnostic reports', 'Financing referrals'].map((x, i) => <div key={i} className="str-rs-item">{x}</div>)}
           </div>
         </div>
         <div className="str-rs-block">
@@ -724,6 +939,7 @@ function PhilosophyTab() {
 
 const TAB_COMPONENTS = {
   'north-star': NorthStarTab,
+  'blockers':   BlockersTab,
   'company':    CompanyTab,
   'strategy':   StrategyTab,
   'layers':     LayersTab,
