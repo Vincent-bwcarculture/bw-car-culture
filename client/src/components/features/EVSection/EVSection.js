@@ -4,12 +4,27 @@ import './EVSection.css';
 const EVSection = () => (
   <section className="premium-banner">
     <div className="premium-banner-inner">
-      <div className="premium-banner-rule" />
-      <p className="premium-banner-text">
-        Making mobility and vehicle ownership as seamless, stress-free, and trustworthy as possible,
-        while delivering a premium experience to consumers throughout their journey.
-      </p>
-      <div className="premium-banner-rule" />
+
+      <div className="premium-banner-mission-row">
+        <div className="premium-banner-rule" />
+        <p className="premium-banner-mission">
+          Our mission is to make mobility and vehicle ownership as seamless, stress-free,
+          and trustworthy as possible, delivering a premium experience throughout the entire journey.
+        </p>
+        <div className="premium-banner-rule" />
+      </div>
+
+      <div className="premium-banner-body">
+        <p className="premium-banner-tagline">
+          Discover. Buy. Own. Maintain. Move. Sell.
+        </p>
+        <p className="premium-banner-desc">
+          From discovering your next vehicle and finding trusted automotive services to maintaining,
+          selling, renting, and accessing mobility solutions, Bw Car Culture is building a connected
+          digital ecosystem for Botswana's automotive and mobility industry.
+        </p>
+      </div>
+
     </div>
   </section>
 );

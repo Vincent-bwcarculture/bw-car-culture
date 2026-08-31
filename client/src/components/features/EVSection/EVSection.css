@@ -1,51 +1,98 @@
-/* Premium Banner — replaces EVSection */
+/* Premium Banner */
 .premium-banner {
-  padding: 2.2rem 1.5rem;
+  padding: 2.8rem 1.5rem;
   background: #0a0a0a;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .premium-banner-inner {
-  max-width: 860px;
+  max-width: 820px;
   margin: 0 auto;
   display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Mission row ── */
+.premium-banner-mission-row {
+  display: flex;
   align-items: center;
-  gap: 1.6rem;
+  gap: 1.4rem;
 }
 
 .premium-banner-rule {
   flex: 1;
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(255, 51, 0, 0.35), transparent);
-  min-width: 40px;
+  background: linear-gradient(to right, transparent, rgba(255, 51, 0, 0.4), transparent);
+  min-width: 30px;
 }
 
-.premium-banner-text {
-  flex: 3;
+.premium-banner-mission {
+  flex: 5;
   text-align: center;
-  font-size: 0.88rem;
-  font-weight: 400;
-  line-height: 1.7;
-  color: rgba(255, 255, 255, 0.55);
-  letter-spacing: 0.01em;
   margin: 0;
-  font-style: italic;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.88);
+  letter-spacing: 0.005em;
 }
 
+/* ── Body section ── */
+.premium-banner-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  text-align: center;
+}
+
+.premium-banner-tagline {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #ff3300;
+}
+
+.premium-banner-desc {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 400;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.42);
+  max-width: 640px;
+}
+
+/* ── Mobile ── */
 @media (max-width: 600px) {
   .premium-banner {
-    padding: 1.6rem 1.2rem;
+    padding: 2rem 1.2rem;
   }
 
   .premium-banner-inner {
-    gap: 1rem;
+    gap: 1.5rem;
   }
 
-  .premium-banner-text {
-    font-size: 0.82rem;
+  .premium-banner-mission-row {
+    gap: 0.9rem;
   }
 
   .premium-banner-rule {
-    min-width: 20px;
+    min-width: 16px;
+  }
+
+  .premium-banner-mission {
+    font-size: 0.9rem;
+  }
+
+  .premium-banner-tagline {
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+  }
+
+  .premium-banner-desc {
+    font-size: 0.8rem;
   }
 }
