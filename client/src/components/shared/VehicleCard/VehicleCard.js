@@ -1620,10 +1620,6 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().substring(0, 2);
             };
 
-            if (dealer?.sellerType === 'marketplace') {
-              return <div className="vc-dealer-avatar-placeholder">BW</div>;
-            }
-
             const possibleSources = [
               dealer?.avatar?.url,
               dealer?.avatar,
@@ -1658,6 +1654,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             }
             
             if (!imageSource || dealerImageError) {
+              if (dealer?.sellerType === 'marketplace') return null;
               return (
                 <div className="vc-dealer-avatar-placeholder">
                   {getInitials()}
@@ -1691,7 +1688,13 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
 
           <div className="vc-dealer-details">
             <div className="vc-dealer-name">
-              {dealer?.businessName || dealer?.name || 'Unknown Seller'}
+              {dealer?.sellerType === 'marketplace' ? (() => {
+                const raw = dealer.marketplace?.sourceCountry || dealer?.location?.country || '';
+                const names = {'za':'South Africa','jp':'Japan','cn':'China','ae':'United Arab Emirates','gb':'United Kingdom','us':'United States','de':'Germany','au':'Australia','bw':'Botswana','sg':'Singapore','uae':'United Arab Emirates','dubai':'United Arab Emirates','uk':'United Kingdom','usa':'United States'};
+                const k = raw.toLowerCase().trim();
+                const fullName = names[k] || raw;
+                return fullName ? `${fullName} Inventory` : 'International Inventory';
+              })() : (dealer?.businessName || dealer?.name || 'Unknown Seller')}
               {(dealer?.verification?.isVerified || dealer?.sellerType === 'marketplace') && (
                 <span className="vc-verified-icon" title="Verified">✓</span>
               )}
@@ -1701,24 +1704,14 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               <span className={`vc-seller-type ${dealer?.sellerType || 'dealership'}`}>
                 {dealer?.sellerTypeLabel || (dealer?.sellerType === 'private' ? 'Private Seller' : 'Dealership')}
               </span>
-              <span className="vc-dealer-location">
-                {dealer?.sellerType === 'marketplace' ? (() => {
-                  const raw = dealer.marketplace?.sourceCountry || dealer?.location?.country || '';
-                  const names = {'za':'South Africa','jp':'Japan','cn':'China','ae':'United Arab Emirates','gb':'United Kingdom','us':'United States','de':'Germany','au':'Australia','bw':'Botswana','sg':'Singapore','uae':'United Arab Emirates','dubai':'United Arab Emirates','uk':'United Kingdom','usa':'United States'};
-                  const flags = {'south africa':'🇿🇦','za':'🇿🇦','japan':'🇯🇵','jp':'🇯🇵','china':'🇨🇳','cn':'🇨🇳','united arab emirates':'🇦🇪','uae':'🇦🇪','ae':'🇦🇪','united kingdom':'🇬🇧','uk':'🇬🇧','gb':'🇬🇧','united states':'🇺🇸','usa':'🇺🇸','us':'🇺🇸','germany':'🇩🇪','de':'🇩🇪','australia':'🇦🇺','au':'🇦🇺','botswana':'🇧🇼','bw':'🇧🇼','singapore':'🇸🇬','sg':'🇸🇬','dubai':'🇦🇪'};
-                  const k = raw.toLowerCase().trim();
-                  const fullName = names[k] || raw;
-                  const flag = flags[k] || (fullName ? '🌍' : '');
-                  return fullName ? `${flag} ${fullName} Inventory` : 'International Inventory';
-                })() : (
-                  <>
-                    {dealer?.location?.city || 'Unknown Location'}
-                    {dealer?.location?.country && dealer.location.country !== 'Botswana' ? (
-                      <>{', '}{dealer.location.country}</>
-                    ) : null}
-                  </>
-                )}
-              </span>
+              {dealer?.sellerType !== 'marketplace' && (
+                <span className="vc-dealer-location">
+                  {dealer?.location?.city || 'Unknown Location'}
+                  {dealer?.location?.country && dealer.location.country !== 'Botswana' ? (
+                    <>{', '}{dealer.location.country}</>
+                  ) : null}
+                </span>
+              )}
             </div>
             
             <div className="vc-dealer-actions">
