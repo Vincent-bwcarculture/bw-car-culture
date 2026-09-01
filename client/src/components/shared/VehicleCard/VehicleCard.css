@@ -1282,6 +1282,18 @@
   border-color: #64b5f6;
 }
 
+.vc-seller-type.marketplace {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #bbdefb;
+}
+
+[data-theme="light"] .vc-seller-type.marketplace {
+  background-color: #90caf9;
+  color: #0d47a1;
+  border-color: #64b5f6;
+}
+
 .vc-dealer-location {
   font-size: 0.75rem;
   color: var(--vc-text-muted);
@@ -2497,175 +2509,3 @@
 [data-theme="light"] .vc-sh-mileage,
 [data-theme="light"] .vc-sh-provider { color: rgba(0,0,0,0.45); }
 [data-theme="light"] .vc-sh-type { color: #111; }
-/* ── Marketplace seller identity ── */
-.vc-dealer-info.marketplace {
-  cursor: pointer;
-  background: linear-gradient(135deg, rgba(255,51,0,0.05) 0%, rgba(255,140,0,0.04) 100%);
-  border: 1px solid rgba(255,51,0,0.18);
-  border-radius: 8px;
-  padding: 0.55rem 0.75rem;
-  gap: 0.6rem;
-  transition: border-color 0.2s, background 0.2s;
-}
-.vc-dealer-info.marketplace:hover {
-  border-color: rgba(255,51,0,0.38);
-  background: linear-gradient(135deg, rgba(255,51,0,0.09) 0%, rgba(255,140,0,0.07) 100%);
-}
-.vc-mp-globe {
-  font-size: 1.3rem;
-  flex-shrink: 0;
-  line-height: 1;
-  margin-top: 2px;
-}
-.vc-mp-label-row {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-bottom: 0.2rem;
-}
-.vc-mp-label {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #ff3300;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-.vc-mp-hint {
-  font-size: 0.72rem;
-  color: rgba(255,51,0,0.5);
-}
-.vc-mp-country-row {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.65);
-  margin-bottom: 0.3rem;
-}
-.vc-mp-trust-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-}
-.vc-trust-chip {
-  font-size: 0.65rem;
-  padding: 0.12rem 0.45rem;
-  border-radius: 3px;
-  background: rgba(34,197,94,0.1);
-  border: 1px solid rgba(34,197,94,0.25);
-  color: #22c55e;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-/* ── Marketplace modal overlay ── */
-.vc-mp-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 2500;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  backdrop-filter: blur(4px);
-  padding: 0 0 env(safe-area-inset-bottom, 0);
-}
-.vc-mp-modal {
-  background: #111;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-bottom: none;
-  border-radius: 16px 16px 0 0;
-  padding: 1.5rem 1.25rem 2rem;
-  width: 100%;
-  max-width: 480px;
-  position: relative;
-  max-height: 88vh;
-  overflow-y: auto;
-}
-.vc-mp-modal-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: rgba(255,255,255,0.08);
-  border: none;
-  color: rgba(255,255,255,0.5);
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 0.78rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.vc-mp-modal-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-.vc-mp-modal-globe { font-size: 2rem; line-height: 1; }
-.vc-mp-modal-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #ff3300;
-  letter-spacing: 0.02em;
-}
-.vc-mp-modal-sub {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.4);
-  margin-top: 0.1rem;
-}
-.vc-mp-modal-body {
-  font-size: 0.82rem;
-  color: rgba(255,255,255,0.55);
-  line-height: 1.55;
-  margin-bottom: 1rem;
-}
-.vc-mp-modal-country {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 8px;
-  padding: 0.65rem 0.85rem;
-  margin-bottom: 1rem;
-}
-.vc-mp-modal-flag { font-size: 1.6rem; }
-.vc-mp-modal-country-name { font-size: 0.88rem; font-weight: 600; color: rgba(255,255,255,0.85); }
-.vc-mp-modal-country-desc { font-size: 0.74rem; color: rgba(255,255,255,0.4); margin-top: 0.15rem; }
-.vc-mp-modal-badges-section { margin-bottom: 1.25rem; }
-.vc-mp-modal-badges-title {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.3);
-  margin-bottom: 0.5rem;
-}
-.vc-mp-modal-badges { display: flex; flex-direction: column; gap: 0.5rem; }
-.vc-mp-modal-badge {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  font-size: 0.8rem;
-}
-.vc-mp-modal-badge.muted { opacity: 0.4; }
-.vc-mp-badge-check {
-  font-size: 0.9rem;
-  color: #22c55e;
-  min-width: 16px;
-  margin-top: 1px;
-}
-.vc-mp-modal-badge strong { display: block; color: rgba(255,255,255,0.8); font-size: 0.8rem; }
-.vc-mp-modal-badge span { color: rgba(255,255,255,0.4); font-size: 0.73rem; margin-top: 0.1rem; display: block; }
-.vc-mp-modal-cta {
-  width: 100%;
-  background: #ff3300;
-  color: #fff;
-  border: none;
-  padding: 0.7rem;
-  border-radius: 8px;
-  font-size: 0.88rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.vc-mp-modal-cta:hover { background: #e02c00; }

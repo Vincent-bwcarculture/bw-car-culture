@@ -462,7 +462,9 @@ const MarketplaceList = () => {
     if (!Array.isArray(cars) || cars.length === 0) return [];
     const dealerCars = cars.filter(car => {
       const classification = getCarClassification(car);
-      return !classification.startsWith('private');
+      const isMp = car.dealer?.sellerType === 'marketplace' ||
+        (car.dealer?.businessName || '').toLowerCase().includes('bw car culture marketplace');
+      return !classification.startsWith('private') && !isMp;
     });
     return dealerCars.sort((a, b) => calculateListingScore(b) - calculateListingScore(a));
   }, [getCarClassification, calculateListingScore]);
