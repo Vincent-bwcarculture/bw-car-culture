@@ -1275,17 +1275,6 @@ const CarMarketplace = () => {
               <div className="car-header">
                 <div className="title-section">
                   <h1 className="title">{car.title}</h1>
-                  {isMarketplaceListing && getMarketplaceInfo && (
-                    <div className="mp-marketplace-identity">
-                      <span className="mp-mkt-label">Marketplace</span>
-                      {getMarketplaceInfo.sourceCountry && (
-                        <span className="mp-mkt-country">{getMarketplaceInfo.flag} {getMarketplaceInfo.sourceCountry} Inventory</span>
-                      )}
-                      {getMarketplaceInfo.badges.map(b => (
-                        <span key={b.key} className="mp-mkt-trust-chip">✓ {b.label}</span>
-                      ))}
-                    </div>
-                  )}
                   <div className="title-badges">
                     {car.warranty && !isPrivateSeller && <div className="warranty-badge">✓ Warranty</div>}
                     {car.isCertified && !isPrivateSeller && <div className="certified-badge">✓ Certified Pre-Owned</div>}
