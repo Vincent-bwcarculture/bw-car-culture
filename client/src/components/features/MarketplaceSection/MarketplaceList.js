@@ -141,27 +141,34 @@ const MarketplaceList = () => {
     }
   }, [isMobile]);
 
-  // Initialize active section from URL immediately with caching
+  // Initialize active section from URL — sessionStorage restore also syncs URL so backend gets correct sellerType
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const sectionParam = searchParams.get('section');
     const pageParam = parseInt(searchParams.get('page')) || 1;
-    
+
     if (sectionParam && ['dealerships', 'private', 'all'].includes(sectionParam)) {
       setActiveSection(sectionParam);
     } else {
       try {
         const cachedSection = sessionStorage.getItem('preferredSection');
-        if (cachedSection && ['dealerships', 'private', 'all'].includes(cachedSection)) {
+        if (cachedSection && cachedSection !== 'all' && ['dealerships', 'private'].includes(cachedSection)) {
+          // Sync URL so the backend fetch includes the correct sellerType
+          const newParams = new URLSearchParams(location.search);
+          newParams.set('section', cachedSection);
+          if (cachedSection === 'dealerships') newParams.set('sellerType', 'dealership');
+          else if (cachedSection === 'private') newParams.set('sellerType', 'private');
+          navigate({ pathname: location.pathname, search: newParams.toString() }, { replace: true });
           setActiveSection(cachedSection);
         }
+        // else: no cached section or 'all' — just stay on 'all' (default state), no URL change needed
       } catch (e) {
         console.warn('Could not access sessionStorage:', e);
       }
     }
-    
+
     setCurrentPage(pageParam);
-  }, [location.search]);
+  }, [location.search]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cache section preference
   useEffect(() => {
