@@ -75,8 +75,36 @@ const CarMarketplace = () => {
   const resizeObserverRef = useRef(null);
   const zoomLevelRef = useRef(1);
 
+  const isMarketplaceListing = useMemo(() => {
+    if (!car) return false;
+    return (
+      car.dealer?.sellerType === 'marketplace' ||
+      car.sellerType === 'marketplace' ||
+      (car.dealer?.businessName || '').toLowerCase().includes('bw car culture marketplace')
+    );
+  }, [car]);
+
+  const getMarketplaceInfo = useMemo(() => {
+    if (!isMarketplaceListing || !car) return null;
+    const countryFlags = { 'south africa': '🇿🇦', 'za': '🇿🇦', 'japan': '🇯🇵', 'jp': '🇯🇵', 'china': '🇨🇳', 'cn': '🇨🇳', 'uae': '🇦🇪', 'ae': '🇦🇪', 'uk': '🇬🇧', 'gb': '🇬🇧', 'usa': '🇺🇸', 'us': '🇺🇸', 'germany': '🇩🇪', 'de': '🇩🇪', 'australia': '🇦🇺', 'au': '🇦🇺', 'botswana': '🇧🇼', 'bw': '🇧🇼', 'dubai': '🇦🇪', 'singapore': '🇸🇬', 'sg': '🇸🇬' };
+    const sourceCountry = car.marketplace?.country || car.dealer?.location?.country || car.location?.country || '';
+    const flag = countryFlags[sourceCountry.toLowerCase().trim()] || '🌍';
+    const badgeLabels = { source: 'Verified Source', vehicle: 'Vehicle Verified', landed_cost: 'Landed Cost Verified', available: 'Available' };
+    const badges = (car.marketplace?.verificationBadges || ['source']).map(b => ({ key: b, label: badgeLabels[b] || b }));
+    const availabilityLabels = { available: 'Available for sourcing', limited: 'Limited availability', sourcing: 'Sourcing on request', sold: 'Sold' };
+    return {
+      sourceCountry,
+      flag,
+      badges,
+      estimatedLandedPrice: car.marketplace?.estimatedLandedPrice || null,
+      availability: car.marketplace?.availability || 'available',
+      availabilityLabel: availabilityLabels[car.marketplace?.availability] || 'Available for sourcing',
+    };
+  }, [isMarketplaceListing, car]);
+
   const isPrivateSeller = useMemo(() => {
     if (!car || !car.dealer) return false;
+    if (isMarketplaceListing) return false;
     if (car.dealer.sellerType === 'private') return true;
     if (car.dealer.privateSeller && car.dealer.privateSeller.firstName && car.dealer.privateSeller.lastName) return true;
     const businessName = (car.dealer.businessName || '').toLowerCase();
@@ -1247,6 +1275,17 @@ const CarMarketplace = () => {
               <div className="car-header">
                 <div className="title-section">
                   <h1 className="title">{car.title}</h1>
+                  {isMarketplaceListing && getMarketplaceInfo && (
+                    <div className="mp-marketplace-identity">
+                      <span className="mp-mkt-label">Marketplace</span>
+                      {getMarketplaceInfo.sourceCountry && (
+                        <span className="mp-mkt-country">{getMarketplaceInfo.flag} {getMarketplaceInfo.sourceCountry} Inventory</span>
+                      )}
+                      {getMarketplaceInfo.badges.map(b => (
+                        <span key={b.key} className="mp-mkt-trust-chip">✓ {b.label}</span>
+                      ))}
+                    </div>
+                  )}
                   <div className="title-badges">
                     {car.warranty && !isPrivateSeller && <div className="warranty-badge">✓ Warranty</div>}
                     {car.isCertified && !isPrivateSeller && <div className="certified-badge">✓ Certified Pre-Owned</div>}
@@ -1432,10 +1471,56 @@ const CarMarketplace = () => {
                     )}
                   </div>
                 )}
+                {isMarketplaceListing && getMarketplaceInfo && (
+                  <div className="mp-marketplace-panel">
+                    <div className="mp-mkt-panel-header">
+                      <span className="mp-mkt-panel-globe">🌍</span>
+                      <div>
+                        <div className="mp-mkt-panel-title">Marketplace Listing</div>
+                        <div className="mp-mkt-panel-sub">International Vehicle Sourcing via Bw Car Culture</div>
+                      </div>
+                    </div>
+                    <div className="mp-mkt-panel-rows">
+                      {getMarketplaceInfo.sourceCountry && (
+                        <div className="mp-mkt-panel-row">
+                          <span className="mp-mkt-panel-label">Vehicle location</span>
+                          <span className="mp-mkt-panel-value">{getMarketplaceInfo.flag} {getMarketplaceInfo.sourceCountry}</span>
+                        </div>
+                      )}
+                      {getMarketplaceInfo.estimatedLandedPrice && (
+                        <div className="mp-mkt-panel-row">
+                          <span className="mp-mkt-panel-label">Est. landed price</span>
+                          <span className="mp-mkt-panel-value landed">P {getMarketplaceInfo.estimatedLandedPrice.toLocaleString()}</span>
+                        </div>
+                      )}
+                      <div className="mp-mkt-panel-row">
+                        <span className="mp-mkt-panel-label">Availability</span>
+                        <span className={`mp-mkt-panel-value availability ${getMarketplaceInfo.availability}`}>{getMarketplaceInfo.availabilityLabel}</span>
+                      </div>
+                    </div>
+                    <div className="mp-mkt-panel-badges">
+                      {getMarketplaceInfo.badges.map(b => (
+                        <span key={b.key} className="mp-mkt-detail-chip">✓ {b.label}</span>
+                      ))}
+                    </div>
+                    <div className="mp-mkt-panel-note">
+                      This vehicle is sourced through Bw Car Culture's international network. Contact us to request this vehicle or get a full landed cost estimate.
+                    </div>
+                  </div>
+                )}
+
                 <div className="contact-buttons">
+                  {isMarketplaceListing ? (
+                    <button className="contact-button whatsapp mp-request-btn" onClick={handleWhatsAppClick}>
+                      🌍 Request this Vehicle
+                    </button>
+                  ) : (
                   <button className="contact-button whatsapp" onClick={handleWhatsAppClick}>{calculateSavings ? `Claim Bw Car Culture Savings via WhatsApp` : `Contact ${isPrivateSeller ? 'Seller' : 'Dealer'} via WhatsApp`}</button>
+                  )}
+                  {!isMarketplaceListing && (
                   <button className="contact-button contact-dealer" onClick={() => { const cp = (v) => (v && typeof v === 'string' && v.trim() !== '' && v.trim().toUpperCase() !== 'N/A') ? v.trim() : null; const callPhone = cp(car?.dealer?.contact?.phone) || cp(car?.dealerId?.contact?.phone) || cp(car?.contact?.phone) || cp(car?.dealer?.phone) || cp(car?.dealerId?.phone); if (callPhone) { window.open(`tel:${callPhone.startsWith('+') ? callPhone.replace(/\s+/g,'') : '+267'+callPhone.replace(/\s+/g,'')}`); } else { dispatch(addNotification({ type: 'warning', message: `${isPrivateSeller ? 'Seller' : 'Dealer'} phone number is not available.` })); } }}>📞 Call {isPrivateSeller ? 'Seller' : 'Dealer'}</button>
-                  {car.dealer && !isPrivateSeller && (
+                  )}
+                  {car.dealer && !isPrivateSeller && !isMarketplaceListing && (
                     <button className="contact-button view-dealer" onClick={() => { let dealerId = null; if (car.dealer && car.dealer._id) { dealerId = safeGetStringId(car.dealer._id); } else if (car.dealer && car.dealer.id) { dealerId = safeGetStringId(car.dealer.id); } else if (car.dealerId) { dealerId = safeGetStringId(car.dealerId); } if (process.env.NODE_ENV === 'development') console.log('Navigating to dealer with ID:', dealerId); if (dealerId) { navigate(`/dealerships/${dealerId}`); } else { if (process.env.NODE_ENV === 'development') console.error('Failed to get valid dealer ID for navigation'); dispatch(addNotification({ type: 'error', message: 'Unable to view dealership details at this time.' })); } }}>View Dealership</button>
                   )}
                 </div>

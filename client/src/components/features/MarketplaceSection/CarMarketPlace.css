@@ -2937,3 +2937,107 @@
     overflow-x: auto;
   }
 }
+
+/* ── Marketplace Identity (detail title row) ── */
+.mp-marketplace-identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.35rem 0 0.5rem;
+}
+.mp-mkt-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ff3300;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.mp-mkt-country {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.55);
+  padding: 0.1rem 0.5rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+}
+.mp-mkt-trust-chip {
+  font-size: 0.67rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 3px;
+  background: rgba(34,197,94,0.1);
+  border: 1px solid rgba(34,197,94,0.22);
+  color: #22c55e;
+  font-weight: 600;
+}
+
+/* ── Marketplace Panel (detail page) ── */
+.mp-marketplace-panel {
+  background: linear-gradient(135deg, rgba(255,51,0,0.06) 0%, rgba(255,140,0,0.04) 100%);
+  border: 1px solid rgba(255,51,0,0.2);
+  border-radius: 12px;
+  padding: 1.1rem 1.15rem;
+  margin-bottom: 1.25rem;
+}
+.mp-mkt-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+.mp-mkt-panel-globe { font-size: 1.6rem; }
+.mp-mkt-panel-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ff3300;
+  letter-spacing: 0.02em;
+}
+.mp-mkt-panel-sub {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+  margin-top: 0.15rem;
+}
+.mp-mkt-panel-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.mp-mkt-panel-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+}
+.mp-mkt-panel-label { color: rgba(255,255,255,0.45); }
+.mp-mkt-panel-value { color: rgba(255,255,255,0.85); font-weight: 500; }
+.mp-mkt-panel-value.landed { color: #0051ff; font-weight: 700; font-size: 0.9rem; }
+.mp-mkt-panel-value.availability.available { color: #22c55e; }
+.mp-mkt-panel-value.availability.limited { color: #f97316; }
+.mp-mkt-panel-value.availability.sourcing { color: rgba(255,255,255,0.55); }
+.mp-mkt-panel-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+.mp-mkt-detail-chip {
+  font-size: 0.69rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 4px;
+  background: rgba(34,197,94,0.1);
+  border: 1px solid rgba(34,197,94,0.25);
+  color: #22c55e;
+  font-weight: 600;
+}
+.mp-mkt-panel-note {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.5;
+}
+.mp-request-btn {
+  background: #ff3300 !important;
+  font-weight: 700 !important;
+}

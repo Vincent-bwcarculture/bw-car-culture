@@ -17,6 +17,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
   const [imageLoadError, setImageLoadError] = useState(false);
   const [hasBeenViewed, setHasBeenViewed] = useState(false);
   const [dealerImageError, setDealerImageError] = useState(false);
+  const [showMpModal, setShowMpModal] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
   
   // TRUE ZOOM: Enhanced zoom functionality state
@@ -643,7 +644,12 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         dealerId = safeGetStringId(car.dealer.id);
       }
       
-      const isPrivateSeller =
+      const isMarketplace =
+        car.dealer.sellerType === 'marketplace' ||
+        car.sellerType === 'marketplace' ||
+        (car.dealer.businessName || '').toLowerCase().includes('bw car culture marketplace');
+
+      const isPrivateSeller = !isMarketplace && (
         car.dealer.sellerType === 'private' ||
         car.dealer.businessType === 'private' ||
         (car.dealer.privateSeller &&
@@ -652,7 +658,8 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         (car.dealer.businessName &&
          (car.dealer.businessName.includes('Private') ||
           car.dealer.businessName.match(/^[A-Z][a-z]+ [A-Z][a-z]+$/))) ||
-        (!car.dealer.businessType && car.dealer.name && !car.dealer.businessName);
+        (!car.dealer.businessType && car.dealer.name && !car.dealer.businessName)
+      );
 
       let displayName = 'Unknown Seller';
       let contactName = null;
@@ -684,8 +691,14 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         id: dealerId,
         name: contactName,
         businessName: displayName,
-        sellerType: isPrivateSeller ? 'private' : 'dealership',
-        sellerTypeLabel: sellerTypeLabel,
+        sellerType: isMarketplace ? 'marketplace' : (isPrivateSeller ? 'private' : 'dealership'),
+        sellerTypeLabel: isMarketplace ? 'Marketplace' : sellerTypeLabel,
+        marketplace: isMarketplace ? {
+          sourceCountry: car.marketplace?.country || car.dealer?.location?.country || car.location?.country || null,
+          estimatedLandedPrice: car.marketplace?.estimatedLandedPrice || null,
+          availability: car.marketplace?.availability || 'available',
+          verificationBadges: car.marketplace?.verificationBadges || ['source'],
+        } : null,
         logo: car.dealer.logo || car.dealer.profile?.logo || car.dealer.profile?.avatar || car.dealer.avatar || car.dealer.profilePicture,
         avatar: car.dealer.avatar || car.dealer.logo || car.dealer.profile?.logo || car.dealer.profile?.avatar || car.dealer.profilePicture,
         profilePicture: car.dealer.profilePicture || car.dealer.profile?.logo || car.dealer.profile?.avatar || car.dealer.logo || car.dealer.avatar,
@@ -1599,7 +1612,34 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           </div>
         )}
         
-        <div className={`vc-dealer-info ${dealer?.sellerType === 'private' ? 'private-seller' : 'dealership'}`} 
+        {dealer?.sellerType === 'marketplace' && (() => {
+          const mp = dealer.marketplace || {};
+          const country = mp.sourceCountry || '';
+          const countryFlags = { 'south africa': '🇿🇦', 'za': '🇿🇦', 'japan': '🇯🇵', 'jp': '🇯🇵', 'china': '🇨🇳', 'cn': '🇨🇳', 'uae': '🇦🇪', 'ae': '🇦🇪', 'uk': '🇬🇧', 'gb': '🇬🇧', 'usa': '🇺🇸', 'us': '🇺🇸', 'germany': '🇩🇪', 'de': '🇩🇪', 'australia': '🇦🇺', 'au': '🇦🇺', 'botswana': '🇧🇼', 'bw': '🇧🇼', 'dubai': '🇦🇪', 'singapore': '🇸🇬', 'sg': '🇸🇬' };
+          const flag = countryFlags[(country).toLowerCase().trim()] || '🌍';
+          const badgeLabels = { source: 'Verified Source', vehicle: 'Vehicle Verified', landed_cost: 'Cost Verified', available: 'Available' };
+          const badges = (mp.verificationBadges || ['source']).map(b => badgeLabels[b] || b);
+          return (
+            <div className="vc-dealer-info marketplace" onClick={e => { e.stopPropagation(); setShowMpModal(true); }}>
+              <div className="vc-mp-globe">🌍</div>
+              <div className="vc-dealer-details">
+                <div className="vc-mp-label-row">
+                  <span className="vc-mp-label">Marketplace</span>
+                  <span className="vc-mp-hint">↗</span>
+                </div>
+                {country && (
+                  <div className="vc-mp-country-row">{flag} {country} Inventory</div>
+                )}
+                <div className="vc-mp-trust-row">
+                  {badges.map(b => <span key={b} className="vc-trust-chip">✓ {b}</span>)}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {dealer?.sellerType !== 'marketplace' && (
+        <div className={`vc-dealer-info ${dealer?.sellerType === 'private' ? 'private-seller' : 'dealership'}`}
              onClick={dealer?.sellerType !== 'private' ? handleDealerClick : undefined}>
           
           {(() => {
@@ -1706,7 +1746,8 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             </div>
           </div>
         </div>
-        
+        )}
+
         <div className="vc-footer">
           <span className={`vc-condition-tag ${(car.condition || 'used').toLowerCase()}`}>
             {car.condition ? 
@@ -1983,6 +2024,51 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         </span>
       )}
     </button>
+
+    {showMpModal && dealer?.sellerType === 'marketplace' && (() => {
+      const mp = dealer.marketplace || {};
+      const country = mp.sourceCountry || '';
+      const countryFlags = { 'south africa': '🇿🇦', 'za': '🇿🇦', 'japan': '🇯🇵', 'jp': '🇯🇵', 'china': '🇨🇳', 'cn': '🇨🇳', 'uae': '🇦🇪', 'ae': '🇦🇪', 'uk': '🇬🇧', 'gb': '🇬🇧', 'usa': '🇺🇸', 'us': '🇺🇸', 'germany': '🇩🇪', 'de': '🇩🇪', 'australia': '🇦🇺', 'au': '🇦🇺', 'botswana': '🇧🇼', 'bw': '🇧🇼', 'dubai': '🇦🇪', 'singapore': '🇸🇬', 'sg': '🇸🇬' };
+      const flag = countryFlags[(country).toLowerCase().trim()] || '🌍';
+      return (
+        <div className="vc-mp-modal-overlay" onClick={() => setShowMpModal(false)}>
+          <div className="vc-mp-modal" onClick={e => e.stopPropagation()}>
+            <button className="vc-mp-modal-close" onClick={() => setShowMpModal(false)}>✕</button>
+            <div className="vc-mp-modal-header">
+              <span className="vc-mp-modal-globe">🌍</span>
+              <div>
+                <div className="vc-mp-modal-title">Marketplace</div>
+                <div className="vc-mp-modal-sub">International Vehicle Sourcing</div>
+              </div>
+            </div>
+            <p className="vc-mp-modal-body">
+              Bw Car Culture Marketplace gives you access to verified international inventory.
+              Vehicles are sourced, reviewed and facilitated through Bw Car Culture — not sold by an individual dealership.
+            </p>
+            {country && (
+              <div className="vc-mp-modal-country">
+                <span className="vc-mp-modal-flag">{flag}</span>
+                <div>
+                  <div className="vc-mp-modal-country-name">{country} Inventory</div>
+                  <div className="vc-mp-modal-country-desc">This vehicle is sourced from {country}.</div>
+                </div>
+              </div>
+            )}
+            <div className="vc-mp-modal-badges-section">
+              <div className="vc-mp-modal-badges-title">Verification</div>
+              <div className="vc-mp-modal-badges">
+                <div className="vc-mp-modal-badge"><span className="vc-mp-badge-check">✓</span><div><strong>Verified Source</strong><span>Supplier or source confirmed by Bw Car Culture</span></div></div>
+                <div className="vc-mp-modal-badge muted"><span className="vc-mp-badge-check">○</span><div><strong>Vehicle Verified</strong><span>Vehicle docs/condition independently checked</span></div></div>
+                <div className="vc-mp-modal-badge muted"><span className="vc-mp-badge-check">○</span><div><strong>Landed Cost Verified</strong><span>Import calculation confirmed</span></div></div>
+              </div>
+            </div>
+            <button className="vc-mp-modal-cta" onClick={() => { setShowMpModal(false); navigate(`/marketplace/${car._id || car.id}`); }}>
+              View Full Listing
+            </button>
+          </div>
+        </div>
+      );
+    })()}
     </div>
   );
 };
