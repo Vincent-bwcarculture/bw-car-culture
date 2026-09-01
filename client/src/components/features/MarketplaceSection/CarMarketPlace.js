@@ -91,7 +91,7 @@ const CarMarketplace = () => {
     const raw = car.marketplace?.country || car.dealer?.location?.country || car.location?.country || '';
     const k = raw.toLowerCase().trim();
     const sourceCountry = countryNames[k] || raw;
-    const flag = countryFlags[k] || (sourceCountry ? '🌍' : '');
+    const flag = countryFlags[k] || '';
     const badgeLabels = { source: 'Verified Source', vehicle: 'Vehicle Verified', landed_cost: 'Landed Cost Verified', available: 'Available' };
     const badges = (car.marketplace?.verificationBadges || ['source']).map(b => ({ key: b, label: badgeLabels[b] || b }));
     const availabilityLabels = { available: 'Available for sourcing', limited: 'Limited availability', sourcing: 'Sourcing on request', sold: 'Sold' };
@@ -1265,7 +1265,7 @@ const CarMarketplace = () => {
               const locationLabel = city ? `${city}, ${countryName}` : countryName;
               return (
                 <div className="mp-import-notice">
-                  <div className="mp-import-notice-icon">🌍</div>
+                  <div className="mp-import-notice-icon"></div>
                   <div className="mp-import-notice-body">
                     <strong>This vehicle is located in {locationLabel}</strong>
                     <p>Bw Car Culture assists you with clearance, registration and logistics to get your vehicle delivered to Botswana.</p>
@@ -1455,9 +1455,9 @@ const CarMarketplace = () => {
                         : getSellerDisplayName()}
                       {(car.dealer?.verification?.isVerified || isMarketplaceListing) && <span className="dealer-verified-icon" title="Verified">✓</span>}
                     </h3>
-                    <div className={`seller-type-badge ${isPrivateSeller ? 'private' : 'dealership'}`}>{isMarketplaceListing ? 'Marketplace' : (isPrivateSeller ? '👤 Private Seller' : 'Dealership')}</div>
+                    <div className={`seller-type-badge ${isPrivateSeller ? 'private' : 'dealership'}`}>{isMarketplaceListing ? 'Marketplace' : (isPrivateSeller ? 'Private Seller' : 'Dealership')}</div>
                     {!isMarketplaceListing && <p className="dealer-location">{car.dealer?.location?.city || 'Location not specified'}{car.dealer?.location?.state ? `, ${car.dealer?.location?.state}` : ''}</p>}
-                    {!isMarketplaceListing && getSellerContactPreference() && <p className="contact-preference">📱 {getSellerContactPreference()}</p>}
+                    {!isMarketplaceListing && getSellerContactPreference() && <p className="contact-preference">{getSellerContactPreference()}</p>}
                   </div>
                 </div>
                 <div className="dealer-stats">
@@ -1467,17 +1467,17 @@ const CarMarketplace = () => {
                 </div>
                 {(car.dealer?.contact || car.contact) && (
                   <div className="dealer-contact-grid">
-                    {(car.dealer?.contact?.email || car.contact?.email) && <div className="contact-grid-item"><span className="contact-icon">✉️</span><span className="contact-info">{car.dealer?.contact?.email || car.contact?.email}</span></div>}
-                    {(car.dealer?.contact?.phone || car.contact?.phone || car.dealer?.phone) && <div className="contact-grid-item"><span className="contact-icon">📞</span><span className="contact-info">{car.dealer?.contact?.phone || car.contact?.phone || car.dealer?.phone}</span></div>}
+                    {(car.dealer?.contact?.email || car.contact?.email) && <div className="contact-grid-item"><span className="contact-info">{car.dealer?.contact?.email || car.contact?.email}</span></div>}
+                    {(car.dealer?.contact?.phone || car.contact?.phone || car.dealer?.phone) && <div className="contact-grid-item"><span className="contact-info">{car.dealer?.contact?.phone || car.contact?.phone || car.dealer?.phone}</span></div>}
                     {car.dealer.contact.website && !isPrivateSeller && (
-                      <div className="contact-grid-item"><span className="contact-icon">🌐</span><a href={car.dealer.contact.website.startsWith('http') ? car.dealer.contact.website : `https://${car.dealer.contact.website}`} target="_blank" rel="noopener noreferrer" className="contact-info website-link">{car.dealer.contact.website.replace(/^https?:\/\//, '').split('/')[0]}</a></div>
+                      <div className="contact-grid-item"><a href={car.dealer.contact.website.startsWith('http') ? car.dealer.contact.website : `https://${car.dealer.contact.website}`} target="_blank" rel="noopener noreferrer" className="contact-info website-link">{car.dealer.contact.website.replace(/^https?:\/\//, '').split('/')[0]}</a></div>
                     )}
                   </div>
                 )}
                 {isMarketplaceListing && getMarketplaceInfo && (
                   <div className="mp-marketplace-panel">
                     <div className="mp-mkt-panel-header">
-                      <span className="mp-mkt-panel-globe">🌍</span>
+                      <span className="mp-mkt-panel-globe"></span>
                       <div>
                         <div className="mp-mkt-panel-title">Marketplace Listing</div>
                         <div className="mp-mkt-panel-sub">International Vehicle Sourcing via Bw Car Culture</div>
@@ -1515,7 +1515,7 @@ const CarMarketplace = () => {
                 <div className="contact-buttons">
                   {isMarketplaceListing ? (
                     <button className="contact-button whatsapp mp-request-btn" onClick={handleWhatsAppClick}>
-                      🌍 Request this Vehicle
+                      Request this Vehicle
                     </button>
                   ) : (
                   <button className="contact-button whatsapp" onClick={handleWhatsAppClick}>{calculateSavings ? `Claim Bw Car Culture Savings via WhatsApp` : `Contact ${isPrivateSeller ? 'Seller' : 'Dealer'} via WhatsApp`}</button>
