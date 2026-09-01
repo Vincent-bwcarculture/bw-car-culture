@@ -86,9 +86,12 @@ const CarMarketplace = () => {
 
   const getMarketplaceInfo = useMemo(() => {
     if (!isMarketplaceListing || !car) return null;
-    const countryFlags = { 'south africa': '🇿🇦', 'za': '🇿🇦', 'japan': '🇯🇵', 'jp': '🇯🇵', 'china': '🇨🇳', 'cn': '🇨🇳', 'uae': '🇦🇪', 'ae': '🇦🇪', 'uk': '🇬🇧', 'gb': '🇬🇧', 'usa': '🇺🇸', 'us': '🇺🇸', 'germany': '🇩🇪', 'de': '🇩🇪', 'australia': '🇦🇺', 'au': '🇦🇺', 'botswana': '🇧🇼', 'bw': '🇧🇼', 'dubai': '🇦🇪', 'singapore': '🇸🇬', 'sg': '🇸🇬' };
-    const sourceCountry = car.marketplace?.country || car.dealer?.location?.country || car.location?.country || '';
-    const flag = countryFlags[sourceCountry.toLowerCase().trim()] || '🌍';
+    const countryFlags = { 'south africa': '🇿🇦', 'za': '🇿🇦', 'japan': '🇯🇵', 'jp': '🇯🇵', 'china': '🇨🇳', 'cn': '🇨🇳', 'united arab emirates': '🇦🇪', 'uae': '🇦🇪', 'ae': '🇦🇪', 'united kingdom': '🇬🇧', 'uk': '🇬🇧', 'gb': '🇬🇧', 'united states': '🇺🇸', 'usa': '🇺🇸', 'us': '🇺🇸', 'germany': '🇩🇪', 'de': '🇩🇪', 'australia': '🇦🇺', 'au': '🇦🇺', 'botswana': '🇧🇼', 'bw': '🇧🇼', 'dubai': '🇦🇪', 'singapore': '🇸🇬', 'sg': '🇸🇬' };
+    const countryNames = { 'za': 'South Africa', 'jp': 'Japan', 'cn': 'China', 'ae': 'United Arab Emirates', 'uae': 'United Arab Emirates', 'gb': 'United Kingdom', 'uk': 'United Kingdom', 'us': 'United States', 'usa': 'United States', 'de': 'Germany', 'au': 'Australia', 'bw': 'Botswana', 'sg': 'Singapore', 'dubai': 'United Arab Emirates' };
+    const raw = car.marketplace?.country || car.dealer?.location?.country || car.location?.country || '';
+    const k = raw.toLowerCase().trim();
+    const sourceCountry = countryNames[k] || raw;
+    const flag = countryFlags[k] || (sourceCountry ? '🌍' : '');
     const badgeLabels = { source: 'Verified Source', vehicle: 'Vehicle Verified', landed_cost: 'Landed Cost Verified', available: 'Available' };
     const badges = (car.marketplace?.verificationBadges || ['source']).map(b => ({ key: b, label: badgeLabels[b] || b }));
     const availabilityLabels = { available: 'Available for sourcing', limited: 'Limited availability', sourcing: 'Sourcing on request', sold: 'Sold' };
@@ -1435,15 +1438,26 @@ const CarMarketplace = () => {
 
           <div className="dealer-sidebar">
             <div className="dealer-section">
-              <div className="dealer-header"><h2>{isPrivateSeller ? 'Private Seller' : 'Dealer'} Information</h2></div>
+              <div className="dealer-header"><h2>{isMarketplaceListing ? 'Marketplace' : (isPrivateSeller ? 'Private Seller' : 'Dealer')} Information</h2></div>
               <div className="dealer-card">
                 <div className="dealer-header-compact">
-                  <img src={car.dealer?.profile?.logo || car.dealer?.logo || (isPrivateSeller ? '/images/placeholders/private-seller-avatar.jpg' : '/images/placeholders/dealer-logo.jpg')} alt={getSellerDisplayName()} className="dealer-avatar" onError={(e) => { e.target.src = isPrivateSeller ? '/images/placeholders/private-seller-avatar.jpg' : '/images/placeholders/dealer-logo.jpg'; }} />
+                  {isMarketplaceListing ? (
+                    (car.dealer?.profile?.logo || car.dealer?.logo) ? (
+                      <img src={car.dealer?.profile?.logo || car.dealer?.logo} alt="Marketplace" className="dealer-avatar" onError={e => { e.target.style.display = 'none'; }} />
+                    ) : null
+                  ) : (
+                    <img src={car.dealer?.profile?.logo || car.dealer?.logo || (isPrivateSeller ? '/images/placeholders/private-seller-avatar.jpg' : '/images/placeholders/dealer-logo.jpg')} alt={getSellerDisplayName()} className="dealer-avatar" onError={(e) => { e.target.src = isPrivateSeller ? '/images/placeholders/private-seller-avatar.jpg' : '/images/placeholders/dealer-logo.jpg'; }} />
+                  )}
                   <div className="dealer-details">
-                    <h3 className="dealer-name">{getSellerDisplayName()}{car.dealer?.verification?.isVerified && <span className="dealer-verified-icon" title="Verified Seller">✓</span>}</h3>
-                    <div className={`seller-type-badge ${isPrivateSeller ? 'private' : 'dealership'}`}>{isPrivateSeller ? '👤 Private Seller' : 'Dealership'}</div>
-                    <p className="dealer-location">{car.dealer?.location?.city || 'Location not specified'}{car.dealer?.location?.state ? `, ${car.dealer?.location?.state}` : ''}</p>
-                    {getSellerContactPreference() && <p className="contact-preference">📱 {getSellerContactPreference()}</p>}
+                    <h3 className="dealer-name">
+                      {isMarketplaceListing
+                        ? (getMarketplaceInfo?.sourceCountry ? `${getMarketplaceInfo.sourceCountry} Inventory` : 'International Inventory')
+                        : getSellerDisplayName()}
+                      {(car.dealer?.verification?.isVerified || isMarketplaceListing) && <span className="dealer-verified-icon" title="Verified">✓</span>}
+                    </h3>
+                    <div className={`seller-type-badge ${isPrivateSeller ? 'private' : 'dealership'}`}>{isMarketplaceListing ? 'Marketplace' : (isPrivateSeller ? '👤 Private Seller' : 'Dealership')}</div>
+                    {!isMarketplaceListing && <p className="dealer-location">{car.dealer?.location?.city || 'Location not specified'}{car.dealer?.location?.state ? `, ${car.dealer?.location?.state}` : ''}</p>}
+                    {!isMarketplaceListing && getSellerContactPreference() && <p className="contact-preference">📱 {getSellerContactPreference()}</p>}
                   </div>
                 </div>
                 <div className="dealer-stats">
