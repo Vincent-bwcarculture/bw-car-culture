@@ -1191,38 +1191,42 @@
   margin-top: 2px;
 }
 
-/* Sidebar — Other dealerships (horizontal pill strip) */
+/* Sidebar — Other dealerships */
+.sidebar-dealerships-wrapper {
+  border-top: 1px solid #2c2c2c;
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
+}
+
 .sidebar-dealerships {
   display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  padding: 4px 2px 8px;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0 0 0.25rem;
 }
-.sidebar-dealerships::-webkit-scrollbar { display: none; }
 
 .sidebar-dealership-item {
   display: flex;
-  flex: 0 0 80px;
-  flex-direction: column;
+  flex: none;
+  flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 4px;
   padding: 6px 4px;
   cursor: pointer;
   transition: background 0.15s;
-  text-align: center;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
 }
-.sidebar-dealership-item:hover { background: rgba(255, 255, 255, 0.09); border-color: rgba(255,51,0,0.4); }
+.sidebar-dealership-item:hover { background: rgba(255, 255, 255, 0.07); border-color: rgba(255,51,0,0.35); }
 
 .sidebar-dealer-logo {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -1231,14 +1235,14 @@
 }
 
 .sidebar-dealer-name {
-  font-size: 0.62rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 60px;
-  text-align: center;
+  max-width: none;
+  text-align: left;
 }
 
 .dealer-section {
@@ -1249,18 +1253,18 @@
 }
 
 .dealer-header {
-  padding: 1rem;
+  padding: 0.6rem 0.85rem;
   border-bottom: 1px solid #2c2c2c;
 }
 
 .dealer-header h2 {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1rem;
   color: #ffffff;
 }
 
 .dealer-card {
-  padding: 0.8rem;
+  padding: 0.65rem;
 }
 
 .dealer-header-compact {
@@ -1308,11 +1312,11 @@
 .dealer-stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.4rem;
-  padding: 0.4rem;
+  gap: 0.3rem;
+  padding: 0.3rem;
   background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.5rem;
 }
 
 .stat-item {
@@ -1320,29 +1324,28 @@
 }
 
 .stat-value {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #ffffff;
-  margin-bottom: 0rem;
+  margin-bottom: 0;
 }
 
 .stat-label {
-  font-size: 0.9rem;
+  font-size: 0.72rem;
   color: #888;
 }
 
 .dealer-contact-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0.4rem;
-  margin-bottom: 0rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0;
 }
 
 .contact-grid-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: rgba(0, 0, 0, 0.1);
-  padding: 0.4rem;
+  gap: 0.4rem;
+  padding: 0.2rem 0.3rem;
   border-radius: 4px;
 }
 
@@ -2986,6 +2989,7 @@
   margin-bottom: 0.9rem;
 }
 .mp-mkt-panel-globe { font-size: 1.6rem; }
+.mp-mkt-panel-globe:empty { display: none; }
 .mp-mkt-panel-title {
   font-size: 0.95rem;
   font-weight: 700;

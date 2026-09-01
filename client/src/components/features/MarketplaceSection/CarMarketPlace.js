@@ -1460,12 +1460,14 @@ const CarMarketplace = () => {
                     {!isMarketplaceListing && getSellerContactPreference() && <p className="contact-preference">{getSellerContactPreference()}</p>}
                   </div>
                 </div>
-                <div className="dealer-stats">
-                  <div className="stat-item"><div className="stat-value">{sellerStats.listings}</div><div className="stat-label">{isPrivateSeller ? 'Listings' : 'Vehicles'}</div></div>
-                  <div className="stat-item"><div className="stat-value">{sellerStats.rating}</div><div className="stat-label">Rating</div></div>
-                  {sellerStats.experience !== 'N/A' && <div className="stat-item"><div className="stat-value">{sellerStats.experience}</div><div className="stat-label">{isPrivateSeller ? 'Member' : 'Experience'}</div></div>}
-                </div>
-                {(car.dealer?.contact || car.contact) && (
+                {!isMarketplaceListing && (
+                  <div className="dealer-stats">
+                    <div className="stat-item"><div className="stat-value">{sellerStats.listings}</div><div className="stat-label">{isPrivateSeller ? 'Listings' : 'Vehicles'}</div></div>
+                    <div className="stat-item"><div className="stat-value">{sellerStats.rating}</div><div className="stat-label">Rating</div></div>
+                    {sellerStats.experience !== 'N/A' && <div className="stat-item"><div className="stat-value">{sellerStats.experience}</div><div className="stat-label">{isPrivateSeller ? 'Member' : 'Experience'}</div></div>}
+                  </div>
+                )}
+                {!isMarketplaceListing && (car.dealer?.contact || car.contact) && (
                   <div className="dealer-contact-grid">
                     {(car.dealer?.contact?.email || car.contact?.email) && <div className="contact-grid-item"><span className="contact-info">{car.dealer?.contact?.email || car.contact?.email}</span></div>}
                     {(car.dealer?.contact?.phone || car.contact?.phone || car.dealer?.phone) && <div className="contact-grid-item"><span className="contact-info">{car.dealer?.contact?.phone || car.contact?.phone || car.dealer?.phone}</span></div>}
@@ -1551,19 +1553,21 @@ const CarMarketplace = () => {
 
                 {/* Other dealerships */}
                 {otherDealerships.length > 0 && (
-                  <div className="sidebar-dealerships">
+                  <div className="sidebar-dealerships-wrapper">
                     <div className="sidebar-section-title">Other Dealerships</div>
-                    {otherDealerships.map(d => (
-                      <div key={d._id || d.id} className="sidebar-dealership-item" onClick={() => navigate(`/dealerships/${d._id || d.id}`)}>
-                        <img
-                          src={d.profile?.logo || d.logo || '/images/placeholders/dealer-logo.jpg'}
-                          alt={d.businessName}
-                          className="sidebar-dealer-logo"
-                          onError={e => { e.target.src = '/images/placeholders/dealer-logo.jpg'; }}
-                        />
-                        <div className="sidebar-dealer-name">{d.businessName || d.name}</div>
-                      </div>
-                    ))}
+                    <div className="sidebar-dealerships">
+                      {otherDealerships.map(d => (
+                        <div key={d._id || d.id} className="sidebar-dealership-item" onClick={() => navigate(`/dealerships/${d._id || d.id}`)}>
+                          <img
+                            src={d.profile?.logo || d.logo || '/images/placeholders/dealer-logo.jpg'}
+                            alt={d.businessName}
+                            className="sidebar-dealer-logo"
+                            onError={e => { e.target.src = '/images/placeholders/dealer-logo.jpg'; }}
+                          />
+                          <div className="sidebar-dealer-name">{d.businessName || d.name}</div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
