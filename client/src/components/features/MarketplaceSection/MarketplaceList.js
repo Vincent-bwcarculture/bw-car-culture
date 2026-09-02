@@ -41,6 +41,7 @@ const MarketplaceList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState('all');
+  const [activeCountry, setActiveCountry] = useState(null);
   const [isRetrying, setIsRetrying] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   
@@ -177,6 +178,7 @@ const MarketplaceList = () => {
     } catch (e) {
       console.warn('Could not access sessionStorage:', e);
     }
+    setActiveCountry(null);
   }, [activeSection]);
 
   // Optimized mobile detection with debounce
@@ -1125,6 +1127,34 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
     };
   }, [getCurrentSectionCars, getSectionStatistics]);
 
+  const CF_NAMES = {'za':'South Africa','jp':'Japan','cn':'China','ae':'United Arab Emirates','uae':'United Arab Emirates','gb':'United Kingdom','uk':'United Kingdom','us':'United States','usa':'United States','de':'Germany','au':'Australia','bw':'Botswana','sg':'Singapore','dubai':'United Arab Emirates'};
+  const CF_FLAGS = {'south africa':'🇿🇦','za':'🇿🇦','japan':'🇯🇵','jp':'🇯🇵','china':'🇨🇳','cn':'🇨🇳','united arab emirates':'🇦🇪','uae':'🇦🇪','ae':'🇦🇪','united kingdom':'🇬🇧','uk':'🇬🇧','gb':'🇬🇧','united states':'🇺🇸','usa':'🇺🇸','us':'🇺🇸','germany':'🇩🇪','de':'🇩🇪','australia':'🇦🇺','au':'🇦🇺','botswana':'🇧🇼','bw':'🇧🇼','singapore':'🇸🇬','sg':'🇸🇬','dubai':'🇦🇪'};
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const availableCountries = useMemo(() => {
+    const map = new Map();
+    filteredDisplayCars.forEach(car => {
+      if (car.isPromoCard) return;
+      const raw = car.marketplace?.country || car.dealer?.location?.country || car.location?.country || '';
+      if (!raw) return;
+      const k = raw.toLowerCase().trim();
+      const fullName = CF_NAMES[k] || raw;
+      const flag = CF_FLAGS[k] || '';
+      if (fullName && !map.has(k)) map.set(k, { key: k, fullName, flag });
+    });
+    return [...map.values()].sort((a, b) => a.fullName.localeCompare(b.fullName));
+  }, [filteredDisplayCars]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const filteredDisplayCars = useMemo(() => {
+    if (!activeCountry) return filteredDisplayCars;
+    return filteredDisplayCars.filter(car => {
+      if (car.isPromoCard) return true;
+      const raw = car.marketplace?.country || car.dealer?.location?.country || car.location?.country || '';
+      return raw.toLowerCase().trim() === activeCountry;
+    });
+  }, [filteredDisplayCars, activeCountry]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Mobile horizontal car row component with promo card support
   const MobileHorizontalCarRow = ({ mainCar, similarCars }) => {
     const allCarsInRow = [mainCar, ...similarCars];
@@ -1318,6 +1348,28 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
         )}
       </div>
 
+      {/* ── Country filter strip ── */}
+      {!loading && !error && availableCountries.length >= 2 && (
+        <div className="cf-strip">
+          <button
+            className={`cf-pill${!activeCountry ? ' active' : ''}`}
+            onClick={() => setActiveCountry(null)}
+          >
+            All
+          </button>
+          {availableCountries.map(c => (
+            <button
+              key={c.key}
+              className={`cf-pill${activeCountry === c.key ? ' active' : ''}`}
+              onClick={() => setActiveCountry(activeCountry === c.key ? null : c.key)}
+            >
+              {c.flag && <span className="cf-flag">{c.flag}</span>}
+              {c.fullName}
+            </button>
+          ))}
+        </div>
+      )}
+
       {loading ? (
         <div className="loading-container">
           <div className="loading-spinner">
@@ -1345,7 +1397,7 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
             </button>
           </div>
         </div>
-      ) : displayData.displayCars.filter(car => !car.isPromoCard).length === 0 ? (
+      ) : filteredDisplayCars.filter(car => !car.isPromoCard).length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">🔍</div>
           <h3>No vehicles found</h3>
@@ -1365,7 +1417,7 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
             <div className="dealerships-section" id="dealerships-panel" role="tabpanel">
               <div className={getGridClassName('marketplace-grid dealerships-grid')}>
                 {isMobile ? (
-                  displayData.displayCars.map((car, index) => {
+                  filteredDisplayCars.map((car, index) => {
                     if (car.isPromoCard) {
                       return (
                         <div key={car._id} className="mobile-horizontal-scroll">
@@ -1388,7 +1440,7 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
                     );
                   })
                 ) : (
-                  displayData.displayCars.map((car, index) => (
+                  filteredDisplayCars.map((car, index) => (
                     car.isPromoCard ? (
                       <CreateListingPromoCard key={car._id} compact={false} />
                     ) : (
@@ -1421,7 +1473,7 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
               </div>
               <div className={getGridClassName('marketplace-grid private-grid')}>
                 {isMobile ? (
-                  displayData.displayCars.map((car, index) => {
+                  filteredDisplayCars.map((car, index) => {
                     if (car.isPromoCard) {
                       return (
                         <div key={car._id} className="mobile-horizontal-scroll">
@@ -1446,7 +1498,7 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
                     );
                   })
                 ) : (
-                  displayData.displayCars.map((car, index) => (
+                  filteredDisplayCars.map((car, index) => (
                     car.isPromoCard ? (
                       <CreateListingPromoCard key={car._id} compact={false} />
                     ) : (
@@ -1476,7 +1528,7 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
               </div>
               <div className={getGridClassName('marketplace-grid all-grid')}>
                 {isMobile ? (
-                  displayData.displayCars.map((car, index) => {
+                  filteredDisplayCars.map((car, index) => {
                     if (car.isPromoCard) {
                       return (
                         <div key={car._id} className="mobile-horizontal-scroll">
@@ -1501,7 +1553,7 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
                     );
                   })
                 ) : (
-                  displayData.displayCars.map((car, index) => (
+                  filteredDisplayCars.map((car, index) => (
                     car.isPromoCard ? (
                       <CreateListingPromoCard key={car._id} compact={false} />
                     ) : (
