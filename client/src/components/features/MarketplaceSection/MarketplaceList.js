@@ -1130,10 +1130,18 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
   const CF_NAMES = {'za':'South Africa','jp':'Japan','cn':'China','ae':'United Arab Emirates','uae':'United Arab Emirates','gb':'United Kingdom','uk':'United Kingdom','us':'United States','usa':'United States','de':'Germany','au':'Australia','bw':'Botswana','sg':'Singapore','dubai':'United Arab Emirates'};
   const CF_FLAGS = {'south africa':'🇿🇦','za':'🇿🇦','japan':'🇯🇵','jp':'🇯🇵','china':'🇨🇳','cn':'🇨🇳','united arab emirates':'🇦🇪','uae':'🇦🇪','ae':'🇦🇪','united kingdom':'🇬🇧','uk':'🇬🇧','gb':'🇬🇧','united states':'🇺🇸','usa':'🇺🇸','us':'🇺🇸','germany':'🇩🇪','de':'🇩🇪','australia':'🇦🇺','au':'🇦🇺','botswana':'🇧🇼','bw':'🇧🇼','singapore':'🇸🇬','sg':'🇸🇬','dubai':'🇦🇪'};
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const filteredDisplayCars = useMemo(() => {
+    if (!activeCountry) return displayData.displayCars;
+    return displayData.displayCars.filter(car => {
+      if (car.isPromoCard) return true;
+      const raw = car.marketplace?.country || car.dealer?.location?.country || car.location?.country || '';
+      return raw.toLowerCase().trim() === activeCountry;
+    });
+  }, [displayData.displayCars, activeCountry]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const availableCountries = useMemo(() => {
     const map = new Map();
-    filteredDisplayCars.forEach(car => {
+    displayData.displayCars.forEach(car => {
       if (car.isPromoCard) return;
       const raw = car.marketplace?.country || car.dealer?.location?.country || car.location?.country || '';
       if (!raw) return;
@@ -1143,17 +1151,7 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
       if (fullName && !map.has(k)) map.set(k, { key: k, fullName, flag });
     });
     return [...map.values()].sort((a, b) => a.fullName.localeCompare(b.fullName));
-  }, [filteredDisplayCars]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const filteredDisplayCars = useMemo(() => {
-    if (!activeCountry) return filteredDisplayCars;
-    return filteredDisplayCars.filter(car => {
-      if (car.isPromoCard) return true;
-      const raw = car.marketplace?.country || car.dealer?.location?.country || car.location?.country || '';
-      return raw.toLowerCase().trim() === activeCountry;
-    });
-  }, [filteredDisplayCars, activeCountry]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [displayData.displayCars]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Mobile horizontal car row component with promo card support
   const MobileHorizontalCarRow = ({ mainCar, similarCars }) => {
