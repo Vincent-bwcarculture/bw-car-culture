@@ -1130,12 +1130,17 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
   const CF_NAMES = {'za':'South Africa','jp':'Japan','cn':'China','ae':'United Arab Emirates','uae':'United Arab Emirates','gb':'United Kingdom','uk':'United Kingdom','us':'United States','usa':'United States','de':'Germany','au':'Australia','bw':'Botswana','sg':'Singapore','dubai':'United Arab Emirates'};
   const CF_FLAGS = {'south africa':'🇿🇦','za':'🇿🇦','japan':'🇯🇵','jp':'🇯🇵','china':'🇨🇳','cn':'🇨🇳','united arab emirates':'🇦🇪','uae':'🇦🇪','ae':'🇦🇪','united kingdom':'🇬🇧','uk':'🇬🇧','gb':'🇬🇧','united states':'🇺🇸','usa':'🇺🇸','us':'🇺🇸','germany':'🇩🇪','de':'🇩🇪','australia':'🇦🇺','au':'🇦🇺','botswana':'🇧🇼','bw':'🇧🇼','singapore':'🇸🇬','sg':'🇸🇬','dubai':'🇦🇪'};
 
+  const cfCanonical = (raw) => {
+    const k = (raw || '').toLowerCase().trim();
+    return (CF_NAMES[k] || raw).toLowerCase();
+  };
+
   const filteredDisplayCars = useMemo(() => {
     if (!activeCountry) return displayData.displayCars;
     return displayData.displayCars.filter(car => {
       if (car.isPromoCard) return true;
       const raw = car.marketplace?.country || car.dealer?.location?.country || car.location?.country || '';
-      return raw.toLowerCase().trim() === activeCountry;
+      return cfCanonical(raw) === activeCountry;
     });
   }, [displayData.displayCars, activeCountry]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1145,10 +1150,11 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
       if (car.isPromoCard) return;
       const raw = car.marketplace?.country || car.dealer?.location?.country || car.location?.country || '';
       if (!raw) return;
-      const k = raw.toLowerCase().trim();
+      const k = (raw).toLowerCase().trim();
       const fullName = CF_NAMES[k] || raw;
-      const flag = CF_FLAGS[k] || '';
-      if (fullName && !map.has(k)) map.set(k, { key: k, fullName, flag });
+      const canonical = fullName.toLowerCase();
+      const flag = CF_FLAGS[canonical] || CF_FLAGS[k] || '';
+      if (!map.has(canonical)) map.set(canonical, { key: canonical, fullName, flag });
     });
     return [...map.values()].sort((a, b) => a.fullName.localeCompare(b.fullName));
   }, [displayData.displayCars]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -1398,16 +1404,27 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
       ) : filteredDisplayCars.filter(car => !car.isPromoCard).length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">🔍</div>
-          <h3>No vehicles found</h3>
-          <p>Try adjusting your search criteria or browse all available vehicles.</p>
-          <div className="empty-actions">
-            <button 
-              className="switch-section-btn"
-              onClick={() => handleSectionChange('all')}
-            >
-              View All Vehicles
-            </button>
-          </div>
+          {activeCountry ? (
+            <>
+              <h3>No vehicles from {availableCountries.find(c => c.key === activeCountry)?.fullName || activeCountry}</h3>
+              <p>No listings match this country filter right now.</p>
+              <div className="empty-actions">
+                <button className="switch-section-btn" onClick={() => setActiveCountry(null)}>
+                  Clear Country Filter
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h3>No vehicles found</h3>
+              <p>Try adjusting your search criteria or browse all available vehicles.</p>
+              <div className="empty-actions">
+                <button className="switch-section-btn" onClick={() => handleSectionChange('all')}>
+                  View All Vehicles
+                </button>
+              </div>
+            </>
+          )}
         </div>
       ) : (
         <div className="marketplace-sections">
