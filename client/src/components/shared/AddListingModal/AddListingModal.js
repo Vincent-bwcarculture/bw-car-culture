@@ -20,6 +20,7 @@ import { listingService } from '../../../services/listingService.js';
 import { useAuth } from '../../../context/AuthContext.js';
 import './AddListingModal.css';
 import ErrorBoundary from '../../ErrorBoundary.js';
+import { parseVideoUrl } from '../../../utils/parseVideoUrl.js';
 
 // Helper functions
 const getSafeFormValue = (obj, path, defaultValue = '') => {
@@ -144,6 +145,8 @@ const AddListingModal = ({ isOpen, onClose, onSubmit }) => {
   const [errors, setErrors] = useState({});
   const [images, setImages] = useState([]);
   const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoParsed, setVideoParsed] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dealers, setDealers] = useState([]);
   const [loadingDealers, setLoadingDealers] = useState(false);
@@ -566,6 +569,12 @@ const fetchDealers = async () => {
     }
   };
 
+  const handleVideoUrlChange = (e) => {
+    const val = e.target.value;
+    setVideoUrl(val);
+    setVideoParsed(parseVideoUrl(val));
+  };
+
   // Remove feature
   const removeFeature = (index) => {
     if (index < 0 || !Array.isArray(formData.features)) return;
@@ -826,7 +835,15 @@ const handleSubmit = async (e) => {
 
       // Add images and primary image index
       images: images,
-      primaryImageIndex: primaryImageIndex
+      primaryImageIndex: primaryImageIndex,
+
+      video: videoParsed ? {
+        url: videoUrl,
+        platform: videoParsed.platform,
+        embedUrl: videoParsed.embedUrl || null,
+        thumbnail: videoParsed.thumbnail || null,
+        label: videoParsed.label
+      } : null
     };
 
     console.log('Submitting listing with enhanced dealer info:', {
@@ -1523,6 +1540,31 @@ const handleSubmit = async (e) => {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+            {/* Video Section */}
+            <div className="form-group" style={{ marginTop: '1.5rem' }}>
+              <label>Vehicle Video (optional)</label>
+              <input
+                type="url"
+                value={videoUrl}
+                onChange={handleVideoUrlChange}
+                placeholder="Paste a YouTube, Facebook, Vimeo or TikTok link..."
+                className="form-input"
+                disabled={isSubmitting}
+              />
+              {videoUrl && !videoParsed && (
+                <span className="error-message">Unrecognised video link. Paste a YouTube, Vimeo, Facebook or TikTok URL.</span>
+              )}
+              {videoParsed && (
+                <div className="video-preview" style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0.75rem', background: 'rgba(255,255,255,0.04)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  {videoParsed.thumbnail && (
+                    <img src={videoParsed.thumbnail} alt="Video thumbnail" style={{ width: '72px', height: '48px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }} />
+                  )}
+                  <span className="video-platform-badge" style={{ background: '#ff3300', color: '#fff', borderRadius: '4px', padding: '0.15rem 0.45rem', fontSize: '0.75rem', fontWeight: 600, flexShrink: 0 }}>{videoParsed.label}</span>
+                  <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{videoUrl}</span>
+                  <button type="button" onClick={() => { setVideoUrl(''); setVideoParsed(null); }} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '1rem', flexShrink: 0 }}>×</button>
                 </div>
               )}
             </div>

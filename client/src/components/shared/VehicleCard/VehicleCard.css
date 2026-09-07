@@ -1198,6 +1198,50 @@
   border: 1px solid rgba(156, 39, 176, 0.4);
 }
 
+/* Video badge */
+.vc-video-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background-color: rgba(255, 51, 0, 0.15);
+  color: #ff6040;
+  border: 1px solid rgba(255, 51, 0, 0.35);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.vc-video-badge:hover {
+  background-color: rgba(255, 51, 0, 0.28);
+}
+
+/* Video tab panel */
+.vc-video-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+}
+.vc-video-embed-wrap {
+  width: 100%;
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  border-radius: 6px;
+}
+.vc-video-iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 6px;
+}
+
 /* Dealer info */
 .vc-dealer-info {
   display: flex;

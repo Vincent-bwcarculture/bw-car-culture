@@ -1246,6 +1246,29 @@ const CarMarketplace = () => {
               )}
             </div>
 
+            {/* Video section */}
+            {(car.video?.embedUrl || car.video?.directUrl) && (
+              <div className="mp-video-section">
+                <h3 className="mp-video-title">▶ Vehicle Video{car.video?.label ? ` · ${car.video.label}` : ''}</h3>
+                {car.video?.embedUrl ? (
+                  <div className="mp-video-embed-wrap">
+                    <iframe
+                      src={car.video.embedUrl}
+                      title="Vehicle Video"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="mp-video-iframe"
+                    />
+                  </div>
+                ) : (
+                  <video controls className="mp-video-iframe" style={{ background: '#000', borderRadius: '8px' }}>
+                    <source src={car.video.directUrl} />
+                  </video>
+                )}
+              </div>
+            )}
+
             {/* Import notice for non-Botswana vehicles */}
             {(() => {
               const countryMap = {

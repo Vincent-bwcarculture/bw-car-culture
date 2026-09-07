@@ -44,7 +44,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
 
   // Review flip state
   const [isFlipped, setIsFlipped] = useState(false);
-  const [backTab, setBackTab] = useState('reviews'); // 'reviews' | 'finance' | 'service-history'
+  const [backTab, setBackTab] = useState('reviews'); // 'reviews' | 'finance' | 'service-history' | 'video'
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsError, setReviewsError] = useState(null);
@@ -1597,7 +1597,7 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
           </div>
         </div>
         
-        {(car.serviceHistory?.hasServiceHistory || car.warranty || car.isCertified) && (
+        {(car.serviceHistory?.hasServiceHistory || car.warranty || car.isCertified || car.video?.embedUrl || car.video?.directUrl) && (
           <div className="vc-badges">
             {car.serviceHistory?.hasServiceHistory && (
               <div className="vc-service-badge">Service History</div>
@@ -1607,6 +1607,9 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
             )}
             {car.isCertified && dealer?.sellerType === 'dealership' && (
               <div className="vc-certified-badge">Certified</div>
+            )}
+            {(car.video?.embedUrl || car.video?.directUrl) && (
+              <div className="vc-video-badge" onClick={e => { e.stopPropagation(); setBackTab('video'); handleFlip(); }}>▶ Video</div>
             )}
           </div>
         )}
@@ -1775,6 +1778,12 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               className={`vc-back-tab${backTab === 'service-history' ? ' active' : ''}`}
               onClick={e => { e.stopPropagation(); setBackTab('service-history'); }}
             >Service History</button>
+            {(car.video?.embedUrl || car.video?.directUrl) && (
+              <button
+                className={`vc-back-tab${backTab === 'video' ? ' active' : ''}`}
+                onClick={e => { e.stopPropagation(); setBackTab('video'); }}
+              >▶ Video</button>
+            )}
           </div>
         </div>
 
@@ -1867,6 +1876,35 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
               </>
             ) : (
               <div className="vc-no-reviews">No service history recorded for this vehicle.</div>
+            )}
+          </div>
+        )}
+
+        {/* ── Video tab ── */}
+        {backTab === 'video' && (
+          <div className="vc-reviews-scroll vc-video-panel">
+            {car.video?.embedUrl ? (
+              <div className="vc-video-embed-wrap">
+                <iframe
+                  src={car.video.embedUrl}
+                  title="Vehicle Video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="vc-video-iframe"
+                />
+              </div>
+            ) : car.video?.directUrl ? (
+              <video controls className="vc-video-iframe" style={{ background: '#000' }}>
+                <source src={car.video.directUrl} />
+              </video>
+            ) : (
+              <div className="vc-no-reviews">No video available for this vehicle.</div>
+            )}
+            {car.video?.label && (
+              <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.4rem' }}>
+                via {car.video.label}
+              </p>
             )}
           </div>
         )}
