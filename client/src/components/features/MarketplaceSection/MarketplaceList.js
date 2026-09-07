@@ -58,6 +58,7 @@ const MarketplaceList = () => {
   
   // UI state
   const fetchInProgress = useRef(false);
+  const retryingRef = useRef(false); // true while auto-retries are pending
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
   const shareButtonRef = useRef(null);
@@ -923,28 +924,34 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
       totalPages: paginationData.totalPages,
       total: paginationData.total
     });
-      
+
       setCurrentPage(page);
-      
+
       if (isMobile && cars.length > 0) {
         generateSimilarCarsData(cars);
       }
-      
+
       // Scroll to top when page changes
       if (page > 1) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-      
+
       setError(null);
-      
+      retryingRef.current = false;
+      // For retry calls (retryCount > 0), debouncedSearch.finally already ran — set loading false here
+      if (retryCount > 0) setLoading(false);
+
     } catch (error) {
       console.error('Search error:', error);
-      
+
       if (retryCount < maxRetries) {
+        retryingRef.current = true; // signal debouncedSearch.finally to NOT clear loading
         setTimeout(() => performSearch(filters, page, retryCount + 1), 1000 * (retryCount + 1));
         return;
       }
-      
+
+      retryingRef.current = false;
+      if (retryCount > 0) setLoading(false); // debouncedSearch.finally already ran for retries
       setError(error.message || 'Failed to load vehicles. Please try again.');
       setAllCars([]);
       setPagination({ currentPage: 1, totalPages: 1, total: 0 });
@@ -985,7 +992,8 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
   const debouncedSearch = useMemo(
     () => debounce(async (searchParams) => {
       if (fetchInProgress.current) return;
-      
+
+      retryingRef.current = false; // cancel any stale retry flag from a previous cycle
       fetchInProgress.current = true;
       setLoading(true);
       setError(null);
@@ -1000,7 +1008,8 @@ const performSearch = useCallback(async (filters, page, retryCount = 0) => {
         setAllCars([]);
         setPagination({ currentPage: 1, totalPages: 1, total: 0 });
       } finally {
-        setLoading(false);
+        // If performSearch scheduled an auto-retry, keep loading=true until the retry resolves
+        if (!retryingRef.current) setLoading(false);
         fetchInProgress.current = false;
       }
     }, 300),
