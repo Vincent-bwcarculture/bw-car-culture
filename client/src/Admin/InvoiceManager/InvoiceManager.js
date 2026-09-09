@@ -1,5 +1,5 @@
 // src/Admin/InvoiceManager/InvoiceManager.js
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext.js';
 import api from '../../config/axios.js';
 import './InvoiceManager.css';
@@ -12,6 +12,249 @@ const STATUS_COLORS = {
 };
 
 const empty_item = () => ({ description: '', quantity: 1, unitPrice: '' });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Service Catalog helpers
+// ─────────────────────────────────────────────────────────────────────────────
+const SVC_KEY = 'bcc_service_catalog';
+
+const loadServices = () => {
+  try { return JSON.parse(localStorage.getItem(SVC_KEY) || '[]'); } catch { return []; }
+};
+const saveServices = (svcs) => {
+  try { localStorage.setItem(SVC_KEY, JSON.stringify(svcs)); } catch {}
+};
+
+const empty_service = () => ({
+  id: `svc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  name: '',
+  category: '',
+  unitPrice: '',
+  includes: [''],
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ServiceCatalog component
+// ─────────────────────────────────────────────────────────────────────────────
+const ServiceCatalog = () => {
+  const [services, setServices] = useState(loadServices);
+  const [editing, setEditing] = useState(null); // null | service object
+
+  const persist = (svcs) => { setServices(svcs); saveServices(svcs); };
+
+  const startNew = () => setEditing(empty_service());
+  const startEdit = (svc) => setEditing({ ...svc, includes: [...(svc.includes || [''])] });
+  const cancelEdit = () => setEditing(null);
+
+  const setEditField = (field, value) => setEditing(prev => ({ ...prev, [field]: value }));
+
+  const setInclude = (idx, val) =>
+    setEditing(prev => { const inc = [...prev.includes]; inc[idx] = val; return { ...prev, includes: inc }; });
+  const addInclude = () => setEditing(prev => ({ ...prev, includes: [...prev.includes, ''] }));
+  const removeInclude = (idx) =>
+    setEditing(prev => ({ ...prev, includes: prev.includes.filter((_, i) => i !== idx) }));
+
+  const saveEdit = () => {
+    if (!editing.name.trim()) return;
+    const clean = { ...editing, includes: editing.includes.filter(s => s.trim()) };
+    const exists = services.find(s => s.id === clean.id);
+    persist(exists
+      ? services.map(s => s.id === clean.id ? clean : s)
+      : [...services, clean]
+    );
+    setEditing(null);
+  };
+
+  const deleteService = (id) => {
+    if (!window.confirm('Delete this service?')) return;
+    persist(services.filter(s => s.id !== id));
+  };
+
+  // Group by category
+  const groups = services.reduce((acc, svc) => {
+    const cat = svc.category?.trim() || 'Uncategorised';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(svc);
+    return acc;
+  }, {});
+
+  return (
+    <div className="im-catalog">
+      <div className="im-catalog-header">
+        <div>
+          <h3 className="im-catalog-title">Services Catalog</h3>
+          <p className="im-catalog-sub">Define your services and pricing. Use "Add from Catalog" when creating an invoice or quotation.</p>
+        </div>
+        <button className="im-btn-primary" onClick={startNew}>+ New Service</button>
+      </div>
+
+      {services.length === 0 ? (
+        <div className="im-state im-empty">
+          <p className="im-empty-icon">🛠️</p>
+          <p>No services yet. Add your first service to build a catalog.</p>
+          <button className="im-btn-ghost" onClick={startNew} style={{ marginTop: '0.75rem' }}>+ Add Service</button>
+        </div>
+      ) : (
+        Object.entries(groups).map(([cat, svcs]) => (
+          <div key={cat} className="im-catalog-group">
+            <p className="im-catalog-group-title">{cat}</p>
+            <div className="im-catalog-grid">
+              {svcs.map(svc => (
+                <div key={svc.id} className="im-catalog-card">
+                  <div className="im-catalog-card-top">
+                    <div>
+                      <p className="im-catalog-card-name">{svc.name}</p>
+                      <p className="im-catalog-card-price">{formatBWP(svc.unitPrice)}</p>
+                    </div>
+                    <div className="im-catalog-card-actions">
+                      <button className="im-action-btn edit" title="Edit" onClick={() => startEdit(svc)}>✏️</button>
+                      <button className="im-action-btn delete" title="Delete" onClick={() => deleteService(svc.id)}>🗑</button>
+                    </div>
+                  </div>
+                  {svc.includes?.length > 0 && (
+                    <ul className="im-catalog-includes">
+                      {svc.includes.map((inc, i) => <li key={i}>{inc}</li>)}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))
+      )}
+
+      {/* Edit / New modal */}
+      {editing && (
+        <div className="im-form-overlay">
+          <div className="im-form-panel" style={{ maxWidth: '520px' }}>
+            <div className="im-form-head">
+              <h2 className="im-form-title">{editing.name ? 'Edit Service' : 'New Service'}</h2>
+              <button className="im-form-close" onClick={cancelEdit}>✕</button>
+            </div>
+            <div className="im-form-body">
+              <div className="im-form-section">
+                <label className="im-form-label">Service Name *</label>
+                <input className="im-input" placeholder="e.g. Premium Listing Package"
+                  value={editing.name} onChange={e => setEditField('name', e.target.value)} />
+              </div>
+              <div className="im-form-section im-form-row-2">
+                <div>
+                  <label className="im-form-label">Category (optional)</label>
+                  <input className="im-input" placeholder="e.g. Listings, Transport, Consulting"
+                    value={editing.category} onChange={e => setEditField('category', e.target.value)} />
+                </div>
+                <div>
+                  <label className="im-form-label">Price (BWP)</label>
+                  <input className="im-input" type="number" min="0" step="0.01" placeholder="0.00"
+                    value={editing.unitPrice} onChange={e => setEditField('unitPrice', e.target.value)} />
+                </div>
+              </div>
+              <div className="im-form-section">
+                <label className="im-form-label">What's Included</label>
+                {editing.includes.map((inc, idx) => (
+                  <div key={idx} className="im-include-row">
+                    <input className="im-input" placeholder={`Item ${idx + 1}, e.g. 10 photos`}
+                      value={inc} onChange={e => setInclude(idx, e.target.value)} />
+                    <button className="im-remove-item" onClick={() => removeInclude(idx)}
+                      disabled={editing.includes.length === 1}>×</button>
+                  </div>
+                ))}
+                <button className="im-add-item-btn" type="button" onClick={addInclude}>+ Add Item</button>
+              </div>
+            </div>
+            <div className="im-form-footer">
+              <button className="im-btn-ghost" onClick={cancelEdit}>Cancel</button>
+              <button className="im-btn-primary" onClick={saveEdit}
+                disabled={!editing.name.trim()}>Save Service</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ServicePicker – modal opened from DocForm
+// ─────────────────────────────────────────────────────────────────────────────
+const ServicePicker = ({ onPick, onClose }) => {
+  const services = loadServices();
+  const [selected, setSelected] = useState(new Set());
+
+  const toggle = (id) => setSelected(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+
+  const confirm = () => {
+    const picked = services.filter(s => selected.has(s.id));
+    onPick(picked);
+    onClose();
+  };
+
+  if (services.length === 0) {
+    return (
+      <div className="im-form-overlay" onClick={onClose}>
+        <div className="im-form-panel" style={{ maxWidth: '420px' }} onClick={e => e.stopPropagation()}>
+          <div className="im-form-head">
+            <h2 className="im-form-title">Add from Catalog</h2>
+            <button className="im-form-close" onClick={onClose}>✕</button>
+          </div>
+          <div className="im-form-body" style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+            <p style={{ color: 'rgba(255,255,255,0.5)', marginBottom: '0.5rem' }}>No services in catalog yet.</p>
+            <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.35)' }}>Go to the Services tab to add your first service.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const groups = services.reduce((acc, svc) => {
+    const cat = svc.category?.trim() || 'Uncategorised';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(svc);
+    return acc;
+  }, {});
+
+  return (
+    <div className="im-form-overlay" onClick={onClose}>
+      <div className="im-form-panel" style={{ maxWidth: '520px' }} onClick={e => e.stopPropagation()}>
+        <div className="im-form-head">
+          <h2 className="im-form-title">Add from Catalog</h2>
+          <button className="im-form-close" onClick={onClose}>✕</button>
+        </div>
+        <div className="im-form-body" style={{ maxHeight: '55vh', overflowY: 'auto' }}>
+          {Object.entries(groups).map(([cat, svcs]) => (
+            <div key={cat} style={{ marginBottom: '1rem' }}>
+              <p className="im-catalog-group-title" style={{ marginBottom: '0.4rem' }}>{cat}</p>
+              {svcs.map(svc => (
+                <label key={svc.id} className={`im-picker-row${selected.has(svc.id) ? ' selected' : ''}`}>
+                  <input type="checkbox" checked={selected.has(svc.id)} onChange={() => toggle(svc.id)} />
+                  <div className="im-picker-row-body">
+                    <span className="im-picker-name">{svc.name}</span>
+                    <span className="im-picker-price">{formatBWP(svc.unitPrice)}</span>
+                  </div>
+                  {svc.includes?.length > 0 && (
+                    <ul className="im-catalog-includes" style={{ marginTop: '0.2rem', paddingLeft: '1.5rem' }}>
+                      {svc.includes.map((inc, i) => <li key={i}>{inc}</li>)}
+                    </ul>
+                  )}
+                </label>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="im-form-footer">
+          <button className="im-btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="im-btn-primary" onClick={confirm} disabled={selected.size === 0}>
+            Add {selected.size > 0 ? `${selected.size} Service${selected.size > 1 ? 's' : ''}` : 'Selected'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const genRefNumber = (type) => {
   const prefix = type === 'quotation' ? 'QUO' : 'INV';
@@ -177,6 +420,16 @@ const PrintModal = ({ doc, onClose }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 const DocForm = ({ initial, onSave, onCancel, saving }) => {
   const [form, setForm] = useState(initial);
+  const [showPicker, setShowPicker] = useState(false);
+
+  const addFromCatalog = (pickedServices) => {
+    const newItems = pickedServices.map(svc => ({
+      description: svc.name + (svc.includes?.length > 0 ? ` (${svc.includes.join(', ')})` : ''),
+      quantity: 1,
+      unitPrice: svc.unitPrice || '',
+    }));
+    setForm(prev => ({ ...prev, items: [...prev.items.filter(it => it.description || it.unitPrice), ...newItems] }));
+  };
 
   const setField = (path, value) => {
     setForm(prev => {
@@ -316,7 +569,12 @@ const DocForm = ({ initial, onSave, onCancel, saving }) => {
 
           {/* Line Items */}
           <div className="im-form-section">
-            <p className="im-form-section-title">Line Items</p>
+            <div className="im-items-title-row">
+              <p className="im-form-section-title" style={{ margin: 0 }}>Line Items</p>
+              <button type="button" className="im-catalog-pick-btn" onClick={() => setShowPicker(true)}>
+                📋 Add from Catalog
+              </button>
+            </div>
             <div className="im-items-table">
               <div className="im-items-header">
                 <span className="desc-col">Description</span>
@@ -431,6 +689,7 @@ const DocForm = ({ initial, onSave, onCancel, saving }) => {
           </button>
         </div>
       </div>
+      {showPicker && <ServicePicker onPick={addFromCatalog} onClose={() => setShowPicker(false)} />}
     </div>
   );
 };
@@ -444,6 +703,7 @@ const InvoiceManager = () => {
   const [docs, setDocs]             = useState([]);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState(null);
+  const [mainTab, setMainTab]       = useState('docs'); // 'docs' | 'services'
   const [typeTab, setTypeTab]       = useState('all');
   const [statusTab, setStatusTab]   = useState('all');
   const [form, setForm]             = useState(null);
@@ -537,16 +797,33 @@ const InvoiceManager = () => {
       <div className="im-header">
         <div>
           <h2 className="im-heading">Invoices & Quotations</h2>
-          <p className="im-subheading">{docs.length} document{docs.length !== 1 ? 's' : ''}</p>
+          <p className="im-subheading">{mainTab === 'docs' ? `${docs.length} document${docs.length !== 1 ? 's' : ''}` : 'Manage your service catalog'}</p>
         </div>
-        <div className="im-header-actions">
-          <button className="im-btn-secondary" onClick={() => setForm(empty_doc('quotation'))}>+ New Quotation</button>
-          <button className="im-btn-primary" onClick={() => setForm(empty_doc('invoice'))}>+ New Invoice</button>
-        </div>
+        {mainTab === 'docs' && (
+          <div className="im-header-actions">
+            <button className="im-btn-secondary" onClick={() => setForm(empty_doc('quotation'))}>+ New Quotation</button>
+            <button className="im-btn-primary" onClick={() => setForm(empty_doc('invoice'))}>+ New Invoice</button>
+          </div>
+        )}
       </div>
 
-      {/* Type tabs */}
+      {/* Main tabs */}
       <div className="im-tabs">
+        <button className={`im-tab ${mainTab === 'docs' ? 'active' : ''}`} onClick={() => setMainTab('docs')}>
+          📄 Documents
+        </button>
+        <button className={`im-tab ${mainTab === 'services' ? 'active' : ''}`} onClick={() => setMainTab('services')}>
+          🛠️ Services
+        </button>
+      </div>
+
+      {/* Services view */}
+      {mainTab === 'services' && <ServiceCatalog />}
+
+      {/* Documents view */}
+      {mainTab === 'docs' && <>
+      {/* Type tabs */}
+      <div className="im-tabs" style={{ marginTop: '0.5rem' }}>
         {[['all', 'All'], ['invoice', 'Invoices'], ['quotation', 'Quotations']].map(([key, label]) => (
           <button key={key} className={`im-tab ${typeTab === key ? 'active' : ''}`}
             onClick={() => { setTypeTab(key); setStatusTab('all'); }}>
@@ -662,6 +939,8 @@ const InvoiceManager = () => {
           </table>
         </div>
       )}
+
+      </>}
 
       {/* Create/Edit form */}
       {form && (

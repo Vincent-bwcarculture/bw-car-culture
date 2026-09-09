@@ -790,6 +790,150 @@ select.im-input option { background: #1a1a1a; }
   }
 }
 
+/* ── Service Catalog ─────────────────────────────────────── */
+.im-catalog {
+  padding: 0.5rem 0;
+}
+.im-catalog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.im-catalog-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e6edf3;
+  margin: 0 0 0.2rem;
+}
+.im-catalog-sub {
+  font-size: 0.78rem;
+  color: #6e7681;
+  margin: 0;
+}
+.im-catalog-group {
+  margin-bottom: 1.5rem;
+}
+.im-catalog-group-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6e7681;
+  margin: 0 0 0.6rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.im-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
+}
+.im-catalog-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  transition: border-color 0.15s;
+}
+.im-catalog-card:hover { border-color: rgba(255,255,255,0.15); }
+.im-catalog-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+.im-catalog-card-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #e6edf3;
+  margin: 0 0 0.2rem;
+}
+.im-catalog-card-price {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ff6040;
+  margin: 0;
+}
+.im-catalog-card-actions {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+.im-catalog-includes {
+  margin: 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+.im-catalog-includes li {
+  font-size: 0.75rem;
+  color: #8b949e;
+  line-height: 1.5;
+}
+
+/* Include row in edit form */
+.im-include-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+.im-include-row .im-input { flex: 1; }
+
+/* Items section title row */
+.im-items-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.im-catalog-pick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.75rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  color: #8b949e;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.im-catalog-pick-btn:hover {
+  background: rgba(255,51,0,0.08);
+  border-color: rgba(255,51,0,0.3);
+  color: #ff6040;
+}
+
+/* Service Picker */
+.im-picker-row {
+  display: block;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.3rem;
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.07);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  background: rgba(255,255,255,0.02);
+}
+.im-picker-row:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12); }
+.im-picker-row.selected { background: rgba(255,51,0,0.07); border-color: rgba(255,51,0,0.3); }
+.im-picker-row input[type="checkbox"] { display: none; }
+.im-picker-row-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.im-picker-name { font-size: 0.88rem; font-weight: 600; color: #e6edf3; }
+.im-picker-price { font-size: 0.82rem; font-weight: 700; color: #ff6040; flex-shrink: 0; }
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 640px) {
   .im-form-panel { width: 100vw; }
