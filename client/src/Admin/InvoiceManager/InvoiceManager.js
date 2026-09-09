@@ -63,7 +63,7 @@ const ServicesPrintModal = ({ services, onClose }) => {
             <img src="/bcc-logo.png" alt="BW Car Culture" className="im-print-logo" />
             <div className="im-print-doc-type">
               <h1 className="im-print-title">SERVICES & PRICING</h1>
-              <p className="im-print-num">I3w Proprietary Limited</p>
+              <p className="im-print-num">I3w Car Culture</p>
             </div>
           </div>
           <div className="im-print-meta">
@@ -74,7 +74,7 @@ const ServicesPrintModal = ({ services, onClose }) => {
         </div>
 
         <p className="im-svc-print-intro">
-          The following is a summary of services offered by I3w Proprietary Limited (BW Car Culture).
+          The following is a summary of services offered by I3w Car Culture.
           All prices are listed in Botswana Pula (BWP) and exclude VAT unless stated otherwise.
           For custom packages or queries, please contact us directly.
         </p>
@@ -126,7 +126,7 @@ const ServicesPrintModal = ({ services, onClose }) => {
         </div>
 
         <p className="im-print-footer">
-          Thank you for choosing BW Car Culture · I3w Proprietary Limited · +267 74 122 453 · P O Box 1473, Mahalapye, Botswana
+          Thank you for choosing I3w Car Culture · +267 74 122 453 · P O Box 1473, Mahalapye, Botswana
         </p>
       </div>
     </div>
