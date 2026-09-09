@@ -36,9 +36,110 @@ const empty_service = () => ({
 // ─────────────────────────────────────────────────────────────────────────────
 // ServiceCatalog component
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// ServicesPrintModal
+// ─────────────────────────────────────────────────────────────────────────────
+const ServicesPrintModal = ({ services, onClose }) => {
+  const groups = services.reduce((acc, svc) => {
+    const cat = svc.category?.trim() || 'General Services';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(svc);
+    return acc;
+  }, {});
+
+  const today = new Date().toLocaleDateString('en-BW', { year: 'numeric', month: 'long', day: '2-digit' });
+
+  return (
+    <div className="im-print-overlay">
+      <div className="im-print-toolbar no-print">
+        <button className="im-print-close" onClick={onClose}>✕ Close</button>
+        <button className="im-print-btn" onClick={() => window.print()}>🖨 Print / Save PDF</button>
+      </div>
+
+      <div className="im-print-doc">
+        {/* Header */}
+        <div className="im-print-header">
+          <div className="im-print-header-left">
+            <img src="/bcc-logo.png" alt="BW Car Culture" className="im-print-logo" />
+            <div className="im-print-doc-type">
+              <h1 className="im-print-title">SERVICES & PRICING</h1>
+              <p className="im-print-num">I3w Proprietary Limited</p>
+            </div>
+          </div>
+          <div className="im-print-meta">
+            <div><span>Issued</span><strong>{today}</strong></div>
+            <div><span>Contact</span><strong>+267 74 122 453</strong></div>
+            <div><span>Location</span><strong>Mahalapye, Botswana</strong></div>
+          </div>
+        </div>
+
+        <p className="im-svc-print-intro">
+          The following is a summary of services offered by I3w Proprietary Limited (BW Car Culture).
+          All prices are listed in Botswana Pula (BWP) and exclude VAT unless stated otherwise.
+          For custom packages or queries, please contact us directly.
+        </p>
+
+        {/* One table per category */}
+        {Object.entries(groups).map(([cat, svcs]) => (
+          <div key={cat} className="im-svc-print-group">
+            <h2 className="im-svc-print-cat">{cat}</h2>
+            <table className="im-print-items im-svc-table">
+              <thead>
+                <tr>
+                  <th className="desc-col">Service</th>
+                  <th className="im-svc-includes-col">What's Included</th>
+                  <th className="num-col" style={{ width: '120px' }}>Price (BWP)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {svcs.map((svc, i) => (
+                  <tr key={svc.id || i} className={i % 2 === 1 ? 'im-svc-alt-row' : ''}>
+                    <td style={{ fontWeight: 600 }}>{svc.name}</td>
+                    <td className="im-svc-includes-col">
+                      {svc.includes?.filter(s => s.trim()).length > 0 ? (
+                        <ul className="im-svc-print-list">
+                          {svc.includes.filter(s => s.trim()).map((inc, j) => (
+                            <li key={j}>{inc}</li>
+                          ))}
+                        </ul>
+                      ) : '–'}
+                    </td>
+                    <td className="num-col">{formatBWP(svc.unitPrice)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+
+        {/* Payment details */}
+        <div className="im-print-payment" style={{ marginTop: '1.5rem' }}>
+          <p className="im-print-payment-title">Payment Details</p>
+          <div className="im-print-payment-grid">
+            {PAYMENT_DETAILS.map(p => (
+              <div key={p.label} className="im-print-payment-row">
+                <span className="im-print-payment-label">{p.label}</span>
+                <span className="im-print-payment-value">{p.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p className="im-print-footer">
+          Thank you for choosing BW Car Culture · I3w Proprietary Limited · +267 74 122 453 · P O Box 1473, Mahalapye, Botswana
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ServiceCatalog component
+// ─────────────────────────────────────────────────────────────────────────────
 const ServiceCatalog = () => {
   const [services, setServices] = useState(loadServices);
   const [editing, setEditing] = useState(null); // null | service object
+  const [showPrint, setShowPrint] = useState(false);
 
   const persist = (svcs) => { setServices(svcs); saveServices(svcs); };
 
@@ -85,7 +186,12 @@ const ServiceCatalog = () => {
           <h3 className="im-catalog-title">Services Catalog</h3>
           <p className="im-catalog-sub">Define your services and pricing. Use "Add from Catalog" when creating an invoice or quotation.</p>
         </div>
-        <button className="im-btn-primary" onClick={startNew}>+ New Service</button>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {services.length > 0 && (
+            <button className="im-btn-secondary" onClick={() => setShowPrint(true)}>🖨 Export PDF</button>
+          )}
+          <button className="im-btn-primary" onClick={startNew}>+ New Service</button>
+        </div>
       </div>
 
       {services.length === 0 ? (
@@ -170,6 +276,8 @@ const ServiceCatalog = () => {
           </div>
         </div>
       )}
+
+      {showPrint && <ServicesPrintModal services={services} onClose={() => setShowPrint(false)} />}
     </div>
   );
 };

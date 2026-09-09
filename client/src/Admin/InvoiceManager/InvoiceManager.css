@@ -934,6 +934,55 @@ select.im-input option { background: #1a1a1a; }
 .im-picker-name { font-size: 0.88rem; font-weight: 600; color: #e6edf3; }
 .im-picker-price { font-size: 0.82rem; font-weight: 700; color: #ff6040; flex-shrink: 0; }
 
+/* ── Services PDF print styles ───────────────────────────── */
+.im-svc-print-intro {
+  font-size: 0.82rem;
+  color: #555;
+  line-height: 1.6;
+  margin: 0.75rem 0 1.25rem;
+  border-left: 3px solid #e8e8e8;
+  padding-left: 0.85rem;
+}
+.im-svc-print-group {
+  margin-bottom: 1.5rem;
+  page-break-inside: avoid;
+}
+.im-svc-print-cat {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.4rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 2px solid #ff3300;
+  display: inline-block;
+}
+.im-svc-table {
+  width: 100%;
+}
+.im-svc-table th,
+.im-svc-table td {
+  vertical-align: top;
+  padding: 0.55rem 0.7rem;
+}
+.im-svc-includes-col {
+  width: 55%;
+}
+.im-svc-print-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+.im-svc-print-list li {
+  font-size: 0.78rem;
+  color: #444;
+  line-height: 1.5;
+}
+.im-svc-alt-row td {
+  background: #f9f9f9;
+}
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 640px) {
   .im-form-panel { width: 100vw; }
