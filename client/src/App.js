@@ -40,7 +40,6 @@ import EVSection from './components/features/EVSection/EVSection.js';
 import BudgetSearch from './components/features/BudgetSearch/BudgetSearch.js';
 import HomeDealershipsSection from './components/features/HomeDealershipsSection/HomeDealershipsSection.js';
 import VideoSection from './components/features/VideoSection/VideoSection.js';
-import HomeRentalsSection from './components/features/HomeRentalsSection/HomeRentalsSection.js';
 import HomeServicesSection from './components/features/HomeServicesSection/HomeServicesSection.js';
 import StickyCarBar from './components/shared/StickyCarBar/StickyCarBar.js';
 // import CarpoolSection from './components/features/CarpoolSection/CarpoolSection.js'; // hidden until launch
@@ -650,7 +649,6 @@ const HomeContent = () => {
       <CarBrands />
       {/* <CarpoolSection /> */}
       <VideoSection />
-      <HomeRentalsSection />
       <NewsProvider>
         {/* <div className="cover-container">
           <FeaturedNews />
