@@ -8,20 +8,21 @@ const EVSection = () => (
       <div className="premium-banner-mission-row">
         <div className="premium-banner-rule" />
         <p className="premium-banner-mission">
-          Making mobility and vehicle ownership seamless, stress-free, and trustworthy,
-          delivering a premium experience at every step of the journey.
+          The vehicle you want, wherever it is. Purchased with confidence. Delivered with care.
         </p>
         <div className="premium-banner-rule" />
       </div>
 
       <div className="premium-banner-body">
         <p className="premium-banner-tagline">
-          Discover. Buy. Own. Maintain. Move. Sell.
+          DISCOVER. BUY. CUSTOMIZE. MAINTAIN. MOVE. SELL.
         </p>
         <p className="premium-banner-desc">
-          From discovering your next vehicle and finding trusted automotive services to maintaining,
-          selling, renting, and accessing mobility solutions, Bw Car Culture is building a connected
-          digital ecosystem for Botswana's automotive and mobility industry.
+          Bw Car Culture gives you access to a wider choice of vehicles, both locally and around
+          the world, with the trust and exceptional service every vehicle purchase deserves.
+          Choose your vehicle and how you want it. We take care of the entire process, from
+          purchase and customization to delivery and ongoing ownership support, all driven by
+          our commitment to world-class standards in vehicle quality, care and service.
         </p>
       </div>
 
