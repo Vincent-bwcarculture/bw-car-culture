@@ -327,11 +327,11 @@ const VehicleManagement = () => {
         // Refresh submissions to show updated data
         fetchUserSubmissions();
       } else {
-        showMessage('error', result.message || 'Failed to save changes');
+        throw new Error(result.errors?.join('; ') || result.message || 'Failed to save changes');
       }
     } catch (error) {
       console.error('Error saving submission changes:', error);
-      showMessage('error', 'Failed to save changes');
+      throw error;
     } finally {
       setEditLoading(false);
     }
@@ -372,7 +372,7 @@ const VehicleManagement = () => {
 
   // Check if submission can be edited
   const canEditSubmission = (submission) => {
-    const editableStatuses = ['pending_review', 'rejected', 'approved'];
+    const editableStatuses = ['pending_review', 'rejected', 'approved', 'listing_created'];
     return editableStatuses.includes(submission.status);
   };
 
@@ -392,7 +392,7 @@ const VehicleManagement = () => {
       case 'approved':
         return { text: 'Edit (Review Required)', type: 'secondary', tooltip: 'Editing will require new admin review' };
       case 'listing_created':
-        return { text: 'Edit Live Listing', type: 'warning', tooltip: 'Editing will take listing offline for review' };
+        return { text: 'Edit Live Listing', type: 'warning', tooltip: 'Changes will be published after admin review' };
       default:
         return { text: 'Edit', type: 'secondary', tooltip: 'Edit submission' };
     }

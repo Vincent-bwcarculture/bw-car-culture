@@ -40,7 +40,7 @@ const SubmissionEditModal = ({
           type: 'warning',
           icon: AlertCircle,
           title: 'Editing Live Listing',
-          message: 'This listing is currently live. Editing will require admin review before changes go live.'
+          message: 'Your current listing stays live while the updated details are reviewed. Changes appear after approval.'
         };
       case 'approved':
         return {
@@ -118,11 +118,7 @@ const SubmissionEditModal = ({
             onSubmit={handleSubmit}
             onCancel={onClose}
             initialData={submission.listingData}
-            isEditing={true}
-            selectedPlan={submission.listingData?.selectedPlan}
-            selectedAddons={submission.listingData?.selectedAddons}
-            editMode={true}
-            submitButtonText={loading ? 'Saving Changes...' : 'Save Changes'}
+            isEdit={true}
             disabled={loading}
           />
         </div>

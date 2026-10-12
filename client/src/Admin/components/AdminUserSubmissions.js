@@ -1,4 +1,4 @@
-﻿// client/src/Admin/components/AdminUserSubmissions.js
+// client/src/Admin/components/AdminUserSubmissions.js
 // COMPLETE VERSION - With Manual Payment Integration + Tier/Addon Display + Professional Listing Assistance
 
 import React, { useState, useEffect } from 'react';
@@ -13,6 +13,7 @@ import {
 import axios from '../../config/axios.js';
 import AdminManualPaymentApproval from './AdminManualPaymentApproval.js'; // Manual payment approval component
 import './AdminUserSubmissions.css';
+import { SubmissionEditNotice, SubmissionListingStats, PaymentProofPreview, SubmissionBoostProof } from './SubmissionReviewDetails.js';
 
 const AdminUserSubmissions = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -116,28 +117,7 @@ const AdminUserSubmissions = () => {
   // Boost payment approval is handled pre-submission; no post-approval payment flow exists
   const needsPaymentApproval = (_submission) => false;
 
-  // Show boost proof status if the user submitted one
-  const getPaymentStatusDisplay = (submission) => {
-    if (submission.paymentProof?.status === 'approved') {
-      return (
-        <div className="admin-submissions-payment-status approved">
-          <CheckCircle size={14} />
-          <span>Boost Payment Approved</span>
-        </div>
-      );
-    }
-
-    if (submission.paymentProof?.submitted) {
-      return (
-        <div className="admin-submissions-payment-status pending">
-          <Clock size={14} />
-          <span>Boost Proof Submitted - Needs Review</span>
-        </div>
-      );
-    }
-
-    return null;
-  };
+  const getPaymentStatusDisplay = submission => <SubmissionBoostProof submission={submission} />;
 
   useEffect(() => {
     fetchSubmissions();
@@ -319,7 +299,10 @@ const AdminUserSubmissions = () => {
       action: submission.adminReview?.action || 'approve',
       adminNotes: submission.adminReview?.adminNotes || '',
       subscriptionTier: 'free',
-      visibilityScore: 50
+      visibilityScore: submission.listingStats?.listingQuality ?? submission.adminReview?.qualityScore ?? 50,
+      verifyBoostPayment: !!submission.listingData?.featuredBoost?.proofUrl &&
+        submission.paymentProof?.status === 'approved' &&
+        submission.paymentProof.proofUrl === submission.listingData.featuredBoost.proofUrl
     });
 
     // Pre-select primary images from submission's isPrimary flags (using original indices)
@@ -380,6 +363,7 @@ const AdminUserSubmissions = () => {
         subscriptionTier: reviewData.action === 'approve' ? reviewData.subscriptionTier : null,
         visibilityScore: reviewData.action === 'approve' ? reviewData.visibilityScore : 0,
         adminPrimaryIndices: reviewData.action === 'approve' ? adminPrimaryImages : [],
+        verifyBoostPayment: reviewData.action === 'approve' && reviewData.verifyBoostPayment === true,
       };
 
       console.log('📤 Sending review request:', requestData);
@@ -406,6 +390,7 @@ const AdminUserSubmissions = () => {
               ? { 
                   ...sub, 
                   status: response.data.data.status,
+                  listingId: response.data.data.listingId || sub.listingId,
                   adminReview: response.data.data.adminReview || {
                     action: reviewData.action,
                     adminNotes: reviewData.adminNotes,
@@ -437,7 +422,8 @@ const AdminUserSubmissions = () => {
         setShowReviewModal(false);
 
         console.log('✅ Review submitted successfully');
-        showMessage('success', `Submission ${reviewData.action}d successfully!`);
+        showMessage('success', response.data.message || `Submission ${reviewData.action}d successfully!`);
+        fetchSubmissions();
         
       } else {
         throw new Error(response.data.message || 'Failed to submit review');
@@ -811,6 +797,8 @@ const AdminUserSubmissions = () => {
             
             return (
               <div key={submission._id} className={`admin-submissions-card ${needsAssistance ? 'assistance-request' : ''}`}>
+                <SubmissionEditNotice submission={submission} />
+                <SubmissionListingStats submission={submission} />
                 {/* Assistance Request Banner */}
                 {needsAssistance && (
                   <div className="admin-submissions-assistance-banner">
@@ -1055,6 +1043,12 @@ const AdminUserSubmissions = () => {
                       </a>
                     )}
 
+                    {submission.status === 'listing_created' && (
+                      <button className="admin-submissions-rereview-btn" onClick={() => handleReviewSubmission(submission)}>
+                        <Eye size={14} /> Details / Review
+                      </button>
+                    )}
+
                     {submission.status === 'approved' && (
                       <div className="admin-submissions-approved-info">
                         <CheckCircle size={16} />
@@ -1217,6 +1211,8 @@ const AdminUserSubmissions = () => {
 
               {/* ── Specifications ── */}
               <div className="review-detail-section">
+                <SubmissionEditNotice submission={selectedSubmission} showChanges />
+                <SubmissionListingStats submission={selectedSubmission} />
                 <h4 className="review-section-title"><Car size={14} /> Specifications</h4>
                 <div className="review-spec-grid">
                   {[
@@ -1226,12 +1222,12 @@ const AdminUserSubmissions = () => {
                     ['Mileage', selectedSubmission.listingData?.specifications?.mileage ? `${Number(selectedSubmission.listingData.specifications.mileage).toLocaleString()} km` : null],
                     ['Transmission', selectedSubmission.listingData?.specifications?.transmission],
                     ['Fuel Type', selectedSubmission.listingData?.specifications?.fuelType],
-                    ['Engine', selectedSubmission.listingData?.specifications?.engine],
-                    ['Condition', selectedSubmission.listingData?.specifications?.condition],
-                    ['Colour', selectedSubmission.listingData?.specifications?.color || selectedSubmission.listingData?.specifications?.colour],
+                    ['Engine', selectedSubmission.listingData?.specifications?.engineType || selectedSubmission.listingData?.specifications?.engine],
+                    ['Condition', selectedSubmission.listingData?.condition || selectedSubmission.listingData?.specifications?.condition],
+                    ['Colour', selectedSubmission.listingData?.specifications?.exteriorColor || selectedSubmission.listingData?.specifications?.color || selectedSubmission.listingData?.specifications?.colour],
                     ['Body Type', selectedSubmission.listingData?.specifications?.bodyType || selectedSubmission.listingData?.specifications?.category],
-                    ['Doors', selectedSubmission.listingData?.specifications?.doors],
-                    ['Seats', selectedSubmission.listingData?.specifications?.seats],
+                    ['Doors', selectedSubmission.listingData?.specifications?.numberOfDoors ?? selectedSubmission.listingData?.specifications?.doors],
+                    ['Seats', selectedSubmission.listingData?.specifications?.numberOfSeats ?? selectedSubmission.listingData?.specifications?.seats],
                   ].filter(([, v]) => v != null && v !== '').map(([label, value]) => (
                     <div key={label} className="review-spec-item">
                       <span className="review-spec-label">{label}</span>
@@ -1331,9 +1327,13 @@ const AdminUserSubmissions = () => {
                   {selectedSubmission.listingData?.featuredBoost?.proofUrl ? (
                     <div className="review-boost-proof">
                       <p className="review-boost-label">Proof of Payment (BWP 200):</p>
-                      <a href={selectedSubmission.listingData.featuredBoost.proofUrl} target="_blank" rel="noopener noreferrer">
-                        <img src={selectedSubmission.listingData.featuredBoost.proofUrl} alt="Boost payment proof" className="review-boost-img" />
-                      </a>
+                      <PaymentProofPreview url={selectedSubmission.listingData.featuredBoost.proofUrl} />
+                      <label className="review-boost-label">
+                        <input type="checkbox" checked={!!reviewData.verifyBoostPayment}
+                          onChange={event => setReviewData(previous => ({ ...previous, verifyBoostPayment: event.target.checked }))} />
+                        I have checked this proof and verified the boost payment.
+                      </label>
+                      <p>Payment verification is optional for approving the free vehicle listing.</p>
                     </div>
                   ) : (
                     <p className="review-boost-pending">Boost requested — proof of payment not yet uploaded.</p>

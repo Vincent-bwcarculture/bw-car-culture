@@ -18,9 +18,11 @@ class ListingService {
 
   // Get auth headers
   getHeaders(isFormData = false) {
-    const headers = {
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    };
+    const headers = {};
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+      if (token) headers.Authorization = `Bearer ${token}`;
+    } catch (_) { /* Public listing requests can proceed when browser storage is unavailable. */ }
     if (!isFormData) {
       headers['Content-Type'] = 'application/json';
       headers['Cache-Control'] = 'no-cache';
@@ -720,28 +722,32 @@ validateUpdateData(listingData) {
   }
 
   async incrementViewCount(id) {
-    try {
-      const viewedListings = JSON.parse(localStorage.getItem('viewedListings') || '{}');
+    if (!id) return false;
+    const requestKey = `view:${id}`;
+    if (this.pendingRequests[requestKey]) return this.pendingRequests[requestKey];
+    const request = (async () => {
+      const readViews = () => {
+        try {
+          const saved = JSON.parse(localStorage.getItem('viewedListings') || '{}');
+          return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+        } catch (_) { return {}; }
+      };
+      const viewedListings = readViews();
       const now = Date.now();
-      
-      if (viewedListings[id] && (now - viewedListings[id]) < 3600000) {
-        console.log('View already recorded for this listing in the last hour');
+      if (viewedListings[id] && now - viewedListings[id] < 3600000) return false;
+      try {
+        const response = await this.axios.post(`${this.endpoint}/${id}/views`, null, { headers: this.getHeaders() });
+        if (!response.data?.success || !response.data?.data) return false;
+        // A failed request must remain retryable. Storage restrictions must not prevent counting.
+        try { localStorage.setItem('viewedListings', JSON.stringify({ ...readViews(), [id]: now })); } catch (_) {}
+        return true;
+      } catch (error) {
+        console.error(`Error incrementing view count for listing ${id}:`, error);
         return false;
       }
-      
-      viewedListings[id] = now;
-      localStorage.setItem('viewedListings', JSON.stringify(viewedListings));
-      
-      await this.axios.post(`${this.endpoint}/${id}/views`, null, {
-        headers: this.getHeaders()
-      });
-      
-      console.log(`View recorded for listing ${id}`);
-      return true;
-    } catch (error) {
-      console.error(`Error incrementing view count for listing ${id}:`, error);
-      return false;
-    }
+    })();
+    this.pendingRequests[requestKey] = request;
+    try { return await request; } finally { delete this.pendingRequests[requestKey]; }
   }
 
   async updateListingStatus(id, status) {

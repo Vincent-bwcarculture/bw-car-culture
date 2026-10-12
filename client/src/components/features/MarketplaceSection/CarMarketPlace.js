@@ -1,4 +1,4 @@
-﻿// src/components/features/MarketplaceSection/CarMarketPlace.js
+// src/components/features/MarketplaceSection/CarMarketPlace.js
 // COMPLETE VERSION WITH IMPROVED FULLSCREEN & BUTTON LAYOUT
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -637,9 +637,11 @@ const CarMarketplace = () => {
   const recordView = useCallback(async (id) => {
     if (user?.role === 'admin') return;
     try {
-      await listingService.incrementViewCount(id);
-      setViews(prev => prev + 1);
-      trackListingView(id);
+      const recorded = await listingService.incrementViewCount(id);
+      if (recorded) {
+        setViews(prev => prev + 1);
+        trackListingView(id);
+      }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') console.error('Error recording view:', error);
     }

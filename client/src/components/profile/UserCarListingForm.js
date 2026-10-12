@@ -1,10 +1,10 @@
-﻿// client/src/components/profile/UserCarListingForm.js
+// client/src/components/profile/UserCarListingForm.js
 // ABSOLUTELY COMPLETE PRODUCTION VERSION - EVERY SINGLE SECTION INCLUDED
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { imageService } from '../../services/imageService.js';
 import './UserCarListingForm.css';
+import { normalizeSubmissionForm, uploadSubmissionFile, applyProfileToForm } from '../../utils/submissionForm.js';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
 
@@ -12,7 +12,8 @@ const UserCarListingForm = ({
   onSubmit,
   onCancel,
   initialData = null,
-  isEdit = false
+  isEdit = false,
+  disabled = false
 }) => {
 
   // Default form structure - COMPLETE with all fields
@@ -172,7 +173,7 @@ const UserCarListingForm = ({
   };
 
   // All form states
-  const [formData, setFormData] = useState(initialData || defaultFormData);
+  const [formData, setFormData] = useState(() => normalizeSubmissionForm(defaultFormData, initialData || {}));
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [currentTab, setCurrentTab] = useState('basic');
@@ -189,7 +190,12 @@ const UserCarListingForm = ({
   );
 
   // Social media boost (BWP 200)
-  const [wantsBoost, setWantsBoost] = useState(false);
+  const [wantsBoost, setWantsBoost] = useState(!!initialData?.featuredBoost?.requested);
+  const savedBoost = initialData?.featuredBoost;
+  const uploadCache = useRef(new Map());
+  const submitLock = useRef(false);
+  const touchedFields = useRef(new Set());
+  const profileLoadStarted = useRef(false);
   const [boostProofFile, setBoostProofFile] = useState(null);
   const [boostProofPreview, setBoostProofPreview] = useState(null);
   
@@ -293,7 +299,7 @@ const UserCarListingForm = ({
       const url = URL.createObjectURL(file);
       img.onload = () => {
         URL.revokeObjectURL(url);
-        const scale = Math.min(1, MAX_WIDTH / img.width);
+        const scale = Math.min(1, MAX_WIDTH / Math.max(img.width, img.height));
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
@@ -301,6 +307,7 @@ const UserCarListingForm = ({
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         canvas.toBlob(
           (blob) => {
+            if (!blob) { resolve(file); return; }
             const compressed = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
               type: 'image/jpeg',
               lastModified: Date.now()
@@ -371,33 +378,10 @@ const UserCarListingForm = ({
           setAutoFillData(result.data);
           setProfileCompletion(result.data.profileCompletion);
 
-          // Auto-apply contact fields immediately for new forms
           if (!isEdit) {
-            const d = result.data;
-            setFormData(prev => ({
-              ...prev,
-              contact: {
-                ...prev.contact,
-                sellerName: prev.contact.sellerName || d.sellerName || '',
-                phone: prev.contact.phone || d.contact?.phone || '',
-                email: prev.contact.email || d.contact?.email || '',
-                whatsapp: prev.contact.whatsapp || d.contact?.whatsapp || '',
-                location: {
-                  ...prev.contact.location,
-                  city: prev.contact.location.city || d.contact?.location?.city || '',
-                  state: prev.contact.location.state || d.contact?.location?.state || '',
-                  address: prev.contact.location.address || d.contact?.location?.address || '',
-                }
-              },
-              location: {
-                ...prev.location,
-                city: prev.location.city || d.contact?.location?.city || '',
-                state: prev.location.state || d.contact?.location?.state || '',
-                address: prev.location.address || d.contact?.location?.address || '',
-              }
-            }));
+            setFormData(prev => applyProfileToForm(prev, result.data, !touchedFields.current.has('sellerType')));
           }
-          
+
           // Show the prompt so users can opt into filling sellerType, businessInfo, social, etc.
           setShowAutoFillPrompt(true);
 
@@ -416,11 +400,12 @@ const UserCarListingForm = ({
     } finally {
       setAutoFillLoading(false);
     }
-  }, [formData.contact.sellerName, formData.contact.phone, formData.contact.location.city, isEdit]);
+  }, [isEdit]);
 
   // Apply auto-fill data to form
   const applyAutoFill = useCallback((selective = false, fields = []) => {
     if (!autoFillData) return;
+    setShowAutoFillPrompt(false);
 
     const updates = {};
 
@@ -547,8 +532,6 @@ const UserCarListingForm = ({
 
   // Save form data back to profile
   const saveToProfile = useCallback(async () => {
-    if (!autoFillData) return;
-
     try {
       const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       if (!token) return;
@@ -556,10 +539,11 @@ const UserCarListingForm = ({
       const profileUpdateData = {
         contact: {
           phone: formData.contact.phone,
+          whatsapp: formData.contact.whatsapp,
           location: {
-            city: formData.contact.location.city,
-            state: formData.contact.location.state,
-            address: formData.contact.location.address
+            city: formData.location.city || formData.contact.location.city,
+            state: formData.location.state || formData.contact.location.state,
+            address: formData.location.address || formData.contact.location.address
           }
         },
         profilePicture: formData.profilePicture,
@@ -581,11 +565,12 @@ const UserCarListingForm = ({
     } catch (error) {
       console.error('Error updating profile:', error);
     }
-  }, [formData, autoFillData]);
+  }, [formData]);
 
   // Load profile data on component mount
   useEffect(() => {
-    if (!isEdit && !autoFillData) {
+    if (!isEdit && !profileLoadStarted.current) {
+      profileLoadStarted.current = true;
       loadUserProfileData();
     }
   }, [loadUserProfileData, isEdit, autoFillData]);
@@ -596,20 +581,20 @@ const UserCarListingForm = ({
 
     const make = formData.make || formData.specifications?.make;
     const model = formData.model || formData.specifications?.model;
-    const year = formData.year || formData.specifications?.year;
+    const year = Number(formData.year || formData.specifications?.year);
     const price = parseFloat(formData.price);
 
     if (!make?.trim()) errors['specifications.make'] = 'Make is required';
     if (!model?.trim()) errors['specifications.model'] = 'Model is required';
-    if (!year || year < 1900 || year > new Date().getFullYear() + 2) {
+    if (!Number.isInteger(year) || year < 1900 || year > new Date().getFullYear() + 2) {
       errors['specifications.year'] = 'Valid year is required';
     }
-    if (!price || price <= 0) errors.price = 'Asking price is required';
+    if (!Number.isFinite(price) || price <= 0) errors.price = 'Asking price is required';
 
-    if (!formData.title?.trim() || formData.title.length < 10) {
+    if (!formData.title?.trim() || formData.title.trim().length < 10) {
       errors.title = 'Title must be at least 10 characters';
     }
-    if (!formData.description?.trim() || formData.description.length < 10) {
+    if (!formData.description?.trim() || formData.description.trim().length < 10) {
       errors.description = 'Description must be at least 10 characters';
     }
     if (!formData.contact?.phone?.trim()) {
@@ -625,6 +610,7 @@ const UserCarListingForm = ({
   // Handle input changes with enhanced nested property support
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    touchedFields.current.add(name);
     
     if (name.includes('.')) {
       // Handle nested properties
@@ -803,15 +789,10 @@ const removeImage = (index) => {
   setImageFiles(newFiles);
   setImagePreviews(newPreviews);
   
-  // Update primary image index if needed
-  if (primaryImageIndex >= newFiles.length && newFiles.length > 0) {
-    setPrimaryImageIndex(0);
-    console.log(`🔄 Reset primary image to index 0`);
-  } else if (primaryImageIndex === index && newFiles.length > 0) {
-    setPrimaryImageIndex(0);
-    console.log(`🔄 Primary image was removed, set to index 0`);
-  }
-  
+  // Removing an earlier photo shifts the selected primary one place left.
+  if (primaryImageIndex === index) setPrimaryImageIndex(0);
+  else if (primaryImageIndex > index) setPrimaryImageIndex(primaryImageIndex - 1);
+
   console.log(`✅ Image removed. ${newFiles.length} images remaining`);
   
   if (newFiles.length === 0) {
@@ -823,9 +804,9 @@ const removeImage = (index) => {
   const handleBoostProofUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const maxSize = 10 * 1024 * 1024;
+    const maxSize = 4 * 1024 * 1024;
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf'];
-    if (file.size > maxSize) { showMessage('error', 'File too large. Maximum 10MB.'); return; }
+    if (file.size > maxSize) { showMessage('error', 'File too large. Maximum 4MB.'); return; }
     if (!validTypes.includes(file.type.toLowerCase())) { showMessage('error', 'Use PDF, JPEG, or PNG.'); return; }
     setBoostProofFile(file);
     if (file.type === 'application/pdf') {
@@ -848,7 +829,8 @@ const removeImage = (index) => {
 const handleFormSubmit = async (e) => {
   e.preventDefault();
   
-  if (isSubmitting) return;
+  if (submitLock.current || disabled) return;
+  submitLock.current = true;
   
   setLoading(true);
   setIsSubmitting(true);
@@ -873,7 +855,7 @@ const handleFormSubmit = async (e) => {
       return;
     }
 
-    if (wantsBoost && !boostProofFile) {
+    if (wantsBoost && !boostProofFile && !savedBoost?.proofUrl) {
       showMessage('error', 'Please upload your proof of payment on the Promote tab, or click "Cancel Boost" to submit without the boost.');
       setCurrentTab('promote');
       return;
@@ -891,7 +873,7 @@ const handleFormSubmit = async (e) => {
       showMessage('info', `Preparing ${imageFiles.length} image${imageFiles.length > 1 ? 's' : ''}…`);
 
       try {
-        const compressedFiles = await Promise.all(imageFiles.map(f => compressImage(f)));
+        const compressedFiles = await Promise.all(imageFiles.map(f => uploadCache.current.has(f) ? f : compressImage(f)));
         const token = localStorage.getItem('token') || localStorage.getItem('authToken');
         const rawUploaded = [];
 
@@ -900,29 +882,13 @@ const handleFormSubmit = async (e) => {
           showMessage('info', `Uploading image ${idx + 1} of ${compressedFiles.length}…`);
           console.log(`📎 Uploading file ${idx}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
 
-          const fd = new FormData();
-          fd.append('image0', file);
-          fd.append('folder', 'user-listings');
-
-          const res = await fetch(`${API_BASE}/api/user/upload-images`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: fd
-          });
-
-          console.log(`📤 Image ${idx + 1} response: ${res.status}`);
-
-          if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(`Image ${idx + 1} upload failed: ${res.status} - ${errorText}`);
+          const original = imageFiles[idx];
+          let uploaded = uploadCache.current.get(original);
+          if (!uploaded) {
+            uploaded = await uploadSubmissionFile({ apiBase: API_BASE, token, file, folder: 'user-listings' });
+            uploadCache.current.set(original, uploaded);
           }
-
-          const result = await res.json();
-          if (!result.success || !result.images?.[0]) {
-            throw new Error(result.message || `Image ${idx + 1} upload returned no data`);
-          }
-
-          rawUploaded.push(result.images[0]);
+          rawUploaded.push(uploaded);
         }
 
         // Reorder so primary image is first
@@ -954,35 +920,24 @@ const handleFormSubmit = async (e) => {
     // ========================================
     // STEP 1b: Upload boost proof of payment (if provided)
     // ========================================
-    let boostProofUrl = null;
+    let boostProofUrl = savedBoost?.proofUrl || null;
     if (wantsBoost && boostProofFile) {
       showMessage('info', 'Uploading proof of payment...');
-      try {
-        const boostFormData = new FormData();
-        boostFormData.append('image0', boostProofFile);
-        boostFormData.append('folder', 'boost-payment-proofs');
-        const boostRes = await fetch(`${API_BASE}/api/user/upload-images`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('authToken')}` },
-          body: boostFormData
-        });
-        if (boostRes.ok) {
-          const boostResult = await boostRes.json();
-          if (boostResult.success && boostResult.images?.[0]) {
-            boostProofUrl = boostResult.images[0].url;
-          }
-        } else {
-          console.warn('Boost proof upload failed, continuing without it');
-        }
-      } catch (boostErr) {
-        console.warn('Boost proof upload error (non-blocking):', boostErr.message);
+      const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+      let proof = uploadCache.current.get(boostProofFile);
+      if (!proof) {
+        const file = boostProofFile.type.startsWith('image/') ? await compressImage(boostProofFile) : boostProofFile;
+        proof = await uploadSubmissionFile({ apiBase: API_BASE, token, file, folder: 'boost-payment-proofs' });
+        uploadCache.current.set(boostProofFile, proof);
       }
+      boostProofUrl = proof.url;
     }
 
     // ========================================
     // STEP 2: Prepare complete listing data with ALL fields
     // ========================================
     const listingData = {
+      ...(isEdit ? initialData : { selectedPlan: 'free' }),
       // Basic Information
       title: formData.title || '',
       description: formData.description || '',
@@ -1078,6 +1033,7 @@ const handleFormSubmit = async (e) => {
       
       // Business Info (if applicable)
       businessInfo: formData.sellerType === 'dealership' ? {
+        ...formData.businessInfo,
         businessName: formData.businessInfo?.businessName || '',
         businessType: formData.businessInfo?.businessType || '',
         registrationNumber: formData.businessInfo?.registrationNumber || '',
@@ -1114,6 +1070,7 @@ const handleFormSubmit = async (e) => {
       
       // Enhanced Price Options
       priceOptions: {
+        ...formData.priceOptions,
         negotiable: formData.priceOptions?.negotiable || false,
         showSavings: formData.priceOptions?.showSavings || false,
         originalPrice: formData.priceOptions?.originalPrice || '',
@@ -1139,12 +1096,13 @@ const handleFormSubmit = async (e) => {
 
       // Social media boost request
       featuredBoost: wantsBoost ? {
+        ...savedBoost,
         requested: true,
         amount: 200,
         currency: 'BWP',
         proofUrl: boostProofUrl,
-        status: boostProofUrl ? 'pending_verification' : 'awaiting_proof',
-        requestedAt: new Date().toISOString()
+        status: boostProofFile ? 'pending_verification' : (savedBoost?.status || 'pending_verification'),
+        requestedAt: savedBoost?.requestedAt || new Date().toISOString()
       } : null,
 
       // Enhanced image metadata
@@ -1167,6 +1125,12 @@ const handleFormSubmit = async (e) => {
     // ========================================
     // STEP 3: Submit listing to backend
     // ========================================
+    if (isEdit) {
+      if (!onSubmit) throw new Error('Unable to save this submission. Please reopen the form.');
+      await onSubmit(listingData);
+      return;
+    }
+
     showMessage('info', 'Submitting your listing...');
     console.log('🔄 Submitting listing to /api/user/submit-listing...');
     
@@ -1204,14 +1168,15 @@ const handleFormSubmit = async (e) => {
       model: formData.model || formData.specifications?.model || '',
       year: formData.year || formData.specifications?.year || '',
       price: formData.price || '',
-      hasBoost: wantsBoost && !!boostProofFile,
-      callbackData: { ...result, hasBoost: wantsBoost && !!boostProofFile }
+      hasBoost: wantsBoost && !!boostProofUrl,
+      callbackData: { ...result, hasBoost: wantsBoost && !!boostProofUrl }
     });
 
   } catch (error) {
     console.error('❌ Form submission failed:', error);
     showMessage('error', formatSubmitError(error));
   } finally {
+    submitLock.current = false;
     setLoading(false);
     setIsSubmitting(false);
   }
@@ -1226,6 +1191,7 @@ const handleFormSubmit = async (e) => {
       });
     }
     
+    uploadCache.current.clear();
     setImageFiles([]);
     setImagePreviews([]);
     setPrimaryImageIndex(0);
@@ -1238,7 +1204,17 @@ const handleFormSubmit = async (e) => {
     setWantsBoost(false);
 
     // Reset form data to initial state
-    setFormData(defaultFormData);
+    touchedFields.current.clear();
+    // Keep contact details ready for another listing in this same session.
+    const profile = {
+      ...autoFillData,
+      sellerName: formData.contact.sellerName,
+      contact: { ...formData.contact, location: formData.location },
+      sellerType: formData.sellerType, businessInfo: formData.businessInfo,
+      privateSeller: formData.privateSeller, social: formData.social, profilePicture: formData.profilePicture
+    };
+    setAutoFillData(profile);
+    setFormData(applyProfileToForm(defaultFormData, profile));
     
     // Clear errors
     setErrors({});
@@ -1349,8 +1325,8 @@ const handleFormSubmit = async (e) => {
       {showAutoFillPrompt && autoFillData && (
         <div className="ulisting-auto-fill-prompt">
           <div className="ulisting-auto-fill-content">
-            <h4>Speed up your listing!</h4>
-            <p>We found information in your profile that can be used to fill this form:</p>
+            <h4>Your profile details are filled in</h4>
+            <p>Available saved details have been added. You can change them below.</p>
             
             <div className="ulisting-auto-fill-preview">
               {autoFillData.sellerName && (
@@ -1385,21 +1361,21 @@ const handleFormSubmit = async (e) => {
                 className="ulisting-auto-fill-accept"
                 onClick={() => applyAutoFill()}
               >
-                Auto-fill form
+                Fill any remaining fields
               </button>
               <button 
                 type="button"
                 className="ulisting-auto-fill-selective"
                 onClick={() => applyAutoFill(true, ['contact', 'sellerName'])}
               >
-                Fill contact only
+                Fill missing contact details
               </button>
               <button 
                 type="button"
                 className="ulisting-auto-fill-decline"
                 onClick={() => setShowAutoFillPrompt(false)}
               >
-                No thanks
+                Dismiss
               </button>
             </div>
           </div>
@@ -2155,8 +2131,9 @@ const handleFormSubmit = async (e) => {
                 {/* Proof of payment upload */}
                 <div className="ulisting-boost-proof-section">
                   <h5>Upload Proof of Payment *</h5>
-                  <p className="ulisting-form-help">Screenshot or PDF of your payment confirmation. Accepted: JPEG, PNG, PDF (max 10MB).</p>
+                  <p className="ulisting-form-help">Screenshot or PDF of your payment confirmation. Accepted: JPEG, PNG, PDF (max 4MB).</p>
 
+                  {!boostProofPreview && savedBoost?.proofUrl && <p className="ulisting-form-help">Your existing payment proof is saved. Choose a new file only to replace it.</p>}
                   {boostProofPreview ? (
                     <div className="ulisting-proof-preview">
                       {boostProofPreview.type === 'pdf' ? (
@@ -2421,12 +2398,12 @@ const handleFormSubmit = async (e) => {
                 <span className={formData.contact?.phone ? 'complete' : 'incomplete'}>
                   Phone: {formData.contact?.phone || 'Missing'}
                 </span>
-                <span className={imageFiles.length > 0 ? 'complete' : 'incomplete'}>
-                  Photos: {imageFiles.length > 0 ? `${imageFiles.length} selected` : 'None yet'}
+                <span className={imageFiles.length + existingImages.length > 0 ? 'complete' : 'incomplete'}>
+                  Photos: {imageFiles.length > 0 ? `${imageFiles.length} selected` : (existingImages.length ? `${existingImages.length} saved` : 'None yet')}
                 </span>
                 {wantsBoost && (
-                  <span className={boostProofFile ? 'complete' : 'incomplete'}>
-                    Boost proof: {boostProofFile ? 'Uploaded' : 'Missing — go to Promote tab'}
+                  <span className={boostProofFile || savedBoost?.proofUrl ? 'complete' : 'incomplete'}>
+                    Boost proof: {boostProofFile || savedBoost?.proofUrl ? 'Uploaded' : 'Missing — go to Promote tab'}
                   </span>
                 )}
               </div>
@@ -2439,8 +2416,8 @@ const handleFormSubmit = async (e) => {
                 hasMakeModel && !!formData.year,
                 !!formData.price,
                 !!(formData.contact?.sellerName && formData.contact?.phone),
-                imageFiles.length > 0,
-                !!formData.title && formData.title.length >= 5,
+                imageFiles.length + existingImages.length > 0,
+                !!formData.title && formData.title.trim().length >= 10,
                 !!formData.description && formData.description.length >= 10
               ];
               const pct = Math.round((steps.filter(Boolean).length / steps.length) * 100);
@@ -2469,7 +2446,7 @@ const handleFormSubmit = async (e) => {
             <div className="ulisting-boost-reminder ulisting-boost-active">
               <div className="ulisting-boost-reminder-text">
                 <strong>Social Media Boost added</strong>
-                <span>{boostProofFile ? 'Proof of payment uploaded.' : 'Upload proof of payment on the Promote tab, or cancel to submit without boost.'}</span>
+                <span>{boostProofFile || savedBoost?.proofUrl ? 'Proof of payment saved.' : 'Upload proof of payment on the Promote tab, or cancel to submit without boost.'}</span>
               </div>
               <button type="button" className="ulisting-boost-cancel-btn" onClick={() => { setWantsBoost(false); removeBoostProof(); }}>
                 Cancel Boost
@@ -2481,7 +2458,7 @@ const handleFormSubmit = async (e) => {
             <button type="button" className="ulisting-form-cancel-btn" onClick={onCancel} disabled={isSubmitting}>
               My Submissions
             </button>
-            <button type="submit" className="ulisting-form-submit-btn" disabled={loading || isSubmitting}>
+            <button type="submit" className="ulisting-form-submit-btn" disabled={disabled || loading || isSubmitting}>
               {loading ? (
                 <>
                   <div className="ulisting-loading-spinner"></div>

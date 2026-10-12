@@ -34,6 +34,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:submissions": "node scripts/test-submission-flow.cjs",
     "eject": "react-scripts eject"
   },
   "proxy": "http://localhost:5000",

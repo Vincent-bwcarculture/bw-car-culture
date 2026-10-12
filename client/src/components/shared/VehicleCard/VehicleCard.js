@@ -1,4 +1,4 @@
-﻿// src/components/shared/VehicleCard/VehicleCard.js
+// src/components/shared/VehicleCard/VehicleCard.js
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAnalytics } from '../../../hooks/useAnalytics.js';
@@ -804,7 +804,8 @@ const VehicleCard = ({ car, onShare, compact = false }) => {
         if (entry.isIntersecting) {
           visibilityTimer = setTimeout(async () => {
             try {
-              await listingService.incrementViewCount(car._id);
+              const recorded = await listingService.incrementViewCount(car._id);
+              if (!recorded) return;
               analytics.trackListingView(car._id, {
                 title: car.title,
                 price: car.price,
