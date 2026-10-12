@@ -338,7 +338,7 @@ const HeroSection = () => {
 
         {activeTab === 'buy' ? (
           <div className="bcc-hero-buy">
-            <h1>Find your perfect car.</h1>
+            <h1>THE VEHICLE YOU WANT, WHEREVER IT IS. QUALITY YOU CAN TRUST. SERVICE YOU DESERVE.</h1>
             <p>Get the best car ownership experience in Botswana.</p>
             
             <div className="bcc-hero-search-container">
