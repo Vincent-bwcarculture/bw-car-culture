@@ -1,76 +1,51 @@
-// utils/modelCache.js
-// Module-level GLB cache — survives re-renders, cleared only on page refresh.
+// Share one model download across the hero, background preload and later previews.
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export const MODEL_URL = 'https://i3wcarculture-images.s3.amazonaws.com/models/golf_r_configurator.glb';
+let buffer = null;
+let fetching = null;
+const progressListeners = new Set();
 
-let _buffer    = null;   // ArrayBuffer once fetched
-let _fetching  = null;   // in-flight Promise<ArrayBuffer>
-
-/** Kick off a background fetch — safe to call multiple times. */
-export const preloadCarModel = () => {
-  if (_buffer || _fetching) return;
-  _fetching = fetch(MODEL_URL)
-    .then(r => r.arrayBuffer())
-    .then(buf => { _buffer = buf; _fetching = null; })
-    .catch(() => { _fetching = null; });
+const fetchModelBuffer = () => {
+  if (buffer) return Promise.resolve(buffer);
+  if (fetching) return fetching;
+  fetching = fetch(MODEL_URL).then(async response => {
+    if (!response.ok) throw new Error(`Vehicle preview request failed (${response.status})`);
+    if (!response.body?.getReader) {
+      buffer = await response.arrayBuffer();
+      return buffer;
+    }
+    const total = Number(response.headers.get('Content-Length')) || 0;
+    const reader = response.body.getReader();
+    const chunks = [];
+    let loaded = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value); loaded += value.length;
+        if (total) {
+          const progress = { loaded, total, percent: Math.round(loaded / total * 100) };
+          progressListeners.forEach(listener => listener(progress));
+        }
+      }
+    } finally { reader.releaseLock(); }
+    const bytes = new Uint8Array(loaded);
+    let offset = 0;
+    chunks.forEach(chunk => { bytes.set(chunk, offset); offset += chunk.length; });
+    buffer = bytes.buffer;
+    return buffer;
+  }).finally(() => { fetching = null; });
+  return fetching;
 };
 
-/**
- * Load the GLTF, using the in-memory buffer if already cached.
- * @param {function} onProgress  called with { loaded, total, percent }
- * @returns {Promise<GLTF>}
- */
-export const loadCarModel = (onProgress) =>
-  new Promise((resolve, reject) => {
-    const loader = new GLTFLoader();
+export const preloadCarModel = () => { fetchModelBuffer().catch(() => {}); };
 
-    // ── Already cached → parse instantly, no network ──────────────────────
-    if (_buffer) {
-      loader.parse(_buffer, '', resolve, reject);
-      return;
-    }
-
-    // ── Fetch with ReadableStream progress tracking ────────────────────────
-    const doFetch = () =>
-      fetch(MODEL_URL)
-        .then(async res => {
-          const total  = parseInt(res.headers.get('Content-Length') || '0', 10);
-          const reader = res.body.getReader();
-          const chunks = [];
-          let loaded   = 0;
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            chunks.push(value);
-            loaded += value.length;
-            if (onProgress && total) onProgress({ loaded, total, percent: Math.round(loaded / total * 100) });
-          }
-
-          const buf = new Uint8Array(loaded);
-          let offset = 0;
-          for (const chunk of chunks) { buf.set(chunk, offset); offset += chunk.length; }
-          _buffer = buf.buffer;
-          loader.parse(_buffer, '', resolve, reject);
-        })
-        .catch(() => {
-          // Fallback: let Three.js handle it (no progress %)
-          loader.load(
-            MODEL_URL,
-            resolve,
-            e => { if (onProgress && e.total) onProgress({ loaded: e.loaded, total: e.total, percent: Math.round(e.loaded / e.total * 100) }); },
-            reject
-          );
-        });
-
-    // If a fetch is already in flight, wait for it then parse from buffer
-    if (_fetching) {
-      _fetching.then(() => {
-        if (_buffer) loader.parse(_buffer, '', resolve, reject);
-        else doFetch();
-      });
-    } else {
-      doFetch();
-    }
-  });
+export const loadCarModel = async onProgress => {
+  if (onProgress) progressListeners.add(onProgress);
+  try {
+    const bytes = await fetchModelBuffer();
+    // Parse separately so each viewer owns its geometry, materials and disposal lifecycle.
+    return await new Promise((resolve, reject) => new GLTFLoader().parse(bytes, '', resolve, reject));
+  } finally { if (onProgress) progressListeners.delete(onProgress); }
+};

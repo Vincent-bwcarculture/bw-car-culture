@@ -5,7 +5,9 @@ import { useAuth } from '../../../context/AuthContext.js'; // NEW: Added authent
 import { statsService } from '../../../services/statsService.js';
 import { dealerService } from '../../../services/dealerService.js';
 import CarBackground3D from './CarBackground3D.js';
+import HeroJourney, { HERO_COLOURS, HERO_WHEELS, HERO_INTERIORS } from './HeroJourney.js';
 import './HeroSection.css';
+import './HeroShowroom.css';
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -16,6 +18,12 @@ const HeroSection = () => {
   const [loading, setLoading] = useState(false);
   const [showImportDropdown, setShowImportDropdown] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('Select country');
+  const [modelReady, setModelReady] = useState(false);
+  const [paintColour, setPaintColour] = useState(HERO_COLOURS[0].hex);
+  const [tourPlaying, setTourPlaying] = useState(false);
+  const [wheelFinish, setWheelFinish] = useState(HERO_WHEELS[0].hex);
+  const [interiorAccent, setInteriorAccent] = useState(HERO_INTERIORS[0].hex);
+  const [previewPart, setPreviewPart] = useState(null);
 
   const [stats, setStats] = useState({
     carListings: 0,
@@ -42,17 +50,6 @@ const HeroSection = () => {
     { type: 'make', value: 'Toyota', label: 'Toyota' },
     { type: 'make', value: 'Audi', label: 'Audi' }
   ], []);
-
-  // Debounced search function
-  const debouncedSearch = useCallback((query) => {
-    const timeoutId = setTimeout(() => {
-      if (query.trim()) {
-        handleSearch(query);
-      }
-    }, 300);
-    
-    return () => clearTimeout(timeoutId);
-  }, []);
 
   // Fetch website stats with error handling and retry
   useEffect(() => {
@@ -82,23 +79,10 @@ const HeroSection = () => {
   }, []);
 
 
-  // Enhanced search change handler
+  // Keep visitors on the hero while they type; submit with Search or Enter.
   const handleSearchChange = useCallback((e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    
-    if (value.length > 2) {
-      debouncedSearch(value);
-    }
-  }, [debouncedSearch]);
-
-  // Enhanced key press handler
-  const handleKeyPress = useCallback((e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSearch(searchQuery);
-    }
-  }, [searchQuery]);
+    setSearchQuery(e.target.value);
+  }, []);
 
   // Enhanced search handler with better validation
   const handleSearch = useCallback(async (query = searchQuery) => {
@@ -135,6 +119,13 @@ const HeroSection = () => {
       setLoading(false);
     }
   }, [searchQuery, loading, navigate]);
+
+  const handleKeyPress = useCallback((e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
+    }
+  }, [handleSearch]);
 
   // Enhanced quick search handler
   const handleQuickSearch = useCallback((type, value) => {
@@ -252,18 +243,19 @@ const HeroSection = () => {
   ], [stats]);
 
   return (
-    <section className="bcc-hero-section">
+    <section className={`bcc-hero-section bcc-hero-premium${modelReady && activeTab === 'buy' ? ' bcc-hero--showroom' : ''}`}>
       {/* 3D car background — desktop only, fades in when model loads */}
-      <CarBackground3D sellMode={activeTab === 'sell'} />
+      <CarBackground3D sellMode={activeTab === 'sell'} paintColour={paintColour} wheelFinish={wheelFinish} interiorAccent={interiorAccent} previewPart={previewPart} motionEnabled={tourPlaying} onReadyChange={setModelReady} />
 
       {/* Semi-transparent dark layer for content legibility */}
       <div className="bcc-hero-dark-overlay" aria-hidden="true" />
 
       <div className="bcc-hero-content">
+        <div className="bcc-hero-editorial">
         {/* Slogan */}
-        <div className="bcc-hero-slogan" aria-label="All your mobility needs in one place">
+        <div className="bcc-hero-slogan">
           <span className="bcc-hero-slogan-dot" aria-hidden="true" />
-          All your mobility needs in one place
+          THE VEHICLE YOU WANT, WHEREVER IT IS. QUALITY YOU CAN TRUST. SERVICE YOU DESERVE.
           <span className="bcc-hero-slogan-dot" aria-hidden="true" />
         </div>
 
@@ -338,14 +330,14 @@ const HeroSection = () => {
 
         {activeTab === 'buy' ? (
           <div className="bcc-hero-buy">
-            <h1>THE VEHICLE YOU WANT, WHEREVER IT IS. QUALITY YOU CAN TRUST. SERVICE YOU DESERVE.</h1>
-            <p>Get the best car ownership experience in Botswana.</p>
+            <h1>Find your perfect car.</h1>
+            <p>A wider world of vehicles. A personal approach to every detail, from your first choice to the road ahead.</p>
             
             <div className="bcc-hero-search-container">
               <div className="bcc-hero-search-bar">
                 <input 
                   type="text" 
-                  placeholder="Enter make, model, year, or price (e.g., BMW, X5, 2020, P200000)"
+                  placeholder="Search make, model, year or price"
                   className="bcc-hero-search-input"
                   value={searchQuery}
                   onChange={handleSearchChange}
@@ -479,6 +471,10 @@ const HeroSection = () => {
             </>
           </div>
         ) : null}
+        </div>
+        {activeTab === 'buy' && (
+          <HeroJourney modelReady={modelReady} onColourChange={setPaintColour} onWheelChange={setWheelFinish} onInteriorChange={setInteriorAccent} onPreviewPartChange={setPreviewPart} onPlayingChange={setTourPlaying} />
+        )}
       </div>
 
       {/* Featured Dealerships strip — bottom of hero, replaces stats */}

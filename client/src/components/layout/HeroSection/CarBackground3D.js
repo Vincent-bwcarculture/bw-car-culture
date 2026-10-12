@@ -1,327 +1,215 @@
-// CarBackground3D.js — vanilla Three.js background car for the Hero section
-// Mouse follow · Scroll rotation · Door-open animation on sellMode
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { loadCarModel } from '../../../utils/modelCache.js';
 
-const HIDE_KEYWORDS = [
-  'turntable', 'platform', 'ground', 'floor', 'shadow', 'spoon',
-  'highpoly', 'lowpoly',
-  '2262a6d3f82749',
-  'wheel.obj.cleaner.materialmerger.gles',
-];
-const HIDE_OBJECT_RE   = /^object_([2-9]|10)$/i;
-const HIDE_ROOTNODE_RE = /^rootnode\.\d{3,}$/i;
+const HIDE_KEYWORDS = ['turntable', 'platform', 'ground', 'floor', 'shadow', 'spoon',
+  'highpoly', 'lowpoly', '2262a6d3f82749', 'wheel.obj.cleaner.materialmerger.gles'];
+const disposeModel = (model) => {
+  const geometries = new Set(), materials = new Set(), textures = new Set();
+  model.traverse(node => {
+    if (node.geometry) geometries.add(node.geometry);
+    const list = Array.isArray(node.material) ? node.material : [node.material];
+    list.filter(Boolean).forEach(material => {
+      materials.add(material);
+      Object.values(material).forEach(value => { if (value?.isTexture) textures.add(value); });
+    });
+  });
+  textures.forEach(texture => texture.dispose());
+  materials.forEach(material => material.dispose());
+  geometries.forEach(geometry => geometry.dispose());
+};
 
-const PAINT_KEYWORDS     = ['paint', 'body', 'chassis', 'exterior', 'shell', 'car_mat'];
-const NOT_PAINT_KEYWORDS = ['glass', 'chrome', 'wheel', 'tire', 'rubber', 'light',
-                            'lamp', 'interior', 'seat', 'dash', 'leather', 'carpet',
-                            'fabric', 'trim', 'window', 'windshield', 'mirror_glass'];
-const BLUE_PAINT_HEX = 0x1a4fad;
-
-const DOOR_OPEN_ANGLE = Math.PI * 0.30;   // ~54° — feels natural on a hatchback
-
-const CarBackground3D = ({ sellMode = false }) => {
-  const canvasRef  = useRef(null);
+const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled = true, onReadyChange }) => {
+  const canvasRef = useRef(null);
+  const stageRef = useRef(null);
   const [visible, setVisible] = useState(false);
-
-  // Ref so the animation loop always sees the latest value without re-running the effect
-  const sellModeRef = useRef(sellMode);
-  useEffect(() => { sellModeRef.current = sellMode; }, [sellMode]);
+  const [desktop, setDesktop] = useState(false);
+  const settings = useRef({ sellMode, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled, onReadyChange });
+  useEffect(() => { settings.current = { sellMode, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled, onReadyChange }; },
+    [sellMode, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled, onReadyChange]);
 
   useEffect(() => {
-    if (window.innerWidth < 900) return;
+    const media = window.matchMedia('(min-width: 1200px)');
+    const update = () => setDesktop(media.matches && !navigator.connection?.saveData);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-
-    // ── Renderer ──────────────────────────────────────────────────────────
-    const renderer = new THREE.WebGLRenderer({
-      canvas, antialias: true, alpha: true, powerPreference: 'high-performance'
-    });
-    renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  useEffect(() => {
+    if (!desktop) { setVisible(false); settings.current.onReadyChange?.(false); return; }
+    const canvas = canvasRef.current, stage = stageRef.current;
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
+    } catch {
+      settings.current.onReadyChange?.(false);
+      return;
+    }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping      = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
-
-    // ── Scene ─────────────────────────────────────────────────────────────
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
     const scene = new THREE.Scene();
-
-    // ── Camera ────────────────────────────────────────────────────────────
-    const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
-    camera.position.set(4, 1.5, 4);
-    camera.lookAt(0, 0.4, 0);
-
-    // ── Lighting (same as CarViewer) ──────────────────────────────────────
-    scene.add(new THREE.AmbientLight(0xffffff, 1.5));
-    const key = new THREE.DirectionalLight(0xfff5e0, 4);
-    key.position.set(4, 5, 4); key.castShadow = true;
-    key.shadow.mapSize.set(1024, 1024);
-    scene.add(key);
-    const fill = new THREE.DirectionalLight(0xe0eeff, 1.5);
+    const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
+    scene.add(new THREE.AmbientLight(0xffffff, 1.8));
+    const key = new THREE.DirectionalLight(0xfff4e2, 4);
+    key.position.set(4, 5, 4); scene.add(key);
+    const fill = new THREE.DirectionalLight(0xdbe9ff, 2);
     fill.position.set(-5, 3, 3); scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xffffff, 2);
+    const rim = new THREE.DirectionalLight(0xffffff, 3);
     rim.position.set(0, 4, -5); scene.add(rim);
-
-    // ── Car group ─────────────────────────────────────────────────────────
-    const carGroup = new THREE.Group();
-    carGroup.position.set(1.6, 0.3, 0);
-    scene.add(carGroup);
-
-    // ── State ─────────────────────────────────────────────────────────────
-    let modelReady = false;
-    const target  = { rotY: 0, rotX: 0 };
-    const current = { rotY: 0, rotX: 0 };
-    const BASE_Y  = -0.35;
-    let scrollY   = window.scrollY;
-    let animId;
-
-    // Auto-rotation idle tracking
-    let idleTimer = null;
-    let isIdle = false;
-    let autoRotAngle = 0;
-    // rotOffset accumulates so mouse-follow always continues from wherever the car is
-    let rotOffset = 0;
-    const IDLE_DELAY = 5000; // 5s
-    const AUTO_ROT_SPEED = 0.003; // radians per frame
-
-    const resetIdle = () => {
-      if (isIdle) {
-        // Snap rotOffset to current position so mouse-follow starts from here
-        rotOffset = current.rotY;
-        target.rotY = current.rotY;
-      }
-      isIdle = false;
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => {
-        // Capture position so auto-rotation begins smoothly from here
-        autoRotAngle = current.rotY;
-        isIdle = true;
-      }, IDLE_DELAY);
+    const group = new THREE.Group(); scene.add(group);
+    let disposed = false, model = null, ready = false, inView = true, contextLost = false;
+    let frame = null, lastFrame = 0, elapsed = 0, dirty = true;
+    const surfaces = {
+      paint: { materials: new Set(), target: new THREE.Color(), last: null },
+      wheels: { materials: new Set(), target: new THREE.Color(), last: null },
+      interior: { materials: new Set(), target: new THREE.Color(), last: null },
     };
+    const paintNodes = new Set();
+    const doors = [];
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-    // Door nodes discovered after model loads
-    // Each entry: { node, openAngle, closedAngle, currentAngle }
-    const doorEntries = [];
-
-    // Paint mesh tracking for theme-based colour changes
-    const paintMeshes = []; // { mat, originalColor }
-    let themeObserver = null;
-
-    const applyPaintColor = () => {
-      const theme = document.documentElement.getAttribute('data-theme') || 'dark';
-      paintMeshes.forEach(({ mat, originalColor }) => {
-        if (theme === 'light' || theme === 'blue') {
-          mat.color.setHex(BLUE_PAINT_HEX);
-        } else {
-          mat.color.copy(originalColor);
-        }
-        mat.needsUpdate = true;
-      });
-    };
-
-    // ── Load & filter ─────────────────────────────────────────────────────
-    loadCarModel(null)
-      .then(gltf => {
-        const car = gltf.scene;
-
-        const carBox  = new THREE.Box3().setFromObject(car);
-        const carSize = new THREE.Vector3();
-        carBox.getSize(carSize);
-
-        // Pass 1: hide unwanted meshes
-        car.traverse(node => {
-          if (!node.isMesh) return;
-          const nameLower = node.name.toLowerCase();
-          const matName   = (Array.isArray(node.material)
-            ? node.material[0]?.name : node.material?.name) || '';
-          const matLower  = matName.toLowerCase();
-
-          if (
-            HIDE_KEYWORDS.some(k => nameLower.includes(k) || matLower.includes(k)) ||
-            HIDE_OBJECT_RE.test(node.name) ||
-            HIDE_ROOTNODE_RE.test(node.name)
-          ) { node.visible = false; return; }
-
-          const meshBox  = new THREE.Box3().setFromObject(node);
-          const meshSize = new THREE.Vector3();
-          const meshCenter = new THREE.Vector3();
-          meshBox.getSize(meshSize); meshBox.getCenter(meshCenter);
-          if (
-            (meshSize.x > carSize.x * 0.7 || meshSize.z > carSize.z * 0.7) &&
-            meshSize.y < 0.25 && meshCenter.y < 0.15
-          ) { node.visible = false; return; }
-
-          node.castShadow = node.receiveShadow = true;
-        });
-
-        // Pass 2: find door Object3D nodes (the pivot parents, not meshes)
-        // We walk ALL nodes, look for "door" in the name, skip handles/mirrors/trim
-        car.traverse(node => {
-          const n = node.name.toLowerCase();
-          if (
-            n.includes('door') &&
-            !n.includes('handle') &&
-            !n.includes('mirror') &&
-            !n.includes('trim') &&
-            !n.includes('sill') &&
-            !n.includes('glass')   // glass is a child mesh — rotate the parent
-          ) {
-            // Log name so we can see what's found
-            console.log('[3D door candidate]', node.name, node.type);
-
-            // Determine open direction from world X position
-            // Negative X = left side → door swings in -Y rotation (opens to the left)
-            // Positive X = right side → door swings in +Y rotation (opens to the right)
-            const worldPos = new THREE.Vector3();
-            node.getWorldPosition(worldPos);
-
-            const isLeftSide = worldPos.x <= 0;
-            // Most Golf R GLTFs have doors with Y as the hinge axis
-            // Adjust sign based on which side the door is on
-            const openAngle = isLeftSide ? -DOOR_OPEN_ANGLE : DOOR_OPEN_ANGLE;
-
-            doorEntries.push({
-              node,
-              openAngle,
-              closedAngle: node.rotation.y,   // whatever the model's rest pose is
-              axisKey: 'y',                   // which rotation axis the hinge is
-            });
-          }
-        });
-
-        console.log('[3D] total door entries found:', doorEntries.length);
-
-        // Pass 3: collect paint meshes for theme-based colour
-        car.traverse(node => {
-          if (!node.isMesh) return;
-          const matName = (Array.isArray(node.material)
-            ? node.material[0]?.name : node.material?.name) || '';
-          const combined = (node.name + ' ' + matName).toLowerCase();
-          if (
-            NOT_PAINT_KEYWORDS.some(k => combined.includes(k))
-          ) return;
-          if (PAINT_KEYWORDS.some(k => combined.includes(k))) {
-            const mat = Array.isArray(node.material) ? node.material[0] : node.material;
-            if (mat?.color) {
-              paintMeshes.push({ mat, originalColor: mat.color.clone() });
-            }
-          }
-        });
-
-        applyPaintColor(); // apply immediately based on current theme
-
-        themeObserver = new MutationObserver(applyPaintColor);
-        themeObserver.observe(document.documentElement, {
-          attributes: true, attributeFilter: ['data-theme'],
-        });
-
-        carGroup.add(car);
-        modelReady = true;
-        carGroup.rotation.y = BASE_Y;
-        setVisible(true);
-      })
-      .catch(() => {});
-
-    // ── Events ────────────────────────────────────────────────────────────
-    const onMouseMove = e => {
-      resetIdle();
-      const nx = (e.clientX / window.innerWidth)  * 2 - 1;
-      const ny = (e.clientY / window.innerHeight) * 2 - 1;
-      // rotOffset carries any accumulated auto-rotation so there's no jump
-      target.rotY = rotOffset + nx * 0.52;
-      target.rotX = ny * -0.10;
-    };
-    const onScroll = () => { scrollY = window.scrollY; resetIdle(); };
-    const onResize = () => {
-      const nW = window.innerWidth, nH = window.innerHeight;
-      camera.aspect = nW / nH;
+    const resize = () => {
+      const { width, height } = stage.getBoundingClientRect();
+      if (!width || !height) return;
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
       camera.updateProjectionMatrix();
-      renderer.setSize(nW, nH);
+      // The car is normalized to four units; keep it inside its own stage at every aspect ratio.
+      const distance = 7.4 / Math.min(1, camera.aspect / 1.35);
+      camera.position.set(distance * 0.68, distance * 0.28, distance * 0.68);
+      camera.lookAt(0, 0, 0);
+      dirty = true;
     };
-    window.addEventListener('mousemove', onMouseMove, { passive: true });
-    window.addEventListener('scroll',    onScroll,    { passive: true });
-    window.addEventListener('resize',    onResize);
+    const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(stage); resize();
 
-    // Start idle countdown immediately on mount
-    resetIdle();
-
-    // ── Render loop ───────────────────────────────────────────────────────
-    const lerp = (a, b, t) => a + (b - a) * t;
-
-    const animate = () => {
-      animId = requestAnimationFrame(animate);
-
-      if (modelReady) {
-        if (isIdle) {
-          // Slow auto-rotation — smoothly drift autoRotAngle and lerp current toward it
-          autoRotAngle += AUTO_ROT_SPEED;
-          current.rotY = lerp(current.rotY, autoRotAngle, 0.012);
-          current.rotX = lerp(current.rotX, 0, 0.02);
-        } else {
-          // Mouse follow
-          current.rotY = lerp(current.rotY, target.rotY, 0.04);
-          current.rotX = lerp(current.rotX, target.rotX, 0.04);
+    const animate = (now = 0) => {
+      frame = requestAnimationFrame(animate);
+      if (now - lastFrame < 1000 / 30) return;
+      const delta = Math.min((now - lastFrame) / 1000, 0.25); lastFrame = now;
+      if (!ready) return;
+      const { paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled: motion, sellMode: selling } = settings.current;
+      const moving = motion && !reducedMotion.matches;
+      let changing = false;
+      const colours = { paint: paintColour || '#164b98', wheels: wheelFinish || '#434851', interior: interiorAccent || '#164b98' };
+      Object.entries(surfaces).forEach(([part, surface]) => {
+        if (colours[part] !== surface.last) {
+          surface.target.set(colours[part]); surface.last = colours[part]; dirty = true;
         }
-
-        carGroup.rotation.y = BASE_Y + current.rotY + scrollY * 0.0012;
-        carGroup.rotation.x = current.rotX;
-        camera.position.y   = lerp(camera.position.y, 1.5 + scrollY * 0.0005, 0.06);
-
-        // Door animation
-        const selling = sellModeRef.current;
-        doorEntries.forEach(entry => {
-          const targetAngle = selling ? entry.openAngle : entry.closedAngle;
-          entry.node.rotation[entry.axisKey] = lerp(
-            entry.node.rotation[entry.axisKey],
-            targetAngle,
-            0.04    // same easing as mouse follow → smooth 1–2s open/close
-          );
+        surface.materials.forEach(material => {
+          if (material.color.equals(surface.target)) return;
+          const difference = Math.abs(material.color.r - surface.target.r) + Math.abs(material.color.g - surface.target.g) + Math.abs(material.color.b - surface.target.b);
+          if (reducedMotion.matches || difference < 0.001) material.color.copy(surface.target);
+          else { material.color.lerp(surface.target, 1 - Math.exp(-delta * 4)); changing = true; }
+          dirty = true;
         });
+      });
+      if (moving) elapsed += delta;
+      const baseRotation = previewPart === 'wheels' ? -1.1 : -0.35;
+      const targetRotation = baseRotation + (moving ? Math.sin(elapsed * 0.18) * 0.18 : 0);
+      if (Math.abs(group.rotation.y - targetRotation) > .001) {
+        group.rotation.y = reducedMotion.matches ? targetRotation : THREE.MathUtils.lerp(group.rotation.y, targetRotation, 1 - Math.exp(-delta * 2));
+        dirty = true;
       }
-
-      renderer.render(scene, camera);
+      doors.forEach(({ node, closed, open, front }) => {
+        const target = selling || (previewPart === 'interior' && front) ? open : closed;
+        if (Math.abs(node.rotation.y - target) > 0.001) {
+          node.rotation.y = reducedMotion.matches ? target : THREE.MathUtils.lerp(node.rotation.y, target, 1 - Math.exp(-delta * 3));
+          dirty = true;
+        }
+      });
+      if (dirty || changing) { renderer.render(scene, camera); dirty = false; }
     };
-
-    animate();
-
-    // ── WebGL context loss ────────────────────────────────────────────────
-    const onContextLost = (e) => {
-      e.preventDefault();           // allow restore attempt
-      cancelAnimationFrame(animId);
+    const updateLoop = () => {
+      if (frame !== null) cancelAnimationFrame(frame);
+      frame = null;
+      if (!disposed && inView && !document.hidden && !contextLost) {
+        lastFrame = performance.now(); frame = requestAnimationFrame(animate);
+      }
+    };
+    const observer = new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; updateLoop(); });
+    observer.observe(stage);
+    document.addEventListener('visibilitychange', updateLoop);
+    const onPreference = () => { dirty = true; };
+    reducedMotion.addEventListener('change', onPreference);
+    const onContextLost = event => {
+      event.preventDefault(); contextLost = true; setVisible(false);
+      settings.current.onReadyChange?.(false); updateLoop();
     };
     const onContextRestored = () => {
-      animate();                    // restart the loop on restore
+      contextLost = false; dirty = true; setVisible(ready);
+      settings.current.onReadyChange?.(ready); updateLoop();
     };
-    canvas.addEventListener('webglcontextlost',     onContextLost,     false);
-    canvas.addEventListener('webglcontextrestored', onContextRestored, false);
+    canvas.addEventListener('webglcontextlost', onContextLost);
+    canvas.addEventListener('webglcontextrestored', onContextRestored);
 
-    // ── Cleanup ───────────────────────────────────────────────────────────
+    loadCarModel(null).then(gltf => {
+      if (disposed) { disposeModel(gltf.scene); return; }
+      model = gltf.scene;
+      model.traverse(node => {
+        if (!node.isMesh) return;
+        const materials = Array.isArray(node.material) ? node.material : [node.material];
+        const names = [node.name, ...materials.map(material => material?.name || '')].join(' ').toLowerCase();
+        if (HIDE_KEYWORDS.some(word => names.includes(word)) || /^object_([2-9]|10)$/i.test(node.name) || /^rootnode\.\d{3,}$/i.test(node.name)) {
+          node.visible = false; return;
+        }
+        materials.forEach(material => {
+          // Use the dedicated paint material, never broad mesh names such as "body".
+          if (material?.color && /paint/i.test(material.name)) { surfaces.paint.materials.add(material); paintNodes.add(node); }
+          if (material?.color && material.name === 'MAT_Rim') surfaces.wheels.materials.add(material);
+          if (material?.color && material.name === 'leather_color') surfaces.interior.materials.add(material);
+        });
+      });
+      const bounds = new THREE.Box3();
+      model.updateMatrixWorld(true);
+      // Frame the vehicle body, excluding unused scenery still present in the source GLB.
+      if (paintNodes.size) paintNodes.forEach(node => bounds.expandByObject(node));
+      else model.traverseVisible(node => { if (node.isMesh) bounds.expandByObject(node); });
+      const size = bounds.getSize(new THREE.Vector3());
+      const centre = bounds.getCenter(new THREE.Vector3());
+      if (bounds.isEmpty() || !Number.isFinite(size.length()) || size.length() === 0) throw new Error('Vehicle bounds unavailable');
+      const pivot = new THREE.Group(); pivot.add(model); pivot.position.copy(centre).negate();
+      group.add(pivot); group.scale.setScalar(4 / Math.max(size.x, size.y, size.z));
+      group.rotation.y = -0.35;
+      model.traverse(node => {
+        const match = /^Pivot_(FL|FR|RL|RR)$/i.exec(node.name);
+        if (!match) return;
+        const side = match[1].endsWith('L') ? -1 : 1;
+        doors.push({ node, closed: node.rotation.y, open: node.rotation.y + side * Math.PI * 0.3, front: match[1].startsWith('F') });
+      });
+      surfaces.paint.materials.forEach(material => material.color.set(settings.current.paintColour || '#164b98'));
+      ready = true; dirty = true;
+      // Reveal the layout only after a frame can actually be displayed.
+      renderer.render(scene, camera);
+      setVisible(!contextLost); settings.current.onReadyChange?.(!contextLost);
+    }).catch(error => {
+      if (!disposed) {
+        console.warn('Hero vehicle preview unavailable:', error.message);
+        settings.current.onReadyChange?.(false);
+      }
+    });
+    updateLoop();
+
     return () => {
-      if (themeObserver) themeObserver.disconnect();
-      clearTimeout(idleTimer);
-      cancelAnimationFrame(animId);
-      canvas.removeEventListener('webglcontextlost',     onContextLost);
+      disposed = true; settings.current.onReadyChange?.(false);
+      if (frame !== null) cancelAnimationFrame(frame);
+      resizeObserver.disconnect(); observer.disconnect();
+      document.removeEventListener('visibilitychange', updateLoop);
+      reducedMotion.removeEventListener('change', onPreference);
+      canvas.removeEventListener('webglcontextlost', onContextLost);
       canvas.removeEventListener('webglcontextrestored', onContextRestored);
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('scroll',    onScroll);
-      window.removeEventListener('resize',    onResize);
+      if (model) disposeModel(model);
       renderer.dispose();
     };
-  }, []);   // intentionally empty — sellModeRef keeps it in sync
+  }, [desktop]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={`hero-3d-canvas${visible ? ' hero-3d-canvas--on' : ''}`}
-      aria-hidden="true"
-    />
+    <div ref={stageRef} className={`bcc-hero-model-stage${visible ? ' is-ready' : ''}`} aria-hidden="true">
+      <canvas ref={canvasRef} className={`hero-3d-canvas${visible ? ' hero-3d-canvas--on' : ''}`} />
+      {visible && !sellMode && <div className="bcc-hero-model-caption">A vision of what’s possible <span>Explore your own expression.</span></div>}
+    </div>
   );
 };
 
