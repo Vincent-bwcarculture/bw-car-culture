@@ -5,39 +5,9 @@ import { http } from '../../../config/axios.js';
 import BusinessCard from '../../shared/BusinessCard/BusinessCard.js';
 import './HomeServicesSection.css';
 
-// Service categories for filtering
-const SERVICE_CATEGORIES = [
-  {
-    id: 'all',
-    name: 'All Service Providers',
-    icon: '',
-    providerType: null
-  },
-  {
-    id: 'workshops',
-    name: 'Workshops',
-    icon: '',
-    providerType: 'workshop'
-  },
-  {
-    id: 'car-rentals',
-    name: 'Car Rentals',
-    icon: '',
-    providerType: 'car_rental'
-  },
-  {
-    id: 'transport',
-    name: 'Transport',
-    icon: '',
-    providerType: 'public_transport'
-  }
-];
-
 const HomeServicesSection = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [activeSlide, setActiveSlide] = useState(0);
@@ -48,23 +18,18 @@ const HomeServicesSection = () => {
   const SERVICES_PER_PAGE = 10;
 
   useEffect(() => {
+    let cancelled = false;
     const fetchServices = async () => {
       try {
         setLoading(true);
-        setError(null);
 
-        // Build filters based on selected category
+        // Only active workshops belong on the homepage.
         const filters = {
           status: 'active',
+          providerType: 'workshop',
           limit: SERVICES_PER_PAGE,
           page: currentPage
         };
-
-        // Add provider type filter if not 'all'
-        const categoryData = SERVICE_CATEGORIES.find(cat => cat.id === selectedCategory);
-        if (categoryData && categoryData.providerType) {
-          filters.providerType = categoryData.providerType;
-        }
 
         console.log('Fetching services with filters:', filters);
 
@@ -82,20 +47,22 @@ const HomeServicesSection = () => {
             });
 
             const response = await http.get(`${endpoint}?${queryParams.toString()}`);
-            
+
+            if (cancelled) return;
             if (response.data && response.data.success) {
-              const providers = response.data.data || [];
+              const providers = (Array.isArray(response.data.data) ? response.data.data : [])
+                .filter(provider => provider.providerType === 'workshop' && provider.status === 'active');
               console.log(`Successfully fetched ${providers.length} service providers from ${endpoint}`);
-              
+
               setServices(providers);
-              
+
               // Calculate total pages
               const pagination = response.data.pagination || {
                 currentPage: currentPage,
                 totalPages: Math.ceil(providers.length / SERVICES_PER_PAGE),
                 total: providers.length
               };
-              
+
               setTotalPages(pagination.totalPages || 1);
               success = true;
               break;
@@ -106,30 +73,25 @@ const HomeServicesSection = () => {
           }
         }
 
-        if (!success) {
+        if (!success && !cancelled) {
           console.warn('All service provider endpoints failed, setting empty results');
           setServices([]);
           setTotalPages(1);
         }
       } catch (error) {
         console.error('Error fetching services:', error);
-        setError('Unable to load services');
-        setServices([]);
+        if (!cancelled) setServices([]);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchServices();
-  }, [currentPage, selectedCategory]);
+    return () => { cancelled = true; };
+  }, [currentPage]);
 
   const handleViewAllServices = () => {
-    // Navigate to services page with current category filter
-    if (selectedCategory === 'all') {
-      navigate('/services');
-    } else {
-      navigate(`/services?category=${selectedCategory}`);
-    }
+    navigate('/services?category=workshops');
   };
 
   const handleServiceAction = (service) => {
@@ -137,16 +99,10 @@ const HomeServicesSection = () => {
       console.error('Cannot navigate: service has no ID', service);
       return;
     }
-    
+
     const serviceType = service.providerType || 'service';
     const typeParam = `?type=${serviceType}`;
     navigate(`/services/${service._id}${typeParam}`);
-  };
-
-  const handleCategoryChange = (categoryId) => {
-    setSelectedCategory(categoryId);
-    setCurrentPage(1); // Reset to first page when changing category
-    setActiveSlide(0); // Reset active slide
   };
 
   const handleNextPage = () => {
@@ -168,7 +124,7 @@ const HomeServicesSection = () => {
     if (carouselRef.current) {
       const cardWidth = carouselRef.current.querySelector('.bcc-business-card')?.offsetWidth;
       const gap = 20; // Approximate gap between items
-      
+
       if (cardWidth) {
         const newActiveSlide = activeSlide + 1;
         if (newActiveSlide < services.length) {
@@ -189,7 +145,7 @@ const HomeServicesSection = () => {
     if (carouselRef.current) {
       const cardWidth = carouselRef.current.querySelector('.bcc-business-card')?.offsetWidth;
       const gap = 20; // Approximate gap between items
-      
+
       if (cardWidth) {
         const newActiveSlide = activeSlide - 1;
         if (newActiveSlide >= 0) {
@@ -206,17 +162,14 @@ const HomeServicesSection = () => {
     }
   };
 
-  // Always show the section structure, handle empty states within
-  const showLoadingState = loading && services.length === 0;
-  const showErrorState = error && services.length === 0 && !loading;
-  const showEmptyState = services.length === 0 && !loading && !error;
-  const selectedCategoryData = SERVICE_CATEGORIES.find(cat => cat.id === selectedCategory) || SERVICE_CATEGORIES[0];
+  // Keep the homepage clear until real workshops have loaded.
+  if (services.length === 0) return null;
 
   return (
     <section className="home-services-section">
       <div className="home-services-header">
-        <h2>Professional Service Providers</h2>
-        <button 
+        <h2>Service Workshops</h2>
+        <button
           className="home-services-view-all"
           onClick={handleViewAllServices}
         >
@@ -224,111 +177,74 @@ const HomeServicesSection = () => {
         </button>
       </div>
 
-      {/* Service Categories - Always show */}
-      <div className="home-services-categories">
-        {SERVICE_CATEGORIES.map(category => (
-          <button
-            key={category.id}
-            className={`home-services-category-button ${selectedCategory === category.id ? 'active' : ''}`}
-            onClick={() => handleCategoryChange(category.id)}
-          >
-            <span className="home-services-category-icon">{category.icon}</span>
-            {category.name}
-          </button>
-        ))}
+      <div className="home-services-carousel-container">
+        {/* Carousel navigation buttons */}
+        <button
+          className={`carousel-nav carousel-prev ${activeSlide === 0 && currentPage === 1 ? 'disabled' : ''}`}
+          onClick={scrollToPrev}
+          disabled={activeSlide === 0 && currentPage === 1}
+          aria-label="Previous service"
+        >
+          &#10094;
+        </button>
+
+        <div className="home-services-carousel" ref={carouselRef}>
+          {services.map((service, index) => (
+            <div
+              key={service._id}
+              className={`carousel-item ${activeSlide === index ? 'active' : ''}`}
+            >
+              <BusinessCard
+                business={service}
+                onAction={handleServiceAction}
+                compact={false}
+              />
+            </div>
+          ))}
+
+          {loading && (
+            <div className="carousel-item carousel-loader">
+              <div className="home-services-spinner"></div>
+            </div>
+          )}
+        </div>
+
+        <button
+          className={`carousel-nav carousel-next ${activeSlide === services.length - 1 && currentPage === totalPages ? 'disabled' : ''}`}
+          onClick={scrollToNext}
+          disabled={activeSlide === services.length - 1 && currentPage === totalPages}
+          aria-label="Next service"
+        >
+          &#10095;
+        </button>
       </div>
 
-      {/* Conditional Content */}
-      {showLoadingState ? (
-        <div className="home-services-loading">
-          <div className="home-services-spinner"></div>
-        </div>
-      ) : showErrorState ? (
-        <div className="home-services-empty">
-          <h3>Unable to load service providers</h3>
-          <p>Please try again later or check your connection.</p>
-        </div>
-      ) : showEmptyState ? (
-        <div className="home-services-empty">
-          <h3>No {selectedCategoryData.name.toLowerCase()} available</h3>
-          <p>
-            {selectedCategory === 'all' 
-              ? 'No service providers are currently available.' 
-              : `No ${selectedCategoryData.name.toLowerCase()} providers found. Try selecting a different category.`}
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className="home-services-carousel-container">
-            {/* Carousel navigation buttons */}
-            <button 
-              className={`carousel-nav carousel-prev ${activeSlide === 0 && currentPage === 1 ? 'disabled' : ''}`}
-              onClick={scrollToPrev}
-              disabled={activeSlide === 0 && currentPage === 1}
-              aria-label="Previous service"
+      {/* Pagination indicators */}
+      <div className="carousel-pagination">
+        <span className="pagination-info">
+          Workshops - Page {currentPage} of {totalPages}
+        </span>
+        <div className="pagination-dots">
+          {services.map((_, index) => (
+            <span
+              key={index}
+              className={`pagination-dot ${activeSlide === index ? 'active' : ''}`}
+              onClick={() => {
+                if (carouselRef.current) {
+                  const cardWidth = carouselRef.current.querySelector('.bcc-business-card')?.offsetWidth;
+                  const gap = 20;
+                  setActiveSlide(index);
+                  carouselRef.current.scrollTo({
+                    left: index * (cardWidth + gap),
+                    behavior: 'smooth'
+                  });
+                }
+              }}
             >
-              &#10094;
-            </button>
-
-            <div className="home-services-carousel" ref={carouselRef}>
-              {services.map((service, index) => (
-                <div 
-                  key={service._id} 
-                  className={`carousel-item ${activeSlide === index ? 'active' : ''}`}
-                >
-                  <BusinessCard 
-                    business={service}
-                    onAction={handleServiceAction}
-                    compact={false}
-                  />
-                </div>
-              ))}
-              
-              {loading && (
-                <div className="carousel-item carousel-loader">
-                  <div className="home-services-spinner"></div>
-                </div>
-              )}
-            </div>
-
-            <button 
-              className={`carousel-nav carousel-next ${activeSlide === services.length - 1 && currentPage === totalPages ? 'disabled' : ''}`}
-              onClick={scrollToNext}
-              disabled={activeSlide === services.length - 1 && currentPage === totalPages}
-              aria-label="Next service"
-            >
-              &#10095;
-            </button>
-          </div>
-
-          {/* Pagination indicators */}
-          <div className="carousel-pagination">
-            <span className="pagination-info">
-              {selectedCategoryData.name} - Page {currentPage} of {totalPages}
             </span>
-            <div className="pagination-dots">
-              {services.map((_, index) => (
-                <span 
-                  key={index} 
-                  className={`pagination-dot ${activeSlide === index ? 'active' : ''}`}
-                  onClick={() => {
-                    if (carouselRef.current) {
-                      const cardWidth = carouselRef.current.querySelector('.bcc-business-card')?.offsetWidth;
-                      const gap = 20;
-                      setActiveSlide(index);
-                      carouselRef.current.scrollTo({
-                        left: index * (cardWidth + gap),
-                        behavior: 'smooth'
-                      });
-                    }
-                  }}
-                >
-                </span>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
+          ))}
+        </div>
+      </div>
     </section>
   );
 };

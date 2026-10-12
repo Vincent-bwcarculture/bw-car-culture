@@ -17,18 +17,10 @@ const HeroSection = () => {
   const [showImportDropdown, setShowImportDropdown] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('Select country');
 
-  // Transport form state
-  const [transportForm, setTransportForm] = useState({ from: '', to: '', date: '', time: '' });
-
-  // Rentals form state
-  const [rentalsForm, setRentalsForm] = useState({
-    location: '', date: '', time: '', vehicleType: '', budget: ''
-  });
   const [stats, setStats] = useState({
     carListings: 0,
     happyCustomers: 0,
-    verifiedDealers: 0,
-    transportProviders: 0
+    verifiedDealers: 0
   });
   const [statsLoading, setStatsLoading] = useState(true);
   
@@ -165,29 +157,6 @@ const HeroSection = () => {
     setActiveTab(tab);
   }, []);
 
-  // Submit transport form → navigate with query params
-  const handleTransportSubmit = useCallback((e) => {
-    e.preventDefault();
-    const params = new URLSearchParams({ category: 'transport' });
-    if (transportForm.from.trim()) params.set('from', transportForm.from.trim());
-    if (transportForm.to.trim()) params.set('to', transportForm.to.trim());
-    if (transportForm.date) params.set('date', transportForm.date);
-    if (transportForm.time) params.set('time', transportForm.time);
-    navigate(`/services?${params.toString()}`);
-  }, [transportForm, navigate]);
-
-  // Submit rentals form → navigate with query params
-  const handleRentalsSubmit = useCallback((e) => {
-    e.preventDefault();
-    const params = new URLSearchParams({ category: 'car-rentals' });
-    if (rentalsForm.location.trim()) params.set('location', rentalsForm.location.trim());
-    if (rentalsForm.date) params.set('date', rentalsForm.date);
-    if (rentalsForm.time) params.set('time', rentalsForm.time);
-    if (rentalsForm.vehicleType) params.set('vehicleType', rentalsForm.vehicleType);
-    if (rentalsForm.budget) params.set('maxBudget', rentalsForm.budget);
-    navigate(`/services?${params.toString()}`);
-  }, [rentalsForm, navigate]);
-
   // UPDATED: Car listing redirect with authentication check
   const handleWhatsAppClick = useCallback(() => {
     try {
@@ -279,12 +248,7 @@ const HeroSection = () => {
       label: 'Happy Customers',
       suffix: '+'
     },
-    {
-      key: 'transportProviders',
-      value: stats.transportProviders,
-      label: 'Transport Providers',
-      suffix: '+'
-    }
+
   ], [stats]);
 
   return (
@@ -320,22 +284,7 @@ const HeroSection = () => {
           >
             Sell my car
           </button>
-          <button
-            className={`bcc-hero-tab-button ${activeTab === 'rentals' ? 'active' : ''}`}
-            onClick={() => handleTabClick('rentals')}
-            disabled={loading}
-            aria-pressed={activeTab === 'rentals'}
-          >
-            Car Rentals
-          </button>
-          <button
-            className={`bcc-hero-tab-button ${activeTab === 'transport' ? 'active' : ''}`}
-            onClick={() => handleTabClick('transport')}
-            disabled={loading}
-            aria-pressed={activeTab === 'transport'}
-          >
-            Public Transport
-          </button>
+
         </div>
 
         {/* Import Vehicles Button — only on Buy tab */}
@@ -529,152 +478,6 @@ const HeroSection = () => {
               </div>
             </>
           </div>
-        ) : activeTab === 'transport' ? (
-          <div className="bcc-hero-quickform">
-            <h1>Plan your trip.</h1>
-            <p>Tell us where you are headed and we will find the best routes and transport for you.</p>
-            <form className="bcc-hero-quickform-fields" onSubmit={handleTransportSubmit}>
-              <div className="bcc-hero-quickform-row">
-                <div className="bcc-hero-quickform-field">
-                  <label htmlFor="transport-from">From</label>
-                  <input
-                    id="transport-from"
-                    type="text"
-                    placeholder="e.g. Gaborone CBD"
-                    value={transportForm.from}
-                    onChange={e => setTransportForm(f => ({ ...f, from: e.target.value }))}
-                  />
-                </div>
-                <div className="bcc-hero-quickform-arrow">→</div>
-                <div className="bcc-hero-quickform-field">
-                  <label htmlFor="transport-to">To</label>
-                  <input
-                    id="transport-to"
-                    type="text"
-                    placeholder="e.g. Francistown"
-                    value={transportForm.to}
-                    onChange={e => setTransportForm(f => ({ ...f, to: e.target.value }))}
-                  />
-                </div>
-              </div>
-              <div className="bcc-hero-quickform-row">
-                <div className="bcc-hero-quickform-field">
-                  <label htmlFor="transport-date">Date</label>
-                  <input
-                    id="transport-date"
-                    type="date"
-                    min={new Date().toISOString().split('T')[0]}
-                    value={transportForm.date}
-                    onChange={e => setTransportForm(f => ({ ...f, date: e.target.value }))}
-                  />
-                </div>
-                <div className="bcc-hero-quickform-field">
-                  <label htmlFor="transport-time">Time</label>
-                  <input
-                    id="transport-time"
-                    type="time"
-                    value={transportForm.time}
-                    onChange={e => setTransportForm(f => ({ ...f, time: e.target.value }))}
-                  />
-                </div>
-              </div>
-              <div className="bcc-hero-quickform-actions">
-                <button type="submit" className="bcc-hero-quickform-submit">
-                  Find Routes
-                </button>
-                <button
-                  type="button"
-                  className="bcc-hero-quickform-skip"
-                  onClick={() => navigate('/services?category=transport')}
-                >
-                  Browse all routes
-                </button>
-              </div>
-            </form>
-          </div>
-
-        ) : activeTab === 'rentals' ? (
-          <div className="bcc-hero-quickform">
-            <h1>Book a rental.</h1>
-            <p>Tell us what you need and we'll match you with the right vehicle.</p>
-            <form className="bcc-hero-quickform-fields" onSubmit={handleRentalsSubmit}>
-              <div className="bcc-hero-quickform-row bcc-hero-quickform-row--wrap">
-                <div className="bcc-hero-quickform-field">
-                  <label htmlFor="rental-location">Pickup Location</label>
-                  <input
-                    id="rental-location"
-                    type="text"
-                    placeholder="e.g. Gaborone, Francistown…"
-                    value={rentalsForm.location}
-                    onChange={e => setRentalsForm(f => ({ ...f, location: e.target.value }))}
-                  />
-                </div>
-                <div className="bcc-hero-quickform-field">
-                  <label htmlFor="rental-date">Date needed</label>
-                  <input
-                    id="rental-date"
-                    type="date"
-                    min={new Date().toISOString().split('T')[0]}
-                    value={rentalsForm.date}
-                    onChange={e => setRentalsForm(f => ({ ...f, date: e.target.value }))}
-                  />
-                </div>
-                <div className="bcc-hero-quickform-field">
-                  <label htmlFor="rental-time">Time</label>
-                  <input
-                    id="rental-time"
-                    type="time"
-                    value={rentalsForm.time}
-                    onChange={e => setRentalsForm(f => ({ ...f, time: e.target.value }))}
-                  />
-                </div>
-                <div className="bcc-hero-quickform-field">
-                  <label htmlFor="rental-type">Vehicle type</label>
-                  <select
-                    id="rental-type"
-                    value={rentalsForm.vehicleType}
-                    onChange={e => setRentalsForm(f => ({ ...f, vehicleType: e.target.value }))}
-                  >
-                    <option value="">Any vehicle</option>
-                    <option value="sedan">Sedan</option>
-                    <option value="suv">SUV / 4x4</option>
-                    <option value="bakkie">Bakkie / Pickup</option>
-                    <option value="minibus">Minibus</option>
-                    <option value="luxury">Luxury</option>
-                  </select>
-                </div>
-                <div className="bcc-hero-quickform-field">
-                  <label htmlFor="rental-budget">Budget (BWP / day)</label>
-                  <select
-                    id="rental-budget"
-                    value={rentalsForm.budget}
-                    onChange={e => setRentalsForm(f => ({ ...f, budget: e.target.value }))}
-                  >
-                    <option value="">Any budget</option>
-                    <option value="300">Up to P300</option>
-                    <option value="500">Up to P500</option>
-                    <option value="800">Up to P800</option>
-                    <option value="1200">Up to P1,200</option>
-                    <option value="2000">Up to P2,000</option>
-                    <option value="9999">P2,000+</option>
-                  </select>
-                </div>
-              </div>
-              <div className="bcc-hero-quickform-actions">
-                <button type="submit" className="bcc-hero-quickform-submit">
-                  Find Rentals
-                </button>
-                <button
-                  type="button"
-                  className="bcc-hero-quickform-skip"
-                  onClick={() => navigate('/services?category=car-rentals')}
-                >
-                  Browse all rentals
-                </button>
-              </div>
-            </form>
-          </div>
-
         ) : null}
       </div>
 
