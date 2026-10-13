@@ -2,7 +2,7 @@
 // COMPLETE FIXED VERSION - All API endpoints corrected to include /api prefix
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Share2, Heart, Clock, Calendar, Tag, ChevronLeft, ChevronRight, Camera, Bookmark, BookmarkCheck, Image, ArrowRight, MessageSquare, ThumbsUp, CornerDownRight } from 'lucide-react';
+import { Share2, Heart, Clock, Calendar, Tag, ChevronLeft, ChevronRight, Camera, Eye, Bookmark, BookmarkCheck, Image, ArrowRight, MessageSquare, ThumbsUp, CornerDownRight } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext.js';
 import { http } from '../../../config/axios.js';
 import { useNews } from '../../../context/NewsContext.js';
@@ -13,6 +13,7 @@ import FeaturedNews from './FeaturedNews.js';
 import VideoSection from '../VideoSection/VideoSection.js';
 import { getNewsImageUrl, getGalleryImageUrls, formatNewsImagePath, handleNewsImageError, getArticleIdentifier, formatDate, getAuthorInfo } from '../../../utils/newsHelpers.js';
 import { buildHelmet, SITE_URL } from '../../../hooks/useSEO.js';
+import { articleVehicle, relevantVehicles, relatedNews, newsVisitorId } from '../../../utils/newsDiscovery.js';
 import StickyCarBar from '../../shared/StickyCarBar/StickyCarBar.js';
 import './NewsArticle.css';
 
@@ -116,36 +117,33 @@ const NewsArticle = () => {
     return '/images/placeholders/default.jpg';
   };
 
-  // Fetch featured vehicles from premium dealers
-  // FIXED: Added /api prefix
-  const fetchFeaturedVehicles = useCallback(async (make, model) => {
-    setIsFeaturedVehiclesLoading(true);
-    try {
-      const queryParams = new URLSearchParams();
-      
-      if (make) {
-        queryParams.append('make', make);
-      }
-      
-      if (model) {
-        queryParams.append('model', model);
-      }
-      
-      queryParams.append('dealerTier', 'premium,standard');
-      queryParams.append('limit', '6');
-      queryParams.append('sort', '-createdAt');
-      
-      // FIXED: Added /api prefix
-      const response = await http.get(`/api/listings?${queryParams.toString()}`);
-      
-      if (response.data?.data) {
-        setFeaturedVehicles(response.data.data);
-      }
-    } catch (error) {
-      console.warn('Error fetching featured vehicles:', error);
-    } finally {
-      setIsFeaturedVehiclesLoading(false);
-    }
+  const loadRelatedContent = useCallback(async (currentArticle, isCurrent) => {
+    const vehicle = articleVehicle(currentArticle);
+    setIsFeaturedVehiclesLoading(!!vehicle.make);
+    const loadNews = async () => {
+      try {
+        const category = encodeURIComponent(currentArticle.category || 'news');
+        const requests = [`/api/news?status=published&category=${category}&limit=20`, '/api/news?status=published&limit=6'];
+        if (vehicle.make) requests.push(`/api/news?status=published&search=${encodeURIComponent(vehicle.make === 'Mercedes-Benz' ? 'Mercedes' : vehicle.make)}&limit=20`);
+        const results = await Promise.allSettled(requests.map(url => http.get(url)));
+        if (!isCurrent()) return;
+        const articles = [...new Map(results.flatMap(result => result.status === 'fulfilled' && Array.isArray(result.value.data?.data) ? result.value.data.data : []).map(item => [String(item._id || item.id), item])).values()];
+        setRelatedArticles(relatedNews(currentArticle, articles));
+        setMoreNewsItems(articles.filter(item => String(item._id || item.id) !== String(currentArticle._id || currentArticle.id)).slice(0, 3));
+      } catch { if (isCurrent()) { setRelatedArticles([]); setMoreNewsItems([]); } }
+    };
+    const loadVehicles = async () => {
+      try {
+        if (!vehicle.make) return;
+        const names = vehicle.make === 'Mercedes-Benz' ? ['Mercedes-Benz', 'Mercedes'] : vehicle.make === 'Volkswagen' ? ['Volkswagen', 'VW'] : [vehicle.make];
+        const responses = await Promise.allSettled(names.map(make => http.get(`/api/listings?make=${encodeURIComponent(make)}&status=active,published&limit=30&sort=-createdAt`)));
+        if (!isCurrent()) return;
+        const unique = [...new Map(responses.flatMap(result => result.status === 'fulfilled' && Array.isArray(result.value.data?.data) ? result.value.data.data : []).map(item => [String(item._id || item.id), item])).values()];
+        const relevant = relevantVehicles(unique, vehicle);
+        setRelatedVehicles(relevant.slice(0, 3)); setFeaturedVehicles(relevant.slice(0, 6));
+      } finally { if (isCurrent()) setIsFeaturedVehiclesLoading(false); }
+    };
+    await Promise.allSettled([loadNews(), loadVehicles()]);
   }, []);
 
   // Fetch the article data and related content
@@ -166,7 +164,7 @@ const NewsArticle = () => {
         setArticle(null);
         setGalleryImages([]);
         setSelectedGalleryIndex(0); setShowGallery(false);
-        setComments([]); setShowComments(false); setRelatedArticles([]); setRelatedVehicles([]); setFeaturedVehicles([]);
+        setComments([]); setShowComments(false); setRelatedArticles([]); setRelatedVehicles([]); setFeaturedVehicles([]); setMoreNewsItems([]);
         initialFetchCompleteRef.current = false;
         galleryProcessedRef.current = false;
         
@@ -189,11 +187,17 @@ const NewsArticle = () => {
           setGalleryImages(getGalleryImageUrls(fetchedArticle));
           setIsLoading(false);
 
-          // Restore like state from localStorage
+          loadRelatedContent(fetchedArticle, () => !cancelled);
           try {
             const likes = JSON.parse(localStorage.getItem('likedArticles') || '{}');
-            setLiked(!!likes[articleId]);
-          } catch (_) {}
+            setLiked(!!(likes[fetchedArticle._id] || likes[articleId]));
+          } catch { setLiked(false); }
+          try {
+            const visitorId = newsVisitorId();
+            http.post(`/api/news/${fetchedArticle._id}/engagement`, { action: 'view', visitorId }).then(result => {
+              if (!cancelled && result.data?.data?.metadata) setArticle(value => ({ ...value, metadata: { ...value.metadata, views: Math.max(value.metadata?.views || 0, result.data.data.metadata.views || 0) } }));
+            }).catch(() => {});
+          } catch { /* Storage restrictions never prevent reading the article. */ }
 
           // Fetch comments from API
           try {
@@ -212,43 +216,6 @@ const NewsArticle = () => {
 
 
 
-          // Get article tags and categories for finding related content
-          const tags = fetchedArticle.tags || [];
-          const category = fetchedArticle.category;
-          const make = extractCarMake(fetchedArticle);
-          
-          // Use related articles from the API response first, fall back to context
-          const apiRelated = response.data.related;
-          if (Array.isArray(apiRelated) && apiRelated.length > 0) {
-            setRelatedArticles(apiRelated);
-          } else {
-            // Will be filled from moreNewsItems once that fetch completes
-            const related = getRelatedItems(fetchedArticle, 3);
-            setRelatedArticles(related);
-          }
-          
-          // Fetch related vehicles based on car make/model mentioned in the article
-          if (make && !initialFetchCompleteRef.current) {
-            try {
-              // FIXED: Added /api prefix
-              const vehiclesResponse = await http.get(`/api/listings?make=${make}&limit=3`);
-              if (cancelled) return;
-              if (vehiclesResponse.data?.data) {
-                setRelatedVehicles(vehiclesResponse.data.data);
-              }
-            } catch (err) {
-              console.warn('Error fetching related vehicles:', err);
-              setRelatedVehicles([]);
-            }
-            
-            // Fetch featured vehicles from premium/standard dealers
-            const model = extractCarModel(fetchedArticle);
-            fetchFeaturedVehicles(make, model);
-          }
-
-          // Also fetch more news articles for the bottom section
-          fetchMoreNews(fetchedArticle);
-          
           initialFetchCompleteRef.current = true;
         } else {
           setError('Article not found');
@@ -280,153 +247,34 @@ const NewsArticle = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [articleId]);
 
-  // Fetch more news articles for bottom section and related sidebar fallback
-  const fetchMoreNews = useCallback(async (currentArticle) => {
+  const [engagementLoading, setEngagementLoading] = useState(false);
+  const handleShare = useCallback(async () => {
+    if (!article) return;
     try {
-      const category = currentArticle?.category || 'news';
-      const response = await http.get(`/api/news?category=${category}&limit=6`);
+      const url = `${SITE_URL}/news/article/${getArticleIdentifier(article)}`;
+      if (navigator.share) await navigator.share({ title: article.title, text: article.subtitle || '', url });
+      else { await navigator.clipboard.writeText(url); alert('Link copied to clipboard!'); }
+      const result = await http.post(`/api/news/${article._id}/engagement`, { action: 'share', visitorId: newsVisitorId() });
+      if (articleFetchedRef.current === articleId && result.data?.data?.metadata) setArticle(value => ({ ...value, metadata: { ...value.metadata, shares: result.data.data.metadata.shares } }));
+    } catch { /* Cancelled or failed shares are not counted. */ }
+  }, [article, articleId]);
 
-      if (response.data?.data) {
-        const filtered = response.data.data.filter(
-          item => String(item._id || item.id) !== String(currentArticle._id || currentArticle.id)
-        );
-        setMoreNewsItems(filtered.slice(0, 3));
-        // Also backfill the sidebar related articles if still empty
-        setRelatedArticles(prev => prev.length > 0 ? prev : filtered.slice(0, 3));
-      }
-    } catch (error) {
-      // Try simpler query as fallback
-      try {
-        const r2 = await http.get('/api/news?limit=5');
-        if (r2.data?.data) {
-          const filtered = r2.data.data.filter(
-            item => String(item._id || item.id) !== String(currentArticle._id || currentArticle.id)
-          );
-          setMoreNewsItems(filtered.slice(0, 3));
-          setRelatedArticles(prev => prev.length > 0 ? prev : filtered.slice(0, 3));
-        }
-      } catch (_) {}
-    }
-  }, [articleId]);
-
-  // Extract car make from article content if available
-  const extractCarMake = useCallback((article) => {
-    if (!article) return null;
-    
-    // First check if article has explicit make/model metadata
-    if (article.metadata?.carMake) {
-      return article.metadata.carMake;
-    }
-    
-    // Check title for common car makes
-    const commonMakes = [
-      'BMW', 'Mercedes', 'Audi', 'Toyota', 'Honda', 'Ford', 'Chevrolet', 
-      'Nissan', 'Hyundai', 'Kia', 'Volkswagen', 'Porsche', 'Ferrari', 'Lamborghini', 'Tesla'
-    ];
-    
-    const title = article.title || '';
-    
-    // Look for car makes in the title
-    for (const make of commonMakes) {
-      if (title.includes(make)) {
-        return make;
-      }
-    }
-    
-    // If we have tags, check if any match common car makes
-    if (article.tags && Array.isArray(article.tags)) {
-      for (const tag of article.tags) {
-        if (commonMakes.includes(tag)) {
-          return tag;
-        }
-      }
-    }
-    
-    // Fallback to category if it matches a car make
-    if (commonMakes.includes(article.category)) {
-      return article.category;
-    }
-    
-    return null;
-  }, []);
-  
-  // Extract car model from article content
-  const extractCarModel = useCallback((article) => {
-    if (!article) return null;
-    
-    // First check if article has explicit model metadata
-    if (article.metadata?.carModel) {
-      return article.metadata.carModel;
-    }
-    
-    // Common models for popular makes
-    const commonModels = [
-      // BMW models
-      '3 Series', '5 Series', '7 Series', 'X3', 'X5', 'M3', 'M5',
-      // Mercedes models
-      'C-Class', 'E-Class', 'S-Class', 'GLE', 'GLC', 'AMG',
-      // Audi models
-      'A3', 'A4', 'A6', 'Q5', 'Q7', 'TT', 'R8',
-      // Toyota models
-      'Corolla', 'Camry', 'RAV4', 'Highlander', 'Prius',
-      // Honda models
-      'Civic', 'Accord', 'CR-V', 'Pilot', 'Jazz',
-      // General models that might be mentioned
-      'SUV', 'Sedan', 'Hatchback', 'Coupe', 'Convertible'
-    ];
-    
-    const title = article.title || '';
-    const content = article.parsedContent || '';
-    
-    // Look for model mentions in title or content
-    for (const model of commonModels) {
-      if (title.includes(model) || content.includes(model)) {
-        return model;
-      }
-    }
-    
-    // Check tags for model mentions
-    if (article.tags && Array.isArray(article.tags)) {
-      for (const tag of article.tags) {
-        if (commonModels.includes(tag)) {
-          return tag;
-        }
-      }
-    }
-    
-    return null;
-  }, []);
-
-  // Function to handle sharing the article
-  const handleShare = useCallback(() => {
-    if (navigator.share) {
-      navigator.share({
-        title: article.title,
-        text: article.subtitle || article.description || '',
-        url: window.location.href
-      }).catch(err => console.log('Error sharing:', err));
-    } else {
-      // Fallback for browsers that don't support the Web Share API
-      navigator.clipboard.writeText(window.location.href)
-        .then(() => alert('Link copied to clipboard!'))
-        .catch(err => console.error('Could not copy text:', err));
-    }
-  }, [article]);
-
-  // Function to handle liking an article — persisted in localStorage
-  const handleLike = useCallback(() => {
-    if (!articleId) return;
-    setLiked(prev => {
-      const next = !prev;
-      try {
-        const likes = JSON.parse(localStorage.getItem('likedArticles') || '{}');
-        if (next) likes[articleId] = true;
-        else delete likes[articleId];
-        localStorage.setItem('likedArticles', JSON.stringify(likes));
-      } catch (_) {}
-      return next;
-    });
-  }, [articleId]);
+  const handleLike = useCallback(async () => {
+    if (!article || engagementLoading) return;
+    setEngagementLoading(true);
+    try {
+      const next = !liked;
+      const result = await http.post(`/api/news/${article._id}/engagement`, { action: 'like', liked: next, visitorId: newsVisitorId() });
+      if (articleFetchedRef.current !== articleId || !result.data?.success) return;
+      setLiked(next);
+      setArticle(value => ({ ...value, metadata: { ...value.metadata, likes: result.data.data.metadata.likes } }));
+      const likes = JSON.parse(localStorage.getItem('likedArticles') || '{}');
+      delete likes[articleId];
+      if (next) likes[article._id] = true; else delete likes[article._id];
+      localStorage.setItem('likedArticles', JSON.stringify(likes));
+    } catch { /* Keep the last confirmed state if the request fails. */ }
+    finally { setEngagementLoading(false); }
+  }, [article, articleId, liked, engagementLoading]);
 
   // Function to handle saving/bookmarking an article
   const handleSave = useCallback(() => {
@@ -654,6 +502,7 @@ const NewsArticle = () => {
               </div>
 
               <div className="cc-news-article-stats">
+                <span className="cc-news-stat-item"><Eye size={16} />{article.metadata?.views || 0} views</span>
                 <span className="cc-news-stat-item">
                   <Calendar size={16} />
                   {formatDate(article.publishDate || article.createdAt || article.date)}
@@ -772,10 +621,11 @@ const NewsArticle = () => {
             <button
               className={`cc-news-action-button ${liked ? 'liked' : ''}`}
               onClick={handleLike}
+              disabled={engagementLoading}
               aria-label={liked ? 'Unlike article' : 'Like article'}
             >
               <Heart size={16} fill={liked ? 'currentColor' : 'none'} />
-              <span>{liked ? 'Liked' : 'Like'}</span>
+              <span>{liked ? 'Liked' : 'Like'}{article.metadata?.likes > 0 ? ` (${article.metadata.likes})` : ''}</span>
             </button>
             <button
               className={`cc-news-action-button ${isItemSaved(article) ? 'saved' : ''}`}
@@ -1062,7 +912,7 @@ const NewsArticle = () => {
       {/* Featured Vehicles Section - Full Width */}
       <div className="cc-news-featured-vehicles-section">
         <h2 className="cc-news-featured-vehicles-heading">
-          {article.category || 'Related'} Vehicles For Sale
+          {articleVehicle(article).make || 'Related'} Vehicles For Sale
         </h2>
         
         {isFeaturedVehiclesLoading ? (
@@ -1073,7 +923,7 @@ const NewsArticle = () => {
         ) : featuredVehicles.length > 0 ? (
           <>
             <p className="cc-news-featured-vehicles-subtitle">
-              Explore these premium vehicles from our trusted dealers
+              Explore available vehicles related to this article
             </p>
             <div className="cc-news-featured-vehicles-grid">
               {featuredVehicles.map(vehicle => (
@@ -1094,7 +944,7 @@ const NewsArticle = () => {
                     </div>
                     <div className="cc-news-featured-vehicle-details">
                       <h3 className="cc-news-featured-vehicle-title">
-                        {vehicle.make} {vehicle.model} {vehicle.year}
+                        {vehicle.title || [vehicle.make, vehicle.model, vehicle.year].filter(Boolean).join(' ')}
                       </h3>
                       <div className="cc-news-featured-vehicle-info">
                         <div className="cc-news-featured-vehicle-price">
@@ -1150,13 +1000,13 @@ const NewsArticle = () => {
 
       {/* Featured News Section */}
       <div className="cc-news-featured-section">
-        <h2 className="cc-news-featured-heading">Featured Car News</h2>
-        <FeaturedNews compact={true} />
+        <h2 className="cc-news-featured-heading">More Car News</h2>
+        <FeaturedNews compact={true} excludeArticleId={article._id || article.id} />
       </div>
 
       {/* Sticky bottom bar — related cars for sale */}
       <StickyCarBar
-        vehicles={featuredVehicles.length ? featuredVehicles : relatedVehicles.length ? relatedVehicles : undefined}
+        vehicles={featuredVehicles.length ? featuredVehicles : relatedVehicles}
         fetchParams={{ sort: '-listingQuality,-featured,-createdAt', limit: 12, status: 'active' }}
         label="Related Cars For Sale"
         sessionKey={`articleCarBar_${articleId}`}

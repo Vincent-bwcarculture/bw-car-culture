@@ -10,7 +10,7 @@ import ReviewModal from '../components/shared/ReviewModal/ReviewModal.js';
 
 jest.mock('react-router-dom', () => ({ useParams: jest.fn(), useNavigate: () => jest.fn(), Link: ({to,children,...props}) => <a href={to} {...props}>{children}</a> }), {virtual:true});
 jest.mock('react-redux', () => ({useDispatch: () => jest.fn()}), {virtual:true});
-jest.mock('../config/axios.js', () => ({http:{get:jest.fn()}}));
+jest.mock('../config/axios.js', () => ({http:{get:jest.fn(),post:jest.fn()}}));
 jest.mock('../context/AuthContext.js', () => ({useAuth: () => ({user:{_id:'editor',role:'admin'}})}));
 jest.mock('../context/NewsContext.js', () => ({useNews: () => ({getRelatedItems:()=>[],isItemSaved:()=>false,toggleSaveItem:jest.fn(),isItemViewed:()=>false})}));
 jest.mock('../hooks/useSEO.js', () => ({buildHelmet:jest.fn(()=>null),SITE_URL:'https://bw-car-culture.vercel.app'}));
@@ -23,7 +23,7 @@ let root,container;
 const story = (id, gallery=[]) => ({_id:id,slug:`story-${id}`,title:`Story ${id}`,content:'<p>News content</p>',category:'news',featuredImage:'https://example.test/cover.jpg',gallery,tags:[],metadata:{}});
 beforeEach(()=>{
  global.IS_REACT_ACT_ENVIRONMENT=true;container=document.createElement('div');document.body.appendChild(container);root=createRoot(container);
- useParams.mockReturnValue({articleId:'first'});http.get.mockReset();buildHelmet.mockImplementation(()=>null);
+ useParams.mockReturnValue({articleId:'first'});http.get.mockReset();http.post.mockReset();http.post.mockResolvedValue({data:{success:true,data:{metadata:{views:1,likes:0,shares:0}}}});buildHelmet.mockImplementation(()=>null);
  jest.spyOn(console,'log').mockImplementation(()=>{});jest.spyOn(console,'warn').mockImplementation(()=>{});
  localStorage.clear();document.body.style.overflow='';URL.createObjectURL=jest.fn(()=> 'blob:preview');
 });
@@ -39,6 +39,36 @@ test('failed images use one bounded fallback without rewriting a valid source UR
  const image=document.createElement('img');image.src='https://example.test/missing.jpg';
  handleNewsImageError({currentTarget:image});const fallback=image.src;handleNewsImageError({currentTarget:image});expect(image.src).toBe(fallback);
  expect(localStorage.getItem('failedGalleryImages')).toBeNull();
+});
+
+test('article views and likes persist through the API using one stable visitor and document ID',async()=>{
+ setup(story('first'));await render(<NewsArticle/>);
+ expect(http.post).toHaveBeenCalledWith('/api/news/first/engagement',expect.objectContaining({action:'view',visitorId:expect.any(String)}));
+ const visitor=http.post.mock.calls[0][1].visitorId;
+ http.post.mockResolvedValue({data:{success:true,data:{metadata:{views:1,likes:1,shares:0}}}});
+ await click('[aria-label="Like article"]');
+ expect(http.post).toHaveBeenLastCalledWith('/api/news/first/engagement',{action:'like',liked:true,visitorId:visitor});
+ expect(container.querySelector('[aria-label="Unlike article"]').textContent).toContain('(1)');
+ expect(JSON.parse(localStorage.getItem('likedArticles')).first).toBe(true);
+ http.post.mockRejectedValueOnce(new Error('offline'));await click('[aria-label="Unlike article"]');
+ expect(container.querySelector('[aria-label="Unlike article"]')).not.toBeNull();
+});
+
+test('cancelled shares are not counted; completed shares use the canonical article URL',async()=>{
+ const share=jest.fn().mockRejectedValueOnce(new Error('cancelled')).mockResolvedValue(undefined);
+ Object.defineProperty(navigator,'share',{configurable:true,value:share});
+ setup(story('first'));await render(<NewsArticle/>);http.post.mockClear();
+ await click('[aria-label="Share article"]');expect(http.post).not.toHaveBeenCalled();
+ await click('[aria-label="Share article"]');expect(http.post).toHaveBeenCalledWith('/api/news/first/engagement',expect.objectContaining({action:'share'}));
+ expect(share).toHaveBeenLastCalledWith(expect.objectContaining({url:'https://bw-car-culture.vercel.app/news/article/story-first'}));
+});
+
+test('related vehicle requests use recognized make and active statuses without blocking on comments',async()=>{
+ const current=story('first');current.title='The KIA EV9 SUV';
+ http.get.mockImplementation(url=>url.startsWith('/api/comments/')?new Promise(()=>{}):Promise.resolve({data:{data:url==='/api/news/first'?current:[]}}));
+ await render(<NewsArticle/>);
+ expect(http.get.mock.calls.some(([url])=>url.includes('/api/listings?make=Kia&status=active,published'))).toBe(true);
+ expect(http.get.mock.calls.some(([url])=>url.includes('dealerTier='))).toBe(false);
 });
 test('gallery starts at a valid photo, supports keyboard navigation and Escape',async()=>{
  const close=jest.fn();await render(<NewsGallery images={['https://example.test/a.jpg','https://example.test/b.jpg']} startIndex={99} onClose={close}/>);

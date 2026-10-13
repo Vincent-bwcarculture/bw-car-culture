@@ -9,7 +9,7 @@ import { buildHelmet } from '../../../hooks/useSEO.js';
 import './CarNewsPage.css';
 
 const CarNewsPage = () => {
-  const { category } = useParams();
+  const { category, tag } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { 
@@ -148,13 +148,11 @@ const markFailedImage = (url) => {
     const search = query.get('search');
     const sort = query.get('sort');
     
-    if (search) setSearchQuery(search);
-    if (sort) setSortBy(sort);
+    setSearchQuery(search || '');
+    setSortBy(sort === 'popular' ? 'popular' : 'newest');
     
     // Set active category from URL param
-    if (category) {
-      changeCategory(category.toLowerCase());
-    }
+    changeCategory(category ? category.toLowerCase() : 'all');
   }, [location.search, category, changeCategory]);
 
   // Set initial load to false after first render
@@ -170,11 +168,14 @@ const markFailedImage = (url) => {
     
     let filteredArticles = [...newsItems];
     
+    if (tag) filteredArticles = filteredArticles.filter(article => article.tags?.some(value => value.toLowerCase() === tag.toLowerCase()));
+
     // Apply search filter if present
     if (searchQuery) {
       filteredArticles = filteredArticles.filter(article => 
         article.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
         article.content?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.subtitle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         article.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
@@ -194,7 +195,7 @@ const markFailedImage = (url) => {
     });
     
     return filteredArticles;
-  }, [newsItems, searchQuery, sortBy, loading, isInitialLoad]);
+  }, [newsItems, searchQuery, sortBy, loading, isInitialLoad, tag]);
   
   // Handle search submission
   const handleSearch = (e) => {
@@ -324,7 +325,7 @@ const markFailedImage = (url) => {
           <button
             key={cat}
             className={`cc-newspage-category-button ${activeCategory === cat ? 'active' : ''}`}
-            onClick={() => changeCategory(cat)}
+            onClick={() => navigate({ pathname: cat === 'all' ? '/news' : `/news/category/${cat}`, search: location.search })}
           >
             {formatCategoryName(cat)}
           </button>

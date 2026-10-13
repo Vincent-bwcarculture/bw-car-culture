@@ -37,7 +37,7 @@
     "test:submissions": "node scripts/test-submission-flow.cjs",
     "test:homepage": "node scripts/test-submission-flow.cjs **/homepage*.test.js",
     "eject": "react-scripts eject",
-    "test:news": "node scripts/test-submission-flow.cjs **/newsArticle.test.js"
+    "test:news": "node scripts/test-submission-flow.cjs **/news*.test.js"
   },
   "proxy": "http://localhost:5000",
   "eslintConfig": {

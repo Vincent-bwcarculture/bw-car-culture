@@ -1,3 +1,4 @@
+import { prepareNewsUpload } from '../../../../utils/newsUpload.js';
 // client/src/components/profile/ArticleManagement/services/articleService.js
 // COMPLETE FIXED VERSION - All improvements integrated
 // Based on working dealer service patterns with enhanced error handling
@@ -159,7 +160,7 @@ class ArticleApiService {
    * ENHANCED FormData creation with proper image handling
    * CRITICAL FIX: Using 'galleryImages' (plural) for gallery upload field name
    */
-  createFormData(articleData) {
+  async createFormData(articleData) {
     try {
       console.log('\n📦 ===== CREATING FORMDATA =====');
       const formData = new FormData();
@@ -282,7 +283,7 @@ class ArticleApiService {
       
       console.log('🏁 ===== FORMDATA CREATION COMPLETE =====\n');
       
-      return formData;
+      return await prepareNewsUpload(formData);
       
     } catch (error) {
       console.error('❌ Error creating FormData:', error);
@@ -354,7 +355,7 @@ class ArticleApiService {
       if (hasImages) {
         // FORMDATA FOR IMAGES
         console.log('📎 Preparing FormData for image upload...');
-        const formData = this.createFormData(articleData);
+        const formData = await this.createFormData(articleData);
         
         response = await this.axios.post(endpoint, formData, {
           timeout: 300000, // 5 minutes for large uploads
@@ -503,7 +504,7 @@ class ArticleApiService {
       
       if (hasImages) {
         console.log('📎 Creating article with images (FormData)');
-        const formData = this.createFormData(articleData);
+        const formData = await this.createFormData(articleData);
         response = await this.axios.post(endpoint, formData, {
           timeout: 300000,
           onUploadProgress: (progressEvent) => {
@@ -680,7 +681,7 @@ class ArticleApiService {
       
       if (hasImages) {
         console.log('📎 Updating with images (FormData)');
-        const formData = this.createFormData(articleData);
+        const formData = await this.createFormData(articleData);
         response = await this.axios.put(endpoint, formData, {
           timeout: 300000,
           onUploadProgress: (progressEvent) => {

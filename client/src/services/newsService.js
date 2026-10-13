@@ -1,9 +1,9 @@
+import { prepareNewsUpload } from '../utils/newsUpload.js';
 // src/services/newsService.js
 import { http } from '../config/axios.js';
 import { 
   enhanceArticleMetadata, 
   findRelatedArticles, 
-  searchArticles,
   extractKeywords
 } from '../utils/newsHelpers.js';
 
@@ -98,248 +98,22 @@ class NewsService {
 
   // Get all articles with filtering and pagination - enhanced with search and metadata
   async getArticles(filters = {}, page = 1, limit = 10) {
-    try {
-      // Check if search is requested
-      if (filters.search) {
-        return this.searchArticles(filters.search, page, limit, filters);
-      }
-
-      // Check category cache if category filter is present
-      if (filters.category && this.isCacheValid() && 
-          this.articlesCache.byCategory[filters.category] && 
-          this.articlesCache.byCategory[filters.category].length > 0) {
-        
-        const cachedResult = this.articlesCache.byCategory[filters.category];
-        const totalItems = cachedResult.length;
-        const startIndex = (page - 1) * limit;
-        const endIndex = startIndex + limit;
-        
-        return {
-          articles: cachedResult.slice(startIndex, endIndex),
-          total: totalItems,
-          currentPage: page,
-          totalPages: Math.ceil(totalItems / limit)
-        };
-      }
-
-      // First, try a direct query if we don't have complex filters
-      const isSimpleFilter = !filters.search && 
-        (!filters.category || filters.category === 'all') && 
-        !filters.tag && !filters.author;
-      
-      if (isSimpleFilter) {
-        const directArticles = await this.getDirectNews(limit * page); // Get enough for paging
-        if (directArticles.length > 0) {
-          const startIndex = (page - 1) * limit;
-          const endIndex = startIndex + limit;
-          
-          return {
-            articles: directArticles.slice(startIndex, endIndex),
-            total: directArticles.length,
-            currentPage: page,
-            totalPages: Math.ceil(directArticles.length / limit)
-          };
-        }
-      }
-      
-      // If direct doesn't work or we have filters, try with parameters
-      const params = new URLSearchParams();
-      params.append('page', page.toString());
-      params.append('limit', limit.toString());
-      
-      // Add filters
-      if (filters.category && filters.category !== 'all') params.append('category', filters.category);
-      if (filters.featured) params.append('featured', 'true');
-      if (filters.tag) params.append('tag', filters.tag);
-      if (filters.author) params.append('author', filters.author);
-      
-      // Try to get from collection with minimal parameters
-      console.log(`Querying with parameters: ${this.endpoint}?${params.toString()}`);
-      const response = await http.get(`${this.endpoint}?${params.toString()}`);
-      
-      if (response.data?.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
-        console.log(`✅ Found ${response.data.data.length} articles with parameters`);
-        this.hasRealData = true;
-        
-        // Enhance articles with metadata
-        const enhancedArticles = response.data.data.map(article => {
-          // Ensure images are properly formatted with S3 URLs
-          if (article.images && article.images.length > 0) {
-            article.images = article.images.map(img => {
-              if (typeof img === 'string') {
-                return { url: img };
-              }
-              return img;
-            });
-          }
-          return enhanceArticleMetadata(article);
-        });
-        
-        // Update category cache if this was a category query
-        if (filters.category && filters.category !== 'all') {
-          this.articlesCache.byCategory[filters.category] = enhancedArticles;
-          this.articlesCache.timestamp = Date.now();
-        }
-        
-        return {
-          articles: enhancedArticles,
-          total: response.data.total || enhancedArticles.length,
-          currentPage: page,
-          totalPages: Math.ceil((response.data.total || enhancedArticles.length) / limit)
-        };
-      }
-      
-      // Last attempt - try without any parameters
-      if (Object.keys(filters).length > 0) {
-        const directArticles = await this.getDirectNews(limit * page);
-        if (directArticles.length > 0) {
-          const startIndex = (page - 1) * limit;
-          const endIndex = startIndex + limit;
-          
-          return {
-            articles: directArticles.slice(startIndex, endIndex),
-            total: directArticles.length,
-            currentPage: page,
-            totalPages: Math.ceil(directArticles.length / limit)
-          };
-        }
-      }
-      
-      // No articles found
-      console.log('No articles found in database');
-      return {
-        articles: [],
-        total: 0,
-        currentPage: 1,
-        totalPages: 0,
-        error: 'No articles found'
-      };
-    } catch (error) {
-      console.error('Error fetching articles:', error);
-      console.log('Error fetching articles, returning empty result');
-      
-      return {
-        articles: [],
-        total: 0,
-        currentPage: 1,
-        totalPages: 0,
-        error: error.message || 'Error fetching articles'
-      };
-    }
+    const params = { ...filters, page, limit };
+    const response = await http.get(this.endpoint, { params });
+    const articles = (Array.isArray(response.data?.data) ? response.data.data : []).map(enhanceArticleMetadata);
+    const pagination = response.data?.pagination || {};
+    return { articles, total: pagination.total ?? articles.length, currentPage: pagination.currentPage ?? page,
+      totalPages: pagination.totalPages ?? Math.ceil(articles.length / limit) };
   }
 
-  // Search articles with text query
   async searchArticles(query, page = 1, limit = 10, additionalFilters = {}) {
-    try {
-      // First get all articles (from cache if available)
-      let allArticles = [];
-      
-      if (this.isCacheValid() && this.articlesCache.all) {
-        console.log('Searching in cached articles');
-        allArticles = this.articlesCache.all;
-      } else {
-        // Get a larger set for searching - API might not have full-text search
-        const response = await this.getDirectNews(50);
-        if (response.length > 0) {
-          allArticles = response;
-        } else {
-          allArticles = [];
-        }
-      }
-      
-      // Use the search helper to find matches
-      let searchResults = searchArticles(allArticles, query);
-      
-      // Apply additional filters if any
-      if (additionalFilters.category && additionalFilters.category !== 'all') {
-        searchResults = searchResults.filter(article => 
-          article.category === additionalFilters.category
-        );
-      }
-      
-      // Apply pagination
-      const totalResults = searchResults.length;
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
-      const paginatedResults = searchResults.slice(startIndex, endIndex);
-      
-      return {
-        articles: paginatedResults,
-        total: totalResults,
-        currentPage: page,
-        totalPages: Math.ceil(totalResults / limit),
-        searchQuery: query
-      };
-    } catch (error) {
-      console.error('Error in searchArticles:', error);
-      return {
-        articles: [],
-        total: 0,
-        currentPage: 1,
-        totalPages: 0,
-        searchQuery: query,
-        error: 'Search failed'
-      };
-    }
+    return this.getArticles({ ...additionalFilters, search: query }, page, limit);
   }
 
-  // Get featured articles with enhanced metadata
   async getFeaturedArticles(limit = 1) {
-    // Check cache first
-    if (this.isCacheValid() && this.articlesCache.featured && this.articlesCache.featured.length > 0) {
-      return this.articlesCache.featured.slice(0, limit);
-    }
-
-    try {
-      // First try the featured endpoint
-      const response = await http.get(`${this.endpoint}/featured?limit=${limit}`);
-      
-      if (response.data?.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
-        const featuredArticles = response.data.data.map(article => {
-          // Ensure images are properly formatted with S3 URLs
-          if (article.images && article.images.length > 0) {
-            article.images = article.images.map(img => {
-              if (typeof img === 'string') {
-                return { url: img };
-              }
-              return img;
-            });
-          }
-          return enhanceArticleMetadata(article);
-        });
-        
-        // Update cache
-        this.articlesCache.featured = featuredArticles;
-        this.articlesCache.timestamp = Date.now();
-        
-        return featuredArticles;
-      }
-      
-      // If no featured articles, get any article and use as featured
-      const articles = await this.getDirectNews(limit);
-      
-      if (articles.length > 0) {
-        console.log('Using direct articles as featured');
-        
-        // Update cache
-        this.articlesCache.featured = articles;
-        this.articlesCache.timestamp = Date.now();
-        
-        return articles;
-      }
-      
-      // No featured articles found
-      console.log('No featured articles found');
-      return [];
-    } catch (error) {
-      console.error('Error in getFeaturedArticles:', error);
-      
-      // Return empty array on error
-      return [];
-    }
+    return (await this.getArticles({ featured: true, status: 'published' }, 1, limit)).articles;
   }
 
-  // Get latest articles with enhanced metadata
   async getLatestArticles(limit = 6) {
     // Check cache first
     if (this.isCacheValid() && this.articlesCache.latest && this.articlesCache.latest.length > 0) {
@@ -404,51 +178,9 @@ class NewsService {
 
   // Get trending articles based on views/popularity
   async getTrendingArticles(limit = 3) {
-    try {
-      // First try the trending endpoint
-      const response = await http.get(`${this.endpoint}/trending?limit=${limit}`);
-      
-      if (response.data?.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
-        return response.data.data.map(article => {
-          // Ensure images are properly formatted with S3 URLs
-          if (article.images && article.images.length > 0) {
-            article.images = article.images.map(img => {
-              if (typeof img === 'string') {
-                return { url: img };
-              }
-              return img;
-            });
-          }
-          return enhanceArticleMetadata(article);
-        });
-      }
-      
-      // If no trending endpoint, use direct query and sort by views
-      const articles = await this.getDirectNews(limit * 2);
-      
-      if (articles.length > 0) {
-        console.log('Using direct articles sorted by views as trending');
-        
-        // Sort by views/popularity
-        const sortedArticles = [...articles].sort((a, b) => {
-          const viewsA = a.metadata?.views || a.stats?.views || 0;
-          const viewsB = b.metadata?.views || b.stats?.views || 0;
-          return viewsB - viewsA;
-        });
-        
-        return sortedArticles.slice(0, limit);
-      }
-      
-      // No trending articles found
-      console.log('No trending articles found');
-      return [];
-    } catch (error) {
-      console.error('Error in getTrendingArticles:', error);
-      return [];
-    }
+    return (await this.getArticles({ sort: 'popular', status: 'published' }, 1, limit)).articles;
   }
 
-  // Get single article by ID or slug with enhanced metadata
   async getArticle(id) {
     if (!id) return null;
     
@@ -631,7 +363,7 @@ class NewsService {
       
       // Make the API request - /api/news/user handles both admins (publishes directly)
       // and journalists (pending review). There is no standalone POST /api/news endpoint.
-      const response = await http.post(`${this.endpoint}/user`, formData, {
+      const response = await http.post(`${this.endpoint}/user`, await prepareNewsUpload(formData), {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -665,7 +397,7 @@ class NewsService {
       }
       
       // Make the API request with the PUT method - FormData will handle S3 uploads on the backend
-      const response = await http.put(`${this.endpoint}/${id}`, formData, {
+      const response = await http.put(`${this.endpoint}/${id}`, await prepareNewsUpload(formData), {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

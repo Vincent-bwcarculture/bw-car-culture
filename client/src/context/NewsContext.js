@@ -1,9 +1,11 @@
 // src/context/NewsContext.js
 import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 import { http } from '../config/axios.js';
+import { normalizeNewsCategory, relatedNews } from '../utils/newsDiscovery.js';
 
 // Create the context
 const NewsContext = createContext(null);
+const NEWS_CATEGORIES = ['all', 'videos', 'news', 'reviews', 'features', 'comparison', 'industry', 'supercar', 'sports', 'luxury'];
 
 
 export const NewsProvider = ({ children, autoplay = true, initialCategory = 'all' }) => {
@@ -14,182 +16,50 @@ export const NewsProvider = ({ children, autoplay = true, initialCategory = 'all
   const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [isAutoplayEnabled, setIsAutoplayEnabled] = useState(autoplay);
-  const [viewHistory, setViewHistory] = useState(() => {
-    const saved = localStorage.getItem('newsViewHistory');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [savedItems, setSavedItems] = useState(() => {
-    const saved = localStorage.getItem('newsSavedItems');
-    return saved ? JSON.parse(saved) : [];
-  });
-  
+  const readSaved = key => { try { const value = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(value) ? value : []; } catch { return []; } };
+  const [viewHistory, setViewHistory] = useState(() => readSaved('newsViewHistory'));
+  const [savedItems, setSavedItems] = useState(() => readSaved('newsSavedItems'));
+
   // All useRef hooks at the top level
   const autoplayTimerRef = useRef(null);
-  const hasInitialLoadRef = useRef(false);
-  const isFetchingCategoryRef = useRef(false);
-  const initialLoadAttemptedRef = useRef(false);
-  const allCategories = ['all', 'videos', 'news', 'reviews', 'features', 'supercar', 'sports', 'luxury'];
+  const allCategories = NEWS_CATEGORIES;
 
-  // Function to fetch news items
-  const fetchNews = useCallback(async (category = 'all', limit = 10) => {
-    try {
-      let endpoint = '/news';
-      
-      const params = { limit };
-      
-      if (category === 'videos') {
-        params.hasVideo = true;
-      } else if (category !== 'all') {
-        params.category = category;
-      }
-      
-      console.log(`Fetching news for category: ${category}, limit: ${limit}`);
-      const response = await http.get(endpoint, { params });
-      
-      if (response?.data?.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
-        console.log(`Fetched ${response.data.data.length} news items for category: ${category}`);
-        return response.data.data;
-      }
-      return null;
-    } catch (error) {
-      console.error('Error fetching news:', error);
-      return null;
-    }
+  const fetchNews = useCallback(async (category = 'all', limit = 100, page = 1) => {
+    const params = { limit, page, status: 'published' };
+    if (category === 'featured') params.featured = true;
+    else if (category === 'videos') params.hasVideo = true;
+    else if (category !== 'all') params.category = normalizeNewsCategory(category);
+    const response = await http.get('/api/news', { params });
+    return { articles: Array.isArray(response.data?.data) ? response.data.data : [], pagination: response.data?.pagination };
   }, []);
 
-  // Filter news items by category
-  const filterNewsByCategory = useCallback((items, category) => {
-    if (!items || !items.length) return [];
-    if (category === 'all') return items;
-    
-    if (category === 'videos') {
-      return items.filter(item => {
-        return item.video || 
-              (item.content && (item.content.includes('youtube.com') || 
-                               item.content.includes('youtu.be')));
-      });
-    }
-    
-    return items.filter(item => item.category === category);
-  }, []);
-
-  // Initialize news data - FIXED to prevent infinite loop
   useEffect(() => {
-    // Check if we already did an initial load
-    if (initialLoadAttemptedRef.current) {
-      return;
-    }
-    
-    initialLoadAttemptedRef.current = true;
-    
-    const loadAllNews = async () => {
-      console.log('Loading initial news data...');
-      setLoading(true);
-      setError(null);
-      
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true); setError(null); setNewsItems([]); setSelectedNewsItem(null);
       try {
-        // Fetch featured news
-        const featured = await fetchNews('featured', 3);
-        
-        // Fetch regular news
-        const news = await fetchNews('all', 8);
-        
-        if ((featured && featured.length > 0) || (news && news.length > 0)) {
-          // Use API data if available
-          if (featured && featured.length > 0) {
-            setFeaturedNews(featured);
-            // Set the first featured item as the selected item if none is selected
-            if (!selectedNewsItem) {
-              setSelectedNewsItem(featured[0]);
-            }
-          } else if (news && news.length > 0) {
-            setFeaturedNews(news.slice(0, 3));
-            // Set the first news item as selected if none is selected
-            if (!selectedNewsItem) {
-              setSelectedNewsItem(news[0]);
-            }
-          }
-          
-          if (news && news.length > 0) {
-            setNewsItems(news);
-          } else if (featured && featured.length > 0) {
-            setNewsItems(featured);
-          }
-          
-          // Mark that we've loaded initial data
-          hasInitialLoadRef.current = true;
-        } else {
-          setFeaturedNews([]);
-          setNewsItems([]);
-          hasInitialLoadRef.current = true;
-        }
-      } catch (error) {
-        console.error('Error loading news:', error);
-        setError('Failed to load news content');
-        setFeaturedNews([]);
-        setNewsItems([]);
-      } finally {
-        setLoading(false);
-      }
+        let items = [], page = 1, totalPages = 1;
+        do {
+          const result = await fetchNews(activeCategory, 100, page);
+          if (cancelled) return;
+          items = [...items, ...result.articles];
+          totalPages = result.pagination?.totalPages || 1;
+          page += 1;
+        } while (page <= totalPages);
+        setNewsItems(items); setSelectedNewsItem(items[0] || null);
+      } catch { if (!cancelled) setError('Failed to load news content. Please try again.'); }
+      finally { if (!cancelled) setLoading(false); }
     };
+    load();
+    return () => { cancelled = true; };
+  }, [activeCategory, fetchNews]);
 
-    loadAllNews();
-  }, [fetchNews]); // IMPORTANT: Removed selectedNewsItem from dependencies
-
-  // Handle category change - FIXED to prevent infinite loop
   useEffect(() => {
-    // Skip if we haven't done the initial load yet
-    if (!hasInitialLoadRef.current) {
-      return;
-    }
-    
-    const loadCategoryNews = async () => {
-      // Skip for 'all' category or if already fetching
-      if (activeCategory === 'all' || isFetchingCategoryRef.current) {
-        return;
-      }
-      
-      console.log(`Loading news for category: ${activeCategory}`);
-      isFetchingCategoryRef.current = true;
-      setLoading(true);
-      
-      try {
-        const categoryNews = await fetchNews(activeCategory, 10);
-        
-        if (categoryNews && categoryNews.length > 0) {
-          setNewsItems(categoryNews);
-          
-          // Only update selected item if necessary
-          const currentItemStillValid = selectedNewsItem && categoryNews.some(item => 
-            (item.id === selectedNewsItem.id) || (item._id === selectedNewsItem._id));
-            
-          if (!currentItemStillValid) {
-            setSelectedNewsItem(categoryNews[0]);
-          }
-        } else {
-          // Filter from existing items as fallback
-          const filteredItems = filterNewsByCategory(newsItems, activeCategory);
-          
-          if (filteredItems.length > 0) {
-            // Just update selected item if needed
-            const currentItemStillValid = selectedNewsItem && filteredItems.some(item => 
-              (item.id === selectedNewsItem.id) || (item._id === selectedNewsItem._id));
-              
-            if (!currentItemStillValid) {
-              setSelectedNewsItem(filteredItems[0]);
-            }
-          }
-        }
-      } catch (error) {
-        console.error(`Error loading ${activeCategory} news:`, error);
-      } finally {
-        setLoading(false);
-        isFetchingCategoryRef.current = false;
-      }
-    };
-    
-    loadCategoryNews();
-  }, [activeCategory, fetchNews, filterNewsByCategory]); // IMPORTANT: Removed newsItems and selectedNewsItem
+    let cancelled = false;
+    fetchNews('featured', 3).then(result => { if (!cancelled) setFeaturedNews(result.articles); })
+      .catch(() => { if (!cancelled) setFeaturedNews([]); });
+    return () => { cancelled = true; };
+  }, [fetchNews]);
 
   // Handle autoplay functionality
   useEffect(() => {
@@ -256,11 +126,12 @@ export const NewsProvider = ({ children, autoplay = true, initialCategory = 'all
   };
 
   // Change active category
-  const changeCategory = (category) => {
-    if (allCategories.includes(category)) {
+  const changeCategory = useCallback((category) => {
+    category = ({ review: 'reviews', feature: 'features', comparisons: 'comparison' })[category] || category;
+    if (NEWS_CATEGORIES.includes(category)) {
       setActiveCategory(category);
     }
-  };
+  }, []);
 
   // Toggle save/bookmark item
   const toggleSaveItem = (item) => {
@@ -289,41 +160,7 @@ export const NewsProvider = ({ children, autoplay = true, initialCategory = 'all
   };
 
   // Get related items based on category and tags
-  const getRelatedItems = (item, limit = 3) => {
-    if (!item || !newsItems.length) return [];
-    
-    // Filter out the current item
-    const otherItems = newsItems.filter(otherItem => 
-      (item.id !== otherItem.id) && (item._id !== otherItem._id)
-    );
-    
-    // First try to match by category and tags
-    if (item.category && item.tags && item.tags.length > 0) {
-      const sameCategoryAndTag = otherItems.filter(otherItem => 
-        otherItem.category === item.category && 
-        otherItem.tags && 
-        otherItem.tags.some(tag => item.tags.includes(tag))
-      );
-      
-      if (sameCategoryAndTag.length >= limit) {
-        return sameCategoryAndTag.slice(0, limit);
-      }
-    }
-    
-    // Next try just category
-    if (item.category) {
-      const sameCategory = otherItems.filter(otherItem => 
-        otherItem.category === item.category
-      );
-      
-      if (sameCategory.length >= limit) {
-        return sameCategory.slice(0, limit);
-      }
-    }
-    
-    // Fallback to any items
-    return otherItems.slice(0, limit);
-  };
+  const getRelatedItems = (item, limit = 3) => item ? relatedNews(item, newsItems, limit) : [];
 
   return (
     <NewsContext.Provider value={{

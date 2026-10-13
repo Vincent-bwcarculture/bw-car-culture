@@ -1,3 +1,4 @@
+import { prepareNewsUpload } from '../../utils/newsUpload.js';
 import React, { useState, useRef } from 'react';
 import { http } from '../../config/axios.js';
 import './SimpleArticleModal.css';
@@ -71,7 +72,7 @@ const SimpleArticleModal = ({ isOpen, onClose, onSuccess }) => {
       if (coverFile) fd.append('featuredImage', coverFile);
       galleryFiles.forEach(f => fd.append('galleryImages', f));
 
-      const res = await http.post('/api/news/user', fd);
+      const res = await http.post('/api/news/user', await prepareNewsUpload(fd));
 
       if (res.data?.success) {
         onSuccess?.();

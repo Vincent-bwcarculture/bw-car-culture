@@ -142,7 +142,7 @@ const NewsTable = ({ articles, loading, onEdit, onDelete }) => {
               </td>
               <td>
                 <span className="views-count">
-                  {article.views || article.metadata?.views || 0}
+                  {article.metadata?.views ?? article.views ?? 0}
                 </span>
               </td>
               <td>

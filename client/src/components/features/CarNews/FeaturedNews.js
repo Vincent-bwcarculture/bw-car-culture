@@ -13,14 +13,16 @@ import {
   hasVideo, 
   hasGallery,
   extractYouTubeId,
-  isPremium
+  isPremium,
+  getGalleryImageUrls
 } from '../../../utils/newsHelpers.js';
 import YouTubePlayer from '../../shared/YouTubePlayer/YouTubePlayer.js';
 import './FeaturedNews.css';
 
-const FeaturedNews = ({ compact = false }) => {
+const FeaturedNews = ({ compact = false, excludeArticleId }) => {
   const { 
-    selectedNewsItem, 
+    selectedNewsItem: contextSelectedItem,
+    newsItems,
     loading, 
     error, 
     getRelatedItems,
@@ -29,6 +31,9 @@ const FeaturedNews = ({ compact = false }) => {
     selectNewsItem
   } = useNews();
   
+  const selectedNewsItem = excludeArticleId && String(contextSelectedItem?._id || contextSelectedItem?.id) === String(excludeArticleId)
+    ? (newsItems || []).find(item => String(item._id || item.id) !== String(excludeArticleId))
+    : contextSelectedItem;
   const [showVideo, setShowVideo] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -85,19 +90,7 @@ const FeaturedNews = ({ compact = false }) => {
 
   // Process gallery images for S3
   const processGalleryImages = useCallback((article) => {
-    if (!article || !article.gallery || !Array.isArray(article.gallery)) {
-      return [];
-    }
-    
-    return article.gallery.map(item => {
-      if (typeof item === 'string') {
-        return getImageUrl(item);
-      }
-      if (item && item.url) {
-        return getImageUrl(item.url);
-      }
-      return '/images/placeholders/default.jpg';
-    }).filter(Boolean);
+    return getGalleryImageUrls(article);
   }, []);
 
   // Get featured image URL
