@@ -24,7 +24,7 @@ beforeEach(() => {
   window.matchMedia = jest.fn(query => query.includes('min-width') ? desktop : { matches: false, addEventListener() {}, removeEventListener() {} });
   global.ResizeObserver = class { observe() {} disconnect() {} };
   global.IntersectionObserver = class { constructor(callback) { observerCallback = callback; } observe() {} disconnect() {} };
-  jest.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({ width: 700, height: 500 });
+  jest.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({ width: 700, height: 500, left: 0, top: 0 });
   jest.spyOn(performance, 'now').mockReturnValue(0);
   jest.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => { nextFrame = callback; return 1; });
   jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
@@ -132,4 +132,26 @@ test('page scroll gently moves the vehicle within its stage', async () => {
   const group = scene.children.find(node => node.isGroup);
   expect(group.position.y).toBeGreaterThan(.2);
   expect(group.position.y).toBeLessThan(.25);
+});
+
+
+test('only the vehicle silhouette enables controls; empty canvas leaves scrolling free', async () => {
+  await render({ motionEnabled: false });
+  const controls = OrbitControls.mock.results.at(-1).value;
+  const canvas = container.querySelector('canvas');
+  expect(controls.enabled).toBe(false);
+  canvas.dispatchEvent(new MouseEvent('pointerdown', { clientX: 350, clientY: 250, bubbles: true }));
+  expect(controls.enabled).toBe(true);
+  canvas.dispatchEvent(new MouseEvent('pointermove', { clientX: 1, clientY: 1, bubbles: true }));
+  expect(controls.enabled).toBe(true); // A drag that starts on the car can finish outside it.
+  window.dispatchEvent(new Event('pointerup'));
+  expect(controls.enabled).toBe(false);
+  canvas.dispatchEvent(new WheelEvent('wheel', { clientX: 1, clientY: 1, deltaY: 100 }));
+  expect(controls.enabled).toBe(false);
+  expect(canvas.style.cursor).toBe('auto');
+  canvas.dispatchEvent(new WheelEvent('wheel', { clientX: 350, clientY: 250, deltaY: -100 }));
+  expect(controls.enabled).toBe(true);
+  expect(canvas.style.cursor).toBe('grab');
+  canvas.dispatchEvent(new Event('pointerleave'));
+  expect(controls.enabled).toBe(false);
 });

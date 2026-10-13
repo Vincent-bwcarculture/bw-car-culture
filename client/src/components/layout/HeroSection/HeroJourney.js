@@ -140,6 +140,7 @@ const HeroJourney = ({ interactionId = 0, modelReady, onColourChange, onWheelCha
         ))}
       </ol>
       <div className="bcc-journey-footer">
+      <div className="bcc-hero-model-hint">Drag to rotate <span aria-hidden="true">&middot;</span> Scroll over the vehicle to zoom</div>
       <nav className="bcc-journey-navigation" aria-label="Journey chapters">
         {HERO_JOURNEY.map((item, index) => <button key={item.title} type="button"
           aria-label={`Step ${index + 1}: ${item.title}`} aria-current={step === index ? 'step' : undefined}

@@ -252,7 +252,6 @@ const HeroSection = () => {
       <div className="bcc-hero-dark-overlay" aria-hidden="true" />
 
       <div className="bcc-hero-content">
-        <div className="bcc-hero-editorial">
         {/* Slogan */}
         <div className="bcc-hero-slogan">
           <span className="bcc-hero-slogan-dot" aria-hidden="true" />
@@ -260,6 +259,7 @@ const HeroSection = () => {
           <span className="bcc-hero-slogan-dot" aria-hidden="true" />
         </div>
 
+        <div className="bcc-hero-editorial">
         <div className="bcc-hero-tabs">
           <button 
             className={`bcc-hero-tab-button ${activeTab === 'buy' ? 'active' : ''}`}

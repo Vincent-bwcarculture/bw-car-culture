@@ -261,35 +261,70 @@
 }
 
 
-/* Put the story above and to the right of the car; playback sits at the foot. */
+/* A shared headline and baseline connect the search and vehicle journey. */
 @media (min-width: 900px) {
-  .bcc-hero--showroom .bcc-hero-journey { top: 5.5rem; bottom: 3rem; width: 26%; max-width: 380px; }
-  .bcc-journey-footer { position: absolute; bottom: 0; right: 0; width: 100%; }
-  .bcc-hero-model-stage { left: 27%; width: 58%; top: 15rem; height: 600px; }
-  .bcc-hero-model-caption { display: none; }
-}
-@media (min-width: 900px) and (max-width: 1199px) {
-  .bcc-hero--showroom .bcc-hero-editorial { width: 44%; }
-  .bcc-hero--showroom .bcc-hero-content { min-height: 980px; }
-  .bcc-hero-model-stage { left: 30%; width: 70%; top: 17rem; height: 600px; }
-  .bcc-hero--showroom .bcc-hero-journey { right: 4vw; top: 5.5rem; bottom: 2rem; width: 46%; max-width: none; }
-  .bcc-journey-steps { min-height: 250px; }
-}
-
-@media (min-width: 900px) {
-  .bcc-hero--showroom .bcc-hero-content { pointer-events: none; }
-  .bcc-hero--showroom .bcc-hero-editorial { pointer-events: auto; }
-  .bcc-hero--showroom .bcc-hero-journey { pointer-events: none; }
+  .bcc-hero-premium { min-height: max(860px, calc(100svh - 110px)); }
+  .bcc-hero--showroom .bcc-hero-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    column-gap: 5vw;
+    row-gap: 2.5rem;
+    min-height: max(860px, calc(100svh - 110px));
+    padding: 3rem 4vw 2.5rem;
+    pointer-events: none;
+  }
+  .bcc-hero--showroom .bcc-hero-slogan {
+    grid-column: 1 / -1;
+    justify-content: center;
+    margin: 0;
+    width: 100%;
+    text-align: center;
+  }
+  .bcc-hero--showroom .bcc-hero-slogan-dot:last-child { display: block; }
+  .bcc-hero--showroom .bcc-hero-editorial {
+    grid-column: 1;
+    grid-row: 2;
+    left: 0;
+    transform: none;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+  }
+  .bcc-hero--showroom .bcc-hero-buy { display: flex; flex-direction: column; flex: 1; }
+  .bcc-hero--showroom .bcc-hero-buy p { margin-inline: 0; }
+  .bcc-hero--showroom .bcc-hero-search-container { width: 100%; margin: auto 0 0; padding-top: 2rem; }
+  .bcc-hero--showroom .bcc-hero-journey {
+    grid-column: 2;
+    grid-row: 2;
+    position: relative;
+    inset: auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+  }
+  .bcc-journey-heading h2 em { display: inline; }
+  .bcc-journey-heading h2 { margin-bottom: .65rem; }
+  .bcc-journey-steps { min-height: 0; }
+  .bcc-journey-steps li > button { padding-top: .5rem; gap: .45rem; }
+  .bcc-journey-footer { position: relative; margin-top: auto; padding-top: 1.5rem; width: 100%; text-align: center; }
+  .bcc-journey-navigation { justify-content: center; margin: .7rem 0 .2rem; }
+  .bcc-journey-playback { margin-inline: auto; }
+  .bcc-journey-signature { display: none; }
   .bcc-journey-heading, .bcc-journey-steps, .bcc-journey-footer { pointer-events: auto; }
-  .bcc-hero-model-stage { pointer-events: none; }
+  .bcc-hero-model-stage { left: 39%; width: 61%; top: 18rem; height: 520px; pointer-events: none; }
   .bcc-hero-model-stage.is-ready { pointer-events: auto; }
   .bcc-hero-model-stage::before, .bcc-hero-model-stage::after { pointer-events: none; }
-  .bcc-hero-model-stage .hero-3d-canvas { pointer-events: none; cursor: grab; touch-action: none; }
+  .bcc-hero-model-stage .hero-3d-canvas { pointer-events: none; cursor: auto; touch-action: pan-y; }
   .bcc-hero-model-stage.is-ready .hero-3d-canvas { pointer-events: auto; }
-  .bcc-hero-model-stage .hero-3d-canvas:active { cursor: grabbing; }
-  .bcc-hero-model-hint { position: absolute; bottom: 0; width: 100%; text-align: center; color: var(--hero-muted); font-size: .72rem; pointer-events: none; }
+  .bcc-hero-model-hint { color: var(--hero-muted); font-size: .72rem; pointer-events: none; }
   .bcc-hero-model-hint span { padding: 0 .4rem; }
 }
 @media (min-width: 900px) and (max-width: 1199px) {
-  .bcc-hero-model-stage { top: 14rem; height: 580px; }
+  .bcc-hero--showroom .bcc-hero-content { min-height: 960px; column-gap: 3vw; }
+  .bcc-hero-model-stage { left: 35%; width: 65%; top: 23rem; height: 470px; }
 }

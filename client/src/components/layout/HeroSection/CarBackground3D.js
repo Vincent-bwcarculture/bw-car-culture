@@ -56,6 +56,7 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
     const controls = new OrbitControls(camera, canvas);
+    controls.enabled = false;
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.enablePan = false;
@@ -76,6 +77,45 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
     const rim = new THREE.DirectionalLight(0xffffff, 2);
     rim.position.set(0, 4, -5); scene.add(rim);
     const group = new THREE.Group(); scene.add(group);
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    const hitBounds = new THREE.Box3();
+    const hitMeshes = [];
+    let dragging = false, lastHit = null;
+    // OrbitControls listens on the canvas. Gate its handlers in capture phase so
+    // empty canvas space keeps native page scrolling, even inside the stage.
+    const hitsVehicle = (event, force = false) => {
+      if (!ready || contextLost) return false;
+      const now = performance.now();
+      if (!force && lastHit && now - lastHit.time < 100 &&
+          Math.abs(event.clientX - lastHit.x) < 3 && Math.abs(event.clientY - lastHit.y) < 3) return lastHit.hit;
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return false;
+      pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1);
+      camera.updateMatrixWorld(); group.updateMatrixWorld(true);
+      raycaster.setFromCamera(pointer, camera);
+      hitBounds.setFromObject(group);
+      const hit = raycaster.ray.intersectsBox(hitBounds) && hitMeshes.some(mesh => raycaster.intersectObject(mesh, false).length > 0);
+      lastHit = { x: event.clientX, y: event.clientY, time: now, hit };
+      return hit;
+    };
+    const setHover = hit => {
+      controls.enabled = hit;
+      canvas.style.cursor = dragging ? 'grabbing' : hit ? 'grab' : 'auto';
+      canvas.style.touchAction = hit ? 'none' : 'pan-y';
+    };
+    const onPointerMove = event => { if (!dragging) setHover(hitsVehicle(event)); };
+    const onPointerDown = event => { dragging = hitsVehicle(event, true); setHover(dragging); };
+    const onWheel = event => { if (!dragging) setHover(hitsVehicle(event)); };
+    const onPointerLeave = () => { if (!dragging) setHover(false); };
+    const onPointerUp = () => { dragging = false; lastHit = null; setHover(false); };
+    canvas.style.touchAction = 'pan-y';
+    canvas.addEventListener('pointermove', onPointerMove, true);
+    canvas.addEventListener('pointerdown', onPointerDown, true);
+    canvas.addEventListener('wheel', onWheel, { capture: true, passive: true });
+    canvas.addEventListener('pointerleave', onPointerLeave);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
     let disposed = false, model = null, ready = false, inView = true, contextLost = false;
     let frame = null, lastFrame = 0, elapsed = 0, dirty = true;
     let scrollProgress = 0;
@@ -105,7 +145,7 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       // The car is normalized to four units; keep it inside its own stage at every aspect ratio.
-      const distance = 6.4 / Math.min(1, camera.aspect / 1.35);
+      const distance = 6 / Math.min(1, camera.aspect / 1.35);
       camera.position.set(distance * 0.68, distance * 0.28, distance * 0.68);
       camera.lookAt(0, 0, 0);
       controls.minDistance = distance * 0.55;
@@ -199,6 +239,7 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
           if (material?.color && material.name === 'leather_color') surfaces.interior.materials.add(material);
         });
       });
+      model.traverseVisible(node => { if (node.isMesh) hitMeshes.push(node); });
       const bounds = new THREE.Box3();
       model.updateMatrixWorld(true);
       // Frame the vehicle body, excluding unused scenery still present in the source GLB.
@@ -239,6 +280,12 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
       canvas.removeEventListener('webglcontextrestored', onContextRestored);
       if (model) disposeModel(model);
       window.removeEventListener('scroll', onScroll);
+      canvas.removeEventListener('pointermove', onPointerMove, true);
+      canvas.removeEventListener('pointerdown', onPointerDown, true);
+      canvas.removeEventListener('wheel', onWheel, true);
+      canvas.removeEventListener('pointerleave', onPointerLeave);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
       controls.removeEventListener('start', onControlStart);
       controls.removeEventListener('change', onControlChange);
       controls.dispose();
@@ -249,7 +296,6 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
   return (
     <div ref={stageRef} className={`bcc-hero-model-stage${visible ? ' is-ready' : ''}`}>
       <canvas aria-label="Vehicle preview. Drag to rotate and scroll over the vehicle to zoom." ref={canvasRef} className={`hero-3d-canvas${visible ? ' hero-3d-canvas--on' : ''}`} />
-      {visible && <div className="bcc-hero-model-hint">Drag to rotate <span aria-hidden="true">&middot;</span> Scroll over the vehicle to zoom</div>}
     </div>
   );
 };
