@@ -234,25 +234,11 @@ class ListingService {
       } catch (uploadError) {
         console.error('Error during image upload:', uploadError);
         
-        // CRITICAL FALLBACK: If server upload fails, create local references
-        // This lets the UI continue working even if S3 is down
-        console.warn('Using fallback image paths due to upload failure');
-        imageData = fileObjects.map((file, index) => {
-          const timestamp = Date.now();
-          const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-          return {
-            url: `/uploads/listings/${timestamp}-${index}-${safeName}`,
-            key: `listings/${timestamp}-${index}-${safeName}`,
-            size: file.size,
-            mimetype: file.type,
-            isPrimary: index === (listingData.primaryImageIndex || 0),
-            isFallback: true
-          };
-        });
+        throw new Error('Vehicle photos could not be uploaded. Please try again with fewer or smaller photos.');
       }
       
       // If we still don't have image data, we can't proceed
-      if (!imageData || imageData.length === 0) {
+      if (!imageData || imageData.length !== fileObjects.length) {
         throw new Error('Failed to process images for listing');
       }
       
@@ -354,8 +340,8 @@ async updateListing(id, listingData, newImages = [], onProgress) {
           return true;
         });
       
-      if (validFiles.length === 0) {
-        console.warn('No valid files to upload');
+      if (validFiles.length !== newImages.length) {
+        throw new Error('Some photos are invalid or too large. Use JPEG, PNG or WebP files under 5MB.');
       } else {
         try {
           uploadedImages = await imageService.uploadMultiple(
@@ -367,6 +353,7 @@ async updateListing(id, listingData, newImages = [], onProgress) {
             })
           );
           
+          if (uploadedImages.length !== validFiles.length) throw new Error('Not all photos uploaded. Please retry before saving.');
           console.log(`Successfully uploaded ${uploadedImages.length} images`);
         } catch (uploadError) {
           console.error('Image upload failed:', uploadError);
@@ -379,6 +366,19 @@ async updateListing(id, listingData, newImages = [], onProgress) {
     
     // Step 2: Prepare the request data
     const requestData = {
+      shortDescription: listingData.shortDescription,
+      category: listingData.category,
+      status: listingData.status,
+      featured: listingData.featured,
+      bodyStyle: listingData.bodyStyle,
+      priceType: listingData.priceType,
+      dealerId: listingData.dealerId,
+      dealer: listingData.dealer,
+      listingQuality: listingData.listingQuality,
+      safetyFeatures: listingData.safetyFeatures,
+      comfortFeatures: listingData.comfortFeatures,
+      performanceFeatures: listingData.performanceFeatures,
+      entertainmentFeatures: listingData.entertainmentFeatures,
       // Core listing data
       title: listingData.title,
       description: listingData.description,
@@ -758,6 +758,7 @@ validateUpdateData(listingData) {
       headers: this.getHeaders()
     });
     
+    if (!response.data?.success) throw new Error(response.data?.message || 'Could not update listing status');
     this.cache.clear();
     console.log(`Successfully updated listing ${id} status to ${status}`);
     return response.data.data;

@@ -1,3 +1,5 @@
+import { ADMIN_LISTING_STATUSES, LISTING_FORM_SECTIONS, listingFormErrors, listingQuality } from '../../../utils/adminListingForm.js';
+import { ListingSectionIcon, ListingSectionHeading, ListingFormFeedback, focusListingError, useListingDialog, useListingPreviews } from './ListingFormElements.js';
 // src/components/shared/AddListingModal/AddListingModal.js - Complete with Savings Integration
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { 
@@ -8,7 +10,6 @@ import {
   FUEL_TYPES,
   DRIVETRAIN_TYPES,
   PRICE_TYPES,
-  LISTING_STATUS,
   TRANSMISSION_TYPES,
   ENTERTAINMENT_FEATURES,
   COUNTRIES 
@@ -159,18 +160,11 @@ const AddListingModal = ({ isOpen, onClose, onSubmit }) => {
   const newFeatureRef = useRef(null);
   const keywordInputRef = useRef(null);
 
-  // Tab configuration - Updated with Savings tab
-  const tabs = [
-    { id: 'basic', label: 'Basic Info', icon: '📝' },
-    { id: 'specs', label: 'Specifications', icon: '🔧' },
-    { id: 'features', label: 'Features', icon: '✨' },
-    { id: 'media', label: 'Media', icon: '📸' },
-    { id: 'pricing', label: 'Pricing', icon: '💰' },
-    { id: 'savings', label: 'I3W Savings', icon: '🎯' }, // NEW
-    { id: 'location', label: 'Location', icon: '📍' },
-    { id: 'seo', label: 'SEO', icon: '🔍' },
-    { id: 'records', label: 'Records', icon: '🔒' }
-  ];
+  const tabs = LISTING_FORM_SECTIONS;
+  const dialogRef = useRef(null), formRef = useRef(null);
+  const changeSection = section => { setActiveTab(section); formRef.current?.scrollTo?.({ top: 0 }); };
+  useListingDialog(isOpen, isSubmitting, onClose, dialogRef);
+  useListingPreviews(images, isOpen);
 
   // NEW: Calculate savings automatically
   const calculateSavings = useCallback((originalPrice, currentPrice, dealerDiscount) => {
@@ -181,7 +175,7 @@ const AddListingModal = ({ isOpen, onClose, onSubmit }) => {
       calculatedSavings.amount = originalPrice - currentPrice;
       calculatedSavings.percentage = Math.round((calculatedSavings.amount / originalPrice) * 100);
       calculatedSavings.originalPriceCalc = originalPrice;
-    } else if (dealerDiscount && currentPrice && dealerDiscount > 0) {
+    } else if (dealerDiscount && currentPrice && dealerDiscount > 0 && dealerDiscount < 100) {
       // Calculate from dealer discount percentage
       const originalPriceFromDiscount = Math.round(currentPrice / (1 - dealerDiscount / 100));
       calculatedSavings.amount = originalPriceFromDiscount - currentPrice;
@@ -209,7 +203,7 @@ const AddListingModal = ({ isOpen, onClose, onSubmit }) => {
             savingsAmount: calculated.amount.toString(),
             savingsPercentage: calculated.percentage.toString(),
             originalPrice: calculated.originalPriceCalc.toString(),
-            showSavings: true
+            showSavings: prev.priceOptions?.showSavings || false
           }
         }));
       }
@@ -261,20 +255,6 @@ const fetchDealers = async () => {
     }
   }, [formData]);
 
-  // Clean up URL objects when component unmounts
-  useEffect(() => {
-    return () => {
-      images.forEach(image => {
-        if (image && image.preview && typeof URL.revokeObjectURL === 'function') {
-          try {
-            URL.revokeObjectURL(image.preview);
-          } catch (err) {
-            console.error('Error revoking object URL during cleanup:', err);
-          }
-        }
-      });
-    };
-  }, [images]);
 
   // Load dealers when modal opens; apply AI prefill if present
   useEffect(() => {
@@ -470,6 +450,7 @@ const fetchDealers = async () => {
     if (!e.target.files || e.target.files.length === 0) return;
     
     const files = Array.from(e.target.files);
+    if (files.length + images.length > 10) { setErrors(prev => ({ ...prev, images: 'A listing can have up to 10 photos. Remove a photo before adding more.' })); return; }
     const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
     const maxSize = 5 * 1024 * 1024; // 5MB
     
@@ -486,7 +467,7 @@ const fetchDealers = async () => {
       return true;
     });
     
-    if (validFiles.length === 0) {
+    if (validFiles.length !== files.length) {
       setErrors(prev => ({
         ...prev,
         images: 'Please upload valid image files (JPEG, PNG, or WebP) under 5MB'
@@ -625,89 +606,17 @@ const fetchDealers = async () => {
 
   // Form validation
   const validateForm = () => {
-    const newErrors = {};
-
-    // Basic validation
-    if (!formData.title?.trim()) {
-      newErrors.title = 'Title is required';
-    }
-
-    if (!formData.description?.trim()) {
-      newErrors.description = 'Description is required';
-    }
-
-    if (!formData.category?.trim()) {
-      newErrors.category = 'Category is required';
-    }
-
-    if (!formData.dealer?.trim()) {
-      newErrors.dealer = 'Dealer is required';
-    }
-
-    // Price validation - only required if not POA
-    if (!formData.priceOptions?.showPriceAsPOA && (!formData.price || formData.price <= 0)) {
-      newErrors.price = 'Price is required unless Price on Application is selected';
-    }
-
-    // NEW: Savings validation
-    if (formData.priceOptions?.showSavings) {
-      const originalPrice = parseFloat(formData.priceOptions.originalPrice) || 0;
-      const currentPrice = parseFloat(formData.price) || 0;
-      const dealerDiscount = parseFloat(formData.priceOptions.dealerDiscount) || 0;
-      
-      if (!originalPrice && !dealerDiscount) {
-        newErrors['priceOptions.originalPrice'] = 'Original price or dealer discount is required for savings';
-      }
-      
-      if (originalPrice && originalPrice <= currentPrice) {
-        newErrors['priceOptions.originalPrice'] = 'Original price must be higher than current price';
-      }
-      
-      if (dealerDiscount && (dealerDiscount <= 0 || dealerDiscount >= 100)) {
-        newErrors['priceOptions.dealerDiscount'] = 'Dealer discount must be between 1% and 99%';
-      }
-    }
-
-    // Specifications validation
-    if (!formData.specifications?.make?.trim()) {
-      newErrors['specifications.make'] = 'Make is required';
-    }
-    
-    if (!formData.specifications?.model?.trim()) {
-      newErrors['specifications.model'] = 'Model is required';
-    }
-    
-    if (!formData.specifications?.transmission?.trim()) {
-      newErrors['specifications.transmission'] = 'Transmission type is required';
-    }
-    
-    if (!formData.specifications?.fuelType?.trim()) {
-      newErrors['specifications.fuelType'] = 'Fuel type is required';
-    }
-
-    // Location validation
-    if (!formData.location?.city?.trim()) {
-      newErrors['location.city'] = 'City is required';
-    }
-    
-    if (!formData.location?.country?.trim()) {
-      newErrors['location.country'] = 'Country is required';
-    }
-
-    // Image validation
-    if (images.length === 0) {
-      newErrors.images = 'At least one image is required';
-    }
-
-    console.log('Validation errors:', newErrors);
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const nextErrors = listingFormErrors(formData, images.length, false);
+    setErrors(nextErrors);
+    const first = Object.keys(nextErrors)[0];
+    if (first) focusListingError(first, changeSection, formRef);
+    return !first;
   };
 
-  // Handle form submission with listingService
 const handleSubmit = async (e) => {
   e.preventDefault();
   
+  if (isSubmitting) return;
   if (!validateForm()) {
     dispatch(addNotification({
       type: 'error',
@@ -756,7 +665,7 @@ const handleSubmit = async (e) => {
       } : null,
       
       price: formData.priceOptions?.showPriceAsPOA ? 0 : (Number(formData.price) || 0),
-      listingQuality: Number(formData.listingQuality) || 50,
+      listingQuality: listingQuality(formData.listingQuality ?? 50),
       priceType: formData.priceType || 'fixed',
       priceOptions: {
         includesVAT: Boolean(formData.priceOptions?.includesVAT),
@@ -880,12 +789,12 @@ const handleSubmit = async (e) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={(e) => {
+    <div className="modal-overlay admin-listing-modal admin-listing-modal--create" data-admin-listing="true" onClick={(e) => {
       if (e.target === e.currentTarget && !isSubmitting) onClose();
     }}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
+      <div className="modal-content" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="admin-create-listing-title" tabIndex={-1} onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Add New Listing</h2>
+          <div className="listing-header-copy"><span className="listing-header-eyebrow">Vehicle inventory</span><h2 id="admin-create-listing-title">Create a vehicle listing</h2><p>Vehicle details, photos and pricing. Fields marked * are required.</p></div>
           <button 
             className="close-button" 
             onClick={onClose}
@@ -896,21 +805,25 @@ const handleSubmit = async (e) => {
           </button>
         </div>
 
-        <div className="modal-tabs">
+        <div className="modal-tabs" role="navigation" aria-label="Listing sections">
           {tabs.map(tab => (
             <button
               key={tab.id}
               className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
+              type="button"
+              aria-pressed={activeTab === tab.id}
+              onClick={() => changeSection(tab.id)}
               disabled={isSubmitting}
             >
-              <span className="tab-icon">{tab.icon}</span>
+              <ListingSectionIcon section={tab.id} />
               {tab.label}
             </button>
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="listing-form">
+        <form onSubmit={handleSubmit} className="listing-form" ref={formRef} noValidate>
+          <ListingSectionHeading section={activeTab} />
+          <ListingFormFeedback errors={errors} changeSection={changeSection} formRef={formRef} />
           {/* Basic Info Section */}
           <section className={`form-section ${activeTab === 'basic' ? 'active' : ''}`}>
             <div className="form-grid">
@@ -954,7 +867,7 @@ const handleSubmit = async (e) => {
                   onChange={handleChange}
                   disabled={isSubmitting}
                 >
-                  {LISTING_STATUS.map(status => (
+                  {ADMIN_LISTING_STATUSES.map(status => (
                     <option key={status.value} value={status.value}>
                       {status.label}
                     </option>
@@ -1033,8 +946,8 @@ const handleSubmit = async (e) => {
       if (picked) {
         setFormData(prev => ({
           ...prev,
-          sellerPhone: prev.sellerPhone || picked.contact?.phone || '',
-          sellerWhatsapp: prev.sellerWhatsapp || picked.contact?.whatsapp || picked.contact?.phone || ''
+          sellerPhone: picked.contact?.phone || '',
+          sellerWhatsapp: picked.contact?.whatsapp || picked.contact?.phone || ''
         }));
       }
     }}
@@ -1148,9 +1061,9 @@ const handleSubmit = async (e) => {
                 <input
                   type="text"
                   id="make"
-                  name="make"
+                  name="specifications.make"
                   value={getSafeFormValue(formData, 'specifications.make', '')}
-                  onChange={handleSpecsChange}
+                  onChange={handleNestedChange}
                   placeholder="Make"
                   className={`form-input ${errors['specifications.make'] ? 'error' : ''}`}
                   disabled={isSubmitting}
@@ -1488,7 +1401,7 @@ const handleSubmit = async (e) => {
           <section className={`form-section ${activeTab === 'media' ? 'active' : ''}`}>
             <div className="form-group">
               <label>Vehicle Images*</label>
-              <div className="image-upload-area" onClick={() => fileInputRef.current?.click()}>
+              <div className="image-upload-area" role="button" tabIndex={0} aria-label="Upload vehicle photos" onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fileInputRef.current?.click(); } }} onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); if (!isSubmitting) handleImageUpload({ target: { files: event.dataTransfer.files, value: '' } }); }} onClick={() => fileInputRef.current?.click()}>
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -2129,6 +2042,10 @@ const handleSubmit = async (e) => {
 
           {/* Form Actions */}
           <div className="form-actions">
+            <div className="listing-step-actions">
+              <button type="button" disabled={isSubmitting || activeTab === tabs[0].id} onClick={() => changeSection(tabs[tabs.findIndex(tab => tab.id === activeTab) - 1].id)}>Previous</button>
+              <button type="button" disabled={isSubmitting || activeTab === tabs[tabs.length - 1].id} onClick={() => changeSection(tabs[tabs.findIndex(tab => tab.id === activeTab) + 1].id)}>Next section</button>
+            </div>
             <button
               type="button"
               className="cancel-button"
@@ -2142,11 +2059,7 @@ const handleSubmit = async (e) => {
               className="submit-button"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Adding...' : 
-                formData.priceOptions?.showSavings ? 
-                  '🎯 Add Listing with Savings' : 
-                  'Add Listing'
-              }
+              {isSubmitting ? 'Saving...' : 'Create listing'}
             </button>
           </div>
         </form>

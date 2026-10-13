@@ -1,7 +1,7 @@
 /* UpdateListingModal.css - Complete standalone version */
 
 /* Modal Overlay */
-.modal-overlay {
+.admin-listing-modal--edit.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -17,7 +17,7 @@
 }
 
 /* Modal Content */
-.modal-content {
+.admin-listing-modal--edit .modal-content {
   background: rgba(20, 20, 20, 0.95);
   border: 1px solid #2c2c2c;
   border-radius: 16px;
@@ -31,7 +31,7 @@
 }
 
 /* Modal Header */
-.modal-header {
+.admin-listing-modal--edit .modal-header {
   padding: 1.5rem 2rem;
   border-bottom: 1px solid #2c2c2c;
   display: flex;
@@ -40,7 +40,7 @@
   background: rgba(0, 0, 0, 0.2);
 }
 
-.modal-header h2 {
+.admin-listing-modal--edit .modal-header h2 {
   color: #ffffff;
   margin: 0;
   font-size: 1.5rem;
@@ -50,12 +50,12 @@
   gap: 0.5rem;
 }
 
-.modal-header h2::before {
+.admin-listing-modal--edit .modal-header h2::before {
   content: "✏️";
   font-size: 1.2rem;
 }
 
-.close-button {
+.admin-listing-modal--edit .close-button {
   background: none;
   border: none;
   color: #888;
@@ -71,18 +71,18 @@
   border-radius: 50%;
 }
 
-.close-button:hover {
+.admin-listing-modal--edit .close-button:hover {
   color: #ff3300;
   background: rgba(255, 51, 0, 0.1);
 }
 
-.close-button:disabled {
+.admin-listing-modal--edit .close-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Modal Tabs */
-.modal-tabs {
+.admin-listing-modal--edit .modal-tabs {
   display: flex;
   background: rgba(0, 0, 0, 0.3);
   border-bottom: 1px solid #2c2c2c;
@@ -91,11 +91,11 @@
   -ms-overflow-style: none;
 }
 
-.modal-tabs::-webkit-scrollbar {
+.admin-listing-modal--edit .modal-tabs::-webkit-scrollbar {
   display: none;
 }
 
-.tab-button {
+.admin-listing-modal--edit .tab-button {
   background: none;
   border: none;
   color: #888;
@@ -112,46 +112,46 @@
   justify-content: center;
 }
 
-.tab-button:hover {
+.admin-listing-modal--edit .tab-button:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.05);
 }
 
-.tab-button.active {
+.admin-listing-modal--edit .tab-button.active {
   color: #ff3300;
   border-bottom-color: #ff3300;
   background: rgba(255, 51, 0, 0.1);
 }
 
-.tab-button:disabled {
+.admin-listing-modal--edit .tab-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.tab-icon {
+.admin-listing-modal--edit .tab-icon {
   font-size: 1.1rem;
 }
 
 /* Form Container */
-.listing-form {
+.admin-listing-modal--edit .listing-form {
   flex: 1;
   overflow-y: auto;
   padding: 0;
 }
 
 /* Form Sections */
-.form-section {
+.admin-listing-modal--edit .form-section {
   display: none;
   padding: 2rem;
   animation: fadeIn 0.3s ease;
   position: relative;
 }
 
-.form-section.active {
+.admin-listing-modal--edit .form-section.active {
   display: block;
 }
 
-.records-private-banner {
+.admin-listing-modal--edit .records-private-banner {
   background: rgba(255, 150, 0, 0.1);
   border: 1px solid rgba(255, 150, 0, 0.35);
   border-radius: 8px;
@@ -162,13 +162,13 @@
   margin-bottom: 1.2rem;
 }
 
-.records-vin-note {
+.admin-listing-modal--edit .records-vin-note {
   font-size: 0.82rem;
   color: rgba(255,255,255,0.55);
   margin: 0;
 }
 
-.records-tab-link {
+.admin-listing-modal--edit .records-tab-link {
   background: none;
   border: none;
   color: #5aacff;
@@ -178,8 +178,8 @@
   text-decoration: underline;
 }
 
-[data-theme="light"] .records-vin-note { color: rgba(0,0,0,0.5); }
-[data-theme="light"] .records-tab-link { color: #0055cc; }
+.admin-listing-modal--edit [data-theme="light"] .records-vin-note { color: rgba(0,0,0,0.5); }
+.admin-listing-modal--edit [data-theme="light"] .records-tab-link { color: #0055cc; }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -187,7 +187,7 @@
 }
 
 /* Update-specific: Status indicator for form sections */
-.form-section::before {
+.admin-listing-modal--edit .form-section::before {
   content: attr(data-status);
   position: absolute;
   top: -15px;
@@ -202,7 +202,7 @@
   display: none;
 }
 
-.form-section.has-changes::before {
+.admin-listing-modal--edit .form-section.has-changes::before {
   content: "Modified";
   display: block;
   background: rgba(255, 193, 7, 0.1);
@@ -211,7 +211,7 @@
 }
 
 /* Savings Section Header */
-.savings-section-header {
+.admin-listing-modal--edit .savings-section-header {
   background: linear-gradient(135deg, rgba(255, 51, 0, 0.1), rgba(255, 102, 0, 0.1));
   border: 1px solid rgba(255, 51, 0, 0.2);
   border-radius: 12px;
@@ -220,14 +220,14 @@
   text-align: center;
 }
 
-.savings-section-header h3 {
+.admin-listing-modal--edit .savings-section-header h3 {
   color: #ff3300;
   margin: 0 0 0.5rem 0;
   font-size: 1.4rem;
   font-weight: 700;
 }
 
-.savings-section-header p {
+.admin-listing-modal--edit .savings-section-header p {
   color: #c9c9c9;
   margin: 0;
   font-size: 1rem;
@@ -235,7 +235,7 @@
 }
 
 /* Savings Preview - Enhanced for updates */
-.savings-preview {
+.admin-listing-modal--edit .savings-preview {
   background: rgba(46, 213, 115, 0.1);
   border: 1px solid rgba(46, 213, 115, 0.3);
   border-radius: 12px;
@@ -245,7 +245,7 @@
   position: relative;
 }
 
-.savings-preview::before {
+.admin-listing-modal--edit .savings-preview::before {
   content: "💰";
   position: absolute;
   top: -10px;
@@ -261,7 +261,7 @@
   font-size: 1.2rem;
 }
 
-.savings-preview h4 {
+.admin-listing-modal--edit .savings-preview h4 {
   color: #2ed573;
   margin: 0 0 1rem 0;
   font-size: 1.2rem;
@@ -270,13 +270,13 @@
   gap: 0.5rem;
 }
 
-.savings-preview-content {
+.admin-listing-modal--edit .savings-preview-content {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
 }
 
-.preview-row {
+.admin-listing-modal--edit .preview-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -284,7 +284,7 @@
   color: #ffffff;
 }
 
-.preview-row.savings-amount {
+.admin-listing-modal--edit .preview-row.savings-amount {
   border-top: 1px solid rgba(46, 213, 115, 0.3);
   padding-top: 0.8rem;
   font-weight: 700;
@@ -293,31 +293,31 @@
 }
 
 /* Form Grid */
-.form-grid {
+.admin-listing-modal--edit .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   align-items: start;
 }
 
-.form-group {
+.admin-listing-modal--edit .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.form-group.full-width {
+.admin-listing-modal--edit .form-group.full-width {
   grid-column: 1 / -1;
 }
 
-.form-group.checkbox {
+.admin-listing-modal--edit .form-group.checkbox {
   flex-direction: row;
   align-items: center;
   gap: 0.8rem;
 }
 
 /* Form Labels */
-label {
+.admin-listing-modal--edit label {
   color: #ffffff;
   font-weight: 500;
   font-size: 0.95rem;
@@ -326,14 +326,14 @@ label {
   gap: 0.5rem;
 }
 
-label small {
+.admin-listing-modal--edit label small {
   color: #888;
   font-weight: normal;
   font-size: 0.8rem;
   margin-left: 0.5rem;
 }
 
-.checkbox-label {
+.admin-listing-modal--edit .checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.8rem;
@@ -342,23 +342,23 @@ label small {
   font-weight: normal;
 }
 
-.checkbox-label input[type="checkbox"] {
+.admin-listing-modal--edit .checkbox-label input[type="checkbox"] {
   margin: 0;
 }
 
-.checkbox-label span {
+.admin-listing-modal--edit .checkbox-label span {
   color: #ffffff;
 }
 
 /* Form Inputs */
-.form-input,
-input[type="text"],
-input[type="number"],
-input[type="email"],
-input[type="tel"],
-input[type="date"],
-select,
-textarea {
+.admin-listing-modal--edit .form-input,
+.admin-listing-modal--edit input[type="text"],
+.admin-listing-modal--edit input[type="number"],
+.admin-listing-modal--edit input[type="email"],
+.admin-listing-modal--edit input[type="tel"],
+.admin-listing-modal--edit input[type="date"],
+.admin-listing-modal--edit select,
+.admin-listing-modal--edit textarea {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #2c2c2c;
   border-radius: 8px;
@@ -368,35 +368,35 @@ textarea {
   transition: all 0.3s ease;
 }
 
-.form-input:focus,
-input:focus,
-select:focus,
-textarea:focus {
+.admin-listing-modal--edit .form-input:focus,
+.admin-listing-modal--edit input:focus,
+.admin-listing-modal--edit select:focus,
+.admin-listing-modal--edit textarea:focus {
   outline: none;
   border-color: #ff3300;
   background: rgba(0, 0, 0, 0.5);
   box-shadow: 0 0 0 3px rgba(255, 51, 0, 0.1);
 }
 
-.form-input.error,
-input.error,
-select.error,
-textarea.error {
+.admin-listing-modal--edit .form-input.error,
+.admin-listing-modal--edit input.error,
+.admin-listing-modal--edit select.error,
+.admin-listing-modal--edit textarea.error {
   border-color: #e53e3e;
   background: rgba(229, 62, 62, 0.1);
 }
 
-.form-input:disabled,
-input:disabled,
-select:disabled,
-textarea:disabled {
+.admin-listing-modal--edit .form-input:disabled,
+.admin-listing-modal--edit input:disabled,
+.admin-listing-modal--edit select:disabled,
+.admin-listing-modal--edit textarea:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   background: rgba(0, 0, 0, 0.2);
 }
 
 /* Small helper text */
-small {
+.admin-listing-modal--edit small {
   color: #888;
   font-size: 0.8rem;
   margin-top: 0.3rem;
@@ -404,7 +404,7 @@ small {
 }
 
 /* Error Messages */
-.error-message {
+.admin-listing-modal--edit .error-message {
   color: #e53e3e;
   font-size: 0.85rem;
   margin-top: 0.3rem;
@@ -413,13 +413,13 @@ small {
   gap: 0.3rem;
 }
 
-.error-message::before {
+.admin-listing-modal--edit .error-message::before {
   content: "⚠";
   font-size: 0.9rem;
 }
 
 /* Select Styling */
-select {
+.admin-listing-modal--edit select {
   appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
@@ -429,8 +429,8 @@ select {
 }
 
 /* Checkbox and Radio Styling */
-input[type="checkbox"],
-input[type="radio"] {
+.admin-listing-modal--edit input[type="checkbox"],
+.admin-listing-modal--edit input[type="radio"] {
   width: 18px;
   height: 18px;
   accent-color: #ff3300;
@@ -438,14 +438,14 @@ input[type="radio"] {
 }
 
 /* Features Grid */
-.features-grid {
+.admin-listing-modal--edit .features-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 0.8rem;
   margin-top: 1rem;
 }
 
-.features-grid .checkbox-label {
+.admin-listing-modal--edit .features-grid .checkbox-label {
   background: rgba(0, 0, 0, 0.2);
   padding: 0.8rem;
   border-radius: 8px;
@@ -453,18 +453,18 @@ input[type="radio"] {
   transition: all 0.3s ease;
 }
 
-.features-grid .checkbox-label:hover {
+.admin-listing-modal--edit .features-grid .checkbox-label:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: #2c2c2c;
 }
 
-.features-grid .checkbox-label input:checked + span {
+.admin-listing-modal--edit .features-grid .checkbox-label input:checked + span {
   color: #ff3300;
   font-weight: 500;
 }
 
 /* Feature Tags */
-.feature-tags {
+.admin-listing-modal--edit .feature-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -472,7 +472,7 @@ input[type="radio"] {
   min-height: 2rem;
 }
 
-.feature-tag {
+.admin-listing-modal--edit .feature-tag {
   background: rgba(255, 51, 0, 0.1);
   color: #ff3300;
   padding: 0.4rem 0.8rem;
@@ -484,7 +484,7 @@ input[type="radio"] {
   border: 1px solid rgba(255, 51, 0, 0.3);
 }
 
-.remove-tag {
+.admin-listing-modal--edit .remove-tag {
   background: none;
   border: none;
   color: #ff3300;
@@ -500,18 +500,18 @@ input[type="radio"] {
   border-radius: 50%;
 }
 
-.remove-tag:hover {
+.admin-listing-modal--edit .remove-tag:hover {
   background: rgba(255, 51, 0, 0.2);
   color: #ffffff;
 }
 
-.feature-input {
+.admin-listing-modal--edit .feature-input {
   flex: 1;
   min-width: 200px;
 }
 
 /* Keywords Container */
-.keywords-container {
+.admin-listing-modal--edit .keywords-container {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -523,7 +523,7 @@ input[type="radio"] {
   background: rgba(0, 0, 0, 0.3);
 }
 
-.keyword-tag {
+.admin-listing-modal--edit .keyword-tag {
   background: rgba(54, 162, 235, 0.1);
   color: #36a2eb;
   padding: 0.3rem 0.6rem;
@@ -535,7 +535,7 @@ input[type="radio"] {
   border: 1px solid rgba(54, 162, 235, 0.3);
 }
 
-.keyword-input {
+.admin-listing-modal--edit .keyword-input {
   border: none;
   background: none;
   color: #ffffff;
@@ -545,12 +545,12 @@ input[type="radio"] {
   padding: 0.3rem;
 }
 
-.keyword-input::placeholder {
+.admin-listing-modal--edit .keyword-input::placeholder {
   color: #666;
 }
 
 /* UPDATE-SPECIFIC: Image Management Sections */
-.existing-images-section {
+.admin-listing-modal--edit .existing-images-section {
   margin-bottom: 2rem;
   padding: 1rem;
   background: rgba(0, 0, 0, 0.1);
@@ -558,7 +558,7 @@ input[type="radio"] {
   border: 1px solid #2c2c2c;
 }
 
-.existing-images-section h4 {
+.admin-listing-modal--edit .existing-images-section h4 {
   color: #ffffff;
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
@@ -567,16 +567,16 @@ input[type="radio"] {
   gap: 0.5rem;
 }
 
-.existing-images-section h4::before {
+.admin-listing-modal--edit .existing-images-section h4::before {
   content: "📁";
   font-size: 1.2rem;
 }
 
-.new-images-section {
+.admin-listing-modal--edit .new-images-section {
   margin-top: 1rem;
 }
 
-.new-images-section h4 {
+.admin-listing-modal--edit .new-images-section h4 {
   color: #ffffff;
   margin: 0 0 1rem 0;
   font-size: 1.1rem;
@@ -585,13 +585,13 @@ input[type="radio"] {
   gap: 0.5rem;
 }
 
-.new-images-section h4::before {
+.admin-listing-modal--edit .new-images-section h4::before {
   content: "📤";
   font-size: 1.2rem;
 }
 
 /* Image Upload Area */
-.image-upload-area {
+.admin-listing-modal--edit .image-upload-area {
   border: 2px dashed #2c2c2c;
   border-radius: 12px;
   padding: 3rem 2rem;
@@ -601,16 +601,16 @@ input[type="radio"] {
   background: rgba(0, 0, 0, 0.2);
 }
 
-.image-upload-area:hover {
+.admin-listing-modal--edit .image-upload-area:hover {
   border-color: #ff3300;
   background: rgba(255, 51, 0, 0.05);
 }
 
-.hidden-input {
+.admin-listing-modal--edit .hidden-input {
   display: none;
 }
 
-.upload-placeholder {
+.admin-listing-modal--edit .upload-placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -618,24 +618,24 @@ input[type="radio"] {
   color: #888;
 }
 
-.upload-icon {
+.admin-listing-modal--edit .upload-icon {
   font-size: 3rem;
 }
 
-.upload-placeholder span {
+.admin-listing-modal--edit .upload-placeholder span {
   font-size: 1.1rem;
   color: #ffffff;
 }
 
 /* Image Previews */
-.image-previews {
+.admin-listing-modal--edit .image-previews {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 1rem;
   margin-top: 1.5rem;
 }
 
-.image-preview {
+.admin-listing-modal--edit .image-preview {
   position: relative;
   aspect-ratio: 16/9;
   border-radius: 8px;
@@ -644,23 +644,23 @@ input[type="radio"] {
   background: rgba(0, 0, 0, 0.3);
 }
 
-.image-preview.existing {
+.admin-listing-modal--edit .image-preview.existing {
   border: 2px solid rgba(54, 162, 235, 0.3);
   background: rgba(54, 162, 235, 0.05);
 }
 
-.image-preview.new {
+.admin-listing-modal--edit .image-preview.new {
   border: 2px solid rgba(46, 213, 115, 0.3);
   background: rgba(46, 213, 115, 0.05);
 }
 
-.image-preview img {
+.admin-listing-modal--edit .image-preview img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.image-preview-actions {
+.admin-listing-modal--edit .image-preview-actions {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
@@ -669,7 +669,7 @@ input[type="radio"] {
   gap: 0.3rem;
 }
 
-.remove-image {
+.admin-listing-modal--edit .remove-image {
   background: rgba(229, 62, 62, 0.9);
   color: white;
   border: none;
@@ -684,12 +684,12 @@ input[type="radio"] {
   transition: all 0.3s ease;
 }
 
-.remove-image:hover {
+.admin-listing-modal--edit .remove-image:hover {
   background: #e53e3e;
   transform: scale(1.1);
 }
 
-.primary-image {
+.admin-listing-modal--edit .primary-image {
   display: flex;
   align-items: center;
   gap: 0.3rem;
@@ -702,17 +702,17 @@ input[type="radio"] {
   transition: all 0.3s ease;
 }
 
-.primary-image:hover {
+.admin-listing-modal--edit .primary-image:hover {
   background: rgba(0, 0, 0, 0.9);
 }
 
-.primary-image input {
+.admin-listing-modal--edit .primary-image input {
   width: 12px;
   height: 12px;
   margin: 0;
 }
 
-.new-badge {
+.admin-listing-modal--edit .new-badge {
   position: absolute;
   bottom: 0.5rem;
   left: 0.5rem;
@@ -725,11 +725,11 @@ input[type="radio"] {
 }
 
 /* Change indicators */
-.field-changed {
+.admin-listing-modal--edit .field-changed {
   position: relative;
 }
 
-.field-changed::after {
+.admin-listing-modal--edit .field-changed::after {
   content: "•";
   position: absolute;
   top: -5px;
@@ -740,7 +740,7 @@ input[type="radio"] {
 }
 
 /* Form Actions */
-.form-actions {
+.admin-listing-modal--edit .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
@@ -749,8 +749,8 @@ input[type="radio"] {
   background: rgba(0, 0, 0, 0.2);
 }
 
-.cancel-button,
-.submit-button {
+.admin-listing-modal--edit .cancel-button,
+.admin-listing-modal--edit .submit-button {
   padding: 0.8rem 2rem;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -761,18 +761,18 @@ input[type="radio"] {
   min-width: 120px;
 }
 
-.cancel-button {
+.admin-listing-modal--edit .cancel-button {
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   border-color: #2c2c2c;
 }
 
-.cancel-button:hover {
+.admin-listing-modal--edit .cancel-button:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
 /* Enhanced submit button for updates */
-.submit-button {
+.admin-listing-modal--edit .submit-button {
   background: linear-gradient(135deg, #ff3300, #cc2900);
   color: white;
   border: none;
@@ -786,7 +786,7 @@ input[type="radio"] {
   overflow: hidden;
 }
 
-.submit-button::before {
+.admin-listing-modal--edit .submit-button::before {
   content: "";
   position: absolute;
   top: 0;
@@ -797,29 +797,29 @@ input[type="radio"] {
   transition: left 0.5s;
 }
 
-.submit-button:hover::before {
+.admin-listing-modal--edit .submit-button:hover::before {
   left: 100%;
 }
 
-.submit-button:hover {
+.admin-listing-modal--edit .submit-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(255, 51, 0, 0.3);
 }
 
-.submit-button:disabled,
-.cancel-button:disabled {
+.admin-listing-modal--edit .submit-button:disabled,
+.admin-listing-modal--edit .cancel-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
-.submit-button:disabled::before {
+.admin-listing-modal--edit .submit-button:disabled::before {
   display: none;
 }
 
 /* Loading Overlay */
-.loading-overlay {
+.admin-listing-modal--edit .loading-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -833,7 +833,7 @@ input[type="radio"] {
   backdrop-filter: blur(4px);
 }
 
-.spinner {
+.admin-listing-modal--edit .spinner {
   width: 40px;
   height: 40px;
   border: 3px solid rgba(255, 51, 0, 0.3);
@@ -848,7 +848,7 @@ input[type="radio"] {
 }
 
 /* Error Fallback */
-.error-fallback {
+.admin-listing-modal--edit .error-fallback {
   padding: 2rem;
   text-align: center;
   background: rgba(229, 62, 62, 0.1);
@@ -857,12 +857,12 @@ input[type="radio"] {
   color: #ffffff;
 }
 
-.error-fallback h3 {
+.admin-listing-modal--edit .error-fallback h3 {
   color: #e53e3e;
   margin-bottom: 1rem;
 }
 
-.error-fallback button {
+.admin-listing-modal--edit .error-fallback button {
   background: #e53e3e;
   color: white;
   border: none;
@@ -873,12 +873,12 @@ input[type="radio"] {
   margin-top: 1rem;
 }
 
-.error-fallback button:hover {
+.admin-listing-modal--edit .error-fallback button:hover {
   background: #c53030;
 }
 
 /* Progress indicator */
-.update-progress {
+.admin-listing-modal--edit .update-progress {
   position: fixed;
   top: 0;
   left: 0;
@@ -888,7 +888,7 @@ input[type="radio"] {
   z-index: 10000;
 }
 
-.update-progress-bar {
+.admin-listing-modal--edit .update-progress-bar {
   height: 100%;
   background: linear-gradient(90deg, #ff3300, #ff6600);
   transition: width 0.3s ease;
@@ -896,27 +896,27 @@ input[type="radio"] {
 }
 
 /* Image comparison view */
-.image-comparison {
+.admin-listing-modal--edit .image-comparison {
   display: flex;
   gap: 1rem;
   align-items: center;
   margin: 1rem 0;
 }
 
-.image-before,
-.image-after {
+.admin-listing-modal--edit .image-before,
+.admin-listing-modal--edit .image-after {
   flex: 1;
   text-align: center;
 }
 
-.image-before h5,
-.image-after h5 {
+.admin-listing-modal--edit .image-before h5,
+.admin-listing-modal--edit .image-after h5 {
   color: #ffffff;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
 
-.comparison-arrow {
+.admin-listing-modal--edit .comparison-arrow {
   font-size: 1.5rem;
   color: #ff3300;
   margin: 0 1rem;
@@ -924,187 +924,187 @@ input[type="radio"] {
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-  .form-grid {
+  .admin-listing-modal--edit .form-grid {
     grid-template-columns: 1fr;
   }
   
-  .features-grid {
+  .admin-listing-modal--edit .features-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .modal-overlay {
+  .admin-listing-modal--edit.modal-overlay {
     padding: 0.5rem;
   }
   
-  .modal-content {
+  .admin-listing-modal--edit .modal-content {
     max-width: 100vw;
     max-height: 100vh;
     border-radius: 0;
   }
   
-  .modal-header {
+  .admin-listing-modal--edit .modal-header {
     padding: 1rem 1.5rem;
   }
   
-  .modal-header h2 {
+  .admin-listing-modal--edit .modal-header h2 {
     font-size: 1.3rem;
   }
   
-  .modal-tabs {
+  .admin-listing-modal--edit .modal-tabs {
     padding: 0;
   }
   
-  .tab-button {
+  .admin-listing-modal--edit .tab-button {
     padding: 0.8rem 1rem;
     font-size: 0.8rem;
     min-width: 100px;
   }
   
-  .tab-icon {
+  .admin-listing-modal--edit .tab-icon {
     font-size: 1rem;
   }
   
-  .form-section {
+  .admin-listing-modal--edit .form-section {
     padding: 1.5rem;
   }
   
-  .form-actions {
+  .admin-listing-modal--edit .form-actions {
     padding: 1rem 1.5rem;
     flex-direction: column;
   }
   
-  .cancel-button,
-  .submit-button {
+  .admin-listing-modal--edit .cancel-button,
+  .admin-listing-modal--edit .submit-button {
     width: 100%;
   }
   
-  .image-previews {
+  .admin-listing-modal--edit .image-previews {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }
   
-  .upload-placeholder span {
+  .admin-listing-modal--edit .upload-placeholder span {
     font-size: 1rem;
   }
   
-  .upload-icon {
+  .admin-listing-modal--edit .upload-icon {
     font-size: 2.5rem;
   }
   
-  .savings-preview {
+  .admin-listing-modal--edit .savings-preview {
     grid-column: span 1;
     padding: 1rem;
   }
 
-  .existing-images-section,
-  .new-images-section {
+  .admin-listing-modal--edit .existing-images-section,
+  .admin-listing-modal--edit .new-images-section {
     padding: 0.8rem;
   }
   
-  .existing-images-section h4,
-  .new-images-section h4 {
+  .admin-listing-modal--edit .existing-images-section h4,
+  .admin-listing-modal--edit .new-images-section h4 {
     font-size: 1rem;
   }
   
-  .image-preview-actions {
+  .admin-listing-modal--edit .image-preview-actions {
     top: 0.3rem;
     right: 0.3rem;
   }
   
-  .image-preview-actions .remove-image {
+  .admin-listing-modal--edit .image-preview-actions .remove-image {
     width: 20px;
     height: 20px;
     font-size: 0.8rem;
   }
   
-  .primary-image {
+  .admin-listing-modal--edit .primary-image {
     font-size: 0.65rem;
     padding: 0.2rem 0.4rem;
   }
   
-  .primary-image input {
+  .admin-listing-modal--edit .primary-image input {
     width: 10px;
     height: 10px;
   }
 }
 
 @media (max-width: 480px) {
-  .modal-header {
+  .admin-listing-modal--edit .modal-header {
     padding: 0.8rem 1rem;
   }
   
-  .form-section {
+  .admin-listing-modal--edit .form-section {
     padding: 1rem;
   }
   
-  .form-actions {
+  .admin-listing-modal--edit .form-actions {
     padding: 1rem;
   }
   
-  .image-previews {
+  .admin-listing-modal--edit .image-previews {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.8rem;
   }
   
-  .features-grid .checkbox-label {
+  .admin-listing-modal--edit .features-grid .checkbox-label {
     padding: 0.6rem;
   }
   
-  .savings-section-header {
+  .admin-listing-modal--edit .savings-section-header {
     padding: 1rem;
     margin-bottom: 1.5rem;
   }
   
-  .savings-section-header h3 {
+  .admin-listing-modal--edit .savings-section-header h3 {
     font-size: 1.2rem;
   }
   
-  .savings-preview {
+  .admin-listing-modal--edit .savings-preview {
     padding: 0.8rem;
   }
   
-  .preview-row {
+  .admin-listing-modal--edit .preview-row {
     font-size: 0.9rem;
   }
 
-  .submit-button {
+  .admin-listing-modal--edit .submit-button {
     min-width: 100%;
   }
 }
 
 /* High Contrast Mode */
 @media (prefers-contrast: more) {
-  .modal-content {
+  .admin-listing-modal--edit .modal-content {
     border: 2px solid #ffffff;
   }
   
-  .form-input,
-  input,
-  select,
-  textarea {
+  .admin-listing-modal--edit .form-input,
+  .admin-listing-modal--edit input,
+  .admin-listing-modal--edit select,
+  .admin-listing-modal--edit textarea {
     border: 2px solid #ffffff;
   }
   
-  .savings-section-header {
+  .admin-listing-modal--edit .savings-section-header {
     border: 2px solid #ff3300;
   }
   
-  .savings-preview {
+  .admin-listing-modal--edit .savings-preview {
     border: 2px solid #2ed573;
   }
 
-  .existing-images-section {
+  .admin-listing-modal--edit .existing-images-section {
     background: rgba(255, 255, 255, 0.05);
     border-color: #444;
   }
   
-  .image-preview.existing {
+  .admin-listing-modal--edit .image-preview.existing {
     border-color: rgba(54, 162, 235, 0.4);
     background: rgba(54, 162, 235, 0.08);
   }
   
-  .image-preview.new {
+  .admin-listing-modal--edit .image-preview.new {
     border-color: rgba(46, 213, 115, 0.4);
     background: rgba(46, 213, 115, 0.08);
   }
@@ -1112,33 +1112,33 @@ input[type="radio"] {
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-  .form-section,
-  .tab-button,
-  .form-input,
-  input,
-  select,
-  textarea,
-  .submit-button,
-  .remove-tag,
-  .remove-image,
-  .primary-image {
+  .admin-listing-modal--edit .form-section,
+  .admin-listing-modal--edit .tab-button,
+  .admin-listing-modal--edit .form-input,
+  .admin-listing-modal--edit input,
+  .admin-listing-modal--edit select,
+  .admin-listing-modal--edit textarea,
+  .admin-listing-modal--edit .submit-button,
+  .admin-listing-modal--edit .remove-tag,
+  .admin-listing-modal--edit .remove-image,
+  .admin-listing-modal--edit .primary-image {
     transition: none;
   }
   
-  .spinner {
+  .admin-listing-modal--edit .spinner {
     animation: none;
   }
 
-  .submit-button::before,
-  .image-preview-actions .remove-image {
+  .admin-listing-modal--edit .submit-button::before,
+  .admin-listing-modal--edit .image-preview-actions .remove-image {
     transition: none;
   }
   
-  .submit-button:hover {
+  .admin-listing-modal--edit .submit-button:hover {
     transform: none;
   }
   
-  .update-progress-bar {
+  .admin-listing-modal--edit .update-progress-bar {
     transition: none;
   }
   
@@ -1150,118 +1150,118 @@ input[type="radio"] {
 
 /* Dark mode enhancements for updates */
 @media (prefers-color-scheme: dark) {
-  .existing-images-section {
+  .admin-listing-modal--edit .existing-images-section {
     background: rgba(255, 255, 255, 0.05);
     border-color: #444;
   }
   
-  .existing-images-section h4,
-  .new-images-section h4 {
+  .admin-listing-modal--edit .existing-images-section h4,
+  .admin-listing-modal--edit .new-images-section h4 {
     color: #ffffff;
   }
   
-  .savings-preview {
+  .admin-listing-modal--edit .savings-preview {
     background: rgba(46, 213, 115, 0.08);
     border-color: rgba(46, 213, 115, 0.3);
   }
 }
 
 /* Focus Styles for Accessibility */
-.tab-button:focus-visible,
-.form-input:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-.submit-button:focus-visible,
-.cancel-button:focus-visible {
+.admin-listing-modal--edit .tab-button:focus-visible,
+.admin-listing-modal--edit .form-input:focus-visible,
+.admin-listing-modal--edit input:focus-visible,
+.admin-listing-modal--edit select:focus-visible,
+.admin-listing-modal--edit textarea:focus-visible,
+.admin-listing-modal--edit .submit-button:focus-visible,
+.admin-listing-modal--edit .cancel-button:focus-visible {
   outline: 2px solid #ff3300;
   outline-offset: 2px;
 }
 
-.image-preview:focus-within {
+.admin-listing-modal--edit .image-preview:focus-within {
   outline: 2px solid #ff3300;
   outline-offset: 2px;
 }
 
-.primary-image:focus-within {
+.admin-listing-modal--edit .primary-image:focus-within {
   outline: 2px solid #ff3300;
   outline-offset: 2px;
 }
 
 /* Print Styles */
 @media print {
-  .modal-overlay {
+  .admin-listing-modal--edit.modal-overlay {
     position: static;
     background: white;
   }
   
-  .modal-content {
+  .admin-listing-modal--edit .modal-content {
     box-shadow: none;
     border: 1px solid #000;
   }
   
-  .modal-tabs,
-  .form-actions,
-  .loading-overlay {
+  .admin-listing-modal--edit .modal-tabs,
+  .admin-listing-modal--edit .form-actions,
+  .admin-listing-modal--edit .loading-overlay {
     display: none;
   }
   
-  .form-section {
+  .admin-listing-modal--edit .form-section {
     display: block !important;
   }
 
-  .existing-images-section,
-  .new-images-section {
+  .admin-listing-modal--edit .existing-images-section,
+  .admin-listing-modal--edit .new-images-section {
     background: white;
     border: 1px solid #000;
   }
   
-  .existing-images-section h4,
-  .new-images-section h4 {
+  .admin-listing-modal--edit .existing-images-section h4,
+  .admin-listing-modal--edit .new-images-section h4 {
     color: #000;
   }
   
-  .image-preview-actions,
-  .new-badge {
+  .admin-listing-modal--edit .image-preview-actions,
+  .admin-listing-modal--edit .new-badge {
     display: none;
   }
 }
 
 /* ── Listing Quality Boost Slider ── */
-.lq-boost-group {
+.admin-listing-modal--edit .lq-boost-group {
   grid-column: 1 / -1;
   margin-top: 0.5rem;
 }
 
-.lq-slider-wrap {
+.admin-listing-modal--edit .lq-slider-wrap {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 10px;
   padding: 1.2rem 1.4rem 0.9rem;
   transition: border-color 0.25s, background 0.25s;
 }
-.lq-slider-wrap.lq-good    { border-color: rgba(74,222,128,0.35);  background: rgba(74,222,128,0.05); }
-.lq-slider-wrap.lq-premium { border-color: rgba(251,146,60,0.4);   background: rgba(251,146,60,0.06); }
-.lq-slider-wrap.lq-showcase{ border-color: rgba(250,204,21,0.5);   background: rgba(250,204,21,0.07); }
+.admin-listing-modal--edit .lq-slider-wrap.lq-good    { border-color: rgba(74,222,128,0.35);  background: rgba(74,222,128,0.05); }
+.admin-listing-modal--edit .lq-slider-wrap.lq-premium { border-color: rgba(251,146,60,0.4);   background: rgba(251,146,60,0.06); }
+.admin-listing-modal--edit .lq-slider-wrap.lq-showcase{ border-color: rgba(250,204,21,0.5);   background: rgba(250,204,21,0.07); }
 
-.lq-header {
+.admin-listing-modal--edit .lq-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.75rem;
 }
-.lq-tier-label {
+.admin-listing-modal--edit .lq-tier-label {
   font-weight: 600;
   font-size: 0.95rem;
   color: #fff;
 }
-.lq-score {
+.admin-listing-modal--edit .lq-score {
   font-size: 0.85rem;
   color: #999;
   font-variant-numeric: tabular-nums;
 }
 
-.lq-range {
+.admin-listing-modal--edit .lq-range {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
@@ -1278,7 +1278,7 @@ textarea:focus-visible,
   cursor: pointer;
   margin-bottom: 0.5rem;
 }
-.lq-range::-webkit-slider-thumb {
+.admin-listing-modal--edit .lq-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 20px;
@@ -1290,8 +1290,8 @@ textarea:focus-visible,
   cursor: pointer;
   transition: transform 0.15s;
 }
-.lq-range::-webkit-slider-thumb:hover { transform: scale(1.15); }
-.lq-range::-moz-range-thumb {
+.admin-listing-modal--edit .lq-range::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.admin-listing-modal--edit .lq-range::-moz-range-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
@@ -1300,14 +1300,14 @@ textarea:focus-visible,
   cursor: pointer;
 }
 
-.lq-track-labels {
+.admin-listing-modal--edit .lq-track-labels {
   display: flex;
   justify-content: space-between;
   font-size: 0.72rem;
   color: #666;
   margin-bottom: 0.6rem;
 }
-.lq-desc {
+.admin-listing-modal--edit .lq-desc {
   font-size: 0.8rem;
   color: #888;
   margin: 0;

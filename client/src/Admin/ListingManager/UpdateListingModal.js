@@ -1,3 +1,5 @@
+import { ADMIN_LISTING_STATUSES, LISTING_FORM_SECTIONS, listingFormErrors, listingDateInput, listingQuality, normalizeListingImage } from '../../utils/adminListingForm.js';
+import { ListingSectionIcon, ListingSectionHeading, ListingFormFeedback, focusListingError, useListingDialog, useListingPreviews } from '../../components/shared/AddListingModal/ListingFormElements.js';
 // src/components/admin/ListingManager/UpdateListingModal.js
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
@@ -8,7 +10,6 @@ import {
   FUEL_TYPES,
   DRIVETRAIN_TYPES,
   PRICE_TYPES,
-  LISTING_STATUS,
   TRANSMISSION_TYPES,
   ENTERTAINMENT_FEATURES,
   COUNTRIES 
@@ -46,18 +47,11 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
   const newFeatureRef = useRef(null);
   const keywordInputRef = useRef(null);
 
-  // Tab configuration - Same as AddListingModal
-  const tabs = [
-    { id: 'basic', label: 'Basic Info' },
-    { id: 'specs', label: 'Specifications' },
-    { id: 'features', label: 'Features' },
-    { id: 'media', label: 'Media' },
-    { id: 'pricing', label: 'Pricing' },
-    { id: 'savings', label: 'I3W Savings' },
-    { id: 'location', label: 'Location' },
-    { id: 'seo', label: 'SEO' },
-    { id: 'records', label: 'Records' }
-  ];
+  const tabs = LISTING_FORM_SECTIONS;
+  const dialogRef = useRef(null), formRef = useRef(null);
+  const changeSection = section => { setActiveTab(section); formRef.current?.scrollTo?.({ top: 0 }); };
+  useListingDialog(isOpen, isSubmitting, onClose, dialogRef);
+  useListingPreviews(newImages, isOpen);
 
   // Calculate savings automatically
   const calculateSavings = useCallback((originalPrice, currentPrice, dealerDiscount) => {
@@ -67,7 +61,7 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
       calculatedSavings.amount = originalPrice - currentPrice;
       calculatedSavings.percentage = Math.round((calculatedSavings.amount / originalPrice) * 100);
       calculatedSavings.originalPriceCalc = originalPrice;
-    } else if (dealerDiscount && currentPrice && dealerDiscount > 0) {
+    } else if (dealerDiscount && currentPrice && dealerDiscount > 0 && dealerDiscount < 100) {
       const originalPriceFromDiscount = Math.round(currentPrice / (1 - dealerDiscount / 100));
       calculatedSavings.amount = originalPriceFromDiscount - currentPrice;
       calculatedSavings.percentage = dealerDiscount;
@@ -94,7 +88,7 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
             savingsAmount: calculated.amount.toString(),
             savingsPercentage: calculated.percentage.toString(),
             originalPrice: calculated.originalPriceCalc.toString(),
-            showSavings: true
+            showSavings: prev.priceOptions?.showSavings || false
           }
         }));
       }
@@ -144,26 +138,26 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
         status: clonedData.status || 'active',
         bodyStyle: clonedData.bodyStyle || '',
         featured: clonedData.featured || false,
-        dealer: clonedData.dealerId || clonedData.dealer?.id || '',
+        dealer: String(clonedData.dealerId || clonedData.dealer?._id || clonedData.dealer?.id || ''),
         sellerPhone: clonedData.dealer?.contact?.phone || '',
         sellerWhatsapp: clonedData.dealer?.contact?.whatsapp || '',
         category: clonedData.category || '',
         
         // Specifications
         specifications: {
-          make: clonedData.specifications?.make || '',
-          model: clonedData.specifications?.model || '',
-          year: clonedData.specifications?.year || new Date().getFullYear(),
-          mileage: clonedData.specifications?.mileage || '',
-          transmission: clonedData.specifications?.transmission || '',
-          fuelType: clonedData.specifications?.fuelType || '',
-          engineSize: clonedData.specifications?.engineSize || '',
-          power: clonedData.specifications?.power || '',
-          torque: clonedData.specifications?.torque || '',
-          drivetrain: clonedData.specifications?.drivetrain || '',
-          exteriorColor: clonedData.specifications?.exteriorColor || '',
-          interiorColor: clonedData.specifications?.interiorColor || '',
-          vin: clonedData.specifications?.vin || ''
+          make: clonedData.specifications?.make ?? clonedData.make ?? '',
+          model: clonedData.specifications?.model ?? clonedData.model ?? '',
+          year: clonedData.specifications?.year ?? clonedData.year ?? new Date().getFullYear(),
+          mileage: clonedData.specifications?.mileage ?? clonedData.mileage ?? '',
+          transmission: clonedData.specifications?.transmission ?? clonedData.transmission ?? '',
+          fuelType: clonedData.specifications?.fuelType ?? clonedData.fuelType ?? '',
+          engineSize: clonedData.specifications?.engineSize ?? clonedData.engineSize ?? '',
+          power: clonedData.specifications?.power ?? clonedData.power ?? '',
+          torque: clonedData.specifications?.torque ?? clonedData.torque ?? '',
+          drivetrain: clonedData.specifications?.drivetrain ?? clonedData.drivetrain ?? '',
+          exteriorColor: clonedData.specifications?.exteriorColor ?? clonedData.exteriorColor ?? '',
+          interiorColor: clonedData.specifications?.interiorColor ?? clonedData.interiorColor ?? '',
+          vin: clonedData.specifications?.vin ?? clonedData.vin ?? ''
         },
         
         // Features
@@ -193,7 +187,7 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
           savingsDescription: clonedData.priceOptions?.savingsDescription || '',
           exclusiveDeal: clonedData.priceOptions?.exclusiveDeal || false,
           savingsValidUntil: clonedData.priceOptions?.savingsValidUntil ? 
-            new Date(clonedData.priceOptions.savingsValidUntil).toISOString().split('T')[0] : ''
+            listingDateInput(clonedData.priceOptions.savingsValidUntil) : ''
         },
 
         // Location
@@ -223,7 +217,7 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
         transit: {
           isInTransit: clonedData.transit?.isInTransit || false,
           destinationCountry: clonedData.transit?.destinationCountry || 'BW',
-          eta: clonedData.transit?.eta ? new Date(clonedData.transit.eta).toISOString().split('T')[0] : ''
+          eta: clonedData.transit?.eta ? listingDateInput(clonedData.transit.eta) : ''
         },
 
         // Admin-only private records
@@ -231,18 +225,14 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
           supplierName: clonedData.adminNotes?.supplierName || '',
           supplierPrice: clonedData.adminNotes?.supplierPrice || '',
           margin: clonedData.adminNotes?.margin || '',
-          purchaseDate: clonedData.adminNotes?.purchaseDate ? new Date(clonedData.adminNotes.purchaseDate).toISOString().split('T')[0] : '',
+          purchaseDate: clonedData.adminNotes?.purchaseDate ? listingDateInput(clonedData.adminNotes.purchaseDate) : '',
           notes: clonedData.adminNotes?.notes || ''
         }
       });
 
       // Set existing images
       if (clonedData.images && Array.isArray(clonedData.images)) {
-        setImages(clonedData.images.map((img, index) => ({
-          ...img,
-          isExisting: true,
-          id: img._id || index
-        })));
+        setImages(clonedData.images.map(normalizeListingImage));
         
         // Find primary image index
         const primaryIndex = clonedData.images.findIndex(img => img.isPrimary);
@@ -266,20 +256,6 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
     }
   }, [isOpen]);
 
-  // Clean up URL objects when component unmounts
-  useEffect(() => {
-    return () => {
-      newImages.forEach(image => {
-        if (image && image.preview && typeof URL.revokeObjectURL === 'function') {
-          try {
-            URL.revokeObjectURL(image.preview);
-          } catch (err) {
-            console.error('Error revoking object URL during cleanup:', err);
-          }
-        }
-      });
-    };
-  }, [newImages]);
 
   // Handle basic input changes
   const handleChange = (e) => {
@@ -414,6 +390,7 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
     if (!e.target.files || e.target.files.length === 0) return;
     
     const files = Array.from(e.target.files);
+    if (files.length + images.length + newImages.length > 10) { setErrors(prev => ({ ...prev, images: 'A listing can have up to 10 photos. Remove a photo before adding more.' })); return; }
     const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
     const maxSize = 5 * 1024 * 1024; // 5MB
     
@@ -430,7 +407,7 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
       return true;
     });
     
-    if (validFiles.length === 0) {
+    if (validFiles.length !== files.length) {
       setErrors(prev => ({
         ...prev,
         images: 'Please upload valid image files (JPEG, PNG, or WebP) under 5MB'
@@ -509,6 +486,9 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
       URL.revokeObjectURL(newImages[index].preview);
     }
     
+    const combinedIndex = images.length + index;
+    if (primaryImageIndex === combinedIndex) setPrimaryImageIndex(0);
+    else if (primaryImageIndex > combinedIndex) setPrimaryImageIndex(value => value - 1);
     setNewImages(prev => {
       const updatedImages = [...prev];
       updatedImages.splice(index, 1);
@@ -581,82 +561,13 @@ const UpdateListingModal = ({ isOpen, onClose, onSubmit, initialData = null }) =
 
   // Form validation
   const validateForm = () => {
-    const newErrors = {};
-
-    // Basic validation
-    if (!formData.title?.trim()) {
-      newErrors.title = 'Title is required';
-    }
-
-    if (!formData.description?.trim()) {
-      newErrors.description = 'Description is required';
-    }
-
-    if (!formData.category?.trim()) {
-      newErrors.category = 'Category is required';
-    }
-
-    // Price validation - only required if not POA
-    if (!formData.priceOptions?.showPriceAsPOA && (!formData.price || formData.price <= 0)) {
-      newErrors.price = 'Price is required unless Price on Application is selected';
-    }
-
-    // Savings validation
-    if (formData.priceOptions?.showSavings) {
-      const originalPrice = parseFloat(formData.priceOptions.originalPrice) || 0;
-      const currentPrice = parseFloat(formData.price) || 0;
-      const dealerDiscount = parseFloat(formData.priceOptions.dealerDiscount) || 0;
-      
-      if (!originalPrice && !dealerDiscount) {
-        newErrors['priceOptions.originalPrice'] = 'Original price or dealer discount is required for savings';
-      }
-      
-      if (originalPrice && originalPrice <= currentPrice) {
-        newErrors['priceOptions.originalPrice'] = 'Original price must be higher than current price';
-      }
-      
-      if (dealerDiscount && (dealerDiscount <= 0 || dealerDiscount >= 100)) {
-        newErrors['priceOptions.dealerDiscount'] = 'Dealer discount must be between 1% and 99%';
-      }
-    }
-
-    // Specifications validation
-    if (!formData.specifications?.make?.trim()) {
-      newErrors['specifications.make'] = 'Make is required';
-    }
-    
-    if (!formData.specifications?.model?.trim()) {
-      newErrors['specifications.model'] = 'Model is required';
-    }
-    
-    if (!formData.specifications?.transmission?.trim()) {
-      newErrors['specifications.transmission'] = 'Transmission type is required';
-    }
-    
-    if (!formData.specifications?.fuelType?.trim()) {
-      newErrors['specifications.fuelType'] = 'Fuel type is required';
-    }
-
-    // Location validation
-    if (!formData.location?.city?.trim()) {
-      newErrors['location.city'] = 'City is required';
-    }
-    
-    if (!formData.location?.country?.trim()) {
-      newErrors['location.country'] = 'Country is required';
-    }
-
-    // Image validation - must have at least one image (existing or new)
-    if (images.length === 0 && newImages.length === 0) {
-      newErrors.images = 'At least one image is required';
-    }
-
-    console.log('Validation errors:', newErrors);
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const nextErrors = listingFormErrors(formData, images.length + newImages.length, true);
+    setErrors(nextErrors);
+    const first = Object.keys(nextErrors)[0];
+    if (first) focusListingError(first, changeSection, formRef);
+    return !first;
   };
 
-  // Handle form submission
 const handleSubmit = async (e) => {
   e.preventDefault();
   
@@ -666,91 +577,22 @@ const handleSubmit = async (e) => {
   setErrors({});
 
   try {
-    console.log('=== VALIDATION DEBUG ===');
-    console.log('formData.specifications:', formData.specifications);
-    
-    // CORRECTED: Check the actual data structure that gets populated
-    const requiredFields = [
-      {
-        path: 'title',
-        label: 'Title',
-        value: formData.title
-      },
-      {
-        path: 'specifications.make',
-        label: 'Make',
-        value: formData.specifications?.make
-      },
-      {
-        path: 'specifications.model',
-        label: 'Model',
-        value: formData.specifications?.model
-      },
-      {
-        path: 'specifications.year',
-        label: 'Year',
-        value: formData.specifications?.year
-      }
-    ];
-    
-    const newErrors = {};
-    
-    // Check each required field
-    requiredFields.forEach(field => {
-      const fieldValue = field.value;
-      const isEmpty = !fieldValue || 
-                     (typeof fieldValue === 'string' && fieldValue.trim() === '') || 
-                     (typeof fieldValue === 'number' && fieldValue <= 0);
-      
-      if (isEmpty) {
-        newErrors[field.path] = `${field.label} is required`;
-        console.error(`❌ ${field.label} validation failed:`, fieldValue);
-      } else {
-        console.log(`✅ ${field.label} validated:`, fieldValue);
-      }
-    });
-    
-    // Additional validations
-    if (formData.specifications?.year) {
-      const year = parseInt(formData.specifications.year);
-      if (isNaN(year) || year < 1900 || year > new Date().getFullYear() + 1) {
-        newErrors['specifications.year'] = 'Please enter a valid year';
-      }
-    }
-    
-    if (!formData.priceOptions?.showPriceAsPOA) {
-      const price = parseFloat(formData.price);
-      if (!formData.price || isNaN(price) || price <= 0) {
-        newErrors.price = 'Price is required';
-      }
-    }
-    
-    // Validate images
-    const totalImages = (images?.length || 0) + (newImages?.length || 0) - (imagesToDelete?.length || 0);
-    if (totalImages <= 0) {
-      newErrors.images = 'At least one image is required';
-    }
-    
-    console.log('=== VALIDATION RESULTS ===');
-    console.log('Errors found:', newErrors);
-    console.log('Total images:', totalImages);
-    
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      dispatch(addNotification({
-        type: 'error',
-        message: 'Please check the highlighted fields'
-      }));
-      return;
-    }
+    if (!validateForm()) return;
 
     // Prepare submission data - ENSURE correct field mapping
     const submitData = {
       // Basic fields
+      shortDescription: formData.shortDescription || '',
+      category: formData.category,
+      status: formData.status,
+      featured: Boolean(formData.featured),
+      bodyStyle: formData.bodyStyle,
+      priceType: formData.priceType,
+      dealerId: formData.dealer || undefined,
       title: formData.title?.trim(),
       description: formData.description?.trim(),
       price: formData.priceOptions?.showPriceAsPOA ? 0 : (parseFloat(formData.price) || 0),
-      listingQuality: Number(formData.listingQuality) || 50,
+      listingQuality: listingQuality(formData.listingQuality ?? 50),
       
       // CRITICAL: Map from nested specifications to flat structure for backend
       make: formData.specifications?.make?.trim(),  // ← Map nested to flat
@@ -779,8 +621,8 @@ const handleSubmit = async (e) => {
       
       // SEO
       seo: {
-        title: formData.seo?.title || formData.title,
-        description: formData.seo?.description || formData.description,
+        metaTitle: formData.seo?.metaTitle || formData.title,
+        metaDescription: formData.seo?.metaDescription || formData.shortDescription || '',
         keywords: Array.isArray(formData.seo?.keywords) ? formData.seo.keywords : []
       },
       
@@ -814,7 +656,9 @@ const handleSubmit = async (e) => {
 
       // Seller contact override (so admin can correct phone/whatsapp per-listing)
       dealer: {
+        ...initialData?.dealer,
         contact: {
+          ...initialData?.dealer?.contact,
           phone: formData.sellerPhone || undefined,
           whatsapp: formData.sellerWhatsapp || formData.sellerPhone || undefined
         }
@@ -938,12 +782,12 @@ const validateImageState = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={(e) => {
+    <div className="modal-overlay admin-listing-modal admin-listing-modal--edit" data-admin-listing="true" onClick={(e) => {
       if (e.target === e.currentTarget && !isSubmitting) onClose();
     }}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
+      <div className="modal-content" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="admin-edit-listing-title" tabIndex={-1} onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Update Listing</h2>
+          <div className="listing-header-copy"><span className="listing-header-eyebrow">Vehicle inventory</span><h2 id="admin-edit-listing-title">Edit vehicle listing</h2><p>Vehicle details, photos and pricing. Fields marked * are required.</p></div>
           <button 
             className="close-button" 
             onClick={onClose}
@@ -954,20 +798,25 @@ const validateImageState = () => {
           </button>
         </div>
 
-        <div className="modal-tabs">
+        <div className="modal-tabs" role="navigation" aria-label="Listing sections">
           {tabs.map(tab => (
             <button
               key={tab.id}
               className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
+              type="button"
+              aria-pressed={activeTab === tab.id}
+              onClick={() => changeSection(tab.id)}
               disabled={isSubmitting}
             >
+              <ListingSectionIcon section={tab.id} />
               {tab.label}
             </button>
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="listing-form">
+        <form onSubmit={handleSubmit} className="listing-form" ref={formRef} noValidate>
+          <ListingSectionHeading section={activeTab} />
+          <ListingFormFeedback errors={errors} changeSection={changeSection} formRef={formRef} />
           {/* Basic Info Section */}
           <section className={`form-section ${activeTab === 'basic' ? 'active' : ''}`}>
             <div className="form-grid">
@@ -1011,7 +860,7 @@ const validateImageState = () => {
                   onChange={handleChange}
                   disabled={isSubmitting}
                 >
-                  {LISTING_STATUS.map(status => (
+                  {ADMIN_LISTING_STATUSES.map(status => (
                     <option key={status.value} value={status.value}>
                       {status.label}
                     </option>
@@ -1053,16 +902,16 @@ const validateImageState = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="dealer">Dealer*</label>
+                <label htmlFor="dealer">Seller</label>
                 <select
                   id="dealer"
                   name="dealer"
                   value={formData.dealer || ''}
-                  onChange={handleChange}
+                  onChange={event => { handleChange(event); const selected = dealers.find(dealer => dealer._id === event.target.value); if (selected) setFormData(prev => ({ ...prev, sellerPhone: selected.contact?.phone || '', sellerWhatsapp: selected.contact?.whatsapp || selected.contact?.phone || '' })); }}
                   className={errors.dealer ? 'error' : ''}
                   disabled={isSubmitting || loadingDealers}
                 >
-                  <option value="">Select Dealer</option>
+                  <option value="">Select seller</option>
                   {loadingDealers ? (
                     <option disabled>Loading dealers...</option>
                   ) : (
@@ -1519,7 +1368,7 @@ const validateImageState = () => {
               {/* New Images Upload */}
               <div className="new-images-section">
                 <h4>Add New Images</h4>
-                <div className="image-upload-area" onClick={() => fileInputRef.current?.click()}>
+                <div className="image-upload-area" role="button" tabIndex={0} aria-label="Upload vehicle photos" onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fileInputRef.current?.click(); } }} onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); if (!isSubmitting) handleImageUpload({ target: { files: event.dataTransfer.files, value: '' } }); }} onClick={() => fileInputRef.current?.click()}>
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -1558,7 +1407,7 @@ const validateImageState = () => {
                           >
                             ×
                           </button>
-                          <span className="new-badge">New</span>
+                          <label className="primary-image"><input type="radio" name="primaryImage" checked={primaryImageIndex === images.length + index} onChange={() => setPrimaryImageIndex(images.length + index)} disabled={isSubmitting} /><span>Cover</span></label>
                         </div>
                       </div>
                     ))}
@@ -2145,6 +1994,10 @@ const validateImageState = () => {
 
           {/* Form Actions */}
           <div className="form-actions">
+            <div className="listing-step-actions">
+              <button type="button" disabled={isSubmitting || activeTab === tabs[0].id} onClick={() => changeSection(tabs[tabs.findIndex(tab => tab.id === activeTab) - 1].id)}>Previous</button>
+              <button type="button" disabled={isSubmitting || activeTab === tabs[tabs.length - 1].id} onClick={() => changeSection(tabs[tabs.findIndex(tab => tab.id === activeTab) + 1].id)}>Next section</button>
+            </div>
             <button
               type="button"
               className="cancel-button"
@@ -2158,11 +2011,7 @@ const validateImageState = () => {
               className="submit-button"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Updating...' : 
-                formData.priceOptions?.showSavings ? 
-                  'Update Listing with Savings' :
-                  'Update Listing'
-              }
+              {isSubmitting ? 'Saving...' : 'Save changes'}
             </button>
           </div>
         </form>

@@ -1,7 +1,7 @@
 /* AddListingModal.css - Complete with Savings Integration */
 
 /* Modal Overlay */
-.modal-overlay {
+.admin-listing-modal--create.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -17,7 +17,7 @@
 }
 
 /* Modal Content */
-.modal-content {
+.admin-listing-modal--create .modal-content {
   background: rgba(20, 20, 20, 0.95);
   border: 1px solid #2c2c2c;
   border-radius: 16px;
@@ -31,7 +31,7 @@
 }
 
 /* Modal Header */
-.modal-header {
+.admin-listing-modal--create .modal-header {
   padding: 1.5rem 2rem;
   border-bottom: 1px solid #2c2c2c;
   display: flex;
@@ -40,14 +40,14 @@
   background: rgba(0, 0, 0, 0.2);
 }
 
-.modal-header h2 {
+.admin-listing-modal--create .modal-header h2 {
   color: #ffffff;
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
 }
 
-.close-button {
+.admin-listing-modal--create .close-button {
   background: none;
   border: none;
   color: #888;
@@ -63,18 +63,18 @@
   border-radius: 50%;
 }
 
-.close-button:hover {
+.admin-listing-modal--create .close-button:hover {
   color: #ff3300;
   background: rgba(255, 51, 0, 0.1);
 }
 
-.close-button:disabled {
+.admin-listing-modal--create .close-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Modal Tabs */
-.modal-tabs {
+.admin-listing-modal--create .modal-tabs {
   display: flex;
   background: rgba(0, 0, 0, 0.3);
   border-bottom: 1px solid #2c2c2c;
@@ -83,11 +83,11 @@
   -ms-overflow-style: none;
 }
 
-.modal-tabs::-webkit-scrollbar {
+.admin-listing-modal--create .modal-tabs::-webkit-scrollbar {
   display: none;
 }
 
-.tab-button {
+.admin-listing-modal--create .tab-button {
   background: none;
   border: none;
   color: #888;
@@ -104,45 +104,45 @@
   justify-content: center;
 }
 
-.tab-button:hover {
+.admin-listing-modal--create .tab-button:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.05);
 }
 
-.tab-button.active {
+.admin-listing-modal--create .tab-button.active {
   color: #ff3300;
   border-bottom-color: #ff3300;
   background: rgba(255, 51, 0, 0.1);
 }
 
-.tab-button:disabled {
+.admin-listing-modal--create .tab-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.tab-icon {
+.admin-listing-modal--create .tab-icon {
   font-size: 1.1rem;
 }
 
 /* Form Container */
-.listing-form {
+.admin-listing-modal--create .listing-form {
   flex: 1;
   overflow-y: auto;
   padding: 0;
 }
 
 /* Form Sections */
-.form-section {
+.admin-listing-modal--create .form-section {
   display: none;
   padding: 2rem;
   animation: fadeIn 0.3s ease;
 }
 
-.form-section.active {
+.admin-listing-modal--create .form-section.active {
   display: block;
 }
 
-.records-private-banner {
+.admin-listing-modal--create .records-private-banner {
   background: rgba(255, 150, 0, 0.1);
   border: 1px solid rgba(255, 150, 0, 0.35);
   border-radius: 8px;
@@ -153,13 +153,13 @@
   margin-bottom: 1.2rem;
 }
 
-.records-vin-note {
+.admin-listing-modal--create .records-vin-note {
   font-size: 0.82rem;
   color: rgba(255,255,255,0.55);
   margin: 0;
 }
 
-.records-tab-link {
+.admin-listing-modal--create .records-tab-link {
   background: none;
   border: none;
   color: #5aacff;
@@ -169,8 +169,8 @@
   text-decoration: underline;
 }
 
-[data-theme="light"] .records-vin-note { color: rgba(0,0,0,0.5); }
-[data-theme="light"] .records-tab-link { color: #0055cc; }
+.admin-listing-modal--create [data-theme="light"] .records-vin-note { color: rgba(0,0,0,0.5); }
+.admin-listing-modal--create [data-theme="light"] .records-tab-link { color: #0055cc; }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -178,7 +178,7 @@
 }
 
 /* NEW: Savings Section Header */
-.savings-section-header {
+.admin-listing-modal--create .savings-section-header {
   background: linear-gradient(135deg, rgba(255, 51, 0, 0.1), rgba(255, 102, 0, 0.1));
   border: 1px solid rgba(255, 51, 0, 0.2);
   border-radius: 12px;
@@ -187,14 +187,14 @@
   text-align: center;
 }
 
-.savings-section-header h3 {
+.admin-listing-modal--create .savings-section-header h3 {
   color: #ff3300;
   margin: 0 0 0.5rem 0;
   font-size: 1.4rem;
   font-weight: 700;
 }
 
-.savings-section-header p {
+.admin-listing-modal--create .savings-section-header p {
   color: #c9c9c9;
   margin: 0;
   font-size: 1rem;
@@ -202,7 +202,7 @@
 }
 
 /* NEW: Savings Preview */
-.savings-preview {
+.admin-listing-modal--create .savings-preview {
   background: rgba(46, 213, 115, 0.1);
   border: 1px solid rgba(46, 213, 115, 0.3);
   border-radius: 12px;
@@ -211,7 +211,7 @@
   grid-column: span 2;
 }
 
-.savings-preview h4 {
+.admin-listing-modal--create .savings-preview h4 {
   color: #2ed573;
   margin: 0 0 1rem 0;
   font-size: 1.2rem;
@@ -220,20 +220,20 @@
   gap: 0.5rem;
 }
 
-.savings-preview-content {
+.admin-listing-modal--create .savings-preview-content {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
 }
 
-.preview-row {
+.admin-listing-modal--create .preview-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 1rem;
 }
 
-.preview-row.savings-amount {
+.admin-listing-modal--create .preview-row.savings-amount {
   border-top: 1px solid rgba(46, 213, 115, 0.3);
   padding-top: 0.8rem;
   font-weight: 700;
@@ -242,31 +242,31 @@
 }
 
 /* Form Grid */
-.form-grid {
+.admin-listing-modal--create .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   align-items: start;
 }
 
-.form-group {
+.admin-listing-modal--create .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.form-group.full-width {
+.admin-listing-modal--create .form-group.full-width {
   grid-column: 1 / -1;
 }
 
-.form-group.checkbox {
+.admin-listing-modal--create .form-group.checkbox {
   flex-direction: row;
   align-items: center;
   gap: 0.8rem;
 }
 
 /* Form Labels */
-label {
+.admin-listing-modal--create label {
   color: #ffffff;
   font-weight: 500;
   font-size: 0.95rem;
@@ -275,14 +275,14 @@ label {
   gap: 0.5rem;
 }
 
-label small {
+.admin-listing-modal--create label small {
   color: #888;
   font-weight: normal;
   font-size: 0.8rem;
   margin-left: 0.5rem;
 }
 
-.checkbox-label {
+.admin-listing-modal--create .checkbox-label {
   display: flex;
   align-items: center;
   gap: 0.8rem;
@@ -291,23 +291,23 @@ label small {
   font-weight: normal;
 }
 
-.checkbox-label input[type="checkbox"] {
+.admin-listing-modal--create .checkbox-label input[type="checkbox"] {
   margin: 0;
 }
 
-.checkbox-label span {
+.admin-listing-modal--create .checkbox-label span {
   color: #ffffff;
 }
 
 /* Form Inputs */
-.form-input,
-input[type="text"],
-input[type="number"],
-input[type="email"],
-input[type="tel"],
-input[type="date"],
-select,
-textarea {
+.admin-listing-modal--create .form-input,
+.admin-listing-modal--create input[type="text"],
+.admin-listing-modal--create input[type="number"],
+.admin-listing-modal--create input[type="email"],
+.admin-listing-modal--create input[type="tel"],
+.admin-listing-modal--create input[type="date"],
+.admin-listing-modal--create select,
+.admin-listing-modal--create textarea {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #2c2c2c;
   border-radius: 8px;
@@ -317,35 +317,35 @@ textarea {
   transition: all 0.3s ease;
 }
 
-.form-input:focus,
-input:focus,
-select:focus,
-textarea:focus {
+.admin-listing-modal--create .form-input:focus,
+.admin-listing-modal--create input:focus,
+.admin-listing-modal--create select:focus,
+.admin-listing-modal--create textarea:focus {
   outline: none;
   border-color: #ff3300;
   background: rgba(0, 0, 0, 0.5);
   box-shadow: 0 0 0 3px rgba(255, 51, 0, 0.1);
 }
 
-.form-input.error,
-input.error,
-select.error,
-textarea.error {
+.admin-listing-modal--create .form-input.error,
+.admin-listing-modal--create input.error,
+.admin-listing-modal--create select.error,
+.admin-listing-modal--create textarea.error {
   border-color: #e53e3e;
   background: rgba(229, 62, 62, 0.1);
 }
 
-.form-input:disabled,
-input:disabled,
-select:disabled,
-textarea:disabled {
+.admin-listing-modal--create .form-input:disabled,
+.admin-listing-modal--create input:disabled,
+.admin-listing-modal--create select:disabled,
+.admin-listing-modal--create textarea:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   background: rgba(0, 0, 0, 0.2);
 }
 
 /* Small helper text */
-small {
+.admin-listing-modal--create small {
   color: #888;
   font-size: 0.8rem;
   margin-top: 0.3rem;
@@ -353,7 +353,7 @@ small {
 }
 
 /* Error Messages */
-.error-message {
+.admin-listing-modal--create .error-message {
   color: #e53e3e;
   font-size: 0.85rem;
   margin-top: 0.3rem;
@@ -362,13 +362,13 @@ small {
   gap: 0.3rem;
 }
 
-.error-message::before {
+.admin-listing-modal--create .error-message::before {
   content: "⚠";
   font-size: 0.9rem;
 }
 
 /* Select Styling */
-select {
+.admin-listing-modal--create select {
   appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
@@ -378,8 +378,8 @@ select {
 }
 
 /* Checkbox and Radio Styling */
-input[type="checkbox"],
-input[type="radio"] {
+.admin-listing-modal--create input[type="checkbox"],
+.admin-listing-modal--create input[type="radio"] {
   width: 18px;
   height: 18px;
   accent-color: #ff3300;
@@ -387,14 +387,14 @@ input[type="radio"] {
 }
 
 /* Features Grid */
-.features-grid {
+.admin-listing-modal--create .features-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 0.8rem;
   margin-top: 1rem;
 }
 
-.features-grid .checkbox-label {
+.admin-listing-modal--create .features-grid .checkbox-label {
   background: rgba(0, 0, 0, 0.2);
   padding: 0.8rem;
   border-radius: 8px;
@@ -402,18 +402,18 @@ input[type="radio"] {
   transition: all 0.3s ease;
 }
 
-.features-grid .checkbox-label:hover {
+.admin-listing-modal--create .features-grid .checkbox-label:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: #2c2c2c;
 }
 
-.features-grid .checkbox-label input:checked + span {
+.admin-listing-modal--create .features-grid .checkbox-label input:checked + span {
   color: #ff3300;
   font-weight: 500;
 }
 
 /* Feature Tags */
-.feature-tags {
+.admin-listing-modal--create .feature-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -421,7 +421,7 @@ input[type="radio"] {
   min-height: 2rem;
 }
 
-.feature-tag {
+.admin-listing-modal--create .feature-tag {
   background: rgba(255, 51, 0, 0.1);
   color: #ff3300;
   padding: 0.4rem 0.8rem;
@@ -433,7 +433,7 @@ input[type="radio"] {
   border: 1px solid rgba(255, 51, 0, 0.3);
 }
 
-.remove-tag {
+.admin-listing-modal--create .remove-tag {
   background: none;
   border: none;
   color: #ff3300;
@@ -449,18 +449,18 @@ input[type="radio"] {
   border-radius: 50%;
 }
 
-.remove-tag:hover {
+.admin-listing-modal--create .remove-tag:hover {
   background: rgba(255, 51, 0, 0.2);
   color: #ffffff;
 }
 
-.feature-input {
+.admin-listing-modal--create .feature-input {
   flex: 1;
   min-width: 200px;
 }
 
 /* Keywords Container */
-.keywords-container {
+.admin-listing-modal--create .keywords-container {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -472,7 +472,7 @@ input[type="radio"] {
   background: rgba(0, 0, 0, 0.3);
 }
 
-.keyword-tag {
+.admin-listing-modal--create .keyword-tag {
   background: rgba(54, 162, 235, 0.1);
   color: #36a2eb;
   padding: 0.3rem 0.6rem;
@@ -484,7 +484,7 @@ input[type="radio"] {
   border: 1px solid rgba(54, 162, 235, 0.3);
 }
 
-.keyword-input {
+.admin-listing-modal--create .keyword-input {
   border: none;
   background: none;
   color: #ffffff;
@@ -494,12 +494,12 @@ input[type="radio"] {
   padding: 0.3rem;
 }
 
-.keyword-input::placeholder {
+.admin-listing-modal--create .keyword-input::placeholder {
   color: #666;
 }
 
 /* Image Upload Area */
-.image-upload-area {
+.admin-listing-modal--create .image-upload-area {
   border: 2px dashed #2c2c2c;
   border-radius: 12px;
   padding: 3rem 2rem;
@@ -509,16 +509,16 @@ input[type="radio"] {
   background: rgba(0, 0, 0, 0.2);
 }
 
-.image-upload-area:hover {
+.admin-listing-modal--create .image-upload-area:hover {
   border-color: #ff3300;
   background: rgba(255, 51, 0, 0.05);
 }
 
-.hidden-input {
+.admin-listing-modal--create .hidden-input {
   display: none;
 }
 
-.upload-placeholder {
+.admin-listing-modal--create .upload-placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -526,24 +526,24 @@ input[type="radio"] {
   color: #888;
 }
 
-.upload-icon {
+.admin-listing-modal--create .upload-icon {
   font-size: 3rem;
 }
 
-.upload-placeholder span {
+.admin-listing-modal--create .upload-placeholder span {
   font-size: 1.1rem;
   color: #ffffff;
 }
 
 /* Image Previews */
-.image-previews {
+.admin-listing-modal--create .image-previews {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 1rem;
   margin-top: 1.5rem;
 }
 
-.image-preview {
+.admin-listing-modal--create .image-preview {
   position: relative;
   aspect-ratio: 16/9;
   border-radius: 8px;
@@ -552,13 +552,13 @@ input[type="radio"] {
   background: rgba(0, 0, 0, 0.3);
 }
 
-.image-preview img {
+.admin-listing-modal--create .image-preview img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.image-preview-actions {
+.admin-listing-modal--create .image-preview-actions {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
@@ -567,7 +567,7 @@ input[type="radio"] {
   gap: 0.3rem;
 }
 
-.remove-image {
+.admin-listing-modal--create .remove-image {
   background: rgba(229, 62, 62, 0.9);
   color: white;
   border: none;
@@ -582,12 +582,12 @@ input[type="radio"] {
   transition: all 0.3s ease;
 }
 
-.remove-image:hover {
+.admin-listing-modal--create .remove-image:hover {
   background: #e53e3e;
   transform: scale(1.1);
 }
 
-.primary-image {
+.admin-listing-modal--create .primary-image {
   display: flex;
   align-items: center;
   gap: 0.3rem;
@@ -599,13 +599,13 @@ input[type="radio"] {
   cursor: pointer;
 }
 
-.primary-image input {
+.admin-listing-modal--create .primary-image input {
   width: 12px;
   height: 12px;
 }
 
 /* Service History Section */
-.service-history-section {
+.admin-listing-modal--create .service-history-section {
   margin-top: 1rem;
   padding: 1rem;
   background: rgba(0, 0, 0, 0.2);
@@ -613,7 +613,7 @@ input[type="radio"] {
   border: 1px solid #2c2c2c;
 }
 
-.add-service-record-btn {
+.admin-listing-modal--create .add-service-record-btn {
   background: rgba(46, 213, 115, 0.1);
   color: #2ed573;
   border: 1px solid rgba(46, 213, 115, 0.3);
@@ -624,12 +624,12 @@ input[type="radio"] {
   font-size: 0.9rem;
 }
 
-.add-service-record-btn:hover {
+.admin-listing-modal--create .add-service-record-btn:hover {
   background: rgba(46, 213, 115, 0.2);
 }
 
 /* Form Actions */
-.form-actions {
+.admin-listing-modal--create .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 1rem;
@@ -638,8 +638,8 @@ input[type="radio"] {
   background: rgba(0, 0, 0, 0.2);
 }
 
-.cancel-button,
-.submit-button {
+.admin-listing-modal--create .cancel-button,
+.admin-listing-modal--create .submit-button {
   padding: 0.8rem 2rem;
   border-radius: 8px;
   font-size: 0.95rem;
@@ -650,30 +650,30 @@ input[type="radio"] {
   min-width: 120px;
 }
 
-.cancel-button {
+.admin-listing-modal--create .cancel-button {
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   border-color: #2c2c2c;
 }
 
-.cancel-button:hover {
+.admin-listing-modal--create .cancel-button:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.submit-button {
+.admin-listing-modal--create .submit-button {
   background: #ff3300;
   color: white;
   border-color: #ff3300;
 }
 
-.submit-button:hover {
+.admin-listing-modal--create .submit-button:hover {
   background: #cc2900;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(255, 51, 0, 0.3);
 }
 
-.submit-button:disabled,
-.cancel-button:disabled {
+.admin-listing-modal--create .submit-button:disabled,
+.admin-listing-modal--create .cancel-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
@@ -681,7 +681,7 @@ input[type="radio"] {
 }
 
 /* Loading Overlay */
-.loading-overlay {
+.admin-listing-modal--create .loading-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -695,7 +695,7 @@ input[type="radio"] {
   backdrop-filter: blur(4px);
 }
 
-.spinner {
+.admin-listing-modal--create .spinner {
   width: 40px;
   height: 40px;
   border: 3px solid rgba(255, 51, 0, 0.3);
@@ -710,7 +710,7 @@ input[type="radio"] {
 }
 
 /* Error Fallback */
-.error-fallback {
+.admin-listing-modal--create .error-fallback {
   padding: 2rem;
   text-align: center;
   background: rgba(229, 62, 62, 0.1);
@@ -719,12 +719,12 @@ input[type="radio"] {
   color: #ffffff;
 }
 
-.error-fallback h3 {
+.admin-listing-modal--create .error-fallback h3 {
   color: #e53e3e;
   margin-bottom: 1rem;
 }
 
-.error-fallback button {
+.admin-listing-modal--create .error-fallback button {
   background: #e53e3e;
   color: white;
   border: none;
@@ -735,188 +735,188 @@ input[type="radio"] {
   margin-top: 1rem;
 }
 
-.error-fallback button:hover {
+.admin-listing-modal--create .error-fallback button:hover {
   background: #c53030;
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .modal-content {
+  .admin-listing-modal--create .modal-content {
     max-width: 90vw;
     margin: 1rem;
   }
 
   /* Keep 2-column grid on tablet — only wide items span full width */
-  .form-grid {
+  .admin-listing-modal--create .form-grid {
     grid-template-columns: 1fr 1fr;
   }
 
-  .features-grid {
+  .admin-listing-modal--create .features-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
 
 @media (max-width: 480px) {
   /* Still keep 2 columns on small phones for short fields */
-  .form-grid {
+  .admin-listing-modal--create .form-grid {
     grid-template-columns: 1fr 1fr;
     gap: 0.6rem;
   }
 
   /* Only full-width fields (textarea, image upload, description) collapse to 1 */
-  .form-group.full-width,
-  .form-group:has(textarea),
-  .form-group:has(input[type="file"]) {
+  .admin-listing-modal--create .form-group.full-width,
+  .admin-listing-modal--create .form-group:has(textarea),
+  .admin-listing-modal--create .form-group:has(input[type="file"]) {
     grid-column: 1 / -1;
   }
 
-  .features-grid {
+  .admin-listing-modal--create .features-grid {
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
   }
 }
 
 @media (max-width: 768px) {
-  .modal-overlay {
+  .admin-listing-modal--create.modal-overlay {
     padding: 0.5rem;
   }
   
-  .modal-content {
+  .admin-listing-modal--create .modal-content {
     max-width: 100vw;
     max-height: 100vh;
     border-radius: 0;
   }
   
-  .modal-header {
+  .admin-listing-modal--create .modal-header {
     padding: 1rem 1.5rem;
   }
   
-  .modal-header h2 {
+  .admin-listing-modal--create .modal-header h2 {
     font-size: 1.3rem;
   }
   
-  .modal-tabs {
+  .admin-listing-modal--create .modal-tabs {
     padding: 0;
   }
   
-  .tab-button {
+  .admin-listing-modal--create .tab-button {
     padding: 0.8rem 1rem;
     font-size: 0.8rem;
     min-width: 100px;
   }
   
-  .tab-icon {
+  .admin-listing-modal--create .tab-icon {
     font-size: 1rem;
   }
   
-  .form-section {
+  .admin-listing-modal--create .form-section {
     padding: 1.5rem;
   }
   
-  .form-actions {
+  .admin-listing-modal--create .form-actions {
     padding: 1rem 1.5rem;
     flex-direction: column;
   }
   
-  .cancel-button,
-  .submit-button {
+  .admin-listing-modal--create .cancel-button,
+  .admin-listing-modal--create .submit-button {
     width: 100%;
   }
   
-  .image-previews {
+  .admin-listing-modal--create .image-previews {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }
   
-  .upload-placeholder span {
+  .admin-listing-modal--create .upload-placeholder span {
     font-size: 1rem;
   }
   
-  .upload-icon {
+  .admin-listing-modal--create .upload-icon {
     font-size: 2.5rem;
   }
   
-  .savings-preview {
+  .admin-listing-modal--create .savings-preview {
     grid-column: span 1;
   }
 }
 
 @media (max-width: 480px) {
-  .modal-header {
+  .admin-listing-modal--create .modal-header {
     padding: 0.8rem 1rem;
   }
   
-  .form-section {
+  .admin-listing-modal--create .form-section {
     padding: 1rem;
   }
   
-  .form-actions {
+  .admin-listing-modal--create .form-actions {
     padding: 1rem;
   }
   
-  .image-previews {
+  .admin-listing-modal--create .image-previews {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.8rem;
   }
   
-  .features-grid .checkbox-label {
+  .admin-listing-modal--create .features-grid .checkbox-label {
     padding: 0.6rem;
   }
   
-  .savings-section-header {
+  .admin-listing-modal--create .savings-section-header {
     padding: 1rem;
     margin-bottom: 1.5rem;
   }
   
-  .savings-section-header h3 {
+  .admin-listing-modal--create .savings-section-header h3 {
     font-size: 1.2rem;
   }
   
-  .savings-preview {
+  .admin-listing-modal--create .savings-preview {
     padding: 1rem;
   }
   
-  .preview-row {
+  .admin-listing-modal--create .preview-row {
     font-size: 0.9rem;
   }
 }
 
 /* High Contrast Mode */
 @media (prefers-contrast: more) {
-  .modal-content {
+  .admin-listing-modal--create .modal-content {
     border: 2px solid #ffffff;
   }
   
-  .form-input,
-  input,
-  select,
-  textarea {
+  .admin-listing-modal--create .form-input,
+  .admin-listing-modal--create input,
+  .admin-listing-modal--create select,
+  .admin-listing-modal--create textarea {
     border: 2px solid #ffffff;
   }
   
-  .savings-section-header {
+  .admin-listing-modal--create .savings-section-header {
     border: 2px solid #ff3300;
   }
   
-  .savings-preview {
+  .admin-listing-modal--create .savings-preview {
     border: 2px solid #2ed573;
   }
 }
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-  .form-section,
-  .tab-button,
-  .form-input,
-  input,
-  select,
-  textarea,
-  .submit-button,
-  .remove-tag,
-  .remove-image {
+  .admin-listing-modal--create .form-section,
+  .admin-listing-modal--create .tab-button,
+  .admin-listing-modal--create .form-input,
+  .admin-listing-modal--create input,
+  .admin-listing-modal--create select,
+  .admin-listing-modal--create textarea,
+  .admin-listing-modal--create .submit-button,
+  .admin-listing-modal--create .remove-tag,
+  .admin-listing-modal--create .remove-image {
     transition: none;
   }
   
-  .spinner {
+  .admin-listing-modal--create .spinner {
     animation: none;
   }
   
@@ -927,74 +927,74 @@ input[type="radio"] {
 }
 
 /* Focus Styles for Accessibility */
-.tab-button:focus-visible,
-.form-input:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
-.submit-button:focus-visible,
-.cancel-button:focus-visible {
+.admin-listing-modal--create .tab-button:focus-visible,
+.admin-listing-modal--create .form-input:focus-visible,
+.admin-listing-modal--create input:focus-visible,
+.admin-listing-modal--create select:focus-visible,
+.admin-listing-modal--create textarea:focus-visible,
+.admin-listing-modal--create .submit-button:focus-visible,
+.admin-listing-modal--create .cancel-button:focus-visible {
   outline: 2px solid #ff3300;
   outline-offset: 2px;
 }
 
 /* Print Styles */
 @media print {
-  .modal-overlay {
+  .admin-listing-modal--create.modal-overlay {
     position: static;
     background: white;
   }
   
-  .modal-content {
+  .admin-listing-modal--create .modal-content {
     box-shadow: none;
     border: 1px solid #000;
   }
   
-  .modal-tabs,
-  .form-actions,
-  .loading-overlay {
+  .admin-listing-modal--create .modal-tabs,
+  .admin-listing-modal--create .form-actions,
+  .admin-listing-modal--create .loading-overlay {
     display: none;
   }
   
-  .form-section {
+  .admin-listing-modal--create .form-section {
     display: block !important;
   }
 }
 /* ── Listing Quality Boost Slider ── */
-.lq-boost-group {
+.admin-listing-modal--create .lq-boost-group {
   grid-column: 1 / -1;
   margin-top: 0.5rem;
 }
 
-.lq-slider-wrap {
+.admin-listing-modal--create .lq-slider-wrap {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 10px;
   padding: 1.2rem 1.4rem 0.9rem;
   transition: border-color 0.25s, background 0.25s;
 }
-.lq-slider-wrap.lq-good    { border-color: rgba(74,222,128,0.35);  background: rgba(74,222,128,0.05); }
-.lq-slider-wrap.lq-premium { border-color: rgba(251,146,60,0.4);   background: rgba(251,146,60,0.06); }
-.lq-slider-wrap.lq-showcase{ border-color: rgba(250,204,21,0.5);   background: rgba(250,204,21,0.07); }
+.admin-listing-modal--create .lq-slider-wrap.lq-good    { border-color: rgba(74,222,128,0.35);  background: rgba(74,222,128,0.05); }
+.admin-listing-modal--create .lq-slider-wrap.lq-premium { border-color: rgba(251,146,60,0.4);   background: rgba(251,146,60,0.06); }
+.admin-listing-modal--create .lq-slider-wrap.lq-showcase{ border-color: rgba(250,204,21,0.5);   background: rgba(250,204,21,0.07); }
 
-.lq-header {
+.admin-listing-modal--create .lq-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.75rem;
 }
-.lq-tier-label {
+.admin-listing-modal--create .lq-tier-label {
   font-weight: 600;
   font-size: 0.95rem;
   color: #fff;
 }
-.lq-score {
+.admin-listing-modal--create .lq-score {
   font-size: 0.85rem;
   color: #999;
   font-variant-numeric: tabular-nums;
 }
 
-.lq-range {
+.admin-listing-modal--create .lq-range {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
@@ -1011,7 +1011,7 @@ textarea:focus-visible,
   cursor: pointer;
   margin-bottom: 0.5rem;
 }
-.lq-range::-webkit-slider-thumb {
+.admin-listing-modal--create .lq-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 20px;
@@ -1023,8 +1023,8 @@ textarea:focus-visible,
   cursor: pointer;
   transition: transform 0.15s;
 }
-.lq-range::-webkit-slider-thumb:hover { transform: scale(1.15); }
-.lq-range::-moz-range-thumb {
+.admin-listing-modal--create .lq-range::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.admin-listing-modal--create .lq-range::-moz-range-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
@@ -1033,14 +1033,14 @@ textarea:focus-visible,
   cursor: pointer;
 }
 
-.lq-track-labels {
+.admin-listing-modal--create .lq-track-labels {
   display: flex;
   justify-content: space-between;
   font-size: 0.72rem;
   color: #666;
   margin-bottom: 0.6rem;
 }
-.lq-desc {
+.admin-listing-modal--create .lq-desc {
   font-size: 0.8rem;
   color: #888;
   margin: 0;

@@ -6,6 +6,8 @@ import { http } from '../../config/axios.js';
 import AddListingModal from '../../components/shared/AddListingModal/AddListingModal.js';
 import UpdateListingModal from './UpdateListingModal.js';
 import './ListingManager.css';
+import ListingStatusControl from './ListingStatusControl.js';
+import { ADMIN_LISTING_STATUSES } from '../../utils/adminListingForm.js';
 
 const ListingManager = () => {
   const [listings, setListings] = useState([]);
@@ -13,6 +15,8 @@ const ListingManager = () => {
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [statusState, setStatusState] = useState({});
+  const [statusNotice, setStatusNotice] = useState('');
   const [selectedListing, setSelectedListing] = useState(null);
   const [showRecordsModal, setShowRecordsModal] = useState(false);
   const [recordsListing, setRecordsListing] = useState(null);
@@ -144,7 +148,7 @@ const ListingManager = () => {
       setError(null);
 
       // Prepare filters for API
-      const apiFilters = { ...filters };
+      const apiFilters = { ...filters, adminView: true };
       
       // Remove 'all' values
       Object.keys(apiFilters).forEach(key => {
@@ -153,13 +157,15 @@ const ListingManager = () => {
         }
       });
 
+      apiFilters.status = filters.status;
+
       // Handle savings filter
       if (filters.hasSavings === 'true') {
         apiFilters.hasSavings = true;
-        delete apiFilters.hasSavings;
+
       } else if (filters.hasSavings === 'false') {
         apiFilters.hasSavings = false;
-        delete apiFilters.hasSavings;
+
       }
 
       const result = await listingService.getListings(
@@ -168,6 +174,7 @@ const ListingManager = () => {
         pagination.limit
       );
 
+      if (result.error) throw new Error(result.error);
       setListings(result.listings || []);
       setPagination(prev => ({
         ...prev,
@@ -277,23 +284,22 @@ const ListingManager = () => {
   };
 
   const handleStatusChange = async (id, newStatus) => {
+    const current = listings.find(listing => listing._id === id);
+    if (!current || current.status === newStatus || statusState[id]?.pending) return;
+    setStatusNotice('');
+    setStatusState(prev => ({ ...prev, [id]: { pending: true, nextStatus: newStatus } }));
     try {
-      setLoading(true);
-      setError(null);
-
-      await listingService.updateListingStatus(id, newStatus);
-      
-      // Update listing in the list
-      setListings(prev => prev.map(listing => 
-        listing._id === id 
-          ? { ...listing, status: newStatus }
-          : listing
-      ));
+      const result = await listingService.updateListingStatus(id, newStatus);
+      const confirmedStatus = result?.status || newStatus;
+      const removedFromFilter = filters.status !== 'all' && filters.status !== confirmedStatus;
+      setListings(prev => prev.map(listing => listing._id === id ? { ...listing, status: confirmedStatus } : listing)
+        .filter(listing => !removedFromFilter || listing._id !== id));
+      if (removedFromFilter) setPagination(prev => ({ ...prev, total: Math.max(0, prev.total - 1), totalPages: Math.max(1, Math.ceil((prev.total - 1) / prev.limit)), currentPage: listings.length === 1 ? Math.max(1, prev.currentPage - 1) : prev.currentPage }));
+      const label = ADMIN_LISTING_STATUSES.find(item => item.value === confirmedStatus)?.label || confirmedStatus;
+      setStatusNotice(`${current.title} is now ${label.toLowerCase()}.`);
+      setStatusState(prev => ({ ...prev, [id]: {} }));
     } catch (error) {
-      console.error('Error updating status:', error);
-      setError('Failed to update status. Please try again.');
-    } finally {
-      setLoading(false);
+      setStatusState(prev => ({ ...prev, [id]: { error: error.message || 'Could not save. Please try again.' } }));
     }
   };
 
@@ -369,13 +375,7 @@ const ListingManager = () => {
     );
   };
 
-  const renderStatusBadge = (status) => {
-    return (
-      <span className={`status-badge ${status}`}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
-      </span>
-    );
-  };
+  const renderStatusControl = listing => <ListingStatusControl listing={listing} state={statusState[listing._id]} onChange={handleStatusChange} />;
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -405,6 +405,7 @@ const ListingManager = () => {
         </div>
       </div>
 
+      {statusNotice && <div className="listing-status-notice" role="status">{statusNotice}</div>}
       <div className="listing-filters">
         <div className="filter-group">
           <input 
@@ -422,11 +423,8 @@ const ListingManager = () => {
             onChange={(e) => handleFilterChange('status', e.target.value)}
             className="filter-select"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="draft">Draft</option>
-            <option value="sold">Sold</option>
-            <option value="archived">Archived</option>
+            <option value="all">All statuses</option>
+            {ADMIN_LISTING_STATUSES.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}
           </select>
         </div>
         
@@ -561,7 +559,7 @@ const ListingManager = () => {
                   <div className="listing-details">
                     <span className="listing-category">{listing.category}</span>
                     <span className="listing-condition">{listing.condition}</span>
-                    {renderStatusBadge(listing.status)}
+                    {renderStatusControl(listing)}
                   </div>
                   
                   <div className="listing-stats">
@@ -689,7 +687,7 @@ const ListingManager = () => {
                       </div>
                     </td>
                     <td>
-                      {renderStatusBadge(listing.status)}
+                      {renderStatusControl(listing)}
                     </td>
                     <td>
                       <div className="listing-stats">
@@ -732,18 +730,6 @@ const ListingManager = () => {
                         title={listing.featured ? "Remove from featured" : "Make featured"}
                       >
                         ★
-                      </button>
-                      <button 
-                        className="action-btn status"
-                        onClick={() => {
-                          const newStatus = prompt('Enter new status (active, draft, sold, archived):', listing.status);
-                          if (newStatus && ['active', 'draft', 'sold', 'archived'].includes(newStatus)) {
-                            handleStatusChange(listing._id, newStatus);
-                          }
-                        }}
-                        title="Change status"
-                      >
-                        🔄
                       </button>
                       <button
                         className={`action-btn transfer ${transferState[listing._id] === 'done' ? 'done' : transferState[listing._id] === 'error' ? 'error' : ''}`}

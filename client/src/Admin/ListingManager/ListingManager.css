@@ -1,4 +1,13 @@
 /* src/components/admin/ListingManager/ListingManager.css */
+.listing-manager-container .listing-status-control { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 124px; }
+.listing-manager-container .listing-status-control select { width: 100%; min-height: 36px; padding: 7px 28px 7px 10px; border: 1px solid #575d67; border-radius: 8px; background: #262a30; color: #f5f5f5; font: inherit; font-size: 12px; color-scheme: dark; cursor: pointer; }
+.listing-manager-container .listing-status-control select:focus-visible { outline: 2px solid #ff6d43; outline-offset: 2px; }
+.listing-manager-container .listing-status-control select:disabled { opacity: .65; cursor: wait; }
+.listing-manager-container .listing-status-control.status-active select, .listing-manager-container .listing-status-control.status-published select { border-color: #40876a; color: #a1e3c7; }
+.listing-manager-container .listing-status-control.status-sold select { border-color: #787299; color: #d2caff; }
+.listing-manager-container .listing-status-control small { font-size: 11px; color: #a4adb8; max-width: 190px; white-space: normal; }
+.listing-manager-container .listing-status-control .listing-status-error { color: #fb9a92; }
+.listing-manager-container .listing-status-notice { margin: 0 0 16px; padding: 12px 16px; border: 1px solid #40876a66; border-radius: 9px; background: #40876a12; color: #a1e3c7; font-size: 13px; }
 .listing-manager-container {
   padding: 1rem;
   background-color: #f5f5f5;
