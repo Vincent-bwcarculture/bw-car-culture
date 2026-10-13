@@ -260,11 +260,36 @@
   .bcc-journey-navigation button[aria-current="step"] { background-color: var(--hero-accent); }
 }
 
+
+/* Put the story above and to the right of the car; playback sits at the foot. */
+@media (min-width: 900px) {
+  .bcc-hero--showroom .bcc-hero-journey { top: 5.5rem; bottom: 3rem; width: 26%; max-width: 380px; }
+  .bcc-journey-footer { position: absolute; bottom: 0; right: 0; width: 100%; }
+  .bcc-hero-model-stage { left: 27%; width: 58%; top: 15rem; height: 600px; }
+  .bcc-hero-model-caption { display: none; }
+}
 @media (min-width: 900px) and (max-width: 1199px) {
   .bcc-hero--showroom .bcc-hero-editorial { width: 44%; }
-  .bcc-hero--showroom .bcc-hero-content { min-height: 1100px; }
-  .bcc-hero-model-stage { left: 38%; width: 62%; top: 7rem; height: 540px; }
-  .bcc-hero--showroom .bcc-hero-journey { right: 4vw; top: 32rem; width: 43%; max-width: none; }
+  .bcc-hero--showroom .bcc-hero-content { min-height: 980px; }
+  .bcc-hero-model-stage { left: 30%; width: 70%; top: 17rem; height: 600px; }
+  .bcc-hero--showroom .bcc-hero-journey { right: 4vw; top: 5.5rem; bottom: 2rem; width: 46%; max-width: none; }
   .bcc-journey-steps { min-height: 250px; }
-  .bcc-hero-model-caption { display: none; }
+}
+
+@media (min-width: 900px) {
+  .bcc-hero--showroom .bcc-hero-content { pointer-events: none; }
+  .bcc-hero--showroom .bcc-hero-editorial { pointer-events: auto; }
+  .bcc-hero--showroom .bcc-hero-journey { pointer-events: none; }
+  .bcc-journey-heading, .bcc-journey-steps, .bcc-journey-footer { pointer-events: auto; }
+  .bcc-hero-model-stage { pointer-events: none; }
+  .bcc-hero-model-stage.is-ready { pointer-events: auto; }
+  .bcc-hero-model-stage::before, .bcc-hero-model-stage::after { pointer-events: none; }
+  .bcc-hero-model-stage .hero-3d-canvas { pointer-events: none; cursor: grab; touch-action: none; }
+  .bcc-hero-model-stage.is-ready .hero-3d-canvas { pointer-events: auto; }
+  .bcc-hero-model-stage .hero-3d-canvas:active { cursor: grabbing; }
+  .bcc-hero-model-hint { position: absolute; bottom: 0; width: 100%; text-align: center; color: var(--hero-muted); font-size: .72rem; pointer-events: none; }
+  .bcc-hero-model-hint span { padding: 0 .4rem; }
+}
+@media (min-width: 900px) and (max-width: 1199px) {
+  .bcc-hero-model-stage { top: 14rem; height: 580px; }
 }

@@ -25,7 +25,7 @@ export const HERO_JOURNEY = [
   { title: 'Enjoy the road ahead', detail: 'Ongoing ownership support. More peace of mind, more time to enjoy your vehicle.' },
 ];
 
-const HeroJourney = ({ modelReady, onColourChange, onWheelChange, onInteriorChange, onPreviewPartChange, onPlayingChange }) => {
+const HeroJourney = ({ interactionId = 0, modelReady, onColourChange, onWheelChange, onInteriorChange, onPreviewPartChange, onPlayingChange }) => {
   const [step, setStep] = useState(0);
   const [colour, setColour] = useState(0);
   const [wheel, setWheel] = useState(0);
@@ -36,6 +36,7 @@ const HeroJourney = ({ modelReady, onColourChange, onWheelChange, onInteriorChan
   const [inView, setInView] = useState(false);
   const [pageVisible, setPageVisible] = useState(!document.hidden);
   const ref = useRef(null);
+  useEffect(() => { if (interactionId) setPaused(true); }, [interactionId]);
   const playing = modelReady && !paused && !reducedMotion && inView && pageVisible;
 
   useEffect(() => {
@@ -138,6 +139,7 @@ const HeroJourney = ({ modelReady, onColourChange, onWheelChange, onInteriorChan
           </li>
         ))}
       </ol>
+      <div className="bcc-journey-footer">
       <nav className="bcc-journey-navigation" aria-label="Journey chapters">
         {HERO_JOURNEY.map((item, index) => <button key={item.title} type="button"
           aria-label={`Step ${index + 1}: ${item.title}`} aria-current={step === index ? 'step' : undefined}
@@ -149,6 +151,7 @@ const HeroJourney = ({ modelReady, onColourChange, onWheelChange, onInteriorChan
         </button>
       )}
       <div className="bcc-journey-signature">DISCOVER. BUY. CUSTOMIZE.<br />MAINTAIN. MOVE. SELL.</div>
+      </div>
     </aside>
   );
 };

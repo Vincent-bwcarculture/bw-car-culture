@@ -209,6 +209,14 @@ describe('ownership journey', () => {
     expect(container.querySelector('.bcc-journey-playback')).toBeNull();
   });
 
+  test('interacting with the vehicle pauses automatic chapters', async () => {
+    await renderJourney();
+    await act(async () => root.render(<HeroJourney interactionId={1} modelReady={true} onColourChange={onColourChange} onPlayingChange={onPlayingChange} />));
+    await advance(30000);
+    expect(current()).toContain('Select your vehicle');
+    expect(container.querySelector('.bcc-journey-playback').textContent).toContain('Play journey');
+  });
+
   test('hidden pages stop advancing and unmount clears every tour timer', async () => {
     await renderJourney();
     Object.defineProperty(document, 'hidden', { configurable: true, value: true });

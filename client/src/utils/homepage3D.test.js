@@ -1,8 +1,11 @@
 import React, { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import CarBackground3D from '../components/layout/HeroSection/CarBackground3D.js';
 import { loadCarModel } from './modelCache.js';
+
+jest.mock('three/examples/jsm/controls/OrbitControls.js', () => ({ OrbitControls: jest.fn().mockImplementation(() => Object.assign(new (jest.requireActual('three').EventDispatcher)(), { update: jest.fn(), dispose: jest.fn() })) }));
 
 jest.mock('./modelCache.js', () => ({ loadCarModel: jest.fn() }));
 jest.mock('three', () => ({
@@ -12,6 +15,7 @@ jest.mock('three', () => ({
 
 let root, container, renderer, desktop, ready, nextFrame, observerCallback, body, rim, cabin, glass, model, door;
 beforeEach(() => {
+  OrbitControls.mockImplementation(() => Object.assign(new (jest.requireActual('three').EventDispatcher)(), { update: jest.fn(), dispose: jest.fn() }));
   global.IS_REACT_ACT_ENVIRONMENT = true;
   container = document.createElement('div'); document.body.appendChild(container); root = createRoot(container);
   renderer = { shadowMap: {}, setPixelRatio: jest.fn(), setSize: jest.fn(), render: jest.fn(), dispose: jest.fn() };
@@ -99,4 +103,33 @@ test('smaller screens never create a renderer or request the model', async () =>
   expect(loadCarModel).not.toHaveBeenCalled();
   expect(THREE.WebGLRenderer).not.toHaveBeenCalled();
   expect(ready).toHaveBeenLastCalledWith(false);
+});
+
+
+test('cursor controls pause the journey, constrain zoom, and dispose on unmount', async () => {
+  const interaction = jest.fn();
+  await render({ onInteraction: interaction });
+  const controls = OrbitControls.mock.results.at(-1).value;
+  expect(controls.enablePan).toBe(false);
+  expect(controls.minDistance).toBeGreaterThan(0);
+  expect(controls.maxDistance).toBeGreaterThan(controls.minDistance);
+  controls.dispatchEvent({ type: 'start' });
+  expect(interaction).toHaveBeenCalledTimes(1);
+  await act(async () => root.render(null));
+  expect(controls.dispose).toHaveBeenCalledTimes(1);
+  controls.dispatchEvent({ type: 'start' });
+  expect(interaction).toHaveBeenCalledTimes(1);
+});
+
+test('page scroll gently moves the vehicle within its stage', async () => {
+  container.className = 'bcc-hero-section';
+  Object.defineProperty(container, 'offsetHeight', { value: 800 });
+  await render({ motionEnabled: false });
+  Element.prototype.getBoundingClientRect.mockReturnValue({ width: 700, height: 500, top: -400 });
+  window.dispatchEvent(new Event('scroll'));
+  frames();
+  const scene = renderer.render.mock.calls.at(-1)[0];
+  const group = scene.children.find(node => node.isGroup);
+  expect(group.position.y).toBeGreaterThan(.2);
+  expect(group.position.y).toBeLessThan(.25);
 });

@@ -21,6 +21,7 @@ const HeroSection = () => {
   const [modelReady, setModelReady] = useState(false);
   const [paintColour, setPaintColour] = useState(HERO_COLOURS[0].hex);
   const [tourPlaying, setTourPlaying] = useState(false);
+  const [modelInteraction, setModelInteraction] = useState(0);
   const [wheelFinish, setWheelFinish] = useState(HERO_WHEELS[0].hex);
   const [interiorAccent, setInteriorAccent] = useState(HERO_INTERIORS[0].hex);
   const [previewPart, setPreviewPart] = useState(null);
@@ -245,7 +246,7 @@ const HeroSection = () => {
   return (
     <section className={`bcc-hero-section bcc-hero-premium${modelReady && activeTab === 'buy' ? ' bcc-hero--showroom' : ''}`}>
       {/* 3D car background — desktop only, fades in when model loads */}
-      <CarBackground3D sellMode={activeTab === 'sell'} paintColour={paintColour} wheelFinish={wheelFinish} interiorAccent={interiorAccent} previewPart={previewPart} motionEnabled={tourPlaying} onReadyChange={setModelReady} />
+      <CarBackground3D sellMode={activeTab === 'sell'} paintColour={paintColour} wheelFinish={wheelFinish} interiorAccent={interiorAccent} previewPart={previewPart} motionEnabled={tourPlaying} onInteraction={() => setModelInteraction(value => value + 1)} onReadyChange={setModelReady} />
 
       {/* Semi-transparent dark layer for content legibility */}
       <div className="bcc-hero-dark-overlay" aria-hidden="true" />
@@ -473,7 +474,7 @@ const HeroSection = () => {
         ) : null}
         </div>
         {activeTab === 'buy' && (
-          <HeroJourney modelReady={modelReady} onColourChange={setPaintColour} onWheelChange={setWheelFinish} onInteriorChange={setInteriorAccent} onPreviewPartChange={setPreviewPart} onPlayingChange={setTourPlaying} />
+          <HeroJourney interactionId={modelInteraction} modelReady={modelReady} onColourChange={setPaintColour} onWheelChange={setWheelFinish} onInteriorChange={setInteriorAccent} onPreviewPartChange={setPreviewPart} onPlayingChange={setTourPlaying} />
         )}
       </div>
 

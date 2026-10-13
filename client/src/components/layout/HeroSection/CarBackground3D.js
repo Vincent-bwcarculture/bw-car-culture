@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { loadCarModel } from '../../../utils/modelCache.js';
 
 const HIDE_KEYWORDS = ['turntable', 'platform', 'ground', 'floor', 'shadow', 'spoon',
@@ -19,14 +20,14 @@ const disposeModel = (model) => {
   geometries.forEach(geometry => geometry.dispose());
 };
 
-const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled = true, onReadyChange }) => {
+const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled = true, onReadyChange, onInteraction }) => {
   const canvasRef = useRef(null);
   const stageRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [desktop, setDesktop] = useState(false);
-  const settings = useRef({ sellMode, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled, onReadyChange });
-  useEffect(() => { settings.current = { sellMode, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled, onReadyChange }; },
-    [sellMode, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled, onReadyChange]);
+  const settings = useRef({ sellMode, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled, onReadyChange, onInteraction });
+  useEffect(() => { settings.current = { sellMode, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled, onReadyChange, onInteraction }; },
+    [sellMode, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled, onReadyChange, onInteraction]);
 
   useEffect(() => {
     const media = window.matchMedia('(min-width: 900px)');
@@ -54,6 +55,14 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.enablePan = false;
+    controls.minPolarAngle = Math.PI * 0.12;
+    controls.maxPolarAngle = Math.PI * 0.58;
+    const onControlStart = () => settings.current.onInteraction?.();
+    controls.addEventListener('start', onControlStart);
     scene.add(new THREE.AmbientLight(0xffffff, 1.5));
     const key = new THREE.DirectionalLight(0xfff5e0, 4);
     key.position.set(4, 5, 4);
@@ -69,6 +78,17 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
     const group = new THREE.Group(); scene.add(group);
     let disposed = false, model = null, ready = false, inView = true, contextLost = false;
     let frame = null, lastFrame = 0, elapsed = 0, dirty = true;
+    let scrollProgress = 0;
+    const onScroll = () => {
+      const hero = stage.closest('.bcc-hero-section');
+      if (!hero) return;
+      scrollProgress = THREE.MathUtils.clamp(-hero.getBoundingClientRect().top / Math.max(hero.offsetHeight, 1), 0, 1);
+      dirty = true;
+    };
+    const onControlChange = () => { dirty = true; };
+    controls.addEventListener('change', onControlChange);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
     const surfaces = {
       paint: { materials: new Set(), target: new THREE.Color(), last: null },
       wheels: { materials: new Set(), target: new THREE.Color(), last: null },
@@ -85,9 +105,12 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       // The car is normalized to four units; keep it inside its own stage at every aspect ratio.
-      const distance = 7.4 / Math.min(1, camera.aspect / 1.35);
+      const distance = 6.4 / Math.min(1, camera.aspect / 1.35);
       camera.position.set(distance * 0.68, distance * 0.28, distance * 0.68);
       camera.lookAt(0, 0, 0);
+      controls.minDistance = distance * 0.55;
+      controls.maxDistance = distance * 1.7;
+      controls.update();
       dirty = true;
     };
     const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(stage); resize();
@@ -97,6 +120,7 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
       if (now - lastFrame < 1000 / 30) return;
       const delta = Math.min((now - lastFrame) / 1000, 0.25); lastFrame = now;
       if (!ready) return;
+      controls.update();
       const { paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled: motion, sellMode: selling } = settings.current;
       const moving = motion && !reducedMotion.matches;
       let changing = false;
@@ -115,9 +139,14 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
       });
       if (moving) elapsed += delta;
       const baseRotation = previewPart === 'wheels' ? -1.1 : -0.35;
-      const targetRotation = baseRotation + (moving ? Math.sin(elapsed * 0.18) * 0.18 : 0);
+      const targetRotation = baseRotation + (reducedMotion.matches ? 0 : scrollProgress * .35) + (moving ? Math.sin(elapsed * 0.18) * 0.18 : 0);
       if (Math.abs(group.rotation.y - targetRotation) > .001) {
         group.rotation.y = reducedMotion.matches ? targetRotation : THREE.MathUtils.lerp(group.rotation.y, targetRotation, 1 - Math.exp(-delta * 2));
+        dirty = true;
+      }
+      const targetY = reducedMotion.matches ? 0 : scrollProgress * .45;
+      if (Math.abs(group.position.y - targetY) > .001) {
+        group.position.y = THREE.MathUtils.lerp(group.position.y, targetY, 1 - Math.exp(-delta * 3));
         dirty = true;
       }
       doors.forEach(({ node, closed, open, front }) => {
@@ -209,14 +238,18 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
       canvas.removeEventListener('webglcontextlost', onContextLost);
       canvas.removeEventListener('webglcontextrestored', onContextRestored);
       if (model) disposeModel(model);
+      window.removeEventListener('scroll', onScroll);
+      controls.removeEventListener('start', onControlStart);
+      controls.removeEventListener('change', onControlChange);
+      controls.dispose();
       renderer.dispose();
     };
   }, [desktop]);
 
   return (
-    <div ref={stageRef} className={`bcc-hero-model-stage${visible ? ' is-ready' : ''}`} aria-hidden="true">
-      <canvas ref={canvasRef} className={`hero-3d-canvas${visible ? ' hero-3d-canvas--on' : ''}`} />
-      {visible && !sellMode && <div className="bcc-hero-model-caption">A vision of what’s possible <span>Explore your own expression.</span></div>}
+    <div ref={stageRef} className={`bcc-hero-model-stage${visible ? ' is-ready' : ''}`}>
+      <canvas aria-label="Vehicle preview. Drag to rotate and scroll over the vehicle to zoom." ref={canvasRef} className={`hero-3d-canvas${visible ? ' hero-3d-canvas--on' : ''}`} />
+      {visible && <div className="bcc-hero-model-hint">Drag to rotate <span aria-hidden="true">&middot;</span> Scroll over the vehicle to zoom</div>}
     </div>
   );
 };
