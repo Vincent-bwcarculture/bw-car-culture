@@ -104,7 +104,7 @@ const HeroJourney = ({ interactionId = 0, modelReady, onColourChange, onWheelCha
     <aside className="bcc-hero-journey" ref={ref} aria-label="Your ownership journey">
       <div className="bcc-journey-heading">
         <span className="bcc-journey-eyebrow">Consider every detail taken care of</span>
-        <h2>Your journey, <em>our commitment.</em></h2>
+        <h2>Your vehicle purchase and ownership journey, <em>our commitment.</em></h2>
       </div>
       <ol className="bcc-journey-steps">
         {HERO_JOURNEY.map((item, index) => (

@@ -263,14 +263,14 @@
 
 /* A shared headline and baseline connect the search and vehicle journey. */
 @media (min-width: 900px) {
-  .bcc-hero-premium { min-height: max(860px, calc(100svh - 110px)); }
+  .bcc-hero-premium { min-height: 720px; }
   .bcc-hero--showroom .bcc-hero-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto 1fr;
     column-gap: 5vw;
     row-gap: 2.5rem;
-    min-height: max(860px, calc(100svh - 110px));
+    min-height: 720px;
     padding: 3rem 4vw 2.5rem;
     pointer-events: none;
   }
@@ -316,7 +316,10 @@
   .bcc-journey-playback { margin-inline: auto; }
   .bcc-journey-signature { display: none; }
   .bcc-journey-heading, .bcc-journey-steps, .bcc-journey-footer { pointer-events: auto; }
-  .bcc-hero-model-stage { left: 39%; width: 61%; top: 18rem; height: 520px; pointer-events: none; }
+  .bcc-hero-model-stage { left: 39%; width: 61%; top: 12rem; height: 520px; pointer-events: none; }
+  /* Reserve extra room only while the customization controls are visible. */
+  .bcc-hero--showroom:has(.is-current .bcc-journey-configurator) .bcc-hero-content { min-height: 850px; }
+  .bcc-hero--showroom:has(.is-current .bcc-journey-configurator) .bcc-hero-model-stage { top: 18rem; }
   .bcc-hero-model-stage.is-ready { pointer-events: auto; }
   .bcc-hero-model-stage::before, .bcc-hero-model-stage::after { pointer-events: none; }
   .bcc-hero-model-stage .hero-3d-canvas { pointer-events: none; cursor: auto; touch-action: pan-y; }
@@ -325,6 +328,8 @@
   .bcc-hero-model-hint span { padding: 0 .4rem; }
 }
 @media (min-width: 900px) and (max-width: 1199px) {
-  .bcc-hero--showroom .bcc-hero-content { min-height: 960px; column-gap: 3vw; }
-  .bcc-hero-model-stage { left: 35%; width: 65%; top: 23rem; height: 470px; }
+  .bcc-hero--showroom .bcc-hero-content { min-height: 760px; column-gap: 3vw; }
+  .bcc-hero-model-stage { left: 35%; width: 65%; top: 15rem; height: 470px; }
+  .bcc-hero--showroom:has(.is-current .bcc-journey-configurator) .bcc-hero-content { min-height: 880px; }
+  .bcc-hero--showroom:has(.is-current .bcc-journey-configurator) .bcc-hero-model-stage { top: 21rem; }
 }
