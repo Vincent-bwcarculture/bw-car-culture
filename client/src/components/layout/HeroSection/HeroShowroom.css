@@ -110,6 +110,9 @@
 .bcc-journey-swatches button:hover { transform: translateY(-2px); }
 .bcc-hero-premium .bcc-journey-colour-name { display: block; font-size: .7rem; color: var(--hero-ink); margin-top: .7rem; }
 .bcc-journey-configurator small { display: block; font-size: .6rem; line-height: 1.6; color: var(--hero-muted); margin-top: .35rem; }
+.bcc-journey-auth { margin-top: .65rem; font-size: .72rem; line-height: 1.6; color: var(--hero-muted); }
+.bcc-journey-auth button { padding: 0; border: 0; background: none; color: var(--hero-ink); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.bcc-journey-auth button:focus-visible { outline: 2px solid var(--hero-accent); outline-offset: 3px; }
 .bcc-journey-playback {
   display: flex;
   gap: .5rem;

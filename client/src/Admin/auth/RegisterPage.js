@@ -1,6 +1,6 @@
 // src/components/auth/RegisterPage.js
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import axios from '../../config/axios.js';
@@ -19,13 +19,14 @@ const RegisterPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Redirect if already authenticated
     if (isAuthenticated) {
-      navigate('/', { replace: true });
+      navigate(location.state?.from || '/', { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, location.state?.from]);
 
   const validate = () => {
     const newErrors = {};
@@ -87,6 +88,7 @@ const RegisterPage = () => {
       if (response.data.success) {
         navigate('/login', { 
           state: { 
+            from: location.state?.from,
             message: 'Registration successful! Please login to continue.' 
           }
         });
@@ -212,7 +214,7 @@ const RegisterPage = () => {
 
         <div className="auth-footer">
           <p>
-            Already have an account? <Link to="/login">Login here</Link>
+            Already have an account? <Link to="/login" state={location.state}>Login here</Link>
           </p>
         </div>
       </div>

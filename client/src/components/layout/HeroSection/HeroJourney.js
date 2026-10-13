@@ -25,13 +25,14 @@ export const HERO_JOURNEY = [
   { title: 'Enjoy the road ahead', detail: 'Ongoing ownership support. More peace of mind, more time to enjoy your vehicle.' },
 ];
 
-const HeroJourney = ({ interactionId = 0, modelReady, onColourChange, onWheelChange, onInteriorChange, onPreviewPartChange, onPlayingChange }) => {
-  const [step, setStep] = useState(0);
+const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, startCustomizing = false, onAuthenticate, onColourChange, onWheelChange, onInteriorChange, onPreviewPartChange, onPlayingChange }) => {
+  const [step, setStep] = useState(startCustomizing ? 1 : 0);
   const [colour, setColour] = useState(0);
   const [wheel, setWheel] = useState(0);
   const [interior, setInterior] = useState(0);
   const [part, setPart] = useState('paint');
-  const [paused, setPaused] = useState(false);
+  const [paused, setPaused] = useState(startCustomizing);
+  const [authPrompt, setAuthPrompt] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(true);
   const [inView, setInView] = useState(false);
   const [pageVisible, setPageVisible] = useState(!document.hidden);
@@ -99,6 +100,12 @@ const HeroJourney = ({ interactionId = 0, modelReady, onColourChange, onWheelCha
   const options = part === 'paint' ? HERO_COLOURS : part === 'wheels' ? HERO_WHEELS : HERO_INTERIORS;
   const selection = part === 'paint' ? colour : part === 'wheels' ? wheel : interior;
   const selectOption = part === 'paint' ? setColour : part === 'wheels' ? setWheel : setInterior;
+  useEffect(() => { if (isAuthenticated) setAuthPrompt(false); }, [isAuthenticated]);
+  const customize = action => {
+    setPaused(true);
+    if (!isAuthenticated) { setAuthPrompt(true); return; }
+    action();
+  };
 
   return (
     <aside className="bcc-hero-journey" ref={ref} aria-label="Your ownership journey">
@@ -121,18 +128,25 @@ const HeroJourney = ({ interactionId = 0, modelReady, onColourChange, onWheelCha
                 <div className="bcc-journey-configurator">
                   <div className="bcc-journey-parts" role="group" aria-label="Customization area">
                     {[['paint', 'Paint'], ['wheels', 'Wheels'], ['interior', 'Interior']].map(([key, label]) => (
-                      <button type="button" key={key} aria-pressed={part === key} onClick={() => { setPart(key); setPaused(true); }}>{label}</button>
+                      <button type="button" key={key} aria-pressed={part === key} onClick={() => customize(() => setPart(key))}>{label}</button>
                     ))}
                   </div>
                   <div className={`bcc-journey-swatches bcc-journey-swatches--${part}`} role="group" aria-label={`Preview vehicle ${part === 'paint' ? 'paint colour' : part === 'wheels' ? 'wheel finish' : 'interior accent'}`}>
                     {options.map((paint, paintIndex) => (
                       <button key={paint.name} type="button" style={{ '--paint': paint.hex }}
                         aria-label={paint.name} aria-pressed={selection === paintIndex} title={paint.name}
-                        onClick={() => { selectOption(paintIndex); setPaused(true); }} />
+                        onClick={() => customize(() => selectOption(paintIndex))} />
                     ))}
                   </div>
                   <span className="bcc-journey-colour-name">{options[selection].name}</span>
                   <small>{part === 'wheels' ? 'Wheel finish' : part === 'interior' ? 'Interior accent' : 'Colour'} preview · options vary by vehicle</small>
+                  {authPrompt && !isAuthenticated && (
+                    <div className="bcc-journey-auth" role="alert">
+                      <button type="button" onClick={() => onAuthenticate?.('login')}>Log in</button>
+                      {' or '}<button type="button" onClick={() => onAuthenticate?.('register')}>create an account</button>
+                      {' to customize this vehicle.'}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

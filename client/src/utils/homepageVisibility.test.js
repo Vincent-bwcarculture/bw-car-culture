@@ -1,17 +1,18 @@
 import React, { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.js';
 import { http } from '../config/axios.js';
 import HomeServicesSection from '../components/features/HomeServicesSection/HomeServicesSection.js';
 import HeroSection from '../components/layout/HeroSection/HeroSection.js';
 import CarBackground3D from '../components/layout/HeroSection/CarBackground3D.js';
 import HeroJourney from '../components/layout/HeroSection/HeroJourney.js';
 
-jest.mock('react-router-dom', () => ({ useNavigate: jest.fn() }), { virtual: true });
+jest.mock('react-router-dom', () => ({ useNavigate: jest.fn(), useLocation: jest.fn() }), { virtual: true });
 jest.mock('../config/axios.js', () => ({ http: { get: jest.fn() } }));
 jest.mock('../components/shared/BusinessCard/BusinessCard.js', () => ({ business }) => <div>{business.businessName}</div>);
 jest.mock('../components/layout/HeroSection/CarBackground3D.js', () => jest.fn(() => null));
-jest.mock('../context/AuthContext.js', () => ({ useAuth: () => ({ isAuthenticated: true }) }));
+jest.mock('../context/AuthContext.js', () => ({ useAuth: jest.fn() }));
 jest.mock('../services/statsService.js', () => ({ statsService: { getWebsiteStats: async () => ({}) } }));
 jest.mock('../services/dealerService.js', () => ({ dealerService: { getDealers: async () => ({ dealers: [] }) } }));
 
@@ -21,6 +22,8 @@ beforeEach(() => {
   container = document.createElement('div'); document.body.appendChild(container);
   root = createRoot(container);
   navigate = jest.fn(); useNavigate.mockReturnValue(navigate); http.get.mockReset();
+  useAuth.mockReturnValue({ isAuthenticated: true });
+  useLocation.mockReturnValue({ pathname: '/home', search: '' });
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
 });
@@ -125,8 +128,8 @@ describe('ownership journey', () => {
     onColourChange = jest.fn(); onWheelChange = jest.fn(); onInteriorChange = jest.fn(); onPlayingChange = jest.fn();
   });
   afterEach(() => { jest.useRealTimers(); delete window.matchMedia; });
-  const renderJourney = async (modelReady = true) => {
-    await act(async () => root.render(<HeroJourney modelReady={modelReady} onColourChange={onColourChange} onWheelChange={onWheelChange} onInteriorChange={onInteriorChange} onPlayingChange={onPlayingChange} />));
+  const renderJourney = async (modelReady = true, props = {}) => {
+    await act(async () => root.render(<HeroJourney isAuthenticated={true} modelReady={modelReady} onColourChange={onColourChange} onWheelChange={onWheelChange} onInteriorChange={onInteriorChange} onPlayingChange={onPlayingChange} {...props} />));
   };
   const advance = async time => { await act(async () => jest.advanceTimersByTime(time)); };
   const current = () => container.querySelector('.is-current > button').textContent;
@@ -151,6 +154,51 @@ describe('ownership journey', () => {
     expect(onColourChange).toHaveBeenLastCalledWith('#9d172d');
     expect(container.querySelector('.bcc-journey-playback').textContent).toContain('Play journey');
     expect(onPlayingChange).toHaveBeenLastCalledWith(false);
+  });
+
+  test.each([['paint', 'Crimson Red'], ['wheels', 'Warm Bronze'], ['interior', 'Ivory']])('guests can watch %s previews but must authenticate before changing a finish', async (part, option) => {
+    const onAuthenticate = jest.fn();
+    await renderJourney(true, { isAuthenticated: false, onAuthenticate });
+    await advance(6000);
+    if (part !== 'paint') await advance(4800);
+    if (part === 'interior') await advance(4800);
+    const callback = part === 'paint' ? onColourChange : part === 'wheels' ? onWheelChange : onInteriorChange;
+    const before = callback.mock.calls.at(-1)[0];
+    await act(async () => container.querySelector(`[aria-label="${option}"]`).click());
+    expect(callback.mock.calls.at(-1)[0]).toBe(before);
+    expect(container.querySelector('[role="alert"]').textContent).toContain('to customize this vehicle');
+    await act(async () => container.querySelectorAll('.bcc-journey-auth button')[0].click());
+    expect(onAuthenticate).toHaveBeenLastCalledWith('login');
+    await act(async () => container.querySelectorAll('.bcc-journey-auth button')[1].click());
+    expect(onAuthenticate).toHaveBeenLastCalledWith('register');
+    const selectedPart = container.querySelector('.bcc-journey-parts [aria-pressed="true"]').textContent;
+    await act(async () => container.querySelector('.bcc-journey-parts button').click());
+    expect(container.querySelector('.bcc-journey-parts [aria-pressed="true"]').textContent).toBe(selectedPart);
+    await advance(30000);
+    expect(current()).toContain('Make it yours');
+    expect(callback.mock.calls.at(-1)[0]).toBe(before);
+  });
+
+  test('authentication return opens customization paused and permits palette changes', async () => {
+    await renderJourney(true, { startCustomizing: true });
+    expect(current()).toContain('Make it yours');
+    await act(async () => container.querySelector('[aria-label="Crimson Red"]').click());
+    expect(onColourChange).toHaveBeenLastCalledWith('#9d172d');
+    expect(container.querySelector('[role="alert"]')).toBeNull();
+  });
+
+  test('hero account actions preserve the customization return destination', async () => {
+    useAuth.mockReturnValue({ isAuthenticated: false });
+    useLocation.mockReturnValue({ pathname: '/home', search: '?customize=1' });
+    await act(async () => root.render(<HeroSection />));
+    await act(async () => CarBackground3D.mock.calls.at(-1)[0].onReadyChange(true));
+    await act(async () => container.querySelector('[aria-label="Crimson Red"]').click());
+    for (const [index, route] of [[0, 'login'], [1, 'register']]) {
+      await act(async () => container.querySelectorAll('.bcc-journey-auth button')[index].click());
+      expect(navigate).toHaveBeenLastCalledWith(`/${route}`, { state: {
+        from: '/home?customize=1', message: 'Log in or create an account to customize the display vehicle.'
+      } });
+    }
   });
 
   test('automatic customization demonstrates wheel finishes and interior accents before delivery', async () => {

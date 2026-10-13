@@ -203,7 +203,7 @@ const LoginPage = () => {
 
         <div className="auth-footer">
           <p>
-            Don't have an account? <Link to="/register">Register here</Link>
+            Don't have an account? <Link to="/register" state={location.state}>Register here</Link>
           </p>
         </div>
       </div>

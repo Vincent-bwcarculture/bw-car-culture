@@ -1,6 +1,6 @@
 ﻿// src/components/layout/HeroSection/HeroSection.js - With authentication integration
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.js'; // NEW: Added authentication
 import { statsService } from '../../../services/statsService.js';
 import { dealerService } from '../../../services/dealerService.js';
@@ -11,6 +11,7 @@ import './HeroShowroom.css';
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated } = useAuth(); // NEW: Added authentication context
   
   const [activeTab, setActiveTab] = useState('buy');
@@ -474,7 +475,10 @@ const HeroSection = () => {
         ) : null}
         </div>
         {activeTab === 'buy' && (
-          <HeroJourney interactionId={modelInteraction} modelReady={modelReady} onColourChange={setPaintColour} onWheelChange={setWheelFinish} onInteriorChange={setInteriorAccent} onPreviewPartChange={setPreviewPart} onPlayingChange={setTourPlaying} />
+          <HeroJourney interactionId={modelInteraction} modelReady={modelReady} isAuthenticated={isAuthenticated}
+            startCustomizing={new URLSearchParams(location.search).get('customize') === '1'}
+            onAuthenticate={route => navigate(`/${route}`, { state: { from: '/home?customize=1', message: 'Log in or create an account to customize the display vehicle.' } })}
+            onColourChange={setPaintColour} onWheelChange={setWheelFinish} onInteriorChange={setInteriorAccent} onPreviewPartChange={setPreviewPart} onPlayingChange={setTourPlaying} />
         )}
       </div>
 
