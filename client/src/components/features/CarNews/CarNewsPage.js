@@ -265,6 +265,8 @@ const markFailedImage = (url) => {
           
           <button 
             className={`cc-newspage-filter-toggle ${filtersVisible ? 'active' : ''}`}
+            aria-label="Filters"
+            aria-expanded={filtersVisible}
             onClick={() => setFiltersVisible(!filtersVisible)}
           >
             <Filter size={18} />
@@ -282,6 +284,8 @@ const markFailedImage = (url) => {
             <div className="cc-newspage-filter-options">
               <button
                 className={`cc-newspage-filter-option ${sortBy === 'newest' ? 'active' : ''}`}
+                aria-label="Newest"
+                aria-pressed={sortBy === 'newest'}
                 onClick={() => handleSortChange('newest')}
               >
                 <Clock size={16} />
@@ -289,6 +293,8 @@ const markFailedImage = (url) => {
               </button>
               <button
                 className={`cc-newspage-filter-option ${sortBy === 'popular' ? 'active' : ''}`}
+                aria-label="Most Popular"
+                aria-pressed={sortBy === 'popular'}
                 onClick={() => handleSortChange('popular')}
               >
                 <Zap size={16} />
@@ -302,6 +308,8 @@ const markFailedImage = (url) => {
             <div className="cc-newspage-filter-options">
               <button
                 className={`cc-newspage-filter-option ${viewMode === 'grid' ? 'active' : ''}`}
+                aria-label="Grid view"
+                aria-pressed={viewMode === 'grid'}
                 onClick={() => setViewMode('grid')}
               >
                 <Grid size={16} />
@@ -309,6 +317,8 @@ const markFailedImage = (url) => {
               </button>
               <button
                 className={`cc-newspage-filter-option ${viewMode === 'list' ? 'active' : ''}`}
+                aria-label="List view"
+                aria-pressed={viewMode === 'list'}
                 onClick={() => setViewMode('list')}
               >
                 <List size={16} />
