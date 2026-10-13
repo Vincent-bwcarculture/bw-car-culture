@@ -355,7 +355,7 @@ const NewsList = () => {
                     </button>
                     <button 
                       className="action-btn view"
-                      onClick={() => window.open(`/news/${article.slug || article._id}`, '_blank')}
+                      onClick={() => window.open(`/news/article/${article.slug || article._id}`, '_blank')}
                       title="View article"
                     >
                       👁

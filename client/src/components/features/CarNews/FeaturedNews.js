@@ -412,7 +412,7 @@ const FeaturedNews = ({ compact = false }) => {
   const shareOn = (platform) => {
     if (!selectedNewsItem) return;
     
-    const url = window.location.origin + `/news/article/${selectedNewsItem.id || selectedNewsItem._id || ''}`;
+    const url = window.location.origin + `/news/article/${selectedNewsItem.slug || selectedNewsItem.id || selectedNewsItem._id || ''}`;
     const title = selectedNewsItem.title || 'Car News';
     const text = selectedNewsItem.description || 'Check out this car news article';
     

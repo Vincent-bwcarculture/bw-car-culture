@@ -11,7 +11,7 @@ import LoadingScreen from '../../shared/LoadingScreen/LoadingScreen.js';
 import NewsGallery from './NewsGallery.js';
 import FeaturedNews from './FeaturedNews.js';
 import VideoSection from '../VideoSection/VideoSection.js';
-import { getNewsImageUrl, getGalleryImageUrls, formatDate, getAuthorInfo } from '../../../utils/newsHelpers.js';
+import { getNewsImageUrl, getGalleryImageUrls, formatNewsImagePath, handleNewsImageError, getArticleIdentifier, formatDate, getAuthorInfo } from '../../../utils/newsHelpers.js';
 import { buildHelmet, SITE_URL } from '../../../hooks/useSEO.js';
 import StickyCarBar from '../../shared/StickyCarBar/StickyCarBar.js';
 import './NewsArticle.css';
@@ -116,35 +116,6 @@ const NewsArticle = () => {
     return '/images/placeholders/default.jpg';
   };
 
-  // Process gallery images to handle S3 URLs — robust multi-format support
-  const processGalleryImages = (gallery) => {
-    if (!gallery || !Array.isArray(gallery)) return [];
-    const results = [];
-    for (const item of gallery) {
-      if (!item) continue;
-      let url = null;
-      if (typeof item === 'string') {
-        url = item;
-      } else if (item.url) {
-        url = item.url;
-      } else if (item.secure_url) {
-        url = item.secure_url;
-      } else if (item.key) {
-        url = `/api/images/s3-proxy/${item.key}`;
-      } else if (item.path) {
-        url = item.path;
-      }
-      if (url) {
-        // Fix duplicate path segments
-        if (url.includes('/images/images/')) url = url.replace(/\/images\/images\//g, '/images/');
-        // Ensure local paths start with /
-        if (!url.startsWith('http') && !url.startsWith('/')) url = `/${url}`;
-        results.push(url);
-      }
-    }
-    return results;
-  };
-
   // Fetch featured vehicles from premium dealers
   // FIXED: Added /api prefix
   const fetchFeaturedVehicles = useCallback(async (make, model) => {
@@ -184,6 +155,7 @@ const NewsArticle = () => {
       return;
     }
     
+    let cancelled = false;
     const fetchArticleAndRelated = async () => {
       try {
         console.log(`Fetching article: ${articleId}`);
@@ -193,11 +165,15 @@ const NewsArticle = () => {
         // Clear previous article data
         setArticle(null);
         setGalleryImages([]);
+        setSelectedGalleryIndex(0); setShowGallery(false);
+        setComments([]); setShowComments(false); setRelatedArticles([]); setRelatedVehicles([]); setFeaturedVehicles([]);
+        initialFetchCompleteRef.current = false;
         galleryProcessedRef.current = false;
         
         // FIXED: Added /api prefix - THIS WAS THE MAIN ISSUE!
         // Try to fetch the article - backend will handle both ID and slug
-        const response = await http.get(`/api/news/${articleId}`);
+        const response = await http.get(`/api/news/${encodeURIComponent(articleId)}`);
+        if (cancelled) return;
         
         if (response.data?.data) {
           // Store article ID to prevent duplicate fetches
@@ -210,6 +186,8 @@ const NewsArticle = () => {
           fetchedArticle.parsedContent = cleanedContent;
           
           setArticle(fetchedArticle);
+          setGalleryImages(getGalleryImageUrls(fetchedArticle));
+          setIsLoading(false);
 
           // Restore like state from localStorage
           try {
@@ -220,7 +198,8 @@ const NewsArticle = () => {
           // Fetch comments from API
           try {
             const cRes = await http.get(`/api/comments/${fetchedArticle._id}`);
-            const apiComments = cRes.data?.data || [];
+            if (cancelled) return;
+            const apiComments = Array.isArray(cRes.data?.data) ? cRes.data.data : [];
             setComments(apiComments);
             if (apiComments.length > 0) setShowComments(true);
             // Seed liked state from localStorage for optimistic UI
@@ -228,17 +207,11 @@ const NewsArticle = () => {
               const lc = JSON.parse(localStorage.getItem('likedComments') || '{}');
               setLikedComments(lc);
             } catch (_) {}
-          } catch (_) { setComments([]); }
+          } catch (_) { if (!cancelled) setComments([]); }
+          if (cancelled) return;
 
-          // Process gallery images for S3 URLs
-          if (fetchedArticle.gallery && Array.isArray(fetchedArticle.gallery)) {
-            console.log('Processing gallery for articleId:', articleId);
-            galleryProcessedRef.current = true;
-            
-            const processedGalleryUrls = processGalleryImages(fetchedArticle.gallery);
-            setGalleryImages(processedGalleryUrls);
-          }
-          
+
+
           // Get article tags and categories for finding related content
           const tags = fetchedArticle.tags || [];
           const category = fetchedArticle.category;
@@ -259,6 +232,7 @@ const NewsArticle = () => {
             try {
               // FIXED: Added /api prefix
               const vehiclesResponse = await http.get(`/api/listings?make=${make}&limit=3`);
+              if (cancelled) return;
               if (vehiclesResponse.data?.data) {
                 setRelatedVehicles(vehiclesResponse.data.data);
               }
@@ -280,6 +254,7 @@ const NewsArticle = () => {
           setError('Article not found');
         }
       } catch (error) {
+        if (cancelled) return;
         console.error('Error fetching article:', error);
         // More detailed error logging
         if (error.status === 404 || error.response?.status === 404) {
@@ -288,7 +263,7 @@ const NewsArticle = () => {
           setError('Failed to load article. Please try again later.');
         }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
   
@@ -296,6 +271,7 @@ const NewsArticle = () => {
     
     // Reset processing flags when article ID changes
     return () => {
+      cancelled = true;
       if (articleId !== articleFetchedRef.current) {
         galleryProcessedRef.current = false;
         initialFetchCompleteRef.current = false;
@@ -312,7 +288,7 @@ const NewsArticle = () => {
 
       if (response.data?.data) {
         const filtered = response.data.data.filter(
-          item => item._id !== articleId && item.id !== articleId
+          item => String(item._id || item.id) !== String(currentArticle._id || currentArticle.id)
         );
         setMoreNewsItems(filtered.slice(0, 3));
         // Also backfill the sidebar related articles if still empty
@@ -324,7 +300,7 @@ const NewsArticle = () => {
         const r2 = await http.get('/api/news?limit=5');
         if (r2.data?.data) {
           const filtered = r2.data.data.filter(
-            item => item._id !== articleId && item.id !== articleId
+            item => String(item._id || item.id) !== String(currentArticle._id || currentArticle.id)
           );
           setMoreNewsItems(filtered.slice(0, 3));
           setRelatedArticles(prev => prev.length > 0 ? prev : filtered.slice(0, 3));
@@ -527,81 +503,23 @@ const NewsArticle = () => {
   const openGallery = useCallback((index) => {
     setSelectedGalleryIndex(index);
     setShowGallery(true);
-    document.body.style.overflow = 'hidden'; // Prevent scrolling
+
   }, []);
   
+  useEffect(() => {
+    if (!showGallery) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  }, [showGallery]);
+
   // Handle gallery close
   const closeGallery = useCallback(() => {
     setShowGallery(false);
-    document.body.style.overflow = ''; // Restore scrolling
+
   }, []);
 
-  // Enhanced image URL function - keeping the original name for compatibility
-  // FIXED VERSION - Never uses thumbnails for gallery display
-  const getImageUrl = (imageData, type = 'article') => {
-    try {
-      if (!imageData) {
-        return `/images/placeholders/${type === 'article' ? 'default' : type}.jpg`;
-      }
-      
-      let imageUrl = '';
-      
-      // If imageData is a string, use it directly
-      if (typeof imageData === 'string') {
-        imageUrl = imageData;
-      } 
-      // If imageData is an object with url property
-      else if (imageData && typeof imageData === 'object') {
-        // FIXED: Only use full URL, never thumbnails for gallery
-        if (type === 'gallery') {
-          imageUrl = imageData.url || ''; // Only use full-size for gallery
-        } else {
-          imageUrl = imageData.url || imageData.thumbnail || ''; // Thumbnails OK for other types
-        }
-        
-        // If we have an S3 key but no URL, create proxy URL
-        if (!imageUrl && imageData.key) {
-          return `/api/images/s3-proxy/${imageData.key}`;
-        }
-      }
-      
-      // If no URL found, return placeholder
-      if (!imageUrl) {
-        return `/images/placeholders/${type === 'article' ? 'default' : type}.jpg`;
-      }
-      
-      // Fix problematic S3 URLs with duplicate paths
-      if (imageUrl.includes('/images/images/')) {
-        imageUrl = imageUrl.replace(/\/images\/images\//g, '/images/');
-      }
-      
-      // Remove /thumbnails/ from path to ensure we get full image
-      if (type === 'gallery' && imageUrl.includes('/thumbnails/')) {
-        imageUrl = imageUrl.replace('/thumbnails/', '/');
-      }
-      
-      // Check for cached failed images
-      if (checkFailedImage(imageUrl)) {
-        console.log(`Using cached fallback for previously failed image: ${imageUrl}`);
-        return `/images/placeholders/${type === 'article' ? 'default' : type}.jpg`;
-      }
-      
-      // If it's already a full URL (like S3), return as is
-      if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-        return imageUrl;
-      }
-      
-      // Ensure local paths start with /
-      if (!imageUrl.startsWith('/')) {
-        imageUrl = `/${imageUrl}`;
-      }
-      
-      return imageUrl;
-    } catch (error) {
-      console.error('Error getting image URL:', error);
-      return `/images/placeholders/${type === 'article' ? 'default' : type}.jpg`;
-    }
-  };
+  const getImageUrl = imageData => formatNewsImagePath(imageData);
 
   // Add these functions near the beginning of your component
   const checkFailedImage = (url) => {
@@ -664,8 +582,8 @@ const NewsArticle = () => {
 
   const authorInfo = getAuthorInfo(article);
 
-  const articleImage = article.featuredImage?.url || article.images?.[0]?.url || null;
-  const articleUrl   = `${SITE_URL}/news/${article.slug || article._id}`;
+  const articleImage = getNewsImageUrl(article);
+  const articleUrl   = `${SITE_URL}/news/article/${getArticleIdentifier(article)}`;
 
   return (
     <div className="cc-news-article-page">
@@ -753,39 +671,9 @@ const NewsArticle = () => {
 
           <div className="cc-news-article-cover">
             <img 
-              src={getImageUrl(article.featuredImage || article.images?.[0])} 
+              src={getNewsImageUrl(article)}
               alt={article.title} 
-              onError={(e) => {
-                const originalSrc = e.target.src;
-                console.log('Article cover image failed to load:', originalSrc);
-                
-                // Mark this image as failed
-                markFailedImage(originalSrc);
-                
-                // For S3 URLs, try the proxy endpoint
-                if (originalSrc.includes('amazonaws.com')) {
-                  // Extract key from S3 URL
-                  const key = originalSrc.split('.amazonaws.com/').pop();
-                  if (key) {
-                    // Normalize the key to prevent duplicate segments
-                    const normalizedKey = key.replace(/images\/images\//g, 'images/');
-                    e.target.src = `/api/images/s3-proxy/${normalizedKey}`;
-                    return;
-                  }
-                }
-                
-                // For local paths, try direct news path if not already a placeholder
-                if (!originalSrc.includes('/images/placeholders/')) {
-                  const filename = originalSrc.split('/').pop();
-                  if (filename && !originalSrc.includes('/uploads/news/')) {
-                    e.target.src = `/uploads/news/${filename}`;
-                    return;
-                  }
-                }
-                
-                // Final fallback
-                e.target.src = '/images/placeholders/default.jpg';
-              }}
+              onError={handleNewsImageError}
             />
             {article.featuredImage?.caption && (
               <div className="cc-news-image-caption">
@@ -826,14 +714,7 @@ const NewsArticle = () => {
                   alt={`Photo ${selectedGalleryIndex + 1} of ${galleryImages.length}`}
                   className="cc-news-ig-main-img"
                   onClick={() => openGallery(selectedGalleryIndex)}
-                  onError={(e) => {
-                    const src = e.target.src;
-                    if (src.includes('amazonaws.com')) {
-                      const key = src.split('.amazonaws.com/').pop();
-                      if (key) { e.target.src = `/api/images/s3-proxy/${key.replace(/images\/images\//g, 'images/')}`; return; }
-                    }
-                    e.target.src = '/images/placeholders/default.jpg';
-                  }}
+                  onError={handleNewsImageError}
                 />
 
                 <button
@@ -860,7 +741,7 @@ const NewsArticle = () => {
                         src={url}
                         alt={`Thumbnail ${idx + 1}`}
                         loading="lazy"
-                        onError={(e) => { e.target.onerror = null; e.target.src = '/images/placeholders/default.jpg'; }}
+                        onError={handleNewsImageError}
                       />
                     </div>
                   ))}
@@ -1057,7 +938,7 @@ const NewsArticle = () => {
                 {moreNewsItems.map(newsItem => (
                   <Link 
                     key={newsItem._id || newsItem.id} 
-                    to={`/news/article/${newsItem._id || newsItem.id}`}
+                    to={`/news/article/${getArticleIdentifier(newsItem)}`}
                     className="cc-news-more-item"
                   >
                     <div className="cc-news-more-image">
@@ -1116,7 +997,7 @@ const NewsArticle = () => {
                 relatedArticles.map(related => (
                   <Link 
                     key={related._id || related.id} 
-                    to={`/news/article/${related._id || related.id}`} 
+                    to={`/news/article/${getArticleIdentifier(related)}`}
                     className="cc-news-related-article"
                   >
                     <img 

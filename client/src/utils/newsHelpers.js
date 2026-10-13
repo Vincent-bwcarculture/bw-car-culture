@@ -32,79 +32,40 @@ export const cleanHtmlContent = (content) => {
  * @param {Object} article - The article object that may contain image data
  * @returns {string} - A properly formatted image URL
  */
-export const getNewsImageUrl = (article) => {
-  if (!article) return '/images/placeholders/default.jpg';
-  
-  try {
-    // Check for featuredImage object with url property
-    if (article.featuredImage?.url) {
-      return formatNewsImagePath(article.featuredImage.url);
-    }
-    
-    // Check for direct image property
-    if (article.image) {
-      return formatNewsImagePath(article.image);
-    }
-    
-    // Check for gallery images
-    if (article.gallery && article.gallery.length > 0) {
-      // Handle both string and object formats
-      const firstImage = article.gallery[0];
-      if (typeof firstImage === 'string') {
-        return formatNewsImagePath(firstImage);
-      } else if (firstImage.url) {
-        return formatNewsImagePath(firstImage.url);
-      }
-    }
-    
-    // If no image found, return fallback
-    return '/images/placeholders/default.jpg';
-  } catch (error) {
-    console.error('Error getting news image URL:', error);
+const NEWS_ASSET_BASE = 'https://i3wcarculture-images.s3.us-east-1.amazonaws.com';
+
+export const formatNewsImagePath = image => {
+  if (!image) return '/images/placeholders/default.jpg';
+  if (typeof image === 'object') {
+    if (image.url || image.secure_url || image.path) return formatNewsImagePath(image.url || image.secure_url || image.path);
+    if (image.key) return `${NEWS_ASSET_BASE}/${String(image.key).replace(/^\/+/, '')}`;
     return '/images/placeholders/default.jpg';
   }
+  if (typeof image !== 'string' || !image.trim()) return '/images/placeholders/default.jpg';
+  const path = image.trim();
+  if (/^https?:\/\//i.test(path)) return path;
+  if (path.startsWith('/uploads/') || path.startsWith('uploads/')) {
+    return `${(process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app').replace(/\/$/, '')}/${path.replace(/^\/+/, '')}`;
+  }
+  return path.startsWith('/') ? path : `/${path}`;
 };
 
-/**
- * Process gallery images from an article to ensure proper URLs
- * @param {Object} article - The article object with a gallery property
- * @returns {Array} - Array of properly formatted image URLs
- */
-export const getGalleryImageUrls = (article) => {
-  if (!article || !article.gallery || !Array.isArray(article.gallery)) {
-    return [];
-  }
-  
-  return article.gallery.map(image => {
-    if (typeof image === 'string') {
-      return formatNewsImagePath(image);
-    } else if (image && typeof image === 'object' && image.url) {
-      return formatNewsImagePath(image.url);
-    }
-    return null;
-  }).filter(Boolean);
+export const getNewsImageUrl = article => formatNewsImagePath(article?.featuredImage || article?.image || article?.images?.[0] || article?.gallery?.[0]);
+
+export const getGalleryImageUrls = article => {
+  if (!article) return [];
+  const seen = new Set();
+  return [article.gallery, article.galleryImages, article.images].filter(Array.isArray).flat()
+    .filter(image => typeof image === 'string' ? image.trim() : image && (image.url || image.secure_url || image.path || image.key))
+    .map(formatNewsImagePath).filter(url => { if (seen.has(url)) return false; seen.add(url); return true; });
 };
 
-/**
- * Format a news image path to ensure it's properly formatted
- * Now handles S3 URLs and legacy paths
- * @param {string} imagePath - The original image path
- * @returns {string} - Properly formatted URL
- */
-export const formatNewsImagePath = (imagePath) => {
-  if (!imagePath) return '/images/placeholders/default.jpg';
-  
-  // If it's already a full URL (S3), return as is
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
-  }
-  
-  // If it's a relative path, ensure it starts with /
-  if (!imagePath.startsWith('/')) {
-    return `/${imagePath}`;
-  }
-  
-  return imagePath;
+// A failed fallback never starts a proxy/path retry loop or poisons future visits.
+export const handleNewsImageError = event => {
+  const image = event.currentTarget;
+  if (image.dataset.newsFallback) return;
+  image.dataset.newsFallback = 'true';
+  image.src = '/images/placeholders/default.jpg';
 };
 
 /**
@@ -182,12 +143,7 @@ export const hasVideo = (article) => {
  * @param {Object} article - The article object
  * @returns {boolean} - Whether the article has a gallery
  */
-export const hasGallery = (article) => {
-  return article && 
-         article.gallery && 
-         Array.isArray(article.gallery) && 
-         article.gallery.length > 0;
-};
+export const hasGallery = article => getGalleryImageUrls(article).length > 0;
 
 /**
  * Get author information with fallbacks
@@ -220,15 +176,14 @@ export const getAuthorInfo = (article) => {
 
 /**
  * Get the proper article identifier for navigation
- * Now prioritizes ID over slug
+ * Prefer readable slugs while retaining older ID links.
  * @param {Object} article - The article object
  * @returns {string|null} - The article identifier
  */
 export const getArticleIdentifier = (article) => {
   if (!article) return null;
   
-  // Prefer ID over slug (changed from slug over ID)
-  return article._id || article.id || article.slug || null;
+  return article.slug || article._id || article.id || null;
 };
 
 /**

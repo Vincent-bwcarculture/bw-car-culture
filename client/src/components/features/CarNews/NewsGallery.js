@@ -1,296 +1,65 @@
-// src/components/features/CarNews/NewsGallery.js
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, X, Maximize, Camera } from 'lucide-react';
+import { getGalleryImageUrls, handleNewsImageError } from '../../../utils/newsHelpers.js';
 import './NewsGallery.css';
 
-/**
- * Component for displaying a gallery of news article images
- * Now fully compatible with S3 URLs
- */
 const NewsGallery = ({ images = [], onClose, startIndex = 0 }) => {
-  const [currentIndex, setCurrentIndex] = useState(startIndex || 0);
+  const processedImages = useMemo(() => getGalleryImageUrls({ gallery: images }), [images]);
+  const [currentIndex, setCurrentIndex] = useState(startIndex);
   const [fullscreen, setFullscreen] = useState(false);
-  const [imageError, setImageError] = useState({});
-
-  // Process images to ensure they're properly formatted
-  // Process images to ensure they're properly formatted with better S3 support
-const processedImages = React.useMemo(() => {
-  return images.filter(Boolean).map(img => {
-    try {
-      // If it's already a full URL (S3), return as is
-      if (typeof img === 'string' && (img.startsWith('http://') || img.startsWith('https://'))) {
-        // Fix duplicate image paths in S3 URLs
-        let cleanUrl = img.includes('/images/images/') ? img.replace(/\/images\/images\//g, '/images/') : img;
-        
-        // IMPORTANT: Remove /thumbnails/ to get full-size image
-        if (cleanUrl.includes('/thumbnails/')) {
-          cleanUrl = cleanUrl.replace('/thumbnails/', '/');
-        }
-        
-        return cleanUrl;
-      }
-      
-      // If it's an object with URL property
-      if (img && typeof img === 'object' && img.url) {
-        let cleanUrl = img.url;
-        
-        // Fix duplicate image paths
-        if (cleanUrl.includes('/images/images/')) {
-          cleanUrl = cleanUrl.replace(/\/images\/images\//g, '/images/');
-        }
-        
-        // IMPORTANT: Remove /thumbnails/ to get full-size image
-        if (cleanUrl.includes('/thumbnails/')) {
-          cleanUrl = cleanUrl.replace('/thumbnails/', '/');
-        }
-        
-        return cleanUrl;
-      }
-      
-      // If it's an object with key property but no URL
-      if (img && typeof img === 'object' && img.key && !img.url) {
-        return `/api/images/s3-proxy/${img.key}`;
-      }
-      
-      // If it's a legacy local path
-      if (typeof img === 'string') {
-        let cleanUrl = img.startsWith('/') ? img : `/${img}`;
-        
-        // Remove thumbnails path
-        if (cleanUrl.includes('/thumbnails/')) {
-          cleanUrl = cleanUrl.replace('/thumbnails/', '/');
-        }
-        
-        return cleanUrl;
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('Error processing gallery image:', error);
-      return null;
-    }
-  }).filter(Boolean);
-}, [images]);
-
-// Add at the beginning of your component
-const checkFailedImage = (url) => {
-  try {
-    const failedImages = JSON.parse(localStorage.getItem('failedGalleryImages') || '{}');
-    return !!failedImages[url];
-  } catch (e) {
-    return false;
-  }
-};
-
-const markFailedImage = (url) => {
-  try {
-    const failedImages = JSON.parse(localStorage.getItem('failedGalleryImages') || '{}');
-    failedImages[url] = Date.now();
-    // Limit cache size
-    const keys = Object.keys(failedImages);
-    if (keys.length > 100) {
-      const oldestKey = keys.sort((a, b) => failedImages[a] - failedImages[b])[0];
-      delete failedImages[oldestKey];
-    }
-    localStorage.setItem('failedGalleryImages', JSON.stringify(failedImages));
-  } catch (e) {
-    // Ignore localStorage errors
-  }
-};
-
+  const ref = useRef(null), closeRef = useRef(null);
+  const index = Math.max(0, Math.min(currentIndex, processedImages.length - 1));
+  const previous = () => setCurrentIndex(value => (value - 1 + processedImages.length) % processedImages.length);
+  const next = () => setCurrentIndex(value => (value + 1) % processedImages.length);
+  useEffect(() => { setCurrentIndex(Math.max(0, Math.min(startIndex, processedImages.length - 1))); }, [startIndex, processedImages.length]);
   useEffect(() => {
-    // Reset error state when images change
-    setImageError({});
-  }, [images]);
-
-  const handlePrev = (e) => {
-    e.stopPropagation();
-    setCurrentIndex((prevIndex) => 
-      prevIndex === 0 ? processedImages.length - 1 : prevIndex - 1
-    );
-  };
-
-  const handleNext = (e) => {
-    e.stopPropagation();
-    setCurrentIndex((prevIndex) => 
-      prevIndex === processedImages.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-
-  const toggleFullscreen = () => {
-    if (!fullscreen) {
-      const gallery = document.querySelector('.news-gallery-container');
-      if (gallery) {
-        if (gallery.requestFullscreen) {
-          gallery.requestFullscreen();
-        } else if (gallery.webkitRequestFullscreen) {
-          gallery.webkitRequestFullscreen();
-        }
-        setFullscreen(true);
+    const previousFocus = document.activeElement;
+    closeRef.current?.focus();
+    const keydown = event => {
+      if (event.key === 'Escape') { event.preventDefault(); onClose(); }
+      if (event.key === 'ArrowLeft') { event.preventDefault(); setCurrentIndex(value => (value - 1 + processedImages.length) % processedImages.length); }
+      if (event.key === 'ArrowRight') { event.preventDefault(); setCurrentIndex(value => (value + 1) % processedImages.length); }
+      if (event.key === 'Tab') {
+        const buttons = [...(ref.current?.querySelectorAll('button:not(:disabled)') || [])];
+        if (event.shiftKey && document.activeElement === buttons[0]) { event.preventDefault(); buttons.at(-1)?.focus(); }
+        else if (!event.shiftKey && document.activeElement === buttons.at(-1)) { event.preventDefault(); buttons[0]?.focus(); }
       }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      }
-      setFullscreen(false);
-    }
+    };
+    document.addEventListener('keydown', keydown);
+    return () => { document.removeEventListener('keydown', keydown); if (previousFocus?.isConnected) previousFocus.focus(); };
+  }, [onClose, processedImages.length]);
+  useEffect(() => {
+    const change = () => setFullscreen(document.fullscreenElement === ref.current);
+    document.addEventListener('fullscreenchange', change);
+    return () => document.removeEventListener('fullscreenchange', change);
+  }, []);
+  const toggleFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen?.();
+      else await ref.current?.requestFullscreen?.();
+    } catch { /* The gallery remains usable if fullscreen is unavailable. */ }
   };
-
-  const handleImageError = (index) => {
-    setImageError(prev => ({ ...prev, [index]: true }));
-  };
-
-  // If no images, don't render
-  if (!processedImages.length) {
-    return null;
-  }
-
+  if (!processedImages.length) return null;
   return (
-    <div className="news-gallery-container">
+    <div className="news-gallery-container" ref={ref} role="dialog" aria-modal="true" aria-label="Article photo gallery">
       <div className="news-gallery-header">
-        <div className="news-gallery-title">
-          <Camera size={18} />
-          <span>Gallery {currentIndex + 1} / {processedImages.length}</span>
-        </div>
+        <div className="news-gallery-title"><Camera size={18} /><span>Gallery {index + 1} / {processedImages.length}</span></div>
         <div className="news-gallery-actions">
-          <button 
-            className="news-gallery-fullscreen" 
-            onClick={toggleFullscreen}
-            aria-label={fullscreen ? "Exit fullscreen" : "View fullscreen"}
-          >
-            <Maximize size={20} />
-          </button>
-          <button 
-            className="news-gallery-close" 
-            onClick={onClose}
-            aria-label="Close gallery"
-          >
-            <X size={20} />
-          </button>
+          <button type="button" className="news-gallery-fullscreen" onClick={toggleFullscreen} aria-label={fullscreen ? 'Exit fullscreen' : 'View fullscreen'}><Maximize size={20} /></button>
+          <button type="button" ref={closeRef} className="news-gallery-close" onClick={onClose} aria-label="Close gallery"><X size={20} /></button>
         </div>
       </div>
-
       <div className="news-gallery-main">
-        <button 
-          className="news-gallery-nav prev" 
-          onClick={handlePrev}
-          aria-label="Previous image"
-          disabled={processedImages.length <= 1}
-        >
-          <ChevronLeft size={24} />
-        </button>
-        
-        <div className="news-gallery-image-container">
-          <img 
-  src={processedImages[currentIndex]} 
-  alt={`Gallery image ${currentIndex + 1}`}
-  className="news-gallery-image"
-  loading="lazy"
-  onError={(e) => {
-    const originalSrc = e.target.src;
-    console.log('Gallery image failed to load:', originalSrc);
-    
-    // Mark this image as failed
-    markFailedImage(originalSrc);
-    
-    // For S3 URLs, try the proxy endpoint
-    if (originalSrc.includes('amazonaws.com')) {
-      // Extract key from S3 URL
-      const key = originalSrc.split('.amazonaws.com/').pop();
-      if (key) {
-        // Normalize the key
-        const normalizedKey = key.replace(/images\/images\//g, 'images/');
-        e.target.src = `/api/images/s3-proxy/${normalizedKey}`;
-        return;
-      }
-    }
-    
-    // Try alternative paths
-    if (!originalSrc.includes('/images/placeholders/')) {
-      const filename = originalSrc.split('/').pop();
-      if (filename) {
-        // Try direct gallery path
-        e.target.src = `/uploads/news/gallery/${filename}`;
-        return;
-      }
-    }
-    
-    // Final fallback
-    e.target.src = '/images/placeholders/default.jpg';
-  }}
-/>
-        </div>
-        
-        <button 
-          className="news-gallery-nav next" 
-          onClick={handleNext}
-          aria-label="Next image"
-          disabled={processedImages.length <= 1}
-        >
-          <ChevronRight size={24} />
-        </button>
+        <button type="button" className="news-gallery-nav prev" onClick={previous} aria-label="Previous image" disabled={processedImages.length <= 1}><ChevronLeft size={24} /></button>
+        <div className="news-gallery-image-container"><img key={processedImages[index]} src={processedImages[index]} alt={`Gallery image ${index + 1}`} className="news-gallery-image" onError={handleNewsImageError} /></div>
+        <button type="button" className="news-gallery-nav next" onClick={next} aria-label="Next image" disabled={processedImages.length <= 1}><ChevronRight size={24} /></button>
       </div>
-
-      {processedImages.length > 1 && (
-        <div className="news-gallery-thumbnails">
-          {processedImages.map((image, index) => (
-            <div 
-              key={index} 
-              className={`gallery-thumbnail ${index === currentIndex ? 'active' : ''} ${imageError[index] ? 'error' : ''}`}
-              onClick={() => setCurrentIndex(index)}
-            >
-              <img 
-  src={image} 
-  alt={`Thumbnail ${index + 1}`}
-  loading="lazy"
-  onError={(e) => {
-    const originalSrc = e.target.src;
-    console.log('Thumbnail image failed to load:', originalSrc);
-    
-    markFailedImage(originalSrc);
-    
-    // For S3 URLs, try the proxy endpoint
-    if (originalSrc.includes('amazonaws.com')) {
-      const key = originalSrc.split('.amazonaws.com/').pop();
-      if (key) {
-        const normalizedKey = key.replace(/images\/images\//g, 'images/');
-        e.target.src = `/api/images/s3-proxy/${normalizedKey}`;
-        return;
-      }
-    }
-    
-    // Try thumbnail directory
-    if (!originalSrc.includes('/images/placeholders/')) {
-      const filename = originalSrc.split('/').pop();
-      if (filename) {
-        e.target.src = `/uploads/news/gallery/thumbnails/${filename}`;
-        return;
-      }
-    }
-    
-    // Final fallback
-    e.target.src = '/images/placeholders/default.jpg';
-  }}
-/>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Keyboard navigation support */}
-      <div 
-        className="news-gallery-keyboard-nav"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'ArrowLeft') handlePrev(e);
-          if (e.key === 'ArrowRight') handleNext(e);
-          if (e.key === 'Escape') onClose();
-        }}
-      />
+      {processedImages.length > 1 && <div className="news-gallery-thumbnails">
+        {processedImages.map((image, itemIndex) => <button type="button" key={image} className={`gallery-thumbnail ${itemIndex === index ? 'active' : ''}`} aria-label={`View photo ${itemIndex + 1}`} aria-pressed={itemIndex === index} onClick={() => setCurrentIndex(itemIndex)}>
+          <img src={image} alt={`Thumbnail ${itemIndex + 1}`} loading="lazy" onError={handleNewsImageError} />
+        </button>)}
+      </div>}
     </div>
   );
 };
-
 export default NewsGallery;

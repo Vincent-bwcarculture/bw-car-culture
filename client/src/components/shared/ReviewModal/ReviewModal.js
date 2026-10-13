@@ -125,7 +125,10 @@ const ReviewModal = ({
     }
     
     if (initialData) {
-      setFormData(initialData);
+      setFormData({ ...(contentType === 'news' ? INITIAL_NEWS_STATE : INITIAL_REVIEW_STATE), ...initialData,
+        featuredImage: typeof initialData.featuredImage === 'string' ? { url: initialData.featuredImage } : initialData.featuredImage,
+        gallery: (initialData.gallery || initialData.images || []).map(image => typeof image === 'string' ? { url: image } : image)
+      });
     } else {
       setFormData(contentType === 'news' ? INITIAL_NEWS_STATE : INITIAL_REVIEW_STATE);
     }
@@ -466,11 +469,16 @@ const ReviewModal = ({
       if (formData.gallery && formData.gallery.length > 0) {
         formData.gallery.forEach((image) => {
           if (image.file) {
-            formDataToSubmit.append('gallery', image.file);
+            formDataToSubmit.append(contentType === 'news' ? 'galleryImages' : 'gallery', image.file);
           }
         });
       }
       
+      if (contentType === 'news' && initialData?._id) {
+        formDataToSubmit.append('existingGallery', JSON.stringify((formData.gallery || []).filter(image => !image?.file)));
+        if (!formData.featuredImage) formDataToSubmit.append('featuredImage', 'null');
+      }
+
       // Add SEO data
       if (formData.seo) {
         formDataToSubmit.append('seo', JSON.stringify(formData.seo));

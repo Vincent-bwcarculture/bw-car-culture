@@ -346,7 +346,7 @@ const markFailedImage = (url) => {
         <section className="cc-newspage-featured-section">
           <div className="cc-newspage-featured-article-card">
             <Link 
-              to={`/news/article/${featuredNews[0]._id || featuredNews[0].id}`}
+              to={`/news/article/${featuredNews[0].slug || featuredNews[0]._id || featuredNews[0].id}`}
               className="cc-newspage-featured-article-link"
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
@@ -448,7 +448,7 @@ const markFailedImage = (url) => {
             {displayedArticles.map(article => (
               <article key={article._id || article.id} className="cc-newspage-article-card">
                 <Link 
-                  to={`/news/article/${article._id || article.id}`}
+                  to={`/news/article/${article.slug || article._id || article.id}`}
                   className="cc-newspage-article-link"
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
