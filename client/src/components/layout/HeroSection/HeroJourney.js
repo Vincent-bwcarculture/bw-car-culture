@@ -138,6 +138,11 @@ const HeroJourney = ({ modelReady, onColourChange, onWheelChange, onInteriorChan
           </li>
         ))}
       </ol>
+      <nav className="bcc-journey-navigation" aria-label="Journey chapters">
+        {HERO_JOURNEY.map((item, index) => <button key={item.title} type="button"
+          aria-label={`Step ${index + 1}: ${item.title}`} aria-current={step === index ? 'step' : undefined}
+          onClick={() => { setStep(index); setPaused(true); }} />)}
+      </nav>
       {modelReady && !reducedMotion && (
         <button type="button" className="bcc-journey-playback" aria-pressed={paused} onClick={() => setPaused(value => !value)}>
           <span aria-hidden="true">{paused ? '▷' : 'Ⅱ'}</span> {paused ? 'Play journey' : 'Pause journey'}

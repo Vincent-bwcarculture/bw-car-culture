@@ -89,3 +89,13 @@ test('rendering pauses when the hero leaves the viewport', async () => {
   observerCallback([{ isIntersecting: true }]);
   expect(window.requestAnimationFrame).toHaveBeenCalledTimes(1);
 });
+
+
+test('smaller screens never create a renderer or request the model', async () => {
+  desktop.matches = false;
+  loadCarModel.mockClear(); THREE.WebGLRenderer.mockClear();
+  await render({});
+  expect(loadCarModel).not.toHaveBeenCalled();
+  expect(THREE.WebGLRenderer).not.toHaveBeenCalled();
+  expect(ready).toHaveBeenLastCalledWith(false);
+});

@@ -28,7 +28,7 @@ import internalAnalytics from './utils/internalAnalytics.js';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
-// Home page components (always needed — used in HomeContent)
+// Home page components (always needed â€” used in HomeContent)
 import CarFilter from './components/features/CarFilters/CarFilter.js';
 import CarResults from './components/features/CarFilters/CarResults.js';
 import CarBrands from './components/features/CarCategories/CarBrands.js';
@@ -50,7 +50,7 @@ import './styles/base.css';
 import './utils/imagePathDiagnostics.js';
 
 // Lazy-loaded components (only fetched when their route is first visited)
-// — Auth pages
+// â€” Auth pages
 const LoginPage = React.lazy(() => import('./Admin/auth/LoginPage.js'));
 const RegisterPage = React.lazy(() => import('./Admin/auth/RegisterPage.js'));
 const AdminRegisterPage = React.lazy(() => import('./Admin/auth/AdminRegisterPage.js'));
@@ -59,7 +59,7 @@ const ResetPasswordPage = React.lazy(() => import('./Admin/auth/ResetPasswordPag
 const UnauthorizedPage = React.lazy(() => import('./Admin/auth/UnauthorizedPage.js'));
 const ServiceProviderRequest = React.lazy(() => import('./Admin/auth/ServiceProviderRequest.js'));
 const MinistryRequest = React.lazy(() => import('./Admin/auth/MinistryRequest.js'));
-// — Admin layout + dashboards
+// â€” Admin layout + dashboards
 const AdminLayout = React.lazy(() => import('./Admin/layout/AdminLayout.js'));
 const AdminDashboard = React.lazy(() => import('./Admin/AdminDashboard.js'));
 const ListingManager = React.lazy(() => import('./Admin/ListingManager/ListingManager.js'));
@@ -91,17 +91,17 @@ const AdminSettings = React.lazy(() => import('./Admin/AdminSettings/AdminSettin
 const PriceCalculator = React.lazy(() => import('./Admin/PriceCalculator/PriceCalculator.js'));
 const MorasimoApp         = React.lazy(() => import('./Morasimo/MorasimoApp.js'));
 const DistributorPortal   = React.lazy(() => import('./Morasimo/DistributorPortal.js'));
-// — Community
+// â€” Community
 const FeedPage      = React.lazy(() => import('./pages/FeedPage.js'));
 const GroupsPage    = React.lazy(() => import('./pages/GroupsPage.js'));
 const GroupPage     = React.lazy(() => import('./pages/GroupPage.js'));
 const CommunityManager = React.lazy(() => import('./Admin/CommunityManager/CommunityManager.js'));
-// — Journalist
+// â€” Journalist
 const CreateArticle = React.lazy(() => import('./components/journalist/CreateArticle.js'));
-// — User pages
+// â€” User pages
 const UserProfilePage = React.lazy(() => import('./pages/UserProfilePage.js'));
 const TransportAdminDashboard = React.lazy(() => import('./pages/TransportAdminDashboard.js'));
-// — Feature pages
+// â€” Feature pages
 const CarNewsPage = React.lazy(() => import('./components/features/CarNews/CarNewsPage.js'));
 const NewsArticle = React.lazy(() => import('./components/features/CarNews/NewsArticle.js'));
 const CarReviewsPage = React.lazy(() => import('./components/features/CarReviews/CarReviewsPage.js'));
@@ -117,14 +117,14 @@ const PublicTransportPage = React.lazy(() => import('./components/features/Publi
 const RentalVehicleDetail = React.lazy(() => import('./components/features/RentalSection/RentalVehicleDetail.js'));
 const TransportRouteDetail = React.lazy(() => import('./components/features/TransportSection/TransportRouteDetail.js'));
 const DriveMap = React.lazy(() => import('./components/features/DriveMap/DriveMap.js'));
-// — Policy pages
+// â€” Policy pages
 const PrivacyPolicyPage = React.lazy(() => import('./components/pages/PolicyPages/PrivacyPolicyPage.js'));
 const TermsOfServicePage = React.lazy(() => import('./components/pages/PolicyPages/TermsOfServicePage.js'));
 const CookiesPolicyPage = React.lazy(() => import('./components/pages/PolicyPages/CookiesPolicyPage.js'));
 const FeedbackPage = React.lazy(() => import('./components/pages/FeedbackPage/FeedbackPage.js'));
-// — Dev tools
+// â€” Dev tools
 const ConnectionTest = React.lazy(() => import('./components/shared/ConnectionTest.js'));
-// — GION (specialized dashboards, rarely used)
+// â€” GION (specialized dashboards, rarely used)
 const GIONApp = React.lazy(() => import('./components/GION/GIONApp.js'));
 const GIONAdminDashboard = React.lazy(() => import('./components/GION/GIONAdminDashboard/GIONAdminDashboard.js'));
 const MinistryDashboard = React.lazy(() => import('./components/GION/GorvDashboards/MinistryDashboard.js'));
@@ -666,7 +666,7 @@ const HomeContent = () => {
       <HomeDealershipsSection />
       <HomeServicesSection />
 
-      {/* Sticky bar — highest priority listings (listingQuality desc, featured first) */}
+      {/* Sticky bar â€” highest priority listings (listingQuality desc, featured first) */}
       <StickyCarBar
         fetchParams={{ sort: '-listingQuality,-featured,-createdAt', limit: 12, status: 'active' }}
         label="Top Vehicles For Sale"
@@ -985,7 +985,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        {/* Dealer Dashboard — accessible to approved dealers AND admins */}
+        {/* Dealer Dashboard â€” accessible to approved dealers AND admins */}
         <Route path="/dealer/dashboard" element={
           <ProtectedRoute requiredRoles={['dealer', 'dealership_admin', 'admin']}>
             <DealerDashboard />
@@ -1000,7 +1000,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        {/* Admin Dealership Management — add/edit/manage all dealerships */}
+        {/* Admin Dealership Management â€” add/edit/manage all dealerships */}
         <Route path="/admin/dealerships" element={
           <ProtectedRoute requiredRoles={['admin']}>
             <AdminLayout>
@@ -1109,10 +1109,10 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        {/* Morasimo Distributor Portal — public (own auth) */}
+        {/* Morasimo Distributor Portal â€” public (own auth) */}
         <Route path="/morasimo/distributor" element={<DistributorPortal />} />
 
-        {/* Community — Feed & Groups */}
+        {/* Community â€” Feed & Groups */}
         <Route path="/feed" element={
           <MainLayout>
             <FeedPage />
@@ -1248,7 +1248,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
 
-        {/* Mechanic Dashboard — accessible to approved mechanics + admins */}
+        {/* Mechanic Dashboard â€” accessible to approved mechanics + admins */}
         <Route path="/mechanic/dashboard" element={
           <ProtectedRoute requiredRoles={['mechanic', 'admin']}>
             <MainLayout>
@@ -1474,7 +1474,7 @@ function App() {
 
   // Preload 3D car model in the background after the app settles
   useEffect(() => {
-    if (window.innerWidth < 1200 || navigator.connection?.saveData) return;
+    if (window.innerWidth < 1024 || navigator.connection?.saveData) return;
     const t = setTimeout(preloadCarModel, 4000);
     return () => clearTimeout(t);
   }, []);

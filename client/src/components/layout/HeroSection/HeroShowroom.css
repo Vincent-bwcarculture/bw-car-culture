@@ -127,10 +127,11 @@
 .bcc-journey-signature { color: var(--hero-muted); font-size: .58rem; letter-spacing: .16em; line-height: 1.9; margin-top: 1.1rem; }
 .bcc-hero-premium .bcc-journey-steps button:focus-visible,
 .bcc-hero-premium .bcc-journey-playback:focus-visible,
+.bcc-hero-premium .bcc-journey-navigation button:focus-visible,
 .bcc-hero-premium .bcc-journey-swatches button:focus-visible { outline: 2px solid var(--hero-accent); outline-offset: 5px; }
 .bcc-hero-model-stage { display: none; }
 
-@media (min-width: 1200px) {
+@media (min-width: 1024px) {
   .bcc-hero-premium { min-height: max(820px, calc(100svh - 72px)); }
   .bcc-hero-premium .bcc-hero-content { max-width: 1920px; padding: 5.5rem 4vw 3rem; }
   .bcc-hero-premium .bcc-hero-editorial {
@@ -221,7 +222,7 @@
   .bcc-hero-premium .bcc-hero-dark-overlay { background: none; }
   .bcc-hero-premium .bcc-hero-dealers { max-width: 1920px; padding-inline: 4vw; padding-bottom: 1rem; box-sizing: border-box; }
 }
-@media (max-width: 1199px) {
+@media (max-width: 1023px) {
   .bcc-hero-premium .bcc-hero-content { padding-top: 4rem; }
   .bcc-hero-premium .bcc-hero-buy h1 { font-size: clamp(1.8rem, 4.5vw, 3.2rem); line-height: 1.15; }
   .bcc-hero-premium .bcc-hero-buy p { font-size: 1rem; line-height: 1.7; }
@@ -244,4 +245,20 @@
 @keyframes hero-detail-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
   .bcc-hero-premium *, .bcc-hero-premium *::before, .bcc-hero-premium *::after { transition: none !important; animation: none !important; }
+}
+
+/* Present one chapter at a time, synchronized with the vehicle preview. */
+.bcc-hero-journey { display: none; }
+@media (min-width: 1024px) {
+  .bcc-hero--showroom .bcc-hero-journey { display: block; top: 10rem; }
+  .bcc-journey-steps { min-height: 280px; }
+  .bcc-journey-steps li { display: none; border: 0; }
+  .bcc-journey-steps li.is-current { display: block; animation: hero-detail-enter .7s ease both; }
+  .bcc-journey-steps li:last-child { border: 0; }
+  .bcc-journey-steps li > button { align-items: flex-start; flex-direction: column; gap: .8rem; font-size: clamp(1.15rem, 1.7vw, 1.8rem); cursor: default; }
+  .bcc-journey-indicator { display: none; }
+  .bcc-journey-detail { padding-left: 0; }
+  .bcc-journey-navigation { display: flex; gap: .6rem; margin: 1.2rem 0 .5rem; }
+  .bcc-journey-navigation button { background: var(--hero-line); border: 0; width: 28px; height: 3px; padding: 8px 0; box-sizing: content-box; background-clip: content-box; cursor: pointer; }
+  .bcc-journey-navigation button[aria-current="step"] { background-color: var(--hero-accent); }
 }

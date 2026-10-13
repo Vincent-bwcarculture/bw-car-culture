@@ -1,5 +1,8 @@
+jest.mock('three/examples/jsm/loaders/DRACOLoader.js', () => ({
+  DRACOLoader: jest.fn().mockImplementation(() => ({ setDecoderPath() { return this; }, dispose: jest.fn() }))
+}));
 jest.mock('three/examples/jsm/loaders/GLTFLoader.js', () => ({
-  GLTFLoader: jest.fn().mockImplementation(() => ({ parse: (bytes, path, resolve) => resolve({ bytes }) }))
+  GLTFLoader: jest.fn().mockImplementation(() => ({ setDRACOLoader() { return this; }, parse: (bytes, path, resolve) => resolve({ bytes }) }))
 }));
 
 let loadCarModel, preloadCarModel;
@@ -21,6 +24,7 @@ test('hero, preload and concurrent viewers share one in-flight download', async 
   const models = await Promise.all([first, second]);
   await loadCarModel();
   expect(fetch).toHaveBeenCalledTimes(1);
+  expect(fetch).toHaveBeenCalledWith('/models/hero-golf.glb');
   expect(models[0].bytes).toBe(bytes);
   expect(models[1].bytes).toBe(bytes);
   expect(models[0]).not.toBe(models[1]);

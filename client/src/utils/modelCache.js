@@ -1,7 +1,8 @@
 // Share one model download across the hero, background preload and later previews.
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-export const MODEL_URL = 'https://i3wcarculture-images.s3.amazonaws.com/models/golf_r_configurator.glb';
+export const MODEL_URL = '/models/hero-golf.glb';
 let buffer = null;
 let fetching = null;
 const progressListeners = new Set();
@@ -46,6 +47,9 @@ export const loadCarModel = async onProgress => {
   try {
     const bytes = await fetchModelBuffer();
     // Parse separately so each viewer owns its geometry, materials and disposal lifecycle.
-    return await new Promise((resolve, reject) => new GLTFLoader().parse(bytes, '', resolve, reject));
+    const decoder = new DRACOLoader().setDecoderPath('/models/draco/');
+    try {
+      return await new Promise((resolve, reject) => new GLTFLoader().setDRACOLoader(decoder).parse(bytes, '', resolve, reject));
+    } finally { decoder.dispose(); }
   } finally { if (onProgress) progressListeners.delete(onProgress); }
 };

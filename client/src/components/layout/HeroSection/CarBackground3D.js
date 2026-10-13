@@ -29,7 +29,7 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
     [sellMode, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled, onReadyChange]);
 
   useEffect(() => {
-    const media = window.matchMedia('(min-width: 1200px)');
+    const media = window.matchMedia('(min-width: 1024px)');
     const update = () => setDesktop(media.matches && !navigator.connection?.saveData);
     update();
     media.addEventListener('change', update);
