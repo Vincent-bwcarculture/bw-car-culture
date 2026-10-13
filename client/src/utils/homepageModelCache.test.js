@@ -1,8 +1,6 @@
-jest.mock('three/examples/jsm/loaders/DRACOLoader.js', () => ({
-  DRACOLoader: jest.fn().mockImplementation(() => ({ setDecoderPath() { return this; }, dispose: jest.fn() }))
-}));
+jest.mock('three/examples/jsm/libs/meshopt_decoder.module.js', () => ({ MeshoptDecoder: {} }));
 jest.mock('three/examples/jsm/loaders/GLTFLoader.js', () => ({
-  GLTFLoader: jest.fn().mockImplementation(() => ({ setDRACOLoader() { return this; }, parse: (bytes, path, resolve) => resolve({ bytes }) }))
+  GLTFLoader: jest.fn().mockImplementation(() => ({ setMeshoptDecoder() { return this; }, parse: (bytes, path, resolve) => resolve({ bytes }) }))
 }));
 
 let loadCarModel, preloadCarModel;

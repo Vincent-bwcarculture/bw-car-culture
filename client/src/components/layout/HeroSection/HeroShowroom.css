@@ -36,7 +36,7 @@
 .bcc-hero-premium .bcc-journey-eyebrow {
   display: block;
   color: var(--hero-accent);
-  font-size: .63rem;
+  font-size: .7rem;
   line-height: 1.65;
   letter-spacing: .14em;
   text-transform: uppercase;
@@ -72,7 +72,7 @@
 .bcc-hero-premium .bcc-journey-steps button span { color: var(--hero-muted); }
 .bcc-hero-premium .bcc-journey-steps .is-current > button span { color: var(--hero-ink); }
 .bcc-hero-premium .bcc-journey-steps .bcc-journey-number {
-  font-size: .63rem;
+  font-size: .7rem;
   font-variant-numeric: tabular-nums;
   letter-spacing: .06em;
   color: var(--hero-muted);
@@ -83,7 +83,7 @@
 .bcc-journey-detail[hidden] { display: none; }
 .bcc-hero-premium .bcc-journey-detail p {
   color: var(--hero-muted);
-  font-size: .78rem;
+  font-size: .95rem;
   line-height: 1.75;
   margin: 0;
 }
@@ -131,7 +131,7 @@
 .bcc-hero-premium .bcc-journey-swatches button:focus-visible { outline: 2px solid var(--hero-accent); outline-offset: 5px; }
 .bcc-hero-model-stage { display: none; }
 
-@media (min-width: 1024px) {
+@media (min-width: 900px) {
   .bcc-hero-premium { min-height: max(820px, calc(100svh - 72px)); }
   .bcc-hero-premium .bcc-hero-content { max-width: 1920px; padding: 5.5rem 4vw 3rem; }
   .bcc-hero-premium .bcc-hero-editorial {
@@ -142,19 +142,19 @@
     transition: left 1.2s cubic-bezier(.22, 1, .36, 1), transform 1.2s cubic-bezier(.22, 1, .36, 1), width 1.2s cubic-bezier(.22, 1, .36, 1);
     z-index: 2;
   }
-  .bcc-hero-premium .bcc-hero-slogan { font-size: .68rem; letter-spacing: .08em; line-height: 1.8; color: var(--hero-muted); }
+  .bcc-hero-premium .bcc-hero-slogan { letter-spacing: .08em; line-height: 1.8; color: var(--hero-muted); }
   .bcc-hero-premium .bcc-hero-tabs { margin-bottom: 2rem; gap: .65rem; }
-  .bcc-hero-premium .bcc-hero-tab-button { padding: .65rem 1rem; font-size: .85rem; border-radius: 5px; }
+  .bcc-hero-premium .bcc-hero-tab-button { padding: .65rem 1rem;  border-radius: 5px; }
   .bcc-hero-premium .bcc-import-wrapper { margin-top: 0; margin-bottom: 1.6rem; }
   .bcc-hero-premium .bcc-import-action,
-  .bcc-hero-premium .bcc-import-selector { padding: .65rem .8rem; font-size: .75rem; }
-  .bcc-hero-premium .bcc-hero-buy h1 { font-size: clamp(2rem, 2.7vw, 3.3rem); line-height: 1.12; letter-spacing: -.04em; text-wrap: balance; }
-  .bcc-hero-premium .bcc-hero-buy p { font-size: .95rem; line-height: 1.8; margin-bottom: 1.8rem; color: var(--hero-muted); }
-  .bcc-hero-premium .bcc-hero-search-input { min-width: 0; padding: .9rem .6rem; font-size: .82rem; }
-  .bcc-hero-premium .bcc-hero-search-button { padding: .9rem 1rem; font-size: .85rem; }
+  .bcc-hero-premium .bcc-import-selector { padding: .65rem .8rem; }
+  .bcc-hero-premium .bcc-hero-buy h1 { line-height: 1.12; letter-spacing: -.04em; text-wrap: balance; }
+  .bcc-hero-premium .bcc-hero-buy p { line-height: 1.8; margin-bottom: 1.8rem; color: var(--hero-muted); }
+  .bcc-hero-premium .bcc-hero-search-input { min-width: 0; padding: .9rem .6rem; }
+  .bcc-hero-premium .bcc-hero-search-button { padding: .9rem 1rem; }
   .bcc-hero-premium .bcc-hero-search-bar { border-radius: 6px; }
-  .bcc-hero-premium .bcc-hero-popular-searches { gap: .65rem; font-size: .7rem; }
-  .bcc-hero-premium .bcc-hero-popular-searches button { font-size: .7rem; padding: .4rem .65rem; }
+  .bcc-hero-premium .bcc-hero-popular-searches { gap: .65rem; }
+  .bcc-hero-premium .bcc-hero-popular-searches button { padding: .4rem .65rem; }
   .bcc-hero-premium .bcc-hero-journey { position: relative; width: min(700px, 100%); margin-top: 2rem; }
   .bcc-hero-premium:not(.bcc-hero--showroom) .bcc-hero-journey { display: none; }
   .bcc-hero--showroom .bcc-hero-content { min-height: 820px; }
@@ -222,10 +222,10 @@
   .bcc-hero-premium .bcc-hero-dark-overlay { background: none; }
   .bcc-hero-premium .bcc-hero-dealers { max-width: 1920px; padding-inline: 4vw; padding-bottom: 1rem; box-sizing: border-box; }
 }
-@media (max-width: 1023px) {
+@media (max-width: 899px) {
   .bcc-hero-premium .bcc-hero-content { padding-top: 4rem; }
-  .bcc-hero-premium .bcc-hero-buy h1 { font-size: clamp(1.8rem, 4.5vw, 3.2rem); line-height: 1.15; }
-  .bcc-hero-premium .bcc-hero-buy p { font-size: 1rem; line-height: 1.7; }
+  .bcc-hero-premium .bcc-hero-buy h1 { line-height: 1.15; }
+  .bcc-hero-premium .bcc-hero-buy p { line-height: 1.7; }
   .bcc-hero-journey { border-top: 1px solid var(--hero-line); padding-top: 1.8rem; margin-top: 0; }
   .bcc-journey-heading h2 em { display: inline; margin-left: .2em; }
   .bcc-journey-signature { display: none; }
@@ -233,14 +233,11 @@
 }
 @media (max-width: 600px) {
   .bcc-hero-premium .bcc-hero-content { padding-inline: 1.25rem; padding-top: 2.5rem; }
-  .bcc-hero-premium .bcc-hero-slogan { font-size: .65rem; letter-spacing: .08em; line-height: 1.8; color: var(--hero-muted); }
+  .bcc-hero-premium .bcc-hero-slogan { letter-spacing: .08em; line-height: 1.8; color: var(--hero-muted); }
   .bcc-hero-premium .bcc-hero-tabs { margin-bottom: 2rem; }
-  .bcc-hero-premium .bcc-hero-tab-button { font-size: .85rem; padding: .8rem 1rem; flex: 0 0 auto; width: auto; min-width: 110px; white-space: nowrap; }
-  .bcc-hero-premium .bcc-hero-search-input { min-width: 0; width: 100%; box-sizing: border-box; font-size: .9rem; padding: .8rem .6rem; }
-  .bcc-hero-premium .bcc-hero-buy h1 { font-size: 1.9rem; }
-  .bcc-hero-premium .bcc-hero-buy p { font-size: .9rem; margin-bottom: 1.8rem; }
-  .bcc-journey-heading h2 { font-size: 1.3rem; }
-  .bcc-journey-detail p { font-size: .82rem; }
+  .bcc-hero-premium .bcc-hero-tab-button { padding: .8rem 1rem; flex: 0 0 auto; width: auto; min-width: 110px; white-space: nowrap; }
+  .bcc-hero-premium .bcc-hero-search-input { min-width: 0; width: 100%; box-sizing: border-box;  padding: .8rem .6rem; }
+  .bcc-hero-premium .bcc-hero-buy p { margin-bottom: 1.8rem; }
 }
 @keyframes hero-detail-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
@@ -249,7 +246,7 @@
 
 /* Present one chapter at a time, synchronized with the vehicle preview. */
 .bcc-hero-journey { display: none; }
-@media (min-width: 1024px) {
+@media (min-width: 900px) {
   .bcc-hero--showroom .bcc-hero-journey { display: block; top: 10rem; }
   .bcc-journey-steps { min-height: 280px; }
   .bcc-journey-steps li { display: none; border: 0; }
@@ -261,4 +258,13 @@
   .bcc-journey-navigation { display: flex; gap: .6rem; margin: 1.2rem 0 .5rem; }
   .bcc-journey-navigation button { background: var(--hero-line); border: 0; width: 28px; height: 3px; padding: 8px 0; box-sizing: content-box; background-clip: content-box; cursor: pointer; }
   .bcc-journey-navigation button[aria-current="step"] { background-color: var(--hero-accent); }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .bcc-hero--showroom .bcc-hero-editorial { width: 44%; }
+  .bcc-hero--showroom .bcc-hero-content { min-height: 1100px; }
+  .bcc-hero-model-stage { left: 38%; width: 62%; top: 7rem; height: 540px; }
+  .bcc-hero--showroom .bcc-hero-journey { right: 4vw; top: 32rem; width: 43%; max-width: none; }
+  .bcc-journey-steps { min-height: 250px; }
+  .bcc-hero-model-caption { display: none; }
 }

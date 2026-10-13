@@ -1474,7 +1474,7 @@ function App() {
 
   // Preload 3D car model in the background after the app settles
   useEffect(() => {
-    if (window.innerWidth < 1024 || navigator.connection?.saveData) return;
+    if (window.innerWidth < 900 || navigator.connection?.saveData) return;
     const t = setTimeout(preloadCarModel, 4000);
     return () => clearTimeout(t);
   }, []);

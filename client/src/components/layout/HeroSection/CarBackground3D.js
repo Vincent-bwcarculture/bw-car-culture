@@ -29,7 +29,7 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
     [sellMode, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled, onReadyChange]);
 
   useEffect(() => {
-    const media = window.matchMedia('(min-width: 1024px)');
+    const media = window.matchMedia('(min-width: 900px)');
     const update = () => setDesktop(media.matches && !navigator.connection?.saveData);
     update();
     media.addEventListener('change', update);
@@ -41,7 +41,7 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
     const canvas = canvasRef.current, stage = stageRef.current;
     let renderer;
     try {
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'low-power' });
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
     } catch {
       settings.current.onReadyChange?.(false);
       return;
@@ -49,15 +49,22 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.2;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
-    scene.add(new THREE.AmbientLight(0xffffff, 1.8));
-    const key = new THREE.DirectionalLight(0xfff4e2, 4);
-    key.position.set(4, 5, 4); scene.add(key);
-    const fill = new THREE.DirectionalLight(0xdbe9ff, 2);
+    scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+    const key = new THREE.DirectionalLight(0xfff5e0, 4);
+    key.position.set(4, 5, 4);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    // Preserve body detail without self-shadow striping on the original mesh.
+    key.shadow.normalBias = 0.03; key.shadow.bias = -0.0002;
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0xe0eeff, 1.5);
     fill.position.set(-5, 3, 3); scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xffffff, 3);
+    const rim = new THREE.DirectionalLight(0xffffff, 2);
     rim.position.set(0, 4, -5); scene.add(rim);
     const group = new THREE.Group(); scene.add(group);
     let disposed = false, model = null, ready = false, inView = true, contextLost = false;
@@ -150,6 +157,7 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
       model = gltf.scene;
       model.traverse(node => {
         if (!node.isMesh) return;
+        node.castShadow = node.receiveShadow = true;
         const materials = Array.isArray(node.material) ? node.material : [node.material];
         const names = [node.name, ...materials.map(material => material?.name || '')].join(' ').toLowerCase();
         if (HIDE_KEYWORDS.some(word => names.includes(word)) || /^object_([2-9]|10)$/i.test(node.name) || /^rootnode\.\d{3,}$/i.test(node.name)) {

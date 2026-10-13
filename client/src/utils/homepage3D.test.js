@@ -14,7 +14,7 @@ let root, container, renderer, desktop, ready, nextFrame, observerCallback, body
 beforeEach(() => {
   global.IS_REACT_ACT_ENVIRONMENT = true;
   container = document.createElement('div'); document.body.appendChild(container); root = createRoot(container);
-  renderer = { setPixelRatio: jest.fn(), setSize: jest.fn(), render: jest.fn(), dispose: jest.fn() };
+  renderer = { shadowMap: {}, setPixelRatio: jest.fn(), setSize: jest.fn(), render: jest.fn(), dispose: jest.fn() };
   THREE.WebGLRenderer.mockImplementation(() => renderer);
   desktop = { matches: true, addEventListener: jest.fn(), removeEventListener: jest.fn() };
   window.matchMedia = jest.fn(query => query.includes('min-width') ? desktop : { matches: false, addEventListener() {}, removeEventListener() {} });
@@ -95,6 +95,7 @@ test('smaller screens never create a renderer or request the model', async () =>
   desktop.matches = false;
   loadCarModel.mockClear(); THREE.WebGLRenderer.mockClear();
   await render({});
+  expect(window.matchMedia).toHaveBeenCalledWith('(min-width: 900px)');
   expect(loadCarModel).not.toHaveBeenCalled();
   expect(THREE.WebGLRenderer).not.toHaveBeenCalled();
   expect(ready).toHaveBeenLastCalledWith(false);

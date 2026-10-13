@@ -1,5 +1,5 @@
 // Share one model download across the hero, background preload and later previews.
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export const MODEL_URL = '/models/hero-golf.glb';
@@ -47,9 +47,6 @@ export const loadCarModel = async onProgress => {
   try {
     const bytes = await fetchModelBuffer();
     // Parse separately so each viewer owns its geometry, materials and disposal lifecycle.
-    const decoder = new DRACOLoader().setDecoderPath('/models/draco/');
-    try {
-      return await new Promise((resolve, reject) => new GLTFLoader().setDRACOLoader(decoder).parse(bytes, '', resolve, reject));
-    } finally { decoder.dispose(); }
+    return await new Promise((resolve, reject) => new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).parse(bytes, '', resolve, reject));
   } finally { if (onProgress) progressListeners.delete(onProgress); }
 };

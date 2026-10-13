@@ -1,17 +1,16 @@
 # Homepage vehicle preview
 
-`hero-golf.glb` is an optimized derivative of the existing site asset
-`https://i3wcarculture-images.s3.amazonaws.com/models/golf_r_configurator.glb`.
-No new vehicle model or third-party artwork was introduced.
+hero-golf.glb preserves the full vehicle mesh and original textures from the
+existing golf_r_configurator.glb asset hosted on i3wcarculture-images S3.
+Only hidden scene props and unused alternate parts have been pruned.
 
-Source size: 28,093,200 bytes. Output size: 3,257,424 bytes.
-Unused scene props and alternate wheels were removed using the same visibility
-rules as CarBackground3D. glTF Transform 4.5.1 prune, dedup, weld and simplify
-(ratio 0.22, error 0.002), followed by Draco compression, reduced transfer size.
-Paint, wheel and seat materials, door pivots and hierarchy are retained for the
-animated customization sequence. The browser uses the bundled Draco decoder
-from the installed Three.js version; its attribution is in draco/README.md.
+The previous simplified preview has been replaced. No simplification, welding,
+quantization or texture resizing is applied. EXT_meshopt_compression encodes the
+original attributes losslessly; Three.js supplies its bundled MeshoptDecoder.
+Verification compares all 546 vertex attribute arrays, 622,418 triangles (allowing
+cyclic index rotation with identical winding), and 34 texture images against the
+original: all match exactly. Model size: 13,280,676 bytes, versus 28,093,200 bytes
+for the original scene including unused props. Door pivots and materials remain.
 
-The model and decoder are served from this site's own /models/ path. The
-showroom is available from 1024 CSS pixels; smaller screens neither render the
-journey nor initiate the model download.
+The original 900 CSS pixel breakpoint is retained for rendering and preload.
+Below 900 pixels the hero model and animated process are hidden and not loaded.
