@@ -166,7 +166,7 @@ describe('ownership journey', () => {
     const before = callback.mock.calls.at(-1)[0];
     await act(async () => container.querySelector(`[aria-label="${option}"]`).click());
     expect(callback.mock.calls.at(-1)[0]).toBe(before);
-    expect(container.querySelector('[role="alert"]').textContent).toContain('to customize this vehicle');
+    expect(container.querySelector('[role="alert"]').textContent).toContain('to customize and order your vehicle');
     await act(async () => container.querySelectorAll('.bcc-journey-auth button')[0].click());
     expect(onAuthenticate).toHaveBeenLastCalledWith('login');
     await act(async () => container.querySelectorAll('.bcc-journey-auth button')[1].click());
@@ -196,7 +196,7 @@ describe('ownership journey', () => {
     for (const [index, route] of [[0, 'login'], [1, 'register']]) {
       await act(async () => container.querySelectorAll('.bcc-journey-auth button')[index].click());
       expect(navigate).toHaveBeenLastCalledWith(`/${route}`, { state: {
-        from: '/home?customize=1', message: 'Log in or create an account to customize the display vehicle.'
+        from: '/home?customize=1', message: 'Log in or create an account to customize and order your vehicle.'
       } });
     }
   });

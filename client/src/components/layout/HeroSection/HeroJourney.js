@@ -144,7 +144,7 @@ const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, s
                     <div className="bcc-journey-auth" role="alert">
                       <button type="button" onClick={() => onAuthenticate?.('login')}>Log in</button>
                       {' or '}<button type="button" onClick={() => onAuthenticate?.('register')}>create an account</button>
-                      {' to customize this vehicle.'}
+                      {' to customize and order your vehicle.'}
                     </div>
                   )}
                 </div>

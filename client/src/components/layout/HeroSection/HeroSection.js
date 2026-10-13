@@ -477,7 +477,7 @@ const HeroSection = () => {
         {activeTab === 'buy' && (
           <HeroJourney interactionId={modelInteraction} modelReady={modelReady} isAuthenticated={isAuthenticated}
             startCustomizing={new URLSearchParams(location.search).get('customize') === '1'}
-            onAuthenticate={route => navigate(`/${route}`, { state: { from: '/home?customize=1', message: 'Log in or create an account to customize the display vehicle.' } })}
+            onAuthenticate={route => navigate(`/${route}`, { state: { from: '/home?customize=1', message: 'Log in or create an account to customize and order your vehicle.' } })}
             onColourChange={setPaintColour} onWheelChange={setWheelFinish} onInteriorChange={setInteriorAccent} onPreviewPartChange={setPreviewPart} onPlayingChange={setTourPlaying} />
         )}
       </div>
