@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from '../../config/axios.js';
 import { useAuth } from '../../context/AuthContext.js';
-import { profileAvatar, prioritizeProfiles } from '../../utils/networkProfiles.js';
+import { publicProfilePath, prioritizeProfiles } from '../../utils/networkProfiles.js';
+import ProfilePhoto from './ProfilePhoto.js';
 import './ProfileStories.css';
 
 export default function ProfileStories() {
@@ -34,14 +35,10 @@ export default function ProfileStories() {
       {status === 'error' && <p>Profiles are unavailable. <button onClick={() => setAttempt(n => n + 1)}>Try again</button></p>}
       {status === 'ready' && !members.length && <p>Community profiles will appear here.</p>}
       <div className="profile-stories-track" tabIndex={0} aria-label="Community profiles, scroll horizontally">
-        {members.map(member => (
+        {members.map((member, index) => (
           <Link className="profile-story" key={member._id || member.id}
-            to={`/profile?tab=network&member=${encodeURIComponent(member._id || member.id)}`}>
-            <span className="profile-story-ring">
-              <span className="profile-story-initials">{(member.name || '?').slice(0, 2).toUpperCase()}</span>
-              {profileAvatar(member) && <img src={profileAvatar(member)} alt="" loading="lazy"
-                onError={event => { event.currentTarget.hidden = true; }} />}
-            </span>
+            to={publicProfilePath(member)}>
+            <ProfilePhoto member={member} className="profile-story-ring" loading={index < 6 ? 'eager' : 'lazy'} />
             <span className="profile-story-name">{member.name || 'Community member'}</span>
           </Link>
         ))}

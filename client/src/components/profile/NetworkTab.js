@@ -3,16 +3,16 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, Filter, Grid, List } from 'lucide-react';
 import axios from '../../config/axios.js';
 import UserCard from '../shared/UserCard/UserCard.js';
-import { useSearchParams } from 'react-router-dom';
-import { prioritizeProfiles } from '../../utils/networkProfiles.js';
-import MemberProfileDialog from './MemberProfileDialog.js';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { prioritizeProfiles, publicProfilePath } from '../../utils/networkProfiles.js';
 import './NetworkTab.css';
 
 const PAGE_SIZE = 50;
 
 const NetworkTab = ({ profileData }) => {
   const [searchParams] = useSearchParams();
-  const [selectedMember, setSelectedMember] = useState(null);
+  const navigate = useNavigate();
+  const linkedMemberId = searchParams.get('member');
   const requestId = useRef(0);
   const pendingFollows = useRef(new Set());
   const [users, setUsers] = useState([]);
@@ -93,9 +93,8 @@ const NetworkTab = ({ profileData }) => {
   }, [fetchNetworkUsers]);
 
   useEffect(() => {
-    const member = users.find(u => String(u._id || u.id) === searchParams.get('member'));
-    if (member) setSelectedMember(member);
-  }, [users, searchParams]);
+    if (linkedMemberId) navigate(publicProfilePath({ id: linkedMemberId }), { replace: true });
+  }, [linkedMemberId, navigate]);
 
   const handleLoadMore = () => {
     fetchNetworkUsers(page + 1, true);
@@ -260,14 +259,13 @@ const NetworkTab = ({ profileData }) => {
               isFollowing={following.has((user._id || user.id)?.toString())}
               onFollowToggle={() => handleFollowToggle(user._id || user.id)}
               viewMode={viewMode}
-              onViewProfile={setSelectedMember}
+              onViewProfile={member => navigate(publicProfilePath(member))}
             />
           ))
         )}
       </div>
 
       {/* Load More */}
-      <MemberProfileDialog member={selectedMember} onClose={() => setSelectedMember(null)} />
       {hasMore && (
         <div className="network-load-more">
           <button

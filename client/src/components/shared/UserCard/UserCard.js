@@ -17,7 +17,8 @@ import {
   ChevronUp
 } from 'lucide-react';
 import './UserCard.css';
-import { profileAvatar, profileCover } from '../../../utils/networkProfiles.js';
+import { profileCoverSources } from '../../../utils/networkProfiles.js';
+import ProfilePhoto from '../../profile/ProfilePhoto.js';
 
 const API_BASE = 'https://bw-car-culture-api.vercel.app/api';
 
@@ -30,9 +31,7 @@ const UserCard = ({
   onViewProfile,
   className = ''
 }) => {
-  const [coverError, setCoverError] = useState(false);
-  React.useEffect(() => setCoverError(false), [user.coverPicture]);
-  const [failedAvatarUrl, setFailedAvatarUrl] = useState(null);
+  const [failedCovers, setFailedCovers] = useState([]);
 
   // Engagement state
   const [showEngagement, setShowEngagement] = useState(false);
@@ -119,12 +118,6 @@ const UserCard = ({
     } catch {}
   };
 
-  // Reset image state when user changes
-  // Resolve avatar URL once per user change
-  const avatarUrl = profileAvatar(user);
-
-  const fallbackUrl = `https://avatar.vercel.sh/${encodeURIComponent(user.name || 'User')}.svg?size=150`;
-
   // Get user type display name with better formatting
   const getUserTypeDisplay = (role) => {
     const roleMap = {
@@ -162,7 +155,6 @@ const UserCard = ({
     return colorMap[role] || '#7f8c8d';
   };
 
-  const handleImageError = () => { if (avatarUrl) setFailedAvatarUrl(avatarUrl); };
 
   // Handle follow button click
   const handleFollowClick = (e) => {
@@ -188,7 +180,7 @@ const UserCard = ({
   };
 
   // Resolve cover picture URL
-  const coverUrl = profileCover(user);
+  const coverUrl = profileCoverSources(user).find(url => !failedCovers.includes(url));
 
   const myId = (currentUser?.id || currentUser?._id)?.toString();
 
@@ -204,7 +196,7 @@ const UserCard = ({
           className="usercard-cover"
 
         >
-          {coverUrl && !coverError ? <img src={coverUrl} alt="" className="usercard-cover-image" loading="lazy" onError={() => setCoverError(true)} /> : <div className="usercard-cover-placeholder" />}
+          {coverUrl ? <img src={coverUrl} alt="" className="usercard-cover-image" loading="lazy" onError={() => setFailedCovers(previous => [...previous, coverUrl])} /> : <div className="usercard-cover-placeholder" />}
         </div>
       )}
 
@@ -212,14 +204,7 @@ const UserCard = ({
       <div className="usercard-header">
         <div className="usercard-avatar-container">
           <div className="usercard-avatar-wrapper">
-            <img
-              key={avatarUrl || fallbackUrl}
-              src={avatarUrl && failedAvatarUrl !== avatarUrl ? avatarUrl : fallbackUrl}
-              alt={user.name}
-              className="usercard-avatar"
-              onError={handleImageError}
-
-            />
+            <ProfilePhoto member={user} className="usercard-avatar" loading="lazy" />
           </div>
           {(user.isVerified || user.emailVerified) && (
             <div className="usercard-verified-badge" title="Verified User">

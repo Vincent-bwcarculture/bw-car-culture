@@ -100,6 +100,7 @@ const CommunityManager = React.lazy(() => import('./Admin/CommunityManager/Commu
 const CreateArticle = React.lazy(() => import('./components/journalist/CreateArticle.js'));
 // â€” User pages
 const UserProfilePage = React.lazy(() => import('./pages/UserProfilePage.js'));
+const PublicProfilePage = React.lazy(() => import('./pages/PublicProfilePage.js'));
 const TransportAdminDashboard = React.lazy(() => import('./pages/TransportAdminDashboard.js'));
 // â€” Feature pages
 const CarNewsPage = React.lazy(() => import('./components/features/CarNews/CarNewsPage.js'));
@@ -1223,6 +1224,8 @@ const AppRoutes = () => {
             <BusinessDetailPage />
           </MainLayout>
         } />
+
+        <Route path="/members/:userId" element={<MainLayout><PublicProfilePage /></MainLayout>} />
 
          {/* Profile Route - Protected */}
         <Route path="/profile" element={

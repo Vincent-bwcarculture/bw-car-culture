@@ -1,4 +1,4 @@
-import { imageUrl, prioritizeProfiles, photoScore } from './networkProfiles.js';
+import { imageUrl, prioritizeProfiles, photoScore, profilePhotoSources, profileCoverSources, publicProfilePath } from './networkProfiles.js';
 
 test('ranks both photos first, then one photo, preserving order for equal scores', () => {
   const members = [
@@ -25,4 +25,12 @@ test('engagement outweighs complete photos and keeps server order for equal scor
     { id: 'tie', engagementScore: 12 }
   ];
   expect(prioritizeProfiles(users).map(u => u.id)).toEqual(['active', 'tie', 'photos']);
+});
+
+test('stored bucket photos prefer resized thumbnails and retain alternate originals', () => {
+  const member = { _id: '69d74c610bfde4c36f0a9001', avatar: 'https://i3wcarculture-images.s3.us-east-1.amazonaws.com/avatar.jpg', profilePicture: 'https://images.test/alternate.jpg', coverPicture: 'https://i3wcarculture-images.s3.us-east-1.amazonaws.com/cover.jpg' };
+  expect(profilePhotoSources(member)[0]).toContain(`/api/users/${member._id}/avatar?v=`);
+  expect(profilePhotoSources(member).slice(1)).toEqual([member.avatar, member.profilePicture]);
+  expect(profileCoverSources(member)[0]).toContain('/cover?v=');
+  expect(publicProfilePath(member)).toBe(`/members/${member._id}`);
 });

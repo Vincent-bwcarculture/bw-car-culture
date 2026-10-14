@@ -4,8 +4,7 @@ import axios from '../../config/axios.js';
 import NetworkTab from './NetworkTab.js';
 
 jest.mock('../../config/axios.js', () => ({ get: jest.fn(), post: jest.fn() }));
-jest.mock('react-router-dom', () => ({ useSearchParams: () => [new URLSearchParams()] }), { virtual: true });
-jest.mock('./MemberProfileDialog.js', () => () => null);
+jest.mock('react-router-dom', () => ({ useSearchParams: () => [new URLSearchParams()], useNavigate: () => jest.fn() }), { virtual: true });
 jest.mock('../shared/UserCard/UserCard.js', () => ({ user, onFollowToggle, isFollowing }) => (
   <button onClick={onFollowToggle}>{user.name}: {user.followerCount} {isFollowing ? 'following' : 'follow'}</button>
 ));
