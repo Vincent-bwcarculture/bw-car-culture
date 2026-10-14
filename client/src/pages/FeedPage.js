@@ -1,3 +1,4 @@
+import ProfileStories from '../components/profile/ProfileStories.js';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../context/AuthContext.js';
 import { useNavigate } from 'react-router-dom';
@@ -788,6 +789,7 @@ export default function FeedPage() {
           <p className="fp-subtitle">Trending posts, community discussions, and show car competitions</p>
         </div>
 
+        <ProfileStories />
         <CompetitionCarousel user={user} />
 
         {isAuthenticated && (() => {

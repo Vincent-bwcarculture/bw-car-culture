@@ -216,6 +216,7 @@ const getAvailableTabs = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Eye },
     { id: 'feed', label: 'Feed', icon: Hash },
+    { id: 'network', label: 'Network', icon: Users },
     { id: 'vehicles', label: 'Sell My Vehicle', icon: Car },
     { id: 'inventory', label: 'Sell Inventory', icon: Package },
     { id: 'register-vehicle', label: 'Register Vehicle', icon: Car },
@@ -319,7 +320,7 @@ const getAvailableTabs = () => {
   // REMOVED: tabs.push({ id: 'roles', label: 'Role Management', icon: Shield })
   
   // Add Network tab before Settings
-  tabs.push({ id: 'network', label: 'Network', icon: Users });
+
   
   tabs.push({ id: 'settings', label: 'Settings', icon: Settings });
 

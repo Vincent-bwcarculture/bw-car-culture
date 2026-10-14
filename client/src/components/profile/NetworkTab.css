@@ -434,3 +434,24 @@
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   }
 }
+
+/* Size cards by their content needs instead of forcing narrow mobile columns. */
+.network-tab { padding: clamp(16px, 2.5vw, 28px); }
+.network-tab, .network-users, .network-users > * { min-width: 0; box-sizing: border-box; }
+.network-tab { width: 100%; max-width: 100%; }
+.network-users.grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+.network-users.list { gap: 12px; }
+.network-controls { flex-wrap: wrap; }
+.network-search { max-width: none; min-width: 0; }
+.network-search input { box-sizing: border-box; }
+.network-header { flex-wrap: wrap; }
+.network-stats { flex-wrap: wrap; gap: 16px 24px; }
+@media (max-width: 600px) {
+  .network-users.grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .network-search { flex-basis: 100%; }
+  .network-actions { width: 100%; justify-content: space-between; }
+}

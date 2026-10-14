@@ -10,7 +10,6 @@ import {
   Shield,
   Award,
   Users,
-  MoreHorizontal,
   ThumbsUp,
   Reply,
   Send,
@@ -18,6 +17,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import './UserCard.css';
+import { profileAvatar, profileCover } from '../../../utils/networkProfiles.js';
 
 const API_BASE = 'https://bw-car-culture-api.vercel.app/api';
 
@@ -30,9 +30,9 @@ const UserCard = ({
   onViewProfile,
   className = ''
 }) => {
-  const [imageError, setImageError] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
-  const [retryCount, setRetryCount] = useState(0);
+  const [coverError, setCoverError] = useState(false);
+  React.useEffect(() => setCoverError(false), [user.coverPicture]);
+  const [failedAvatarUrl, setFailedAvatarUrl] = useState(null);
 
   // Engagement state
   const [showEngagement, setShowEngagement] = useState(false);
@@ -121,25 +121,9 @@ const UserCard = ({
 
   // Reset image state when user changes
   // Resolve avatar URL once per user change
-  const avatarUrl =
-    user.avatar?.url ||
-    (typeof user.avatar === 'string' ? user.avatar : null) ||
-    user.profilePicture?.url ||
-    (typeof user.profilePicture === 'string' ? user.profilePicture : null) ||
-    null;
+  const avatarUrl = profileAvatar(user);
 
   const fallbackUrl = `https://avatar.vercel.sh/${encodeURIComponent(user.name || 'User')}.svg?size=150`;
-
-  React.useEffect(() => {
-    setImageError(false);
-    setRetryCount(0);
-    // If no real URL exists, skip loading state entirely
-    if (!avatarUrl) {
-      setImageLoading(false);
-    } else {
-      setImageLoading(true);
-    }
-  }, [user._id, user.id, avatarUrl]);
 
   // Get user type display name with better formatting
   const getUserTypeDisplay = (role) => {
@@ -178,8 +162,7 @@ const UserCard = ({
     return colorMap[role] || '#7f8c8d';
   };
 
-  const handleImageLoad = () => { setImageLoading(false); setImageError(false); };
-  const handleImageError = () => { setImageLoading(false); setImageError(true); };
+  const handleImageError = () => { if (avatarUrl) setFailedAvatarUrl(avatarUrl); };
 
   // Handle follow button click
   const handleFollowClick = (e) => {
@@ -205,12 +188,7 @@ const UserCard = ({
   };
 
   // Resolve cover picture URL
-  const getCoverUrl = () => {
-    if (user.coverPicture?.url) return user.coverPicture.url;
-    if (typeof user.coverPicture === 'string') return user.coverPicture;
-    return null;
-  };
-  const coverUrl = getCoverUrl();
+  const coverUrl = profileCover(user);
 
   const myId = (currentUser?.id || currentUser?._id)?.toString();
 
@@ -224,9 +202,9 @@ const UserCard = ({
       {viewMode === 'grid' && (
         <div
           className="usercard-cover"
-          style={coverUrl ? { backgroundImage: `url(${coverUrl})` } : {}}
+
         >
-          {!coverUrl && <div className="usercard-cover-placeholder" />}
+          {coverUrl && !coverError ? <img src={coverUrl} alt="" className="usercard-cover-image" loading="lazy" onError={() => setCoverError(true)} /> : <div className="usercard-cover-placeholder" />}
         </div>
       )}
 
@@ -234,23 +212,13 @@ const UserCard = ({
       <div className="usercard-header">
         <div className="usercard-avatar-container">
           <div className="usercard-avatar-wrapper">
-            {imageLoading && avatarUrl && (
-              <div className="usercard-avatar-loading">
-                <div className="usercard-avatar-spinner"></div>
-              </div>
-            )}
             <img
-              key={`${user._id || user.id}-${retryCount}`}
-              src={(!imageError && avatarUrl) ? avatarUrl : fallbackUrl}
+              key={avatarUrl || fallbackUrl}
+              src={avatarUrl && failedAvatarUrl !== avatarUrl ? avatarUrl : fallbackUrl}
               alt={user.name}
               className="usercard-avatar"
-              onLoad={handleImageLoad}
               onError={handleImageError}
-              style={{
-                display: imageLoading ? 'none' : 'block',
-                opacity: 1,
-                transition: 'opacity 0.3s ease'
-              }}
+
             />
           </div>
           {(user.isVerified || user.emailVerified) && (
@@ -274,11 +242,7 @@ const UserCard = ({
                 </span>
               )}
             </h3>
-            {viewMode === 'grid' && (
-              <button className="usercard-menu-btn" title="More options">
-                <MoreHorizontal size={16} />
-              </button>
-            )}
+
           </div>
           
           <p className="usercard-role" style={{ color: getRoleColor(user.role) }}>
@@ -333,10 +297,10 @@ const UserCard = ({
           </div>
         )}
 
-        <div className="usercard-stat">
+        {Number.isFinite(user.associateCount) && <div className="usercard-stat">
           <Users size={14} />
-          <span>{((user.followerCount ?? (user.followers?.length ?? 0)) + (user.followingCount ?? (user.following?.length ?? 0)))} associates</span>
-        </div>
+          <span>{user.associateCount} associates</span>
+        </div>}
       </div>
 
       {/* Action Buttons */}
@@ -354,14 +318,14 @@ const UserCard = ({
           </button>
         )}
         
-        <button 
+        {onMessage && <button
           className="usercard-action-btn message"
           onClick={handleMessageClick}
           title="Send message"
         >
           <MessageCircle size={16} />
           <span>Message</span>
-        </button>
+        </button>}
         
         <button
           className="usercard-action-btn profile"

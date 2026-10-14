@@ -1,0 +1,14 @@
+.profile-stories { min-width: 0; width: 100%; box-sizing: border-box; padding: 16px; margin-bottom: 20px; border: 1px solid #333; border-radius: 14px; background: #191919; color: #f5f5f5; }
+.profile-stories-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.profile-stories-heading h2 { margin: 0; font-size: 15px; }
+.profile-stories-heading a, .profile-stories button { color: #ff8b70; font-size: 13px; }
+.profile-stories button { background: none; border: 0; cursor: pointer; text-decoration: underline; }
+.profile-stories p { color: #aaa; font-size: 13px; }
+.profile-stories-track { display: flex; gap: 16px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; padding: 16px 2px 10px; scrollbar-width: thin; scrollbar-color: #555 #191919; }
+.profile-story { flex: 0 0 76px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; color: #ddd; text-decoration: none; scroll-snap-align: start; }
+.profile-story-ring { position: relative; display: grid; place-items: center; box-sizing: border-box; width: 68px; height: 68px; border-radius: 50%; border: 2px solid #ff693f; background: #2d2421; overflow: hidden; }
+.profile-story-ring img { position: absolute; inset: 3px; width: 58px; height: 58px; object-fit: cover; border-radius: 50%; }
+.profile-story-ring img[hidden] { display: none; }
+.profile-story-initials { font-size: 18px; font-weight: 600; }
+.profile-story-name { width: 100%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.profile-story:focus-visible, .profile-stories-track:focus-visible { outline: 2px solid #ff8b70; outline-offset: 2px; }

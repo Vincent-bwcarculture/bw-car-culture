@@ -15,6 +15,32 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const activityUserId = user?._id || user?.id;
+
+  // Record real signed-in visits; repeated refreshes earn no extra ranking credit.
+  useEffect(() => {
+    if (!isAuthenticated || !activityUserId) return;
+    let pending = false;
+    const key = `network-last-visit:${activityUserId}`;
+    const recordVisit = async () => {
+      if (document.visibilityState !== 'visible' || pending) return;
+      const now = Date.now();
+      if (now - Number(localStorage.getItem(key) || 0) < 15 * 60000) return;
+      pending = true;
+      try {
+        await axios.post('/api/users/activity');
+        localStorage.setItem(key, String(now));
+      } catch { /* Activity tracking must not interrupt browsing. */ }
+      finally { pending = false; }
+    };
+    recordVisit();
+    const interval = setInterval(recordVisit, 15 * 60000);
+    document.addEventListener('visibilitychange', recordVisit);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', recordVisit);
+    };
+  }, [isAuthenticated, activityUserId, location.pathname]);
 
   // Debug logger for authentication state changes
   useEffect(() => {

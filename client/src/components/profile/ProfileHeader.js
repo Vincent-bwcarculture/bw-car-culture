@@ -26,6 +26,7 @@ import {
 import { useAuth } from '../../context/AuthContext.js';
 import { useNavigate } from 'react-router-dom';  // Added for navigation
 import './ProfileHeader.css';
+import { profileCover } from '../../utils/networkProfiles.js';
 
 // === SOCIAL STATS SECTION COMPONENT ===
 const SocialStatsSection = ({ profileData, isOwnProfile = false, onFollowAction }) => {
@@ -131,6 +132,8 @@ const ProfileHeader = ({
 }) => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const coverUrl = profileCover(profileData || {});
+  const [failedCover, setFailedCover] = useState(null);
   const [uploadError, setUploadError] = useState('');
   
   // Get AuthContext to update user data
@@ -450,10 +453,11 @@ const handleCreateArticleClick = () => {
     <div className="pheader-main-container">
       {/* Cover Picture Section */}
       <div className="pheader-cover-section">
-        {profileData?.coverPicture?.url ? (
+        {coverUrl && failedCover !== coverUrl ? (
           <div className="pheader-cover-image-container">
             <img 
-              src={profileData.coverPicture.url} 
+              src={coverUrl}
+              onError={() => setFailedCover(coverUrl)}
               alt="Cover" 
               className="pheader-cover-image"
             />

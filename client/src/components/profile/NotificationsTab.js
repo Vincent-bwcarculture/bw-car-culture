@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Bell, X, CheckCircle, AlertCircle, Info, AlertTriangle, Settings, Car, Check } from 'lucide-react';
 
-const API_BASE = process.env.REACT_APP_API_URL || '';
+const API_BASE = (process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app').replace(/\/$/, '').replace(/\/api$/, '');
 const authHeader = () => ({
   'Authorization': `Bearer ${localStorage.getItem('token')}`,
   'Content-Type': 'application/json'

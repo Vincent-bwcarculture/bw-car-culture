@@ -1,3 +1,4 @@
+import ProfileStories from './ProfileStories.js';
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from '../../config/axios.js';
@@ -211,6 +212,7 @@ export default function FeedEmbed() {
 
   return (
     <div className="fe-embed">
+      <ProfileStories />
       {/* Top bar */}
       <div className="fe-embed-topbar">
         <span className="fe-embed-title">Community Feed</span>

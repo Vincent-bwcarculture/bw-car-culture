@@ -4,6 +4,7 @@ import {
   X,
   QrCode,
   Hash,
+  Users,
   Car,
   MessageSquare,
   Trophy,
@@ -724,6 +725,7 @@ const EnhancedFABModal = ({
 
   const navItems = [
     { label: 'Feed', desc: 'Community posts & showcases', path: '/feed', icon: <Hash size={22} /> },
+    { label: 'Network', desc: 'Meet the automotive community', path: '/profile?tab=network', icon: <Users size={22} /> },
     { label: 'Browse Cars', desc: 'Search marketplace listings', path: '/marketplace', icon: <Car size={22} /> },
     { label: 'Find Dealerships', desc: 'View verified dealerships', path: '/dealerships', icon: <Trophy size={22} /> },
     { label: 'Services', desc: 'Workshops, rentals & transport', path: '/services', icon: <ChevronRight size={22} /> },

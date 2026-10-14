@@ -677,3 +677,127 @@
   width: 48px;
   height: 48px;
 }
+
+/* Consistent card rhythm across the responsive network grid. */
+.usercard-wrapper { min-width: 0; }
+.usercard-wrapper, .usercard-container, .usercard-container * { box-sizing: border-box; }
+.usercard-container { max-width: 100%; background: #191919; isolation: isolate; }
+.usercard-container.grid .usercard-cover { position: relative; overflow: hidden; background: #202020; }
+.usercard-cover-image { display: block; width: 100%; height: 100%; object-fit: cover; background: #202020; }
+.usercard-container.grid .usercard-header { background: transparent; }
+.usercard-container.grid .usercard-actions > button { min-width: 0; flex-basis: 80px; }
+.usercard-container.grid {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 0;
+  border-radius: 16px;
+}
+.usercard-container.grid .usercard-cover { height: 84px; }
+.usercard-cover-placeholder {
+  background: radial-gradient(ellipse at top right, rgba(255, 51, 0, 0.16), transparent 65%),
+    linear-gradient(120deg, #242424, #171717);
+}
+.usercard-container.grid .usercard-header {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 0 18px;
+  margin: -24px 0 16px;
+  text-align: left;
+}
+.usercard-container.grid .usercard-avatar-container { margin: 0; }
+.usercard-container.grid .usercard-avatar-wrapper,
+.usercard-container.grid .usercard-avatar,
+.usercard-container.grid .usercard-avatar-loading,
+.usercard-container.grid .usercard-avatar-fallback {
+  width: 56px;
+  height: 56px;
+  box-sizing: border-box;
+  border-radius: 50%;
+}
+.usercard-container.grid .usercard-avatar-wrapper { border: 0; box-shadow: none; }
+.usercard-container.grid .usercard-avatar { border-width: 3px; }
+.usercard-container.grid .usercard-info { padding-top: 32px; text-align: left; }
+.usercard-name-row { gap: 6px; }
+.usercard-name { font-size: 1rem; line-height: 1.4; overflow-wrap: anywhere; }
+.usercard-verified-icon { flex-shrink: 0; }
+.usercard-role { font-size: 12px; line-height: 1.5; }
+.usercard-location { line-height: 1.5; overflow-wrap: anywhere; }
+.usercard-container.grid .usercard-name-row { justify-content: space-between; }
+.usercard-container.grid .usercard-follow-btn {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 40px;
+  justify-content: center;
+  border-radius: 8px;
+}
+.usercard-container.grid .usercard-bio {
+  padding: 0;
+  margin: 0 18px 16px;
+  border: 0;
+  background: transparent;
+}
+.usercard-bio p {
+  font-style: normal;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.usercard-container.grid .usercard-stats {
+  margin: auto 18px 0;
+  padding: 12px 0;
+  gap: 10px 16px;
+  justify-content: flex-start;
+  border-bottom: 0;
+}
+.usercard-stat { font-size: 12px; line-height: 1.5; gap: 5px; }
+.usercard-container.grid .usercard-actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 0 18px 18px;
+  gap: 8px;
+}
+.usercard-action-btn {
+  min-height: 40px;
+  padding: 8px;
+  gap: 5px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+.usercard-action-btn svg { flex-shrink: 0; }
+.usercard-container button:focus-visible {
+  outline: 2px solid var(--uprofile-primary-accent);
+  outline-offset: 3px;
+}
+.usercard-menu-btn { opacity: 1; }
+.uc-thread-input { min-width: 0; }
+.uc-eng-meta { flex-wrap: wrap; }
+.usercard-container.list .usercard-avatar-fallback { width: 48px; height: 48px; }
+
+@media (max-width: 900px) {
+  .usercard-container.list { flex-wrap: wrap; gap: 16px; }
+  .usercard-container.list .usercard-header {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    flex-basis: 100%;
+  }
+  .usercard-container.list .usercard-info { text-align: left; }
+  .usercard-container.list .usercard-name-row { justify-content: flex-start; }
+  .usercard-container.list .usercard-actions {
+    width: 100%;
+    margin-left: 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .usercard-container.list .usercard-follow-btn { width: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .usercard-container, .usercard-container button { transition: none; }
+  .usercard-container:hover { transform: none; }
+}

@@ -15,7 +15,7 @@ const api = axios.create({
 });
 
 // Normalize URL paths to prevent duplicate /api prefixes and fix formatting
-const normalizeUrlPath = (url) => {
+export const normalizeUrlPath = (url, baseURL = '') => {
   if (!url) return '';
   
   // Check for URL with duplicate API paths (a common error pattern)
@@ -38,6 +38,7 @@ const normalizeUrlPath = (url) => {
   
   // Remove duplicate slashes
   path = path.replace(/\/+/g, '/');
+  if (/\/api\/?$/.test(baseURL) && path.startsWith('/api/')) path = path.slice(4);
   
   return path;
 };
@@ -49,7 +50,7 @@ api.interceptors.request.use(
       // Just normalize URL - NO ROUTING LOGIC
       if (config.url) {
         const originalUrl = config.url;
-        config.url = normalizeUrlPath(config.url);
+        config.url = normalizeUrlPath(config.url, config.baseURL);
         
         // Log if URL was changed
         if (originalUrl !== config.url && process.env.NODE_ENV === 'development') {

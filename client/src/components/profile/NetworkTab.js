@@ -3,15 +3,23 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, Filter, Grid, List } from 'lucide-react';
 import axios from '../../config/axios.js';
 import UserCard from '../shared/UserCard/UserCard.js';
+import { useSearchParams } from 'react-router-dom';
+import { prioritizeProfiles } from '../../utils/networkProfiles.js';
+import MemberProfileDialog from './MemberProfileDialog.js';
 import './NetworkTab.css';
 
 const PAGE_SIZE = 50;
 
 const NetworkTab = ({ profileData }) => {
+  const [searchParams] = useSearchParams();
+  const [selectedMember, setSelectedMember] = useState(null);
+  const requestId = useRef(0);
+  const pendingFollows = useRef(new Set());
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
+  const [followError, setFollowError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('grid');
   const [filters, setFilters] = useState({ userType: 'all', verified: 'all' });
@@ -24,6 +32,7 @@ const NetworkTab = ({ profileData }) => {
   const searchDebounce = useRef(null);
 
   const fetchNetworkUsers = useCallback(async (overridePage = 1, append = false) => {
+    const thisRequest = ++requestId.current;
     try {
       append ? setLoadingMore(true) : setLoading(true);
       setError('');
@@ -36,12 +45,8 @@ const NetworkTab = ({ profileData }) => {
       if (filters.userType !== 'all') params.append('userType', filters.userType);
       if (filters.verified !== 'all') params.append('verified', filters.verified);
 
-      let response;
-      try {
-        response = await axios.get(`/api/users/network?${params.toString()}`);
-      } catch {
-        response = await axios.get('/auth/users');
-      }
+      const response = await axios.get(`/api/users/network?${params.toString()}`);
+      if (thisRequest !== requestId.current) return;
 
       if (response.data.success) {
         const currentUserId = profileData?.id || profileData?._id;
@@ -51,7 +56,9 @@ const NetworkTab = ({ profileData }) => {
           return vis !== 'private';
         });
 
-        setUsers(prev => append ? [...prev, ...fetched] : fetched);
+        setUsers(prev => prioritizeProfiles(append
+          ? [...new Map([...prev, ...fetched].map(u => [String(u._id || u.id), u])).values()]
+          : fetched));
         setTotal(response.data.total ?? fetched.length);
         setHasMore(response.data.hasMore ?? false);
         setPage(overridePage);
@@ -64,28 +71,31 @@ const NetworkTab = ({ profileData }) => {
         throw new Error(response.data.message || 'Failed to fetch users');
       }
     } catch (err) {
+      if (thisRequest !== requestId.current) return;
       if (err.response?.status === 401) setError('Please log in to view the network.');
       else if (err.response?.status === 403) setError('You do not have permission to view the network.');
       else setError('Failed to load network users. Please try again.');
     } finally {
-      setLoading(false);
-      setLoadingMore(false);
+      if (thisRequest === requestId.current) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     }
   }, [searchTerm, filters, profileData]);
 
-  // Initial load
-  useEffect(() => {
-    fetchNetworkUsers(1, false);
-  }, [filters]); // refetch from page 1 when filters change
-
-  // Debounce search
+  // One debounced request; stale responses cannot overwrite newer results.
   useEffect(() => {
     if (searchDebounce.current) clearTimeout(searchDebounce.current);
     searchDebounce.current = setTimeout(() => {
       fetchNetworkUsers(1, false);
     }, 350);
-    return () => clearTimeout(searchDebounce.current);
-  }, [searchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => { clearTimeout(searchDebounce.current); requestId.current += 1; };
+  }, [fetchNetworkUsers]);
+
+  useEffect(() => {
+    const member = users.find(u => String(u._id || u.id) === searchParams.get('member'));
+    if (member) setSelectedMember(member);
+  }, [users, searchParams]);
 
   const handleLoadMore = () => {
     fetchNetworkUsers(page + 1, true);
@@ -93,6 +103,11 @@ const NetworkTab = ({ profileData }) => {
 
   const handleFollowToggle = async (userId) => {
     const idStr = userId.toString();
+    if (pendingFollows.current.has(idStr)) return;
+    pendingFollows.current.add(idStr);
+    const wasFollowing = following.has(idStr);
+    const originalCount = users.find(u => String(u._id || u.id) === idStr)?.followerCount ?? 0;
+    setFollowError('');
     setFollowing(prev => {
       const next = new Set(prev);
       next.has(idStr) ? next.delete(idStr) : next.add(idStr);
@@ -100,17 +115,21 @@ const NetworkTab = ({ profileData }) => {
     });
     setUsers(prev => prev.map(u => {
       if ((u._id || u.id).toString() !== idStr) return u;
-      const wasFollowing = following.has(idStr);
-      return { ...u, followerCount: (u.followerCount ?? 0) + (wasFollowing ? -1 : 1) };
+      return { ...u, followerCount: Math.max(0, (u.followerCount ?? 0) + (wasFollowing ? -1 : 1)) };
     }));
     try {
       await axios.post(`/api/users/${idStr}/follow`);
     } catch {
+      setFollowError('Could not update your follow. Please try again.');
+      setUsers(prev => prev.map(u => String(u._id || u.id) === idStr
+        ? { ...u, followerCount: originalCount } : u));
       setFollowing(prev => {
         const next = new Set(prev);
         next.has(idStr) ? next.delete(idStr) : next.add(idStr);
         return next;
       });
+    } finally {
+      pendingFollows.current.delete(idStr);
     }
   };
 
@@ -166,6 +185,7 @@ const NetworkTab = ({ profileData }) => {
           <input
             type="text"
             placeholder="Search users..."
+            aria-label="Search network members"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -179,10 +199,10 @@ const NetworkTab = ({ profileData }) => {
             Filters
           </button>
           <div className="network-view-toggle">
-            <button className={viewMode === 'grid' ? 'active' : ''} onClick={() => setViewMode('grid')}>
+            <button aria-label="Grid view" aria-pressed={viewMode === 'grid'} className={viewMode === 'grid' ? 'active' : ''} onClick={() => setViewMode('grid')}>
               <Grid size={18} />
             </button>
-            <button className={viewMode === 'list' ? 'active' : ''} onClick={() => setViewMode('list')}>
+            <button aria-label="List view" aria-pressed={viewMode === 'list'} className={viewMode === 'list' ? 'active' : ''} onClick={() => setViewMode('list')}>
               <List size={18} />
             </button>
           </div>
@@ -225,6 +245,7 @@ const NetworkTab = ({ profileData }) => {
       </div>
 
       {/* Users Grid/List */}
+      {followError && <p role="alert">{followError}</p>}
       <div className={`network-users ${viewMode}`}>
         {users.length === 0 ? (
           <div className="network-empty">
@@ -239,14 +260,14 @@ const NetworkTab = ({ profileData }) => {
               isFollowing={following.has((user._id || user.id)?.toString())}
               onFollowToggle={() => handleFollowToggle(user._id || user.id)}
               viewMode={viewMode}
-              onMessage={(u) => console.log('Message user:', u)}
-              onViewProfile={(u) => console.log('View profile:', u)}
+              onViewProfile={setSelectedMember}
             />
           ))
         )}
       </div>
 
       {/* Load More */}
+      <MemberProfileDialog member={selectedMember} onClose={() => setSelectedMember(null)} />
       {hasMore && (
         <div className="network-load-more">
           <button
