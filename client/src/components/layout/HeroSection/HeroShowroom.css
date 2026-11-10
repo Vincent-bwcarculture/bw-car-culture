@@ -392,8 +392,8 @@
     margin-right: 0;
     box-sizing: border-box;
   }
-  .bcc-hero--showroom .bcc-hero-slogan { justify-content: flex-start; margin: 0 0 1.5rem; width: 100%; }
-  .bcc-hero--showroom .bcc-hero-slogan-dot:last-child { display: none; }
+  /* Slogan duplicates the journey panel's message — hide it on desktop showroom */
+  .bcc-hero--showroom .bcc-hero-slogan { display: none; }
   .bcc-hero--showroom .bcc-hero-editorial {
     left: 0;
     transform: none;
@@ -404,7 +404,8 @@
     flex: 1;
   }
   .bcc-hero--showroom .bcc-hero-buy { display: flex; flex-direction: column; flex: 1; }
-  .bcc-hero--showroom .bcc-hero-buy p { margin-inline: 0; }
+  /* Description paragraph is redundant when the glass card carries the narrative */
+  .bcc-hero--showroom .bcc-hero-buy > p { display: none; }
   .bcc-hero--showroom .bcc-hero-search-container { width: 100%; margin: auto 0 0; padding-top: 2rem; }
   /* Journey: frosted glass card floating on the right */
   .bcc-hero--showroom .bcc-hero-journey {
