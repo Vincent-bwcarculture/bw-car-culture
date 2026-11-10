@@ -410,30 +410,31 @@
   .bcc-hero--showroom .bcc-hero-journey {
     position: absolute;
     right: 2vw;
-    top: 7rem;
+    top: 5rem;
     width: 23%;
-    max-width: 310px;
+    max-width: 300px;
     display: flex;
     flex-direction: column;
-    background: rgba(8,8,10,0.76);
-    backdrop-filter: blur(24px) saturate(1.3);
-    -webkit-backdrop-filter: blur(24px) saturate(1.3);
+    background: rgba(6,6,8,0.80);
+    backdrop-filter: blur(28px) saturate(1.4);
+    -webkit-backdrop-filter: blur(28px) saturate(1.4);
     border: 1px solid rgba(255,255,255,0.07);
-    border-top: 1px solid rgba(255,255,255,0.13);
+    border-top: 1px solid rgba(255,255,255,0.14);
     border-radius: 10px;
-    padding: 1.5rem 1.4rem 1.1rem;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
+    padding: 1.4rem 1.3rem 1.1rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
     pointer-events: none;
+    z-index: 3;
   }
-  .bcc-journey-heading h2 em { display: inline; }
-  .bcc-journey-heading h2 { margin-bottom: .65rem; }
+  /* Glass card: compact — heading adds height and overlaps the car, hide it */
+  .bcc-hero--showroom .bcc-journey-heading { display: none; }
   .bcc-journey-steps { min-height: 0; }
   .bcc-journey-steps li > button { padding-top: .5rem; gap: .45rem; }
   .bcc-journey-footer { position: relative; margin-top: auto; padding-top: 1.2rem; width: 100%; text-align: center; }
   .bcc-journey-navigation { justify-content: center; margin: .7rem 0 .2rem; }
   .bcc-journey-playback { margin-inline: auto; }
   .bcc-journey-signature { display: none; }
-  .bcc-journey-heading, .bcc-journey-steps, .bcc-journey-footer { pointer-events: auto; }
+  .bcc-journey-steps, .bcc-journey-footer { pointer-events: auto; }
   /* Model fills the centre, raised so the car sits in the visible viewport */
   .bcc-hero-model-stage { left: 22%; width: 54%; top: 6rem; height: 580px; pointer-events: none; }
   .bcc-hero--showroom:has(.is-current .bcc-journey-configurator) .bcc-hero-content { min-height: 850px; }
