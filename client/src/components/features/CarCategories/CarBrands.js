@@ -1,7 +1,6 @@
 // src/components/features/CarCategories/CarBrands.js
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { listingService } from '../../../services/listingService.js';
 import './CarBrands.css';
 
 const CarBrands = () => {
@@ -42,106 +41,41 @@ const CarBrands = () => {
     }
   };
   
-  // Fetch brands data from API
+  // Fetch brands data from dedicated aggregation endpoint
   useEffect(() => {
-    const fetchBrandsData = async () => {
+    let cancelled = false;
+    const fetchBrandsData = async (attempt = 0) => {
       try {
         setLoading(true);
         setError(null);
-        
-        // Get listings to build brand data
-        const allListings = await listingService.getListings({}, 1, 100);
-        const listings = allListings?.listings || [];
-        
-        if (listings.length === 0) {
-          throw new Error('No vehicle listings available');
+        const apiBase = process.env.REACT_APP_API_URL || '/api';
+        const res = await fetch(`${apiBase}/listings/brands`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const brandsData = (json.data || []).map(b => ({
+          ...b,
+          image: b.image || '/images/placeholders/car.jpg'
+        }));
+        if (cancelled) return;
+        if (brandsData.length === 0 && attempt < 2) {
+          setTimeout(() => fetchBrandsData(attempt + 1), 1500);
+          return;
         }
-        
-        // Extract all unique brands (makes) from the data
-        const uniqueMakes = [...new Set(listings.map(listing => 
-          (listing.specifications?.make || listing.make || '').trim()
-        ).filter(make => make))];
-        
-        // Process each make to create brand data
-        const brandsData = [];
-        
-        uniqueMakes.forEach(make => {
-          // Get all listings for this make
-          const brandListings = listings.filter(listing => {
-            const listingMake = (listing.specifications?.make || listing.make || '').trim();
-            return listingMake.toLowerCase() === make.toLowerCase();
-          });
-          
-          // Only add brands that have listings
-          if (brandListings.length > 0) {
-            // Find the most expensive car for this brand to use as featured image
-            const sortedByPrice = [...brandListings].sort((a, b) => 
-              (b.price || 0) - (a.price || 0)
-            );
-            
-            // Get the most expensive model (for the "featured" label)
-            const featuredModel = sortedByPrice[0]?.specifications?.model || 
-                                 sortedByPrice[0]?.model || 
-                                 'Featured Model';
-            
-            // Get the most expensive car's image to represent the brand
-            let brandImage = null;
-            if (sortedByPrice[0]?.images && sortedByPrice[0].images.length > 0) {
-              const featuredCarImage = sortedByPrice[0].images[0];
-              
-              if (typeof featuredCarImage === 'string') {
-                brandImage = featuredCarImage;
-              } else if (featuredCarImage && typeof featuredCarImage === 'object') {
-                brandImage = featuredCarImage.url || featuredCarImage.thumbnail || '';
-              }
-            }
-            
-            // Fallback if no image is found
-            if (!brandImage) {
-              brandImage = '/images/placeholders/car.jpg';
-            }
-            
-            // Calculate price range
-            const prices = brandListings.map(item => item.price).filter(Boolean);
-            let priceRange = 'P TBD';
-            
-            if (prices.length > 0) {
-              const minPrice = Math.min(...prices);
-              const maxPrice = Math.max(...prices);
-              priceRange = `P ${minPrice.toLocaleString()} - P ${maxPrice.toLocaleString()}`;
-            }
-            
-            // Add the processed brand
-            brandsData.push({
-              id: make.toLowerCase().replace(/\s+/g, '-'),
-              name: make,
-              image: brandImage,
-              modelCount: brandListings.length,
-              featured: featuredModel,
-              priceRange: priceRange,
-              filter: make
-            });
-          }
-        });
-        
-        // Sort brands by number of models (descending)
-        brandsData.sort((a, b) => b.modelCount - a.modelCount);
-        
-        if (brandsData.length === 0) {
-          throw new Error('No brands with listings found');
-        } else {
-          setBrands(brandsData);
-        }
-        
+        setBrands(brandsData);
         setLoading(false);
       } catch (err) {
+        if (cancelled) return;
         console.error('Error fetching brands data:', err);
-        setError(true);
-        setLoading(false);
+        if (attempt < 2) {
+          setTimeout(() => fetchBrandsData(attempt + 1), 1500);
+        } else {
+          setError(true);
+          setLoading(false);
+        }
       }
     };
-    
     fetchBrandsData();
+    return () => { cancelled = true; };
   }, []);
 
   // Parse active brand from URL on component mount
