@@ -1,10 +1,10 @@
 ﻿// src/components/layout/HeroSection/HeroSection.js - With authentication integration
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.js'; // NEW: Added authentication
 import { statsService } from '../../../services/statsService.js';
 import { dealerService } from '../../../services/dealerService.js';
-import CarBackground3D from './CarBackground3D.js';
+const CarBackground3D = lazy(() => import('./CarBackground3D.js'));
 import HeroJourney, { HERO_COLOURS, HERO_WHEELS, HERO_INTERIORS } from './HeroJourney.js';
 import './HeroSection.css';
 import './HeroShowroom.css';
@@ -246,8 +246,17 @@ const HeroSection = () => {
 
   return (
     <section className={`bcc-hero-section bcc-hero-premium${modelReady && activeTab === 'buy' ? ' bcc-hero--showroom' : ''}`}>
-      {/* 3D car background — desktop only, fades in when model loads */}
-      <CarBackground3D sellMode={activeTab === 'sell'} paintColour={paintColour} wheelFinish={wheelFinish} interiorAccent={interiorAccent} previewPart={previewPart} motionEnabled={tourPlaying} onInteraction={() => setModelInteraction(value => value + 1)} onReadyChange={setModelReady} />
+      {/* 3D car — lazy-loaded so Three.js doesn't block the initial page render */}
+      <Suspense fallback={
+        <div className="bcc-hero-model-stage">
+          <div className="bcc-model-loading" aria-label="Configurator loading">
+            <div className="bcc-model-loading-ring" />
+            <span>Loading configurator</span>
+          </div>
+        </div>
+      }>
+        <CarBackground3D sellMode={activeTab === 'sell'} paintColour={paintColour} wheelFinish={wheelFinish} interiorAccent={interiorAccent} previewPart={previewPart} motionEnabled={tourPlaying} onInteraction={() => setModelInteraction(value => value + 1)} onReadyChange={setModelReady} />
+      </Suspense>
 
       {/* Semi-transparent dark layer for content legibility */}
       <div className="bcc-hero-dark-overlay" aria-hidden="true" />

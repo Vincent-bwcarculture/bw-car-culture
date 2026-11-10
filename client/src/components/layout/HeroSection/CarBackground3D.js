@@ -296,9 +296,9 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
   return (
     <div ref={stageRef} className={`bcc-hero-model-stage${visible ? ' is-ready' : ''}`}>
       {desktop && !visible && (
-        <div className="bcc-model-loading" aria-label="Vehicle preview loading">
+        <div className="bcc-model-loading" aria-label="Configurator loading">
           <div className="bcc-model-loading-ring" />
-          <span>Loading model</span>
+          <span>Loading configurator</span>
         </div>
       )}
       <canvas aria-label="Vehicle preview. Drag to rotate and scroll over the vehicle to zoom." ref={canvasRef} className={`hero-3d-canvas${visible ? ' hero-3d-canvas--on' : ''}`} />
