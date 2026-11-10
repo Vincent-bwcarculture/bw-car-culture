@@ -6,8 +6,7 @@
   }
   
   .bcc-dealerships-hero {
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.85)), 
-                url('');
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.85));
     background-size: cover;
     background-position: center;
     height: 220px; /* Reduced from 300px */
