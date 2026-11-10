@@ -242,18 +242,19 @@
   .bcc-hero-model-stage {
     order: 2;
     display: block;
-    position: relative;      /* exit absolute flow so it takes vertical space */
+    position: relative;
     left: auto; top: auto;
     width: 100%;
     height: 55vw;
     min-height: 200px;
     max-height: 300px;
-    opacity: 0;
-    transition: opacity 1.4s ease;
+    opacity: 1;              /* always visible so loading indicator shows */
     pointer-events: none;
     z-index: 1;
+    background: rgba(255,255,255,0.025);
+    border-radius: 4px;
   }
-  .bcc-hero-model-stage.is-ready { opacity: 1; pointer-events: auto; }
+  .bcc-hero-model-stage.is-ready { pointer-events: auto; }
   .bcc-hero-model-stage .hero-3d-canvas {
     display: block;      /* override HeroSection.css mobile hide rule */
     pointer-events: none;
@@ -263,9 +264,10 @@
     pointer-events: auto;
     touch-action: none; /* let orbit controls handle all touch when model ready */
   }
-  .bcc-hero-dealers { order: 3; }
+  .bcc-hero-journey { order: 3; }   /* journey floats after the model */
+  .bcc-hero-dealers { order: 4; }
 
-  /* Show the journey configurator below the model on mobile */
+  /* ── Mobile journey panel ── */
   .bcc-hero--showroom .bcc-hero-journey {
     display: block;
     position: relative;
@@ -273,19 +275,86 @@
     width: 100%;
     max-width: none;
     margin: 0;
-    padding-inline: 1.25rem;
+    padding: .6rem 1.25rem .9rem;
+    border-top: 1px solid var(--hero-line);
     pointer-events: auto;
   }
+  /* Show only the active step on mobile — matches desktop behaviour */
+  .bcc-hero--showroom .bcc-journey-steps li { display: none; border: 0; }
+  .bcc-hero--showroom .bcc-journey-steps li.is-current { display: block; animation: hero-detail-enter .5s ease both; }
+  .bcc-hero--showroom .bcc-journey-steps li:last-child { border: 0; }
+  .bcc-hero--showroom .bcc-journey-indicator { display: none; }
+  /* Step title reads as a label, not a toggle */
+  .bcc-hero--showroom .bcc-journey-steps li > button {
+    font-size: .95rem;
+    font-weight: 600;
+    min-height: auto;
+    padding: .3rem 0 .35rem;
+    cursor: default;
+    gap: .5rem;
+  }
+  /* Hide the long heading — step title + detail is enough on mobile */
+  .bcc-hero--showroom .bcc-journey-heading { display: none; }
+  .bcc-hero--showroom .bcc-journey-detail p { font-size: .86rem; line-height: 1.6; }
+  /* Nav dots — let users swipe between steps */
+  .bcc-hero--showroom .bcc-journey-navigation {
+    display: flex;
+    justify-content: center;
+    gap: .6rem;
+    margin: .5rem 0 .15rem;
+  }
+  .bcc-hero--showroom .bcc-journey-navigation button {
+    background: var(--hero-line);
+    border: 0;
+    width: 24px; height: 3px;
+    padding: 8px 0;
+    box-sizing: content-box;
+    background-clip: content-box;
+    cursor: pointer;
+  }
+  .bcc-hero--showroom .bcc-journey-navigation button[aria-current="step"] { background-color: var(--hero-accent); }
+  /* Show play/pause on mobile */
+  .bcc-hero--showroom .bcc-journey-playback { display: flex; margin-inline: auto; }
+  /* Model hint compact */
+  .bcc-hero--showroom .bcc-hero-model-hint { text-align: center; font-size: .64rem; padding: .15rem 0; }
 }
 @media (max-width: 600px) {
-  .bcc-hero-premium .bcc-hero-content { padding-inline: 1.25rem; padding-top: 2.5rem; }
-  .bcc-hero-premium .bcc-hero-slogan { letter-spacing: .08em; line-height: 1.8; color: var(--hero-muted); }
-  .bcc-hero-premium .bcc-hero-tabs { margin-bottom: 2rem; }
-  .bcc-hero-premium .bcc-hero-tab-button { padding: .8rem 1rem; flex: 0 0 auto; width: auto; min-width: 110px; white-space: nowrap; }
-  .bcc-hero-premium .bcc-hero-search-input { min-width: 0; width: 100%; box-sizing: border-box;  padding: .8rem .6rem; }
-  .bcc-hero-premium .bcc-hero-buy p { margin-bottom: 1.8rem; }
+  .bcc-hero-premium .bcc-hero-content { padding-inline: 1.25rem; padding-top: 2rem; }
+  .bcc-hero-premium .bcc-hero-slogan { display: none; }  /* reclaim vertical space on small mobile */
+  .bcc-hero-premium .bcc-hero-tabs { margin-bottom: 1.2rem; }
+  .bcc-hero-premium .bcc-hero-tab-button { padding: .7rem 1rem; flex: 0 0 auto; width: auto; min-width: 110px; white-space: nowrap; }
+  .bcc-hero-premium .bcc-hero-search-input { min-width: 0; width: 100%; box-sizing: border-box; padding: .75rem .6rem; }
+  .bcc-hero-premium .bcc-hero-buy h1 { font-size: 1.75rem; margin-bottom: .5rem; }
+  .bcc-hero-premium .bcc-hero-buy p { font-size: 1rem; margin-bottom: 1.2rem; }
+  .bcc-hero-model-stage { height: 58vw; min-height: 190px; max-height: 290px; }
 }
 @keyframes hero-detail-enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes bcc-model-spin { to { transform: rotate(360deg); } }
+
+/* Model loading placeholder — visible on mobile while GLB loads */
+.bcc-model-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  pointer-events: none;
+  color: rgba(255,255,255,0.28);
+  font-size: .64rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.bcc-model-loading-ring {
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-top-color: var(--hero-accent, #ed714d);
+  border-radius: 50%;
+  animation: bcc-model-spin 1s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) { .bcc-model-loading-ring { animation: none; border-top-color: var(--hero-accent, #ed714d); } }
 @media (prefers-reduced-motion: reduce) {
   .bcc-hero-premium *, .bcc-hero-premium *::before, .bcc-hero-premium *::after { transition: none !important; animation: none !important; }
 }
@@ -307,48 +376,43 @@
 }
 
 
-/* A shared headline and baseline connect the search and vehicle journey. */
+/* Left column (search) + journey absolutely right + model fills centre-right. */
 @media (min-width: 900px) {
   .bcc-hero-premium { min-height: 720px; }
+  /* Journey is now a sibling of hero-content; constrain content to left column */
   .bcc-hero--showroom .bcc-hero-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto 1fr;
-    column-gap: 5vw;
-    row-gap: 2.5rem;
+    display: flex;
+    flex-direction: column;
     min-height: 720px;
     padding: 3rem 4vw 2.5rem;
     pointer-events: none;
+    width: 54%;
+    max-width: 760px;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
   }
-  .bcc-hero--showroom .bcc-hero-slogan {
-    grid-column: 1 / -1;
-    justify-content: center;
-    margin: 0;
-    width: 100%;
-    text-align: center;
-  }
-  .bcc-hero--showroom .bcc-hero-slogan-dot:last-child { display: block; }
+  .bcc-hero--showroom .bcc-hero-slogan { justify-content: flex-start; margin: 0 0 1.5rem; width: 100%; }
+  .bcc-hero--showroom .bcc-hero-slogan-dot:last-child { display: none; }
   .bcc-hero--showroom .bcc-hero-editorial {
-    grid-column: 1;
-    grid-row: 2;
     left: 0;
     transform: none;
     width: 100%;
     display: flex;
     flex-direction: column;
     pointer-events: auto;
+    flex: 1;
   }
   .bcc-hero--showroom .bcc-hero-buy { display: flex; flex-direction: column; flex: 1; }
   .bcc-hero--showroom .bcc-hero-buy p { margin-inline: 0; }
   .bcc-hero--showroom .bcc-hero-search-container { width: 100%; margin: auto 0 0; padding-top: 2rem; }
+  /* Journey: absolutely positioned on right side */
   .bcc-hero--showroom .bcc-hero-journey {
-    grid-column: 2;
-    grid-row: 2;
-    position: relative;
-    inset: auto;
-    width: 100%;
-    max-width: none;
-    margin: 0;
+    position: absolute;
+    right: 4vw;
+    top: 10rem;
+    width: 22%;
+    max-width: 300px;
     display: flex;
     flex-direction: column;
     pointer-events: none;
@@ -363,7 +427,6 @@
   .bcc-journey-signature { display: none; }
   .bcc-journey-heading, .bcc-journey-steps, .bcc-journey-footer { pointer-events: auto; }
   .bcc-hero-model-stage { left: 39%; width: 61%; top: 12rem; height: 520px; pointer-events: none; }
-  /* Reserve extra room only while the customization controls are visible. */
   .bcc-hero--showroom:has(.is-current .bcc-journey-configurator) .bcc-hero-content { min-height: 850px; }
   .bcc-hero--showroom:has(.is-current .bcc-journey-configurator) .bcc-hero-model-stage { top: 18rem; }
   .bcc-hero-model-stage.is-ready { pointer-events: auto; }
@@ -374,7 +437,7 @@
   .bcc-hero-model-hint span { padding: 0 .4rem; }
 }
 @media (min-width: 900px) and (max-width: 1199px) {
-  .bcc-hero--showroom .bcc-hero-content { min-height: 760px; column-gap: 3vw; }
+  .bcc-hero--showroom .bcc-hero-content { min-height: 760px; }
   .bcc-hero-model-stage { left: 35%; width: 65%; top: 15rem; height: 470px; }
   .bcc-hero--showroom:has(.is-current .bcc-journey-configurator) .bcc-hero-content { min-height: 880px; }
   .bcc-hero--showroom:has(.is-current .bcc-journey-configurator) .bcc-hero-model-stage { top: 21rem; }
