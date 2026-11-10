@@ -406,7 +406,10 @@
   .bcc-hero-premium .bcc-hero-tagline-eyebrow { color: var(--hero-muted); margin-top: .35rem; }
   .bcc-hero-tagline h2 { color: var(--hero-ink); font-size: clamp(1.3rem, 1.7vw, 1.7rem); font-weight: 500; letter-spacing: -.03em; line-height: 1.3; margin: .4rem 0 0; }
   .bcc-hero-tagline h2 em { font-style: normal; color: var(--hero-muted); }
-  .bcc-hero--showroom .bcc-hero-search-container { width: 100%; max-width: 520px; margin: 0; }
+  .bcc-hero--showroom .bcc-hero-search-container { width: 100%; max-width: 440px; margin: 0; }
+  .bcc-hero--showroom .bcc-hero-search-bar { padding: .35rem; margin-bottom: 1.1rem; }
+  .bcc-hero--showroom .bcc-hero-search-input { padding: .65rem .8rem; font-size: .95rem; }
+  .bcc-hero--showroom .bcc-hero-search-button { padding: .65rem 1.3rem; font-size: .95rem; }
   .bcc-hero--showroom .bcc-hero-dealers { width: 50%; max-width: 680px; margin: 0; padding-left: 4vw; padding-right: 0; }
 
   /* Journey: no card — chapter text sits top-centre, controls sit under the car */
