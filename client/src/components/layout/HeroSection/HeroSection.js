@@ -337,8 +337,8 @@ const HeroSection = () => {
             
             <div className="bcc-hero-search-container">
               <div className="bcc-hero-search-bar">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Search make, model, year or price"
                   className="bcc-hero-search-input"
                   value={searchQuery}
@@ -347,8 +347,8 @@ const HeroSection = () => {
                   disabled={loading}
                   aria-label="Search for vehicles"
                 />
-                <button 
-                  className="bcc-hero-search-button" 
+                <button
+                  className="bcc-hero-search-button"
                   onClick={() => handleSearch()}
                   disabled={loading}
                   aria-label="Search vehicles"
@@ -360,7 +360,10 @@ const HeroSection = () => {
                   )}
                 </button>
               </div>
-              
+
+              {/* 3D car model — mobile only, appears between search bar and popular links */}
+              <CarBackground3D forMobile sellMode={activeTab === 'sell'} paintColour={paintColour} wheelFinish={wheelFinish} interiorAccent={interiorAccent} previewPart={previewPart} motionEnabled={true} />
+
               <div className="bcc-hero-popular-searches">
                 <span>Popular:</span>
                 {popularSearches.map((search, index) => (

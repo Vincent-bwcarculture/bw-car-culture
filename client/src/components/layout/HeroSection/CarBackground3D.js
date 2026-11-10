@@ -20,7 +20,7 @@ const disposeModel = (model) => {
   geometries.forEach(geometry => geometry.dispose());
 };
 
-const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled = true, onReadyChange, onInteraction }) => {
+const CarBackground3D = ({ forMobile = false, sellMode = false, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled = true, onReadyChange, onInteraction }) => {
   const canvasRef = useRef(null);
   const stageRef = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -30,12 +30,13 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
     [sellMode, paintColour, wheelFinish, interiorAccent, previewPart, motionEnabled, onReadyChange, onInteraction]);
 
   useEffect(() => {
-    const media = window.matchMedia('(min-width: 900px)');
+    const query = forMobile ? '(max-width: 899px)' : '(min-width: 900px)';
+    const media = window.matchMedia(query);
     const update = () => setDesktop(media.matches && !navigator.connection?.saveData);
     update();
     media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
-  }, []);
+  }, [forMobile]);
 
   useEffect(() => {
     if (!desktop) { setVisible(false); settings.current.onReadyChange?.(false); return; }
@@ -64,6 +65,8 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
     controls.maxPolarAngle = Math.PI * 0.58;
     const onControlStart = () => settings.current.onInteraction?.();
     controls.addEventListener('start', onControlStart);
+    // Mobile inline: orbit controls are always on; no hover-gate needed.
+    if (forMobile) { controls.enabled = true; canvas.style.touchAction = 'none'; }
     scene.add(new THREE.AmbientLight(0xffffff, 1.5));
     const key = new THREE.DirectionalLight(0xfff5e0, 4);
     key.position.set(4, 5, 4);
@@ -294,8 +297,8 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
   }, [desktop]);
 
   return (
-    <div ref={stageRef} className={`bcc-hero-model-stage${visible ? ' is-ready' : ''}`}>
-      <canvas aria-label="Vehicle preview. Drag to rotate and scroll over the vehicle to zoom." ref={canvasRef} className={`hero-3d-canvas${visible ? ' hero-3d-canvas--on' : ''}`} />
+    <div ref={stageRef} className={forMobile ? `bcc-hero-model-stage--mobile${visible ? ' is-ready' : ''}` : `bcc-hero-model-stage${visible ? ' is-ready' : ''}`}>
+      <canvas aria-label="Vehicle preview. Drag to rotate." ref={canvasRef} className={`hero-3d-canvas${visible ? ' hero-3d-canvas--on' : ''}`} />
     </div>
   );
 };

@@ -43,13 +43,51 @@
   opacity: 1;
 }
 
-/* Mobile: hide canvas, revert to a subtle dark gradient bg */
+/* Mobile: hide background canvas, revert to a subtle dark gradient bg */
 @media (max-width: 899px) {
-  .hero-3d-canvas { display: none; }
+  .bcc-hero-model-stage .hero-3d-canvas { display: none; }
   .bcc-hero-section {
     background: linear-gradient(135deg, #0d0d0d 0%, #1c1c1c 100%);
   }
   .bcc-hero-section::before { display: none; }
+}
+
+/* Mobile inline 3D model — below the search bar */
+.bcc-hero-model-stage--mobile {
+  display: none;
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  border-radius: 12px;
+  margin: 14px 0 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+.bcc-hero-model-stage--mobile .hero-3d-canvas {
+  display: block;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.bcc-hero-model-stage--mobile .hero-3d-canvas--on {
+  opacity: 1;
+}
+.bcc-hero-model-stage--mobile::after {
+  content: 'drag to rotate';
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+  letter-spacing: 0.04em;
+}
+@media (max-width: 899px) {
+  .bcc-hero-model-stage--mobile { display: block; }
 }
 
 .bcc-hero-section span {
