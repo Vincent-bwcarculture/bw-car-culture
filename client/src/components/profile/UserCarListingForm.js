@@ -4,9 +4,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import './UserCarListingForm.css';
-import { normalizeSubmissionForm, uploadSubmissionFile, applyProfileToForm } from '../../utils/submissionForm.js';
+import { normalizeSubmissionForm, uploadSubmissionFile, applyProfileToForm, submissionApiBase } from '../../utils/submissionForm.js';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
+const API_BASE = submissionApiBase(process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app');
 
 const UserCarListingForm = ({
   onSubmit,
@@ -288,41 +288,6 @@ const UserCarListingForm = ({
     { value: 'classic', label: 'Classic / Vintage' }
   ];
 
-  // Compress an image file using Canvas before upload.
-  // Mobile cameras produce 4-10MB photos; Vercel serverless has a 4.5MB body limit.
-  // Target: ≤1MB per image (1400px wide, JPEG 82%) so even 4 images stay safe.
-  const compressImage = (file) => {
-    return new Promise((resolve) => {
-      const MAX_WIDTH = 1400;
-      const QUALITY = 0.82;
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        const scale = Math.min(1, MAX_WIDTH / Math.max(img.width, img.height));
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) { resolve(file); return; }
-            const compressed = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
-              type: 'image/jpeg',
-              lastModified: Date.now()
-            });
-            resolve(compressed);
-          },
-          'image/jpeg',
-          QUALITY
-        );
-      };
-      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); }; // fallback: use original
-      img.src = url;
-    });
-  };
-
   // Classify fetch/network errors into user-friendly messages
   const formatSubmitError = (error) => {
     const msg = (error?.message || '').toLowerCase();
@@ -459,8 +424,9 @@ const UserCarListingForm = ({
       updates.profilePicture = autoFillData.profilePicture;
     }
 
-    // Apply seller type
-    if (fieldsToFill.includes('sellerType') && autoFillData.sellerType && !formData.sellerType) {
+    // Apply seller type — guard only prevents overwriting if user already manually changed it
+    // (default 'private' should still be replaced by the actual profile type)
+    if (fieldsToFill.includes('sellerType') && autoFillData.sellerType) {
       updates.sellerType = autoFillData.sellerType;
     }
 
@@ -642,9 +608,11 @@ const UserCarListingForm = ({
       }));
     }
     
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+    // Clear error when user starts typing.
+    // Input names are flat ("make") but validation keys may be nested ("specifications.make").
+    const specKey = `specifications.${name}`;
+    if (errors[name] || errors[specKey]) {
+      setErrors(prev => { const n = { ...prev }; delete n[name]; delete n[specKey]; return n; });
     }
   };
 
@@ -873,13 +841,12 @@ const handleFormSubmit = async (e) => {
       showMessage('info', `Preparing ${imageFiles.length} image${imageFiles.length > 1 ? 's' : ''}…`);
 
       try {
-        const compressedFiles = await Promise.all(imageFiles.map(f => uploadCache.current.has(f) ? f : compressImage(f)));
         const token = localStorage.getItem('token') || localStorage.getItem('authToken');
         const rawUploaded = [];
 
-        for (let idx = 0; idx < compressedFiles.length; idx++) {
-          const file = compressedFiles[idx];
-          showMessage('info', `Uploading image ${idx + 1} of ${compressedFiles.length}…`);
+        for (let idx = 0; idx < imageFiles.length; idx++) {
+          const file = imageFiles[idx];
+          showMessage('info', `Uploading image ${idx + 1} of ${imageFiles.length}…`);
           console.log(`📎 Uploading file ${idx}: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
 
           const original = imageFiles[idx];
@@ -926,7 +893,7 @@ const handleFormSubmit = async (e) => {
       const token = localStorage.getItem('token') || localStorage.getItem('authToken');
       let proof = uploadCache.current.get(boostProofFile);
       if (!proof) {
-        const file = boostProofFile.type.startsWith('image/') ? await compressImage(boostProofFile) : boostProofFile;
+        const file = boostProofFile; // no client-side compression — upload as-is
         proof = await uploadSubmissionFile({ apiBase: API_BASE, token, file, folder: 'boost-payment-proofs' });
         uploadCache.current.set(boostProofFile, proof);
       }
@@ -1128,6 +1095,7 @@ const handleFormSubmit = async (e) => {
     if (isEdit) {
       if (!onSubmit) throw new Error('Unable to save this submission. Please reopen the form.');
       await onSubmit(listingData);
+      showMessage('success', 'Listing updated successfully!');
       return;
     }
 
