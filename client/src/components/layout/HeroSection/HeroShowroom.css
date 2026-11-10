@@ -233,6 +233,49 @@
   .bcc-journey-heading h2 em { display: inline; margin-left: .2em; }
   .bcc-journey-signature { display: none; }
   .bcc-journey-steps li > button { min-height: 48px; }
+
+  /* ── Mobile showroom: stack content → car → journey vertically ── */
+  /* Hero section uses flex-column; reorder children so model appears below content */
+  .bcc-hero-section { display: flex; flex-direction: column; }
+  .bcc-hero-dark-overlay { order: 0; }
+  .bcc-hero-content   { order: 1; }
+  .bcc-hero-model-stage {
+    order: 2;
+    display: block;
+    position: relative;      /* exit absolute flow so it takes vertical space */
+    left: auto; top: auto;
+    width: 100%;
+    height: 55vw;
+    min-height: 200px;
+    max-height: 300px;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .bcc-hero-model-stage.is-ready { opacity: 1; pointer-events: auto; }
+  .bcc-hero-model-stage .hero-3d-canvas {
+    display: block;      /* override HeroSection.css mobile hide rule */
+    pointer-events: none;
+    touch-action: pan-y;
+  }
+  .bcc-hero-model-stage.is-ready .hero-3d-canvas {
+    pointer-events: auto;
+    touch-action: none; /* let orbit controls handle all touch when model ready */
+  }
+  .bcc-hero-dealers { order: 3; }
+
+  /* Show the journey configurator below the model on mobile */
+  .bcc-hero--showroom .bcc-hero-journey {
+    display: block;
+    position: relative;
+    top: auto; left: auto; right: auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding-inline: 1.25rem;
+    pointer-events: auto;
+  }
 }
 @media (max-width: 600px) {
   .bcc-hero-premium .bcc-hero-content { padding-inline: 1.25rem; padding-top: 2.5rem; }

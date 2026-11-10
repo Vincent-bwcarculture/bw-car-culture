@@ -361,9 +361,6 @@ const HeroSection = () => {
                 </button>
               </div>
 
-              {/* 3D car model — mobile only, appears between search bar and popular links */}
-              <CarBackground3D forMobile sellMode={activeTab === 'sell'} paintColour={paintColour} wheelFinish={wheelFinish} interiorAccent={interiorAccent} previewPart={previewPart} motionEnabled={true} />
-
               <div className="bcc-hero-popular-searches">
                 <span>Popular:</span>
                 {popularSearches.map((search, index) => (
