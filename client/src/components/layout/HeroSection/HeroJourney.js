@@ -25,11 +25,14 @@ export const HERO_JOURNEY = [
   { title: 'Enjoy the road ahead', detail: 'Ongoing ownership support. More peace of mind, more time to enjoy your vehicle.' },
 ];
 
+const loadHeroPrefs = () => { try { return JSON.parse(localStorage.getItem('bcc-hero-prefs') || 'null') || {}; } catch { return {}; } };
+const saveHeroPrefs = prefs => { try { localStorage.setItem('bcc-hero-prefs', JSON.stringify(prefs)); } catch {} };
+
 const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, startCustomizing = false, onAuthenticate, onColourChange, onWheelChange, onInteriorChange, onPreviewPartChange, onPlayingChange }) => {
   const [step, setStep] = useState(startCustomizing ? 1 : 0);
-  const [colour, setColour] = useState(0);
-  const [wheel, setWheel] = useState(0);
-  const [interior, setInterior] = useState(0);
+  const [colour, setColour] = useState(() => loadHeroPrefs().colour ?? 0);
+  const [wheel, setWheel] = useState(() => loadHeroPrefs().wheel ?? 0);
+  const [interior, setInterior] = useState(() => loadHeroPrefs().interior ?? 0);
   const [part, setPart] = useState('paint');
   const [paused, setPaused] = useState(startCustomizing);
   const [authPrompt, setAuthPrompt] = useState(false);
@@ -37,7 +40,18 @@ const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, s
   const [inView, setInView] = useState(false);
   const [pageVisible, setPageVisible] = useState(!document.hidden);
   const ref = useRef(null);
-  useEffect(() => { if (interactionId) setPaused(true); }, [interactionId]);
+  const autoResumeRef = useRef(null);
+
+  const scheduleAutoResume = () => {
+    if (autoResumeRef.current) clearTimeout(autoResumeRef.current);
+    autoResumeRef.current = setTimeout(() => { autoResumeRef.current = null; setPaused(false); }, 9000);
+  };
+  const cancelAutoResume = () => {
+    if (autoResumeRef.current) { clearTimeout(autoResumeRef.current); autoResumeRef.current = null; }
+  };
+
+  useEffect(() => () => cancelAutoResume(), []); // eslint-disable-line
+  useEffect(() => { if (interactionId) { setPaused(true); scheduleAutoResume(); } }, [interactionId]); // eslint-disable-line
   const playing = modelReady && !paused && !reducedMotion && inView && pageVisible;
 
   useEffect(() => {
@@ -92,6 +106,7 @@ const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, s
   useEffect(() => { onColourChange(HERO_COLOURS[colour].hex); }, [colour, onColourChange]);
   useEffect(() => { onWheelChange?.(HERO_WHEELS[wheel].hex); }, [wheel, onWheelChange]);
   useEffect(() => { onInteriorChange?.(HERO_INTERIORS[interior].hex); }, [interior, onInteriorChange]);
+  useEffect(() => { saveHeroPrefs({ colour, wheel, interior }); }, [colour, wheel, interior]);
   useEffect(() => {
     onPreviewPartChange?.(modelReady && step === 1 ? part : null);
     return () => onPreviewPartChange?.(null);
@@ -103,6 +118,7 @@ const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, s
   useEffect(() => { if (isAuthenticated) setAuthPrompt(false); }, [isAuthenticated]);
   const customize = action => {
     setPaused(true);
+    scheduleAutoResume(); // resume automatically if user stops interacting
     if (!isAuthenticated) { setAuthPrompt(true); return; }
     action();
   };
@@ -117,7 +133,7 @@ const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, s
         {HERO_JOURNEY.map((item, index) => (
           <li key={item.title} className={step === index ? 'is-current' : ''}>
             <button type="button" aria-expanded={step === index} aria-controls={`hero-journey-detail-${index}`}
-              onClick={() => { setStep(index); setPaused(true); }}>
+              onClick={() => { setStep(index); setPaused(true); scheduleAutoResume(); }}>
               <span className="bcc-journey-number">{String(index + 1).padStart(2, '0')}</span>
               <span>{item.title}</span>
               <span className="bcc-journey-indicator" aria-hidden="true">{step === index ? '−' : '+'}</span>
@@ -158,10 +174,10 @@ const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, s
       <nav className="bcc-journey-navigation" aria-label="Journey chapters">
         {HERO_JOURNEY.map((item, index) => <button key={item.title} type="button"
           aria-label={`Step ${index + 1}: ${item.title}`} aria-current={step === index ? 'step' : undefined}
-          onClick={() => { setStep(index); setPaused(true); }} />)}
+          onClick={() => { setStep(index); setPaused(true); scheduleAutoResume(); }} />)}
       </nav>
       {modelReady && !reducedMotion && (
-        <button type="button" className="bcc-journey-playback" aria-pressed={paused} onClick={() => setPaused(value => !value)}>
+        <button type="button" className="bcc-journey-playback" aria-pressed={paused} onClick={() => { cancelAutoResume(); setPaused(v => !v); }}>
           <span aria-hidden="true">{paused ? '▷' : 'Ⅱ'}</span> {paused ? 'Play journey' : 'Pause journey'}
         </button>
       )}

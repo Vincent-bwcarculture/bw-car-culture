@@ -3,17 +3,59 @@ import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.j
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export const MODEL_URL = '/models/hero-golf.glb';
+// Bump this string when the GLB file is replaced so users re-download the new model.
+const CACHE_VERSION = 'v1';
+const IDB_DB = 'bcc-models';
+const IDB_STORE = 'glb';
+const IDB_KEY = `${MODEL_URL}@${CACHE_VERSION}`;
+
 let buffer = null;
 let fetching = null;
 const progressListeners = new Set();
 
-const fetchModelBuffer = () => {
-  if (buffer) return Promise.resolve(buffer);
+const openIDB = () => new Promise((resolve, reject) => {
+  const req = indexedDB.open(IDB_DB, 1);
+  req.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
+  req.onsuccess = e => resolve(e.target.result);
+  req.onerror = () => reject(req.error);
+});
+
+const readIDB = async () => {
+  try {
+    const db = await openIDB();
+    return await new Promise((resolve, reject) => {
+      const req = db.transaction(IDB_STORE).objectStore(IDB_STORE).get(IDB_KEY);
+      req.onsuccess = () => resolve(req.result ?? null);
+      req.onerror = () => reject(req.error);
+    });
+  } catch { return null; }
+};
+
+const writeIDB = async data => {
+  try {
+    const db = await openIDB();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      tx.objectStore(IDB_STORE).put(data, IDB_KEY);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch {}
+};
+
+const fetchModelBuffer = async () => {
+  if (buffer) return buffer;
   if (fetching) return fetching;
+
+  // Check persistent IndexedDB cache first (survives page refreshes)
+  const cached = await readIDB();
+  if (cached) { buffer = cached; return buffer; }
+
   fetching = fetch(MODEL_URL).then(async response => {
     if (!response.ok) throw new Error(`Vehicle preview request failed (${response.status})`);
     if (!response.body?.getReader) {
       buffer = await response.arrayBuffer();
+      writeIDB(buffer);
       return buffer;
     }
     const total = Number(response.headers.get('Content-Length')) || 0;
@@ -35,6 +77,7 @@ const fetchModelBuffer = () => {
     let offset = 0;
     chunks.forEach(chunk => { bytes.set(chunk, offset); offset += chunk.length; });
     buffer = bytes.buffer;
+    writeIDB(buffer); // async write, don't await — don't block rendering
     return buffer;
   }).finally(() => { fetching = null; });
   return fetching;
