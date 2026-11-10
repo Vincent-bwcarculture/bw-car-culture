@@ -376,69 +376,72 @@
 }
 
 
-/* Left column (search) + journey absolutely right + model fills centre-right. */
+/* Desktop showroom: editorial column left, journey chapter top-centre, car right. */
+.bcc-hero-tagline { display: none; }
 @media (min-width: 900px) {
   .bcc-hero-premium { min-height: 720px; }
-  /* Journey is now a sibling of hero-content; constrain content to left column */
   .bcc-hero--showroom .bcc-hero-content {
     display: flex;
     flex-direction: column;
-    min-height: 720px;
-    padding: 3rem 4vw 2.5rem;
+    min-height: 0;
+    padding: 3rem 0 1.5rem 4vw;
     pointer-events: none;
-    width: 36%;
-    max-width: 540px;
+    width: 50%;
+    max-width: 680px;
     margin-left: 0;
     margin-right: 0;
     box-sizing: border-box;
   }
-  .bcc-hero--showroom .bcc-hero-slogan { justify-content: flex-start; margin: 0 0 1.5rem; width: 100%; }
-  .bcc-hero--showroom .bcc-hero-slogan-dot:last-child { display: none; }
-  .bcc-hero--showroom .bcc-hero-editorial {
-    left: 0;
-    transform: none;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    pointer-events: auto;
-    flex: 1;
-  }
-  .bcc-hero--showroom .bcc-hero-buy { display: flex; flex-direction: column; flex: 1; }
-  .bcc-hero--showroom .bcc-hero-buy p { margin-inline: 0; }
-  .bcc-hero--showroom .bcc-hero-search-container { width: 100%; margin: auto 0 0; padding-top: 2rem; }
-  /* Journey: frosted glass card floating on the right */
+  /* Slogan moves under the headline (tagline); the intro paragraph is dropped */
+  .bcc-hero--showroom .bcc-hero-slogan,
+  .bcc-hero--showroom .bcc-hero-buy > p { display: none; }
+  .bcc-hero--showroom .bcc-hero-editorial { left: 0; transform: none; width: 100%; pointer-events: auto; }
+  .bcc-hero--showroom .bcc-hero-tabs { margin-bottom: 1.8rem; }
+  .bcc-hero--showroom .bcc-import-wrapper { margin-bottom: 1.4rem; }
+  .bcc-hero--showroom .bcc-hero-buy h1 { font-size: clamp(3rem, 4.6vw, 4.6rem); line-height: 1.05; margin: 0 0 1.4rem; }
+  .bcc-hero--showroom .bcc-hero-tagline { display: block; margin-bottom: 1.2rem; }
+  .bcc-hero-premium .bcc-hero-tagline-slogan,
+  .bcc-hero-premium .bcc-hero-tagline-eyebrow { display: block; text-transform: uppercase; letter-spacing: .1em; font-size: .78rem; line-height: 1.7; }
+  .bcc-hero-premium .bcc-hero-tagline-slogan { color: var(--hero-ink); font-weight: 600; max-width: 30em; }
+  .bcc-hero-premium .bcc-hero-tagline-eyebrow { color: var(--hero-muted); margin-top: .35rem; }
+  .bcc-hero-tagline h2 { color: var(--hero-ink); font-size: clamp(1.3rem, 1.7vw, 1.7rem); font-weight: 500; letter-spacing: -.03em; line-height: 1.3; margin: .4rem 0 0; }
+  .bcc-hero-tagline h2 em { font-style: normal; color: var(--hero-muted); }
+  .bcc-hero--showroom .bcc-hero-search-container { width: 100%; max-width: 520px; margin: 0; }
+  .bcc-hero--showroom .bcc-hero-dealers { width: 50%; max-width: 680px; margin: 0; padding-left: 4vw; padding-right: 0; }
+
+  /* Journey: no card — chapter text sits top-centre, controls sit under the car */
   .bcc-hero--showroom .bcc-hero-journey {
     position: absolute;
-    right: 2vw;
-    top: 5rem;
-    width: 23%;
-    max-width: 300px;
-    display: flex;
-    flex-direction: column;
-    background: rgba(6,6,8,0.80);
-    backdrop-filter: blur(28px) saturate(1.4);
-    -webkit-backdrop-filter: blur(28px) saturate(1.4);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-top: 1px solid rgba(255,255,255,0.14);
-    border-radius: 10px;
-    padding: 1.4rem 1.3rem 1.1rem;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+    left: 47%;
+    right: 0;
+    top: 3rem;
+    bottom: 5rem;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    display: block;
     pointer-events: none;
     z-index: 3;
   }
-  /* Glass card: compact — heading adds height and overlaps the car, hide it */
-  .bcc-hero--showroom .bcc-journey-heading { display: none; }
-  .bcc-journey-steps { min-height: 0; }
-  .bcc-journey-steps li > button { padding-top: .5rem; gap: .45rem; }
-  .bcc-journey-footer { position: relative; margin-top: auto; padding-top: 1.2rem; width: 100%; text-align: center; }
+  .bcc-hero--showroom .bcc-journey-heading,
+  .bcc-journey-signature { display: none; }
+  .bcc-hero--showroom .bcc-journey-steps { max-width: 400px; min-height: 0; pointer-events: auto; }
+  .bcc-hero--showroom .bcc-journey-steps li > button { padding: 0 0 .5rem; gap: .5rem; font-size: 1.3rem; }
+  .bcc-hero-premium .bcc-journey-steps .bcc-journey-number { font-size: 2.1rem; font-weight: 600; line-height: 1; letter-spacing: .02em; }
+  .bcc-hero--showroom .bcc-journey-footer {
+    position: absolute;
+    left: 30%;
+    width: 48%;
+    bottom: 0;
+    text-align: center;
+    pointer-events: auto;
+  }
   .bcc-journey-navigation { justify-content: center; margin: .7rem 0 .2rem; }
   .bcc-journey-playback { margin-inline: auto; }
-  .bcc-journey-signature { display: none; }
-  .bcc-journey-steps, .bcc-journey-footer { pointer-events: auto; }
-  /* Model fills the centre, raised so the car sits in the visible viewport */
-  .bcc-hero-model-stage { left: 22%; width: 54%; top: 6rem; height: 580px; pointer-events: none; }
-  .bcc-hero--showroom:has(.is-current .bcc-journey-configurator) .bcc-hero-content { min-height: 850px; }
-  .bcc-hero--showroom:has(.is-current .bcc-journey-configurator) .bcc-hero-model-stage { top: 12rem; }
+
+  /* Car takes the right half, below the chapter text */
+  .bcc-hero-model-stage { left: 46%; width: 54%; top: 9rem; height: 480px; pointer-events: none; }
   .bcc-hero-model-stage.is-ready { pointer-events: auto; }
   .bcc-hero-model-stage::before, .bcc-hero-model-stage::after { pointer-events: none; }
   .bcc-hero-model-stage .hero-3d-canvas { pointer-events: none; cursor: auto; touch-action: pan-y; }
@@ -447,8 +450,10 @@
   .bcc-hero-model-hint span { padding: 0 .4rem; }
 }
 @media (min-width: 900px) and (max-width: 1199px) {
-  .bcc-hero--showroom .bcc-hero-content { min-height: 760px; }
-  .bcc-hero-model-stage { left: 16%; width: 54%; top: 5rem; height: 520px; }
-  .bcc-hero--showroom:has(.is-current .bcc-journey-configurator) .bcc-hero-content { min-height: 880px; }
-  .bcc-hero--showroom:has(.is-current .bcc-journey-configurator) .bcc-hero-model-stage { top: 11rem; }
+  .bcc-hero--showroom .bcc-hero-content,
+  .bcc-hero--showroom .bcc-hero-dealers { width: 52%; }
+  .bcc-hero--showroom .bcc-hero-buy h1 { font-size: clamp(2.6rem, 4.4vw, 3.4rem); }
+  .bcc-hero--showroom .bcc-hero-journey { left: 50%; }
+  .bcc-hero--showroom .bcc-journey-steps { max-width: 340px; }
+  .bcc-hero-model-stage { left: 46%; width: 54%; top: 11rem; height: 400px; }
 }
