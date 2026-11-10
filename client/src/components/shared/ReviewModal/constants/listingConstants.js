@@ -85,14 +85,15 @@ export const SAFETY_FEATURES = [
   ];
   
   export const COUNTRIES = [
-    { code: 'ZA', name: 'South Africa' },
     { code: 'BW', name: 'Botswana' },
-    { code: 'NA', name: 'Namibia' },
-    { code: 'ZW', name: 'Zimbabwe' },
-    { code: 'MZ', name: 'Mozambique' },
-    { code: 'LS', name: 'Lesotho' },
+    { code: 'CN', name: 'China' },
     { code: 'SZ', name: 'Eswatini' },
-    // Add more as needed
+    { code: 'JP', name: 'Japan' },
+    { code: 'LS', name: 'Lesotho' },
+    { code: 'MZ', name: 'Mozambique' },
+    { code: 'NA', name: 'Namibia' },
+    { code: 'ZA', name: 'South Africa' },
+    { code: 'ZW', name: 'Zimbabwe' },
   ];
   
   export const TRANSMISSION_TYPES = [
