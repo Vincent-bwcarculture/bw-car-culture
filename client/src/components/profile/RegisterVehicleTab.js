@@ -8,6 +8,9 @@ import axios from '../../config/axios.js';
 import { loadCarModel } from '../../utils/modelCache.js';
 import { findVehicleModel, vehicleDisplayName, HERO_VEHICLE } from '../../utils/vehicleModels.js';
 import ThreeDBadge from '../shared/ThreeDBadge/ThreeDBadge.js';
+import SimulatorCube from '../shared/ThreeDBadge/SimulatorCube.js';
+import { useAuth } from '../../context/AuthContext.js';
+import { canUseSimulator } from '../../utils/simulator.js';
 import './RegisterVehicleTab.css';
 
 const DEMO_COLORS = [
@@ -33,7 +36,7 @@ const emptyForm = {
 };
 
 // ── Three.js Viewer ──────────────────────────────────────────────────────────
-const CarViewer = ({ color }) => {
+export const CarViewer = ({ color }) => {
   const mountRef = useRef(null);
   const modelRef = useRef(null);
   const colorRef = useRef(color);
@@ -267,6 +270,7 @@ const ModelComingSoon = ({ name }) => (
 );
 
 const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
+  const { user } = useAuth();
   const [form, setForm]   = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved]   = useState('');
@@ -414,7 +418,10 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
           <div className="rvt-viewer-badge">
             {isDemo ? `Demo — ${HERO_VEHICLE.name}` : subjectName}
           </div>
-          {subjectModel && <ThreeDBadge className="rvt-3d-badge" />}
+          {subjectModel && (typing
+            ? <ThreeDBadge className="rvt-3d-badge" />
+            : <SimulatorCube className="rvt-3d-badge" showToEveryone
+                link={isDemo ? { source: 'hero', modelId: HERO_VEHICLE.id } : { source: 'registered', vehicleId: subject._id }} />)}
           {subjectModel ? <CarViewer color={viewerColor} /> : <ModelComingSoon name={subjectName} />}
           <div className="rvt-viewer-note">
             <Info size={13} />
@@ -542,8 +549,9 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
                     <span className={`rvt-reg-status rvt-reg-status--${v.status || 'pending'}`}>
                       {STATUS_LABELS[v.status] || STATUS_LABELS.pending}
                     </span>
-                    {hasModel
-                      ? <ThreeDBadge compact label="3D digital model available" />
+                    {hasModel || (v._id && canUseSimulator(user))
+                      ? <SimulatorCube compact showToEveryone label="3D digital model available"
+                          link={{ source: 'registered', vehicleId: v._id }} />
                       : <span className="rvt-model-pending">Model soon</span>}
                     {v._id && (v.ownershipProof ? (
                       <span className="rvt-proof-ok" title={`Proof sent ${new Date(v.ownershipProof.uploadedAt).toLocaleDateString()}`}>

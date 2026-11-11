@@ -100,6 +100,7 @@ const CommunityManager = React.lazy(() => import('./Admin/CommunityManager/Commu
 const CreateArticle = React.lazy(() => import('./components/journalist/CreateArticle.js'));
 // â€” User pages
 const UserProfilePage = React.lazy(() => import('./pages/UserProfilePage.js'));
+const ConfigSimulatorPage = React.lazy(() => import('./pages/ConfigSimulatorPage.js'));
 const PublicProfilePage = React.lazy(() => import('./pages/PublicProfilePage.js'));
 const TransportAdminDashboard = React.lazy(() => import('./pages/TransportAdminDashboard.js'));
 // â€” Feature pages
@@ -1128,6 +1129,15 @@ const AppRoutes = () => {
           <MainLayout>
             <GroupPage />
           </MainLayout>
+        } />
+
+        {/* 3D Config Simulator — admin preview until it opens to all users (see utils/simulator.js) */}
+        <Route path="/simulator" element={
+          <ProtectedRoute requiredRoles={['admin']}>
+            <MainLayout>
+              <ConfigSimulatorPage />
+            </MainLayout>
+          </ProtectedRoute>
         } />
 
         {/* Main Website Routes */}

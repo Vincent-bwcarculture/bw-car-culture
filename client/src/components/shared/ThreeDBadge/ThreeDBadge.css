@@ -26,3 +26,7 @@
   background: rgba(255, 255, 255, .75);
   color: #29241e;
 }
+.bcc-3d-link { display: inline-flex; border-radius: 999px; text-decoration: none; pointer-events: auto; cursor: pointer; }
+.bcc-3d-link .bcc-3d-badge { transition: border-color .2s ease, background-color .2s ease, transform .2s ease; }
+.bcc-3d-link:hover .bcc-3d-badge { border-color: #ed714d; background: rgba(237, 113, 77, .18); transform: translateY(-1px); }
+.bcc-3d-link:focus-visible { outline: 2px solid #ed714d; outline-offset: 3px; }

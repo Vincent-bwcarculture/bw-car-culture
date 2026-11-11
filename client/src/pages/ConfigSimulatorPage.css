@@ -1,0 +1,152 @@
+/* 3D Config Simulator — mobile first */
+.cfs-page {
+  min-height: calc(100vh - 72px);
+  padding: 1rem 1rem 2rem;
+  background: #0b0b0c;
+  color: #f4f1eb;
+  box-sizing: border-box;
+}
+.cfs-header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .75rem;
+  align-items: start;
+  margin-bottom: 1rem;
+}
+.cfs-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, .15);
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.cfs-back:hover { border-color: #ed714d; }
+.cfs-heading { min-width: 0; }
+.cfs-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  color: #ed714d;
+  font-size: .68rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.cfs-heading h1 { margin: .3rem 0 0; font-size: 1.35rem; line-height: 1.25; font-weight: 600; }
+.cfs-plate {
+  display: inline-block;
+  margin-top: .35rem;
+  font-family: 'Courier New', monospace;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: #e63946;
+}
+.cfs-mode {
+  grid-column: 1 / -1;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .3rem .65rem;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 600;
+}
+.cfs-mode--purchase { background: rgba(237, 113, 77, .15); color: #ed714d; }
+.cfs-mode--customize { background: rgba(59, 130, 246, .15); color: #60a5fa; }
+
+.cfs-body { display: grid; gap: 1rem; }
+.cfs-stage {
+  position: relative;
+  min-height: 300px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 14px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #1a1a2e 0%, #0d0d0d 100%);
+}
+.cfs-stage .rvt-viewer-wrapper { height: 60vw; min-height: 300px; max-height: 560px; }
+.cfs-stage-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  min-height: 300px;
+  padding: 2rem 1.25rem;
+  text-align: center;
+  color: #9a9a9a;
+}
+.cfs-stage-message strong { color: #f4f1eb; font-size: 1.05rem; font-weight: 600; }
+.cfs-stage-message span { max-width: 36ch; font-size: .85rem; line-height: 1.5; }
+.cfs-twin-missing svg { color: #ed714d; }
+.cfs-spinner {
+  width: 26px;
+  height: 26px;
+  border: 2px solid rgba(255, 255, 255, .1);
+  border-top-color: #ed714d;
+  border-radius: 50%;
+  animation: cfs-spin 1s linear infinite;
+}
+@keyframes cfs-spin { to { transform: rotate(360deg); } }
+.cfs-link { color: #ed714d; font-size: .85rem; }
+
+.cfs-panel {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 14px;
+  background: #121214;
+}
+.cfs-panel h2 { margin: 0; font-size: 1rem; font-weight: 600; }
+.cfs-muted { margin: 0; color: #9a9a9a; font-size: .82rem; line-height: 1.5; }
+.cfs-parts-empty {
+  padding: 1.25rem;
+  border: 1px dashed rgba(255, 255, 255, .15);
+  border-radius: 10px;
+  text-align: center;
+  color: #777;
+  font-size: .8rem;
+}
+.cfs-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: .75rem;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  font-size: .85rem;
+  color: #9a9a9a;
+}
+.cfs-total strong { color: #f4f1eb; font-size: 1.15rem; }
+.cfs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  min-height: 44px;
+  padding: .6rem 1rem;
+  border-radius: 8px;
+  font-size: .85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.cfs-btn--primary { background: #ed714d; color: #fff; }
+.cfs-btn--primary:hover { filter: brightness(1.08); }
+.cfs-note { margin: 0; font-size: .75rem; line-height: 1.5; color: #8aa4c8; }
+
+@media (min-width: 900px) {
+  .cfs-page { padding: 1.5rem 4vw 3rem; }
+  .cfs-header { grid-template-columns: auto 1fr auto; align-items: center; }
+  .cfs-heading h1 { font-size: 1.7rem; }
+  .cfs-mode { grid-column: auto; justify-self: end; }
+  .cfs-body { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; }
+  .cfs-stage .rvt-viewer-wrapper { height: 560px; }
+  .cfs-stage-message { min-height: 560px; }
+  .cfs-panel { position: sticky; top: 90px; }
+}
