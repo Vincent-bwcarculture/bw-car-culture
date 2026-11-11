@@ -1132,7 +1132,7 @@ const AppRoutes = () => {
         } />
 
         {/* 3D Config Simulator — admin preview until it opens to all users (see utils/simulator.js) */}
-        <Route path="/simulator" element={
+        <Route path="/config-simulator" element={
           <ProtectedRoute requiredRoles={['admin']}>
             <MainLayout>
               <ConfigSimulatorPage />

@@ -6,7 +6,6 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Car, Save, Info, CheckCircle, Trash2, Upload, FileCheck } from 'lucide-react';
 import axios from '../../config/axios.js';
 import { loadCarModel } from '../../utils/modelCache.js';
-import { computePartView, isCutawayMesh } from '../../utils/partCamera.js';
 import { findVehicleModel, vehicleDisplayName, HERO_VEHICLE } from '../../utils/vehicleModels.js';
 import ThreeDBadge from '../shared/ThreeDBadge/ThreeDBadge.js';
 import SimulatorCube from '../shared/ThreeDBadge/SimulatorCube.js';
@@ -37,22 +36,9 @@ const emptyForm = {
 };
 
 // ── Three.js Viewer ──────────────────────────────────────────────────────────
-const HIGHLIGHT_COLOR = new THREE.Color('#ed714d');
-
-const DEFAULT_CAMERA = new THREE.Vector3(4, 1.5, 4);
-const DEFAULT_TARGET = new THREE.Vector3(0, 0.4, 0);
-const meshNames = node => `${node.name} ${node.parent?.name || ''}`;
-const easeInOut = t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
-
-// highlight: mesh-name fragments to tint (e.g. ['Rim_', 'Caliper']).
-// focus: { key, meshMatch, view } — turns the camera to show that part ('interior' uses a cut-away).
-// Both are used by the Config Simulator; the registration tab passes neither.
-export const CarViewer = ({ color, highlight = [], focus = null }) => {
+const CarViewer = ({ color }) => {
   const mountRef = useRef(null);
   const modelRef = useRef(null);
-  const cameraRef = useRef(null);
-  const controlsRef = useRef(null);
-  const flightRef = useRef(null);
   const colorRef = useRef(color);
   colorRef.current = color;
   const rendererRef = useRef(null);
@@ -111,8 +97,6 @@ export const CarViewer = ({ color, highlight = [], focus = null }) => {
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.update();
-    cameraRef.current = camera;
-    controlsRef.current = controls;
 
     // Load model (uses in-memory cache if already fetched)
     loadCarModel(({ percent }) => setProgress(percent))
@@ -186,21 +170,9 @@ export const CarViewer = ({ color, highlight = [], focus = null }) => {
         setStatus('error');
       });
 
-    // A drag or zoom by the user cancels any camera move in progress.
-    const cancelFlight = () => { flightRef.current = null; };
-    controls.addEventListener('start', cancelFlight);
-
     // Animate
     const animate = () => {
       animFrameRef.current = requestAnimationFrame(animate);
-      const flight = flightRef.current;
-      if (flight) {
-        const t = Math.min(1, (performance.now() - flight.start) / flight.duration);
-        const k = easeInOut(t);
-        camera.position.lerpVectors(flight.fromPos, flight.toPos, k);
-        controls.target.lerpVectors(flight.fromTarget, flight.toTarget, k);
-        if (t === 1) flightRef.current = null;
-      }
       controls.update();
       renderer.render(scene, camera);
     };
@@ -219,7 +191,6 @@ export const CarViewer = ({ color, highlight = [], focus = null }) => {
     return () => {
       window.removeEventListener('resize', onResize);
       cancelAnimationFrame(animFrameRef.current);
-      controls.removeEventListener('start', cancelFlight);
       controls.dispose();
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
@@ -243,83 +214,6 @@ export const CarViewer = ({ color, highlight = [], focus = null }) => {
       }
     });
   }, [color]);
-
-  // Tint highlighted parts. Materials are shared across many meshes (texture atlas), so each
-  // highlighted mesh gets its own clone and the original is restored when it is deselected.
-  const highlightKey = highlight.join('|');
-  useEffect(() => {
-    if (status !== 'ready' || !modelRef.current) return;
-    const fragments = highlightKey ? highlightKey.split('|') : [];
-    modelRef.current.traverse((node) => {
-      if (!node.isMesh) return;
-      const names = `${node.name} ${node.parent?.name || ''}`;
-      const wanted = fragments.some(f => names.includes(f));
-      if (wanted && !node.userData.originalMaterial) {
-        node.userData.originalMaterial = node.material;
-        const tint = m => {
-          const c = m.clone();
-          if (c.emissive) { c.emissive = HIGHLIGHT_COLOR.clone(); c.emissiveIntensity = 0.55; }
-          return c;
-        };
-        node.material = Array.isArray(node.material) ? node.material.map(tint) : tint(node.material);
-      } else if (!wanted && node.userData.originalMaterial) {
-        (Array.isArray(node.material) ? node.material : [node.material]).forEach(m => m.dispose());
-        node.material = node.userData.originalMaterial;
-        delete node.userData.originalMaterial;
-      }
-    });
-  }, [highlightKey, status]);
-
-  // Turn the camera to show the focused part. Parts fitted at several corners (calipers, discs,
-  // wheels) are shown at the corner nearest the current view; interior parts use a cut-away.
-  const focusRef = useRef(focus);
-  focusRef.current = focus;
-  const hadFocusRef = useRef(false);
-  const focusKey = focus ? String(focus.key) : '';
-  useEffect(() => {
-    const car = modelRef.current, camera = cameraRef.current, controls = controlsRef.current;
-    if (status !== 'ready' || !car || !camera || !controls) return;
-    const current = focusRef.current;
-    const interior = current?.view === 'interior';
-    car.updateMatrixWorld(true);
-
-    car.traverse(node => {
-      if (!node.isMesh) return;
-      if (interior && node.visible && !node.userData.cutaway && isCutawayMesh(meshNames(node))) {
-        node.visible = false;
-        node.userData.cutaway = true;
-      } else if (!interior && node.userData.cutaway) {
-        node.visible = true;
-        delete node.userData.cutaway;
-      }
-    });
-
-    const flyTo = (toPos, toTarget) => {
-      flightRef.current = { fromPos: camera.position.clone(), toPos, fromTarget: controls.target.clone(), toTarget,
-        start: performance.now(), duration: 1100 };
-    };
-
-    if (!current) {
-      controls.autoRotate = true;
-      if (hadFocusRef.current) flyTo(DEFAULT_CAMERA.clone(), DEFAULT_TARGET.clone());
-      hadFocusRef.current = false;
-      return;
-    }
-    hadFocusRef.current = true;
-    controls.autoRotate = false;
-
-    // Measure every mesh that is shown (cut-away meshes are still measured; the helper skips them).
-    const meshes = [];
-    car.traverse(node => {
-      if (node.isMesh && (node.visible || node.userData.cutaway)) {
-        meshes.push({ name: meshNames(node), box: new THREE.Box3().setFromObject(node) });
-      }
-    });
-    const view = computePartView({ meshes, camera, part: { meshMatch: current.meshMatch || [], view: current.view } });
-    if (!view) return;
-    controls.minDistance = Math.min(controls.minDistance, view.position.distanceTo(view.target) * 0.6);
-    flyTo(view.position, view.target);
-  }, [focusKey, status]);
 
   return (
     <div className="rvt-viewer-wrapper" ref={mountRef}>

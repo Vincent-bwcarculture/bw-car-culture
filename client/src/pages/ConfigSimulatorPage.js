@@ -7,7 +7,7 @@ import axios from '../config/axios.js';
 import { VEHICLE_MODELS, findVehicleModel, vehicleDisplayName } from '../utils/vehicleModels.js';
 import { simulatorMode } from '../utils/simulator.js';
 import { fetchPartsForModel, loadDraftBuild, saveDraftBuild, formatPrice } from '../utils/configuratorApi.js';
-import { CarViewer } from '../components/profile/RegisterVehicleTab.js';
+import ConfigSimulatorViewer from '../components/configurator/ConfigSimulatorViewer.js';
 import './ConfigSimulatorPage.css';
 
 const resolveVehicle = async ({ source, model, vehicle, listing }) => {
@@ -38,7 +38,7 @@ const resolveVehicle = async ({ source, model, vehicle, listing }) => {
       purchaseLink: `/marketplace/${item._id}`
     };
   }
-  throw new Error('This simulator link is incomplete.');
+  throw new Error('This Config Simulator link is incomplete.');
 };
 
 const ConfigSimulatorPage = () => {
@@ -81,13 +81,17 @@ const ConfigSimulatorPage = () => {
     return () => { active = false; };
   }, [modelId, buildId]);
 
-  // Camera focus: the part just added (or tapped) is turned towards; interior parts use a cut-away.
+  // Camera focus: the part just added (or tapped) is turned towards; interior parts are shown
+  // from inside the cabin. Product pictures are rendered from the model until real photos exist.
   const [focus, setFocus] = useState(null);
+  const [pictures, setPictures] = useState({});
   const focusPart = part => setFocus(part ? {
     key: `${part.id}-${Date.now()}`,
     partId: part.id,
     meshMatch: part.meshMatch || [],
-    view: part.view || (part.category === 'Interior' ? 'interior' : 'exterior')
+    view: part.view || (part.category === 'Interior' ? 'interior' : 'exterior'),
+    viewFrom: part.viewFrom,
+    reveal: part.reveal
   } : null);
 
   const togglePart = id => {
@@ -106,7 +110,6 @@ const ConfigSimulatorPage = () => {
   const chosen = parts.list.filter(p => selected.includes(p.id));
   const total = chosen.reduce((sum, p) => sum + p.price, 0);
   const longestLead = chosen.reduce((max, p) => Math.max(max, p.leadTimeDays || 0), 0);
-  const highlight = useMemo(() => chosen.flatMap(p => p.meshMatch || []), [chosen]);
 
   return (
     <div className="cfs-page">
@@ -133,9 +136,12 @@ const ConfigSimulatorPage = () => {
               <Link to="/" className="cfs-link">Back to home</Link>
             </div>
           )}
-          {vehicle && vehicle.model && <CarViewer color={vehicle.color || '#164b98'} highlight={highlight} focus={focus} />}
+          {vehicle && vehicle.model && (
+            <ConfigSimulatorViewer color={vehicle.color || '#164b98'} parts={parts.list} fitted={selected}
+              focus={focus} onThumbnails={setPictures} />
+          )}
           {vehicle?.model && chosen.length > 0 && (
-            <div className="cfs-stage-legend"><span className="cfs-legend-dot" /> Selected parts are highlighted</div>
+            <div className="cfs-stage-legend"><span className="cfs-legend-dot" /> {chosen.length} part{chosen.length > 1 ? 's' : ''} fitted</div>
           )}
           {vehicle?.model && focus && (
             <button type="button" className="cfs-stage-reset" onClick={() => setFocus(null)}>Full view</button>
@@ -171,6 +177,11 @@ const ConfigSimulatorPage = () => {
                   const isOn = selected.includes(part.id);
                   return (
                     <article key={part.id} className={`cfs-part${isOn ? ' is-selected' : ''}${focus?.partId === part.id ? ' is-focused' : ''}`}>
+                      <div className="cfs-part-picture" aria-hidden={!part.imageUrl}>
+                        {part.imageUrl || pictures[part.id]
+                          ? <img src={part.imageUrl || pictures[part.id]} alt={part.imageUrl ? part.name : ''} loading="lazy" />
+                          : <span className="cfs-picture-placeholder" />}
+                      </div>
                       <div className="cfs-part-main" role="button" tabIndex={0} title="Show this part on the car"
                         onClick={() => focusPart(part)}
                         onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); focusPart(part); } }}>

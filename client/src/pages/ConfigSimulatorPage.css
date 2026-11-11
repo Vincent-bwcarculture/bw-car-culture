@@ -69,7 +69,7 @@
   overflow: hidden;
   background: radial-gradient(ellipse at center, #1a1a2e 0%, #0d0d0d 100%);
 }
-.cfs-stage .rvt-viewer-wrapper { height: 60vw; min-height: 300px; max-height: 560px; }
+.cfs-stage .csv-viewer { height: 62vw; min-height: 300px; max-height: 560px; }
 .cfs-stage-message {
   display: flex;
   flex-direction: column;
@@ -146,7 +146,7 @@
   .cfs-heading h1 { font-size: 1.7rem; }
   .cfs-mode { grid-column: auto; justify-self: end; }
   .cfs-body { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; }
-  .cfs-stage .rvt-viewer-wrapper { height: 560px; }
+  .cfs-stage .csv-viewer { height: 560px; }
   .cfs-stage-message { min-height: 560px; }
   .cfs-panel { position: sticky; top: 90px; }
 }
@@ -245,3 +245,39 @@
   cursor: pointer;
 }
 .cfs-stage-reset:hover { border-color: #ed714d; }
+
+/* ── Product pictures in the parts list ── */
+.cfs-part {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  grid-template-areas: "picture main" "picture side";
+  column-gap: .75rem;
+  row-gap: .5rem;
+  align-items: start;
+}
+.cfs-part-picture {
+  grid-area: picture;
+  width: 76px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center, #26262b 0%, #141416 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cfs-part-picture img { width: 100%; height: 100%; object-fit: contain; }
+.cfs-picture-placeholder {
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(255, 255, 255, .08);
+  border-top-color: rgba(237, 113, 77, .6);
+  border-radius: 50%;
+  animation: cfs-spin 1s linear infinite;
+}
+.cfs-part-main { grid-area: main; }
+.cfs-part-side { grid-area: side; flex-direction: row; align-items: center; justify-content: space-between; }
+@media (min-width: 900px) {
+  .cfs-part { grid-template-columns: 88px minmax(0, 1fr); }
+  .cfs-part-picture { width: 88px; height: 72px; }
+}
