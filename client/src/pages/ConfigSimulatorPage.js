@@ -103,6 +103,14 @@ const ConfigSimulatorPage = () => {
     else if (focus?.partId === id) focusPart(parts.list.find(p => p.id === next[next.length - 1]));
   };
 
+  // On phones the parts are a sideways row: bring the shown part's card into view without
+  // moving the page (block: 'nearest'), so the model stays on screen.
+  useEffect(() => {
+    if (!focus?.partId || !window.matchMedia?.('(max-width: 899px)').matches) return;
+    document.getElementById(`cfs-part-${focus.partId}`)
+      ?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [focus]);
+
   const grouped = useMemo(() => parts.list.reduce((acc, part) => {
     (acc[part.category] = acc[part.category] || []).push(part);
     return acc;
@@ -160,6 +168,7 @@ const ConfigSimulatorPage = () => {
             <h2>Parts that fit</h2>
             {parts.list.some(p => p.mock) && <span className="cfs-dev-chip">Development data</span>}
           </div>
+          {parts.list.length > 1 && <span className="cfs-swipe-hint">Swipe for more parts →</span>}
           {!vehicle?.model && (
             <p className="cfs-muted">Parts that fit this vehicle will appear here once its digital twin and catalogue are ready.</p>
           )}
@@ -176,7 +185,8 @@ const ConfigSimulatorPage = () => {
                 {items.map(part => {
                   const isOn = selected.includes(part.id);
                   return (
-                    <article key={part.id} className={`cfs-part${isOn ? ' is-selected' : ''}${focus?.partId === part.id ? ' is-focused' : ''}`}>
+                    <article key={part.id} id={`cfs-part-${part.id}`}
+                      className={`cfs-part${isOn ? ' is-selected' : ''}${focus?.partId === part.id ? ' is-focused' : ''}`}>
                       <div className="cfs-part-picture" aria-hidden={!part.imageUrl}>
                         {part.imageUrl || pictures[part.id]
                           ? <img src={part.imageUrl || pictures[part.id]} alt={part.imageUrl ? part.name : ''} loading="lazy" />
@@ -185,6 +195,7 @@ const ConfigSimulatorPage = () => {
                       <div className="cfs-part-main" role="button" tabIndex={0} title="Show this part on the car"
                         onClick={() => focusPart(part)}
                         onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); focusPart(part); } }}>
+                        <span className="cfs-part-category">{category}</span>
                         <span className="cfs-part-view">Show on car</span>
                         <h4>{part.name}</h4>
                         <p>{part.description}</p>

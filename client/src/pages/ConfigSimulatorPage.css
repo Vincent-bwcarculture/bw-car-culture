@@ -281,3 +281,67 @@
   .cfs-part { grid-template-columns: 88px minmax(0, 1fr); }
   .cfs-part-picture { width: 88px; height: 72px; }
 }
+
+/* ── Phones and tablets: parts in a sideways row under the model ── */
+.cfs-part-category,
+.cfs-swipe-hint { display: none; }
+@media (max-width: 899px) {
+  .cfs-page { padding: .75rem .75rem 1.5rem; }
+  .cfs-header { gap: .5rem; margin-bottom: .6rem; }
+  .cfs-back { width: 34px; height: 34px; }
+  .cfs-heading h1 { font-size: 1.1rem; }
+  /* minmax(0, 1fr): without it the sideways parts row stretches the column (and the page) to
+     the combined width of every card. */
+  .cfs-body { gap: .6rem; grid-template-columns: minmax(0, 1fr); }
+  .cfs-panel { min-width: 0; }
+  /* Leave room on screen for the parts row below the model. */
+  .cfs-stage .csv-viewer { height: min(60vw, 38vh); min-height: 220px; }
+  .cfs-stage, .cfs-stage-message { min-height: 220px; }
+  .cfs-panel { padding: .75rem; gap: .6rem; }
+  .cfs-swipe-hint { display: block; margin-top: -.35rem; font-size: .68rem; color: #777; }
+
+  .cfs-parts {
+    flex-direction: row;
+    gap: .6rem;
+    margin: 0 -.75rem;
+    padding: .1rem .75rem .5rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: .75rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .cfs-category { display: contents; }
+  .cfs-category h3 { display: none; }
+  .cfs-part {
+    flex: 0 0 min(62vw, 230px);
+    padding: .6rem;
+    row-gap: .4rem;
+    margin-bottom: 0;
+    scroll-snap-align: start;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas: "picture" "main" "side";
+  }
+  .cfs-part-picture { width: 100%; height: 72px; }
+  .cfs-part-main h4 { font-size: .8rem; }
+  .cfs-part-category {
+    display: block;
+    margin-bottom: .15rem;
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #8a8a8a;
+  }
+  .cfs-part-view { display: none; }
+  .cfs-part-main p {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .cfs-part.is-focused { box-shadow: inset 0 3px 0 #ed714d; }
+  .cfs-part-toggle { min-height: 40px; padding: .4rem .9rem; }
+}
