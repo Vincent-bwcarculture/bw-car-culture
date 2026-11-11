@@ -1,6 +1,6 @@
 // Admin/VehicleRegistrations/AdminVehicleRegistrations.js
 import { useState, useEffect, useCallback } from 'react';
-import { Car, CheckCircle, XCircle, Clock, Search, RefreshCw } from 'lucide-react';
+import { Car, CheckCircle, XCircle, Clock, Search, RefreshCw, Eye } from 'lucide-react';
 import axios from '../../config/axios.js';
 import './AdminVehicleRegistrations.css';
 
@@ -18,6 +18,17 @@ const AdminVehicleRegistrations = () => {
   const [actionLoading, setActionLoading] = useState(null);
   const [noteModal, setNoteModal]         = useState(null); // { reg, status }
   const [note, setNote]                   = useState('');
+  const [proofView, setProofView]         = useState(null); // { reg, image, loading, error }
+
+  const openProof = async (reg) => {
+    setProofView({ reg, loading: true });
+    try {
+      const res = await axios.get(`/vehicle-ownership-proofs/${reg.userId}/${reg._id}`);
+      setProofView({ reg, image: res.data.data.image, uploadedAt: res.data.data.uploadedAt });
+    } catch (err) {
+      setProofView({ reg, error: err.response?.data?.message || 'Could not load proof of ownership' });
+    }
+  };
 
   const fetchRegistrations = useCallback(async () => {
     setLoading(true);
@@ -123,6 +134,7 @@ const AdminVehicleRegistrations = () => {
                 <th>Plate</th>
                 <th>Owner</th>
                 <th>Service Shop</th>
+                <th>Proof</th>
                 <th>Registered</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -148,6 +160,13 @@ const AdminVehicleRegistrations = () => {
                       <div className="avr-email">{r.userEmail}</div>
                     </td>
                     <td>{r.serviceShop || <span className="avr-none">—</span>}</td>
+                    <td>
+                      {r.ownershipProof ? (
+                        <button className="avr-btn avr-btn--proof" onClick={() => openProof(r)}>
+                          <Eye size={13} /> View proof
+                        </button>
+                      ) : <span className="avr-none">Not submitted</span>}
+                    </td>
                     <td>{r.registeredAt ? new Date(r.registeredAt).toLocaleDateString() : '—'}</td>
                     <td>
                       <span className="avr-status" style={{ color: S.color }}>
@@ -191,6 +210,30 @@ const AdminVehicleRegistrations = () => {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {proofView && (
+        <div className="avr-modal-overlay" onClick={() => setProofView(null)}>
+          <div className="avr-modal avr-proof-modal" onClick={e => e.stopPropagation()}>
+            <h3>Proof of ownership — {proofView.reg.vehicleName} <em>({proofView.reg.regPlate})</em></h3>
+            {proofView.loading && <div className="avr-loading"><span className="avr-spinner" /> Loading…</div>}
+            {proofView.error && <p className="avr-proof-error">{proofView.error}</p>}
+            {proofView.image && (
+              <>
+                <img className="avr-proof-image" src={proofView.image} alt={`Proof of ownership for ${proofView.reg.regPlate}`} />
+                <p className="avr-proof-meta">Uploaded {new Date(proofView.uploadedAt).toLocaleString()} by {proofView.reg.userName}</p>
+              </>
+            )}
+            <div className="avr-modal-actions">
+              <button className="avr-btn avr-btn--cancel" onClick={() => setProofView(null)}>Close</button>
+              {proofView.reg.status !== 'approved' && (
+                <button className="avr-btn avr-btn--approve" onClick={() => { const reg = proofView.reg; setProofView(null); openNote(reg, 'approved'); }}>
+                  <CheckCircle size={13} /> Approve
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

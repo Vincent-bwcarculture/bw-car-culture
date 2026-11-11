@@ -2,7 +2,9 @@
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-export const MODEL_URL = '/models/hero-golf.glb';
+import { HERO_VEHICLE } from './vehicleModels.js';
+
+export const MODEL_URL = HERO_VEHICLE.url;
 // Bump this string when the GLB file is replaced so users re-download the new model.
 const CACHE_VERSION = 'v1';
 const IDB_DB = 'bcc-models';

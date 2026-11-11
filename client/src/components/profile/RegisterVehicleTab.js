@@ -3,11 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { Car, Save, Info, CheckCircle } from 'lucide-react';
+import { Car, Save, Info, CheckCircle, Trash2, Upload, FileCheck } from 'lucide-react';
 import axios from '../../config/axios.js';
 import { loadCarModel } from '../../utils/modelCache.js';
+import { findVehicleModel, vehicleDisplayName, HERO_VEHICLE } from '../../utils/vehicleModels.js';
+import ThreeDBadge from '../shared/ThreeDBadge/ThreeDBadge.js';
 import './RegisterVehicleTab.css';
-const API_BASE = process.env.REACT_APP_API_URL || 'https://bw-car-culture-api.vercel.app';
 
 const DEMO_COLORS = [
   { label: 'Pearl White',   hex: '#EBEBEB' },
@@ -21,7 +22,8 @@ const DEMO_COLORS = [
 const CURRENT_YEAR = new Date().getFullYear();
 
 const emptyForm = {
-  vehicleName: '',
+  make: '',
+  model: '',
   year: '',
   regPlate: '',
   vin: '',
@@ -34,6 +36,8 @@ const emptyForm = {
 const CarViewer = ({ color }) => {
   const mountRef = useRef(null);
   const modelRef = useRef(null);
+  const colorRef = useRef(color);
+  colorRef.current = color;
   const rendererRef = useRef(null);
   const animFrameRef = useRef(null);
   const [status, setStatus]   = useState('loading'); // 'loading' | 'ready' | 'error'
@@ -149,7 +153,7 @@ const CarViewer = ({ color }) => {
             const mats = Array.isArray(node.material) ? node.material : [node.material];
             mats.forEach(mat => {
               if (mat.name === 'MAT_Body_Paint' || mat.name === 'CarPaint') {
-                mat.color.set('#EBEBEB');
+                mat.color.set(colorRef.current || '#EBEBEB');
                 mat.needsUpdate = true;
               }
             });
@@ -231,15 +235,85 @@ const CarViewer = ({ color }) => {
 };
 
 // ── Main Component ────────────────────────────────────────────────────────────
+const STATUS_LABELS = { pending: 'Pending review', approved: 'Verified', rejected: 'Not approved' };
+
+// Downscale and re-encode so proof photos stay well under the API's request size limit.
+const compressProofImage = (file, maxSide = 1600, quality = 0.82) => new Promise((resolve, reject) => {
+  if (!file.type.startsWith('image/')) { reject(new Error('Please choose an image (photo or scan) of your ownership document.')); return; }
+  if (file.size > 15 * 1024 * 1024) { reject(new Error('That image is too large — please use one under 15MB.')); return; }
+  const url = URL.createObjectURL(file);
+  const img = new window.Image();
+  img.onload = () => {
+    const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(img.naturalWidth * scale);
+    canvas.height = Math.round(img.naturalHeight * scale);
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(url);
+    resolve(canvas.toDataURL('image/jpeg', quality));
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read that image. Try a JPEG or PNG.')); };
+  img.src = url;
+});
+
+const uploadProof = (vehicleId, image) => axios.post(`/user/register-vehicle/${vehicleId}/proof`, { image });
+
+const ModelComingSoon = ({ name }) => (
+  <div className="rvt-viewer-wrapper rvt-model-soon">
+    <Car size={40} />
+    <strong>{name} digital model will be available soon.</strong>
+    <span>We're adding more 3D models on our side — your vehicle is saved and we'll let you know.</span>
+  </div>
+);
+
 const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
   const [form, setForm]   = useState(emptyForm);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved]   = useState(false);
+  const [saved, setSaved]   = useState('');
   const [error, setError]   = useState('');
   const [registeredVehicles, setRegisteredVehicles] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const [removingId, setRemovingId] = useState(null);
+  const [proofImage, setProofImage] = useState('');
+  const [proofUploadingId, setProofUploadingId] = useState(null);
+  const proofInputRef = useRef(null);
+
+  const handleProofPick = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setError('');
+    try { setProofImage(await compressProofImage(file)); }
+    catch (err) { setError(err.message); }
+  };
+
+  const markProofUploaded = (vehicleId, data) => {
+    setRegisteredVehicles(prev => prev.map(v => String(v._id) === String(vehicleId)
+      ? { ...v, ownershipProof: data.ownershipProof, status: data.status || v.status } : v));
+  };
+
+  const handleCardProof = async (vehicle, e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setError('');
+    setProofUploadingId(vehicle._id);
+    try {
+      const image = await compressProofImage(file);
+      const response = await uploadProof(vehicle._id, image);
+      if (!response.data.success) throw new Error(response.data.message);
+      markProofUploaded(vehicle._id, response.data.data);
+      setSaved(`Proof of ownership sent for ${vehicleDisplayName(vehicle)}.`);
+      setTimeout(() => setSaved(''), 6000);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to upload proof of ownership.');
+    } finally {
+      setProofUploadingId(null);
+    }
+  };
 
   useEffect(() => {
-    if (profileData?.registeredVehicles?.length) {
+    if (Array.isArray(profileData?.registeredVehicles)) {
       setRegisteredVehicles(profileData.registeredVehicles);
     }
   }, [profileData]);
@@ -252,22 +326,52 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
     setForm(prev => ({ ...prev, color: hex }));
   };
 
+  // What the viewer shows: the car being typed, else the selected/latest registration, else the demo.
+  const typing = form.make.trim() && form.model.trim();
+  const selected = registeredVehicles.find(v => String(v._id) === String(selectedId)) ||
+    registeredVehicles[registeredVehicles.length - 1];
+  const subject = typing ? form : selected;
+  const subjectModel = subject ? findVehicleModel(subject) : HERO_VEHICLE;
+  const subjectName = subject ? `${subject.year ? `${subject.year} ` : ''}${vehicleDisplayName(subject)}` : HERO_VEHICLE.name;
+  const viewerColor = typing || !subject ? form.color : (subject.color || '#EBEBEB');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!form.vehicleName || !form.year || !form.regPlate) {
-      setError('Vehicle name, year, and registration plate are required.');
+    const year = Number(form.year);
+    if (!form.make.trim() || !form.model.trim() || !form.year || !form.regPlate.trim()) {
+      setError('Make, model, year and registration plate are required.');
+      return;
+    }
+    if (!Number.isInteger(year) || year < 1950 || year > CURRENT_YEAR + 1) {
+      setError(`Enter a year between 1950 and ${CURRENT_YEAR + 1}.`);
       return;
     }
     try {
       setSaving(true);
-      const response = await axios.post('/user/register-vehicle', { ...form });
+      const payload = { ...form, vehicleName: vehicleDisplayName(form) };
+      const response = await axios.post('/user/register-vehicle', payload);
       if (response.data.success) {
-        setSaved(true);
-        setRegisteredVehicles(prev => [...prev, response.data.data]);
+        const vehicle = response.data.data;
+        const model = findVehicleModel(vehicle);
+        setRegisteredVehicles(prev => [...prev, vehicle]);
+        setSelectedId(vehicle._id);
+        setSaved(model
+          ? `${vehicleDisplayName(vehicle)} registered — its 3D digital model is ready below.`
+          : `${vehicleDisplayName(vehicle)} registered. Its digital model will be available soon.`);
+        if (proofImage) {
+          try {
+            const proofResponse = await uploadProof(vehicle._id, proofImage);
+            if (!proofResponse.data.success) throw new Error(proofResponse.data.message);
+            markProofUploaded(vehicle._id, proofResponse.data.data);
+          } catch (proofErr) {
+            setError(`Vehicle registered, but the proof of ownership didn't upload (${proofErr.response?.data?.message || proofErr.message}). Use "Upload proof" on the vehicle below to try again.`);
+          }
+        }
+        setProofImage('');
         setForm(emptyForm);
         if (refreshProfile) refreshProfile();
-        setTimeout(() => setSaved(false), 3000);
+        setTimeout(() => setSaved(''), 6000);
       } else {
         setError(response.data.message || 'Failed to register vehicle.');
       }
@@ -278,7 +382,24 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
     }
   };
 
+  const handleRemove = async (vehicle) => {
+    if (!window.confirm(`Remove ${vehicleDisplayName(vehicle)} (${vehicle.regPlate}) from your registered vehicles?`)) return;
+    setRemovingId(vehicle._id);
+    setError('');
+    try {
+      const response = await axios.delete(`/user/register-vehicle/${vehicle._id}`);
+      if (!response.data.success) throw new Error(response.data.message);
+      setRegisteredVehicles(prev => prev.filter(v => String(v._id) !== String(vehicle._id)));
+      if (refreshProfile) refreshProfile();
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to remove vehicle.');
+    } finally {
+      setRemovingId(null);
+    }
+  };
+
   const hasRegistered = registeredVehicles.length > 0;
+  const isDemo = !subject;
 
   return (
     <div className="rvt-container">
@@ -291,58 +412,67 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
         {/* 3D Viewer */}
         <div className="rvt-viewer-panel">
           <div className="rvt-viewer-badge">
-            {hasRegistered ? 'Your Digital Twin' : 'Demo — VW Golf R'}
+            {isDemo ? `Demo — ${HERO_VEHICLE.name}` : subjectName}
           </div>
-          <CarViewer color={form.color} />
+          {subjectModel && <ThreeDBadge className="rvt-3d-badge" />}
+          {subjectModel ? <CarViewer color={viewerColor} /> : <ModelComingSoon name={subjectName} />}
           <div className="rvt-viewer-note">
             <Info size={13} />
             <span>
-              {hasRegistered
-                ? 'Your vehicle digital twin — track service history and more.'
-                : 'Register your vehicle to order your digital twin or get personalised service tracking.'}
+              {isDemo
+                ? 'Enter your make and model — we\'ll check whether a 3D digital model is available for it.'
+                : subjectModel
+                  ? `3D digital model available for ${vehicleDisplayName(subject)}.`
+                  : 'No 3D model yet for this vehicle — more models are being added.'}
             </span>
           </div>
         </div>
 
         {/* Form */}
         <div className="rvt-form-panel">
-          {saved && <div className="rvt-success-banner"><CheckCircle size={16} /> Vehicle registered successfully!</div>}
+          {saved && <div className="rvt-success-banner"><CheckCircle size={16} /> {saved}</div>}
           {error && <div className="rvt-error-banner">{error}</div>}
 
           <form onSubmit={handleSubmit} className="rvt-form">
-            <div className="rvt-field-row">
+            <div className="rvt-field-row rvt-field-row--three">
               <div className="rvt-field">
-                <label className="rvt-label">Vehicle Name *</label>
-                <input className="rvt-input" name="vehicleName" value={form.vehicleName}
-                  onChange={handleChange} placeholder="e.g. VW Golf R Mk7.5" />
+                <label className="rvt-label" htmlFor="rvt-make">Make *</label>
+                <input id="rvt-make" className="rvt-input" name="make" value={form.make}
+                  onChange={handleChange} placeholder="e.g. Volkswagen" maxLength={40} />
+              </div>
+              <div className="rvt-field">
+                <label className="rvt-label" htmlFor="rvt-model">Model *</label>
+                <input id="rvt-model" className="rvt-input" name="model" value={form.model}
+                  onChange={handleChange} placeholder="e.g. Golf 8.5 R" maxLength={60} />
               </div>
               <div className="rvt-field rvt-field-sm">
-                <label className="rvt-label">Year *</label>
-                <input className="rvt-input" name="year" type="number"
-                  min="1980" max={CURRENT_YEAR + 1} value={form.year}
+                <label className="rvt-label" htmlFor="rvt-year">Year *</label>
+                <input id="rvt-year" className="rvt-input" name="year" type="number"
+                  min="1950" max={CURRENT_YEAR + 1} value={form.year}
                   onChange={handleChange} placeholder={String(CURRENT_YEAR)} />
               </div>
             </div>
 
             <div className="rvt-field-row">
               <div className="rvt-field">
-                <label className="rvt-label">Registration Plate *</label>
-                <input className="rvt-input rvt-input-plate" name="regPlate" value={form.regPlate}
+                <label className="rvt-label" htmlFor="rvt-plate">Registration Plate *</label>
+                <input id="rvt-plate" className="rvt-input rvt-input-plate" name="regPlate" value={form.regPlate}
                   onChange={e => setForm(prev => ({ ...prev, regPlate: e.target.value.toUpperCase() }))}
-                  placeholder="B 123 ABC" maxLength={10} />
+                  placeholder="B 123 ABC" maxLength={12} />
               </div>
               <div className="rvt-field">
-                <label className="rvt-label">VIN</label>
-                <input className="rvt-input" name="vin" value={form.vin}
-                  onChange={handleChange} placeholder="17-character VIN (optional)" maxLength={17} />
+                <label className="rvt-label" htmlFor="rvt-vin">VIN</label>
+                <input id="rvt-vin" className="rvt-input" name="vin" value={form.vin}
+                  onChange={e => setForm(prev => ({ ...prev, vin: e.target.value.toUpperCase() }))}
+                  placeholder="17-character VIN (optional)" maxLength={17} />
               </div>
             </div>
 
             <div className="rvt-field-row">
               <div className="rvt-field">
-                <label className="rvt-label">Service Shop</label>
-                <input className="rvt-input" name="serviceShop" value={form.serviceShop}
-                  onChange={handleChange} placeholder="Where you service your vehicle" />
+                <label className="rvt-label" htmlFor="rvt-shop">Service Shop</label>
+                <input id="rvt-shop" className="rvt-input" name="serviceShop" value={form.serviceShop}
+                  onChange={handleChange} placeholder="Where you service your vehicle" maxLength={80} />
               </div>
             </div>
 
@@ -355,7 +485,7 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
                   {DEMO_COLORS.map(c => (
                     <button key={c.hex} type="button"
                       className={`rvt-swatch ${form.color === c.hex ? 'rvt-swatch-active' : ''}`}
-                      style={{ background: c.hex }} title={c.label}
+                      style={{ background: c.hex }} title={c.label} aria-label={c.label}
                       onClick={() => handleColorSwatch(c.hex)} />
                   ))}
                 </div>
@@ -363,9 +493,30 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
             </div>
 
             <div className="rvt-field">
-              <label className="rvt-label">Service Records</label>
-              <textarea className="rvt-textarea" name="serviceRecords" value={form.serviceRecords}
-                onChange={handleChange} placeholder="Paste any service history notes here (optional)" rows={3} />
+              <label className="rvt-label" htmlFor="rvt-records">Service Records</label>
+              <textarea id="rvt-records" className="rvt-textarea" name="serviceRecords" value={form.serviceRecords}
+                onChange={handleChange} placeholder="Paste any service history notes here (optional)" rows={3} maxLength={2000} />
+            </div>
+
+            <div className="rvt-field">
+              <span className="rvt-label">Proof of Ownership</span>
+              <p className="rvt-help">A clear photo or scan of your registration certificate (blue book) or purchase document. Only you and our verification team can see it.</p>
+              <input ref={proofInputRef} id="rvt-proof" type="file" accept="image/*" className="rvt-file-input" onChange={handleProofPick} />
+              {proofImage ? (
+                <div className="rvt-proof-preview">
+                  <img src={proofImage} alt="Proof of ownership preview" />
+                  <div className="rvt-proof-preview-actions">
+                    <button type="button" onClick={() => proofInputRef.current?.click()}>Replace</button>
+                    <button type="button" onClick={() => setProofImage('')}>Remove</button>
+                  </div>
+                </div>
+              ) : (
+                <label htmlFor="rvt-proof" className="rvt-proof-drop">
+                  <Upload size={18} />
+                  <span>Upload image</span>
+                  <small>JPEG, PNG or WebP — you can also add it later</small>
+                </label>
+              )}
             </div>
 
             <button type="submit" className="rvt-submit-btn" disabled={saving}>
@@ -377,13 +528,43 @@ const RegisterVehicleTab = ({ profileData, refreshProfile }) => {
           {hasRegistered && (
             <div className="rvt-registered-list">
               <h4 className="rvt-registered-title">Your Registered Vehicles</h4>
-              {registeredVehicles.map((v, i) => (
-                <div key={i} className="rvt-registered-card">
-                  <Car size={14} />
-                  <span>{v.vehicleName} ({v.year})</span>
-                  <span className="rvt-registered-plate">{v.regPlate}</span>
-                </div>
-              ))}
+              {registeredVehicles.map((v) => {
+                const hasModel = !!findVehicleModel(v);
+                const isSelected = !typing && selected && String(selected._id) === String(v._id);
+                return (
+                  <div key={v._id || v.regPlate} className={`rvt-registered-card${isSelected ? ' rvt-registered-card--active' : ''}`}>
+                    <button type="button" className="rvt-registered-main" onClick={() => setSelectedId(v._id)}
+                      title="Preview this vehicle">
+                      <Car size={14} />
+                      <span>{vehicleDisplayName(v)} ({v.year})</span>
+                      <span className="rvt-registered-plate">{v.regPlate}</span>
+                    </button>
+                    <span className={`rvt-reg-status rvt-reg-status--${v.status || 'pending'}`}>
+                      {STATUS_LABELS[v.status] || STATUS_LABELS.pending}
+                    </span>
+                    {hasModel
+                      ? <ThreeDBadge compact label="3D digital model available" />
+                      : <span className="rvt-model-pending">Model soon</span>}
+                    {v._id && (v.ownershipProof ? (
+                      <span className="rvt-proof-ok" title={`Proof sent ${new Date(v.ownershipProof.uploadedAt).toLocaleDateString()}`}>
+                        <FileCheck size={13} /> Proof sent
+                      </span>
+                    ) : (
+                      <label className={`rvt-proof-btn${proofUploadingId === v._id ? ' is-busy' : ''}`}>
+                        <Upload size={13} /> {proofUploadingId === v._id ? 'Uploading…' : 'Upload proof'}
+                        <input type="file" accept="image/*" className="rvt-file-input"
+                          disabled={proofUploadingId === v._id} onChange={e => handleCardProof(v, e)} />
+                      </label>
+                    ))}
+                    {v._id && (
+                      <button type="button" className="rvt-remove-btn" disabled={removingId === v._id}
+                        onClick={() => handleRemove(v)} aria-label={`Remove ${vehicleDisplayName(v)}`}>
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

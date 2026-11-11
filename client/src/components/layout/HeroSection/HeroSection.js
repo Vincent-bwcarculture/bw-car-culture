@@ -6,6 +6,7 @@ import { statsService } from '../../../services/statsService.js';
 import { dealerService } from '../../../services/dealerService.js';
 const CarBackground3D = lazy(() => import('./CarBackground3D.js'));
 import HeroJourney, { HERO_COLOURS, HERO_WHEELS, HERO_INTERIORS } from './HeroJourney.js';
+import { HERO_VEHICLE } from '../../../utils/vehicleModels.js';
 import './HeroSection.css';
 import './HeroShowroom.css';
 
@@ -504,7 +505,7 @@ const HeroSection = () => {
           startCustomizing={new URLSearchParams(location.search).get('customize') === '1'}
           onAuthenticate={route => navigate(`/${route}`, { state: { from: '/home?customize=1', message: 'Log in or create an account to customize and order your vehicle.' } })}
           onConfigure={handleModelInteraction}
-          onPurchase={() => navigate(`/marketplace?search=${encodeURIComponent('Volkswagen Golf')}`)}
+          onPurchase={() => navigate(`/marketplace?${HERO_VEHICLE.marketplaceQuery}`)}
           onRegisterCar={() => navigate('/profile?tab=register-vehicle')}
           onColourChange={setPaintColour} onWheelChange={setWheelFinish} onInteriorChange={setInteriorAccent} onPreviewPartChange={setPreviewPart} onPlayingChange={setTourPlaying} />
       )}
