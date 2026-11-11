@@ -26,6 +26,16 @@ const HeroSection = () => {
   const [wheelFinish, setWheelFinish] = useState(HERO_WHEELS[0].hex);
   const [interiorAccent, setInteriorAccent] = useState(HERO_INTERIORS[0].hex);
   const [previewPart, setPreviewPart] = useState(null);
+  const [searchAttention, setSearchAttention] = useState(false);
+  const attentionTimer = useRef(null);
+
+  const handleModelInteraction = useCallback(() => {
+    setModelInteraction(value => value + 1);
+    setSearchAttention(true);
+    clearTimeout(attentionTimer.current);
+    attentionTimer.current = setTimeout(() => setSearchAttention(false), 3000);
+  }, []);
+  useEffect(() => () => clearTimeout(attentionTimer.current), []);
 
   const [stats, setStats] = useState({
     carListings: 0,
@@ -255,7 +265,7 @@ const HeroSection = () => {
           </div>
         </div>
       }>
-        <CarBackground3D sellMode={activeTab === 'sell'} paintColour={paintColour} wheelFinish={wheelFinish} interiorAccent={interiorAccent} previewPart={previewPart} motionEnabled={tourPlaying} onInteraction={() => setModelInteraction(value => value + 1)} onReadyChange={setModelReady} />
+        <CarBackground3D sellMode={activeTab === 'sell'} paintColour={paintColour} wheelFinish={wheelFinish} interiorAccent={interiorAccent} previewPart={previewPart} motionEnabled={tourPlaying} onInteraction={handleModelInteraction} onReadyChange={setModelReady} />
       </Suspense>
 
       {/* Semi-transparent dark layer for content legibility */}
@@ -350,7 +360,7 @@ const HeroSection = () => {
             <p>A wider world of vehicles. A personal approach to every detail, from your first choice to the road ahead.</p>
             
             <div className="bcc-hero-search-container">
-              <div className="bcc-hero-search-bar">
+              <div className={`bcc-hero-search-bar${searchAttention ? ' bcc-attention' : ''}`}>
                 <input
                   type="text"
                   placeholder="Search make, model, year or price"

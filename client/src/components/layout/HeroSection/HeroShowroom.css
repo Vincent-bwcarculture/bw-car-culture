@@ -110,7 +110,29 @@
 .bcc-journey-swatches button:hover { transform: translateY(-2px); }
 .bcc-hero-premium .bcc-journey-colour-name { display: block; font-size: .7rem; color: var(--hero-ink); margin-top: .7rem; }
 .bcc-journey-configurator small { display: block; font-size: .6rem; line-height: 1.6; color: var(--hero-muted); margin-top: .35rem; }
-.bcc-journey-auth { margin-top: .65rem; font-size: .72rem; line-height: 1.6; color: var(--hero-muted); }
+.bcc-journey-auth {
+  margin-top: .65rem;
+  padding: .5rem .7rem;
+  border: 1px solid var(--hero-line);
+  border-radius: 6px;
+  font-size: .72rem;
+  line-height: 1.6;
+  color: var(--hero-muted);
+  transition: border-color .4s ease, background-color .4s ease, color .4s ease;
+}
+.bcc-journey-footer .bcc-journey-auth { margin: 0 auto .8rem; max-width: 320px; }
+.bcc-journey-auth.bcc-attention {
+  border-color: var(--hero-accent);
+  background: rgba(237, 113, 77, .12);
+  color: var(--hero-ink);
+  animation: bcc-attention-pulse 1.2s ease-in-out infinite;
+}
+.bcc-hero-premium .bcc-hero-search-bar { transition: box-shadow .5s ease; }
+.bcc-hero-premium .bcc-hero-search-bar.bcc-attention { animation: bcc-attention-pulse 1.2s ease-in-out infinite; box-shadow: 0 0 0 3px rgba(255, 51, 0, .85), 0 0 28px rgba(255, 51, 0, .4); }
+@keyframes bcc-attention-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(255, 51, 0, .85), 0 0 18px rgba(255, 51, 0, .3); }
+  50% { box-shadow: 0 0 0 5px rgba(255, 51, 0, .5), 0 0 40px rgba(255, 51, 0, .55); }
+}
 .bcc-journey-auth button { padding: 0; border: 0; background: none; color: var(--hero-ink); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .bcc-journey-auth button:focus-visible { outline: 2px solid var(--hero-accent); outline-offset: 3px; }
 .bcc-journey-playback {

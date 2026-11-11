@@ -36,6 +36,8 @@ const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, s
   const [part, setPart] = useState('paint');
   const [paused, setPaused] = useState(startCustomizing);
   const [authPrompt, setAuthPrompt] = useState(false);
+  const [authAttention, setAuthAttention] = useState(false);
+  const authAttentionRef = useRef(null);
   const [reducedMotion, setReducedMotion] = useState(true);
   const [inView, setInView] = useState(false);
   const [pageVisible, setPageVisible] = useState(!document.hidden);
@@ -50,8 +52,20 @@ const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, s
     if (autoResumeRef.current) { clearTimeout(autoResumeRef.current); autoResumeRef.current = null; }
   };
 
-  useEffect(() => () => cancelAutoResume(), []); // eslint-disable-line
-  useEffect(() => { if (interactionId) { setPaused(true); scheduleAutoResume(); } }, [interactionId]); // eslint-disable-line
+  const promptLogin = () => {
+    setAuthPrompt(true);
+    setAuthAttention(true);
+    clearTimeout(authAttentionRef.current);
+    authAttentionRef.current = setTimeout(() => setAuthAttention(false), 3000);
+  };
+
+  useEffect(() => () => { cancelAutoResume(); clearTimeout(authAttentionRef.current); }, []); // eslint-disable-line
+  useEffect(() => {
+    if (!interactionId) return;
+    setPaused(true);
+    scheduleAutoResume();
+    if (!isAuthenticated) promptLogin();
+  }, [interactionId]); // eslint-disable-line
   const playing = modelReady && !paused && !reducedMotion && inView && pageVisible;
 
   useEffect(() => {
@@ -119,9 +133,18 @@ const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, s
   const customize = action => {
     setPaused(true);
     scheduleAutoResume(); // resume automatically if user stops interacting
-    if (!isAuthenticated) { setAuthPrompt(true); return; }
+    if (!isAuthenticated) { promptLogin(); return; }
     action();
   };
+
+  const showAuthPrompt = authPrompt && !isAuthenticated;
+  const authCta = (
+    <div className={`bcc-journey-auth${authAttention ? ' bcc-attention' : ''}`} role="alert">
+      <button type="button" onClick={() => onAuthenticate?.('login')}>Log in</button>
+      {' or '}<button type="button" onClick={() => onAuthenticate?.('register')}>create an account</button>
+      {' to customize and order your vehicle.'}
+    </div>
+  );
 
   return (
     <aside className="bcc-hero-journey" ref={ref} aria-label="Your ownership journey">
@@ -156,13 +179,7 @@ const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, s
                   </div>
                   <span className="bcc-journey-colour-name">{options[selection].name}</span>
                   <small>{part === 'wheels' ? 'Wheel finish' : part === 'interior' ? 'Interior accent' : 'Colour'} preview · options vary by vehicle</small>
-                  {authPrompt && !isAuthenticated && (
-                    <div className="bcc-journey-auth" role="alert">
-                      <button type="button" onClick={() => onAuthenticate?.('login')}>Log in</button>
-                      {' or '}<button type="button" onClick={() => onAuthenticate?.('register')}>create an account</button>
-                      {' to customize and order your vehicle.'}
-                    </div>
-                  )}
+                  {showAuthPrompt && authCta}
                 </div>
               )}
             </div>
@@ -170,6 +187,7 @@ const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, s
         ))}
       </ol>
       <div className="bcc-journey-footer">
+      {showAuthPrompt && !(step === 1 && modelReady) && authCta}
       <div className="bcc-hero-model-hint">Drag to rotate <span aria-hidden="true">&middot;</span> Scroll over the vehicle to zoom</div>
       <nav className="bcc-journey-navigation" aria-label="Journey chapters">
         {HERO_JOURNEY.map((item, index) => <button key={item.title} type="button"
