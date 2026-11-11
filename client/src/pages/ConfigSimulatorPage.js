@@ -2,7 +2,7 @@
 // to load and whether it can be purchased (hero / listing) or only customised (own car).
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Box, ShoppingCart, Wrench, Plus, Check, PenTool, Truck } from 'lucide-react';
+import { ArrowLeft, Box, ShoppingCart, Wrench, Plus, Check, PenTool, Truck, DoorOpen, DoorClosed, Package } from 'lucide-react';
 import axios from '../config/axios.js';
 import { VEHICLE_MODELS, findVehicleModel, vehicleDisplayName } from '../utils/vehicleModels.js';
 import { simulatorMode } from '../utils/simulator.js';
@@ -85,6 +85,9 @@ const ConfigSimulatorPage = () => {
   // from inside the cabin. Product pictures are rendered from the model until real photos exist.
   const [focus, setFocus] = useState(null);
   const [pictures, setPictures] = useState({});
+  const [doorsOpen, setDoorsOpen] = useState(false);
+  const [bootOpen, setBootOpen] = useState(false);
+  const interiorShown = focus?.view === 'interior';
   const focusPart = part => setFocus(part ? {
     key: `${part.id}-${Date.now()}`,
     partId: part.id,
@@ -146,7 +149,20 @@ const ConfigSimulatorPage = () => {
           )}
           {vehicle && vehicle.model && (
             <ConfigSimulatorViewer color={vehicle.color || '#164b98'} parts={parts.list} fitted={selected}
-              focus={focus} onThumbnails={setPictures} />
+              focus={focus} onThumbnails={setPictures} doorsOpen={doorsOpen} bootOpen={bootOpen} />
+          )}
+          {vehicle?.model && (
+            <div className="cfs-stage-tools" role="group" aria-label="Open the vehicle">
+              <button type="button" className={`cfs-tool${doorsOpen || interiorShown ? ' is-on' : ''}`}
+                aria-pressed={doorsOpen} onClick={() => setDoorsOpen(v => !v)}
+                title={interiorShown ? 'Doors open while an interior part is shown' : undefined}>
+                {doorsOpen || interiorShown ? <DoorOpen size={14} /> : <DoorClosed size={14} />} Doors
+              </button>
+              <button type="button" className={`cfs-tool${bootOpen ? ' is-on' : ''}`}
+                aria-pressed={bootOpen} onClick={() => setBootOpen(v => !v)}>
+                <Package size={14} /> Boot
+              </button>
+            </div>
           )}
           {vehicle?.model && chosen.length > 0 && (
             <div className="cfs-stage-legend"><span className="cfs-legend-dot" /> {chosen.length} part{chosen.length > 1 ? 's' : ''} fitted</div>

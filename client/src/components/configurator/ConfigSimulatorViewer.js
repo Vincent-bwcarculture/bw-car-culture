@@ -67,7 +67,51 @@ const setBase = (node, material) => {
   }
 };
 
-const ConfigSimulatorViewer = ({ color, parts = [], fitted = [], focus = null, onThumbnails }) => {
+// Opening panels: the meshes that move together and where their hinge is. Doors hinge on the
+// front edge at the body's outer skin; the tailgate hinges along its top edge.
+const OPENINGS = [
+  { key: 'FL', group: 'doors', match: ['Door_FL'], kind: 'door' },
+  { key: 'FR', group: 'doors', match: ['Door_FR'], kind: 'door' },
+  { key: 'RL', group: 'doors', match: ['Door_RL'], kind: 'door' },
+  { key: 'RR', group: 'doors', match: ['Door_RR'], kind: 'door' },
+  { key: 'boot', group: 'boot', match: ['Trunk_Lid', 'Window_Rear'], kind: 'hatch' }
+];
+const DOOR_ANGLE = 1.1;   // ~63°
+const HATCH_ANGLE = 1.15; // ~66°
+
+// Re-parents each panel's meshes onto a pivot at its hinge (world transforms are kept).
+const buildOpenings = (car, nodes) => {
+  const body = new THREE.Box3();
+  nodes.filter(n => /Ext_Body_Car_Paint/.test(nameOf(n))).forEach(n => body.expandByObject(n));
+  const halfWidth = body.isEmpty() ? Infinity : Math.max(Math.abs(body.min.x), Math.abs(body.max.x));
+  return OPENINGS.map(spec => {
+    const panel = nodes.filter(n => isPartNode(n, spec.match));
+    if (!panel.length) return null;
+    const box = panel.reduce((b, n) => b.expandByObject(n), new THREE.Box3());
+    const center = box.getCenter(new THREE.Vector3());
+    const side = Math.sign(center.x) || 1;
+    const hinge = spec.kind === 'door'
+      ? new THREE.Vector3(side * Math.min(halfWidth, side > 0 ? box.max.x : -box.min.x), center.y, box.max.z)
+      : new THREE.Vector3(center.x, box.max.y, box.max.z);
+    const pivot = new THREE.Group();
+    pivot.name = `opening-${spec.key}`;
+    pivot.position.copy(car.worldToLocal(hinge.clone()));
+    car.add(pivot);
+    pivot.updateMatrixWorld(true);
+    panel.forEach(n => pivot.attach(n));
+    return {
+      ...spec,
+      pivot,
+      axis: spec.kind === 'door' ? 'y' : 'x',
+      openAngle: spec.kind === 'door' ? -side * DOOR_ANGLE : HATCH_ANGLE,
+      current: 0,
+      target: 0
+    };
+  }).filter(Boolean);
+};
+
+const ConfigSimulatorViewer = ({ color, parts = [], fitted = [], focus = null, onThumbnails,
+  doorsOpen = false, bootOpen = false }) => {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
   const modelRef = useRef(null);
@@ -78,6 +122,7 @@ const ConfigSimulatorViewer = ({ color, parts = [], fitted = [], focus = null, o
   const fitAnimsRef = useRef([]);
   const fittedRef = useRef(new Set());
   const hadFocusRef = useRef(false);
+  const openingsRef = useRef([]);
   const colorRef = useRef(color);
   colorRef.current = color;
   const [status, setStatus] = useState('loading');
@@ -155,18 +200,28 @@ const ConfigSimulatorViewer = ({ color, parts = [], fitted = [], focus = null, o
           mats.forEach(mat => {
             if (mat.name === 'MAT_Body_Paint' || mat.name === 'CarPaint') { mat.color.set(colorRef.current || '#164b98'); }
           });
-          node.userData.homePosition = node.position.clone();
           nodes.push(node);
         });
+        // Doors/tailgate re-parent their meshes, so record home positions afterwards.
+        openingsRef.current = buildOpenings(car, nodes);
+        nodes.forEach(node => { node.userData.homePosition = node.position.clone(); });
         nodesRef.current = nodes;
         setStatus('ready');
       })
       .catch(() => !disposed && setStatus('error'));
 
     let frame;
+    let last = performance.now();
     const animate = () => {
       frame = requestAnimationFrame(animate);
       const now = performance.now();
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      openingsRef.current.forEach(o => {
+        if (Math.abs(o.target - o.current) < 0.001) return;
+        o.current += (o.target - o.current) * Math.min(1, dt * 4.5);
+        o.pivot.rotation[o.axis] = o.current;
+      });
       const flight = flightRef.current;
       if (flight) {
         const t = Math.min(1, (now - flight.start) / flight.duration);
@@ -331,6 +386,16 @@ const ConfigSimulatorViewer = ({ color, parts = [], fitted = [], focus = null, o
     camera.updateProjectionMatrix();
     fly(view.position, view.target, view.inside ? 1500 : 1200);
   }, [focusKey, status]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Doors and tailgate: user toggles, and doors open by themselves for interior parts ──
+  const interiorFocus = focus?.view === 'interior';
+  useEffect(() => {
+    if (status !== 'ready') return;
+    openingsRef.current.forEach(o => {
+      const open = o.group === 'doors' ? (doorsOpen || interiorFocus) : bootOpen;
+      o.target = open ? o.openAngle : 0;
+    });
+  }, [doorsOpen, bootOpen, interiorFocus, status]);
 
   // ── Product pictures rendered from the model (part alone, in its product finish) ──
   useEffect(() => {

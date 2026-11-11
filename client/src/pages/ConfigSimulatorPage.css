@@ -246,6 +246,33 @@
 }
 .cfs-stage-reset:hover { border-color: #ed714d; }
 
+/* ── Doors / boot toggles ── */
+.cfs-stage-tools {
+  position: absolute;
+  top: .75rem;
+  left: .75rem;
+  display: flex;
+  gap: .4rem;
+  z-index: 2;
+}
+.cfs-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  min-height: 34px;
+  padding: .3rem .75rem;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .55);
+  color: #eee;
+  font-size: .72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .2s ease, border-color .2s ease;
+}
+.cfs-tool:hover { border-color: #ed714d; }
+.cfs-tool.is-on { background: #ed714d; border-color: #ed714d; color: #fff; }
+
 /* ── Product pictures in the parts list ── */
 .cfs-part {
   display: grid;
