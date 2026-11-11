@@ -22,7 +22,11 @@ import {
   TrendingUp,
   Shield,
   Zap,
-  RefreshCw
+  RefreshCw,
+  Pause,
+  Play,
+  Archive,
+  Trash2
 } from 'lucide-react';
 import ManualPaymentModal from './ManualPaymentModal/ManualPaymentModal.js';
 import './UserSubmissionCard.css';
@@ -61,6 +65,12 @@ const UserSubmissionCard = ({
   const [enhancedStatus, setEnhancedStatus] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastStatusCheck, setLastStatusCheck] = useState(null);
+
+  // Owner listing controls (pause / archive / sold / delete)
+  const [listingStatus, setListingStatus] = useState(submission.listingStatus || 'active');
+  const [listingAction, setListingAction] = useState('');
+  const [removed, setRemoved] = useState(false);
+  useEffect(() => { setListingStatus(submission.listingStatus || 'active'); }, [submission.listingStatus]);
 
   // Calculate pricing with FREE TIER support (keep your existing logic)
   const selectedPlan = submission.listingData?.selectedPlan;
@@ -362,6 +372,37 @@ const UserSubmissionCard = ({
     showMessage('info', 'Creating new listing...');
   };
 
+  const isManageable = ['approved', 'listing_created'].includes(submission.status);
+  const LISTING_CONFIRM = {
+    sold: 'Mark this vehicle as sold? It will be removed from the marketplace.',
+    archived: 'Archive this listing? It will be hidden from the marketplace until you reactivate it.',
+    deleted: 'Delete this listing permanently? This cannot be undone.'
+  };
+
+  const handleListingAction = async (nextStatus) => {
+    if (listingAction) return;
+    if (LISTING_CONFIRM[nextStatus] && !window.confirm(LISTING_CONFIRM[nextStatus])) return;
+    setListingAction(nextStatus);
+    try {
+      const url = `/api/user/my-garage/${submission._id}`;
+      const res = nextStatus === 'deleted'
+        ? await axios.delete(url)
+        : await axios.put(`${url}/status`, { status: nextStatus });
+      if (!res.data?.success) throw new Error(res.data?.message);
+      if (nextStatus === 'deleted') {
+        setRemoved(true);
+        onRefreshSubmissions?.();
+      } else {
+        setListingStatus(nextStatus);
+      }
+      showMessage('success', res.data.message || 'Listing updated');
+    } catch (error) {
+      showMessage('error', error.response?.data?.message || error.message || 'Could not update listing');
+    } finally {
+      setListingAction('');
+    }
+  };
+
   // YOUR EXISTING CONFIGURATION LOGIC
   const editButtonInfo = getEditButtonInfo ? getEditButtonInfo(submission) : null;
   const canEdit = canEditSubmission ? canEditSubmission(submission) : false;
@@ -611,6 +652,8 @@ const UserSubmissionCard = ({
     return null;
   };
 
+  if (removed) return null;
+
   // YOUR EXISTING JSX STRUCTURE (keeping everything as-is)
   return (
     <div key={submission._id} className="usc-submission-card">
@@ -640,6 +683,9 @@ const UserSubmissionCard = ({
             <h4 className="usc-submission-title">
               {submission.listingData?.title || 'Untitled Listing'}
               {isFreeSubmission && <span className="usc-free-label">FREE</span>}
+              {isManageable && listingStatus !== 'active' && (
+                <span className={`usc-listing-state usc-listing-state--${listingStatus}`}>{listingStatus}</span>
+              )}
             </h4>
             {getStatusBadge(submission.status)}
           </div>
@@ -766,6 +812,36 @@ const UserSubmissionCard = ({
               )}
             </div>
 
+            <div className="usc-manage-actions">
+              {isManageable && (listingStatus === 'active' ? (
+                <button className="usc-btn usc-btn-secondary usc-btn-small" disabled={!!listingAction}
+                  onClick={() => handleListingAction('paused')} title="Temporarily hide from the marketplace">
+                  <Pause size={14} /> {listingAction === 'paused' ? 'Pausing…' : 'Pause'}
+                </button>
+              ) : (
+                <button className="usc-btn usc-btn-success usc-btn-small" disabled={!!listingAction}
+                  onClick={() => handleListingAction('active')} title="Show on the marketplace again">
+                  <Play size={14} /> {listingAction === 'active' ? 'Reactivating…' : listingStatus === 'sold' ? 'Relist' : 'Reactivate'}
+                </button>
+              ))}
+              {isManageable && listingStatus !== 'sold' && (
+                <button className="usc-btn usc-btn-sold usc-btn-small" disabled={!!listingAction}
+                  onClick={() => handleListingAction('sold')}>
+                  <CheckCircle size={14} /> {listingAction === 'sold' ? 'Updating…' : 'Mark as sold'}
+                </button>
+              )}
+              {isManageable && listingStatus !== 'archived' && (
+                <button className="usc-btn usc-btn-secondary usc-btn-small" disabled={!!listingAction}
+                  onClick={() => handleListingAction('archived')} title="Hide and keep for your records">
+                  <Archive size={14} /> {listingAction === 'archived' ? 'Archiving…' : 'Archive'}
+                </button>
+              )}
+              <button className="usc-btn usc-btn-danger usc-btn-small" disabled={!!listingAction}
+                onClick={() => handleListingAction('deleted')}>
+                <Trash2 size={14} /> {listingAction === 'deleted' ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+
             <div className="usc-secondary-actions">
               {submission.status === 'pending_review' && (
                 <div className="usc-status-indicator">
@@ -794,7 +870,7 @@ const UserSubmissionCard = ({
                 </div>
               )}
 
-              {(submission.status === 'listing_created' || (enhancedStatus && enhancedStatus.isLive)) && (
+              {listingStatus === 'active' && (submission.status === 'listing_created' || (enhancedStatus && enhancedStatus.isLive)) && (
                 <div className="usc-status-indicator usc-status-live">
                   <Star size={12} />
                   <span>Live on platform</span>

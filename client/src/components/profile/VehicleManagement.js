@@ -781,6 +781,7 @@ const VehicleManagement = () => {
               canCloneSubmission={canCloneSubmission}
               getEditButtonInfo={getEditButtonInfo}
               editLoading={editLoading}
+              onRefreshSubmissions={fetchUserSubmissions}
             />
           ))}
         </div>

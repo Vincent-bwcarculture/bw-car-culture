@@ -1538,3 +1538,43 @@
     border-color: #000;
   }
 }
+/* Owner listing controls */
+.usc-manage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--usc-border-color, rgba(255, 255, 255, 0.1));
+}
+.usc-btn-sold {
+  background: #2563eb;
+  color: #fff;
+  border: 1px solid #1d4ed8;
+}
+.usc-btn-sold:hover:not(:disabled) { background: #1d4ed8; }
+.usc-btn-danger {
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.55);
+  margin-left: auto;
+}
+.usc-btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.12); }
+.usc-manage-actions .usc-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.usc-listing-state {
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  vertical-align: middle;
+  color: #fff;
+}
+.usc-listing-state--sold { background: #2563eb; }
+.usc-listing-state--paused { background: #d97706; }
+.usc-listing-state--archived { background: #6b7280; }
+@media (max-width: 768px) {
+  .usc-btn-danger { margin-left: 0; }
+}
