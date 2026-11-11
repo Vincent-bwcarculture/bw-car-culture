@@ -36,7 +36,10 @@ const emptyForm = {
 };
 
 // ── Three.js Viewer ──────────────────────────────────────────────────────────
-export const CarViewer = ({ color }) => {
+const HIGHLIGHT_COLOR = new THREE.Color('#ed714d');
+
+// highlight: mesh-name fragments to tint (e.g. ['Rim_', 'Caliper']); used by the Config Simulator.
+export const CarViewer = ({ color, highlight = [] }) => {
   const mountRef = useRef(null);
   const modelRef = useRef(null);
   const colorRef = useRef(color);
@@ -214,6 +217,32 @@ export const CarViewer = ({ color }) => {
       }
     });
   }, [color]);
+
+  // Tint highlighted parts. Materials are shared across many meshes (texture atlas), so each
+  // highlighted mesh gets its own clone and the original is restored when it is deselected.
+  const highlightKey = highlight.join('|');
+  useEffect(() => {
+    if (status !== 'ready' || !modelRef.current) return;
+    const fragments = highlightKey ? highlightKey.split('|') : [];
+    modelRef.current.traverse((node) => {
+      if (!node.isMesh) return;
+      const names = `${node.name} ${node.parent?.name || ''}`;
+      const wanted = fragments.some(f => names.includes(f));
+      if (wanted && !node.userData.originalMaterial) {
+        node.userData.originalMaterial = node.material;
+        const tint = m => {
+          const c = m.clone();
+          if (c.emissive) { c.emissive = HIGHLIGHT_COLOR.clone(); c.emissiveIntensity = 0.55; }
+          return c;
+        };
+        node.material = Array.isArray(node.material) ? node.material.map(tint) : tint(node.material);
+      } else if (!wanted && node.userData.originalMaterial) {
+        (Array.isArray(node.material) ? node.material : [node.material]).forEach(m => m.dispose());
+        node.material = node.userData.originalMaterial;
+        delete node.userData.originalMaterial;
+      }
+    });
+  }, [highlightKey, status]);
 
   return (
     <div className="rvt-viewer-wrapper" ref={mountRef}>
