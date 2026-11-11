@@ -214,3 +214,34 @@
 @media (min-width: 900px) {
   .cfs-panel { max-height: calc(100vh - 110px); overflow-y: auto; }
 }
+
+/* ── Show-on-car focus ── */
+.cfs-part-main { cursor: pointer; border-radius: 6px; outline: none; }
+.cfs-part-main:focus-visible { box-shadow: 0 0 0 2px #ed714d; }
+.cfs-part-view {
+  display: inline-block;
+  margin-bottom: .2rem;
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #6b6b6b;
+  transition: color .2s ease;
+}
+.cfs-part-main:hover .cfs-part-view, .cfs-part.is-focused .cfs-part-view { color: #ed714d; }
+.cfs-part.is-focused { box-shadow: inset 3px 0 0 #ed714d; }
+.cfs-stage-reset {
+  position: absolute;
+  right: .75rem;
+  bottom: .75rem;
+  min-height: 34px;
+  padding: .3rem .8rem;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .55);
+  color: #eee;
+  font-size: .72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cfs-stage-reset:hover { border-color: #ed714d; }

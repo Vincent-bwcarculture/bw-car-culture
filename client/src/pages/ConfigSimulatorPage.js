@@ -81,11 +81,23 @@ const ConfigSimulatorPage = () => {
     return () => { active = false; };
   }, [modelId, buildId]);
 
-  const togglePart = id => setSelected(prev => {
-    const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
+  // Camera focus: the part just added (or tapped) is turned towards; interior parts use a cut-away.
+  const [focus, setFocus] = useState(null);
+  const focusPart = part => setFocus(part ? {
+    key: `${part.id}-${Date.now()}`,
+    partId: part.id,
+    meshMatch: part.meshMatch || [],
+    view: part.view || (part.category === 'Interior' ? 'interior' : 'exterior')
+  } : null);
+
+  const togglePart = id => {
+    const removing = selected.includes(id);
+    const next = removing ? selected.filter(x => x !== id) : [...selected, id];
+    setSelected(next);
     if (buildId) saveDraftBuild(buildId, next);
-    return next;
-  });
+    if (!removing) focusPart(parts.list.find(p => p.id === id));
+    else if (focus?.partId === id) focusPart(parts.list.find(p => p.id === next[next.length - 1]));
+  };
 
   const grouped = useMemo(() => parts.list.reduce((acc, part) => {
     (acc[part.category] = acc[part.category] || []).push(part);
@@ -121,9 +133,12 @@ const ConfigSimulatorPage = () => {
               <Link to="/" className="cfs-link">Back to home</Link>
             </div>
           )}
-          {vehicle && vehicle.model && <CarViewer color={vehicle.color || '#164b98'} highlight={highlight} />}
+          {vehicle && vehicle.model && <CarViewer color={vehicle.color || '#164b98'} highlight={highlight} focus={focus} />}
           {vehicle?.model && chosen.length > 0 && (
             <div className="cfs-stage-legend"><span className="cfs-legend-dot" /> Selected parts are highlighted</div>
+          )}
+          {vehicle?.model && focus && (
+            <button type="button" className="cfs-stage-reset" onClick={() => setFocus(null)}>Full view</button>
           )}
           {vehicle && !vehicle.model && (
             <div className="cfs-stage-message cfs-twin-missing">
@@ -155,8 +170,11 @@ const ConfigSimulatorPage = () => {
                 {items.map(part => {
                   const isOn = selected.includes(part.id);
                   return (
-                    <article key={part.id} className={`cfs-part${isOn ? ' is-selected' : ''}`}>
-                      <div className="cfs-part-main">
+                    <article key={part.id} className={`cfs-part${isOn ? ' is-selected' : ''}${focus?.partId === part.id ? ' is-focused' : ''}`}>
+                      <div className="cfs-part-main" role="button" tabIndex={0} title="Show this part on the car"
+                        onClick={() => focusPart(part)}
+                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); focusPart(part); } }}>
+                        <span className="cfs-part-view">Show on car</span>
                         <h4>{part.name}</h4>
                         <p>{part.description}</p>
                         <div className="cfs-part-meta">

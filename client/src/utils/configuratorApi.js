@@ -2,7 +2,7 @@ import axios from '../config/axios.js';
 
 // Parts change rarely: keep one copy per vehicle model on the device for an hour.
 const PARTS_TTL_MS = 60 * 60 * 1000;
-const partsKey = id => `bcc-config-parts:${id}`;
+const partsKey = id => `bcc-config-parts:v2:${id}`;
 const buildKey = id => `bcc-config-build:${id}`;
 
 const readJSON = key => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } };
