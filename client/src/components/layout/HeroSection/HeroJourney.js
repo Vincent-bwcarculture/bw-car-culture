@@ -28,16 +28,16 @@ export const HERO_JOURNEY = [
 const loadHeroPrefs = () => { try { return JSON.parse(localStorage.getItem('bcc-hero-prefs') || 'null') || {}; } catch { return {}; } };
 const saveHeroPrefs = prefs => { try { localStorage.setItem('bcc-hero-prefs', JSON.stringify(prefs)); } catch {} };
 
-const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, startCustomizing = false, onAuthenticate, onColourChange, onWheelChange, onInteriorChange, onPreviewPartChange, onPlayingChange }) => {
+const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, startCustomizing = false, onAuthenticate, onConfigure, onPurchase, onRegisterCar, onColourChange, onWheelChange, onInteriorChange, onPreviewPartChange, onPlayingChange }) => {
   const [step, setStep] = useState(startCustomizing ? 1 : 0);
   const [colour, setColour] = useState(() => loadHeroPrefs().colour ?? 0);
   const [wheel, setWheel] = useState(() => loadHeroPrefs().wheel ?? 0);
   const [interior, setInterior] = useState(() => loadHeroPrefs().interior ?? 0);
   const [part, setPart] = useState('paint');
   const [paused, setPaused] = useState(startCustomizing);
-  const [authPrompt, setAuthPrompt] = useState(false);
-  const [authAttention, setAuthAttention] = useState(false);
-  const authAttentionRef = useRef(null);
+  const [ctaPrompt, setCtaPrompt] = useState(false);
+  const [ctaAttention, setCtaAttention] = useState(false);
+  const ctaAttentionRef = useRef(null);
   const [reducedMotion, setReducedMotion] = useState(true);
   const [inView, setInView] = useState(false);
   const [pageVisible, setPageVisible] = useState(!document.hidden);
@@ -52,19 +52,20 @@ const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, s
     if (autoResumeRef.current) { clearTimeout(autoResumeRef.current); autoResumeRef.current = null; }
   };
 
-  const promptLogin = () => {
-    setAuthPrompt(true);
-    setAuthAttention(true);
-    clearTimeout(authAttentionRef.current);
-    authAttentionRef.current = setTimeout(() => setAuthAttention(false), 3000);
+  // Guests are asked to log in; signed-in users are offered purchase / register.
+  const promptNextStep = () => {
+    setCtaPrompt(true);
+    setCtaAttention(true);
+    clearTimeout(ctaAttentionRef.current);
+    ctaAttentionRef.current = setTimeout(() => setCtaAttention(false), 3000);
   };
 
-  useEffect(() => () => { cancelAutoResume(); clearTimeout(authAttentionRef.current); }, []); // eslint-disable-line
+  useEffect(() => () => { cancelAutoResume(); clearTimeout(ctaAttentionRef.current); }, []); // eslint-disable-line
   useEffect(() => {
     if (!interactionId) return;
     setPaused(true);
     scheduleAutoResume();
-    if (!isAuthenticated) promptLogin();
+    promptNextStep();
   }, [interactionId]); // eslint-disable-line
   const playing = modelReady && !paused && !reducedMotion && inView && pageVisible;
 
@@ -129,17 +130,24 @@ const HeroJourney = ({ interactionId = 0, modelReady, isAuthenticated = false, s
   const options = part === 'paint' ? HERO_COLOURS : part === 'wheels' ? HERO_WHEELS : HERO_INTERIORS;
   const selection = part === 'paint' ? colour : part === 'wheels' ? wheel : interior;
   const selectOption = part === 'paint' ? setColour : part === 'wheels' ? setWheel : setInterior;
-  useEffect(() => { if (isAuthenticated) setAuthPrompt(false); }, [isAuthenticated]);
   const customize = action => {
     setPaused(true);
     scheduleAutoResume(); // resume automatically if user stops interacting
-    if (!isAuthenticated) { promptLogin(); return; }
-    action();
+    if (isAuthenticated) action();
+    if (onConfigure) onConfigure(); else promptNextStep();
   };
 
-  const showAuthPrompt = authPrompt && !isAuthenticated;
-  const authCta = (
-    <div className={`bcc-journey-auth${authAttention ? ' bcc-attention' : ''}`} role="alert">
+  const showAuthPrompt = ctaPrompt;
+  const authCta = isAuthenticated ? (
+    <div className={`bcc-journey-auth bcc-journey-cta${ctaAttention ? ' bcc-attention' : ''}`} role="status">
+      <span>Like this one? Make it yours, or add the car you already own.</span>
+      <div className="bcc-journey-cta-actions">
+        <button type="button" className="bcc-journey-cta-primary" onClick={() => onPurchase?.()}>Purchase this vehicle</button>
+        <button type="button" onClick={() => onRegisterCar?.()}>Register your car</button>
+      </div>
+    </div>
+  ) : (
+    <div className={`bcc-journey-auth${ctaAttention ? ' bcc-attention' : ''}`} role="alert">
       <button type="button" onClick={() => onAuthenticate?.('login')}>Log in</button>
       {' or '}<button type="button" onClick={() => onAuthenticate?.('register')}>create an account</button>
       {' to customize and order your vehicle.'}

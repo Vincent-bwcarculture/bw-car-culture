@@ -127,6 +127,23 @@
   color: var(--hero-ink);
   animation: bcc-attention-pulse 1.2s ease-in-out infinite;
 }
+.bcc-journey-cta > span { display: block; margin-bottom: .5rem; }
+.bcc-journey-cta-actions { display: flex; flex-wrap: wrap; gap: .45rem; }
+.bcc-journey-footer .bcc-journey-cta-actions { justify-content: center; }
+.bcc-hero-premium .bcc-journey-cta-actions button {
+  padding: .4rem .75rem;
+  border: 1px solid var(--hero-line);
+  border-radius: 4px;
+  font-size: .7rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--hero-ink);
+  transition: background-color .2s ease, border-color .2s ease;
+}
+.bcc-hero-premium .bcc-journey-cta-actions button:hover { border-color: var(--hero-ink); }
+.bcc-hero-premium .bcc-journey-cta-actions .bcc-journey-cta-primary { background: var(--hero-accent); border-color: var(--hero-accent); color: #fff; }
+.bcc-hero-premium .bcc-journey-cta-actions .bcc-journey-cta-primary:hover { filter: brightness(1.08); }
+.bcc-hero-model-stage .bcc-hero-3d-badge { position: absolute; top: .75rem; right: 1rem; z-index: 2; color: #f4f1eb; }
 .bcc-hero-premium .bcc-hero-search-bar { transition: box-shadow .5s ease; }
 .bcc-hero-premium .bcc-hero-search-bar.bcc-attention { animation: bcc-attention-pulse 1.2s ease-in-out infinite; box-shadow: 0 0 0 3px rgba(255, 51, 0, .85), 0 0 28px rgba(255, 51, 0, .4); }
 @keyframes bcc-attention-pulse {

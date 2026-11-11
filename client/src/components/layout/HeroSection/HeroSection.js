@@ -503,6 +503,9 @@ const HeroSection = () => {
         <HeroJourney interactionId={modelInteraction} modelReady={modelReady} isAuthenticated={isAuthenticated}
           startCustomizing={new URLSearchParams(location.search).get('customize') === '1'}
           onAuthenticate={route => navigate(`/${route}`, { state: { from: '/home?customize=1', message: 'Log in or create an account to customize and order your vehicle.' } })}
+          onConfigure={handleModelInteraction}
+          onPurchase={() => navigate(`/marketplace?search=${encodeURIComponent('Volkswagen Golf')}`)}
+          onRegisterCar={() => navigate('/profile?tab=register-vehicle')}
           onColourChange={setPaintColour} onWheelChange={setWheelFinish} onInteriorChange={setInteriorAccent} onPreviewPartChange={setPreviewPart} onPlayingChange={setTourPlaying} />
       )}
 

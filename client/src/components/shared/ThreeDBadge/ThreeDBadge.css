@@ -1,0 +1,28 @@
+.bcc-3d-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .3rem .55rem;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 999px;
+  background: rgba(10, 10, 12, .55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #f4f1eb;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+.bcc-3d-badge svg { color: #ed714d; flex-shrink: 0; }
+.bcc-3d-badge .bcc-3d-badge-text {
+  color: inherit;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+.bcc-3d-badge--compact { padding: .3rem; }
+[data-theme="light"] .bcc-3d-badge {
+  border-color: rgba(0, 0, 0, .15);
+  background: rgba(255, 255, 255, .75);
+  color: #29241e;
+}

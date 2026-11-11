@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { loadCarModel } from '../../../utils/modelCache.js';
+import ThreeDBadge from '../../shared/ThreeDBadge/ThreeDBadge.js';
 
 const HIDE_KEYWORDS = ['turntable', 'platform', 'ground', 'floor', 'shadow', 'spoon',
   'highpoly', 'lowpoly', '2262a6d3f82749', 'wheel.obj.cleaner.materialmerger.gles'];
@@ -302,6 +303,7 @@ const CarBackground3D = ({ sellMode = false, paintColour, wheelFinish, interiorA
         </div>
       )}
       <canvas aria-label="Vehicle preview. Drag to rotate and scroll over the vehicle to zoom." ref={canvasRef} className={`hero-3d-canvas${visible ? ' hero-3d-canvas--on' : ''}`} />
+      {visible && <ThreeDBadge className="bcc-hero-3d-badge" />}
     </div>
   );
 };
